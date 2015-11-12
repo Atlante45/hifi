@@ -33,4 +33,7 @@ if (BUILD_TOOLS)
 
   add_subdirectory(nitpick)
   set_target_properties(nitpick PROPERTIES FOLDER "Tools")
+
+  add_subdirectory(benchmarks)
+  set_target_properties(benchmarks PROPERTIES FOLDER "Tools")
 endif()
