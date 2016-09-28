@@ -50,11 +50,11 @@ Scene::Scene(glm::vec3 origin, float size) :
 
 ItemID Scene::allocateID() {
     // Just increment and return the proevious value initialized at 0
-    return _IDAllocator.fetch_add(1);
+    return _idAllocator.allocate();
 }
 
 bool Scene::isAllocatedID(const ItemID& id) {
-    return Item::isValidID(id) && (id < _numAllocatedItems.load());
+    return Item::isValidID(id) && (id < _idAllocator.peek());
 }
 
 /// Enqueue change batch to the scene
@@ -82,27 +82,19 @@ void Scene::processPendingChangesQueue() {
     _itemsMutex.lock();
         // Here we should be able to check the value of last ItemID allocated 
         // and allocate new items accordingly
-        ItemID maxID = _IDAllocator.load();
-        if (maxID > _items.size()) {
-            _items.resize(maxID + 100); // allocate the maxId and more
-        }
+        _items.resize(_idAllocator.peek());
+
         // Now we know for sure that we have enough items in the array to
         // capture anything coming from the pendingChanges
 
         // resets and potential NEW items
         resetItems(consolidatedPendingChanges._resetItems, consolidatedPendingChanges._resetPayloads);
 
-        // Update the numItemsAtomic counter AFTER the reset changes went through
-        _numAllocatedItems.exchange(maxID);
-
         // updates
         updateItems(consolidatedPendingChanges._updatedItems, consolidatedPendingChanges._updateFunctors);
 
         // removes
         removeItems(consolidatedPendingChanges._removedItems);
-
-        // Update the numItemsAtomic counter AFTER the pending changes went through
-        _numAllocatedItems.exchange(maxID);
 
      // ready to go back to rendering activities
     _itemsMutex.unlock();

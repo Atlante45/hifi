@@ -12,6 +12,8 @@
 #ifndef hifi_render_Scene_h
 #define hifi_render_Scene_h
 
+#include <IDAllocator.h>
+
 #include "Item.h"
 #include "SpatialTree.h"
 
@@ -41,8 +43,6 @@ public:
     ItemIDs _removedItems;
     ItemIDs _updatedItems;
     UpdateFunctors _updateFunctors;
-
-protected:
 };
 typedef std::queue<PendingChanges> PendingChangesQueue;
 
@@ -64,7 +64,7 @@ public:
     bool isAllocatedID(const ItemID& id);
 
     // THis is the total number of allocated items, this a threadsafe call
-    size_t getNumItems() const { return _numAllocatedItems.load(); }
+    size_t getNumItems() const { return _idAllocator.peek() - 1; }
 
     // Enqueue change batch to the scene
     void enqueuePendingChanges(const PendingChanges& pendingChanges);
@@ -86,8 +86,8 @@ public:
 
 protected:
     // Thread safe elements that can be accessed from anywhere
-    std::atomic<unsigned int> _IDAllocator{ 1 }; // first valid itemID will be One
-    std::atomic<unsigned int> _numAllocatedItems{ 1 }; // num of allocated items, matching the _items.size()
+    IDAllocator<ItemID> _idAllocator { 1 }; // first valid itemID will be One
+
     std::mutex _changeQueueMutex;
     PendingChangesQueue _changeQueue;
 
