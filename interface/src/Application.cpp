@@ -160,23 +160,24 @@
 #include "InterfaceDynamicFactory.h"
 #include "InterfaceLogging.h"
 #include "LODManager.h"
+#include "graphics-scripting/GraphicsScriptingInterface.h"
 #include "ModelPackager.h"
-#include "scripting/Audio.h"
 #include "networking/CloseEventSender.h"
-#include "scripting/TestScriptingInterface.h"
-#include "scripting/AssetMappingsScriptingInterface.h"
-#include "scripting/ClipboardScriptingInterface.h"
-#include "scripting/DesktopScriptingInterface.h"
 #include "scripting/AccountServicesScriptingInterface.h"
+#include "scripting/AssetMappingsScriptingInterface.h"
+#include "scripting/Audio.h"
+#include "scripting/ClipboardScriptingInterface.h"
+#include "scripting/ControllerScriptingInterface.h"
+#include "scripting/DesktopScriptingInterface.h"
 #include "scripting/HMDScriptingInterface.h"
 #include "scripting/MenuScriptingInterface.h"
-#include "graphics-scripting/GraphicsScriptingInterface.h"
-#include "scripting/SettingsScriptingInterface.h"
-#include "scripting/WindowScriptingInterface.h"
-#include "scripting/ControllerScriptingInterface.h"
+#include "scripting/NetworkingScriptingInterface.h"
 #include "scripting/RatesScriptingInterface.h"
 #include "scripting/SelectionScriptingInterface.h"
+#include "scripting/SettingsScriptingInterface.h"
+#include "scripting/TestScriptingInterface.h"
 #include "scripting/WalletScriptingInterface.h"
+#include "scripting/WindowScriptingInterface.h"
 #if defined(Q_OS_MAC) || defined(Q_OS_WIN)
 #include "SpeechRecognizer.h"
 #endif
@@ -6660,6 +6661,7 @@ void Application::registerScriptEngineWithApplicationServices(ScriptEnginePointe
     scriptEngine->registerGlobalObject("Wallet", DependencyManager::get<WalletScriptingInterface>().data());
     scriptEngine->registerGlobalObject("AddressManager", DependencyManager::get<AddressManager>().data());
     scriptEngine->registerGlobalObject("HifiAbout", AboutUtil::getInstance());
+    scriptEngine->registerGlobalObject("Networking", new NetworkingScriptingInterface(scriptEngine.data()));
 
     qScriptRegisterMetaType(scriptEngine.data(), OverlayIDtoScriptValue, OverlayIDfromScriptValue);
 

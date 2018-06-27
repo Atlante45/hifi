@@ -18,7 +18,6 @@
 #include <QtCore/QUrl>
 #include <QtCore/QThread>
 #include <QtNetwork/QHostInfo>
-#include <QtNetwork/QNetworkInterface>
 
 #include <shared/QtHelpers.h>
 #include <ThreadHelpers.h>
@@ -382,26 +381,7 @@ void NodeList::sendDomainServerCheckIn() {
             packetStream.writeBytes(protocolVersionSig.constData(), protocolVersionSig.size());
 
             // if possible, include the MAC address for the current interface in our connect request
-            QString hardwareAddress;
-
-            for (auto networkInterface : QNetworkInterface::allInterfaces()) {
-                for (auto interfaceAddress : networkInterface.addressEntries()) {
-                    if (interfaceAddress.ip() == _localSockAddr.getAddress()) {
-                        // this is the interface whose local IP matches what we've detected the current IP to be
-                        hardwareAddress = networkInterface.hardwareAddress();
-
-                        // stop checking interfaces and addresses
-                        break;
-                    }
-                }
-
-                // stop looping if this was the current interface
-                if (!hardwareAddress.isEmpty()) {
-                    break;
-                }
-            }
-
-            packetStream << hardwareAddress;
+            packetStream << getHardwareAddress();
 
             // now add the machine fingerprint
             auto accountManager = DependencyManager::get<AccountManager>();

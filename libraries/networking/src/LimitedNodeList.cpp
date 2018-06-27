@@ -20,8 +20,9 @@
 #include <QtCore/QJsonDocument>
 #include <QtCore/QThread>
 #include <QtCore/QUrl>
-#include <QtNetwork/QTcpSocket>
 #include <QtNetwork/QHostInfo>
+#include <QtNetwork/QNetworkInterface>
+#include <QtNetwork/QTcpSocket>
 
 #include <LogHandler.h>
 #include <shared/NetworkUtils.h>
@@ -191,6 +192,18 @@ void LimitedNodeList::setSocketLocalPort(quint16 socketLocalPort) {
         _nodeSocket.rebind(socketLocalPort);
         LIMITED_NODELIST_LOCAL_PORT.set(socketLocalPort);
     }
+}
+
+QString LimitedNodeList::getHardwareAddress() const {
+    for (auto networkInterface : QNetworkInterface::allInterfaces()) {
+        for (auto interfaceAddress : networkInterface.addressEntries()) {
+            if (interfaceAddress.ip() == _localSockAddr.getAddress()) {
+                // this is the interface whose local IP matches what we've detected the current IP to be
+                return networkInterface.hardwareAddress();
+            }
+        }
+    }
+    return QString();
 }
 
 QUdpSocket& LimitedNodeList::getDTLSSocket() {

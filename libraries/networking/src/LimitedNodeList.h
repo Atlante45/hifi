@@ -126,6 +126,8 @@ public:
     quint16 getSocketLocalPort() const { return _nodeSocket.localPort(); }
     Q_INVOKABLE void setSocketLocalPort(quint16 socketLocalPort);
 
+    QString getHardwareAddress() const;
+
     QUdpSocket& getDTLSSocket();
 
     PacketReceiver& getPacketReceiver() { return *_packetReceiver; }
