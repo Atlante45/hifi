@@ -135,6 +135,10 @@ QSharedPointer<T> DependencyManager::set(Args&&... args) {
     QSharedPointer<Dependency> storedInstance = qSharedPointerCast<Dependency>(newInstance);
     instance.swap(storedInstance);
 
+    // Ensure static variables are set
+    get<T>();
+    isSet<T>();
+
     return newInstance;
 }
 
