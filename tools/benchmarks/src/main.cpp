@@ -35,10 +35,12 @@ static void ProfileRange(benchmark::State& state) {
 }
 BENCHMARK(ProfileRange)->Threads(1);
 BENCHMARK(ProfileRange)->Threads(2);
-BENCHMARK(ProfileRange)->Threads(3);
 BENCHMARK(ProfileRange)->Threads(4);
-BENCHMARK(ProfileRange)->Threads(5);
-BENCHMARK(ProfileRange)->Threads(6);
+BENCHMARK(ProfileRange)->Threads(8);
+BENCHMARK(ProfileRange)->Threads(16);
+BENCHMARK(ProfileRange)->Threads(32);
+BENCHMARK(ProfileRange)->Threads(64);
+BENCHMARK(ProfileRange)->Threads(72);
 
 //static void StdPointerCopy(benchmark::State& state) {
 //    using Pointer = std::shared_ptr<int>;
