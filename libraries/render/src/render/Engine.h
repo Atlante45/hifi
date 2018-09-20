@@ -33,7 +33,7 @@ namespace render {
     };
     using RenderContextPointer = std::shared_ptr<RenderContext>;
 
-    Task_DeclareCategoryTimeProfilerClass(RenderTimeProfiler, trace_render);
+    Task_DeclareCategoryTimeProfilerClass(RenderTimeProfiler, tracing::render);
 
     Task_DeclareTypeAliases(RenderContext, RenderTimeProfiler)
 

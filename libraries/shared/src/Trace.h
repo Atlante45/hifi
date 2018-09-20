@@ -23,8 +23,6 @@
 
 namespace tracing {
 
-bool enabled();
-
 using TraceTimestamp = uint64_t;
 
 enum EventType : char {
@@ -62,58 +60,71 @@ enum EventType : char {
     ContextLeave = ')'
 };
 
+enum Category : uint8_t {
+    app,
+    app_detail,
+    metadata,
+    network,
+    parse,
+    render,
+    render_detail,
+    render_gpu,
+    render_gpu_gl,
+    render_gpu_gl_detail,
+    render_qml,
+    render_qml_gl,
+    render_qml_gl_detail,
+    render_overlays,
+    resource,
+    resource_network,
+    resource_parse,
+    resource_parse_geometry,
+    resource_parse_image,
+    resource_parse_image_raw,
+    resource_parse_image_ktx,
+    script,
+    script_entities,
+    simulation,
+    simulation_detail,
+    simulation_animation,
+    simulation_animation_detail,
+    simulation_avatar,
+    simulation_physics,
+    simulation_physics_detail,
+    startup,
+    workload,
+    test,
+
+    NUM_CATEGORIES
+};
+
 struct TraceEvent {
     QString id;
     QString name;
     EventType type;
     qint64 timestamp;
-    qint64 processID;
     qint64 threadID;
-    const QLoggingCategory& category;
+    Category category;
     QVariantMap args;
     QVariantMap extra;
 
     void writeJson(QTextStream& out) const;
 };
 
-class Tracer : public Dependency {
-public:
-    void traceEvent(const QLoggingCategory& category, 
-        const QString& name, EventType type,
-        const QString& id = "", 
-        const QVariantMap& args = QVariantMap(), const QVariantMap& extra = QVariantMap());
+bool isTracingEnabled();
+bool isTracingEnabled(Category category);
 
-    void startTracing();
-    void stopTracing();
-    void serialize(const QString& file);
-    bool isEnabled() const { return _enabled; }
+void startTracing();
+void stopTracing();
+void serialize(const QString& file);
 
-private:
-    void traceEvent(const QLoggingCategory& category, 
-        const QString& name, EventType type,
-        qint64 timestamp, qint64 processID, qint64 threadID,
-        const QString& id = "",
-        const QVariantMap& args = QVariantMap(), const QVariantMap& extra = QVariantMap());
+void traceEvent(Category category, const QString& name, EventType type,
+                const QString& id = QString(), const QVariantMap& args = QVariantMap(),
+                const QVariantMap& extra = QVariantMap());
 
-    bool _enabled { false };
-    std::list<TraceEvent> _events;
-    std::list<TraceEvent> _metadataEvents;
-    std::mutex _eventsMutex;
-};
-
-inline void traceEvent(const QLoggingCategory& category, const QString& name, EventType type, const QString& id = "", const QVariantMap& args = {}, const QVariantMap& extra = {}) {
-    if (!DependencyManager::isSet<Tracer>()) {
-        return;
-    }
-    const auto& tracer = DependencyManager::get<Tracer>();
-    if (tracer) {
-        tracer->traceEvent(category, name, type, id, args, extra);
-    }
-}
-
-inline void traceEvent(const QLoggingCategory& category, const QString& name, EventType type, int id, const QVariantMap& args = {}, const QVariantMap& extra = {}) {
-    traceEvent(category, name, type, QString::number(id), args, extra);
-}
+void traceMetadata(Category category, const QString& name, EventType type,
+                   const QString& id = QString(), const QVariantMap& args = QVariantMap(),
+                   const QVariantMap& extra = QVariantMap());
 
 }
 

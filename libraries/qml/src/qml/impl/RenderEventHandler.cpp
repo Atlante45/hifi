@@ -17,7 +17,7 @@
 #include <QtQuick/QQuickWindow>
 
 #include <shared/NsightHelpers.h>
-#include "Profiling.h"
+#include <Profile.h>
 #include "SharedObject.h"
 #include "TextureCache.h"
 #include "RenderControl.h"

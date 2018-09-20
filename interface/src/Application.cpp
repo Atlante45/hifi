@@ -312,9 +312,6 @@ private:
     }
 };
 
-
-Q_LOGGING_CATEGORY(trace_app_input_mouse, "trace.app.input.mouse")
-
 using namespace std;
 
 static QTimer locationUpdateTimer;
@@ -2574,11 +2571,10 @@ void Application::cleanupBeforeQuit() {
 
     DependencyManager::prepareToExit();
 
-    if (tracing::enabled()) {
-        auto tracer = DependencyManager::get<tracing::Tracer>();
-        tracer->stopTracing();
+    if (tracing::isTracingEnabled()) {
+        tracing::stopTracing();
         auto outputFile = property(hifi::properties::TRACING).toString();
-        tracer->serialize(outputFile);
+        tracing::serialize(outputFile);
     }
 
     // Stop third party processes so that they're not left running in the event of a subsequent shutdown crash.
@@ -4254,7 +4250,7 @@ void Application::maybeToggleMenuVisible(QMouseEvent* event) const {
 }
 
 void Application::mouseMoveEvent(QMouseEvent* event) {
-    PROFILE_RANGE(app_input_mouse, __FUNCTION__);
+    PROFILE_RANGE(app, __FUNCTION__);
 
     maybeToggleMenuVisible(event);
 

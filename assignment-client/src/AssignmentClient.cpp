@@ -47,7 +47,6 @@ AssignmentClient::AssignmentClient(Assignment::Type requestAssignmentType, QStri
 {
     LogUtils::init();
 
-    DependencyManager::set<tracing::Tracer>();
     DependencyManager::set<StatTracker>();
     DependencyManager::set<AccountManager>();
     DependencyManager::set<ResourceRequestObserver>();

@@ -20,11 +20,11 @@
 #include <shared/NsightHelpers.h>
 #include <gl/QOpenGLContextWrapper.h>
 #include <gl/GLHelpers.h>
+#include <Profile.h>
 
 #include "../OffscreenSurface.h"
 #include "../Logging.h"
 
-#include "Profiling.h"
 #include "RenderControl.h"
 #include "RenderEventHandler.h"
 #include "TextureCache.h"

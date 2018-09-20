@@ -455,7 +455,6 @@ public:
         DependencyManager::registerInheritance<EntityDynamicFactoryInterface, TestActionFactory>();
         DependencyManager::registerInheritance<LimitedNodeList, NodeList>();
         DependencyManager::registerInheritance<SpatialParentFinder, ParentFinder>();
-        DependencyManager::set<tracing::Tracer>();
         DependencyManager::set<StatTracker>();
         DependencyManager::set<AddressManager>();
         DependencyManager::set<NodeList>(NodeType::Agent);

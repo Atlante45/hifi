@@ -33,7 +33,7 @@ namespace workload {
 
     using WorkloadContextPointer = std::shared_ptr<WorkloadContext>;
 
-    Task_DeclareCategoryTimeProfilerClass(WorkloadTimeProfiler, trace_workload);
+    Task_DeclareCategoryTimeProfilerClass(WorkloadTimeProfiler, tracing::workload);
 
     // Instanciate the specialized types of Job Engine and Task for the Workload context
     Task_DeclareTypeAliases(WorkloadContext, WorkloadTimeProfiler)

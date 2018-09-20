@@ -20,17 +20,16 @@
 
 static void ProfileRange(benchmark::State& state) {
     if (state.thread_index == 0) {
-        DependencyManager::set<tracing::Tracer>()->startTracing();
+        tracing::startTracing();
     }
 
     for (auto _ : state) {
-        Duration profileRangeThis(trace_app(), "test");
+        Duration profileRangeThis(tracing::app, "test");
         benchmark::DoNotOptimize(profileRangeThis);
     }
 
     if (state.thread_index == 0) {
-        DependencyManager::get<tracing::Tracer>()->stopTracing();
-        DependencyManager::destroy<tracing::Tracer>();
+        tracing::stopTracing();
     }
 }
 BENCHMARK(ProfileRange)->Threads(1);

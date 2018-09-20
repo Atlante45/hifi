@@ -429,7 +429,7 @@ protected:
 #define Task_DeclareCategoryTimeProfilerClass(className, category) \
     class className : public PerformanceTimer { \
     public: \
-        className(const std::string& label) : PerformanceTimer(label.c_str()), profileRange(category(), label.c_str()) {} \
+        className(const std::string& label) : PerformanceTimer(label.c_str()), profileRange(category, label.c_str()) {} \
         Duration profileRange; \
     };
 

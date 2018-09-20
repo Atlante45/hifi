@@ -97,9 +97,8 @@ int main(int argc, const char* argv[]) {
         Q_UNREACHABLE();
     }
 
-    // Early check for --traceFile argument 
-    auto tracer = DependencyManager::set<tracing::Tracer>();
-    const char * traceFile = nullptr;
+    // Early check for --traceFile argument
+    const char* traceFile = nullptr;
     const QString traceFileFlag("--traceFile");
     float traceDuration = 0.0f;
     for (int a = 1; a < argc; ++a) {
@@ -112,7 +111,7 @@ int main(int argc, const char* argv[]) {
         }
     }
     if (traceFile != nullptr) {
-        tracer->startTracing();
+        tracing::startTracing();
     }
    
     PROFILE_SYNC_BEGIN(startup, "main startup", "");
@@ -349,8 +348,8 @@ int main(int argc, const char* argv[]) {
         server.close();
 
         if (traceFile != nullptr) {
-            tracer->stopTracing();
-            tracer->serialize(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/" + traceFile);
+            tracing::stopTracing();
+            tracing::serialize(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/" + traceFile);
         }
     }
 

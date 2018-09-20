@@ -165,7 +165,6 @@ DomainServer::DomainServer(int argc, char* argv[]) :
 
     PathUtils::removeTemporaryApplicationDirs();
 
-    DependencyManager::set<tracing::Tracer>();
     DependencyManager::set<StatTracker>();
 
     LogUtils::init();

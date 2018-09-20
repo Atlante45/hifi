@@ -21,8 +21,6 @@
 
 #include "Application.h"
 
-Q_LOGGING_CATEGORY(trace_test, "trace.test")
-
 TestScriptingInterface* TestScriptingInterface::getInstance() {
     static TestScriptingInterface sharedInstance;
     return &sharedInstance;
@@ -86,22 +84,13 @@ bool TestScriptingInterface::startTracing(QString logrules) {
         QLoggingCategory::setFilterRules(logrules);
     }
 
-    if (!DependencyManager::isSet<tracing::Tracer>()) {
-        return false;
-    }
-
-    DependencyManager::get<tracing::Tracer>()->startTracing();
+    tracing::startTracing();
     return true;
 }
 
 bool TestScriptingInterface::stopTracing(QString filename) {
-    if (!DependencyManager::isSet<tracing::Tracer>()) {
-        return false;
-    }
-
-    auto tracer = DependencyManager::get<tracing::Tracer>();
-    tracer->stopTracing();
-    tracer->serialize(filename);
+    tracing::stopTracing();
+    tracing::serialize(filename);
     return true;
 }
 
@@ -136,11 +125,11 @@ bool TestScriptingInterface::waitForCondition(qint64 maxWaitMs, std::function<bo
 }
 
 void TestScriptingInterface::startTraceEvent(QString name) {
-    tracing::traceEvent(trace_test(), name, tracing::DurationBegin, "");
+    tracing::traceEvent(tracing::test, name, tracing::DurationBegin, "");
 }
 
 void TestScriptingInterface::endTraceEvent(QString name) {
-    tracing::traceEvent(trace_test(), name, tracing::DurationEnd);
+    tracing::traceEvent(tracing::test, name, tracing::DurationEnd);
 }
 
 void TestScriptingInterface::savePhysicsSimulationStats(QString originalPath) {

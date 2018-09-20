@@ -8,39 +8,14 @@
 
 #include "Profile.h"
 
-Q_LOGGING_CATEGORY(trace_app, "trace.app")
-Q_LOGGING_CATEGORY(trace_app_detail, "trace.app.detail")
-Q_LOGGING_CATEGORY(trace_metadata, "trace.metadata")
-Q_LOGGING_CATEGORY(trace_network, "trace.network")
-Q_LOGGING_CATEGORY(trace_parse, "trace.parse")
-Q_LOGGING_CATEGORY(trace_render, "trace.render")
-Q_LOGGING_CATEGORY(trace_render_detail, "trace.render.detail")
-Q_LOGGING_CATEGORY(trace_render_gpu, "trace.render.gpu")
-Q_LOGGING_CATEGORY(trace_resource, "trace.resource")
-Q_LOGGING_CATEGORY(trace_resource_network, "trace.resource.network")
-Q_LOGGING_CATEGORY(trace_resource_parse, "trace.resource.parse")
-Q_LOGGING_CATEGORY(trace_script, "trace.script")
-Q_LOGGING_CATEGORY(trace_script_entities, "trace.script.entities")
-Q_LOGGING_CATEGORY(trace_simulation, "trace.simulation")
-Q_LOGGING_CATEGORY(trace_simulation_detail, "trace.simulation.detail")
-Q_LOGGING_CATEGORY(trace_simulation_animation, "trace.simulation.animation")
-Q_LOGGING_CATEGORY(trace_simulation_animation_detail, "trace.simulation.animation.detail")
-Q_LOGGING_CATEGORY(trace_simulation_physics, "trace.simulation.physics")
-Q_LOGGING_CATEGORY(trace_simulation_physics_detail, "trace.simulation.physics.detail")
-Q_LOGGING_CATEGORY(trace_startup, "trace.startup")
-Q_LOGGING_CATEGORY(trace_workload, "trace.workload")
-
 #if defined(NSIGHT_FOUND)
 #include "nvToolsExt.h"
 #define NSIGHT_TRACING
 #endif
 
-static bool tracingEnabled() {
-    return DependencyManager::isSet<tracing::Tracer>() && DependencyManager::get<tracing::Tracer>()->isEnabled();
-}
 
-Duration::Duration(const QLoggingCategory& category, const QString& name, uint32_t argbColor, uint64_t payload, const QVariantMap& baseArgs) : _name(name), _category(category) {
-    if (tracingEnabled() && category.isDebugEnabled()) {
+Duration::Duration(tracing::Category category, const QString& name, uint32_t argbColor, uint64_t payload, const QVariantMap& baseArgs) : _name(name), _category(category) {
+    if (tracing::isTracingEnabled(category)) {
         QVariantMap args = baseArgs;
         args["nv_payload"] = QVariant::fromValue(payload);
         tracing::traceEvent(_category, _name, tracing::DurationBegin, "", args);
@@ -62,7 +37,7 @@ Duration::Duration(const QLoggingCategory& category, const QString& name, uint32
 }
 
 Duration::~Duration() {
-    if (tracingEnabled() && _category.isDebugEnabled()) {
+    if (tracing::isTracingEnabled(_category)) {
         tracing::traceEvent(_category, _name, tracing::DurationEnd);
 #ifdef NSIGHT_TRACING
         nvtxRangePop();
@@ -71,9 +46,9 @@ Duration::~Duration() {
 }
 
 // FIXME
-uint64_t Duration::beginRange(const QLoggingCategory& category, const char* name, uint32_t argbColor) {
+uint64_t Duration::beginRange(tracing::Category category, const char* name, uint32_t argbColor) {
 #ifdef NSIGHT_TRACING
-    if (tracingEnabled() && category.isDebugEnabled()) {
+    if (tracing::isTracingEnabled(category)) {
         nvtxEventAttributes_t eventAttrib = { 0 };
         eventAttrib.version = NVTX_VERSION;
         eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE;
@@ -88,9 +63,9 @@ uint64_t Duration::beginRange(const QLoggingCategory& category, const char* name
 }
 
 // FIXME
-void Duration::endRange(const QLoggingCategory& category, uint64_t rangeId) {
+void Duration::endRange(tracing::Category category, uint64_t rangeId) {
 #ifdef NSIGHT_TRACING
-    if (tracingEnabled() && category.isDebugEnabled()) {
+    if (tracing::isTracingEnabled(category)) {
         nvtxRangeEnd(rangeId);
     }
 #endif

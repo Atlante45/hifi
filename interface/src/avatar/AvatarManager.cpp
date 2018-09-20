@@ -175,9 +175,6 @@ void AvatarManager::updateMyAvatar(float deltaTime) {
     }
 }
 
-
-Q_LOGGING_CATEGORY(trace_simulation_avatar, "trace.simulation.avatar");
-
 float AvatarManager::getAvatarDataRate(const QUuid& sessionID, const QString& rateName) const {
     auto avatar = getAvatarBySessionID(sessionID);
     return avatar ? avatar->getDataRate(rateName) : 0.0f;

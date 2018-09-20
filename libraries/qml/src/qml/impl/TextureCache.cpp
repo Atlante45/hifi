@@ -3,11 +3,11 @@
 #include <cassert>
 
 #include <gl/Config.h>
+#include <Profile.h>
 
 #include <QtCore/QThread>
 #include <QtCore/QCoreApplication>
 
-#include "Profiling.h"
 
 using namespace hifi::qml::impl;
 

@@ -40,8 +40,6 @@
 
 #include <PointerManager.h>
 
-Q_LOGGING_CATEGORY(trace_render_overlays, "trace.render.overlays")
-
 Overlays::Overlays() {
     auto pointerManager = DependencyManager::get<PointerManager>();
     connect(pointerManager.data(), &PointerManager::hoverBeginOverlay, this, &Overlays::hoverEnterPointerEvent);

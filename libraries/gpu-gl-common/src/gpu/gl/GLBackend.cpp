@@ -504,7 +504,7 @@ void GLBackend::resetStages() {
 
 
 void GLBackend::do_pushProfileRange(const Batch& batch, size_t paramOffset) {
-    if (trace_render_gpu_gl_detail().isDebugEnabled()) {
+    if (isTracingEnabled(tracing::render_gpu_gl_detail)) {
         auto name = batch._profileRanges.get(batch._params[paramOffset]._uint);
         profileRanges.push_back(name);
 #if defined(NSIGHT_FOUND)
@@ -514,7 +514,7 @@ void GLBackend::do_pushProfileRange(const Batch& batch, size_t paramOffset) {
 }
 
 void GLBackend::do_popProfileRange(const Batch& batch, size_t paramOffset) {
-    if (trace_render_gpu_gl_detail().isDebugEnabled()) {
+    if (isTracingEnabled(tracing::render_gpu_gl_detail)) {
         profileRanges.pop_back();
 #if defined(NSIGHT_FOUND)
         nvtxRangePop();

@@ -102,8 +102,6 @@ VHACDUtilApp::VHACDUtilApp(int argc, char* argv[]) :
 {
     vhacd::VHACDUtil vUtil;
 
-    DependencyManager::set<tracing::Tracer>();
-
     // parse command-line
     QCommandLineParser parser;
     parser.setApplicationDescription("High Fidelity Object Decomposer");

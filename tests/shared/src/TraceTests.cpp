@@ -17,13 +17,11 @@
 #include <test-utils/QTestExtensions.h>
 
 QTEST_MAIN(TraceTests)
-Q_LOGGING_CATEGORY(trace_test, "trace.test")
 
 const QString OUTPUT_FILE = "traces/testTrace.json.gz";
 
 void TraceTests::testTraceSerialization() {
-    auto tracer = DependencyManager::set<tracing::Tracer>();
-    tracer->startTracing();
+    tracing::startTracing();
     {
         auto start = usecTimestampNow();
         PROFILE_RANGE(test, "TestEvent")
@@ -34,10 +32,10 @@ void TraceTests::testTraceSerialization() {
         duration /= USECS_PER_MSEC;
         qDebug() << "Recording took " << duration << "ms";
     }
-    tracer->stopTracing();
+    tracing::stopTracing();
     {
         auto start = usecTimestampNow();
-        tracer->serialize(OUTPUT_FILE);
+        tracing::serialize(OUTPUT_FILE);
         auto duration = usecTimestampNow() - start;
         duration /= USECS_PER_MSEC;
         qDebug() << "Serialization took " << duration << "ms";

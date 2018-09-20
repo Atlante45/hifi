@@ -27,8 +27,6 @@
 #include <Trace.h>
 #include <StatTracker.h>
 
-Q_LOGGING_CATEGORY(trace_resource_parse_geometry, "trace.resource.parse.geometry")
-
 class GeometryReader;
 
 class GeometryExtra {

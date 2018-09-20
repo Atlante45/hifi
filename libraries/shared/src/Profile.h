@@ -13,96 +13,74 @@
 #include "Trace.h"
 #include "SharedUtil.h"
 
-// When profiling something that may happen many times per frame, use a xxx_detail category so that they may easily be filtered out of trace results
-Q_DECLARE_LOGGING_CATEGORY(trace_app)
-Q_DECLARE_LOGGING_CATEGORY(trace_app_detail)
-Q_DECLARE_LOGGING_CATEGORY(trace_metadata)
-Q_DECLARE_LOGGING_CATEGORY(trace_network)
-Q_DECLARE_LOGGING_CATEGORY(trace_render)
-Q_DECLARE_LOGGING_CATEGORY(trace_render_detail)
-Q_DECLARE_LOGGING_CATEGORY(trace_render_gpu)
-Q_DECLARE_LOGGING_CATEGORY(trace_resource)
-Q_DECLARE_LOGGING_CATEGORY(trace_resource_parse)
-Q_DECLARE_LOGGING_CATEGORY(trace_resource_network)
-Q_DECLARE_LOGGING_CATEGORY(trace_script)
-Q_DECLARE_LOGGING_CATEGORY(trace_script_entities)
-Q_DECLARE_LOGGING_CATEGORY(trace_simulation)
-Q_DECLARE_LOGGING_CATEGORY(trace_simulation_detail)
-Q_DECLARE_LOGGING_CATEGORY(trace_simulation_animation)
-Q_DECLARE_LOGGING_CATEGORY(trace_simulation_animation_detail)
-Q_DECLARE_LOGGING_CATEGORY(trace_simulation_physics)
-Q_DECLARE_LOGGING_CATEGORY(trace_simulation_physics_detail)
-Q_DECLARE_LOGGING_CATEGORY(trace_startup)
-Q_DECLARE_LOGGING_CATEGORY(trace_workload)
-
 class Duration {
 public:
-    Duration(const QLoggingCategory& category, const QString& name, uint32_t argbColor = 0xff0000ff, uint64_t payload = 0, const QVariantMap& args = QVariantMap());
+    Duration(tracing::Category category, const QString& name, uint32_t argbColor = 0xff0000ff, uint64_t payload = 0, const QVariantMap& args = QVariantMap());
     ~Duration();
 
-    static uint64_t beginRange(const QLoggingCategory& category, const char* name, uint32_t argbColor);
-    static void endRange(const QLoggingCategory& category, uint64_t rangeId);
+    static uint64_t beginRange(tracing::Category category, const char* name, uint32_t argbColor);
+    static void endRange(tracing::Category category, uint64_t rangeId);
 
 private:
     QString _name;
-    const QLoggingCategory& _category;
+    tracing::Category _category;
 };
 
 
-inline void syncBegin(const QLoggingCategory& category, const QString& name, const QString& id, const QVariantMap& args = QVariantMap(), const QVariantMap& extra = QVariantMap()) {
-    if (category.isDebugEnabled()) {
+inline void syncBegin(tracing::Category category, const QString& name, const QString& id, const QVariantMap& args = QVariantMap(), const QVariantMap& extra = QVariantMap()) {
+    if (tracing::isTracingEnabled(category)) {
         tracing::traceEvent(category, name, tracing::DurationBegin, id, args, extra);
     }
 }
 
 
-inline void syncEnd(const QLoggingCategory& category, const QString& name, const QString& id, const QVariantMap& args = QVariantMap(), const QVariantMap& extra = QVariantMap()) {
-    if (category.isDebugEnabled()) {
+inline void syncEnd(tracing::Category category, const QString& name, const QString& id, const QVariantMap& args = QVariantMap(), const QVariantMap& extra = QVariantMap()) {
+    if (tracing::isTracingEnabled(category)) {
         tracing::traceEvent(category, name, tracing::DurationEnd, id, args, extra);
     }
 }
 
-inline void asyncBegin(const QLoggingCategory& category, const QString& name, const QString& id, const QVariantMap& args = QVariantMap(), const QVariantMap& extra = QVariantMap()) {
-    if (category.isDebugEnabled()) {
+inline void asyncBegin(tracing::Category category, const QString& name, const QString& id, const QVariantMap& args = QVariantMap(), const QVariantMap& extra = QVariantMap()) {
+    if (tracing::isTracingEnabled(category)) {
         tracing::traceEvent(category, name, tracing::AsyncNestableStart, id, args, extra);
     }
 }
 
 
-inline void asyncEnd(const QLoggingCategory& category, const QString& name, const QString& id, const QVariantMap& args = QVariantMap(), const QVariantMap& extra = QVariantMap()) {
-    if (category.isDebugEnabled()) {
+inline void asyncEnd(tracing::Category category, const QString& name, const QString& id, const QVariantMap& args = QVariantMap(), const QVariantMap& extra = QVariantMap()) {
+    if (tracing::isTracingEnabled(category)) {
         tracing::traceEvent(category, name, tracing::AsyncNestableEnd, id, args, extra);
     }
 }
 
-inline void instant(const QLoggingCategory& category, const QString& name, const QString& scope = "t", const QVariantMap& args = QVariantMap(), QVariantMap extra = QVariantMap()) {
-    if (category.isDebugEnabled()) {
+inline void instant(tracing::Category category, const QString& name, const QString& scope = "t", const QVariantMap& args = QVariantMap(), QVariantMap extra = QVariantMap()) {
+    if (tracing::isTracingEnabled(category)) {
         extra["s"] = scope;
         tracing::traceEvent(category, name, tracing::Instant, "", args, extra);
     }
 }
 
-inline void counter(const QLoggingCategory& category, const QString& name, const QVariantMap& args, const QVariantMap& extra = QVariantMap()) {
-    if (category.isDebugEnabled()) {
+inline void counter(tracing::Category category, const QString& name, const QVariantMap& args, const QVariantMap& extra = QVariantMap()) {
+    if (tracing::isTracingEnabled(category)) {
         tracing::traceEvent(category, name, tracing::Counter, "", args, extra);
     }
 }
 
 inline void metadata(const QString& metadataType, const QVariantMap& args) {
-    tracing::traceEvent(trace_metadata(), metadataType, tracing::Metadata, "", args);
+    tracing::traceMetadata(tracing::metadata, metadataType, tracing::Metadata, "", args, QVariantMap());
 }
 
-#define PROFILE_RANGE(category, name) Duration profileRangeThis(trace_##category(), name);
-#define PROFILE_RANGE_EX(category, name, argbColor, payload, ...) Duration profileRangeThis(trace_##category(), name, argbColor, (uint64_t)payload, ##__VA_ARGS__);
-#define PROFILE_RANGE_BEGIN(category, rangeId, name, argbColor) rangeId = Duration::beginRange(trace_##category(), name, argbColor)
-#define PROFILE_RANGE_END(category, rangeId) Duration::endRange(trace_##category(), rangeId)
-#define PROFILE_SYNC_BEGIN(category, name, id, ...) syncBegin(trace_##category(), name, id, ##__VA_ARGS__);
-#define PROFILE_SYNC_END(category, name, id, ...) syncEnd(trace_##category(), name, id, ##__VA_ARGS__);
-#define PROFILE_ASYNC_BEGIN(category, name, id, ...) asyncBegin(trace_##category(), name, id, ##__VA_ARGS__);
-#define PROFILE_ASYNC_END(category, name, id, ...) asyncEnd(trace_##category(), name, id, ##__VA_ARGS__);
-#define PROFILE_COUNTER_IF_CHANGED(category, name, type, value) { static type lastValue = 0; type newValue = value;  if (newValue != lastValue) { counter(trace_##category(), name, { { name, newValue }}); lastValue = newValue; } }
-#define PROFILE_COUNTER(category, name, ...) counter(trace_##category(), name, ##__VA_ARGS__);
-#define PROFILE_INSTANT(category, name, ...) instant(trace_##category(), name, ##__VA_ARGS__);
+#define PROFILE_RANGE(category, name) Duration profileRangeThis(tracing::category, name);
+#define PROFILE_RANGE_EX(category, name, argbColor, payload, ...) Duration profileRangeThis(tracing::category, name, argbColor, (uint64_t)payload, ##__VA_ARGS__);
+#define PROFILE_RANGE_BEGIN(category, rangeId, name, argbColor) rangeId = Duration::beginRange(tracing::category, name, argbColor)
+#define PROFILE_RANGE_END(category, rangeId) Duration::endRange(tracing::category, rangeId)
+#define PROFILE_SYNC_BEGIN(category, name, id, ...) syncBegin(tracing::category, name, id, ##__VA_ARGS__);
+#define PROFILE_SYNC_END(category, name, id, ...) syncEnd(tracing::category, name, id, ##__VA_ARGS__);
+#define PROFILE_ASYNC_BEGIN(category, name, id, ...) asyncBegin(tracing::category, name, id, ##__VA_ARGS__);
+#define PROFILE_ASYNC_END(category, name, id, ...) asyncEnd(tracing::category, name, id, ##__VA_ARGS__);
+#define PROFILE_COUNTER_IF_CHANGED(category, name, type, value) { static type lastValue = 0; type newValue = value;  if (newValue != lastValue) { counter(tracing::category, name, { { name, newValue }}); lastValue = newValue; } }
+#define PROFILE_COUNTER(category, name, ...) counter(tracing::category, name, ##__VA_ARGS__);
+#define PROFILE_INSTANT(category, name, ...) instant(tracing::category, name, ##__VA_ARGS__);
 #define PROFILE_SET_THREAD_NAME(threadName) metadata("thread_name", { { "name", threadName } });
 
 #define SAMPLE_PROFILE_RANGE(chance, category, name, ...) if (randFloat() <= chance) { PROFILE_RANGE(category, name); }
@@ -113,8 +91,8 @@ inline void metadata(const QString& metadataType, const QVariantMap& args) {
 // uncomment WANT_DETAILED_PROFILING definition to enable profiling in high-frequency contexts
 //#define WANT_DETAILED_PROFILING
 #ifdef WANT_DETAILED_PROFILING
-#define DETAILED_PROFILE_RANGE(category, name) Duration profileRangeThis(trace_##category(), name);
-#define DETAILED_PROFILE_RANGE_EX(category, name, argbColor, payload, ...) Duration profileRangeThis(trace_##category(), name, argbColor, (uint64_t)payload, ##__VA_ARGS__);
+#define DETAILED_PROFILE_RANGE(category, name) Duration profileRangeThis(tracing::category, name);
+#define DETAILED_PROFILE_RANGE_EX(category, name, argbColor, payload, ...) Duration profileRangeThis(tracing::category, name, argbColor, (uint64_t)payload, ##__VA_ARGS__);
 #else // WANT_DETAILED_PROFILING
 #define DETAILED_PROFILE_RANGE(category, name) ; // no-op
 #define DETAILED_PROFILE_RANGE_EX(category, name, argbColor, payload, ...) ; // no-op
