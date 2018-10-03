@@ -332,17 +332,24 @@ void AudioMixer::sendStatsPacket() {
     QJsonObject listenerStats;
 
     nodeList->eachNode([&](const SharedNodePointer& node) {
-        AudioMixerClientData* clientData = static_cast<AudioMixerClientData*>(node->getLinkedData());
-        if (clientData) {
-            QJsonObject nodeStats;
-            QString uuidString = uuidStringWithoutCurlyBraces(node->getUUID());
+        auto clientData = static_cast<AudioMixerClientData*>(node->getLinkedData());
+        auto activeSocket = node->getActiveSocket();
 
-            nodeStats["outbound_kbps"] = node->getOutboundBandwidth();
-            nodeStats[USERNAME_UUID_REPLACEMENT_STATS_KEY] = uuidString;
+        if (clientData && activeSocket) {
+            QHostAddress fastmetrics { "0.0.0.0" };
+            QHostAddress monkeybrains { "0.0.0.0" };
+            auto address = activeSocket->getAddress();
+            if (address == fastmetrics || address == monkeybrains) {
+                QJsonObject nodeStats;
+                QString uuidString = uuidStringWithoutCurlyBraces(node->getUUID());
 
-            nodeStats["jitter"] = clientData->getAudioStreamStats();
+                nodeStats["outbound_kbps"] = node->getOutboundBandwidth();
+                nodeStats[USERNAME_UUID_REPLACEMENT_STATS_KEY] = uuidString;
 
-            listenerStats[uuidString] = nodeStats;
+                nodeStats["jitter"] = clientData->getAudioStreamStats();
+
+                listenerStats[uuidString] = nodeStats;
+            }
         }
     });
 
