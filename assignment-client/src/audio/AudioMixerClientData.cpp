@@ -66,9 +66,13 @@ int AudioMixerClientData::processPackets(ConcurrentAddedStreams& addedStreams) {
         auto& packet = _packetQueue.front();
 
         switch (packet->getType()) {
+            case PacketType::InjectAudio:
+                if (!node->isAllowedEditor()) {
+                    break;
+                }
+                Q_FALLTHROUGH();
             case PacketType::MicrophoneAudioNoEcho:
             case PacketType::MicrophoneAudioWithEcho:
-            case PacketType::InjectAudio:
             case PacketType::SilentAudioFrame: {
                 if (node->isUpstream()) {
                     setupCodecForReplicatedAgent(packet);
