@@ -71,6 +71,10 @@ void AudioMixerSlave::configureMix(ConstIter begin, ConstIter end, unsigned int 
 }
 
 void AudioMixerSlave::mix(const SharedNodePointer& node) {
+#ifdef HIFI_AUDIO_MIXER_DEBUG
+    auto mixStart = std::chrono::system_clock::now();
+#endif
+    
     // check that the node is valid
     AudioMixerClientData* data = (AudioMixerClientData*)node->getLinkedData();
     if (data == nullptr) {
@@ -126,6 +130,12 @@ void AudioMixerSlave::mix(const SharedNodePointer& node) {
             data->sendAudioStreamStatsPackets(node);
         }
     }
+
+#ifdef HIFI_AUDIO_MIXER_DEBUG
+    auto mixEnd = std::chrono::system_clock::now();
+    auto mixTime = std::chrono::duration_cast<std::chrono::nanoseconds>(mixEnd - mixStart);
+    stats.mixTime += mixTime.count();
+#endif
 }
 
 
@@ -459,12 +469,6 @@ bool AudioMixerSlave::prepareMix(const SharedNodePointer& listener) {
 
     // clear the newly ignored, un-ignored, ignoring, and un-ignoring streams now that we've processed them
     listenerData->clearStagedIgnoreChanges();
-
-#ifdef HIFI_AUDIO_MIXER_DEBUG
-    auto mixEnd = p_high_resolution_clock::now();
-    auto mixTime = std::chrono::duration_cast<std::chrono::nanoseconds>(mixEnd - mixStart);
-    stats.mixTime += mixTime.count();
-#endif
 
     // check for silent audio before limiting
     // limiting uses a dither and can only guarantee abs(sample) <= 1

@@ -12,6 +12,8 @@
 #ifndef hifi_AudioMixerStats_h
 #define hifi_AudioMixerStats_h
 
+#define HIFI_AUDIO_MIXER_DEBUG
+
 #ifdef HIFI_AUDIO_MIXER_DEBUG
 #include <cstdint>
 #endif

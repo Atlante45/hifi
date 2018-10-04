@@ -291,7 +291,7 @@ void AudioMixer::sendStatsPacket() {
     addTiming(_eventsTiming, "events");
 
 #ifdef HIFI_AUDIO_MIXER_DEBUG
-    timingStats["ns_per_mix"] = (_stats.totalMixes > 0) ?  (float)(_stats.mixTime / _stats.totalMixes) : 0;
+    timingStats["mix_per_thread"] = (float)_stats.mixTime / (_slavePool.numThreads() * _numStatFrames * 1000.0f * timingStats["us_per_mix"].toInt());
 #endif
 
     // call it "avg_..." to keep it higher in the display, sorted alphabetically
