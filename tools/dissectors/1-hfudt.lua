@@ -151,7 +151,8 @@ local packet_types = {
   [96] = "OctreeDataFileReply",
   [97] = "OctreeDataPersist",
   [98] = "EntityClone",
-  [99] = "EntityQueryInitialResultsComplete"
+  [99] = "EntityQueryInitialResultsComplete",
+  [100] = "BulkAvatarTraits"
 }
 
 local unsourced_packet_types = {
@@ -291,6 +292,11 @@ function p_hfudt.dissector(buf, pinfo, tree)
     -- AvatarData or BulkAvatarDataPacket
     if packet_type_text == "AvatarData" or packet_type_text == "BulkAvatarData" then
       Dissector.get("hf-avatar"):call(buf(i):tvb(), pinfo, tree)
+    end
+
+    -- BulkAvatarTraits
+    if packet_type_text == "BulkAvatarTraits" then
+      Dissector.get("hf-traits"):call(buf(i):tvb(), pinfo, tree)
     end
 
     if packet_type_text == "EntityEdit" then
