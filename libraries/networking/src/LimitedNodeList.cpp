@@ -408,7 +408,7 @@ qint64 LimitedNodeList::sendUnreliablePacket(const NLPacket& packet, const Node&
     }
 
     emit dataSent(destinationNode.getType(), packet.getDataSize());
-    destinationNode.recordBytesSent(packet.getDataSize());
+    //destinationNode.recordBytesSent(packet.getDataSize());
 
     return sendUnreliablePacket(packet, *destinationNode.getActiveSocket(), destinationNode.getAuthenticateHash());
 }
@@ -431,7 +431,7 @@ qint64 LimitedNodeList::sendPacket(std::unique_ptr<NLPacket> packet, const Node&
 
     if (activeSocket) {
         emit dataSent(destinationNode.getType(), packet->getDataSize());
-        destinationNode.recordBytesSent(packet->getDataSize());
+        //destinationNode.recordBytesSent(packet->getDataSize());
 
         return sendPacket(std::move(packet), *activeSocket, destinationNode.getAuthenticateHash());
     } else {

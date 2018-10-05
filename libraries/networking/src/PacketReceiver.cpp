@@ -284,9 +284,9 @@ void PacketReceiver::handleVerifiedMessage(QSharedPointer<ReceivedMessage> recei
             connectionType = _directlyConnectedObjects.contains(listener.object) ? Qt::DirectConnection : Qt::AutoConnection;
         }
 
-        if (matchingNode) {
-            matchingNode->recordBytesReceived(receivedMessage->getSize());
-        }
+//        if (matchingNode) {
+//            matchingNode->recordBytesReceived(receivedMessage->getSize());
+//        }
 
         QMetaMethod metaMethod = listener.method;
 

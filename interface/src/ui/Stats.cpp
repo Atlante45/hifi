@@ -198,7 +198,7 @@ void Stats::updateStats(bool force) {
         // TODO: this should also support entities
         if (node->getType() == NodeType::EntityServer) {
             totalPingOctree += node->getPingMs();
-            totalEntityKbps += node->getInboundBandwidth();
+//            totalEntityKbps += node->getInboundBandwidth();
             octreeServerCount++;
             if (pingOctreeMax < node->getPingMs()) {
                 pingOctreeMax = node->getPingMs();
