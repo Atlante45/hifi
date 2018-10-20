@@ -30,6 +30,9 @@
 // 6) Truncate filter length to 2.5ms using rectangular window with 8-tap Hanning taper
 //
 
+// clang-format off
+// Turn off clang-format for this whole file
+
 #if defined(_MSC_VER)
 #define ALIGN32 __declspec(align(32))
 #elif defined(__GNUC__)

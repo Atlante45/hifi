@@ -18,6 +18,8 @@
 
 #include <QtCore/QUuid>
 
+#include "ExtendedIODevice.h"
+
 namespace AvatarTraits {
     enum TraitType : int8_t {
         NullTrait = -1,

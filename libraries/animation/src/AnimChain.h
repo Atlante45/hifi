@@ -12,14 +12,16 @@
 #define hifi_AnimChain
 
 #include <vector>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
 #include <DebugDraw.h>
 
+#include "AnimSkeleton.h"
+
 template <int N>
 class AnimChainT {
-
 public:
     AnimChainT() {}
 

@@ -11,8 +11,10 @@
 #include "AutoTester.h"
 
 #ifdef Q_OS_WIN
+// clang-format off
 #include <windows.h>
 #include <shellapi.h>
+// clang-format on
 #endif
 
 AutoTester::AutoTester(QWidget* parent) : QMainWindow(parent) {

@@ -11,8 +11,9 @@
 #ifndef hifi_AnimTwoBoneIK_h
 #define hifi_AnimTwoBoneIK_h
 
-#include "AnimNode.h"
 #include "AnimChain.h"
+#include "AnimNode.h"
+#include "AnimSkeleton.h"
 
 // Simple two bone IK chain
 class AnimTwoBoneIK : public AnimNode {

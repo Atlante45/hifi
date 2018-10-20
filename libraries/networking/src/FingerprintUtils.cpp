@@ -19,9 +19,11 @@
 #include <DependencyManager.h>
 
 #ifdef Q_OS_WIN
+// clang-format off
 #include <Windows.h>
 #include <winreg.h>
-#endif //Q_OS_WIN
+// clang-format on
+#endif // Q_OS_WIN
 
 #ifdef Q_OS_MAC
 #include <IOKit/IOBSD.h>

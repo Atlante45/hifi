@@ -11,6 +11,8 @@
 #include <memory>
 #include <array>
 
+#include "Texture.h"
+
 namespace gpu {
     class SwapChain {
     public:
