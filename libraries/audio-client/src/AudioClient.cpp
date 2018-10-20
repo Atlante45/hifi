@@ -25,12 +25,14 @@
 
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
+// clang-format off
 #include <windows.h>
 #include <Mmsystem.h>
 #include <mmdeviceapi.h>
 #include <devicetopology.h>
 #include <Functiondiscoverykeys_devpkey.h>
 #include <VersionHelpers.h>
+// clang-format on
 #endif
 
 #include <QtConcurrent/QtConcurrent>

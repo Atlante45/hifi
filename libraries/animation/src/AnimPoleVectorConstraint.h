@@ -11,8 +11,9 @@
 #ifndef hifi_AnimPoleVectorConstraint_h
 #define hifi_AnimPoleVectorConstraint_h
 
-#include "AnimNode.h"
 #include "AnimChain.h"
+#include "AnimNode.h"
+#include "AnimSkeleton.h"
 
 // Three bone IK chain
 

@@ -7,7 +7,7 @@
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
-
+// clang-format off
 #include "Overlays.h"
 
 #include <limits>
@@ -36,6 +36,8 @@
 
 #include "ui/Keyboard.h"
 #include <QtQuick/QQuickWindow>
+
+// clang-format on
 
 Q_LOGGING_CATEGORY(trace_render_overlays, "trace.render.overlays")
 

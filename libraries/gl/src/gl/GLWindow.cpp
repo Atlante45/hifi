@@ -8,9 +8,12 @@
 
 #include "GLWindow.h"
 
+// clang-format off
 #include "Config.h"
-#include <QtCore/QDebug>
 #include <QtGui/QOpenGLContext>
+// clang-format on
+
+#include <QtCore/QDebug>
 
 #include "GLHelpers.h"
 #include "GLLogging.h"

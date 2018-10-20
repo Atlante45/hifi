@@ -13,10 +13,13 @@
 
 #ifdef Q_OS_WIN
 
+// clang-format off
 #include <windows.h>
 #include <mmdeviceapi.h>
-#include <endpointvolume.h>
+// clang-format on
+
 #include <audioclient.h>
+#include <endpointvolume.h>
 
 #include <QString>
 

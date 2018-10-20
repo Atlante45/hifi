@@ -25,9 +25,13 @@
 #include <glm/glm.hpp>
 
 #ifdef Q_OS_WIN
+// clang-format off
+// Include order is important
 #include <windows.h>
-#include "CPUIdent.h"
 #include <Psapi.h>
+// clang-format on
+
+#include "CPUIdent.h"
 
 #if _MSC_VER >= 1900
 #pragma comment(lib, "legacy_stdio_definitions.lib")
