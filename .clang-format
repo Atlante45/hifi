@@ -1,4 +1,5 @@
 ---
+Language: Cpp
 BasedOnStyle: Chromium
 AccessModifierOffset: '-4'
 AlignAfterOpenBracket: Align
@@ -10,7 +11,7 @@ AlignTrailingComments: 'false'
 AllowAllParametersOfDeclarationOnNextLine: 'true'
 AllowShortBlocksOnASingleLine: 'false'
 AllowShortCaseLabelsOnASingleLine: 'false'
-AllowShortFunctionsOnASingleLine: Inline
+AllowShortFunctionsOnASingleLine: InlineOnly
 AllowShortIfStatementsOnASingleLine: 'false'
 AllowShortLoopsOnASingleLine: 'false'
 AlwaysBreakAfterReturnType: None
@@ -35,11 +36,10 @@ IndentPPDirectives: None
 IndentWidth: '4'
 IndentWrappedFunctionNames: 'false'
 KeepEmptyLinesAtTheStartOfBlocks: 'false'
-Language: Cpp
 MaxEmptyLinesToKeep: '1'
 NamespaceIndentation: None
 PenaltyBreakAssignment: '1000'
-PenaltyBreakBeforeFirstCallParameter: '900'
+PenaltyBreakBeforeFirstCallParameter: '100'
 PenaltyReturnTypeOnItsOwnLine: '1000'
 PointerAlignment: Left
 ReflowComments: 'true'
@@ -61,5 +61,3 @@ SpacesInParentheses: 'false'
 SpacesInSquareBrackets: 'false'
 Standard: Cpp11
 UseTab: Never
-
-...
