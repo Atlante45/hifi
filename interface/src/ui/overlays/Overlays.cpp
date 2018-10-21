@@ -19,7 +19,11 @@
 #include <render/Scene.h>
 #include <RegisteredMetaTypes.h>
 
+// clang-format off
 #include "Application.h"
+#include <QtQuick/QQuickWindow>
+// clang-format on
+
 #include "InterfaceLogging.h"
 #include "Image3DOverlay.h"
 #include "Circle3DOverlay.h"
@@ -35,7 +39,6 @@
 #include "RectangleOverlay.h"
 #include "Text3DOverlay.h"
 #include "Web3DOverlay.h"
-#include <QtQuick/QQuickWindow>
 
 #include <PointerManager.h>
 // clang-format on
