@@ -16,19 +16,18 @@
 #include <QtCore/QProcessEnvironment>
 #include <QtCore/QThread>
 
-#include <QtGui/QWindow>
 #include <QtGui/QGuiApplication>
+#include <QtGui/QWindow>
 
+#include <GLMHelpers.h>
 #include <shared/AbstractLoggerInterface.h>
 #include <shared/GlobalAppProperties.h>
-#include <GLMHelpers.h>
-#include "GLLogging.h"
 #include "Config.h"
 #include "GLHelpers.h"
+#include "GLLogging.h"
 #include "QOpenGLContextWrapper.h"
 
 using namespace gl;
-
 
 bool Context::enableDebugLogger() {
 #if defined(Q_OS_MAC)
@@ -45,11 +44,11 @@ bool Context::enableDebugLogger() {
 #endif
 }
 
-
-
 std::atomic<size_t> Context::_totalSwapchainMemoryUsage { 0 };
 
-size_t Context::getSwapchainMemoryUsage() { return _totalSwapchainMemoryUsage.load(); }
+size_t Context::getSwapchainMemoryUsage() {
+    return _totalSwapchainMemoryUsage.load();
+}
 
 size_t Context::evalSurfaceMemoryUsage(uint32_t width, uint32_t height, uint32_t pixelSize) {
     return width * height * pixelSize;
@@ -66,8 +65,8 @@ void Context::updateSwapchainMemoryUsage(size_t prevSize, size_t newSize) {
     }
 }
 
-
-Context::Context() {}
+Context::Context() {
+}
 
 Context::Context(QWindow* window) {
     setWindow(window);
@@ -104,7 +103,7 @@ Context::~Context() {
 void Context::updateSwapchainMemoryCounter() {
     if (_window) {
         auto newSize = _window->size();
-        auto newMemSize = gl::Context::evalSurfaceMemoryUsage(newSize.width(), newSize.height(), (uint32_t) _swapchainPixelSize);
+        auto newMemSize = gl::Context::evalSurfaceMemoryUsage(newSize.width(), newSize.height(), (uint32_t)_swapchainPixelSize);
         gl::Context::updateSwapchainMemoryUsage(_swapchainMemoryUsage, newMemSize);
         _swapchainMemoryUsage = newMemSize;
     } else {
@@ -135,7 +134,8 @@ void Context::clear() {
 
 #if defined(GL_CUSTOM_CONTEXT)
 
-static void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+static void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message,
+                                 const void* userParam) {
     if (GL_DEBUG_SEVERITY_NOTIFICATION == severity) {
         return;
     }
@@ -145,28 +145,38 @@ static void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum s
 }
 
 static void setupPixelFormatSimple(HDC hdc) {
-    // FIXME build the PFD based on the 
-    static const PIXELFORMATDESCRIPTOR pfd =    // pfd Tells Windows How We Want Things To Be
-    {
-        sizeof(PIXELFORMATDESCRIPTOR),         // Size Of This Pixel Format Descriptor
-        1,                                      // Version Number
-        PFD_DRAW_TO_WINDOW |                    // Format Must Support Window
-        PFD_SUPPORT_OPENGL |                    // Format Must Support OpenGL
-        PFD_DOUBLEBUFFER,                       // Must Support Double Buffering
-        PFD_TYPE_RGBA,                          // Request An RGBA Format
-        24,                                     // Select Our Color Depth
-        0, 0, 0, 0, 0, 0,                       // Color Bits Ignored
-        1,                                      // Alpha Buffer
-        0,                                      // Shift Bit Ignored
-        0,                                      // No Accumulation Buffer
-        0, 0, 0, 0,                             // Accumulation Bits Ignored
-        24,                                     // 24 Bit Z-Buffer (Depth Buffer)  
-        8,                                      // 8 Bit Stencil Buffer
-        0,                                      // No Auxiliary Buffer
-        PFD_MAIN_PLANE,                         // Main Drawing Layer
-        0,                                      // Reserved
-        0, 0, 0                                 // Layer Masks Ignored
-    };
+    // FIXME build the PFD based on the
+    static const PIXELFORMATDESCRIPTOR pfd = // pfd Tells Windows How We Want Things To Be
+        {
+            sizeof(PIXELFORMATDESCRIPTOR), // Size Of This Pixel Format Descriptor
+            1, // Version Number
+            PFD_DRAW_TO_WINDOW | // Format Must Support Window
+                PFD_SUPPORT_OPENGL | // Format Must Support OpenGL
+                PFD_DOUBLEBUFFER, // Must Support Double Buffering
+            PFD_TYPE_RGBA, // Request An RGBA Format
+            24, // Select Our Color Depth
+            0,
+            0,
+            0,
+            0,
+            0,
+            0, // Color Bits Ignored
+            1, // Alpha Buffer
+            0, // Shift Bit Ignored
+            0, // No Accumulation Buffer
+            0,
+            0,
+            0,
+            0, // Accumulation Bits Ignored
+            24, // 24 Bit Z-Buffer (Depth Buffer)
+            8, // 8 Bit Stencil Buffer
+            0, // No Auxiliary Buffer
+            PFD_MAIN_PLANE, // Main Drawing Layer
+            0, // Reserved
+            0,
+            0,
+            0 // Layer Masks Ignored
+        };
     auto pixelFormat = ChoosePixelFormat(hdc, &pfd);
     if (pixelFormat == 0) {
         throw std::runtime_error("Unable to create initial context");
@@ -223,13 +233,14 @@ void Context::doneCurrent() {
 #define GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB 0x8242
 #endif
 
-typedef BOOL(APIENTRYP PFNWGLCHOOSEPIXELFORMATARBPROC)(HDC hdc, const int *piAttribIList, const FLOAT *pfAttribFList, UINT nMaxFormats, int *piFormats, UINT *nNumFormats);
-typedef HGLRC(APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int *attribList);
+typedef BOOL(APIENTRYP PFNWGLCHOOSEPIXELFORMATARBPROC)(HDC hdc, const int* piAttribIList, const FLOAT* pfAttribFList,
+                                                       UINT nMaxFormats, int* piFormats, UINT* nNumFormats);
+typedef HGLRC(APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int* attribList);
 
 GLAPI PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB;
 GLAPI PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
 
-Q_GUI_EXPORT QOpenGLContext *qt_gl_global_share_context();
+Q_GUI_EXPORT QOpenGLContext* qt_gl_global_share_context();
 
 void Context::create(QOpenGLContext* shareContext) {
     assert(0 != _hwnd);
@@ -289,8 +300,8 @@ void Context::create(QOpenGLContext* shareContext) {
         formatAttribs.push_back(8);
 
 #ifdef NATIVE_SRGB_FRAMEBUFFER
-     //   formatAttribs.push_back(WGL_FRAMEBUFFER_SRGB_CAPABLE_ARB);
-     //   formatAttribs.push_back(GL_TRUE);
+        //   formatAttribs.push_back(WGL_FRAMEBUFFER_SRGB_CAPABLE_ARB);
+        //   formatAttribs.push_back(GL_TRUE);
 #endif
         // terminate the list
         formatAttribs.push_back(0);

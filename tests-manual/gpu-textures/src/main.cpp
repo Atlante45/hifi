@@ -8,57 +8,57 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-#include <unordered_map>
-#include <memory>
 #include <cstdio>
+#include <memory>
+#include <unordered_map>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <QtCore/QTime>
-#include <QtCore/QTimer>
 #include <QtCore/QDir>
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QFile>
 #include <QtCore/QLoggingCategory>
+#include <QtCore/QTime>
+#include <QtCore/QTimer>
 
 #include <QtGui/QDesktopServices>
-#include <QtGui/QResizeEvent>
-#include <QtGui/QWindow>
 #include <QtGui/QGuiApplication>
 #include <QtGui/QImage>
+#include <QtGui/QResizeEvent>
 #include <QtGui/QScreen>
+#include <QtGui/QWindow>
 
 #include <QtWidgets/QApplication>
 
 #include <gl/Config.h>
 
-#include <QtQuick/QQuickWindow>
-#include <QtQuick/QQuickView>
 #include <QtQml/QQmlContext>
+#include <QtQuick/QQuickView>
+#include <QtQuick/QQuickWindow>
 
-#include <gpu/Context.h>
 #include <gpu/Batch.h>
+#include <gpu/Context.h>
 #include <gpu/Stream.h>
 #include <gpu/gl/GLBackend.h>
 
-#include <gl/QOpenGLContextWrapper.h>
 #include <gl/GLHelpers.h>
+#include <gl/QOpenGLContextWrapper.h>
 
 #include <GLMHelpers.h>
-#include <PathUtils.h>
 #include <NumericalConstants.h>
-
-#include <PerfStat.h>
 #include <PathUtils.h>
+
+#include <PathUtils.h>
+#include <PerfStat.h>
 #include <SharedUtil.h>
 #include <ViewFrustum.h>
 
-#include <gpu/Pipeline.h>
 #include <gpu/Context.h>
+#include <gpu/Pipeline.h>
 
-#include "TestWindow.h"
 #include "TestTextures.h"
+#include "TestWindow.h"
 
 using TestBuilder = std::function<GpuTestBase*()>;
 using TestBuilders = std::list<TestBuilder>;
@@ -68,9 +68,9 @@ using TestBuilders = std::list<TestBuilder>;
 class MyTestWindow : public TestWindow {
     using Parent = TestWindow;
     TestBuilders _testBuilders;
-    GpuTestBase* _currentTest{ nullptr };
-    size_t _currentTestId{ 0 };
-    size_t _currentMaxTests{ 0 };
+    GpuTestBase* _currentTest { nullptr };
+    size_t _currentTestId { 0 };
+    size_t _currentMaxTests { 0 };
     glm::mat4 _camera;
     QTime _time;
 
@@ -85,10 +85,10 @@ class MyTestWindow : public TestWindow {
 
     void updateCamera() {
         float t = _time.elapsed() * 1e-3f;
-        static const glm::vec3 up{ 0.0f, 1.0f, 0.0f };
+        static const glm::vec3 up { 0.0f, 1.0f, 0.0f };
 
         float distance = 3.0f;
-        glm::vec3 camera_position{ distance * sinf(t), 0.5f, distance * cosf(t) };
+        glm::vec3 camera_position { distance * sinf(t), 0.5f, distance * cosf(t) };
 
         static const vec3 camera_focus(0);
         _camera = glm::inverse(glm::lookAt(camera_position, camera_focus, up));

@@ -20,8 +20,8 @@
 // time).  Z_DEFAULT_COMPRESSION requests a default compromise between
 // speed and compression (currently equivalent to level 6).
 
-bool gzip(QByteArray source, QByteArray &destination, int compressionLevel = -1); // -1 is Z_DEFAULT_COMPRESSION
+bool gzip(QByteArray source, QByteArray& destination, int compressionLevel = -1); // -1 is Z_DEFAULT_COMPRESSION
 
-bool gunzip(QByteArray source, QByteArray &destination);
+bool gunzip(QByteArray source, QByteArray& destination);
 
 #endif

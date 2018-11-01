@@ -21,17 +21,17 @@
 
 namespace controller {
 
-    class Mapping {
-    public:
-        using Pointer = std::shared_ptr<Mapping>;
-        using List = Route::List;
+class Mapping {
+public:
+    using Pointer = std::shared_ptr<Mapping>;
+    using List = Route::List;
 
-        Mapping(const QString& name) : name(name) {}
+    Mapping(const QString& name) : name(name) {}
 
-        List routes;
-        QString name;
-    };
+    List routes;
+    QString name;
+};
 
-}
+} // namespace controller
 
 #endif

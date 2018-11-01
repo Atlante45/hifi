@@ -37,7 +37,7 @@ struct win_high_resolution_clock {
     typedef std::chrono::duration<rep, period> duration;
     typedef std::chrono::time_point<win_high_resolution_clock> time_point;
     static const bool is_steady = true;
-    
+
     static time_point now();
 };
 

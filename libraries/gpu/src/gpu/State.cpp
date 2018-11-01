@@ -55,7 +55,7 @@ State::Signature State::evalSignature(const Data& state) {
         signature.set(State::DEPTH_BIAS_SLOPE_SCALE);
     }
     if (state.depthTest != State::DEFAULT.depthTest) {
-        signature.set(State::DEPTH_TEST); 
+        signature.set(State::DEPTH_TEST);
     }
     if (state.stencilActivation != State::DEFAULT.stencilActivation) {
         signature.set(State::STENCIL_ACTIVATION);
@@ -70,7 +70,7 @@ State::Signature State::evalSignature(const Data& state) {
         signature.set(State::SAMPLE_MASK);
     }
     if (state.alphaToCoverageEnable != State::DEFAULT.alphaToCoverageEnable) {
-        signature.set(State::ALPHA_TO_COVERAGE_ENABLE); 
+        signature.set(State::ALPHA_TO_COVERAGE_ENABLE);
     }
     if (state.blendFunction != State::DEFAULT.blendFunction) {
         signature.set(State::BLEND_FUNCTION);
@@ -82,7 +82,6 @@ State::Signature State::evalSignature(const Data& state) {
     return signature;
 }
 
-State::State(const Data& values) :
-    _values(values) {
+State::State(const Data& values) : _values(values) {
     _signature = evalSignature(_values);
 }

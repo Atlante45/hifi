@@ -19,12 +19,9 @@
 class FileResourceRequest : public ResourceRequest {
     Q_OBJECT
 public:
-    FileResourceRequest(
-        const QUrl& url,
-        const bool isObservable = true,
-        const qint64 callerId = -1,
-        const QString& extra = ""
-    ) : ResourceRequest(url, isObservable, callerId, extra) { }
+    FileResourceRequest(const QUrl& url, const bool isObservable = true, const qint64 callerId = -1,
+                        const QString& extra = "") :
+        ResourceRequest(url, isObservable, callerId, extra) {}
 
 protected:
     virtual void doSend() override;

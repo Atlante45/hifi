@@ -7,14 +7,14 @@
 //
 #include "MaterialCache.h"
 
-#include "QJsonObject"
-#include "QJsonDocument"
 #include "QJsonArray"
+#include "QJsonDocument"
+#include "QJsonObject"
 
 #include "RegisteredMetaTypes.h"
 
-NetworkMaterialResource::NetworkMaterialResource(const QUrl& url) :
-    Resource(url) {}
+NetworkMaterialResource::NetworkMaterialResource(const QUrl& url) : Resource(url) {
+}
 
 void NetworkMaterialResource::downloadFinished(const QByteArray& data) {
     parsedMaterials.reset();
@@ -75,7 +75,8 @@ bool NetworkMaterialResource::parseJSONColor(const QJsonValue& array, glm::vec3&
  * @property {number} materialVersion=1 - The version of the material. <em>Currently not used.</em>
  * @property {Material|Material[]} materials - The details of the material or materials.
  */
-NetworkMaterialResource::ParsedMaterials NetworkMaterialResource::parseJSONMaterials(const QJsonDocument& materialJSON, const QUrl& baseUrl) {
+NetworkMaterialResource::ParsedMaterials NetworkMaterialResource::parseJSONMaterials(const QJsonDocument& materialJSON,
+                                                                                     const QUrl& baseUrl) {
     ParsedMaterials toReturn;
     if (!materialJSON.isNull() && materialJSON.isObject()) {
         QJsonObject materialJSONObject = materialJSON.object();
@@ -124,7 +125,7 @@ NetworkMaterialResource::ParsedMaterials NetworkMaterialResource::parseJSONMater
  * @property {number} scattering - The scattering, <code>0.0</code> &ndash; <code>1.0</code>.
  * @property {string} emissiveMap - URL of emissive texture image.
  * @property {string} albedoMap - URL of albedo texture image.
- * @property {string} opacityMap - URL of opacity texture image. Set value the same as the <code>albedoMap</code> value for 
+ * @property {string} opacityMap - URL of opacity texture image. Set value the same as the <code>albedoMap</code> value for
  *     transparency.
  * @property {string} roughnessMap - URL of roughness texture image. Can use this or <code>glossMap</code>, but not both.
  * @property {string} glossMap - URL of gloss texture image. Can use this or <code>roughnessMap</code>, but not both.
@@ -133,12 +134,13 @@ NetworkMaterialResource::ParsedMaterials NetworkMaterialResource::parseJSONMater
  * @property {string} normalMap - URL of normal texture image. Can use this or <code>bumpMap</code>, but not both.
  * @property {string} bumpMap - URL of bump texture image. Can use this or <code>normalMap</code>, but not both.
  * @property {string} occlusionMap - URL of occlusion texture image.
- * @property {string} scatteringMap - URL of scattering texture image. Only used if <code>normalMap</code> or 
+ * @property {string} scatteringMap - URL of scattering texture image. Only used if <code>normalMap</code> or
  *     <code>bumpMap</code> is specified.
  * @property {string} lightMap - URL of light map texture image. <em>Currently not used.</em>
  */
 // Note: See MaterialEntityItem.h for default values used in practice.
-std::pair<std::string, std::shared_ptr<NetworkMaterial>> NetworkMaterialResource::parseJSONMaterial(const QJsonObject& materialJSON, const QUrl& baseUrl) {
+std::pair<std::string, std::shared_ptr<NetworkMaterial>> NetworkMaterialResource::parseJSONMaterial(
+    const QJsonObject& materialJSON, const QUrl& baseUrl) {
     std::string name = "";
     std::shared_ptr<NetworkMaterial> material = std::make_shared<NetworkMaterial>();
     for (auto& key : materialJSON.keys()) {
@@ -266,6 +268,7 @@ NetworkMaterialResourcePointer MaterialCache::getMaterial(const QUrl& url) {
     return ResourceCache::getResource(url, QUrl(), nullptr).staticCast<NetworkMaterialResource>();
 }
 
-QSharedPointer<Resource> MaterialCache::createResource(const QUrl& url, const QSharedPointer<Resource>& fallback, const void* extra) {
+QSharedPointer<Resource> MaterialCache::createResource(const QUrl& url, const QSharedPointer<Resource>& fallback,
+                                                       const void* extra) {
     return QSharedPointer<Resource>(new NetworkMaterialResource(url), &Resource::deleter);
 }

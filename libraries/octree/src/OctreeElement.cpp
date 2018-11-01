@@ -12,9 +12,9 @@
 #include "OctreeElement.h"
 
 #include <assert.h>
+#include <stdio.h>
 #include <cmath>
 #include <cstring>
-#include <stdio.h>
 
 #include <QtCore/QDebug>
 
@@ -51,14 +51,13 @@ OctreeElement::OctreeElement() {
     // debug::setDeadBeef(this, sizeof(*this));
 }
 
-void OctreeElement::init(unsigned char * octalCode) {
+void OctreeElement::init(unsigned char* octalCode) {
     if (!octalCode) {
         octalCode = new unsigned char[1];
         *octalCode = 0;
     }
     _voxelNodeCount++;
     _voxelNodeLeafCount++; // all nodes start as leaf nodes
-
 
     size_t octalCodeLength = bytesRequiredForCodeLength(numberOfThreeBitSectionsInCode(octalCode));
     if (octalCodeLength > sizeof(_octalCode)) {
@@ -75,7 +74,6 @@ void OctreeElement::init(unsigned char * octalCode) {
     _childBitmask = 0;
     _childrenExternal = false;
 
-
     _childrenCount[0]++;
 
     // default pointers to child nodes to NULL
@@ -89,7 +87,7 @@ void OctreeElement::init(unsigned char * octalCode) {
     _childrenSingle.reset();
 #endif
 
-    for (int i = 0; i < NUMBER_OF_CHILDREN; i ++) {
+    for (int i = 0; i < NUMBER_OF_CHILDREN; i++) {
         _externalChildren[i].reset();
     }
 
@@ -179,8 +177,6 @@ uint16_t OctreeElement::getSourceNodeUUIDKey(const QUuid& sourceUUID) {
     }
     return key;
 }
-
-
 
 void OctreeElement::setShouldRender(bool shouldRender) {
     // if shouldRender is changing, then consider ourselves dirty
@@ -277,9 +273,7 @@ OctreeElementPointer OctreeElement::getChildAtIndex(int childIndex) const {
             }
         } break;
 
-        default : {
-            return _externalChildren[childIndex];
-        } break;
+        default: { return _externalChildren[childIndex]; } break;
     }
 #endif // def SIMPLE_EXTERNAL_CHILDREN
 }
@@ -295,7 +289,7 @@ void OctreeElement::deleteAllChildren() {
 
     if (_childrenExternal) {
         // if the children_t union represents _children.external we need to delete it here
-        for (int i = 0; i < NUMBER_OF_CHILDREN; i ++) {
+        for (int i = 0; i < NUMBER_OF_CHILDREN; i++) {
             _externalChildren[i].reset();
         }
     }
@@ -346,7 +340,7 @@ void OctreeElement::setChildAtIndex(int childIndex, const OctreeElementPointer& 
         _childrenSingle = child;
     } else if (previousChildCount == 1 && newChildCount == 2) {
         OctreeElementPointer previousChild = _childrenSingle;
-        for (int i = 0; i < NUMBER_OF_CHILDREN; i ++) {
+        for (int i = 0; i < NUMBER_OF_CHILDREN; i++) {
             _externalChildren[i].reset();
         }
         _externalChildren[firstIndex] = previousChild;
@@ -361,7 +355,7 @@ void OctreeElement::setChildAtIndex(int childIndex, const OctreeElementPointer& 
         OctreeElementPointer previousFirstChild = _externalChildren[firstIndex];
         OctreeElementPointer previousSecondChild = _externalChildren[secondIndex];
 
-        for (int i = 0; i < NUMBER_OF_CHILDREN; i ++) {
+        for (int i = 0; i < NUMBER_OF_CHILDREN; i++) {
             _externalChildren[i].reset();
         }
         _childrenExternal = false;
@@ -378,7 +372,6 @@ void OctreeElement::setChildAtIndex(int childIndex, const OctreeElementPointer& 
 
 #endif // def SIMPLE_EXTERNAL_CHILDREN
 }
-
 
 OctreeElementPointer OctreeElement::addChildAtIndex(int childIndex) {
     OctreeElementPointer childAt = getChildAtIndex(childIndex);
@@ -413,7 +406,7 @@ bool OctreeElement::safeDeepDeleteChildAtIndex(int childIndex, int recursionCoun
                 // delete all it's children
                 for (int i = 0; i < NUMBER_OF_CHILDREN; i++) {
                     if (childToDelete->getChildAtIndex(i)) {
-                        deleteApproved = childToDelete->safeDeepDeleteChildAtIndex(i,recursionCount+1);
+                        deleteApproved = childToDelete->safeDeepDeleteChildAtIndex(i, recursionCount + 1);
                         if (!deleteApproved) {
                             break; // no point in continuing...
                         }
@@ -432,21 +425,20 @@ bool OctreeElement::safeDeepDeleteChildAtIndex(int childIndex, int recursionCoun
     return deleteApproved;
 }
 
-
 void OctreeElement::printDebugDetails(const char* label) const {
     unsigned char childBits = 0;
     for (int i = 0; i < NUMBER_OF_CHILDREN; i++) {
         OctreeElementPointer childAt = getChildAtIndex(i);
         if (childAt) {
-            setAtBit(childBits,i);
+            setAtBit(childBits, i);
         }
     }
 
     QString resultString;
     resultString.sprintf("%s - Voxel at corner=(%f,%f,%f) size=%f\n isLeaf=%s isDirty=%s shouldRender=%s\n children=", label,
                          (double)_cube.getCorner().x, (double)_cube.getCorner().y, (double)_cube.getCorner().z,
-                         (double)_cube.getScale(),
-                         debug::valueOf(isLeaf()), debug::valueOf(isDirty()), debug::valueOf(getShouldRender()));
+                         (double)_cube.getScale(), debug::valueOf(isLeaf()), debug::valueOf(isDirty()),
+                         debug::valueOf(getShouldRender()));
     qCDebug(octree).nospace() << resultString;
 }
 
@@ -486,8 +478,8 @@ float OctreeElement::distanceToPoint(const glm::vec3& point) const {
     return distance;
 }
 
-bool OctreeElement::findSpherePenetration(const glm::vec3& center, float radius,
-                        glm::vec3& penetration, void** penetratedObject) const {
+bool OctreeElement::findSpherePenetration(const glm::vec3& center, float radius, glm::vec3& penetration,
+                                          void** penetratedObject) const {
     // center and radius are in meters, so we have to scale the _cube into world-frame
     return _cube.findSpherePenetration(center, radius, penetration);
 }
@@ -500,9 +492,9 @@ OctreeElementPointer OctreeElement::getOrCreateChildElementAt(float x, float y, 
     float ourScale = getScale();
     float halfOurScale = ourScale / 2.0f;
 
-    if(s > ourScale) {
-        qCDebug(octree, "UNEXPECTED -- OctreeElement::getOrCreateChildElementAt() s=[%f] > ourScale=[%f] ",
-                (double)s, (double)ourScale);
+    if (s > ourScale) {
+        qCDebug(octree, "UNEXPECTED -- OctreeElement::getOrCreateChildElementAt() s=[%f] > ourScale=[%f] ", (double)s,
+                (double)ourScale);
     }
 
     if (s > halfOurScale) {
@@ -520,7 +512,6 @@ OctreeElementPointer OctreeElement::getOrCreateChildElementAt(float x, float y, 
     // Now that we have the child to recurse down, let it answer the original question...
     return child->getOrCreateChildElementAt(x, y, z, s);
 }
-
 
 OctreeElementPointer OctreeElement::getOrCreateChildElementContaining(const AACube& cube) {
     OctreeElementPointer child = NULL;
@@ -596,7 +587,8 @@ int OctreeElement::getMyChildContaining(const AACube& cube) const {
         int childIndexCubeMinimum = getMyChildContainingPoint(cubeCornerMinimum);
         int childIndexCubeMaximum = getMyChildContainingPoint(cubeCornerMaximum);
 
-        // If the minimum and maximum corners of the cube are in two different children's cubes, then we are the containing element
+        // If the minimum and maximum corners of the cube are in two different children's cubes, then we are the containing
+        // element
         if (childIndexCubeMinimum != childIndexCubeMaximum) {
             return CHILD_UNKNOWN;
         }
@@ -611,9 +603,11 @@ int OctreeElement::getMyChildContaining(const AABox& box) const {
     float boxLargestScale = box.getLargestDimension();
 
     // TODO: consider changing this to assert()
-    if(boxLargestScale > ourScale) {
-        qCDebug(octree, "UNEXPECTED -- OctreeElement::getMyChildContaining() "
-                "boxLargestScale=[%f] > ourScale=[%f] ", (double)boxLargestScale, (double)ourScale);
+    if (boxLargestScale > ourScale) {
+        qCDebug(octree,
+                "UNEXPECTED -- OctreeElement::getMyChildContaining() "
+                "boxLargestScale=[%f] > ourScale=[%f] ",
+                (double)boxLargestScale, (double)ourScale);
     }
 
     // Determine which of our children the minimum and maximum corners of the cube live in...
@@ -688,4 +682,3 @@ int OctreeElement::getMyChildContainingPoint(const glm::vec3& point) const {
     }
     return childIndex;
 }
-

@@ -50,13 +50,13 @@ public slots:
      * @returns {number} Integer maximum number of entity packets that the client can send per second.
      */
     /// get the max packets per second send rate
-    int getPacketsPerSecond() const  { return _packetSender->getPacketsPerSecond(); }
+    int getPacketsPerSecond() const { return _packetSender->getPacketsPerSecond(); }
 
     /**jsdoc
-     * Check whether servers exist for the client to send entity packets to, i.e., whether you are connected to a domain and 
+     * Check whether servers exist for the client to send entity packets to, i.e., whether you are connected to a domain and
      * its entity server is working.
      * @function Entities.serversExist
-     * @returns {boolean} <code>true</code> if servers exist for the client to send entity packets to, otherwise 
+     * @returns {boolean} <code>true</code> if servers exist for the client to send entity packets to, otherwise
      *     <code>false</code>.
      */
     /// does a server exist to send to
@@ -100,7 +100,7 @@ public slots:
      * @returns {number} Entity packets per second queued rate of the client over its lifetime.
      */
     /// returns the packets per second queued rate of this object over its lifetime
-    float getLifetimePPSQueued() const  { return _packetSender->getLifetimePPSQueued(); }
+    float getLifetimePPSQueued() const { return _packetSender->getLifetimePPSQueued(); }
 
     /**jsdoc
      * Get the entity bytes per second queued rate of the client over its lifetime.

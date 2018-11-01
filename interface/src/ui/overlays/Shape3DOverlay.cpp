@@ -11,17 +11,16 @@
 // include this before QGLWidget, which includes an earlier version of OpenGL
 #include "Shape3DOverlay.h"
 
+#include <DependencyManager.h>
+#include <GeometryCache.h>
 #include <SharedUtil.h>
 #include <StreamUtils.h>
-#include <GeometryCache.h>
-#include <DependencyManager.h>
 
 QString const Shape3DOverlay::TYPE = "shape";
 
 Shape3DOverlay::Shape3DOverlay(const Shape3DOverlay* shape3DOverlay) :
     Volume3DOverlay(shape3DOverlay),
-    _shape(shape3DOverlay->_shape)
-{
+    _shape(shape3DOverlay->_shape) {
 }
 
 void Shape3DOverlay::render(RenderArgs* args) {
@@ -65,7 +64,6 @@ Shape3DOverlay* Shape3DOverlay::createClone() const {
     return new Shape3DOverlay(this);
 }
 
-
 /**jsdoc
  * <p>A <code>shape</code> {@link Overlays.OverlayType|OverlayType} may display as one of the following geometrical shapes:</p>
  * <table>
@@ -92,24 +90,12 @@ Shape3DOverlay* Shape3DOverlay::createClone() const {
  * </table>
  * @typedef {string} Overlays.Shape
  */
-static const std::array<QString, GeometryCache::Shape::NUM_SHAPES> shapeStrings { {
-    "Line",
-    "Triangle",
-    "Quad",
-    "Hexagon",
-    "Octagon",
-    "Circle",
-    "Cube",
-    "Sphere",
-    "Tetrahedron",
-    "Octahedron",
-    "Dodecahedron",
-    "Icosahedron",
-    "Torus",  // Not implemented yet.
-    "Cone",
-    "Cylinder"
-} };
-
+static const std::array<QString, GeometryCache::Shape::NUM_SHAPES> shapeStrings {
+    { "Line", "Triangle", "Quad", "Hexagon", "Octagon", "Circle", "Cube", "Sphere", "Tetrahedron", "Octahedron", "Dodecahedron",
+      "Icosahedron",
+      "Torus", // Not implemented yet.
+      "Cone", "Cylinder" }
+};
 
 void Shape3DOverlay::setProperties(const QVariantMap& properties) {
     Volume3DOverlay::setProperties(properties);
@@ -159,7 +145,8 @@ void Shape3DOverlay::setProperties(const QVariantMap& properties) {
  *     Antonyms: <code>isWire</code> and <code>wire</code>.
  * @property {boolean} isDashedLine=false - If <code>true</code>, a dashed line is drawn on the overlay's edges. Synonym:
  *     <code>dashed</code>.
- * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.  <code>ignoreRayIntersection</code> is a synonym.
+ * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.
+ * <code>ignoreRayIntersection</code> is a synonym.
  * @property {boolean} drawInFront=false - If <code>true</code>, the overlay is rendered in front of other overlays that don't
  *     have <code>drawInFront</code> set to <code>true</code>, and in front of entities.
  * @property {boolean} grabbable=false - Signal to grabbing scripts whether or not this overlay can be grabbed.

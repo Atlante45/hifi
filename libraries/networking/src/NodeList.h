@@ -12,9 +12,9 @@
 #ifndef hifi_NodeList_h
 #define hifi_NodeList_h
 
+#include <assert.h>
 #include <stdint.h>
 #include <iterator>
-#include <assert.h>
 
 #ifndef _WIN32
 #include <unistd.h> // not on windows, not needed for mac or windows
@@ -103,7 +103,7 @@ public:
 public slots:
     void reset(bool skipDomainHandlerReset = false);
     void resetFromDomainHandler() { reset(true); }
-    
+
     void sendDomainServerCheckIn();
     void handleDSPathQuery(const QString& newPath);
 
@@ -146,7 +146,9 @@ private slots:
     void maybeSendIgnoreSetToNode(SharedNodePointer node);
 
 private:
-    NodeList() : LimitedNodeList(INVALID_PORT, INVALID_PORT) { assert(false); } // Not implemented, needed for DependencyManager templates compile
+    NodeList() : LimitedNodeList(INVALID_PORT, INVALID_PORT) {
+        assert(false);
+    } // Not implemented, needed for DependencyManager templates compile
     NodeList(char ownerType, int socketListenPort = INVALID_PORT, int dtlsListenPort = INVALID_PORT);
     NodeList(NodeList const&) = delete; // Don't implement, needed to avoid copies of singleton
     void operator=(NodeList const&) = delete; // Don't implement, needed to avoid copies of singleton
@@ -185,7 +187,8 @@ private:
 #if defined(Q_OS_ANDROID)
     Setting::Handle<bool> _ignoreRadiusEnabled { "IgnoreRadiusEnabled", false };
 #else
-    Setting::Handle<bool> _ignoreRadiusEnabled { "IgnoreRadiusEnabled", false }; // False, until such time as it is made to work better.
+    Setting::Handle<bool> _ignoreRadiusEnabled { "IgnoreRadiusEnabled",
+                                                 false }; // False, until such time as it is made to work better.
 #endif
 
 #if (PR_BUILD || DEV_BUILD)

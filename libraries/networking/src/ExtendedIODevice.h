@@ -18,20 +18,26 @@ class ExtendedIODevice : public QIODevice {
 public:
     ExtendedIODevice(QObject* parent = nullptr) : QIODevice(parent) {};
 
-    template<typename T> qint64 peekPrimitive(T* data);
-    template<typename T> qint64 readPrimitive(T* data);
-    template<typename T> qint64 writePrimitive(const T& data);
+    template<typename T>
+    qint64 peekPrimitive(T* data);
+    template<typename T>
+    qint64 readPrimitive(T* data);
+    template<typename T>
+    qint64 writePrimitive(const T& data);
 };
 
-template<typename T> qint64 ExtendedIODevice::peekPrimitive(T* data) {
+template<typename T>
+qint64 ExtendedIODevice::peekPrimitive(T* data) {
     return peek(reinterpret_cast<char*>(data), sizeof(T));
 }
 
-template<typename T> qint64 ExtendedIODevice::readPrimitive(T* data) {
+template<typename T>
+qint64 ExtendedIODevice::readPrimitive(T* data) {
     return read(reinterpret_cast<char*>(data), sizeof(T));
 }
 
-template<typename T> qint64 ExtendedIODevice::writePrimitive(const T& data) {
+template<typename T>
+qint64 ExtendedIODevice::writePrimitive(const T& data) {
     static_assert(!std::is_pointer<T>::value, "T must not be a pointer");
     return write(reinterpret_cast<const char*>(&data), sizeof(T));
 }

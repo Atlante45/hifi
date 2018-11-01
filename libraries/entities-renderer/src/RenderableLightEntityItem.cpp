@@ -43,11 +43,10 @@ void LightEntityRenderer::doRenderUpdateAsynchronousTyped(const TypedEntityPoint
 
     light->setColor(toGlm(entity->getColor()));
 
-    float intensity = entity->getIntensity();//* entity->getFadingRatio();
+    float intensity = entity->getIntensity(); //* entity->getFadingRatio();
     light->setIntensity(intensity);
 
     light->setFalloffRadius(entity->getFalloffRadius());
-
 
     float exponent = entity->getExponent();
     float cutoff = glm::radians(entity->getCutoff());
@@ -76,4 +75,3 @@ bool LightEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityPoin
 void LightEntityRenderer::doRender(RenderArgs* args) {
     _lightPayload->render(args);
 }
-

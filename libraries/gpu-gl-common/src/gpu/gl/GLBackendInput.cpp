@@ -9,9 +9,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 #include "GLBackend.h"
-#include "GLShared.h"
-#include "GLInputFormat.h"
 #include "GLBuffer.h"
+#include "GLInputFormat.h"
+#include "GLShared.h"
 
 using namespace gpu;
 using namespace gpu::gl;
@@ -66,19 +66,19 @@ void GLBackend::do_setInputBuffer(const Batch& batch, size_t paramOffset) {
 }
 
 void GLBackend::initInput() {
-    if(!_input._defaultVAO) {
+    if (!_input._defaultVAO) {
         glGenVertexArrays(1, &_input._defaultVAO);
     }
     glBindVertexArray(_input._defaultVAO);
-    (void) CHECK_GL_ERROR();
+    (void)CHECK_GL_ERROR();
 }
 
 void GLBackend::killInput() {
-    glBindVertexArray(0);    
-    if(_input._defaultVAO) {
+    glBindVertexArray(0);
+    if (_input._defaultVAO) {
         glDeleteVertexArrays(1, &_input._defaultVAO);
     }
-    (void) CHECK_GL_ERROR();
+    (void)CHECK_GL_ERROR();
 }
 
 void GLBackend::syncInputStateCache() {
@@ -97,7 +97,7 @@ void GLBackend::resetInputStage() {
     _input._indexBufferOffset = 0;
     reset(_input._indexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    (void) CHECK_GL_ERROR();
+    (void)CHECK_GL_ERROR();
 
     // Reset vertex buffer and format
     reset(_input._format);
@@ -130,7 +130,7 @@ void GLBackend::do_setIndexBuffer(const Batch& batch, size_t paramOffset) {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
     }
-    (void) CHECK_GL_ERROR();
+    (void)CHECK_GL_ERROR();
 }
 
 void GLBackend::do_setIndirectBuffer(const Batch& batch, size_t paramOffset) {
@@ -159,14 +159,14 @@ void GLBackend::updateInput() {
     _input._invalidFormat |= (isStereoNow != _input._lastUpdateStereoState);
 #endif
     _input._lastUpdateStereoState = isStereoNow;
- 
+
     if (_input._invalidFormat) {
         InputStageState::ActivationCache newActivation;
 
         // Assign the vertex format required
         auto format = acquire(_input._format);
         if (format) {
-            bool hasColorAttribute{ false };
+            bool hasColorAttribute { false };
 
             _input._attribBindingBuffers.reset();
 
@@ -186,7 +186,8 @@ void GLBackend::updateInput() {
                     uint8_t locationCount = attrib._element.getLocationCount();
                     GLenum type = gl::ELEMENT_TYPE_TO_GL[attrib._element.getType()];
 
-                    GLuint offset = (GLuint)attrib._offset;;
+                    GLuint offset = (GLuint)attrib._offset;
+                    ;
                     GLboolean isNormalized = attrib._element.isNormalized();
 
                     GLenum perLocationSize = attrib._element.getLocationSize();
@@ -214,7 +215,6 @@ void GLBackend::updateInput() {
                         assert(frequency == attrib._frequency);
                     }
 
-
                     (void)CHECK_GL_ERROR();
                 }
 #ifdef GPU_STEREO_DRAWCALL_INSTANCED
@@ -235,7 +235,8 @@ void GLBackend::updateInput() {
         }
 
         // Manage Activation what was and what is expected now
-        // This should only disable VertexAttribs since the one needed by the vertex format (if it exists) have been enabled above
+        // This should only disable VertexAttribs since the one needed by the vertex format (if it exists) have been enabled
+        // above
         for (GLuint i = 0; i < (GLuint)newActivation.size(); i++) {
             bool newState = newActivation[i];
             if (newState != _input._attributeActivation[i]) {
@@ -259,7 +260,7 @@ void GLBackend::updateInput() {
         auto stride = _input._bufferStrides.data();
 
         // Profile the count of buffers to update and use it to short cut the for loop
-        int numInvalids = (int) _input._invalidBuffers.count();
+        int numInvalids = (int)_input._invalidBuffers.count();
         _stats._ISNumInputBufferChanges += numInvalids;
 
         for (GLuint buffer = 0; buffer < _input._buffers.size(); buffer++, vbo++, offset++, stride++) {
@@ -276,4 +277,3 @@ void GLBackend::updateInput() {
         (void)CHECK_GL_ERROR();
     }
 }
-

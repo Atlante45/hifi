@@ -18,15 +18,17 @@
 
 #include <QString>
 
-class GPUIdent
-{
+class GPUIdent {
 public:
     uint64_t getMemory() { return _dedicatedMemoryMB; }
     QString getName() { return _name; }
     QString getDriver() { return _driver; }
     bool isValid() { return _isValid; }
     // E.g., GPUIdent::getInstance()->getMemory();
-    static GPUIdent* getInstance(const QString& vendor = "", const QString& renderer = "") { return _instance.ensureQuery(vendor, renderer); }
+    static GPUIdent* getInstance(const QString& vendor = "", const QString& renderer = "") {
+        return _instance.ensureQuery(vendor, renderer);
+    }
+
 private:
     uint64_t _dedicatedMemoryMB { 0 };
     QString _name { "" };

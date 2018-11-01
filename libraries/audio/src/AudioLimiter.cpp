@@ -17,7 +17,6 @@
 //
 class LimiterImpl {
 protected:
-
     static const int NARC = 64;
     int32_t _holdTable[NARC];
     int32_t _releaseTable[NARC];
@@ -47,7 +46,6 @@ public:
 };
 
 LimiterImpl::LimiterImpl(int sampleRate) {
-
     sampleRate = MAX(sampleRate, 8000);
     sampleRate = MIN(sampleRate, 96000);
     _sampleRate = sampleRate;
@@ -63,8 +61,7 @@ LimiterImpl::LimiterImpl(int sampleRate) {
 // Makeup gain is applied, to reach but never exceed the output ceiling.
 //
 void LimiterImpl::setThreshold(float threshold) {
-
-    const double OUT_CEILING = -0.3;    // cannot be 0.0, due to dither
+    const double OUT_CEILING = -0.3; // cannot be 0.0, due to dither
     const double Q31_TO_Q15 = 32768 / 2147483648.0;
 
     // limiter threshold = -48dB to 0dB
@@ -85,10 +82,9 @@ void LimiterImpl::setThreshold(float threshold) {
 // This is a base value that scales the adaptive hold and release algorithms.
 //
 void LimiterImpl::setRelease(float release) {
-
-    const double MAXHOLD = 0.100;   // max hold = 100ms
-    const double MINREL = 0.025;    // min release = 0.025 * release
-    const int NHOLD = 16;           // adaptive hold to adaptive release transition
+    const double MAXHOLD = 0.100; // max hold = 100ms
+    const double MINREL = 0.025; // min release = 0.025 * release
+    const int NHOLD = 16; // adaptive hold to adaptive release transition
 
     // limiter release = 50 to 5000ms
     release = MAX(release, 50.0f);
@@ -105,11 +101,10 @@ void LimiterImpl::setRelease(float release) {
     // At high peak/rms, hold = 0 and release is progressive to min
 
     double x = MAXHOLD * _sampleRate;
-    double xstep = x / NHOLD;   // 1.0 to 1.0/NHOLD
+    double xstep = x / NHOLD; // 1.0 to 1.0/NHOLD
 
     int i = 0;
     for (; i < NHOLD; i++) {
-
         // max release
         _releaseTable[i] = maxRelease;
 
@@ -122,15 +117,14 @@ void LimiterImpl::setRelease(float release) {
     }
 
     x = release;
-    xstep = x * (1.0-MINREL) / (NARC-NHOLD-1);  // 1.0 to MINREL
+    xstep = x * (1.0 - MINREL) / (NARC - NHOLD - 1); // 1.0 to MINREL
 
     for (; i < NARC; i++) {
-
         // progressive release
         _releaseTable[i] = msToTc(x, _sampleRate);
 
         // min hold
-        _holdTable[i] = (_releaseTable[i] - 0x7fffffff);    // 1 sample
+        _holdTable[i] = (_releaseTable[i] - 0x7fffffff); // 1 sample
 
         x -= xstep;
     }
@@ -141,31 +135,25 @@ void LimiterImpl::setRelease(float release) {
 // zero attack, adaptive hold and release
 //
 int32_t LimiterImpl::envelope(int32_t attn) {
-
     // table of (1/attn) for 1dB to 6dB, rounded to prevent overflow
     static const int16_t invTable[64] = {
-        0x6000, 0x6000, 0x6000, 0x6000, 0x6000, 0x6000, 0x6000, 0x6000, 
-        0x6000, 0x6000, 0x5d17, 0x5555, 0x4ec4, 0x4924, 0x4444, 0x4000, 
-        0x3c3c, 0x38e3, 0x35e5, 0x3333, 0x30c3, 0x2e8b, 0x2c85, 0x2aaa, 
-        0x28f5, 0x2762, 0x25ed, 0x2492, 0x234f, 0x2222, 0x2108, 0x2000, 
-        0x1f07, 0x1e1e, 0x1d41, 0x1c71, 0x1bac, 0x1af2, 0x1a41, 0x1999, 
-        0x18f9, 0x1861, 0x17d0, 0x1745, 0x16c1, 0x1642, 0x15c9, 0x1555, 
-        0x14e5, 0x147a, 0x1414, 0x13b1, 0x1352, 0x12f6, 0x129e, 0x1249, 
-        0x11f7, 0x11a7, 0x115b, 0x1111, 0x10c9, 0x1084, 0x1041, 0x1000, 
+        0x6000, 0x6000, 0x6000, 0x6000, 0x6000, 0x6000, 0x6000, 0x6000, 0x6000, 0x6000, 0x5d17, 0x5555, 0x4ec4,
+        0x4924, 0x4444, 0x4000, 0x3c3c, 0x38e3, 0x35e5, 0x3333, 0x30c3, 0x2e8b, 0x2c85, 0x2aaa, 0x28f5, 0x2762,
+        0x25ed, 0x2492, 0x234f, 0x2222, 0x2108, 0x2000, 0x1f07, 0x1e1e, 0x1d41, 0x1c71, 0x1bac, 0x1af2, 0x1a41,
+        0x1999, 0x18f9, 0x1861, 0x17d0, 0x1745, 0x16c1, 0x1642, 0x15c9, 0x1555, 0x14e5, 0x147a, 0x1414, 0x13b1,
+        0x1352, 0x12f6, 0x129e, 0x1249, 0x11f7, 0x11a7, 0x115b, 0x1111, 0x10c9, 0x1084, 0x1041, 0x1000,
     };
 
     if (attn < _attn) {
-
         // RELEASE
         // update release before use, to implement hold = 0
 
-        _arcRelease += _holdTable[_arc];                        // update progressive hold
-        _arcRelease = MAX(_arcRelease, _releaseTable[_arc]);    // saturate at final value
+        _arcRelease += _holdTable[_arc]; // update progressive hold
+        _arcRelease = MAX(_arcRelease, _releaseTable[_arc]); // saturate at final value
 
-        attn += MULQ31((_attn - attn), _arcRelease);            // apply release
+        attn += MULQ31((_attn - attn), _arcRelease); // apply release
 
     } else {
-
         // ATTACK
         // update ARC with normalized peak/rms
         //
@@ -173,12 +161,12 @@ int32_t LimiterImpl::envelope(int32_t attn) {
         // arc = (attn-rms)*6/attn for attn = 1dB to 6dB
         // arc = (attn-rms)*6/6    for attn > 6dB
 
-        size_t bits = MIN(attn >> 20, 0x3f);    // saturate 1/attn at 6dB
-        _arc = MAX(attn - _rms, 0);             // peak/rms = (attn-rms)
-        _arc = MULHI(_arc, invTable[bits]);     // normalized peak/rms = (attn-rms)/attn
-        _arc = MIN(_arc, NARC - 1);             // saturate at 6dB
+        size_t bits = MIN(attn >> 20, 0x3f); // saturate 1/attn at 6dB
+        _arc = MAX(attn - _rms, 0); // peak/rms = (attn-rms)
+        _arc = MULHI(_arc, invTable[bits]); // normalized peak/rms = (attn-rms)/attn
+        _arc = MIN(_arc, NARC - 1); // saturate at 6dB
 
-        _arcRelease = 0x7fffffff;               // reset release
+        _arcRelease = 0x7fffffff; // reset release
     }
     _attn = attn;
 
@@ -196,7 +184,6 @@ int32_t LimiterImpl::envelope(int32_t attn) {
 //
 template<int N>
 class LimiterMono : public LimiterImpl {
-
     MinFilter<N> _filter;
     MonoDelay<N> _delay;
 
@@ -208,9 +195,7 @@ public:
 
 template<int N>
 void LimiterMono<N>::process(float* input, int16_t* output, int numFrames) {
-
     for (int n = 0; n < numFrames; n++) {
-
         // peak detect and convert to log2 domain
         int32_t peak = peaklog2(&input[n]);
 
@@ -247,7 +232,6 @@ void LimiterMono<N>::process(float* input, int16_t* output, int numFrames) {
 //
 template<int N>
 class LimiterStereo : public LimiterImpl {
-
     MinFilter<N> _filter;
     StereoDelay<N> _delay;
 
@@ -260,11 +244,9 @@ public:
 
 template<int N>
 void LimiterStereo<N>::process(float* input, int16_t* output, int numFrames) {
-
     for (int n = 0; n < numFrames; n++) {
-
         // peak detect and convert to log2 domain
-        int32_t peak = peaklog2(&input[2*n+0], &input[2*n+1]);
+        int32_t peak = peaklog2(&input[2 * n + 0], &input[2 * n + 1]);
 
         // compute limiter attenuation
         int32_t attn = MAX(_threshold - peak, 0);
@@ -280,8 +262,8 @@ void LimiterStereo<N>::process(float* input, int16_t* output, int numFrames) {
         float gain = attn * _outGain;
 
         // delay audio
-        float x0 = input[2*n+0];
-        float x1 = input[2*n+1];
+        float x0 = input[2 * n + 0];
+        float x1 = input[2 * n + 1];
         _delay.process(x0, x1);
 
         // apply gain
@@ -294,8 +276,8 @@ void LimiterStereo<N>::process(float* input, int16_t* output, int numFrames) {
         x1 += d;
 
         // store 16-bit output
-        output[2*n+0] = (int16_t)floatToInt(x0);
-        output[2*n+1] = (int16_t)floatToInt(x1);
+        output[2 * n + 0] = (int16_t)floatToInt(x0);
+        output[2 * n + 1] = (int16_t)floatToInt(x1);
     }
 }
 
@@ -304,7 +286,6 @@ void LimiterStereo<N>::process(float* input, int16_t* output, int numFrames) {
 //
 template<int N>
 class LimiterQuad : public LimiterImpl {
-
     MinFilter<N> _filter;
     QuadDelay<N> _delay;
 
@@ -317,11 +298,9 @@ public:
 
 template<int N>
 void LimiterQuad<N>::process(float* input, int16_t* output, int numFrames) {
-
     for (int n = 0; n < numFrames; n++) {
-
         // peak detect and convert to log2 domain
-        int32_t peak = peaklog2(&input[4*n+0], &input[4*n+1], &input[4*n+2], &input[4*n+3]);
+        int32_t peak = peaklog2(&input[4 * n + 0], &input[4 * n + 1], &input[4 * n + 2], &input[4 * n + 3]);
 
         // compute limiter attenuation
         int32_t attn = MAX(_threshold - peak, 0);
@@ -337,10 +316,10 @@ void LimiterQuad<N>::process(float* input, int16_t* output, int numFrames) {
         float gain = attn * _outGain;
 
         // delay audio
-        float x0 = input[4*n+0];
-        float x1 = input[4*n+1];
-        float x2 = input[4*n+2];
-        float x3 = input[4*n+3];
+        float x0 = input[4 * n + 0];
+        float x1 = input[4 * n + 1];
+        float x2 = input[4 * n + 2];
+        float x3 = input[4 * n + 3];
         _delay.process(x0, x1, x2, x3);
 
         // apply gain
@@ -357,10 +336,10 @@ void LimiterQuad<N>::process(float* input, int16_t* output, int numFrames) {
         x3 += d;
 
         // store 16-bit output
-        output[4*n+0] = (int16_t)floatToInt(x0);
-        output[4*n+1] = (int16_t)floatToInt(x1);
-        output[4*n+2] = (int16_t)floatToInt(x2);
-        output[4*n+3] = (int16_t)floatToInt(x3);
+        output[4 * n + 0] = (int16_t)floatToInt(x0);
+        output[4 * n + 1] = (int16_t)floatToInt(x1);
+        output[4 * n + 2] = (int16_t)floatToInt(x2);
+        output[4 * n + 3] = (int16_t)floatToInt(x3);
     }
 }
 
@@ -369,9 +348,7 @@ void LimiterQuad<N>::process(float* input, int16_t* output, int numFrames) {
 //
 
 AudioLimiter::AudioLimiter(int sampleRate, int numChannels) {
-
     if (numChannels == 1) {
-
         // ~1.5ms lookahead for all rates
         if (sampleRate < 16000) {
             _impl = new LimiterMono<16>(sampleRate);
@@ -384,7 +361,6 @@ AudioLimiter::AudioLimiter(int sampleRate, int numChannels) {
         }
 
     } else if (numChannels == 2) {
-
         // ~1.5ms lookahead for all rates
         if (sampleRate < 16000) {
             _impl = new LimiterStereo<16>(sampleRate);
@@ -397,7 +373,6 @@ AudioLimiter::AudioLimiter(int sampleRate, int numChannels) {
         }
 
     } else if (numChannels == 4) {
-
         // ~1.5ms lookahead for all rates
         if (sampleRate < 16000) {
             _impl = new LimiterQuad<16>(sampleRate);

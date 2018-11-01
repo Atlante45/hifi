@@ -89,7 +89,7 @@ public:
  * @hifi-client-entity
  *
  * @property {Uuid} keyboardFocusOverlay - Get or set the {@link Overlays.OverlayType|web3d} overlay that has keyboard focus.
- *     If no overlay has keyboard focus, get returns <code>null</code>; set to <code>null</code> or {@link Uuid|Uuid.NULL} to 
+ *     If no overlay has keyboard focus, get returns <code>null</code>; set to <code>null</code> or {@link Uuid|Uuid.NULL} to
  *     clear keyboard focus.
  */
 
@@ -114,14 +114,14 @@ public:
     OverlayID addOverlay(const Overlay::Pointer& overlay);
 
     RayToOverlayIntersectionResult findRayIntersectionVector(const PickRay& ray, bool precisionPicking,
-        const QVector<OverlayID>& overlaysToInclude,
-        const QVector<OverlayID>& overlaysToDiscard,
-        bool visibleOnly = false, bool collidableOnly = false);
+                                                             const QVector<OverlayID>& overlaysToInclude,
+                                                             const QVector<OverlayID>& overlaysToDiscard,
+                                                             bool visibleOnly = false, bool collidableOnly = false);
 
     ParabolaToOverlayIntersectionResult findParabolaIntersectionVector(const PickParabola& parabola, bool precisionPicking,
-        const QVector<OverlayID>& overlaysToInclude,
-        const QVector<OverlayID>& overlaysToDiscard,
-        bool visibleOnly = false, bool collidableOnly = false);
+                                                                       const QVector<OverlayID>& overlaysToInclude,
+                                                                       const QVector<OverlayID>& overlaysToDiscard,
+                                                                       bool visibleOnly = false, bool collidableOnly = false);
 
     bool mousePressEvent(QMouseEvent* event);
     bool mouseDoublePressEvent(QMouseEvent* event);
@@ -152,7 +152,7 @@ public slots:
      * @function Overlays.cloneOverlay
      * @param {Uuid} overlayID - The ID of the overlay to clone.
      * @returns {Uuid} The ID of the new overlay if successful, otherwise {@link Uuid|Uuid.NULL}.
-     * @example <caption>Add an overlay in front of your avatar, clone it, and move the clone to be above the 
+     * @example <caption>Add an overlay in front of your avatar, clone it, and move the clone to be above the
      *     original.</caption>
      * var position = Vec3.sum(MyAvatar.position, Vec3.multiplyQbyV(MyAvatar.orientation, { x: 0, y: 0, z: -3 }));
      * var original = Overlays.addOverlay("cube", {
@@ -253,7 +253,7 @@ public slots:
     QString getOverlayType(OverlayID overlayId);
 
     /**jsdoc
-     * Get the overlay script object. In particular, this is useful for accessing the event bridge for a <code>web3d</code> 
+     * Get the overlay script object. In particular, this is useful for accessing the event bridge for a <code>web3d</code>
      * overlay.
      * @function Overlays.getOverlayObject
      * @param {Uuid} overlayID - The ID of the overlay to get the script object of.
@@ -339,7 +339,7 @@ public slots:
      * @function Overlays.getProperties
      * @param {Uuid} overlayID - The ID of the overlay.
      * @param {Array.<string>} properties - An array of names of properties to get the values of.
-     * @returns {Overlays.OverlayProperties} The values of valid properties if the overlay can be found, otherwise 
+     * @returns {Overlays.OverlayProperties} The values of valid properties if the overlay can be found, otherwise
      *     <code>undefined</code>.
      * @example <caption>Create an overlay in front of your avatar then report some of its properties.</caption>
      * var overlay = Overlays.addOverlay("cube", {
@@ -356,7 +356,7 @@ public slots:
     /**jsdoc
      * Get the values of multiple overlays' properties.
      * @function Overlays.getOverlaysProperties
-     * @param propertiesById {object.<Uuid, Array.<string>>} - An object with overlay IDs as keys and arrays of the names of 
+     * @param propertiesById {object.<Uuid, Array.<string>>} - An object with overlay IDs as keys and arrays of the names of
      *     properties to get for each as values.
      * @returns {object.<Uuid, Overlays.OverlayProperties>} An object with overlay IDs as keys and
      *     {@link Overlays.OverlayProperties|OverlayProperties} as values.
@@ -382,10 +382,10 @@ public slots:
     OverlayPropertyResult getOverlaysProperties(const QVariant& overlaysProperties);
 
     /**jsdoc
-     *  Find the closest 3D overlay intersected by a {@link PickRay}. Overlays with their <code>drawInFront</code> property set  
-     * to <code>true</code> have priority over overlays that don't, except that tablet overlays have priority over any  
-     * <code>drawInFront</code> overlays behind them. I.e., if a <code>drawInFront</code> overlay is behind one that isn't  
-     * <code>drawInFront</code>, the <code>drawInFront</code> overlay is returned, but if a tablet overlay is in front of a  
+     *  Find the closest 3D overlay intersected by a {@link PickRay}. Overlays with their <code>drawInFront</code> property set
+     * to <code>true</code> have priority over overlays that don't, except that tablet overlays have priority over any
+     * <code>drawInFront</code> overlays behind them. I.e., if a <code>drawInFront</code> overlay is behind one that isn't
+     * <code>drawInFront</code>, the <code>drawInFront</code> overlay is returned, but if a tablet overlay is in front of a
      * <code>drawInFront</code> overlay, the tablet overlay is returned.
      * @function Overlays.findRayIntersection
      * @param {PickRay} pickRay - The PickRay to use for finding overlays.
@@ -396,7 +396,7 @@ public slots:
      * @param {boolean} [collidableOnly=false] - <em>Unused</em>; exists to match Entity API.
      * @returns {Overlays.RayToOverlayIntersectionResult} The closest 3D overlay intersected by <code>pickRay</code>, taking
      *     into account <code>overlayIDsToInclude</code> and <code>overlayIDsToExclude</code> if they're not empty.
-     * @example <caption>Create a cube overlay in front of your avatar. Report 3D overlay intersection details for mouse 
+     * @example <caption>Create a cube overlay in front of your avatar. Report 3D overlay intersection details for mouse
      *     clicks.</caption>
      * var overlay = Overlays.addOverlay("cube", {
      *     position: Vec3.sum(MyAvatar.position, Vec3.multiplyQbyV(MyAvatar.orientation, { x: 0, y: 0, z: -3 })),
@@ -411,12 +411,10 @@ public slots:
      *     print("Intersection: " + JSON.stringify(intersection));
      * });
      */
-    RayToOverlayIntersectionResult findRayIntersection(const PickRay& ray,
-                                                       bool precisionPicking = false,
+    RayToOverlayIntersectionResult findRayIntersection(const PickRay& ray, bool precisionPicking = false,
                                                        const QScriptValue& overlayIDsToInclude = QScriptValue(),
                                                        const QScriptValue& overlayIDsToDiscard = QScriptValue(),
-                                                       bool visibleOnly = false,
-                                                       bool collidableOnly = false);
+                                                       bool visibleOnly = false, bool collidableOnly = false);
 
     /**jsdoc
      * Return a list of 3D overlays with bounding boxes that touch a search sphere.
@@ -588,7 +586,7 @@ public slots:
     /**jsdoc
      * Get the ID of the Web3D overlay that has keyboard focus.
      * @function Overlays.getKeyboardFocusOverlay
-     * @returns {Uuid} The ID of the {@link Overlays.OverlayType|web3d} overlay that has focus, if any, otherwise 
+     * @returns {Uuid} The ID of the {@link Overlays.OverlayType|web3d} overlay that has focus, if any, otherwise
      *     <code>null</code>.
      */
     OverlayID getKeyboardFocusOverlay();
@@ -596,7 +594,7 @@ public slots:
     /**jsdoc
      * Set the Web3D overlay that has keyboard focus.
      * @function Overlays.setKeyboardFocusOverlay
-     * @param {Uuid} overlayID - The ID of the {@link Overlays.OverlayType|web3d} overlay to set keyboard focus to. Use 
+     * @param {Uuid} overlayID - The ID of the {@link Overlays.OverlayType|web3d} overlay to set keyboard focus to. Use
      *     <code>null</code> or {@link Uuid|Uuid.NULL} to unset keyboard focus from an overlay.
      */
     void setKeyboardFocusOverlay(const OverlayID& id);
@@ -626,7 +624,7 @@ signals:
     void overlayDeleted(OverlayID id);
 
     /**jsdoc
-     * Triggered when a mouse press event occurs on an overlay. Only occurs for 3D overlays (unless you use 
+     * Triggered when a mouse press event occurs on an overlay. Only occurs for 3D overlays (unless you use
      *     {@link Overlays.sendMousePressOnOverlay|sendMousePressOnOverlay} for a 2D overlay).
      * @function Overlays.mousePressOnOverlay
      * @param {Uuid} overlayID - The ID of the overlay the mouse press event occurred on.
@@ -659,7 +657,7 @@ signals:
     void mouseDoublePressOnOverlay(OverlayID overlayID, const PointerEvent& event);
 
     /**jsdoc
-     * Triggered when a mouse release event occurs on an overlay. Only occurs for 3D overlays (unless you use 
+     * Triggered when a mouse release event occurs on an overlay. Only occurs for 3D overlays (unless you use
      *     {@link Overlays.sendMouseReleaseOnOverlay|sendMouseReleaseOnOverlay} for a 2D overlay).
      * @function Overlays.mouseReleaseOnOverlay
      * @param {Uuid} overlayID - The ID of the overlay the mouse release event occurred on.
@@ -669,7 +667,7 @@ signals:
     void mouseReleaseOnOverlay(OverlayID overlayID, const PointerEvent& event);
 
     /**jsdoc
-     * Triggered when a mouse move event occurs on an overlay. Only occurs for 3D overlays (unless you use 
+     * Triggered when a mouse move event occurs on an overlay. Only occurs for 3D overlays (unless you use
      *     {@link Overlays.sendMouseMoveOnOverlay|sendMouseMoveOnOverlay} for a 2D overlay).
      * @function Overlays.mouseMoveOnOverlay
      * @param {Uuid} overlayID - The ID of the overlay the mouse moved event occurred on.
@@ -693,7 +691,7 @@ signals:
     void mouseDoublePressOffOverlay();
 
     /**jsdoc
-     * Triggered when a mouse cursor starts hovering over an overlay. Only occurs for 3D overlays (unless you use 
+     * Triggered when a mouse cursor starts hovering over an overlay. Only occurs for 3D overlays (unless you use
      *     {@link Overlays.sendHoverEnterOverlay|sendHoverEnterOverlay} for a 2D overlay).
      * @function Overlays.hoverEnterOverlay
      * @param {Uuid} overlayID - The ID of the overlay the mouse moved event occurred on.
@@ -715,7 +713,7 @@ signals:
     void hoverEnterOverlay(OverlayID overlayID, const PointerEvent& event);
 
     /**jsdoc
-     * Triggered when a mouse cursor continues hovering over an overlay. Only occurs for 3D overlays (unless you use 
+     * Triggered when a mouse cursor continues hovering over an overlay. Only occurs for 3D overlays (unless you use
      *     {@link Overlays.sendHoverOverOverlay|sendHoverOverOverlay} for a 2D overlay).
      * @function Overlays.hoverOverOverlay
      * @param {Uuid} overlayID - The ID of the overlay the hover over event occurred on.
@@ -725,7 +723,7 @@ signals:
     void hoverOverOverlay(OverlayID overlayID, const PointerEvent& event);
 
     /**jsdoc
-     * Triggered when a mouse cursor finishes hovering over an overlay. Only occurs for 3D overlays (unless you use 
+     * Triggered when a mouse cursor finishes hovering over an overlay. Only occurs for 3D overlays (unless you use
      *     {@link Overlays.sendHoverLeaveOverlay|sendHoverLeaveOverlay} for a 2D overlay).
      * @function Overlays.hoverLeaveOverlay
      * @param {Uuid} overlayID - The ID of the overlay the hover leave event occurred on.
@@ -745,10 +743,10 @@ private:
     unsigned int _stackOrder { 1 };
 
     bool _enabled = true;
-    std::atomic<bool> _shuttingDown{ false };
+    std::atomic<bool> _shuttingDown { false };
 
     PointerEvent calculateOverlayPointerEvent(OverlayID overlayID, PickRay ray, RayToOverlayIntersectionResult rayPickResult,
-        QMouseEvent* event, PointerEvent::EventType eventType);
+                                              QMouseEvent* event, PointerEvent::EventType eventType);
 
     OverlayID _currentClickingOnOverlayID { UNKNOWN_OVERLAY_ID };
     OverlayID _currentHoverOverOverlayID { UNKNOWN_OVERLAY_ID };

@@ -12,42 +12,27 @@
 
 #include <QtCore/QObject>
 
-
-namespace hifi { namespace qt {
+namespace hifi {
+namespace qt {
 void addBlockingForbiddenThread(const QString& name, QThread* thread = nullptr);
 
-bool blockingInvokeMethod(
-    const char* function,
-    QObject *obj, const char *member,
-    QGenericReturnArgument ret,
-    QGenericArgument val0 = QGenericArgument(Q_NULLPTR),
-    QGenericArgument val1 = QGenericArgument(),
-    QGenericArgument val2 = QGenericArgument(),
-    QGenericArgument val3 = QGenericArgument(),
-    QGenericArgument val4 = QGenericArgument(),
-    QGenericArgument val5 = QGenericArgument(),
-    QGenericArgument val6 = QGenericArgument(),
-    QGenericArgument val7 = QGenericArgument(),
-    QGenericArgument val8 = QGenericArgument(),
-    QGenericArgument val9 = QGenericArgument());
+bool blockingInvokeMethod(const char* function, QObject* obj, const char* member, QGenericReturnArgument ret,
+                          QGenericArgument val0 = QGenericArgument(Q_NULLPTR), QGenericArgument val1 = QGenericArgument(),
+                          QGenericArgument val2 = QGenericArgument(), QGenericArgument val3 = QGenericArgument(),
+                          QGenericArgument val4 = QGenericArgument(), QGenericArgument val5 = QGenericArgument(),
+                          QGenericArgument val6 = QGenericArgument(), QGenericArgument val7 = QGenericArgument(),
+                          QGenericArgument val8 = QGenericArgument(), QGenericArgument val9 = QGenericArgument());
 
-bool blockingInvokeMethod(
-    const char* function,
-    QObject *obj, const char *member,
-    QGenericArgument val0 = QGenericArgument(Q_NULLPTR),
-    QGenericArgument val1 = QGenericArgument(),
-    QGenericArgument val2 = QGenericArgument(),
-    QGenericArgument val3 = QGenericArgument(),
-    QGenericArgument val4 = QGenericArgument(),
-    QGenericArgument val5 = QGenericArgument(),
-    QGenericArgument val6 = QGenericArgument(),
-    QGenericArgument val7 = QGenericArgument(),
-    QGenericArgument val8 = QGenericArgument(),
-    QGenericArgument val9 = QGenericArgument());
+bool blockingInvokeMethod(const char* function, QObject* obj, const char* member,
+                          QGenericArgument val0 = QGenericArgument(Q_NULLPTR), QGenericArgument val1 = QGenericArgument(),
+                          QGenericArgument val2 = QGenericArgument(), QGenericArgument val3 = QGenericArgument(),
+                          QGenericArgument val4 = QGenericArgument(), QGenericArgument val5 = QGenericArgument(),
+                          QGenericArgument val6 = QGenericArgument(), QGenericArgument val7 = QGenericArgument(),
+                          QGenericArgument val8 = QGenericArgument(), QGenericArgument val9 = QGenericArgument());
 
-} }
+} // namespace qt
+} // namespace hifi
 
-#define BLOCKING_INVOKE_METHOD(obj, member, ...) \
-    ::hifi::qt::blockingInvokeMethod(__FUNCTION__, obj, member, ##__VA_ARGS__)
+#define BLOCKING_INVOKE_METHOD(obj, member, ...) ::hifi::qt::blockingInvokeMethod(__FUNCTION__, obj, member, ##__VA_ARGS__)
 
 #endif

@@ -56,7 +56,7 @@ public:
     void setProperties(const QVariantMap& properties) override;
     QVariant getProperty(const QString& property) override;
 
-    QSizeF textSize(const QString& test) const;  // Meters
+    QSizeF textSize(const QString& test) const; // Meters
 
     virtual Text3DOverlay* createClone() const override;
 

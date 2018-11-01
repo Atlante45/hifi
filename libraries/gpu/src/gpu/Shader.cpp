@@ -17,10 +17,7 @@ using namespace gpu;
 
 Shader::ProgramMap Shader::_programMap;
 
-
-Shader::Shader(Type type, const Source& source, bool dynamic) :
-    _type(type)
-{
+Shader::Shader(Type type, const Source& source, bool dynamic) : _type(type) {
     auto& thisSource = const_cast<Source&>(_source);
     thisSource = source;
     if (!dynamic) {
@@ -28,10 +25,7 @@ Shader::Shader(Type type, const Source& source, bool dynamic) :
     }
 }
 
-Shader::Shader(Type type, const Pointer& vertex, const Pointer& geometry, const Pointer& pixel) :
-    _type(type) 
-{
-
+Shader::Shader(Type type, const Pointer& vertex, const Pointer& geometry, const Pointer& pixel) : _type(type) {
     auto& shaders = const_cast<Shaders&>(_shaders);
     if (geometry) {
         shaders.resize(3);
@@ -56,8 +50,7 @@ Shader::Shader(Type type, const Pointer& vertex, const Pointer& geometry, const 
     }
 }
 
-Shader::~Shader()
-{
+Shader::~Shader() {
 }
 
 static std::unordered_map<uint32_t, std::weak_ptr<Shader>> _shaderCache;
@@ -65,7 +58,7 @@ static std::unordered_map<uint32_t, std::weak_ptr<Shader>> _shaderCache;
 Shader::ID Shader::getID() const {
     if (isProgram()) {
         return (_shaders[VERTEX]->getID() << 16) | (_shaders[PIXEL]->getID());
-    } 
+    }
 
     return _source.id;
 }
@@ -84,8 +77,8 @@ Shader::Pointer Shader::createOrReuseDomainShader(Type type, uint32_t sourceId) 
     return shader;
 }
 
-
-ShaderPointer Shader::createOrReuseProgramShader(Type type, const Pointer& vertexShader, const Pointer& geometryShader, const Pointer& pixelShader) {
+ShaderPointer Shader::createOrReuseProgramShader(Type type, const Pointer& vertexShader, const Pointer& geometryShader,
+                                                 const Pointer& pixelShader) {
     PROFILE_RANGE(app, "createOrReuseProgramShader");
     ProgramMapKey key(0);
 
@@ -153,7 +146,6 @@ Shader::Pointer Shader::createVertex(uint32_t id) {
 Shader::Pointer Shader::createPixel(uint32_t id) {
     return createOrReuseDomainShader(FRAGMENT, id);
 }
-
 
 Shader::Pointer Shader::createProgram(uint32_t programId) {
     auto vertexShader = createVertex(shader::getVertexId(programId));

@@ -17,14 +17,14 @@
 
 class Shape3DOverlay : public Volume3DOverlay {
     Q_OBJECT
-    
+
 public:
     static QString const TYPE;
     virtual QString getType() const override { return TYPE; }
 
     Shape3DOverlay() {}
     Shape3DOverlay(const Shape3DOverlay* shape3DOverlay);
-    
+
     virtual void render(RenderArgs* args) override;
     virtual const render::ShapeKey getShapeKey() override;
 
@@ -34,6 +34,7 @@ public:
     QVariant getProperty(const QString& property) override;
 
     virtual scriptable::ScriptableModelBase getScriptableModel() override;
+
 protected:
     Transform evalRenderTransform() override;
 
@@ -41,5 +42,4 @@ private:
     GeometryCache::Shape _shape { GeometryCache::Hexagon };
 };
 
- 
 #endif // hifi_Shape3DOverlay_h

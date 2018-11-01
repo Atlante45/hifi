@@ -12,13 +12,13 @@
 #ifndef hifi_NodePermissions_h
 #define hifi_NodePermissions_h
 
+#include <QHash>
+#include <QMap>
+#include <QString>
+#include <QUuid>
+#include <QVariant>
 #include <memory>
 #include <unordered_map>
-#include <QString>
-#include <QMap>
-#include <QVariant>
-#include <QUuid>
-#include <QHash>
 #include <utility>
 #include "GroupRank.h"
 
@@ -28,17 +28,26 @@ using NodePermissionsKey = std::pair<QString, QUuid>; // name, rankID
 using NodePermissionsKeyList = QList<QPair<QString, QUuid>>;
 
 namespace std {
-    template<>
-    struct hash<NodePermissionsKey> {    
-        size_t operator()(const NodePermissionsKey& key) const;
-    };
-}
+template<>
+struct hash<NodePermissionsKey> {
+    size_t operator()(const NodePermissionsKey& key) const;
+};
+} // namespace std
 
 class NodePermissions {
 public:
-    NodePermissions() { _id = QUuid::createUuid().toString(); _rankID = QUuid(); }
-    NodePermissions(const QString& name) { _id = name.toLower(); _rankID = QUuid(); }
-    NodePermissions(const NodePermissionsKey& key) { _id = key.first.toLower(); _rankID = key.second; }
+    NodePermissions() {
+        _id = QUuid::createUuid().toString();
+        _rankID = QUuid();
+    }
+    NodePermissions(const QString& name) {
+        _id = name.toLower();
+        _rankID = QUuid();
+    }
+    NodePermissions(const NodePermissionsKey& key) {
+        _id = key.first.toLower();
+        _rankID = key.second;
+    }
     NodePermissions(QMap<QString, QVariant> perms);
 
     const QString& getID() const { return _id; } // a user-name or a group-name, not verified
@@ -51,7 +60,12 @@ public:
     void setVerifiedUserName(QString userName) { _verifiedUserName = userName.toLower(); }
     const QString& getVerifiedUserName() const { return _verifiedUserName; }
 
-    void setGroupID(QUuid groupID) { _groupID = groupID; if (!groupID.isNull()) { _groupIDSet = true; }}
+    void setGroupID(QUuid groupID) {
+        _groupID = groupID;
+        if (!groupID.isNull()) {
+            _groupIDSet = true;
+        }
+    }
     const QUuid& getGroupID() const { return _groupID; }
     bool isGroup() const { return _groupIDSet; }
 
@@ -90,7 +104,7 @@ public:
     friend QDataStream& operator<<(QDataStream& out, const NodePermissions& perms);
     friend QDataStream& operator>>(QDataStream& in, NodePermissions& perms);
 
-    void clear(Permission p) { permissions &= (Permission) (~(uint)p); }
+    void clear(Permission p) { permissions &= (Permission)(~(uint)p); }
     void set(Permission p) { permissions |= p; }
     bool can(Permission p) const { return permissions.testFlag(p); }
 
@@ -104,11 +118,10 @@ protected:
 };
 Q_DECLARE_OPERATORS_FOR_FLAGS(NodePermissions::Permissions)
 
-
 // wrap QHash in a class that forces all keys to be lowercase
 class NodePermissionsMap {
 public:
-    NodePermissionsMap() { }
+    NodePermissionsMap() {}
     NodePermissionsPointer& operator[](const NodePermissionsKey& key) {
         NodePermissionsKey dataKey(key.first.toLower(), key.second);
         if (0 == _data.count(dataKey)) {
@@ -118,7 +131,7 @@ public:
     }
     NodePermissionsPointer operator[](const NodePermissionsKey& key) const {
         NodePermissionsPointer result;
-        auto itr =  _data.find(NodePermissionsKey(key.first.toLower(), key.second));
+        auto itr = _data.find(NodePermissionsKey(key.first.toLower(), key.second));
         if (_data.end() != itr) {
             result = itr->second;
         }
@@ -131,7 +144,7 @@ public:
         return 0 != _data.count(NodePermissionsKey(keyFirst.toLower(), keySecond));
     }
 
-    QList<NodePermissionsKey> keys() const { 
+    QList<NodePermissionsKey> keys() const {
         QList<NodePermissionsKey> result;
         for (const auto& entry : _data) {
             result.push_back(entry.first);
@@ -146,7 +159,6 @@ public:
 private:
     std::unordered_map<NodePermissionsKey, NodePermissionsPointer> _data;
 };
-
 
 const NodePermissions DEFAULT_AGENT_PERMISSIONS;
 

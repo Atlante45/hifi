@@ -11,8 +11,8 @@
 #define hifi_TBBHelpers_h
 
 #ifdef _WIN32
-#pragma warning( push )
-#pragma warning( disable : 4334 )
+#pragma warning(push)
+#pragma warning(disable : 4334)
 #endif
 
 #include <tbb/concurrent_queue.h>
@@ -22,7 +22,7 @@
 #include <tbb/parallel_for.h>
 
 #ifdef _WIN32
-#pragma warning( pop )
+#pragma warning(pop)
 #endif
 
 #endif // hifi_TBBHelpers_h

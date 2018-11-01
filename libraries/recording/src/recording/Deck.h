@@ -10,19 +10,18 @@
 #ifndef hifi_Recording_Deck_h
 #define hifi_Recording_Deck_h
 
-#include <utility>
 #include <list>
 #include <mutex>
+#include <utility>
 
+#include <QtCore/QList>
 #include <QtCore/QObject>
 #include <QtCore/QTimer>
-#include <QtCore/QList>
 
 #include <DependencyManager.h>
 
 #include "Forward.h"
 #include "Frame.h"
-
 
 namespace recording {
 
@@ -78,6 +77,6 @@ private:
     float _length { 0 };
 };
 
-}
+} // namespace recording
 
 #endif

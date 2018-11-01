@@ -8,8 +8,8 @@
 
 #include "RenderableMaterialEntityItem.h"
 
-#include "RenderPipelines.h"
 #include "GeometryCache.h"
+#include "RenderPipelines.h"
 
 using namespace render;
 using namespace render::entities;
@@ -21,7 +21,8 @@ bool MaterialEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityP
     if (entity->getParentID() != _parentID) {
         return true;
     }
-    if (entity->getMaterialMappingPos() != _materialMappingPos || entity->getMaterialMappingScale() != _materialMappingScale || entity->getMaterialMappingRot() != _materialMappingRot) {
+    if (entity->getMaterialMappingPos() != _materialMappingPos || entity->getMaterialMappingScale() != _materialMappingScale ||
+        entity->getMaterialMappingRot() != _materialMappingRot) {
         return true;
     }
     if (!_texturesLoaded) {
@@ -30,7 +31,8 @@ bool MaterialEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityP
     return false;
 }
 
-void MaterialEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) {
+void MaterialEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                            const TypedEntityPointer& entity) {
     withWriteLock([&] {
         if (_drawMaterial != entity->getMaterial()) {
             _texturesLoaded = false;
@@ -81,7 +83,7 @@ ShapeKey MaterialEntityRenderer::getShapeKey() {
     bool hasTangents = drawMaterialKey.isNormalMap();
     bool hasLightmap = drawMaterialKey.isLightmapMap();
     bool isUnlit = drawMaterialKey.isUnlit();
-    
+
     ShapeKey::Builder builder;
     builder.withMaterial();
 

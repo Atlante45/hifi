@@ -85,5 +85,5 @@ float Interpolate::easeInOutQuad(float lerpValue) {
         return (2.0f * lerpValue * lerpValue);
     }
 
-    return (lerpValue*(4.0f - 2.0f * lerpValue) - 1.0f);
+    return (lerpValue * (4.0f - 2.0f * lerpValue) - 1.0f);
 }

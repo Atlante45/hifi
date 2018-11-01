@@ -11,27 +11,26 @@
 #include "FileDialogHelper.h"
 #include "ui/Logging.h"
 
+#include <QDesktopServices>
+#include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
-#include <QtCore/QDebug>
 #include <QtCore/QRegularExpression>
-#include <QDesktopServices>
-
 
 QUrl FileDialogHelper::home() {
     return pathToUrl(QStandardPaths::standardLocations(QStandardPaths::HomeLocation)[0]);
 }
 
 QStringList FileDialogHelper::standardPath(StandardLocation location) {
-    return QStandardPaths::standardLocations(static_cast<QStandardPaths::StandardLocation>(location)); 
+    return QStandardPaths::standardLocations(static_cast<QStandardPaths::StandardLocation>(location));
 }
 
 QString FileDialogHelper::writableLocation(StandardLocation location) {
     return QStandardPaths::writableLocation(static_cast<QStandardPaths::StandardLocation>(location));
 }
 
-QString FileDialogHelper::urlToPath(const QUrl& url) { 
-    return url.toLocalFile(); 
+QString FileDialogHelper::urlToPath(const QUrl& url) {
+    return url.toLocalFile();
 }
 
 bool FileDialogHelper::fileExists(const QString& path) {
@@ -39,17 +38,16 @@ bool FileDialogHelper::fileExists(const QString& path) {
 }
 
 bool FileDialogHelper::validPath(const QString& path) {
-    return QFile(path).exists(); 
+    return QFile(path).exists();
 }
 
-bool FileDialogHelper::validFolder(const QString& path) { 
-    return QDir(path).exists(); 
+bool FileDialogHelper::validFolder(const QString& path) {
+    return QDir(path).exists();
 }
 
-QUrl FileDialogHelper::pathToUrl(const QString& path) { 
-    return QUrl::fromLocalFile(path); 
+QUrl FileDialogHelper::pathToUrl(const QString& path) {
+    return QUrl::fromLocalFile(path);
 }
-
 
 QUrl FileDialogHelper::saveHelper(const QString& saveText, const QUrl& currentFolder, const QStringList& selectionFilters) {
     qDebug(uiLogging) << "Calling save helper with " << saveText << " " << currentFolder << " " << selectionFilters;
@@ -67,7 +65,7 @@ QUrl FileDialogHelper::saveHelper(const QString& saveText, const QUrl& currentFo
     if (!fileInfo.isDir()) {
         QString fileName = fileInfo.fileName();
         if (!fileName.contains(".") && selectionFilters.size() == 1) {
-            const QRegularExpression extensionRe{ ".*(\\.[a-zA-Z0-9]+)$" };
+            const QRegularExpression extensionRe { ".*(\\.[a-zA-Z0-9]+)$" };
             QString filter = selectionFilters[0];
             auto match = extensionRe.match(filter);
             if (match.hasMatch()) {
@@ -96,7 +94,7 @@ bool FileDialogHelper::urlIsWritable(const QUrl& url) {
     // Is the file writable?
     if (fileInfo.exists()) {
         return fileInfo.isWritable();
-    } 
+    }
 
     // No file, get the parent directory and check if writable
     return QFileInfo(fileInfo.absoluteDir().absolutePath()).isWritable();

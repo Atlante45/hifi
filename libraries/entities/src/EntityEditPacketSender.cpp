@@ -16,8 +16,8 @@
 #include <QJsonDocument>
 
 #include <AddressManager.h>
-#include <PerfStat.h>
 #include <OctalCode.h>
+#include <PerfStat.h>
 #include <udt/PacketHeaders.h>
 
 #include "EntitiesLogging.h"
@@ -29,7 +29,8 @@ EntityEditPacketSender::EntityEditPacketSender() {
     packetReceiver.registerDirectListener(PacketType::EntityEditNack, this, "processEntityEditNackPacket");
 }
 
-void EntityEditPacketSender::processEntityEditNackPacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer sendingNode) {
+void EntityEditPacketSender::processEntityEditNackPacket(QSharedPointer<ReceivedMessage> message,
+                                                         SharedNodePointer sendingNode) {
     processNackPacket(*message, sendingNode);
 }
 
@@ -39,10 +40,8 @@ void EntityEditPacketSender::adjustEditPacketForClockSkew(PacketType type, QByte
     }
 }
 
-void EntityEditPacketSender::queueEditAvatarEntityMessage(PacketType type,
-                                                          EntityTreePointer entityTree,
-                                                          EntityItemID entityItemID,
-                                                          const EntityItemProperties& properties) {
+void EntityEditPacketSender::queueEditAvatarEntityMessage(PacketType type, EntityTreePointer entityTree,
+                                                          EntityItemID entityItemID, const EntityItemProperties& properties) {
     assert(_myAvatar);
     if (!entityTree) {
         qCDebug(entities) << "EntityEditPacketSender::queueEditEntityMessage null entityTree.";
@@ -79,10 +78,7 @@ void EntityEditPacketSender::queueEditAvatarEntityMessage(PacketType type,
     entity->setLastBroadcast(usecTimestampNow());
 }
 
-
-void EntityEditPacketSender::queueEditEntityMessage(PacketType type,
-                                                    EntityTreePointer entityTree,
-                                                    EntityItemID entityItemID,
+void EntityEditPacketSender::queueEditEntityMessage(PacketType type, EntityTreePointer entityTree, EntityItemID entityItemID,
                                                     const EntityItemProperties& properties) {
     if (properties.getClientOnly()) {
         if (!_myAvatar) {
@@ -122,18 +118,20 @@ void EntityEditPacketSender::queueEditEntityMessage(PacketType type,
     EntityPropertyFlags requestedProperties = propertiesCopy.getChangedProperties();
 
     while (encodeResult == OctreeElement::PARTIAL) {
-        encodeResult = EntityItemProperties::encodeEntityEditPacket(type, entityItemID, propertiesCopy, bufferOut, requestedProperties, didntFitProperties);
+        encodeResult = EntityItemProperties::encodeEntityEditPacket(type, entityItemID, propertiesCopy, bufferOut,
+                                                                    requestedProperties, didntFitProperties);
 
         if (encodeResult != OctreeElement::NONE) {
-            #ifdef WANT_DEBUG
-                qCDebug(entities) << "calling queueOctreeEditMessage()...";
-                qCDebug(entities) << "    id:" << entityItemID;
-                qCDebug(entities) << "    properties:" << properties;
-            #endif
+#ifdef WANT_DEBUG
+            qCDebug(entities) << "calling queueOctreeEditMessage()...";
+            qCDebug(entities) << "    id:" << entityItemID;
+            qCDebug(entities) << "    properties:" << properties;
+#endif
 
             queueOctreeEditMessage(type, bufferOut);
             if (type == PacketType::EntityAdd && !properties.getCertificateID().isEmpty()) {
-                emit addingEntityWithCertificate(properties.getCertificateID(), DependencyManager::get<AddressManager>()->getPlaceName());
+                emit addingEntityWithCertificate(properties.getCertificateID(),
+                                                 DependencyManager::get<AddressManager>()->getPlaceName());
             }
         }
 
@@ -148,7 +146,6 @@ void EntityEditPacketSender::queueEditEntityMessage(PacketType type,
 }
 
 void EntityEditPacketSender::queueEraseEntityMessage(const EntityItemID& entityItemID) {
-
     QByteArray bufferOut(NLPacket::maxPayloadSize(PacketType::EntityErase), 0);
 
     if (EntityItemProperties::encodeEraseEntityMessage(entityItemID, bufferOut)) {

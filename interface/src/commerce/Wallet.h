@@ -50,7 +50,11 @@ public:
     bool walletIsAuthenticatedWithPassphrase();
     bool changePassphrase(const QString& newPassphrase);
     void setSoftReset() { _isOverridingServer = true; }
-    bool wasSoftReset() { bool was = _isOverridingServer; _isOverridingServer = false; return was; }
+    bool wasSoftReset() {
+        bool was = _isOverridingServer;
+        _isOverridingServer = false;
+        return was;
+    }
     void clear();
 
     void getWalletStatus();
@@ -74,7 +78,7 @@ private slots:
 
 private:
     friend class Ledger;
-    QStringList _publicKeys{};
+    QStringList _publicKeys {};
     QPixmap* _securityImage { nullptr };
     QByteArray _salt;
     QByteArray _iv;

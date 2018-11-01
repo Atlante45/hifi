@@ -11,8 +11,8 @@
 
 #include "KeyLightPropertyGroup.h"
 
-#include <QJsonDocument>
 #include <OctreePacketData.h>
+#include <QJsonDocument>
 
 #include "EntityItemProperties.h"
 #include "EntityItemPropertiesMacros.h"
@@ -23,9 +23,9 @@ const float KeyLightPropertyGroup::DEFAULT_KEYLIGHT_AMBIENT_INTENSITY = 0.5f;
 const glm::vec3 KeyLightPropertyGroup::DEFAULT_KEYLIGHT_DIRECTION = { 0.0f, -1.0f, 0.0f };
 const bool KeyLightPropertyGroup::DEFAULT_KEYLIGHT_CAST_SHADOWS { false };
 
-void KeyLightPropertyGroup::copyToScriptValue(const EntityPropertyFlags& desiredProperties, QScriptValue& properties, 
-    QScriptEngine* engine, bool skipDefaults, EntityItemProperties& defaultEntityProperties) const {
-        
+void KeyLightPropertyGroup::copyToScriptValue(const EntityPropertyFlags& desiredProperties, QScriptValue& properties,
+                                              QScriptEngine* engine, bool skipDefaults,
+                                              EntityItemProperties& defaultEntityProperties) const {
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE_TYPED(PROP_KEYLIGHT_COLOR, KeyLight, keyLight, Color, color, u8vec3Color);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_KEYLIGHT_INTENSITY, KeyLight, keyLight, Intensity, intensity);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_KEYLIGHT_DIRECTION, KeyLight, keyLight, Direction, direction);
@@ -75,15 +75,11 @@ void KeyLightPropertyGroup::listChangedProperties(QList<QString>& out) {
     }
 }
 
-bool KeyLightPropertyGroup::appendToEditPacket(OctreePacketData* packetData,
-    EntityPropertyFlags& requestedProperties,
-    EntityPropertyFlags& propertyFlags,
-    EntityPropertyFlags& propertiesDidntFit,
-    int& propertyCount, 
-    OctreeElement::AppendState& appendState) const {
-
+bool KeyLightPropertyGroup::appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+                                               EntityPropertyFlags& propertyFlags, EntityPropertyFlags& propertiesDidntFit,
+                                               int& propertyCount, OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
-    
+
     APPEND_ENTITY_PROPERTY(PROP_KEYLIGHT_COLOR, getColor());
     APPEND_ENTITY_PROPERTY(PROP_KEYLIGHT_INTENSITY, getIntensity());
     APPEND_ENTITY_PROPERTY(PROP_KEYLIGHT_DIRECTION, getDirection());
@@ -92,13 +88,12 @@ bool KeyLightPropertyGroup::appendToEditPacket(OctreePacketData* packetData,
     return true;
 }
 
-bool KeyLightPropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt, 
+bool KeyLightPropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt,
                                                  int& processedBytes) {
-        
     int bytesRead = 0;
     bool overwriteLocalData = true;
     bool somethingChanged = false;
-    
+
     READ_ENTITY_PROPERTY(PROP_KEYLIGHT_COLOR, u8vec3Color, setColor);
     READ_ENTITY_PROPERTY(PROP_KEYLIGHT_INTENSITY, float, setIntensity);
     READ_ENTITY_PROPERTY(PROP_KEYLIGHT_DIRECTION, glm::vec3, setDirection);
@@ -125,7 +120,7 @@ void KeyLightPropertyGroup::markAllChanged() {
 
 EntityPropertyFlags KeyLightPropertyGroup::getChangedProperties() const {
     EntityPropertyFlags changedProperties;
- 
+
     CHECK_PROPERTY_CHANGE(PROP_KEYLIGHT_COLOR, color);
     CHECK_PROPERTY_CHANGE(PROP_KEYLIGHT_INTENSITY, intensity);
     CHECK_PROPERTY_CHANGE(PROP_KEYLIGHT_DIRECTION, direction);
@@ -134,7 +129,7 @@ EntityPropertyFlags KeyLightPropertyGroup::getChangedProperties() const {
     return changedProperties;
 }
 
-void KeyLightPropertyGroup::getProperties(EntityItemProperties& properties) const {  
+void KeyLightPropertyGroup::getProperties(EntityItemProperties& properties) const {
     COPY_ENTITY_GROUP_PROPERTY_TO_PROPERTIES(KeyLight, Color, getColor);
     COPY_ENTITY_GROUP_PROPERTY_TO_PROPERTIES(KeyLight, Intensity, getIntensity);
     COPY_ENTITY_GROUP_PROPERTY_TO_PROPERTIES(KeyLight, Direction, getDirection);
@@ -162,15 +157,12 @@ EntityPropertyFlags KeyLightPropertyGroup::getEntityProperties(EncodeBitstreamPa
 
     return requestedProperties;
 }
-    
-void KeyLightPropertyGroup::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params, 
-                                EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                EntityPropertyFlags& requestedProperties,
-                                EntityPropertyFlags& propertyFlags,
-                                EntityPropertyFlags& propertiesDidntFit,
-                                int& propertyCount, 
-                                OctreeElement::AppendState& appendState) const {
 
+void KeyLightPropertyGroup::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
+                                               EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
+                                               EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                               EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                               OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_KEYLIGHT_COLOR, getColor());
@@ -179,14 +171,12 @@ void KeyLightPropertyGroup::appendSubclassData(OctreePacketData* packetData, Enc
     APPEND_ENTITY_PROPERTY(PROP_KEYLIGHT_CAST_SHADOW, getCastShadows());
 }
 
-int KeyLightPropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead, 
-                                            ReadBitstreamToTreeParams& args,
-                                            EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                            bool& somethingChanged) {
-
+int KeyLightPropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
+                                                            ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                            bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
-    
+
     READ_ENTITY_PROPERTY(PROP_KEYLIGHT_COLOR, u8vec3Color, setColor);
     READ_ENTITY_PROPERTY(PROP_KEYLIGHT_INTENSITY, float, setIntensity);
     READ_ENTITY_PROPERTY(PROP_KEYLIGHT_DIRECTION, glm::vec3, setDirection);

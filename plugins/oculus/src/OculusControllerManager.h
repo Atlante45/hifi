@@ -10,8 +10,8 @@
 #define hifi__OculusControllerManager
 
 #include <QObject>
-#include <unordered_set>
 #include <map>
+#include <unordered_set>
 
 #include <GLMHelpers.h>
 
@@ -42,7 +42,9 @@ private slots:
 private:
     class OculusInputDevice : public controller::InputDevice {
     public:
-        OculusInputDevice(OculusControllerManager& parent, const QString& name) : controller::InputDevice(name), _parent(parent) {}
+        OculusInputDevice(OculusControllerManager& parent, const QString& name) :
+            controller::InputDevice(name),
+            _parent(parent) {}
 
         OculusControllerManager& _parent;
         friend class OculusControllerManager;
@@ -75,10 +77,10 @@ private:
 
     private:
         void stopHapticPulse(bool leftHand);
-        void handlePose(float deltaTime, const controller::InputCalibrationData& inputCalibrationData,
-                        ovrHandType hand, const ovrPoseStatef& handPose);
-        void handleRotationForUntrackedHand(const controller::InputCalibrationData& inputCalibrationData,
-                                            ovrHandType hand, const ovrPoseStatef& handPose);
+        void handlePose(float deltaTime, const controller::InputCalibrationData& inputCalibrationData, ovrHandType hand,
+                        const ovrPoseStatef& handPose);
+        void handleRotationForUntrackedHand(const controller::InputCalibrationData& inputCalibrationData, ovrHandType hand,
+                                            const ovrPoseStatef& handPose);
         void handleHeadPose(float deltaTime, const controller::InputCalibrationData& inputCalibrationData,
                             const ovrPoseStatef& headPose);
 
@@ -86,8 +88,11 @@ private:
 
         // perform an action when the TouchDevice mutex is acquired.
         using Locker = std::unique_lock<std::recursive_mutex>;
-        template <typename F>
-        void withLock(F&& f) { Locker locker(_lock); f(); }
+        template<typename F>
+        void withLock(F&& f) {
+            Locker locker(_lock);
+            f();
+        }
 
         float _leftHapticDuration { 0.0f };
         float _leftHapticStrength { 0.0f };

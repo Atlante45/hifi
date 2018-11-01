@@ -14,9 +14,9 @@
 #include "Application.h"
 #include "ui/DialogsManager.h"
 
+#include <AddressManager.h>
 #include <DependencyManager.h>
 #include <DomainHandler.h>
-#include <AddressManager.h>
 #include <NodeList.h>
 
 // Because the connection monitor is created at startup, the time we wait on initial load

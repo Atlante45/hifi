@@ -7,8 +7,8 @@
 //
 #include "ShaderCache.h"
 
-NetworkShader::NetworkShader(const QUrl& url) :
-    Resource(url) {}
+NetworkShader::NetworkShader(const QUrl& url) : Resource(url) {
+}
 
 void NetworkShader::downloadFinished(const QByteArray& data) {
     _source = QString::fromUtf8(data);
@@ -25,7 +25,6 @@ NetworkShaderPointer ShaderCache::getShader(const QUrl& url) {
 }
 
 QSharedPointer<Resource> ShaderCache::createResource(const QUrl& url, const QSharedPointer<Resource>& fallback,
-    const void* extra) {
+                                                     const void* extra) {
     return QSharedPointer<Resource>(new NetworkShader(url), &Resource::deleter);
 }
-

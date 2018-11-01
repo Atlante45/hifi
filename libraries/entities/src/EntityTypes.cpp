@@ -16,21 +16,21 @@
 #include <ByteCountCoding.h>
 #include <Octree.h>
 
+#include "EntitiesLogging.h"
 #include "EntityItem.h"
 #include "EntityItemProperties.h"
-#include "EntitiesLogging.h"
 
 #include "LightEntityItem.h"
+#include "LineEntityItem.h"
+#include "MaterialEntityItem.h"
 #include "ModelEntityItem.h"
 #include "ParticleEffectEntityItem.h"
+#include "PolyLineEntityItem.h"
+#include "PolyVoxEntityItem.h"
+#include "ShapeEntityItem.h"
 #include "TextEntityItem.h"
 #include "WebEntityItem.h"
 #include "ZoneEntityItem.h"
-#include "LineEntityItem.h"
-#include "PolyVoxEntityItem.h"
-#include "PolyLineEntityItem.h"
-#include "ShapeEntityItem.h"
-#include "MaterialEntityItem.h"
 
 QMap<EntityTypes::EntityType, QString> EntityTypes::_typeToNameMap;
 QMap<QString, EntityTypes::EntityType> EntityTypes::_nameToTypeMap;
@@ -77,7 +77,7 @@ bool EntityTypes::registerEntityType(EntityType entityType, const char* name, En
     _typeToNameMap[entityType] = name;
     _nameToTypeMap[name] = entityType;
     if (!_factoriesInitialized) {
-        memset(&_factories,0,sizeof(_factories));
+        memset(&_factories, 0, sizeof(_factories));
         _factoriesInitialized = true;
     }
     if (entityType >= 0 && entityType <= LAST) {
@@ -88,7 +88,7 @@ bool EntityTypes::registerEntityType(EntityType entityType, const char* name, En
 }
 
 EntityItemPointer EntityTypes::constructEntityItem(EntityType entityType, const EntityItemID& entityID,
-                                                    const EntityItemProperties& properties) {
+                                                   const EntityItemProperties& properties) {
     EntityItemPointer newEntityItem = NULL;
     EntityTypeFactory factory = NULL;
     if (entityType >= 0 && entityType <= LAST) {
@@ -104,8 +104,7 @@ EntityItemPointer EntityTypes::constructEntityItem(EntityType entityType, const 
 }
 
 EntityItemPointer EntityTypes::constructEntityItem(const unsigned char* data, int bytesToRead,
-            ReadBitstreamToTreeParams& args) {
-
+                                                   ReadBitstreamToTreeParams& args) {
     // Header bytes
     //    object ID [16 bytes]
     //    ByteCountCoded(type code) [~1 byte]
@@ -132,11 +131,11 @@ EntityItemPointer EntityTypes::constructEntityItem(const unsigned char* data, in
         bytesRead += encodedType.size();
         quint32 type = typeCoder;
         EntityTypes::EntityType entityType = (EntityTypes::EntityType)type;
-        
+
         EntityItemID tempEntityID(actualID);
         EntityItemProperties tempProperties;
         return constructEntityItem(entityType, tempEntityID, tempProperties);
     }
-    
+
     return NULL;
 }

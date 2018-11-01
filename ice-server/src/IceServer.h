@@ -12,18 +12,18 @@
 #ifndef hifi_IceServer_h
 #define hifi_IceServer_h
 
+#include <QUdpSocket>
 #include <QtCore/QCoreApplication>
 #include <QtCore/QSharedPointer>
-#include <QUdpSocket>
 
 #include <openssl/rsa.h>
 
 #include <UUIDHasher.h>
 
-#include <NetworkPeer.h>
 #include <HTTPConnection.h>
 #include <HTTPManager.h>
 #include <NLPacket.h>
+#include <NetworkPeer.h>
 #include <udt/Socket.h>
 
 class QNetworkReply;
@@ -35,10 +35,11 @@ public:
 private slots:
     void clearInactivePeers();
     void publicKeyReplyFinished(QNetworkReply* reply);
+
 private:
     bool packetVersionMatch(const udt::Packet& packet);
     void processPacket(std::unique_ptr<udt::Packet> packet);
-    
+
     SharedNetworkPeer addOrUpdateHeartbeatingPeer(NLPacket& incomingPacket);
     void sendPeerInformationPacket(const NetworkPeer& peer, const HifiSockAddr* destinationSockAddr);
 

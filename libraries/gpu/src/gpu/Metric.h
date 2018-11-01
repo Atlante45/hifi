@@ -15,7 +15,7 @@
 
 namespace gpu {
 
-template <typename T>
+template<typename T>
 class Metric {
     std::atomic<T> _value { 0 };
     std::atomic<T> _maximum { 0 };
@@ -24,18 +24,14 @@ public:
     T getValue() { return _value; }
     T getMaximum() { return _maximum; }
 
-    void set(T newValue) {
-        _value = newValue;
-    }
+    void set(T newValue) { _value = newValue; }
     void increment() {
         auto total = ++_value;
         if (total > _maximum.load()) {
             _maximum = total;
         }
     }
-    void decrement() {
-        --_value;
-    }
+    void decrement() { --_value; }
 
     void update(T prevValue, T newValue) {
         if (prevValue == newValue) {
@@ -60,5 +56,5 @@ public:
 using ContextMetricCount = Metric<uint32_t>;
 using ContextMetricSize = Metric<Size>;
 
-}
+} // namespace gpu
 #endif

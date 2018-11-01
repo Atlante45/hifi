@@ -13,8 +13,8 @@
 #ifndef hifi_ContextOverlayInterface_h
 #define hifi_ContextOverlayInterface_h
 
-#include <QtCore/QObject>
 #include <QUuid>
+#include <QtCore/QObject>
 
 #include <DependencyManager.h>
 #include <PointerEvent.h>
@@ -22,14 +22,14 @@
 #include "avatar/AvatarManager.h"
 
 #include "EntityScriptingInterface.h"
-#include "ui/overlays/Image3DOverlay.h"
-#include "ui/overlays/Overlays.h"
 #include "scripting/HMDScriptingInterface.h"
 #include "scripting/SelectionScriptingInterface.h"
 #include "scripting/WalletScriptingInterface.h"
+#include "ui/overlays/Image3DOverlay.h"
+#include "ui/overlays/Overlays.h"
 
-#include "EntityTree.h"
 #include "ContextOverlayLogging.h"
+#include "EntityTree.h"
 
 class ContextOverlayInterface : public QObject, public Dependency {
     Q_OBJECT
@@ -45,11 +45,15 @@ class ContextOverlayInterface : public QObject, public Dependency {
     QSharedPointer<SelectionScriptingInterface> _selectionScriptingInterface;
     OverlayID _contextOverlayID { UNKNOWN_OVERLAY_ID };
     std::shared_ptr<Image3DOverlay> _contextOverlay { nullptr };
+
 public:
     ContextOverlayInterface();
     Q_INVOKABLE QUuid getCurrentEntityWithContextOverlay() { return _currentEntityWithContextOverlay; }
     void setCurrentEntityWithContextOverlay(const QUuid& entityID) { _currentEntityWithContextOverlay = entityID; }
-    void setLastInspectedEntity(const QUuid& entityID) { _challengeOwnershipTimeoutTimer.stop(); _lastInspectedEntity = entityID; }
+    void setLastInspectedEntity(const QUuid& entityID) {
+        _challengeOwnershipTimeoutTimer.stop();
+        _lastInspectedEntity = entityID;
+    }
     void setEnabled(bool enabled);
     bool getEnabled() { return _enabled; }
     bool getIsInMarketplaceInspectionMode() { return _isInMarketplaceInspectionMode; }
@@ -79,16 +83,13 @@ private slots:
     void handleChallengeOwnershipReplyPacket(QSharedPointer<ReceivedMessage> packet, SharedNodePointer sendingNode);
 
 private:
-
-    enum {
-        MAX_SELECTION_COUNT = 16
-    };
-    bool _verboseLogging{ true };
+    enum { MAX_SELECTION_COUNT = 16 };
+    bool _verboseLogging { true };
     bool _enabled { true };
-    EntityItemID _mouseDownEntity{};
+    EntityItemID _mouseDownEntity {};
     quint64 _mouseDownEntityTimestamp;
-    EntityItemID _currentEntityWithContextOverlay{};
-    EntityItemID _lastInspectedEntity{};
+    EntityItemID _currentEntityWithContextOverlay {};
+    EntityItemID _lastInspectedEntity {};
     QString _entityMarketplaceID;
     bool _contextOverlayJustClicked { false };
 

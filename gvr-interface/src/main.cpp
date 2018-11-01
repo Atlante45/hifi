@@ -9,20 +9,20 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-#include "GVRMainWindow.h"
 #include "GVRInterface.h"
+#include "GVRMainWindow.h"
 
 int main(int argc, char* argv[]) {
     GVRInterface app(argc, argv);
-    
+
     GVRMainWindow mainWindow;
 #ifdef ANDROID
     mainWindow.showFullScreen();
 #else
     mainWindow.showMaximized();
 #endif
-    
+
     app.setMainWindow(&mainWindow);
-    
+
     return app.exec();
 }

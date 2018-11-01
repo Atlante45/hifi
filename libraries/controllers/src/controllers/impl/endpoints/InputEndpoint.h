@@ -16,9 +16,7 @@ namespace controller {
 
 class InputEndpoint : public Endpoint {
 public:
-    InputEndpoint(const Input& id = Input::INVALID_INPUT)
-        : Endpoint(id) {
-    }
+    InputEndpoint(const Input& id = Input::INVALID_INPUT) : Endpoint(id) {}
 
     virtual float peek() const override;
     virtual float value() override;
@@ -26,7 +24,7 @@ public:
     virtual void apply(float newValue, const Pointer& source) override {}
     virtual Pose peekPose() const override;
     virtual Pose pose() override;
-    virtual void apply(const Pose& value, const Pointer& source) override { }
+    virtual void apply(const Pose& value, const Pointer& source) override {}
 
     virtual bool writeable() const override { return false; }
     virtual bool readable() const override { return !_read; }
@@ -36,6 +34,6 @@ private:
     bool _read { false };
 };
 
-}
+} // namespace controller
 
 #endif

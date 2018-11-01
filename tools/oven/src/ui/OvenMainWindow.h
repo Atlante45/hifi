@@ -22,11 +22,11 @@ const int FIXED_WINDOW_WIDTH = 640;
 class OvenMainWindow : public QMainWindow {
     Q_OBJECT
 public:
-    OvenMainWindow(QWidget *parent = Q_NULLPTR, Qt::WindowFlags flags = Qt::WindowFlags());
+    OvenMainWindow(QWidget* parent = Q_NULLPTR, Qt::WindowFlags flags = Qt::WindowFlags());
     ~OvenMainWindow();
 
     ResultsWindow* showResultsWindow(bool shouldRaise = true);
-    
+
 private:
     QPointer<ResultsWindow> _resultsWindow;
 };

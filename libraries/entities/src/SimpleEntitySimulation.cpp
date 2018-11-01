@@ -13,8 +13,8 @@
 
 #include <DirtyOctreeElementOperator.h>
 
-#include "EntityItem.h"
 #include "EntitiesLogging.h"
+#include "EntityItem.h"
 
 const uint64_t MAX_OWNERLESS_PERIOD = 2 * USECS_PER_SECOND;
 

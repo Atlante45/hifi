@@ -7,14 +7,14 @@
 //
 #pragma once
 
+#include <stdint.h>
 #include <functional>
 #include <map>
-#include <stdint.h>
 
-#include <QtCore/QString>
-#include <QtCore/QVector>
 #include <QtCore/QPair>
 #include <QtCore/QRect>
+#include <QtCore/QString>
+#include <QtCore/QVector>
 
 #include <plugins/Forward.h>
 
@@ -27,12 +27,12 @@ class QWindow;
 class DisplayPlugin;
 
 namespace gpu {
-    class Texture;
-    using TexturePointer = std::shared_ptr<Texture>;
-}
+class Texture;
+using TexturePointer = std::shared_ptr<Texture>;
+} // namespace gpu
 
 namespace ui {
-    class Menu;
+class Menu;
 }
 
 class QActionGroup;
@@ -46,7 +46,8 @@ public:
 
     void addMenu(const QString& menuName);
     void removeMenu(const QString& menuName);
-    void addMenuItem(PluginType pluginType, const QString& path, const QString& name, std::function<void(bool)> onClicked, bool checkable = false, bool checked = false, const QString& groupName = "");
+    void addMenuItem(PluginType pluginType, const QString& path, const QString& name, std::function<void(bool)> onClicked,
+                     bool checkable = false, bool checked = false, const QString& groupName = "");
     void removeMenuItem(const QString& menuName, const QString& menuItem);
     bool isOptionChecked(const QString& name);
     void setIsOptionChecked(const QString& path, bool checked);
@@ -58,7 +59,7 @@ public:
     // Instead let display plugins expose a structure about the kinds
     // of actions and menu items they want to have appear when they are
     // active and allow the application to act on that when the display
-    // plugin becomes active (or when the UI is initialized, and a 
+    // plugin becomes active (or when the UI is initialized, and a
     // display plugin is already active)
     virtual ui::Menu* getPrimaryMenu() = 0;
     virtual void showDisplayPluginsTools(bool show = true) = 0;
@@ -74,13 +75,9 @@ public:
     bool getBoolSetting(const QString& settingName, bool defaultValue);
     void setBoolSetting(const QString& settingName, bool value);
 
-    QVector<QPair<QString, QString>>& currentDisplayActions() {
-        return _currentDisplayPluginActions;
-    }
+    QVector<QPair<QString, QString>>& currentDisplayActions() { return _currentDisplayPluginActions; }
 
-    QVector<QPair<QString, QString>>& currentInputActions() {
-        return _currentInputPluginActions;
-    }
+    QVector<QPair<QString, QString>>& currentInputActions() { return _currentInputPluginActions; }
 
 protected:
     void flushMenuUpdates();
@@ -88,4 +85,3 @@ protected:
     QVector<QPair<QString, QString>> _currentInputPluginActions;
     QRect _savedGeometry { 10, 120, 800, 600 };
 };
-

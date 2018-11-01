@@ -11,13 +11,13 @@
 #include <NumericalConstants.h>
 #include <SharedUtil.h>
 
-#include "impl/BufferClip.h"
 #include "Frame.h"
+#include "impl/BufferClip.h"
 
 using namespace recording;
 
-Recorder::Recorder(QObject* parent) 
-    : QObject(parent) {}
+Recorder::Recorder(QObject* parent) : QObject(parent) {
+}
 
 float Recorder::position() {
     Locker lock(_mutex);
@@ -75,4 +75,3 @@ ClipPointer Recorder::getClip() {
     Locker lock(_mutex);
     return _clip;
 }
-

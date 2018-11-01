@@ -14,13 +14,13 @@
 
 #include "FBX.h"
 
-#include <QtGlobal>
 #include <QMetaType>
 #include <QSet>
 #include <QUrl>
 #include <QVarLengthArray>
 #include <QVariant>
 #include <QVector>
+#include <QtGlobal>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -36,11 +36,13 @@ class FBXNode;
 
 /// Reads FBX geometry from the supplied model and mapping data.
 /// \exception QString if an error occurs in parsing
-FBXGeometry* readFBX(const QByteArray& model, const QVariantHash& mapping, const QString& url = "", bool loadLightmaps = true, float lightmapLevel = 1.0f);
+FBXGeometry* readFBX(const QByteArray& model, const QVariantHash& mapping, const QString& url = "", bool loadLightmaps = true,
+                     float lightmapLevel = 1.0f);
 
 /// Reads FBX geometry from the supplied model and mapping data.
 /// \exception QString if an error occurs in parsing
-FBXGeometry* readFBX(QIODevice* device, const QVariantHash& mapping, const QString& url = "", bool loadLightmaps = true, float lightmapLevel = 1.0f);
+FBXGeometry* readFBX(QIODevice* device, const QVariantHash& mapping, const QString& url = "", bool loadLightmaps = true,
+                     float lightmapLevel = 1.0f);
 
 class TextureParam {
 public:
@@ -56,7 +58,7 @@ public:
     uint8_t currentTextureBlendMode;
     bool useMaterial;
 
-    template <typename T>
+    template<typename T>
     bool assign(T& ref, const T& v) {
         if (ref == v) {
             return false;
@@ -80,9 +82,8 @@ public:
         alphaSource(0),
         currentTextureBlendMode(0),
         useMaterial(true),
-        isDefault(true)
-    {}
-    
+        isDefault(true) {}
+
     TextureParam(const TextureParam& src) :
         UVTranslation(src.UVTranslation),
         UVScaling(src.UVScaling),
@@ -94,9 +95,7 @@ public:
         alphaSource(src.alphaSource),
         currentTextureBlendMode(src.currentTextureBlendMode),
         useMaterial(src.useMaterial),
-        isDefault(src.isDefault)
-    {}
-    
+        isDefault(src.isDefault) {}
 };
 
 class ExtractedMesh;
@@ -126,7 +125,6 @@ public:
     // Hashes texture content by filepath, in case they are inlined
     QHash<QByteArray, QByteArray> _textureContent;
     QHash<QString, TextureParam> _textureParams;
-
 
     QHash<QString, QString> diffuseTextures;
     QHash<QString, QString> diffuseFactorTextures;

@@ -14,7 +14,6 @@
 #include <AudioCodec.h>
 #include <AudioConstants.h>
 
-
 const char* HiFiCodec::NAME { "hifiAC" };
 
 void HiFiCodec::init() {
@@ -32,41 +31,46 @@ void HiFiCodec::deactivate() {
     CodecPlugin::deactivate();
 }
 
-
 bool HiFiCodec::isSupported() const {
     return true;
 }
 
 class HiFiEncoder : public Encoder, public AudioEncoder {
 public:
-    HiFiEncoder(int sampleRate, int numChannels) : AudioEncoder(sampleRate, numChannels) { 
-        _encodedSize = (AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL * sizeof(int16_t) * numChannels) / 4;  // codec reduces by 1/4th
+    HiFiEncoder(int sampleRate, int numChannels) : AudioEncoder(sampleRate, numChannels) {
+        _encodedSize = (AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL * sizeof(int16_t) * numChannels) /
+                       4; // codec reduces by 1/4th
     }
 
     virtual void encode(const QByteArray& decodedBuffer, QByteArray& encodedBuffer) override {
         encodedBuffer.resize(_encodedSize);
-        AudioEncoder::process((const int16_t*)decodedBuffer.constData(), (int16_t*)encodedBuffer.data(), AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL);
+        AudioEncoder::process((const int16_t*)decodedBuffer.constData(), (int16_t*)encodedBuffer.data(),
+                              AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL);
     }
+
 private:
     int _encodedSize;
 };
 
 class HiFiDecoder : public Decoder, public AudioDecoder {
 public:
-    HiFiDecoder(int sampleRate, int numChannels) : AudioDecoder(sampleRate, numChannels) { 
+    HiFiDecoder(int sampleRate, int numChannels) : AudioDecoder(sampleRate, numChannels) {
         _decodedSize = AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL * sizeof(int16_t) * numChannels;
     }
 
     virtual void decode(const QByteArray& encodedBuffer, QByteArray& decodedBuffer) override {
         decodedBuffer.resize(_decodedSize);
-        AudioDecoder::process((const int16_t*)encodedBuffer.constData(), (int16_t*)decodedBuffer.data(), AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL, true);
+        AudioDecoder::process((const int16_t*)encodedBuffer.constData(), (int16_t*)decodedBuffer.data(),
+                              AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL, true);
     }
 
     virtual void lostFrame(QByteArray& decodedBuffer) override {
         decodedBuffer.resize(_decodedSize);
         // this performs packet loss interpolation
-        AudioDecoder::process(nullptr, (int16_t*)decodedBuffer.data(), AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL, false);
+        AudioDecoder::process(nullptr, (int16_t*)decodedBuffer.data(), AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL,
+                              false);
     }
+
 private:
     int _decodedSize;
 };

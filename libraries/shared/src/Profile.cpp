@@ -39,7 +39,10 @@ static bool tracingEnabled() {
     return DependencyManager::isSet<tracing::Tracer>() && DependencyManager::get<tracing::Tracer>()->isEnabled();
 }
 
-Duration::Duration(const QLoggingCategory& category, const QString& name, uint32_t argbColor, uint64_t payload, const QVariantMap& baseArgs) : _name(name), _category(category) {
+Duration::Duration(const QLoggingCategory& category, const QString& name, uint32_t argbColor, uint64_t payload,
+                   const QVariantMap& baseArgs) :
+    _name(name),
+    _category(category) {
     if (tracingEnabled() && category.isDebugEnabled()) {
         QVariantMap args = baseArgs;
         args["nv_payload"] = QVariant::fromValue(payload);
@@ -95,4 +98,3 @@ void Duration::endRange(const QLoggingCategory& category, uint64_t rangeId) {
     }
 #endif
 }
-

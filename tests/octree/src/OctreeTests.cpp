@@ -55,7 +55,7 @@ QTEST_MAIN(OctreeTests)
 
 void OctreeTests::propertyFlagsTests() {
     bool verbose = true;
-    
+
     qDebug() << "FIXME: this test is broken and needs to be fixed.";
     qDebug() << "We're disabling this so that ALL_BUILD works";
     return;
@@ -63,7 +63,7 @@ void OctreeTests::propertyFlagsTests() {
     if (verbose) {
         qDebug() << "******************************************************************************************";
     }
-    
+
     qDebug() << "OctreeTests::propertyFlagsTests()";
 
     {
@@ -78,13 +78,12 @@ void OctreeTests::propertyFlagsTests() {
         props.setHasProperty(PROP_MODEL_URL);
         props.setHasProperty(PROP_COMPOUND_SHAPE_URL);
         props.setHasProperty(PROP_ROTATION);
-    
-        QByteArray encoded = props.encode();
-        QCOMPARE(encoded, makeQByteArray({ (char) 13 }));
 
+        QByteArray encoded = props.encode();
+        QCOMPARE(encoded, makeQByteArray({ (char)13 }));
     }
 
-    {    
+    {
         if (verbose) {
             qDebug() << "Test 2: ExamplePropertyFlags: using setHasProperty()";
         }
@@ -95,47 +94,43 @@ void OctreeTests::propertyFlagsTests() {
         props2.setHasProperty(PROP_ANIMATION_FPS);
         props2.setHasProperty(PROP_ANIMATION_FRAME_INDEX);
         props2.setHasProperty(PROP_ANIMATION_PLAYING);
-    
+
         QByteArray encoded = props2.encode();
-        QCOMPARE(encoded, makeQByteArray({ (char) 196, 15, 2 }));
+        QCOMPARE(encoded, makeQByteArray({ (char)196, 15, 2 }));
 
         if (verbose) {
             qDebug() << "Test 2b: remove flag with setHasProperty() PROP_PAUSE_SIMULATION";
         }
 
         encoded = props2.encode();
-        QCOMPARE(encoded, makeQByteArray({ (char) 136, 30 }));
+        QCOMPARE(encoded, makeQByteArray({ (char)136, 30 }));
     }
 
-    {    
+    {
         if (verbose) {
             qDebug() << "Test 3: ExamplePropertyFlags: using | operator";
         }
-        
+
         ExamplePropertyFlags props;
 
-        props = ExamplePropertyFlags(EXAMPLE_PROP_VISIBLE) 
-                    | ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_URL)
-                    | ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_FPS)
-                    | ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_FRAME_INDEX)
-                    | ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_PLAYING) 
-                    | ExamplePropertyFlags(EXAMPLE_PROP_PAUSE_SIMULATION);
-    
-        QByteArray encoded = props.encode();
-        QCOMPARE(encoded, makeQByteArray({ (char) 196, 15, 2 }));
+        props = ExamplePropertyFlags(EXAMPLE_PROP_VISIBLE) | ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_URL) |
+                ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_FPS) | ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_FRAME_INDEX) |
+                ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_PLAYING) | ExamplePropertyFlags(EXAMPLE_PROP_PAUSE_SIMULATION);
 
+        QByteArray encoded = props.encode();
+        QCOMPARE(encoded, makeQByteArray({ (char)196, 15, 2 }));
 
         if (verbose) {
             qDebug() << "Test 3b: remove flag with -= EXAMPLE_PROP_PAUSE_SIMULATION";
         }
-        
+
         props -= EXAMPLE_PROP_PAUSE_SIMULATION;
-    
+
         encoded = props.encode();
-        QCOMPARE(encoded, makeQByteArray({ (char) 136, 30 }));
+        QCOMPARE(encoded, makeQByteArray({ (char)136, 30 }));
     }
 
-    {    
+    {
         if (verbose) {
             qDebug() << "Test 3c: ExamplePropertyFlags: using |= operator";
         }
@@ -150,28 +145,25 @@ void OctreeTests::propertyFlagsTests() {
         props |= EXAMPLE_PROP_PAUSE_SIMULATION;
 
         QByteArray encoded = props.encode();
-        QCOMPARE(encoded, makeQByteArray({ (char) 196, 15, 2 }));
+        QCOMPARE(encoded, makeQByteArray({ (char)196, 15, 2 }));
     }
 
-    {    
+    {
         if (verbose) {
             qDebug() << "Test 4: ExamplePropertyFlags: using + operator";
         }
 
         ExamplePropertyFlags props;
 
-        props = ExamplePropertyFlags(EXAMPLE_PROP_VISIBLE) 
-                    + ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_URL)
-                    + ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_FPS)
-                    + ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_FRAME_INDEX)
-                    + ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_PLAYING) 
-                    + ExamplePropertyFlags(EXAMPLE_PROP_PAUSE_SIMULATION);
-    
+        props = ExamplePropertyFlags(EXAMPLE_PROP_VISIBLE) + ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_URL) +
+                ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_FPS) + ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_FRAME_INDEX) +
+                ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_PLAYING) + ExamplePropertyFlags(EXAMPLE_PROP_PAUSE_SIMULATION);
+
         QByteArray encoded = props.encode();
-        QCOMPARE(encoded, makeQByteArray({ (char) 196, 15, 2 }));
+        QCOMPARE(encoded, makeQByteArray({ (char)196, 15, 2 }));
     }
 
-    {    
+    {
         if (verbose) {
             qDebug() << "Test 5: ExamplePropertyFlags: using += operator";
         }
@@ -183,34 +175,32 @@ void OctreeTests::propertyFlagsTests() {
         props += EXAMPLE_PROP_ANIMATION_FRAME_INDEX;
         props += EXAMPLE_PROP_ANIMATION_PLAYING;
         props += EXAMPLE_PROP_PAUSE_SIMULATION;
-    
+
         QByteArray encoded = props.encode();
-        QCOMPARE(encoded, makeQByteArray({ (char) 196, 15, 2 }));
+        QCOMPARE(encoded, makeQByteArray({ (char)196, 15, 2 }));
     }
 
-    {    
+    {
         if (verbose) {
             qDebug() << "Test 6: ExamplePropertyFlags: using = ... << operator";
         }
-        
+
         ExamplePropertyFlags props;
 
-        props = ExamplePropertyFlags(EXAMPLE_PROP_VISIBLE) 
-                    << ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_URL)
-                    << ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_FPS)
-                    << ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_FRAME_INDEX)
-                    << ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_PLAYING) 
-                    << ExamplePropertyFlags(EXAMPLE_PROP_PAUSE_SIMULATION);
-    
+        props = ExamplePropertyFlags(EXAMPLE_PROP_VISIBLE)
+                << ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_URL) << ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_FPS)
+                << ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_FRAME_INDEX)
+                << ExamplePropertyFlags(EXAMPLE_PROP_ANIMATION_PLAYING) << ExamplePropertyFlags(EXAMPLE_PROP_PAUSE_SIMULATION);
+
         QByteArray encoded = props.encode();
-        QCOMPARE(encoded, makeQByteArray({ (char) 196, 15, 2 }));
+        QCOMPARE(encoded, makeQByteArray({ (char)196, 15, 2 }));
     }
 
     {
         if (verbose) {
             qDebug() << "Test 7: ExamplePropertyFlags: using <<= operator";
         }
-        
+
         ExamplePropertyFlags props;
 
         props <<= EXAMPLE_PROP_VISIBLE;
@@ -219,16 +209,16 @@ void OctreeTests::propertyFlagsTests() {
         props <<= EXAMPLE_PROP_ANIMATION_FRAME_INDEX;
         props <<= EXAMPLE_PROP_ANIMATION_PLAYING;
         props <<= EXAMPLE_PROP_PAUSE_SIMULATION;
-    
+
         QByteArray encoded = props.encode();
-        QCOMPARE(encoded, makeQByteArray({ (char) 196, 15, 2 }));
+        QCOMPARE(encoded, makeQByteArray({ (char)196, 15, 2 }));
     }
 
     {
         if (verbose) {
             qDebug() << "Test 8: ExamplePropertyFlags: using << enum operator";
         }
-        
+
         ExamplePropertyFlags props;
 
         props << EXAMPLE_PROP_VISIBLE;
@@ -239,7 +229,7 @@ void OctreeTests::propertyFlagsTests() {
         props << EXAMPLE_PROP_PAUSE_SIMULATION;
 
         QByteArray encoded = props.encode();
-        QCOMPARE(encoded, makeQByteArray({ (char) 196, 15, 2 }));
+        QCOMPARE(encoded, makeQByteArray({ (char)196, 15, 2 }));
     }
 
     {
@@ -261,9 +251,9 @@ void OctreeTests::propertyFlagsTests() {
         props << props2;
 
         QByteArray encoded = props.encode();
-        QCOMPARE(encoded, makeQByteArray({ (char) 196, 15, 2 }));
+        QCOMPARE(encoded, makeQByteArray({ (char)196, 15, 2 }));
     }
-  
+
     {
         if (verbose) {
             qDebug() << "Test 10: ExamplePropertyFlags comparison";
@@ -298,11 +288,11 @@ void OctreeTests::propertyFlagsTests() {
         }
         QCOMPARE(propsA == propsB, true);
         QCOMPARE(propsA != propsB, false);
-        
+
         if (verbose) {
             qDebug() << "AFTER propsB -= EXAMPLE_PROP_PAUSE_SIMULATION...";
         }
-        
+
         propsB -= EXAMPLE_PROP_PAUSE_SIMULATION;
 
         QCOMPARE(propsA == propsB, false);
@@ -322,12 +312,12 @@ void OctreeTests::propertyFlagsTests() {
         if (verbose) {
             qDebug() << "ExamplePropertyFlags props;";
         }
-        
+
         QByteArray encoded = props.encode();
 
         if (verbose) {
-            qDebug() << "Test 11b: props.getHasProperty(EXAMPLE_PROP_VISIBLE)" << (props.getHasProperty(EXAMPLE_PROP_VISIBLE)) 
-                        << "{ expect false }";
+            qDebug() << "Test 11b: props.getHasProperty(EXAMPLE_PROP_VISIBLE)" << (props.getHasProperty(EXAMPLE_PROP_VISIBLE))
+                     << "{ expect false }";
         }
         QCOMPARE(props.getHasProperty(EXAMPLE_PROP_VISIBLE), false);
 
@@ -338,14 +328,14 @@ void OctreeTests::propertyFlagsTests() {
         QCOMPARE(props.getHasProperty(EXAMPLE_PROP_VISIBLE), true);
 
         encoded = props.encode();
-        QCOMPARE(encoded, makeQByteArray({ (char) 16 }));
+        QCOMPARE(encoded, makeQByteArray({ (char)16 }));
         if (verbose) {
             qDebug() << "props << EXAMPLE_PROP_ANIMATION_URL;";
         }
         props << EXAMPLE_PROP_ANIMATION_URL;
-    
+
         encoded = props.encode();
-        QCOMPARE(encoded, makeQByteArray({ (char) 136, 16}));
+        QCOMPARE(encoded, makeQByteArray({ (char)136, 16 }));
         QCOMPARE(props.getHasProperty(EXAMPLE_PROP_VISIBLE), true);
 
         if (verbose) {
@@ -367,13 +357,13 @@ void OctreeTests::propertyFlagsTests() {
         QCOMPARE(propsB.getHasProperty(EXAMPLE_PROP_VISIBLE), true);
 
         encoded = propsB.encode();
-        QCOMPARE(encoded, makeQByteArray({ (char) 16 }));
+        QCOMPARE(encoded, makeQByteArray({ (char)16 }));
 
         if (verbose) {
             qDebug() << "ExamplePropertyFlags propsC = ~propsB;";
         }
         ExamplePropertyFlags propsC = ~propsB;
-        
+
         QCOMPARE(propsC.getHasProperty(EXAMPLE_PROP_VISIBLE), false);
 
         encoded = propsC.encode();
@@ -382,7 +372,7 @@ void OctreeTests::propertyFlagsTests() {
             outputBufferBits((const unsigned char*)encoded.constData(), encoded.size());
         }
     }
-    
+
     {
         if (verbose) {
             qDebug() << "Test 12: ExamplePropertyFlags: decode tests";
@@ -405,7 +395,7 @@ void OctreeTests::propertyFlagsTests() {
 
         ExamplePropertyFlags propsDecoded;
         propsDecoded.decode(encoded);
-        
+
         QCOMPARE(propsDecoded, props);
 
         QByteArray encodedAfterDecoded = propsDecoded.encode();
@@ -425,7 +415,7 @@ void OctreeTests::propertyFlagsTests() {
 
         ExamplePropertyFlags propsDecodedExtra;
         propsDecodedExtra.decode(encoded);
-        
+
         QCOMPARE(propsDecodedExtra, props);
 
         QByteArray encodedAfterDecodedExtra = propsDecodedExtra.encode();
@@ -435,7 +425,7 @@ void OctreeTests::propertyFlagsTests() {
             outputBufferBits((const unsigned char*)encodedAfterDecodedExtra.constData(), encodedAfterDecodedExtra.size());
         }
     }
-    
+
     {
         if (verbose) {
             qDebug() << "Test 13: ExamplePropertyFlags: QByteArray << / >> tests";
@@ -464,8 +454,7 @@ void OctreeTests::propertyFlagsTests() {
             qDebug() << "testing encoded >> propsDecoded";
         }
         encoded >> propsDecoded;
-        
-        
+
         QCOMPARE(propsDecoded, props);
     }
 
@@ -474,7 +463,6 @@ void OctreeTests::propertyFlagsTests() {
     }
 }
 
-
 typedef ByteCountCoded<unsigned int> ByteCountCodedUINT;
 typedef ByteCountCoded<quint64> ByteCountCodedQUINT64;
 
@@ -482,7 +470,7 @@ typedef ByteCountCoded<int> ByteCountCodedINT;
 
 void OctreeTests::byteCountCodingTests() {
     bool verbose = true;
-    
+
     qDebug() << "FIXME: this test is broken and needs to be fixed.";
     qDebug() << "We're disabling this so that ALL_BUILD works";
     return;
@@ -490,11 +478,11 @@ void OctreeTests::byteCountCodingTests() {
     if (verbose) {
         qDebug() << "******************************************************************************************";
     }
-    
+
     qDebug() << "OctreeTests::byteCountCodingTests()";
-    
+
     QByteArray encoded;
-    
+
     if (verbose) {
         qDebug() << "ByteCountCodedUINT zero(0)";
     }
@@ -506,13 +494,13 @@ void OctreeTests::byteCountCodingTests() {
 
     ByteCountCodedUINT decodedZero;
     decodedZero.decode(encoded);
-    
-    QCOMPARE(decodedZero.data, static_cast<decltype(decodedZero.data)>( 0 ));
+
+    QCOMPARE(decodedZero.data, static_cast<decltype(decodedZero.data)>(0));
     QCOMPARE(decodedZero, zero);
 
     ByteCountCodedUINT decodedZeroB(encoded);
-    
-    QCOMPARE(decodedZeroB.data, (unsigned int) 0);
+
+    QCOMPARE(decodedZeroB.data, (unsigned int)0);
 
     if (verbose) {
         qDebug() << "ByteCountCodedUINT foo(259)";
@@ -527,12 +515,12 @@ void OctreeTests::byteCountCodingTests() {
     ByteCountCodedUINT decodedFoo;
     decodedFoo.decode(encoded);
 
-    QCOMPARE(decodedFoo.data, (unsigned int) 259);
+    QCOMPARE(decodedFoo.data, (unsigned int)259);
 
     QCOMPARE(decodedFoo, foo);
 
     ByteCountCodedUINT decodedFooB(encoded);
-    QCOMPARE(decodedFooB.data, (unsigned int) 259);
+    QCOMPARE(decodedFooB.data, (unsigned int)259);
 
     if (verbose) {
         qDebug() << "ByteCountCodedUINT bar(1000000)";
@@ -545,14 +533,14 @@ void OctreeTests::byteCountCodingTests() {
 
     ByteCountCodedUINT decodedBar;
     decodedBar.decode(encoded);
-    QCOMPARE(decodedBar.data, (unsigned int) 1000000);
+    QCOMPARE(decodedBar.data, (unsigned int)1000000);
 
     QCOMPARE(decodedBar, bar);
 
     if (verbose) {
         qDebug() << "ByteCountCodedUINT spam(4294967295/2)";
     }
-    ByteCountCodedUINT spam(4294967295/2);
+    ByteCountCodedUINT spam(4294967295 / 2);
     encoded = spam.encode();
     if (verbose) {
         outputBufferBits((const unsigned char*)encoded.constData(), encoded.size());
@@ -562,9 +550,9 @@ void OctreeTests::byteCountCodingTests() {
     decodedSpam.decode(encoded);
     if (verbose) {
         qDebug() << "decodedSpam=" << decodedSpam.data;
-        qDebug() << "decodedSpam==spam" << (decodedSpam==spam) << " { expected true } ";
+        qDebug() << "decodedSpam==spam" << (decodedSpam == spam) << " { expected true } ";
     }
-    QCOMPARE(decodedSpam.data, (unsigned int) 4294967295/2);
+    QCOMPARE(decodedSpam.data, (unsigned int)4294967295 / 2);
 
     QCOMPARE(decodedSpam, spam);
 
@@ -576,7 +564,7 @@ void OctreeTests::byteCountCodingTests() {
     if (verbose) {
         outputBufferBits((const unsigned char*)encoded.constData(), encoded.size());
     }
-    
+
     if (verbose) {
         qDebug() << "testing... quint64 foo64POD = foo64;";
     }
@@ -585,7 +573,7 @@ void OctreeTests::byteCountCodingTests() {
         qDebug() << "foo64POD=" << foo64POD;
     }
 
-    QCOMPARE(foo64POD, (quint64) 259);
+    QCOMPARE(foo64POD, (quint64)259);
     if (verbose) {
         qDebug() << "testing... encoded = foo64;";
     }
@@ -600,10 +588,10 @@ void OctreeTests::byteCountCodingTests() {
 
     if (verbose) {
         qDebug() << "decodedFoo64=" << decodedFoo64.data;
-        qDebug() << "decodedFoo64==foo64" << (decodedFoo64==foo64) << " { expected true } ";
+        qDebug() << "decodedFoo64==foo64" << (decodedFoo64 == foo64) << " { expected true } ";
     }
-    QCOMPARE(decodedFoo.data, (unsigned int) 259);
-    
+    QCOMPARE(decodedFoo.data, (unsigned int)259);
+
     QCOMPARE(decodedFoo64, foo64);
 
     if (verbose) {
@@ -617,14 +605,14 @@ void OctreeTests::byteCountCodingTests() {
 
     ByteCountCodedQUINT64 decodedBar64;
     decodedBar64.decode(encoded);
-    QCOMPARE(decodedBar64.data, static_cast<decltype(decodedBar.data)>( 1000000 ));
+    QCOMPARE(decodedBar64.data, static_cast<decltype(decodedBar.data)>(1000000));
 
     QCOMPARE(decodedBar64, bar64);
 
     if (verbose) {
         qDebug() << "ByteCountCodedQUINT64 spam64(4294967295/2)";
     }
-    ByteCountCodedQUINT64 spam64(4294967295/2);
+    ByteCountCodedQUINT64 spam64(4294967295 / 2);
     encoded = spam64.encode();
     if (verbose) {
         outputBufferBits((const unsigned char*)encoded.constData(), encoded.size());
@@ -632,7 +620,7 @@ void OctreeTests::byteCountCodingTests() {
 
     ByteCountCodedQUINT64 decodedSpam64;
     decodedSpam64.decode(encoded);
-    QCOMPARE(decodedSpam64.data, static_cast<decltype(decodedSpam64.data)>( 4294967295/2 ));
+    QCOMPARE(decodedSpam64.data, static_cast<decltype(decodedSpam64.data)>(4294967295 / 2));
 
     QCOMPARE(decodedSpam64, spam64);
     if (verbose) {
@@ -650,7 +638,7 @@ void OctreeTests::byteCountCodingTests() {
     encoded >> decodedSpam64;
 
     QCOMPARE(decodedSpam64, spam64);
-    
+
     if (verbose) {
         qDebug() << "NOW...";
     }
@@ -659,8 +647,8 @@ void OctreeTests::byteCountCodingTests() {
     QByteArray nowEncoded = nowCoded;
 
     ByteCountCodedQUINT64 decodedNow = nowEncoded;
-    QCOMPARE(decodedNow.data, static_cast<decltype(decodedNow.data)>( now ));
-    
+    QCOMPARE(decodedNow.data, static_cast<decltype(decodedNow.data)>(now));
+
     if (verbose) {
         qDebug() << "******************************************************************************************";
     }
@@ -791,8 +779,8 @@ void OctreeTests::modelItemTests() {
     if (verbose) {
         qDebug() << "******************************************************************************************";
     }
-    
-#endif 
+
+#endif
 }
 
 void OctreeTests::elementAddChildTests() {

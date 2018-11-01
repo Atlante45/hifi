@@ -12,13 +12,12 @@
 #include "EntityTreeHeadlessViewer.h"
 #include "SimpleEntitySimulation.h"
 
-EntityTreeHeadlessViewer::EntityTreeHeadlessViewer()
-    :   OctreeHeadlessViewer(), _simulation(NULL) {
+EntityTreeHeadlessViewer::EntityTreeHeadlessViewer() : OctreeHeadlessViewer(), _simulation(NULL) {
 }
 
 EntityTreeHeadlessViewer::~EntityTreeHeadlessViewer() {
     if (_simulation) {
-        _simulation->setEntityTree(nullptr);  // Break shared_ptr cycle.
+        _simulation->setEntityTree(nullptr); // Break shared_ptr cycle.
     }
 }
 
@@ -36,9 +35,7 @@ void EntityTreeHeadlessViewer::init() {
 void EntityTreeHeadlessViewer::update() {
     if (_tree) {
         EntityTreePointer tree = std::static_pointer_cast<EntityTree>(_tree);
-        tree->withTryWriteLock([&] {
-            tree->update();
-        });
+        tree->withTryWriteLock([&] { tree->update(); });
     }
 }
 

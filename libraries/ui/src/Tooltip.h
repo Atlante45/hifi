@@ -17,8 +17,7 @@
 
 #include "OffscreenQmlDialog.h"
 
-class Tooltip : public QQuickItem
-{
+class Tooltip : public QQuickItem {
     Q_OBJECT
     HIFI_QML_DECL
 

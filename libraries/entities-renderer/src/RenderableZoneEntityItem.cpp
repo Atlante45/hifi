@@ -15,26 +15,25 @@
 
 #include <graphics/Stage.h>
 
+#include <DeferredLightingEffect.h>
 #include <DependencyManager.h>
 #include <GeometryCache.h>
+#include <LightPayload.h>
 #include <PerfStat.h>
 #include <procedural/ProceduralSkybox.h>
-#include <LightPayload.h>
-#include <DeferredLightingEffect.h>
 
 #include "EntityTreeRenderer.h"
 
 // Sphere entities should fit inside a cube entity of the same size, so a sphere that has dimensions 1x1x1
 // is a half unit sphere.  However, the geometry cache renders a UNIT sphere, so we need to scale down.
 static const float SPHERE_ENTITY_SCALE = 0.5f;
-static const unsigned int SUN_SHADOW_CASCADE_COUNT{ 4 };
-static const float SUN_SHADOW_MAX_DISTANCE{ 40.0f };
+static const unsigned int SUN_SHADOW_CASCADE_COUNT { 4 };
+static const float SUN_SHADOW_MAX_DISTANCE { 40.0f };
 
 using namespace render;
 using namespace render::entities;
 
-ZoneEntityRenderer::ZoneEntityRenderer(const EntityItemPointer& entity)
-    : Parent(entity) {
+ZoneEntityRenderer::ZoneEntityRenderer(const EntityItemPointer& entity) : Parent(entity) {
     _background->setSkybox(std::make_shared<ProceduralSkybox>());
 }
 
@@ -124,7 +123,7 @@ void ZoneEntityRenderer::doRender(RenderArgs* args) {
         assert(_bloomStage);
     }
 
-    { // Sun 
+    { // Sun
       // Need an update ?
         if (_needSunUpdate) {
             // Do we need to allocate the light in the stage ?
@@ -229,10 +228,11 @@ void ZoneEntityRenderer::removeFromScene(const ScenePointer& scene, Transaction&
     Parent::removeFromScene(scene, transaction);
 }
 
-void ZoneEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) {
+void ZoneEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                        const TypedEntityPointer& entity) {
     DependencyManager::get<EntityTreeRenderer>()->updateZone(entity->getID());
 
-    // FIXME one of the bools here could become true between being fetched and being reset, 
+    // FIXME one of the bools here could become true between being fetched and being reset,
     // resulting in a lost update
     bool keyLightChanged = entity->keyLightPropertiesChanged();
     bool ambientLightChanged = entity->ambientLightPropertiesChanged();
@@ -288,7 +288,6 @@ void ZoneEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scen
         updateHazeFromEntity(entity);
     }
 
-
     bool visuallyReady = true;
     uint32_t skyboxMode = entity->getSkyboxMode();
     if (skyboxMode == COMPONENT_MODE_ENABLED && !_skyboxTextureURL.isEmpty()) {
@@ -311,18 +310,13 @@ void ZoneEntityRenderer::doRenderUpdateAsynchronousTyped(const TypedEntityPointe
     }
 }
 
-
 ItemKey ZoneEntityRenderer::getKey() {
     return ItemKey::Builder().withTypeMeta().withTagBits(getTagMask()).build();
 }
 
 bool ZoneEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const {
-    if (entity->keyLightPropertiesChanged() ||
-        entity->ambientLightPropertiesChanged() ||
-        entity->hazePropertiesChanged() ||
-        entity->bloomPropertiesChanged() ||
-        entity->skyboxPropertiesChanged()) {
-
+    if (entity->keyLightPropertiesChanged() || entity->ambientLightPropertiesChanged() || entity->hazePropertiesChanged() ||
+        entity->bloomPropertiesChanged() || entity->skyboxPropertiesChanged()) {
         return true;
     }
 
@@ -390,7 +384,6 @@ void ZoneEntityRenderer::updateAmbientLightFromEntity(const TypedEntityPointer& 
     ambientLight->setPosition(_lastPosition);
     ambientLight->setOrientation(_lastRotation);
 
-
     // Set the ambient light
     ambientLight->setAmbientIntensity(_ambientLightProperties.getAmbientIntensity());
 
@@ -428,7 +421,8 @@ void ZoneEntityRenderer::updateHazeFromEntity(const TypedEntityPointer& entity) 
 
     haze->setHazeAttenuateKeyLight(_hazeProperties.getHazeAttenuateKeyLight());
     haze->setHazeKeyLightRangeFactor(graphics::Haze::convertHazeRangeToHazeRangeFactor(_hazeProperties.getHazeKeyLightRange()));
-    haze->setHazeKeyLightAltitudeFactor(graphics::Haze::convertHazeAltitudeToHazeAltitudeFactor(_hazeProperties.getHazeKeyLightAltitude()));
+    haze->setHazeKeyLightAltitudeFactor(
+        graphics::Haze::convertHazeAltitudeToHazeAltitudeFactor(_hazeProperties.getHazeKeyLightAltitude()));
 
     haze->setTransform(entity->getTransform().getMatrix());
 }

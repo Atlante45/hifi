@@ -21,7 +21,6 @@
 #include <test-utils/GLMTestUtils.h>
 #include <test-utils/QTestExtensions.h>
 
-
 const float ACCEPTABLE_FLOAT_ERROR = 1.0e-6f;
 const float ACCEPTABLE_DOT_ERROR = 1.0e-5f;
 const float ACCEPTABLE_CLIP_ERROR = 3e-4f;
@@ -29,7 +28,6 @@ const float ACCEPTABLE_CLIP_ERROR = 3e-4f;
 const glm::vec3 localRight(1.0f, 0.0f, 0.0f);
 const glm::vec3 localUp(0.0f, 1.0f, 0.0f);
 const glm::vec3 localForward(0.0f, 0.0f, -1.0f);
-
 
 QTEST_MAIN(ViewFrustumTests)
 
@@ -256,7 +254,7 @@ void ViewFrustumTests::testCubeKeyholeIntersection() {
     cube.setBox(cubeCenter - halfScaleOffset, cubeScale);
     QCOMPARE(view.calculateCubeKeyholeIntersection(cube), ViewFrustum::INSIDE);
 
-    localOffset = - holeRadius * localForward;
+    localOffset = -holeRadius * localForward;
     cubeCenter = center + rotation * localOffset;
     cube.setBox(cubeCenter - halfScaleOffset, cubeScale);
     QCOMPARE(view.calculateCubeKeyholeIntersection(cube), ViewFrustum::INTERSECT);
@@ -949,7 +947,7 @@ void ViewFrustumTests::testSphereIntersectsKeyhole() {
     sphereCenter = center + rotation * localOffset;
     QCOMPARE(view.sphereIntersectsKeyhole(sphereCenter, sphereRadius), true); // inside back
 
-    localOffset = - holeRadius * localForward;
+    localOffset = -holeRadius * localForward;
     sphereCenter = center + rotation * localOffset;
     QCOMPARE(view.sphereIntersectsKeyhole(sphereCenter, sphereRadius), true); // straddle back
 
@@ -1141,7 +1139,7 @@ void ViewFrustumTests::testCubeIntersectsKeyhole() {
     cube.setBox(cubeCenter - halfScaleOffset, cubeScale);
     QCOMPARE(view.cubeIntersectsKeyhole(cube), true); // inside back
 
-    localOffset = - holeRadius * localForward;
+    localOffset = -holeRadius * localForward;
     cubeCenter = center + rotation * localOffset;
     cube.setBox(cubeCenter - halfScaleOffset, cubeScale);
     QCOMPARE(view.cubeIntersectsKeyhole(cube), true); // straddle back
@@ -1335,7 +1333,7 @@ void ViewFrustumTests::testBoxIntersectsKeyhole() {
     box.setBox(boxCenter - halfScaleOffset, boxScale);
     QCOMPARE(view.boxIntersectsKeyhole(box), true); // inside back
 
-    localOffset = - holeRadius * localForward;
+    localOffset = -holeRadius * localForward;
     boxCenter = center + rotation * localOffset;
     box.setBox(boxCenter - halfScaleOffset, boxScale);
     QCOMPARE(view.boxIntersectsKeyhole(box), true); // straddle back

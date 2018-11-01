@@ -25,7 +25,8 @@ public:
 
 protected:
     virtual QSharedPointer<Resource> createResource(const QUrl& url, const QSharedPointer<Resource>& fallback,
-        const void* extra) override;
+                                                    const void* extra) override;
+
 private:
     SoundCache(QObject* parent = NULL);
 };

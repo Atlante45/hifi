@@ -20,11 +20,9 @@ using namespace render;
 gpu::PipelinePointer HalfDownsample::_pipeline;
 
 HalfDownsample::HalfDownsample() {
-
 }
 
 void HalfDownsample::configure(const Config& config) {
-
 }
 
 gpu::FramebufferPointer HalfDownsample::getResampledFrameBuffer(const gpu::FramebufferPointer& sourceFramebuffer) {
@@ -37,13 +35,16 @@ gpu::FramebufferPointer HalfDownsample::getResampledFrameBuffer(const gpu::Frame
         _destinationFrameBuffer = gpu::FramebufferPointer(gpu::Framebuffer::create("HalfOutput"));
 
         auto sampler = gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_LINEAR_MIP_POINT);
-        auto target = gpu::Texture::createRenderBuffer(sourceFramebuffer->getRenderBuffer(0)->getTexelFormat(), resampledFramebufferSize.x, resampledFramebufferSize.y, gpu::Texture::SINGLE_MIP, sampler);
+        auto target = gpu::Texture::createRenderBuffer(sourceFramebuffer->getRenderBuffer(0)->getTexelFormat(),
+                                                       resampledFramebufferSize.x, resampledFramebufferSize.y,
+                                                       gpu::Texture::SINGLE_MIP, sampler);
         _destinationFrameBuffer->setRenderBuffer(0, target);
     }
     return _destinationFrameBuffer;
 }
 
-void HalfDownsample::run(const RenderContextPointer& renderContext, const gpu::FramebufferPointer& sourceFramebuffer, gpu::FramebufferPointer& resampledFrameBuffer) {
+void HalfDownsample::run(const RenderContextPointer& renderContext, const gpu::FramebufferPointer& sourceFramebuffer,
+                         gpu::FramebufferPointer& resampledFrameBuffer) {
     assert(renderContext->args);
     assert(renderContext->args->hasViewFrustum());
     RenderArgs* args = renderContext->args;
@@ -58,7 +59,7 @@ void HalfDownsample::run(const RenderContextPointer& renderContext, const gpu::F
     }
 
     const auto bufferSize = resampledFrameBuffer->getSize();
-    glm::ivec4 viewport{ 0, 0, bufferSize.x, bufferSize.y };
+    glm::ivec4 viewport { 0, 0, bufferSize.x, bufferSize.y };
 
     gpu::doInBatch("HalfDownsample::run", args->_context, [&](gpu::Batch& batch) {
         batch.enableStereo(false);
@@ -93,13 +94,16 @@ gpu::FramebufferPointer Upsample::getResampledFrameBuffer(const gpu::Framebuffer
         _destinationFrameBuffer = gpu::FramebufferPointer(gpu::Framebuffer::create("UpsampledOutput"));
 
         auto sampler = gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_LINEAR);
-        auto target = gpu::Texture::createRenderBuffer(sourceFramebuffer->getRenderBuffer(0)->getTexelFormat(), resampledFramebufferSize.x, resampledFramebufferSize.y, gpu::Texture::SINGLE_MIP, sampler);
+        auto target = gpu::Texture::createRenderBuffer(sourceFramebuffer->getRenderBuffer(0)->getTexelFormat(),
+                                                       resampledFramebufferSize.x, resampledFramebufferSize.y,
+                                                       gpu::Texture::SINGLE_MIP, sampler);
         _destinationFrameBuffer->setRenderBuffer(0, target);
     }
     return _destinationFrameBuffer;
 }
 
-void Upsample::run(const RenderContextPointer& renderContext, const gpu::FramebufferPointer& sourceFramebuffer, gpu::FramebufferPointer& resampledFrameBuffer) {
+void Upsample::run(const RenderContextPointer& renderContext, const gpu::FramebufferPointer& sourceFramebuffer,
+                   gpu::FramebufferPointer& resampledFrameBuffer) {
     assert(renderContext->args);
     assert(renderContext->args->hasViewFrustum());
     RenderArgs* args = renderContext->args;
@@ -114,7 +118,7 @@ void Upsample::run(const RenderContextPointer& renderContext, const gpu::Framebu
         }
 
         const auto bufferSize = resampledFrameBuffer->getSize();
-        glm::ivec4 viewport{ 0, 0, bufferSize.x, bufferSize.y };
+        glm::ivec4 viewport { 0, 0, bufferSize.x, bufferSize.y };
 
         gpu::doInBatch("Upsample::run", args->_context, [&](gpu::Batch& batch) {
             batch.enableStereo(false);

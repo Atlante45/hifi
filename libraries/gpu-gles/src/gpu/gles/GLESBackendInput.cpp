@@ -17,7 +17,6 @@ void GLESBackend::updateInput() {
     Parent::updateInput();
 }
 
-
 void GLESBackend::resetInputStage() {
     Parent::resetInputStage();
 

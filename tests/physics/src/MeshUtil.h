@@ -19,9 +19,7 @@ namespace MeshUtil {
 class TriangleEdge {
 public:
     TriangleEdge() {}
-    TriangleEdge(uint32_t A, uint32_t B) {
-        setIndices(A, B);
-    }
+    TriangleEdge(uint32_t A, uint32_t B) { setIndices(A, B); }
     void setIndices(uint32_t A, uint32_t B) {
         if (A < B) {
             _indexA = A;
@@ -31,29 +29,28 @@ public:
             _indexB = A;
         }
     }
-    bool operator==(const TriangleEdge& other) const {
-        return _indexA == other._indexA && _indexB == other._indexB;
-    }
+    bool operator==(const TriangleEdge& other) const { return _indexA == other._indexA && _indexB == other._indexB; }
 
     uint32_t getIndexA() const { return _indexA; }
     uint32_t getIndexB() const { return _indexB; }
+
 private:
     uint32_t _indexA { (uint32_t)(-1) };
     uint32_t _indexB { (uint32_t)(-1) };
 };
 
-} // MeshUtil namespace
+} // namespace MeshUtil
 
 namespace std {
-    template <>
-    struct hash<MeshUtil::TriangleEdge> {
-        std::size_t operator()(const MeshUtil::TriangleEdge& edge) const {
-            // use Cantor's pairing function to generate a hash of ZxZ --> Z
-            uint32_t ab = edge.getIndexA() + edge.getIndexB();
-            return hash<uint32_t>()((ab * (ab + 1)) / 2 + edge.getIndexB());
-        }
-    };
-} // std namesspace
+template<>
+struct hash<MeshUtil::TriangleEdge> {
+    std::size_t operator()(const MeshUtil::TriangleEdge& edge) const {
+        // use Cantor's pairing function to generate a hash of ZxZ --> Z
+        uint32_t ab = edge.getIndexA() + edge.getIndexB();
+        return hash<uint32_t>()((ab * (ab + 1)) / 2 + edge.getIndexB());
+    }
+};
+} // namespace std
 
 namespace MeshUtil {
 bool isClosedManifold(const uint32_t* meshIndices, uint32_t numIndices) {
@@ -79,13 +76,12 @@ bool isClosedManifold(const uint32_t* meshIndices, uint32_t numIndices) {
     // scan for outside edge
     for (auto& edgeEntry : edges) {
         if (edgeEntry.second == 1) {
-             return false;
+            return false;
         }
     }
     return true;
 }
 
-} // MeshUtil namespace
-
+} // namespace MeshUtil
 
 #endif // hifi_MeshUtil_h

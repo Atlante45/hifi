@@ -11,17 +11,17 @@
 
 #include "OctreeSceneStats.h"
 
-#include <limits>
 #include <QString>
 #include <QStringList>
+#include <limits>
 
 #include <LogHandler.h>
 #include <NumericalConstants.h>
 #include <udt/PacketHeaders.h>
 
-#include "OctreePacketData.h"
 #include "OctreeElement.h"
 #include "OctreeLogging.h"
+#include "OctreePacketData.h"
 
 const int samples = 100;
 OctreeSceneStats::OctreeSceneStats() :
@@ -37,8 +37,7 @@ OctreeSceneStats::OctreeSceneStats() :
     _incomingBytes(0),
     _incomingWastedBytes(0),
     _incomingOctreeSequenceNumberStats(),
-    _incomingFlightTimeAverage(samples)
-{
+    _incomingFlightTimeAverage(samples) {
     reset();
 }
 
@@ -114,7 +113,6 @@ void OctreeSceneStats::copyFromOther(const OctreeSceneStats& other) {
     _incomingOctreeSequenceNumberStats = other._incomingOctreeSequenceNumberStats;
 }
 
-
 OctreeSceneStats::~OctreeSceneStats() {
     reset();
 }
@@ -126,7 +124,7 @@ void OctreeSceneStats::sceneStarted(bool isFullScene, bool isMoving, const Octre
 
     _totalElements = OctreeElement::getNodeCount();
     _totalInternal = OctreeElement::getInternalNodeCount();
-    _totalLeaves   = OctreeElement::getLeafNodeCount();
+    _totalLeaves = OctreeElement::getLeafNodeCount();
 
     _isFullScene = isFullScene;
     _isMoving = isMoving;
@@ -407,7 +405,6 @@ int OctreeSceneStats::unpackFromPacket(ReceivedMessage& packet) {
     return packet.getPosition(); // excludes header!
 }
 
-
 void OctreeSceneStats::printDebugDetails() {
     qCDebug(octree) << "\n------------------------------";
     qCDebug(octree) << "OctreeSceneStats:";
@@ -478,14 +475,14 @@ OctreeSceneStats::ItemInfo OctreeSceneStats::_ITEMS[] = {
 const char* OctreeSceneStats::getItemValue(Item item) {
     const quint64 USECS_PER_SECOND = 1000 * 1000;
     int calcFPS, calcAverageFPS, calculatedKBPS;
-    switch(item) {
+    switch (item) {
         case ITEM_ELAPSED: {
             calcFPS = (float)USECS_PER_SECOND / (float)_elapsed;
             float elapsedAverage = _elapsedAverage.getAverage();
             calcAverageFPS = (float)USECS_PER_SECOND / (float)elapsedAverage;
 
-            sprintf(_itemValueBuffer, "%llu usecs (%d fps) Average: %.0f usecs (%d fps)",
-                    (long long unsigned int)_elapsed, calcFPS, (double)elapsedAverage, calcAverageFPS);
+            sprintf(_itemValueBuffer, "%llu usecs (%d fps) Average: %.0f usecs (%d fps)", (long long unsigned int)_elapsed,
+                    calcFPS, (double)elapsedAverage, calcAverageFPS);
             break;
         }
         case ITEM_ENCODE:
@@ -499,96 +496,75 @@ const char* OctreeSceneStats::getItemValue(Item item) {
             break;
         }
         case ITEM_VOXELS_SERVER: {
-            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves",
-                    (long unsigned int)_totalElements,
-                    (long unsigned int)_totalInternal,
-                    (long unsigned int)_totalLeaves);
+            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves", (long unsigned int)_totalElements,
+                    (long unsigned int)_totalInternal, (long unsigned int)_totalLeaves);
             break;
         }
         case ITEM_VOXELS: {
             unsigned long total = _existsInPacketBitsWritten + _colorSent;
             float calculatedBPV = total == 0 ? 0 : (_bytes * 8) / total;
             float averageBPV = _bitsPerOctreeAverage.getAverage();
-            sprintf(_itemValueBuffer, "%lu (%.2f bits/octree Average: %.2f bits/octree) %lu internal %lu leaves",
-                    total, (double)calculatedBPV, (double)averageBPV,
-                    (long unsigned int)_existsInPacketBitsWritten,
+            sprintf(_itemValueBuffer, "%lu (%.2f bits/octree Average: %.2f bits/octree) %lu internal %lu leaves", total,
+                    (double)calculatedBPV, (double)averageBPV, (long unsigned int)_existsInPacketBitsWritten,
                     (long unsigned int)_colorSent);
             break;
         }
         case ITEM_TRAVERSED: {
-            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves",
-                    (long unsigned int)_traversed, (long unsigned int)_internal, (long unsigned int)_leaves);
+            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves", (long unsigned int)_traversed,
+                    (long unsigned int)_internal, (long unsigned int)_leaves);
             break;
         }
         case ITEM_SKIPPED: {
-            unsigned long total    = _skippedDistance + _skippedOutOfView +
-                                     _skippedWasInView + _skippedNoChange + _skippedOccluded;
+            unsigned long total = _skippedDistance + _skippedOutOfView + _skippedWasInView + _skippedNoChange +
+                                  _skippedOccluded;
 
-            unsigned long internal = _internalSkippedDistance + _internalSkippedOutOfView +
-                                     _internalSkippedWasInView + _internalSkippedNoChange + _internalSkippedOccluded;
+            unsigned long internal = _internalSkippedDistance + _internalSkippedOutOfView + _internalSkippedWasInView +
+                                     _internalSkippedNoChange + _internalSkippedOccluded;
 
-            unsigned long leaves   = _leavesSkippedDistance + _leavesSkippedOutOfView +
-                                     _leavesSkippedWasInView + _leavesSkippedNoChange + _leavesSkippedOccluded;
+            unsigned long leaves = _leavesSkippedDistance + _leavesSkippedOutOfView + _leavesSkippedWasInView +
+                                   _leavesSkippedNoChange + _leavesSkippedOccluded;
 
-            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves",
-                    total, internal, leaves);
+            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves", total, internal, leaves);
             break;
         }
         case ITEM_SKIPPED_DISTANCE: {
-            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves",
-                    (long unsigned int)_skippedDistance,
-                    (long unsigned int)_internalSkippedDistance,
-                    (long unsigned int)_leavesSkippedDistance);
+            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves", (long unsigned int)_skippedDistance,
+                    (long unsigned int)_internalSkippedDistance, (long unsigned int)_leavesSkippedDistance);
             break;
         }
         case ITEM_SKIPPED_OUT_OF_VIEW: {
-            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves",
-                    (long unsigned int)_skippedOutOfView,
-                    (long unsigned int)_internalSkippedOutOfView,
-                    (long unsigned int)_leavesSkippedOutOfView);
+            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves", (long unsigned int)_skippedOutOfView,
+                    (long unsigned int)_internalSkippedOutOfView, (long unsigned int)_leavesSkippedOutOfView);
             break;
         }
         case ITEM_SKIPPED_WAS_IN_VIEW: {
-            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves",
-                    (long unsigned int)_skippedWasInView,
-                    (long unsigned int)_internalSkippedWasInView,
-                    (long unsigned int)_leavesSkippedWasInView);
+            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves", (long unsigned int)_skippedWasInView,
+                    (long unsigned int)_internalSkippedWasInView, (long unsigned int)_leavesSkippedWasInView);
             break;
         }
         case ITEM_SKIPPED_NO_CHANGE: {
-            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves",
-                    (long unsigned int)_skippedNoChange,
-                    (long unsigned int)_internalSkippedNoChange,
-                    (long unsigned int)_leavesSkippedNoChange);
+            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves", (long unsigned int)_skippedNoChange,
+                    (long unsigned int)_internalSkippedNoChange, (long unsigned int)_leavesSkippedNoChange);
             break;
         }
         case ITEM_SKIPPED_OCCLUDED: {
-            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves",
-                    (long unsigned int)_skippedOccluded,
-                    (long unsigned int)_internalSkippedOccluded,
-                    (long unsigned int)_leavesSkippedOccluded);
+            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves", (long unsigned int)_skippedOccluded,
+                    (long unsigned int)_internalSkippedOccluded, (long unsigned int)_leavesSkippedOccluded);
             break;
         }
         case ITEM_COLORS: {
-            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves",
-                    (long unsigned int)_colorSent,
-                    (long unsigned int)_internalColorSent,
-                    (long unsigned int)_leavesColorSent);
+            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves", (long unsigned int)_colorSent,
+                    (long unsigned int)_internalColorSent, (long unsigned int)_leavesColorSent);
             break;
         }
         case ITEM_DIDNT_FIT: {
-            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves (removed: %lu)",
-                    (long unsigned int)_didntFit,
-                    (long unsigned int)_internalDidntFit,
-                    (long unsigned int)_leavesDidntFit,
-                    (long unsigned int)_treesRemoved);
+            sprintf(_itemValueBuffer, "%lu total %lu internal %lu leaves (removed: %lu)", (long unsigned int)_didntFit,
+                    (long unsigned int)_internalDidntFit, (long unsigned int)_leavesDidntFit, (long unsigned int)_treesRemoved);
             break;
         }
         case ITEM_BITS: {
-            sprintf(_itemValueBuffer, "colors: %lu, exists: %lu, in packets: %lu",
-                    (long unsigned int)_colorBitsWritten,
-                    (long unsigned int)_existsBitsWritten,
-                    (long unsigned int)_existsInPacketBitsWritten);
+            sprintf(_itemValueBuffer, "colors: %lu, exists: %lu, in packets: %lu", (long unsigned int)_colorBitsWritten,
+                    (long unsigned int)_existsBitsWritten, (long unsigned int)_existsInPacketBitsWritten);
             break;
         }
         case ITEM_MODE: {
@@ -607,15 +583,15 @@ void OctreeSceneStats::trackIncomingOctreePacket(ReceivedMessage& message, bool 
 
     // skip past the flags
     message.seek(sizeof(OCTREE_PACKET_FLAGS));
-    
+
     OCTREE_PACKET_SEQUENCE sequence;
     message.readPrimitive(&sequence);
 
     OCTREE_PACKET_SENT_TIME sentAt;
     message.readPrimitive(&sentAt);
 
-    //bool packetIsColored = oneAtBit(flags, PACKET_IS_COLOR_BIT);
-    //bool packetIsCompressed = oneAtBit(flags, PACKET_IS_COMPRESSED_BIT);
+    // bool packetIsColored = oneAtBit(flags, PACKET_IS_COLOR_BIT);
+    // bool packetIsCompressed = oneAtBit(flags, PACKET_IS_COMPRESSED_BIT);
 
     OCTREE_PACKET_SENT_TIME arrivedAt = usecTimestampNow();
     qint64 flightTime = arrivedAt - sentAt + nodeClockSkewUsec;
@@ -629,11 +605,13 @@ void OctreeSceneStats::trackIncomingOctreePacket(ReceivedMessage& message, bool 
     }
 
     // Guard against possible corrupted packets... with bad timestamps
-    const qint64 MAX_RESONABLE_FLIGHT_TIME = 200 * USECS_PER_SECOND; // 200 seconds is more than enough time for a packet to arrive
-    const qint64 MIN_RESONABLE_FLIGHT_TIME = -1 * (qint64)USECS_PER_SECOND; // more than 1 second of "reverse flight time" would be unreasonable
+    const qint64 MAX_RESONABLE_FLIGHT_TIME = 200 *
+                                             USECS_PER_SECOND; // 200 seconds is more than enough time for a packet to arrive
+    const qint64 MIN_RESONABLE_FLIGHT_TIME = -1 * (qint64)USECS_PER_SECOND; // more than 1 second of "reverse flight time" would
+                                                                            // be unreasonable
     if (flightTime > MAX_RESONABLE_FLIGHT_TIME || flightTime < MIN_RESONABLE_FLIGHT_TIME) {
-        HIFI_FCDEBUG(octree(), "ignoring unreasonable packet... flightTime:" << flightTime
-                    << "nodeClockSkewUsec:" << nodeClockSkewUsec << "usecs");
+        HIFI_FCDEBUG(octree(), "ignoring unreasonable packet... flightTime:" << flightTime << "nodeClockSkewUsec:"
+                                                                             << nodeClockSkewUsec << "usecs");
         return; // ignore any packets that are unreasonable
     }
 

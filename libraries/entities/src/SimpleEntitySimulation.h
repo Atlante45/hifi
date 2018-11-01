@@ -17,12 +17,11 @@
 class SimpleEntitySimulation;
 using SimpleEntitySimulationPointer = std::shared_ptr<SimpleEntitySimulation>;
 
-
 /// provides simple velocity + gravity extrapolation of EntityItem's
 
 class SimpleEntitySimulation : public EntitySimulation {
 public:
-    SimpleEntitySimulation() : EntitySimulation() { }
+    SimpleEntitySimulation() : EntitySimulation() {}
     ~SimpleEntitySimulation() { clearEntitiesInternal(); }
 
     void clearOwnership(const QUuid& ownerID);

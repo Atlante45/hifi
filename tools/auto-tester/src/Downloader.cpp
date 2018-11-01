@@ -11,11 +11,8 @@
 
 #include <QtWidgets/QMessageBox>
 
-Downloader::Downloader(QUrl fileURL, QObject *parent) : QObject(parent) {
-    connect(
-        &_networkAccessManager, SIGNAL (finished(QNetworkReply*)),
-        this, SLOT (fileDownloaded(QNetworkReply*))
-    );
+Downloader::Downloader(QUrl fileURL, QObject* parent) : QObject(parent) {
+    connect(&_networkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(fileDownloaded(QNetworkReply*)));
 
     QNetworkRequest request(fileURL);
     _networkAccessManager.get(request);
@@ -30,7 +27,7 @@ void Downloader::fileDownloaded(QNetworkReply* reply) {
 
     _downloadedData = reply->readAll();
 
-    //emit a signal
+    // emit a signal
     reply->deleteLater();
     emit downloaded();
 }

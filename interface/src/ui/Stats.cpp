@@ -8,42 +8,41 @@
 
 #include "Stats.h"
 
+#include <QFontDatabase>
 #include <queue>
 #include <sstream>
-#include <QFontDatabase>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/component_wise.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
-#include <render/Args.h>
-#include <avatar/AvatarManager.h>
 #include <Application.h>
 #include <AudioClient.h>
 #include <GeometryCache.h>
 #include <LODManager.h>
 #include <OffscreenUi.h>
 #include <PerfStat.h>
-#include <plugins/DisplayPlugin.h>
 #include <PickManager.h>
+#include <avatar/AvatarManager.h>
+#include <plugins/DisplayPlugin.h>
+#include <render/Args.h>
 
 #include <gl/Context.h>
 
 #include "BandwidthRecorder.h"
 #include "Menu.h"
-#include "Util.h"
 #include "SequenceNumberStats.h"
 #include "StatTracker.h"
-
+#include "Util.h"
 
 HIFI_QML_DEF(Stats)
 
 using namespace std;
 
-static Stats* INSTANCE{ nullptr };
+static Stats* INSTANCE { nullptr };
 
-#if !defined (Q_OS_ANDROID)
+#if !defined(Q_OS_ANDROID)
 QString getTextureMemoryPressureModeString();
 #endif
 Stats* Stats::getInstance() {
@@ -51,7 +50,7 @@ Stats* Stats::getInstance() {
     return INSTANCE;
 }
 
-Stats::Stats(QQuickItem* parent) :  QQuickItem(parent) {
+Stats::Stats(QQuickItem* parent) : QQuickItem(parent) {
     INSTANCE = this;
     const QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     _monospaceFont = font.family();
@@ -84,29 +83,28 @@ bool Stats::includeTimingRecord(const QString& name) {
     return false;
 }
 
-#define STAT_UPDATE(name, src) \
-    { \
-        auto val = src; \
-        if (_##name != val) { \
-            _##name = val; \
-            emit name##Changed(); \
-        } \
+#define STAT_UPDATE(name, src)                                                                                                 \
+    {                                                                                                                          \
+        auto val = src;                                                                                                        \
+        if (_##name != val) {                                                                                                  \
+            _##name = val;                                                                                                     \
+            emit name##Changed();                                                                                              \
+        }                                                                                                                      \
     }
 
-#define STAT_UPDATE_FLOAT(name, src, epsilon) \
-    { \
-        float val = src; \
-        if (fabs(_##name - val) >= epsilon) { \
-            _##name = val; \
-            emit name##Changed(); \
-        } \
+#define STAT_UPDATE_FLOAT(name, src, epsilon)                                                                                  \
+    {                                                                                                                          \
+        float val = src;                                                                                                       \
+        if (fabs(_##name - val) >= epsilon) {                                                                                  \
+            _##name = val;                                                                                                     \
+            emit name##Changed();                                                                                              \
+        }                                                                                                                      \
     }
 
 extern std::atomic<size_t> DECIMATED_TEXTURE_COUNT;
 extern std::atomic<size_t> RECTIFIED_TEXTURE_COUNT;
 
 void Stats::updateStats(bool force) {
-
     if (qApp->isInterstitialMode()) {
         return;
     }
@@ -172,15 +170,17 @@ void Stats::updateStats(bool force) {
     STAT_UPDATE_FLOAT(mbpsIn, (float)bandwidthRecorder->getCachedTotalAverageInputKilobitsPerSecond() / 1000.0f, 0.01f);
     STAT_UPDATE_FLOAT(mbpsOut, (float)bandwidthRecorder->getCachedTotalAverageOutputKilobitsPerSecond() / 1000.0f, 0.01f);
 
-    STAT_UPDATE_FLOAT(assetMbpsIn, (float)bandwidthRecorder->getAverageInputKilobitsPerSecond(NodeType::AssetServer) / 1000.0f, 0.01f);
-    STAT_UPDATE_FLOAT(assetMbpsOut, (float)bandwidthRecorder->getAverageOutputKilobitsPerSecond(NodeType::AssetServer) / 1000.0f, 0.01f);
+    STAT_UPDATE_FLOAT(assetMbpsIn, (float)bandwidthRecorder->getAverageInputKilobitsPerSecond(NodeType::AssetServer) / 1000.0f,
+                      0.01f);
+    STAT_UPDATE_FLOAT(assetMbpsOut,
+                      (float)bandwidthRecorder->getAverageOutputKilobitsPerSecond(NodeType::AssetServer) / 1000.0f, 0.01f);
 
     // Second column: ping
     SharedNodePointer audioMixerNode = nodeList->soloNodeOfType(NodeType::AudioMixer);
     SharedNodePointer avatarMixerNode = nodeList->soloNodeOfType(NodeType::AvatarMixer);
     SharedNodePointer assetServerNode = nodeList->soloNodeOfType(NodeType::AssetServer);
     SharedNodePointer messageMixerNode = nodeList->soloNodeOfType(NodeType::MessagesMixer);
-    STAT_UPDATE(audioPing, audioMixerNode ? audioMixerNode->getPingMs() : -1); 
+    STAT_UPDATE(audioPing, audioMixerNode ? audioMixerNode->getPingMs() : -1);
     const int mixerLossRate = (int)roundf(_audioStats->data()->getMixerStream()->lossRateWindow() * 100.0f);
     const int clientLossRate = (int)roundf(_audioStats->data()->getClientStream()->lossRateWindow() * 100.0f);
     const int largestLossRate = mixerLossRate > clientLossRate ? mixerLossRate : clientLossRate;
@@ -218,10 +218,14 @@ void Stats::updateStats(bool force) {
     if (_expanded || force) {
         SharedNodePointer avatarMixer = nodeList->soloNodeOfType(NodeType::AvatarMixer);
         if (avatarMixer) {
-            STAT_UPDATE(avatarMixerInKbps, (int)roundf(bandwidthRecorder->getAverageInputKilobitsPerSecond(NodeType::AvatarMixer)));
-            STAT_UPDATE(avatarMixerInPps, (int)roundf(bandwidthRecorder->getAverageInputPacketsPerSecond(NodeType::AvatarMixer)));
-            STAT_UPDATE(avatarMixerOutKbps, (int)roundf(bandwidthRecorder->getAverageOutputKilobitsPerSecond(NodeType::AvatarMixer)));
-            STAT_UPDATE(avatarMixerOutPps, (int)roundf(bandwidthRecorder->getAverageOutputPacketsPerSecond(NodeType::AvatarMixer)));
+            STAT_UPDATE(avatarMixerInKbps,
+                        (int)roundf(bandwidthRecorder->getAverageInputKilobitsPerSecond(NodeType::AvatarMixer)));
+            STAT_UPDATE(avatarMixerInPps,
+                        (int)roundf(bandwidthRecorder->getAverageInputPacketsPerSecond(NodeType::AvatarMixer)));
+            STAT_UPDATE(avatarMixerOutKbps,
+                        (int)roundf(bandwidthRecorder->getAverageOutputKilobitsPerSecond(NodeType::AvatarMixer)));
+            STAT_UPDATE(avatarMixerOutPps,
+                        (int)roundf(bandwidthRecorder->getAverageOutputPacketsPerSecond(NodeType::AvatarMixer)));
         } else {
             STAT_UPDATE(avatarMixerInKbps, -1);
             STAT_UPDATE(avatarMixerInPps, -1);
@@ -233,17 +237,19 @@ void Stats::updateStats(bool force) {
         SharedNodePointer audioMixerNode = nodeList->soloNodeOfType(NodeType::AudioMixer);
         auto audioClient = DependencyManager::get<AudioClient>().data();
         if (audioMixerNode || force) {
-            STAT_UPDATE(audioMixerKbps, (int)roundf(
-                bandwidthRecorder->getAverageInputKilobitsPerSecond(NodeType::AudioMixer) +
-                bandwidthRecorder->getAverageOutputKilobitsPerSecond(NodeType::AudioMixer)));
-            STAT_UPDATE(audioMixerPps, (int)roundf(
-                bandwidthRecorder->getAverageInputPacketsPerSecond(NodeType::AudioMixer) +
-                bandwidthRecorder->getAverageOutputPacketsPerSecond(NodeType::AudioMixer)));
+            STAT_UPDATE(audioMixerKbps,
+                        (int)roundf(bandwidthRecorder->getAverageInputKilobitsPerSecond(NodeType::AudioMixer) +
+                                    bandwidthRecorder->getAverageOutputKilobitsPerSecond(NodeType::AudioMixer)));
+            STAT_UPDATE(audioMixerPps, (int)roundf(bandwidthRecorder->getAverageInputPacketsPerSecond(NodeType::AudioMixer) +
+                                                   bandwidthRecorder->getAverageOutputPacketsPerSecond(NodeType::AudioMixer)));
 
-            STAT_UPDATE(audioMixerInKbps, (int)roundf(bandwidthRecorder->getAverageInputKilobitsPerSecond(NodeType::AudioMixer)));
+            STAT_UPDATE(audioMixerInKbps,
+                        (int)roundf(bandwidthRecorder->getAverageInputKilobitsPerSecond(NodeType::AudioMixer)));
             STAT_UPDATE(audioMixerInPps, (int)roundf(bandwidthRecorder->getAverageInputPacketsPerSecond(NodeType::AudioMixer)));
-            STAT_UPDATE(audioMixerOutKbps, (int)roundf(bandwidthRecorder->getAverageOutputKilobitsPerSecond(NodeType::AudioMixer)));
-            STAT_UPDATE(audioMixerOutPps, (int)roundf(bandwidthRecorder->getAverageOutputPacketsPerSecond(NodeType::AudioMixer)));
+            STAT_UPDATE(audioMixerOutKbps,
+                        (int)roundf(bandwidthRecorder->getAverageOutputKilobitsPerSecond(NodeType::AudioMixer)));
+            STAT_UPDATE(audioMixerOutPps,
+                        (int)roundf(bandwidthRecorder->getAverageOutputPacketsPerSecond(NodeType::AudioMixer)));
             STAT_UPDATE(audioAudioInboundPPS, (int)audioClient->getAudioInboundPPS());
             STAT_UPDATE(audioSilentInboundPPS, (int)audioClient->getSilentInboundPPS());
             STAT_UPDATE(audioOutboundPPS, (int)audioClient->getAudioOutboundPPS());
@@ -285,18 +291,16 @@ void Stats::updateStats(bool force) {
         // If the urls have changed, update the list
         if (shouldUpdateUrls) {
             _downloadUrls.clear();
-            foreach (const auto& resource, loadingRequests) {
-                _downloadUrls << resource->getURL().toString();
-            }
+            foreach (const auto& resource, loadingRequests) { _downloadUrls << resource->getURL().toString(); }
             emit downloadUrlsChanged();
         }
         // TODO fix to match original behavior
-        //stringstream downloads;
-        //downloads << "Downloads: ";
-        //foreach(Resource* resource, ) {
+        // stringstream downloads;
+        // downloads << "Downloads: ";
+        // foreach(Resource* resource, ) {
         //    downloads << (int)(resource->getProgress() * 100.0f) << "% ";
         //}
-        //downloads << "(" <<  << " pending)";
+        // downloads << "(" <<  << " pending)";
     }
 
     // Fourth column, octree stats
@@ -309,7 +313,7 @@ void Stats::updateStats(bool force) {
     sendingModeStream << "[";
     NodeToOctreeSceneStats* octreeServerSceneStats = qApp->getOcteeSceneStats();
     for (NodeToOctreeSceneStatsIterator i = octreeServerSceneStats->begin(); i != octreeServerSceneStats->end(); i++) {
-        //const QUuid& uuid = i->first;
+        // const QUuid& uuid = i->first;
         OctreeSceneStats& stats = i->second;
         serverCount++;
         if (_expanded) {
@@ -324,8 +328,7 @@ void Stats::updateStats(bool force) {
             }
             if (stats.isFullScene()) {
                 sendingModeStream << "F";
-            }
-            else {
+            } else {
                 sendingModeStream << "p";
             }
         }
@@ -357,13 +360,14 @@ void Stats::updateStats(bool force) {
         QVector2D dims(displayPlugin->getRecommendedRenderSize().x, displayPlugin->getRecommendedRenderSize().y);
         dims *= displayPlugin->getRenderResolutionScale();
         STAT_UPDATE(gpuFrameSize, dims);
-        STAT_UPDATE(gpuFrameTimePerPixel, (float)(gpuContext->getFrameTimerGPUAverage()*1000000.0 / double(dims.x()*dims.y())));
+        STAT_UPDATE(gpuFrameTimePerPixel,
+                    (float)(gpuContext->getFrameTimerGPUAverage() * 1000000.0 / double(dims.x() * dims.y())));
     }
     // Update Frame timing (in ms)
     STAT_UPDATE(gpuFrameTime, (float)gpuContext->getFrameTimerGPUAverage());
     STAT_UPDATE(batchFrameTime, (float)gpuContext->getFrameTimerBatchAverage());
     auto config = qApp->getRenderEngine()->getConfiguration().get();
-    STAT_UPDATE(engineFrameTime, (float) config->getCPURunTime());
+    STAT_UPDATE(engineFrameTime, (float)config->getCPURunTime());
     STAT_UPDATE(avatarSimulationTime, (float)avatarManager->getAvatarSimulationTime());
 
     if (_expanded) {
@@ -395,7 +399,6 @@ void Stats::updateStats(bool force) {
 
     STAT_UPDATE(drawcalls, gpuFrameStats._DSNumDrawcalls);
 
-
     // Incoming packets
     QLocale locale(QLocale::English);
     auto voxelPacketsToProcess = qApp->getOctreePacketProcessor().packetsToProcessCount();
@@ -403,8 +406,8 @@ void Stats::updateStats(bool force) {
         std::stringstream octreeStats;
         QString packetsString = locale.toString((int)voxelPacketsToProcess);
         QString maxString = locale.toString((int)_recentMaxPackets);
-        octreeStats << "Octree Packets to Process: " << qPrintable(packetsString)
-            << " [Recent Max: " << qPrintable(maxString) << "]";
+        octreeStats << "Octree Packets to Process: " << qPrintable(packetsString) << " [Recent Max: " << qPrintable(maxString)
+                    << "]";
         QString str = octreeStats.str().c_str();
         STAT_UPDATE(packetStats, str);
         // drawText(horizontalOffset, verticalOffset, scale, rotation, font, (char*)octreeStats.str().c_str(), color);
@@ -434,7 +437,6 @@ void Stats::updateStats(bool force) {
         STAT_UPDATE(lodStatus, "You can see " + DependencyManager::get<LODManager>()->getLODFeedbackText());
     }
 
-
     bool performanceTimerShouldBeActive = Menu::getInstance()->isOptionChecked(MenuOption::Stats) && _expanded;
     if (performanceTimerShouldBeActive != PerformanceTimer::isActive()) {
         PerformanceTimer::setActive(performanceTimerShouldBeActive);
@@ -443,8 +445,7 @@ void Stats::updateStats(bool force) {
         PerformanceTimer::tallyAllTimerRecords(); // do this even if we're not displaying them, so they don't stack up
     }
 
-    if (performanceTimerShouldBeActive &&
-        Menu::getInstance()->isOptionChecked(MenuOption::DisplayDebugTimingDetails)) {
+    if (performanceTimerShouldBeActive && Menu::getInstance()->isOptionChecked(MenuOption::DisplayDebugTimingDetails)) {
         if (!_showTimingDetails) {
             _showTimingDetails = true;
             emit timingExpandedChanged();
@@ -477,10 +478,10 @@ void Stats::updateStats(bool force) {
             static const QChar noBreakingSpace = QChar::Nbsp;
             QString functionName = j.value();
             const PerformanceTimerRecord& record = allRecords.value(functionName);
-            perfLines += QString("%1: %2 [%3]\n").
-                arg(QString(qPrintable(functionName)), -80, noBreakingSpace).
-                arg((float)record.getMovingAverage() / (float)USECS_PER_MSEC, 8, 'f', 3, noBreakingSpace).
-                arg((int)record.getCount(), 6, 10, noBreakingSpace);
+            perfLines += QString("%1: %2 [%3]\n")
+                             .arg(QString(qPrintable(functionName)), -80, noBreakingSpace)
+                             .arg((float)record.getMovingAverage() / (float)USECS_PER_MSEC, 8, 'f', 3, noBreakingSpace)
+                             .arg((int)record.getCount(), 6, 10, noBreakingSpace);
             linesDisplayed++;
             if (onlyDisplayTopTen && linesDisplayed == 10) {
                 break;
@@ -513,18 +514,13 @@ void Stats::updateStats(bool force) {
             _gameUpdateStats = QString("/idle/update = %1 ms").arg(dt);
 
             QVector<QString> categories = {
-                "devices",
-                "MyAvatar",
-                "otherAvatars",
-                "pickManager",
-                "pointerManager",
-                "simulation"
+                "devices", "MyAvatar", "otherAvatars", "pickManager", "pointerManager", "simulation"
             };
             for (int32_t j = 0; j < categories.size(); ++j) {
                 QString recordKey = "/idle/update/" + categories[j];
                 auto& record = allRecords[recordKey];
                 if (record.getCount()) {
-                    float dt = (float) record.getMovingAverage() / (float)USECS_PER_MSEC;
+                    float dt = (float)record.getMovingAverage() / (float)USECS_PER_MSEC;
                     QString message = QString("\n    %1 = %2").arg(categories[j]).arg(dt);
                     idleUpdateStats.push(SortableStat(message, dt));
                 }
@@ -560,7 +556,6 @@ void Stats::setRenderDetails(const render::RenderDetails& details) {
         STAT_UPDATE(shadowRendered, details._shadow._rendered);
     }
 }
-
 
 /*
 // display expanded or contracted stats

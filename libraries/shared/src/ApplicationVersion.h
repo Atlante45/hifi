@@ -21,11 +21,11 @@ public:
     bool operator==(const ApplicationVersion& other) const;
     bool operator!=(const ApplicationVersion& other) const { return !(*this == other); }
 
-    bool operator <(const ApplicationVersion& other) const;
-    bool operator >(const ApplicationVersion& other) const;
+    bool operator<(const ApplicationVersion& other) const;
+    bool operator>(const ApplicationVersion& other) const;
 
-    bool operator >=(const ApplicationVersion& other) const { return (*this == other) || (*this > other); }
-    bool operator <=(const ApplicationVersion& other) const { return (*this == other) || (*this < other); }
+    bool operator>=(const ApplicationVersion& other) const { return (*this == other) || (*this > other); }
+    bool operator<=(const ApplicationVersion& other) const { return (*this == other) || (*this < other); }
 
     int major = -1;
     int minor = -1;

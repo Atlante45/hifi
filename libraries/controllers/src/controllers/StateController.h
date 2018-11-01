@@ -45,6 +45,6 @@ protected:
     QHash<QString, ReadLambda> _namedReadLambdas;
 };
 
-}
+} // namespace controller
 
 #endif // hifi_StateController_h

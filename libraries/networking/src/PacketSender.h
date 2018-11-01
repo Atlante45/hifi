@@ -24,7 +24,6 @@
 class PacketSender : public GenericThread {
     Q_OBJECT
 public:
-
     static const quint64 USECS_PER_SECOND;
     static const quint64 SENDING_INTERVAL_ADJUST;
     static const int TARGET_FPS;
@@ -59,20 +58,24 @@ public:
     void setProcessCallIntervalHint(int usecsPerProcessCall) { _usecsPerProcessCallHint = usecsPerProcessCall; }
 
     /// returns the packets per second send rate of this object over its lifetime
-    float getLifetimePPS() const
-        { return getLifetimeInSeconds() == 0 ? 0 : (float)((float)_totalPacketsSent / getLifetimeInSeconds()); }
+    float getLifetimePPS() const {
+        return getLifetimeInSeconds() == 0 ? 0 : (float)((float)_totalPacketsSent / getLifetimeInSeconds());
+    }
 
     /// returns the bytes per second send rate of this object over its lifetime
-    float getLifetimeBPS() const
-        { return getLifetimeInSeconds() == 0 ? 0 : (float)((float)_totalBytesSent / getLifetimeInSeconds()); }
+    float getLifetimeBPS() const {
+        return getLifetimeInSeconds() == 0 ? 0 : (float)((float)_totalBytesSent / getLifetimeInSeconds());
+    }
 
     /// returns the packets per second queued rate of this object over its lifetime
-    float getLifetimePPSQueued() const
-        { return getLifetimeInSeconds() == 0 ? 0 : (float)((float)_totalPacketsQueued / getLifetimeInSeconds()); }
+    float getLifetimePPSQueued() const {
+        return getLifetimeInSeconds() == 0 ? 0 : (float)((float)_totalPacketsQueued / getLifetimeInSeconds());
+    }
 
     /// returns the bytes per second queued rate of this object over its lifetime
-    float getLifetimeBPSQueued() const
-        { return getLifetimeInSeconds() == 0 ? 0 : (float)((float)_totalBytesQueued / getLifetimeInSeconds()); }
+    float getLifetimeBPSQueued() const {
+        return getLifetimeInSeconds() == 0 ? 0 : (float)((float)_totalBytesQueued / getLifetimeInSeconds());
+    }
 
     /// returns lifetime of this object from first packet sent to now in usecs
     quint64 getLifetimeInUsecs() const { return (usecTimestampNow() - _started); }
@@ -93,6 +96,7 @@ public:
     quint64 getLifetimeBytesQueued() const { return _totalBytesQueued; }
 signals:
     void packetSent(quint64);
+
 protected:
     int _packetsPerSecond;
     int _usecsPerProcessCallHint;

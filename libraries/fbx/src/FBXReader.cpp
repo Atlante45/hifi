@@ -11,31 +11,32 @@
 
 #include "FBXReader.h"
 
-#include <iostream>
 #include <QBuffer>
 #include <QDataStream>
+#include <QFileInfo>
 #include <QIODevice>
 #include <QStringList>
 #include <QTextStream>
 #include <QtDebug>
 #include <QtEndian>
-#include <QFileInfo>
+#include <iostream>
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/transform.hpp>
 
 #include <FaceshiftConstants.h>
-#include <GeometryUtil.h>
 #include <GLMHelpers.h>
+#include <GeometryUtil.h>
+#include <LogHandler.h>
 #include <NumericalConstants.h>
 #include <OctalCode.h>
 #include <gpu/Format.h>
-#include <LogHandler.h>
 
 #include "ModelFormatLogging.h"
 
-// TOOL: Uncomment the following line to enable the filtering of all the unkwnon fields of a node so we can break point easily while loading a model with problems...
+// TOOL: Uncomment the following line to enable the filtering of all the unkwnon fields of a node so we can break point easily
+// while loading a model with problems...
 //#define DEBUG_FBXREADER
 
 using namespace std;
@@ -44,9 +45,7 @@ int FBXGeometryPointerMetaTypeId = qRegisterMetaType<FBXGeometry::Pointer>();
 
 QStringList FBXGeometry::getJointNames() const {
     QStringList names;
-    foreach (const FBXJoint& joint, joints) {
-        names.append(joint.name);
-    }
+    foreach (const FBXJoint& joint, joints) { names.append(joint.name); }
     return names;
 }
 
@@ -82,15 +81,10 @@ bool FBXGeometry::convexHullContains(const glm::vec3& point) const {
     auto checkEachPrimitive = [=](FBXMesh& mesh, QVector<int> indices, int primitiveSize) -> bool {
         // Check whether the point is "behind" all the primitives.
         int verticesSize = mesh.vertices.size();
-        for (int j = 0;
-             j < indices.size() - 2; // -2 in case the vertices aren't the right size -- we access j + 2 below
+        for (int j = 0; j < indices.size() - 2; // -2 in case the vertices aren't the right size -- we access j + 2 below
              j += primitiveSize) {
-            if (indices[j] < verticesSize &&
-                indices[j + 1] < verticesSize &&
-                indices[j + 2] < verticesSize &&
-                !isPointBehindTrianglesPlane(point,
-                                             mesh.vertices[indices[j]],
-                                             mesh.vertices[indices[j + 1]],
+            if (indices[j] < verticesSize && indices[j + 1] < verticesSize && indices[j + 2] < verticesSize &&
+                !isPointBehindTrianglesPlane(point, mesh.vertices[indices[j]], mesh.vertices[indices[j + 1]],
                                              mesh.vertices[indices[j + 2]])) {
                 // it's not behind at least one so we bail
                 return false;
@@ -107,8 +101,7 @@ bool FBXGeometry::convexHullContains(const glm::vec3& point) const {
         // the point needs to be "behind" all the primitives respective planes.
         for (auto part : mesh.parts) {
             // run through all the triangles and quads
-            if (!checkEachPrimitive(mesh, part.triangleIndices, 3) ||
-                !checkEachPrimitive(mesh, part.quadIndices, 4)) {
+            if (!checkEachPrimitive(mesh, part.triangleIndices, 3) || !checkEachPrimitive(mesh, part.quadIndices, 4)) {
                 // If not, the point is outside, bail for this mesh
                 insideMesh = false;
                 continue;
@@ -133,8 +126,7 @@ QString FBXGeometry::getModelNameOfMesh(int meshIndex) const {
 
 int fbxGeometryMetaTypeId = qRegisterMetaType<FBXGeometry>();
 int fbxAnimationFrameMetaTypeId = qRegisterMetaType<FBXAnimationFrame>();
-int fbxAnimationFrameVectorMetaTypeId = qRegisterMetaType<QVector<FBXAnimationFrame> >();
-
+int fbxAnimationFrameVectorMetaTypeId = qRegisterMetaType<QVector<FBXAnimationFrame>>();
 
 glm::vec3 parseVec3(const QString& string) {
     QStringList elements = string.split(',');
@@ -149,15 +141,7 @@ glm::vec3 parseVec3(const QString& string) {
     return value;
 }
 
-enum RotationOrder {
-    OrderXYZ = 0,
-    OrderXZY,
-    OrderYZX,
-    OrderYXZ,
-    OrderZXY,
-    OrderZYX,
-    OrderSphericXYZ
-};
+enum RotationOrder { OrderXYZ = 0, OrderXZY, OrderYZX, OrderYXZ, OrderZXY, OrderZYX, OrderSphericXYZ };
 
 bool haveReportedUnhandledRotationOrder = false; // Report error only once per FBX file.
 
@@ -171,24 +155,29 @@ glm::vec3 convertRotationToXYZ(int rotationOrder, const glm::vec3& rotation) {
 
     switch (rotationOrder) {
         case OrderXZY:
-            xyzRotation = glm::quat(glm::radians(glm::vec3(0, rotation.y, 0)))
-                * (glm::quat(glm::radians(glm::vec3(0, 0, rotation.z))) * glm::quat(glm::radians(glm::vec3(rotation.x, 0, 0))));
+            xyzRotation = glm::quat(glm::radians(glm::vec3(0, rotation.y, 0))) *
+                          (glm::quat(glm::radians(glm::vec3(0, 0, rotation.z))) *
+                           glm::quat(glm::radians(glm::vec3(rotation.x, 0, 0))));
             break;
         case OrderYZX:
-            xyzRotation = glm::quat(glm::radians(glm::vec3(rotation.x, 0, 0)))
-                * (glm::quat(glm::radians(glm::vec3(0, 0, rotation.z))) * glm::quat(glm::radians(glm::vec3(0, rotation.y, 0))));
+            xyzRotation = glm::quat(glm::radians(glm::vec3(rotation.x, 0, 0))) *
+                          (glm::quat(glm::radians(glm::vec3(0, 0, rotation.z))) *
+                           glm::quat(glm::radians(glm::vec3(0, rotation.y, 0))));
             break;
         case OrderYXZ:
-            xyzRotation = glm::quat(glm::radians(glm::vec3(0, 0, rotation.z)))
-                * (glm::quat(glm::radians(glm::vec3(rotation.x, 0, 0))) * glm::quat(glm::radians(glm::vec3(0, rotation.y, 0))));
+            xyzRotation = glm::quat(glm::radians(glm::vec3(0, 0, rotation.z))) *
+                          (glm::quat(glm::radians(glm::vec3(rotation.x, 0, 0))) *
+                           glm::quat(glm::radians(glm::vec3(0, rotation.y, 0))));
             break;
         case OrderZXY:
-            xyzRotation = glm::quat(glm::radians(glm::vec3(0, rotation.y, 0)))
-                * (glm::quat(glm::radians(glm::vec3(rotation.x, 0, 0))) * glm::quat(glm::radians(glm::vec3(0, 0, rotation.z))));
+            xyzRotation = glm::quat(glm::radians(glm::vec3(0, rotation.y, 0))) *
+                          (glm::quat(glm::radians(glm::vec3(rotation.x, 0, 0))) *
+                           glm::quat(glm::radians(glm::vec3(0, 0, rotation.z))));
             break;
         case OrderZYX:
-            xyzRotation = glm::quat(glm::radians(glm::vec3(rotation.x, 0, 0)))
-                * (glm::quat(glm::radians(glm::vec3(0, rotation.y, 0))) * glm::quat(glm::radians(glm::vec3(0, 0, rotation.z))));
+            xyzRotation = glm::quat(glm::radians(glm::vec3(rotation.x, 0, 0))) *
+                          (glm::quat(glm::radians(glm::vec3(0, rotation.y, 0))) *
+                           glm::quat(glm::radians(glm::vec3(0, 0, rotation.z))));
             break;
         default:
             // FIXME: Handle OrderSphericXYZ.
@@ -223,24 +212,9 @@ QString getID(const QVariantList& properties, int index = 0) {
 }
 
 /// The names of the joints in the Maya HumanIK rig
-static const std::array<const char*, 16> HUMANIK_JOINTS = {{
-    "RightHand",
-    "RightForeArm",
-    "RightArm",
-    "Head",
-    "LeftArm",
-    "LeftForeArm",
-    "LeftHand",
-    "Neck",
-    "Spine",
-    "Hips",
-    "RightUpLeg",
-    "LeftUpLeg",
-    "RightLeg",
-    "LeftLeg",
-    "RightFoot",
-    "LeftFoot"
-}};
+static const std::array<const char*, 16> HUMANIK_JOINTS = { { "RightHand", "RightForeArm", "RightArm", "Head", "LeftArm",
+                                                              "LeftForeArm", "LeftHand", "Neck", "Spine", "Hips", "RightUpLeg",
+                                                              "LeftUpLeg", "RightLeg", "LeftLeg", "RightFoot", "LeftFoot" } };
 
 class FBXModel {
 public:
@@ -254,8 +228,8 @@ public:
     glm::quat postRotation;
     glm::mat4 postTransform;
 
-    glm::vec3 rotationMin;  // radians
-    glm::vec3 rotationMax;  // radians
+    glm::vec3 rotationMin; // radians
+    glm::vec3 rotationMax; // radians
 
     bool hasGeometricOffset;
     glm::vec3 geometricTranslation;
@@ -263,18 +237,20 @@ public:
     glm::vec3 geometricScaling;
 };
 
-glm::mat4 getGlobalTransform(const QMultiMap<QString, QString>& _connectionParentMap,
-        const QHash<QString, FBXModel>& models, QString nodeID, bool mixamoHack, const QString& url) {
+glm::mat4 getGlobalTransform(const QMultiMap<QString, QString>& _connectionParentMap, const QHash<QString, FBXModel>& models,
+                             QString nodeID, bool mixamoHack, const QString& url) {
     glm::mat4 globalTransform;
     QVector<QString> visitedNodes; // Used to prevent following a cycle
     while (!nodeID.isNull()) {
         visitedNodes.append(nodeID); // Append each node we visit
 
         const FBXModel& model = models.value(nodeID);
-        globalTransform = glm::translate(model.translation) * model.preTransform * glm::mat4_cast(model.preRotation *
-            model.rotation * model.postRotation) * model.postTransform * globalTransform;
+        globalTransform = glm::translate(model.translation) * model.preTransform *
+                          glm::mat4_cast(model.preRotation * model.rotation * model.postRotation) * model.postTransform *
+                          globalTransform;
         if (model.hasGeometricOffset) {
-            glm::mat4 geometricOffset = createMatFromScaleQuatAndPos(model.geometricScaling, model.geometricRotation, model.geometricTranslation);
+            glm::mat4 geometricOffset = createMatFromScaleQuatAndPos(model.geometricScaling, model.geometricRotation,
+                                                                     model.geometricTranslation);
             globalTransform = globalTransform * geometricOffset;
         }
 
@@ -312,13 +288,9 @@ void printNode(const FBXNode& node, int indentLevel) {
     QDebug nodeDebug = qDebug(modelformat);
 
     nodeDebug.nospace() << spaces.data() << node.name.data() << ": ";
-    foreach (const QVariant& property, node.properties) {
-        nodeDebug << property;
-    }
+    foreach (const QVariant& property, node.properties) { nodeDebug << property; }
 
-    foreach (const FBXNode& child, node.children) {
-        printNode(child, indentLevel + 1);
-    }
+    foreach (const FBXNode& child, node.children) { printNode(child, indentLevel + 1); }
 }
 
 class Cluster {
@@ -329,7 +301,8 @@ public:
 };
 
 void appendModelIDs(const QString& parentID, const QMultiMap<QString, QString>& connectionChildMap,
-        QHash<QString, FBXModel>& models, QSet<QString>& remainingModels, QVector<QString>& modelIDs, bool isRootNode = false) {
+                    QHash<QString, FBXModel>& models, QSet<QString>& remainingModels, QVector<QString>& modelIDs,
+                    bool isRootNode = false) {
     if (remainingModels.contains(parentID)) {
         modelIDs.append(parentID);
         remainingModels.remove(parentID);
@@ -377,30 +350,35 @@ static void setTangents(const FBXMesh& mesh, const IndexAccessor& vertexAccessor
         glm::vec2 texCoordDelta = mesh.texCoords.at(secondIndex) - mesh.texCoords.at(firstIndex);
         glm::vec3 normalizedNormal = glm::normalize(normal);
         *tangent += glm::cross(glm::angleAxis(-atan2f(-texCoordDelta.t, texCoordDelta.s), normalizedNormal) *
-                                       glm::normalize(bitangent), normalizedNormal);
+                                   glm::normalize(bitangent),
+                               normalizedNormal);
     }
 }
 
-static void createTangents(const FBXMesh& mesh, bool generateFromTexCoords,
-                           const QVector<glm::vec3>& vertices, const QVector<glm::vec3>& normals, QVector<glm::vec3>& tangents,
-                           IndexAccessor accessor) {
+static void createTangents(const FBXMesh& mesh, bool generateFromTexCoords, const QVector<glm::vec3>& vertices,
+                           const QVector<glm::vec3>& normals, QVector<glm::vec3>& tangents, IndexAccessor accessor) {
     // if we have a normal map (and texture coordinates), we must compute tangents
     if (generateFromTexCoords && !mesh.texCoords.isEmpty()) {
         tangents.resize(vertices.size());
 
-        foreach(const FBXMeshPart& part, mesh.parts) {
+        foreach (const FBXMeshPart& part, mesh.parts) {
             for (int i = 0; i < part.quadIndices.size(); i += 4) {
                 setTangents(mesh, accessor, part.quadIndices.at(i), part.quadIndices.at(i + 1), vertices, normals, tangents);
-                setTangents(mesh, accessor, part.quadIndices.at(i + 1), part.quadIndices.at(i + 2), vertices, normals, tangents);
-                setTangents(mesh, accessor, part.quadIndices.at(i + 2), part.quadIndices.at(i + 3), vertices, normals, tangents);
+                setTangents(mesh, accessor, part.quadIndices.at(i + 1), part.quadIndices.at(i + 2), vertices, normals,
+                            tangents);
+                setTangents(mesh, accessor, part.quadIndices.at(i + 2), part.quadIndices.at(i + 3), vertices, normals,
+                            tangents);
                 setTangents(mesh, accessor, part.quadIndices.at(i + 3), part.quadIndices.at(i), vertices, normals, tangents);
             }
             // <= size - 3 in order to prevent overflowing triangleIndices when (i % 3) != 0
             // This is most likely evidence of a further problem in extractMesh()
             for (int i = 0; i <= part.triangleIndices.size() - 3; i += 3) {
-                setTangents(mesh, accessor, part.triangleIndices.at(i), part.triangleIndices.at(i + 1), vertices, normals, tangents);
-                setTangents(mesh, accessor, part.triangleIndices.at(i + 1), part.triangleIndices.at(i + 2), vertices, normals, tangents);
-                setTangents(mesh, accessor, part.triangleIndices.at(i + 2), part.triangleIndices.at(i), vertices, normals, tangents);
+                setTangents(mesh, accessor, part.triangleIndices.at(i), part.triangleIndices.at(i + 1), vertices, normals,
+                            tangents);
+                setTangents(mesh, accessor, part.triangleIndices.at(i + 1), part.triangleIndices.at(i + 2), vertices, normals,
+                            tangents);
+                setTangents(mesh, accessor, part.triangleIndices.at(i + 2), part.triangleIndices.at(i), vertices, normals,
+                            tangents);
             }
             if ((part.triangleIndices.size() % 3) != 0) {
                 qCDebug(modelformat) << "Error in extractFBXGeometry part.triangleIndices.size() is not divisible by three ";
@@ -422,13 +400,13 @@ void FBXMesh::createMeshTangents(bool generateFromTexCoords) {
     // This is the only workaround I've found to trick the compiler into understanding that mesh.tangents isn't
     // const in the lambda function.
     auto& tangents = mesh.tangents;
-    createTangents(mesh, generateFromTexCoords, mesh.vertices, mesh.normals, mesh.tangents, 
+    createTangents(mesh, generateFromTexCoords, mesh.vertices, mesh.normals, mesh.tangents,
                    [&](const FBXMesh& mesh, int firstIndex, int secondIndex, glm::vec3* outVertices, glm::vec3& outNormal) {
-        outVertices[0] = mesh.vertices[firstIndex];
-        outVertices[1] = mesh.vertices[secondIndex];
-        outNormal = mesh.normals[firstIndex];
-        return &(tangents[firstIndex]);
-    });
+                       outVertices[0] = mesh.vertices[firstIndex];
+                       outVertices[1] = mesh.vertices[secondIndex];
+                       outNormal = mesh.normals[firstIndex];
+                       return &(tangents[firstIndex]);
+                   });
 }
 
 static void _createBlendShapeTangents(FBXMesh& mesh, bool generateFromTexCoords, FBXBlendshape& blendShape) {
@@ -444,24 +422,24 @@ static void _createBlendShapeTangents(FBXMesh& mesh, bool generateFromTexCoords,
 
     createTangents(mesh, generateFromTexCoords, blendShape.vertices, blendShape.normals, blendShape.tangents,
                    [&](const FBXMesh& mesh, int firstIndex, int secondIndex, glm::vec3* outVertices, glm::vec3& outNormal) {
-        const auto index1 = reverseIndices[firstIndex];
-        const auto index2 = reverseIndices[secondIndex];
+                       const auto index1 = reverseIndices[firstIndex];
+                       const auto index2 = reverseIndices[secondIndex];
 
-        if (index1 < blendShape.vertices.size()) {
-            outVertices[0] = blendShape.vertices[index1];
-            if (index2 < blendShape.vertices.size()) {
-                outVertices[1] = blendShape.vertices[index2];
-            } else {
-                // Index isn't in the blend shape so return vertex from mesh
-                outVertices[1] = mesh.vertices[secondIndex];
-            }
-            outNormal = blendShape.normals[index1];
-            return &blendShape.tangents[index1];
-        } else {
-            // Index isn't in blend shape so return nullptr
-            return (glm::vec3*)nullptr;
-        }
-    });
+                       if (index1 < blendShape.vertices.size()) {
+                           outVertices[0] = blendShape.vertices[index1];
+                           if (index2 < blendShape.vertices.size()) {
+                               outVertices[1] = blendShape.vertices[index2];
+                           } else {
+                               // Index isn't in the blend shape so return vertex from mesh
+                               outVertices[1] = mesh.vertices[secondIndex];
+                           }
+                           outNormal = blendShape.normals[index1];
+                           return &blendShape.tangents[index1];
+                       } else {
+                           // Index isn't in blend shape so return nullptr
+                           return (glm::vec3*)nullptr;
+                       }
+                   });
 }
 
 QVector<int> getIndices(const QVector<QString> ids, QVector<QString> modelIDs) {
@@ -486,7 +464,7 @@ void addBlendshapes(const ExtractedBlendshape& extracted, const QList<WeightedIn
         for (int i = 0; i < extracted.blendshape.indices.size(); i++) {
             int oldIndex = extracted.blendshape.indices.at(i);
             for (QMultiHash<int, int>::const_iterator it = extractedMesh.newIndices.constFind(oldIndex);
-                    it != extractedMesh.newIndices.constEnd() && it.key() == oldIndex; it++) {
+                 it != extractedMesh.newIndices.constEnd() && it.key() == oldIndex; it++) {
                 QHash<int, int>::iterator blendshapeIndex = blendshapeIndexMap.find(it.value());
                 if (blendshapeIndex == blendshapeIndexMap.end()) {
                     blendshapeIndexMap.insert(it.value(), blendshape.indices.size());
@@ -502,8 +480,8 @@ void addBlendshapes(const ExtractedBlendshape& extracted, const QList<WeightedIn
     }
 }
 
-QString getTopModelID(const QMultiMap<QString, QString>& connectionParentMap,
-        const QHash<QString, FBXModel>& models, const QString& modelID, const QString& url) {
+QString getTopModelID(const QMultiMap<QString, QString>& connectionParentMap, const QHash<QString, FBXModel>& models,
+                      const QString& modelID, const QString& url) {
     QString topID = modelID;
     QVector<QString> visitedNodes; // Used to prevent following a cycle
     forever {
@@ -522,7 +500,7 @@ QString getTopModelID(const QMultiMap<QString, QString>& connectionParentMap,
         }
         return topID;
 
-        outerContinue: ;
+    outerContinue:;
     }
 }
 
@@ -540,7 +518,8 @@ public:
 };
 
 bool checkMaterialsHaveTextures(const QHash<QString, FBXMaterial>& materials,
-        const QHash<QString, QByteArray>& textureFilenames, const QMultiMap<QString, QString>& _connectionChildMap) {
+                                const QHash<QString, QByteArray>& textureFilenames,
+                                const QMultiMap<QString, QString>& _connectionChildMap) {
     foreach (const QString& materialID, materials.keys()) {
         foreach (const QString& childID, _connectionChildMap.values(materialID)) {
             if (textureFilenames.contains(childID)) {
@@ -568,7 +547,6 @@ int matchTextureUVSetToAttributeChannel(const QString& texUVSetName, const QHash
     }
 }
 
-
 FBXLight extractLight(const FBXNode& object) {
     FBXLight light;
     foreach (const FBXNode& subobject, object.children) {
@@ -586,8 +564,7 @@ FBXLight extractLight(const FBXNode& object) {
                     }
                 }
             }
-        } else if ( subobject.name == "GeometryVersion"
-                   || subobject.name == "TypeFlags") {
+        } else if (subobject.name == "GeometryVersion" || subobject.name == "TypeFlags") {
         }
     }
 #if defined(DEBUG_FBXREADER)
@@ -625,7 +602,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
     QVector<ExtractedBlendshape> blendshapes;
 
     QHash<QString, FBXModel> models;
-    QHash<QString, Cluster> clusters; 
+    QHash<QString, Cluster> clusters;
     QHash<QString, AnimationCurve> animationCurves;
 
     QHash<QString, QString> typeFlags;
@@ -658,9 +635,8 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
     QString jointLeftToeID;
     QString jointRightToeID;
 
-
     QVector<QString> humanIKJointNames;
-    for (int i = 0; i <  (int) HUMANIK_JOINTS.size(); i++) {
+    for (int i = 0; i < (int)HUMANIK_JOINTS.size(); i++) {
         QByteArray jointName = HUMANIK_JOINTS[i];
         humanIKJointNames.append(processID(getString(joints.value(jointName, jointName))));
     }
@@ -681,7 +657,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
             foreach (const QVariant& mapping, mappings) {
                 QVariantList blendshapeMapping = mapping.toList();
                 blendshapeIndices.insert(blendshapeMapping.at(0).toByteArray(),
-                   WeightedIndex(i, blendshapeMapping.at(1).toFloat()));
+                                         WeightedIndex(i, blendshapeMapping.at(1).toFloat()));
             }
         }
     }
@@ -700,7 +676,6 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
     unsigned int meshIndex = 0;
     haveReportedUnhandledRotationOrder = false;
     foreach (const FBXNode& child, node.children) {
-
         if (child.name == "FBXHeaderExtension") {
             foreach (const FBXNode& object, child.children) {
                 if (object.name == "SceneInfo") {
@@ -715,7 +690,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                             foreach (const FBXNode& subsubobject, subobject.children) {
                                 static const QVariant APPLICATION_NAME = QVariant(QByteArray("Original|ApplicationName"));
                                 if (subsubobject.name == "P" && subsubobject.properties.size() >= 5 &&
-                                        subsubobject.properties.at(0) == APPLICATION_NAME) {
+                                    subsubobject.properties.at(0) == APPLICATION_NAME) {
                                     geometry.applicationName = subsubobject.properties.at(4).toString();
                                 }
                             }
@@ -800,7 +775,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                     glm::vec3 translation;
                     // NOTE: the euler angles as supplied by the FBX file are in degrees
                     glm::vec3 rotationOffset;
-                    int rotationOrder = OrderXYZ;  // Default rotation order set in "Definitions" node is assumed to be XYZ.
+                    int rotationOrder = OrderXYZ; // Default rotation order set in "Definitions" node is assumed to be XYZ.
                     glm::vec3 preRotation, rotation, postRotation;
                     glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
                     glm::vec3 scalePivot, rotationPivot, scaleOffset;
@@ -814,9 +789,9 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                     glm::vec3 geometricRotation;
 
                     glm::vec3 rotationMin, rotationMax;
-                    FBXModel model = { name, -1, glm::vec3(), glm::mat4(), glm::quat(), glm::quat(), glm::quat(),
-                                       glm::mat4(), glm::vec3(), glm::vec3(),
-                                       false, glm::vec3(), glm::quat(), glm::vec3(1.0f) };
+                    FBXModel model = { name,        -1,          glm::vec3(), glm::mat4(),    glm::quat(),
+                                       glm::quat(), glm::quat(), glm::mat4(), glm::vec3(),    glm::vec3(),
+                                       false,       glm::vec3(), glm::quat(), glm::vec3(1.0f) };
                     ExtractedMesh* mesh = NULL;
                     QVector<ExtractedBlendshape> blendshapes;
                     foreach (const FBXNode& subobject, object.children) {
@@ -855,7 +830,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                             static const QVariant SCALING_PIVOT = QByteArray("ScalingPivot");
                             static const QVariant PRE_ROTATION = QByteArray("PreRotation");
                             static const QVariant POST_ROTATION = QByteArray("PostRotation");
-                            foreach(const FBXNode& property, subobject.children) {
+                            foreach (const FBXNode& property, subobject.children) {
                                 const auto& childProperty = property.properties.at(0);
                                 if (property.name == propertyName) {
                                     if (childProperty == LCL_TRANSLATION) {
@@ -888,7 +863,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                                     } else if (childProperty == SCALING_OFFSET) {
                                         scaleOffset = getVec3(property.properties, index);
 
-                                    // NOTE: these rotation limits are stored in degrees (NOT radians)
+                                        // NOTE: these rotation limits are stored in degrees (NOT radians)
                                     } else if (childProperty == ROTATION_MIN) {
                                         rotationMin = getVec3(property.properties, index);
 
@@ -930,8 +905,8 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                             *mesh = extractMesh(object, meshIndex);
 
                         } else if (subobject.name == "Shape") {
-                            ExtractedBlendshape blendshape =  { subobject.properties.at(0).toString(),
-                                extractBlendshape(subobject) };
+                            ExtractedBlendshape blendshape = { subobject.properties.at(0).toString(),
+                                                               extractBlendshape(subobject) };
                             blendshapes.append(blendshape);
                         }
 #if defined(DEBUG_FBXREADER)
@@ -940,9 +915,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                             if (!attributetype.empty()) {
                                 if (attributetype == "Light") {
                                     QString lightprop;
-                                    foreach (const QVariant& vprop, subobject.properties) {
-                                        lightprop = vprop.toString();
-                                    }
+                                    foreach (const QVariant& vprop, subobject.properties) { lightprop = vprop.toString(); }
 
                                     FBXLight light = extractLight(object);
                                 }
@@ -970,13 +943,15 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                     model.rotation = glm::quat(glm::radians(rotation));
                     model.postRotation = glm::inverse(glm::quat(glm::radians(postRotation)));
                     model.postTransform = glm::translate(-rotationPivot) * glm::translate(scaleOffset) *
-                        glm::translate(scalePivot) * glm::scale(scale) * glm::translate(-scalePivot);
+                                          glm::translate(scalePivot) * glm::scale(scale) * glm::translate(-scalePivot);
                     // NOTE: angles from the FBX file are in degrees
                     // so we convert them to radians for the FBXModel class
                     model.rotationMin = glm::radians(glm::vec3(rotationMinX ? rotationMin.x : -180.0f,
-                        rotationMinY ? rotationMin.y : -180.0f, rotationMinZ ? rotationMin.z : -180.0f));
+                                                               rotationMinY ? rotationMin.y : -180.0f,
+                                                               rotationMinZ ? rotationMin.z : -180.0f));
                     model.rotationMax = glm::radians(glm::vec3(rotationMaxX ? rotationMax.x : 180.0f,
-                        rotationMaxY ? rotationMax.y : 180.0f, rotationMaxZ ? rotationMax.z : 180.0f));
+                                                               rotationMaxY ? rotationMax.y : 180.0f,
+                                                               rotationMaxZ ? rotationMax.z : 180.0f));
 
                     model.hasGeometricOffset = hasGeometricOffset;
                     model.geometricTranslation = geometricTranslation;
@@ -993,7 +968,8 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                         const int MODEL_UV_TRANSLATION_MIN_SIZE = 2;
                         const int MODEL_UV_SCALING_MIN_SIZE = 2;
                         const int CROPPING_MIN_SIZE = 4;
-                        if (subobject.name == "RelativeFilename" && subobject.properties.length() >= RELATIVE_FILENAME_MIN_SIZE) {
+                        if (subobject.name == "RelativeFilename" &&
+                            subobject.properties.length() >= RELATIVE_FILENAME_MIN_SIZE) {
                             QByteArray filename = subobject.properties.at(0).toByteArray();
                             QByteArray filepath = filename.replace('\\', '/');
                             filename = fileOnUrl(filepath, url);
@@ -1004,12 +980,15 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                             QString name = QString(subobject.properties.at(0).toByteArray());
                             name = name.left(name.indexOf('['));
                             _textureNames.insert(getID(object.properties), name);
-                        } else if (subobject.name == "Texture_Alpha_Source" && subobject.properties.length() >= TEXTURE_ALPHA_SOURCE_MIN_SIZE) {
+                        } else if (subobject.name == "Texture_Alpha_Source" &&
+                                   subobject.properties.length() >= TEXTURE_ALPHA_SOURCE_MIN_SIZE) {
                             tex.assign<uint8_t>(tex.alphaSource, subobject.properties.at(0).value<int>());
-                        } else if (subobject.name == "ModelUVTranslation" && subobject.properties.length() >= MODEL_UV_TRANSLATION_MIN_SIZE) {
+                        } else if (subobject.name == "ModelUVTranslation" &&
+                                   subobject.properties.length() >= MODEL_UV_TRANSLATION_MIN_SIZE) {
                             tex.assign(tex.UVTranslation, glm::vec2(subobject.properties.at(0).value<double>(),
                                                                     subobject.properties.at(1).value<double>()));
-                        } else if (subobject.name == "ModelUVScaling" && subobject.properties.length() >= MODEL_UV_SCALING_MIN_SIZE) {
+                        } else if (subobject.name == "ModelUVScaling" &&
+                                   subobject.properties.length() >= MODEL_UV_SCALING_MIN_SIZE) {
                             tex.assign(tex.UVScaling, glm::vec2(subobject.properties.at(0).value<double>(),
                                                                 subobject.properties.at(1).value<double>()));
                             if (tex.UVScaling.x == 0.0f) {
@@ -1020,54 +999,55 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                             }
                         } else if (subobject.name == "Cropping" && subobject.properties.length() >= CROPPING_MIN_SIZE) {
                             tex.assign(tex.cropping, glm::vec4(subobject.properties.at(0).value<int>(),
-                                                                subobject.properties.at(1).value<int>(),
-                                                                subobject.properties.at(2).value<int>(),
-                                                                subobject.properties.at(3).value<int>()));
+                                                               subobject.properties.at(1).value<int>(),
+                                                               subobject.properties.at(2).value<int>(),
+                                                               subobject.properties.at(3).value<int>()));
                         } else if (subobject.name == "Properties70") {
                             QByteArray propertyName;
                             int index;
-                                propertyName = "P";
-                                index = 4;
-                                foreach (const FBXNode& property, subobject.children) {
-                                    static const QVariant UV_SET = QByteArray("UVSet");
-                                    static const QVariant CURRENT_TEXTURE_BLEND_MODE = QByteArray("CurrentTextureBlendMode");
-                                    static const QVariant USE_MATERIAL = QByteArray("UseMaterial");
-                                    static const QVariant TRANSLATION = QByteArray("Translation");
-                                    static const QVariant ROTATION = QByteArray("Rotation");
-                                    static const QVariant SCALING = QByteArray("Scaling");
-                                    if (property.name == propertyName) {
-                                        QString v = property.properties.at(0).toString();
-                                        if (property.properties.at(0) == UV_SET) {
-                                            std::string uvName = property.properties.at(index).toString().toStdString();
-                                            tex.assign(tex.UVSet, property.properties.at(index).toString());
-                                        } else if (property.properties.at(0) == CURRENT_TEXTURE_BLEND_MODE) {
-                                            tex.assign<uint8_t>(tex.currentTextureBlendMode, property.properties.at(index).value<int>());
-                                        } else if (property.properties.at(0) == USE_MATERIAL) {
-                                            tex.assign<bool>(tex.useMaterial, property.properties.at(index).value<int>());
-                                        } else if (property.properties.at(0) == TRANSLATION) {
-                                            tex.assign(tex.translation, getVec3(property.properties, index));
-                                        } else if (property.properties.at(0) == ROTATION) {
-                                            tex.assign(tex.rotation, getVec3(property.properties, index));
-                                        } else if (property.properties.at(0) == SCALING) {
-                                            tex.assign(tex.scaling, getVec3(property.properties, index));
-                                            if (tex.scaling.x == 0.0f) {
-                                                tex.scaling.x = 1.0f;
-                                            }
-                                            if (tex.scaling.y == 0.0f) {
-                                                tex.scaling.y = 1.0f;
-                                            }
-                                            if (tex.scaling.z == 0.0f) {
-                                                tex.scaling.z = 1.0f;
-                                            }
+                            propertyName = "P";
+                            index = 4;
+                            foreach (const FBXNode& property, subobject.children) {
+                                static const QVariant UV_SET = QByteArray("UVSet");
+                                static const QVariant CURRENT_TEXTURE_BLEND_MODE = QByteArray("CurrentTextureBlendMode");
+                                static const QVariant USE_MATERIAL = QByteArray("UseMaterial");
+                                static const QVariant TRANSLATION = QByteArray("Translation");
+                                static const QVariant ROTATION = QByteArray("Rotation");
+                                static const QVariant SCALING = QByteArray("Scaling");
+                                if (property.name == propertyName) {
+                                    QString v = property.properties.at(0).toString();
+                                    if (property.properties.at(0) == UV_SET) {
+                                        std::string uvName = property.properties.at(index).toString().toStdString();
+                                        tex.assign(tex.UVSet, property.properties.at(index).toString());
+                                    } else if (property.properties.at(0) == CURRENT_TEXTURE_BLEND_MODE) {
+                                        tex.assign<uint8_t>(tex.currentTextureBlendMode,
+                                                            property.properties.at(index).value<int>());
+                                    } else if (property.properties.at(0) == USE_MATERIAL) {
+                                        tex.assign<bool>(tex.useMaterial, property.properties.at(index).value<int>());
+                                    } else if (property.properties.at(0) == TRANSLATION) {
+                                        tex.assign(tex.translation, getVec3(property.properties, index));
+                                    } else if (property.properties.at(0) == ROTATION) {
+                                        tex.assign(tex.rotation, getVec3(property.properties, index));
+                                    } else if (property.properties.at(0) == SCALING) {
+                                        tex.assign(tex.scaling, getVec3(property.properties, index));
+                                        if (tex.scaling.x == 0.0f) {
+                                            tex.scaling.x = 1.0f;
                                         }
-#if defined(DEBUG_FBXREADER)
-                                        else {
-                                            QString propName = v;
-                                            unknown++;
+                                        if (tex.scaling.y == 0.0f) {
+                                            tex.scaling.y = 1.0f;
                                         }
-#endif
+                                        if (tex.scaling.z == 0.0f) {
+                                            tex.scaling.z = 1.0f;
+                                        }
                                     }
+#if defined(DEBUG_FBXREADER)
+                                    else {
+                                        QString propName = v;
+                                        unknown++;
+                                    }
+#endif
                                 }
+                            }
                         }
 #if defined(DEBUG_FBXREADER)
                         else {
@@ -1148,10 +1128,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                             static const QVariant MAYA_USE_EMISSIVE_MAP = QByteArray("Maya|use_emissive_map");
                             static const QVariant MAYA_USE_AO_MAP = QByteArray("Maya|use_ao_map");
 
-
-
-
-                            foreach(const FBXNode& property, subobject.children) {
+                            foreach (const FBXNode& property, subobject.children) {
                                 if (property.name == propertyName) {
                                     if (property.properties.at(0) == DIFFUSE_COLOR) {
                                         material.diffuseColor = getVec3(property.properties, index);
@@ -1201,7 +1178,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
 
                                     } else if (property.properties.at(0) == MAYA_USE_COLOR_MAP) {
                                         material.isPBSMaterial = true;
-                                        material.useAlbedoMap = (bool) property.properties.at(index).value<double>();
+                                        material.useAlbedoMap = (bool)property.properties.at(index).value<double>();
 
                                     } else if (property.properties.at(0) == MAYA_ROUGHNESS) {
                                         material.isPBSMaterial = true;
@@ -1246,8 +1223,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                         else {
                             QString propname = subobject.name.data();
                             int unknown = 0;
-                            if ( (propname == "Version")
-                                ||(propname == "Multilayer")) {
+                            if ((propname == "Version") || (propname == "Multilayer")) {
                             } else {
                                 unknown++;
                             }
@@ -1257,13 +1233,10 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                     material.materialID = getID(object.properties);
                     _fbxMaterials.insert(material.materialID, material);
 
-
                 } else if (object.name == "NodeAttribute") {
 #if defined(DEBUG_FBXREADER)
                     std::vector<QString> properties;
-                    foreach(const QVariant& v, object.properties) {
-                        properties.push_back(v.toString());
-                    }
+                    foreach (const QVariant& v, object.properties) { properties.push_back(v.toString()); }
 #endif
                     QString attribID = getID(object.properties);
                     QString attributetype;
@@ -1323,12 +1296,10 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
 
                 }
 #if defined(DEBUG_FBXREADER)
-                 else {
+                else {
                     QString objectname = object.name.data();
-                    if ( objectname == "Pose"
-                        || objectname == "AnimationStack"
-                        || objectname == "AnimationLayer"
-                        || objectname == "AnimationCurveNode") {
+                    if (objectname == "Pose" || objectname == "AnimationStack" || objectname == "AnimationLayer" ||
+                        objectname == "AnimationCurveNode") {
                     } else {
                         unknown++;
                     }
@@ -1345,7 +1316,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                         QString parentID = getID(connection.properties, 2);
                         ooChildToParent.insert(childID, parentID);
                         if (!hifiGlobalNodeID.isEmpty() && (parentID == hifiGlobalNodeID)) {
-                            std::map< QString, FBXLight >::iterator lightIt = lights.find(childID);
+                            std::map<QString, FBXLight>::iterator lightIt = lights.find(childID);
                             if (lightIt != lights.end()) {
                                 _lightmapLevel = (*lightIt).second.intensity;
                                 if (_lightmapLevel <= 0.0f) {
@@ -1373,7 +1344,8 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                             normalTextures.insert(getID(connection.properties, 2), getID(connection.properties, 1));
                         } else if (type.contains("tex_normal_map")) {
                             normalTextures.insert(getID(connection.properties, 2), getID(connection.properties, 1));
-                        } else if ((type.contains("specular") && !type.contains("tex_global_specular")) || type.contains("reflection")) {
+                        } else if ((type.contains("specular") && !type.contains("tex_global_specular")) ||
+                                   type.contains("reflection")) {
                             specularTextures.insert(getID(connection.properties, 2), getID(connection.properties, 1));
                         } else if (type.contains("tex_metallic_map")) {
                             metallicTextures.insert(getID(connection.properties, 2), getID(connection.properties, 1));
@@ -1416,17 +1388,10 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
 #if defined(DEBUG_FBXREADER)
         else {
             QString objectname = child.name.data();
-            if ( objectname == "Pose"
-                || objectname == "CreationTime"
-                || objectname == "FileId"
-                || objectname == "Creator"
-                || objectname == "Documents"
-                || objectname == "References"
-                || objectname == "Definitions"
-                || objectname == "Takes"
-                || objectname == "AnimationStack"
-                || objectname == "AnimationLayer"
-                || objectname == "AnimationCurveNode") {
+            if (objectname == "Pose" || objectname == "CreationTime" || objectname == "FileId" || objectname == "Creator" ||
+                objectname == "Documents" || objectname == "References" || objectname == "Definitions" ||
+                objectname == "Takes" || objectname == "AnimationStack" || objectname == "AnimationLayer" ||
+                objectname == "AnimationCurveNode") {
             } else {
                 unknown++;
             }
@@ -1452,11 +1417,11 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
 
     // get offset transform from mapping
     float offsetScale = mapping.value("scale", 1.0f).toFloat() * unitScaleFactor * METERS_PER_CENTIMETER;
-    glm::quat offsetRotation = glm::quat(glm::radians(glm::vec3(mapping.value("rx").toFloat(),
-            mapping.value("ry").toFloat(), mapping.value("rz").toFloat())));
+    glm::quat offsetRotation = glm::quat(
+        glm::radians(glm::vec3(mapping.value("rx").toFloat(), mapping.value("ry").toFloat(), mapping.value("rz").toFloat())));
     geometry.offset = glm::translate(glm::vec3(mapping.value("tx").toFloat(), mapping.value("ty").toFloat(),
-        mapping.value("tz").toFloat())) * glm::mat4_cast(offsetRotation) *
-            glm::scale(glm::vec3(offsetScale, offsetScale, offsetScale));
+                                               mapping.value("tz").toFloat())) *
+                      glm::mat4_cast(offsetRotation) * glm::scale(glm::vec3(offsetScale, offsetScale, offsetScale));
 
     // get the list of models in depth-first traversal order
     QVector<QString> modelIDs;
@@ -1465,9 +1430,9 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
         // models with clusters must be parented to the cluster top
         // Unless the model is a root node.
         bool isARootNode = !modelIDs.contains(_connectionParentMap.value(model.key()));
-        if (!isARootNode) {  
-            foreach(const QString& deformerID, _connectionChildMap.values(model.key())) {
-                foreach(const QString& clusterID, _connectionChildMap.values(deformerID)) {
+        if (!isARootNode) {
+            foreach (const QString& deformerID, _connectionChildMap.values(model.key())) {
+                foreach (const QString& clusterID, _connectionChildMap.values(deformerID)) {
                     if (!clusters.contains(clusterID)) {
                         continue;
                     }
@@ -1477,7 +1442,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                     goto outerBreak;
                 }
             }
-            outerBreak: ;
+        outerBreak:;
         }
 
         // make sure the parent is in the child map
@@ -1500,9 +1465,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
 
     // figure the number of animation frames from the curves
     int frameCount = 1;
-    foreach (const AnimationCurve& curve, animationCurves) {
-        frameCount = qMax(frameCount, curve.values.size());
-    }
+    foreach (const AnimationCurve& curve, animationCurves) { frameCount = qMax(frameCount, curve.values.size()); }
     for (int i = 0; i < frameCount; i++) {
         FBXAnimationFrame frame;
         frame.rotations.resize(modelIDs.size());
@@ -1548,17 +1511,17 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
 
         if (joint.parentIndex == -1) {
             joint.transform = geometry.offset * glm::translate(joint.translation) * joint.preTransform *
-                glm::mat4_cast(combinedRotation) * joint.postTransform;
+                              glm::mat4_cast(combinedRotation) * joint.postTransform;
             joint.inverseDefaultRotation = glm::inverse(combinedRotation);
             joint.distanceToParent = 0.0f;
 
         } else {
             const FBXJoint& parentJoint = geometry.joints.at(joint.parentIndex);
-            joint.transform = parentJoint.transform * glm::translate(joint.translation) *
-                joint.preTransform * glm::mat4_cast(combinedRotation) * joint.postTransform;
+            joint.transform = parentJoint.transform * glm::translate(joint.translation) * joint.preTransform *
+                              glm::mat4_cast(combinedRotation) * joint.postTransform;
             joint.inverseDefaultRotation = glm::inverse(combinedRotation) * parentJoint.inverseDefaultRotation;
             joint.distanceToParent = glm::distance(extractTranslation(parentJoint.transform),
-                extractTranslation(joint.transform));
+                                                   extractTranslation(joint.transform));
         }
         joint.inverseBindRotation = joint.inverseDefaultRotation;
         joint.name = model.name;
@@ -1590,10 +1553,10 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
         glm::vec3 defaultPosValues = joint.translation;
 
         for (int i = 0; i < frameCount; i++) {
-            geometry.animationFrames[i].rotations[jointIndex] = glm::quat(glm::radians(glm::vec3(
-                xRotCurve.values.isEmpty() ? defaultRotValues.x : xRotCurve.values.at(i % xRotCurve.values.size()),
-                yRotCurve.values.isEmpty() ? defaultRotValues.y : yRotCurve.values.at(i % yRotCurve.values.size()),
-                zRotCurve.values.isEmpty() ? defaultRotValues.z : zRotCurve.values.at(i % zRotCurve.values.size()))));
+            geometry.animationFrames[i].rotations[jointIndex] = glm::quat(glm::radians(
+                glm::vec3(xRotCurve.values.isEmpty() ? defaultRotValues.x : xRotCurve.values.at(i % xRotCurve.values.size()),
+                          yRotCurve.values.isEmpty() ? defaultRotValues.y : yRotCurve.values.at(i % yRotCurve.values.size()),
+                          zRotCurve.values.isEmpty() ? defaultRotValues.z : zRotCurve.values.at(i % zRotCurve.values.size()))));
             geometry.animationFrames[i].translations[jointIndex] = glm::vec3(
                 xPosCurve.values.isEmpty() ? defaultPosValues.x : xPosCurve.values.at(i % xPosCurve.values.size()),
                 yPosCurve.values.isEmpty() ? defaultPosValues.y : yPosCurve.values.at(i % yPosCurve.values.size()),
@@ -1603,7 +1566,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
 
     // NOTE: shapeVertices are in joint-frame
     std::vector<ShapeVertices> shapeVertices;
-    shapeVertices.resize(std::max(1, geometry.joints.size()) );
+    shapeVertices.resize(std::max(1, geometry.joints.size()));
 
     // find our special joints
     geometry.leftEyeJointIndex = modelIDs.indexOf(jointEyeLeftID);
@@ -1617,9 +1580,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
     geometry.leftToeJointIndex = modelIDs.indexOf(jointLeftToeID);
     geometry.rightToeJointIndex = modelIDs.indexOf(jointRightToeID);
 
-    foreach (const QString& id, humanIKJointIDs) {
-        geometry.humanIKJointIndices.append(modelIDs.indexOf(id));
-    }
+    foreach (const QString& id, humanIKJointIDs) { geometry.humanIKJointIndices.append(modelIDs.indexOf(id)); }
 
     // extract the translation component of the neck transform
     if (geometry.neckJointIndex != -1) {
@@ -1633,8 +1594,9 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
     // Create the Material Library
     consolidateFBXMaterials(mapping);
 
-    // We can't allow the scaling of a given image to different sizes, because the hash used for the KTX cache is based on the original image
-    // Allowing scaling of the same image to different sizes would cause different KTX files to target the same cache key
+    // We can't allow the scaling of a given image to different sizes, because the hash used for the KTX cache is based on the
+    // original image Allowing scaling of the same image to different sizes would cause different KTX files to target the same
+    // cache key
 #if 0
     // HACK: until we get proper LOD management we're going to cap model textures
     // according to how many unique textures the model uses:
@@ -1676,7 +1638,8 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
 
         // accumulate local transforms
         QString modelID = models.contains(it.key()) ? it.key() : _connectionParentMap.value(it.key());
-        glm::mat4 modelTransform = getGlobalTransform(_connectionParentMap, models, modelID, geometry.applicationName == "mixamo.com", url);
+        glm::mat4 modelTransform = getGlobalTransform(_connectionParentMap, models, modelID,
+                                                      geometry.applicationName == "mixamo.com", url);
 
         // compute the mesh extents from the transformed vertices
         foreach (const glm::vec3& vertex, extracted.mesh.vertices) {
@@ -1696,7 +1659,6 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
         bool generateTangents = false;
         QList<QString> children = _connectionChildMap.values(modelID);
         for (int i = children.size() - 1; i >= 0; i--) {
-
             const QString& childID = children.at(i);
             if (_fbxMaterials.contains(childID)) {
                 // the pure material associated with this part
@@ -1823,14 +1785,15 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                     int oldIndex = cluster.indices.at(j);
                     float weight = cluster.weights.at(j);
                     for (QMultiHash<int, int>::const_iterator it = extracted.newIndices.constFind(oldIndex);
-                            it != extracted.newIndices.end() && it.key() == oldIndex; it++) {
+                         it != extracted.newIndices.end() && it.key() == oldIndex; it++) {
                         int newIndex = it.value();
 
                         // remember vertices with at least 1/4 weight
                         const float EXPANSION_WEIGHT_THRESHOLD = 0.25f;
                         if (weight >= EXPANSION_WEIGHT_THRESHOLD) {
                             // transform to joint-frame and save for later
-                            const glm::mat4 vertexTransform = meshToJoint * glm::translate(extracted.mesh.vertices.at(newIndex));
+                            const glm::mat4 vertexTransform = meshToJoint *
+                                                              glm::translate(extracted.mesh.vertices.at(newIndex));
                             points.push_back(extractTranslation(vertexTransform));
                         }
 
@@ -1875,7 +1838,8 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
                     const float ALMOST_HALF = 0.499f;
                     float weightScalingFactor = (float)(UINT16_MAX) / totalWeight;
                     for (int k = j; k < j + WEIGHTS_PER_VERTEX; ++k) {
-                        extracted.mesh.clusterWeights[k] = (uint16_t)(weightScalingFactor * weightAccumulators[k] + ALMOST_HALF);
+                        extracted.mesh.clusterWeights[k] = (uint16_t)(weightScalingFactor * weightAccumulators[k] +
+                                                                      ALMOST_HALF);
                     }
                 }
             }
@@ -1894,7 +1858,8 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
 
             // Apply geometric offset, if present, by transforming the vertices directly
             if (joint.hasGeometricOffset) {
-                glm::mat4 geometricOffset = createMatFromScaleQuatAndPos(joint.geometricScaling, joint.geometricRotation, joint.geometricTranslation);
+                glm::mat4 geometricOffset = createMatFromScaleQuatAndPos(joint.geometricScaling, joint.geometricRotation,
+                                                                         joint.geometricTranslation);
                 for (int i = 0; i < extracted.mesh.vertices.size(); i++) {
                     extracted.mesh.vertices[i] = transformPoint(geometricOffset, extracted.mesh.vertices[i]);
                 }
@@ -1912,15 +1877,13 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
     }
 
     const float INV_SQRT_3 = 0.57735026918f;
-    ShapeVertices cardinalDirections = {
-        Vectors::UNIT_X,
-        Vectors::UNIT_Y,
-        Vectors::UNIT_Z,
-        glm::vec3(INV_SQRT_3,  INV_SQRT_3,  INV_SQRT_3),
-        glm::vec3(INV_SQRT_3, -INV_SQRT_3,  INV_SQRT_3),
-        glm::vec3(INV_SQRT_3,  INV_SQRT_3, -INV_SQRT_3),
-        glm::vec3(INV_SQRT_3, -INV_SQRT_3, -INV_SQRT_3)
-    };
+    ShapeVertices cardinalDirections = { Vectors::UNIT_X,
+                                         Vectors::UNIT_Y,
+                                         Vectors::UNIT_Z,
+                                         glm::vec3(INV_SQRT_3, INV_SQRT_3, INV_SQRT_3),
+                                         glm::vec3(INV_SQRT_3, -INV_SQRT_3, INV_SQRT_3),
+                                         glm::vec3(INV_SQRT_3, INV_SQRT_3, -INV_SQRT_3),
+                                         glm::vec3(INV_SQRT_3, -INV_SQRT_3, -INV_SQRT_3) };
 
     // now that all joints have been scanned compute a k-Dop bounding volume of mesh
     for (int i = 0; i < geometry.joints.size(); ++i) {
@@ -1961,9 +1924,7 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
     geometry.palmDirection = parseVec3(mapping.value("palmDirection", "0, -1, 0").toString());
 
     // attempt to map any meshes to a named model
-    for (QHash<QString, int>::const_iterator m = meshIDsToMeshIndices.constBegin();
-            m != meshIDsToMeshIndices.constEnd(); m++) {
-
+    for (QHash<QString, int>::const_iterator m = meshIDsToMeshIndices.constBegin(); m != meshIDsToMeshIndices.constEnd(); m++) {
         const QString& meshID = m.key();
         int meshIndex = m.value();
 
@@ -1994,13 +1955,15 @@ FBXGeometry* FBXReader::extractFBXGeometry(const QVariantHash& mapping, const QS
     return geometryPtr;
 }
 
-FBXGeometry* readFBX(const QByteArray& model, const QVariantHash& mapping, const QString& url, bool loadLightmaps, float lightmapLevel) {
+FBXGeometry* readFBX(const QByteArray& model, const QVariantHash& mapping, const QString& url, bool loadLightmaps,
+                     float lightmapLevel) {
     QBuffer buffer(const_cast<QByteArray*>(&model));
     buffer.open(QIODevice::ReadOnly);
     return readFBX(&buffer, mapping, url, loadLightmaps, lightmapLevel);
 }
 
-FBXGeometry* readFBX(QIODevice* device, const QVariantHash& mapping, const QString& url, bool loadLightmaps, float lightmapLevel) {
+FBXGeometry* readFBX(QIODevice* device, const QVariantHash& mapping, const QString& url, bool loadLightmaps,
+                     float lightmapLevel) {
     FBXReader reader;
     reader._rootNode = FBXReader::parseFBX(device);
     reader._loadLightmaps = loadLightmaps;

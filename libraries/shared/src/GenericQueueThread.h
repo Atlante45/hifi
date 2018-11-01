@@ -20,12 +20,11 @@
 #include "GenericThread.h"
 #include "NumericalConstants.h"
 
-template <typename T>
+template<typename T>
 class GenericQueueThread : public GenericThread {
 public:
     using Queue = QQueue<T>;
-    GenericQueueThread(QObject* parent = nullptr) 
-        : GenericThread() {}
+    GenericQueueThread(QObject* parent = nullptr) : GenericThread() {}
 
     virtual ~GenericQueueThread() {}
 
@@ -41,9 +40,9 @@ public:
         timer.start();
 
         // FIXME this will work as long as the thread doing the wait
-        // is the only thread which can add work to the queue.  
+        // is the only thread which can add work to the queue.
         // It would be better if instead we had a queue empty condition to wait on
-        // that would ensure that we get woken as soon as we're idle the very 
+        // that would ensure that we get woken as soon as we're idle the very
         // first time the queue was empty.
         while (timer.elapsed() < maxWaitMs) {
             lock();
@@ -79,15 +78,9 @@ public:
     }
 
 protected:
-    virtual void queueItemInternal(const T& t) {
-        _items.push_back(t);
-    }
+    virtual void queueItemInternal(const T& t) { _items.push_back(t); }
 
-    virtual uint32_t getMaxWait() {
-        return MSECS_PER_SECOND;
-    }
-
-
+    virtual uint32_t getMaxWait() { return MSECS_PER_SECOND; }
 
     virtual bool processQueueItems(const Queue& items) = 0;
 

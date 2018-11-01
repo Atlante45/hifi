@@ -18,7 +18,6 @@
 #include "EntityTree.h"
 #include "PhysicsLogging.h"
 
-
 const uint16_t HINGE_VERSION_WITH_UNUSED_PAREMETERS = 1;
 const uint16_t ObjectConstraintHinge::constraintVersion = 2;
 const glm::vec3 DEFAULT_HINGE_AXIS(1.0f, 0.0f, 0.0f);
@@ -26,26 +25,23 @@ const glm::vec3 DEFAULT_HINGE_AXIS(1.0f, 0.0f, 0.0f);
 ObjectConstraintHinge::ObjectConstraintHinge(const QUuid& id, EntityItemPointer ownerEntity) :
     ObjectConstraint(DYNAMIC_TYPE_HINGE, id, ownerEntity),
     _axisInA(DEFAULT_HINGE_AXIS),
-    _axisInB(DEFAULT_HINGE_AXIS)
-{
-    #if WANT_DEBUG
+    _axisInB(DEFAULT_HINGE_AXIS) {
+#if WANT_DEBUG
     qCDebug(physics) << "ObjectConstraintHinge::ObjectConstraintHinge";
-    #endif
+#endif
 }
 
 ObjectConstraintHinge::~ObjectConstraintHinge() {
-    #if WANT_DEBUG
+#if WANT_DEBUG
     qCDebug(physics) << "ObjectConstraintHinge::~ObjectConstraintHinge";
-    #endif
+#endif
 }
 
 QList<btRigidBody*> ObjectConstraintHinge::getRigidBodies() {
     QList<btRigidBody*> result;
     result += getRigidBody();
     QUuid otherEntityID;
-    withReadLock([&]{
-        otherEntityID = _otherID;
-    });
+    withReadLock([&] { otherEntityID = _otherID; });
     if (!otherEntityID.isNull()) {
         result += getOtherRigidBody(otherEntityID);
     }
@@ -61,7 +57,7 @@ void ObjectConstraintHinge::updateHinge() {
     float low;
     float high;
 
-    withReadLock([&]{
+    withReadLock([&] {
         axisInA = _axisInA;
         constraint = static_cast<btHingeConstraint*>(_constraint);
         low = _low;
@@ -75,7 +71,6 @@ void ObjectConstraintHinge::updateHinge() {
     constraint->setLimit(low, high);
 }
 
-
 btTypedConstraint* ObjectConstraintHinge::getConstraint() {
     btHingeConstraint* constraint { nullptr };
     QUuid otherEntityID;
@@ -84,7 +79,7 @@ btTypedConstraint* ObjectConstraintHinge::getConstraint() {
     glm::vec3 pivotInB;
     glm::vec3 axisInB;
 
-    withReadLock([&]{
+    withReadLock([&] {
         constraint = static_cast<btHingeConstraint*>(_constraint);
         pivotInA = _pivotInA;
         axisInA = _axisInA;
@@ -95,7 +90,7 @@ btTypedConstraint* ObjectConstraintHinge::getConstraint() {
     if (constraint) {
         return constraint;
     }
-    
+
     static int repeatMessageID = LogHandler::getInstance().newRepeatedMessageID();
 
     btRigidBody* rigidBodyA = getRigidBody();
@@ -126,21 +121,17 @@ btTypedConstraint* ObjectConstraintHinge::getConstraint() {
             axisInB = glm::normalize(axisInB);
         }
 
-        constraint = new btHingeConstraint(*rigidBodyA, *rigidBodyB,
-                                           glmToBullet(pivotInA), glmToBullet(pivotInB),
+        constraint = new btHingeConstraint(*rigidBodyA, *rigidBodyB, glmToBullet(pivotInA), glmToBullet(pivotInB),
                                            glmToBullet(axisInA), glmToBullet(axisInB),
                                            true); // useReferenceFrameA
 
     } else {
         // This hinge is between an entity and the world-frame.
-        constraint = new btHingeConstraint(*rigidBodyA,
-                                           glmToBullet(pivotInA), glmToBullet(axisInA),
+        constraint = new btHingeConstraint(*rigidBodyA, glmToBullet(pivotInA), glmToBullet(axisInA),
                                            true); // useReferenceFrameA
     }
 
-    withWriteLock([&]{
-        _constraint = constraint;
-    });
+    withWriteLock([&] { _constraint = constraint; });
 
     // if we don't wake up rigidBodyA, we may not send the dynamicData property over the network
     forceBodyNonStatic();
@@ -150,7 +141,6 @@ btTypedConstraint* ObjectConstraintHinge::getConstraint() {
 
     return constraint;
 }
-
 
 bool ObjectConstraintHinge::updateArguments(QVariantMap arguments) {
     glm::vec3 pivotInA;
@@ -163,7 +153,7 @@ bool ObjectConstraintHinge::updateArguments(QVariantMap arguments) {
 
     bool needUpdate = false;
     bool somethingChanged = ObjectDynamic::updateArguments(arguments);
-    withReadLock([&]{
+    withReadLock([&] {
         bool ok = true;
         pivotInA = EntityDynamicInterface::extractVec3Argument("hinge constraint", arguments, "pivot", ok, false);
         if (!ok) {
@@ -177,8 +167,8 @@ bool ObjectConstraintHinge::updateArguments(QVariantMap arguments) {
         }
 
         ok = true;
-        otherEntityID = QUuid(EntityDynamicInterface::extractStringArgument("hinge constraint",
-                                                                            arguments, "otherEntityID", ok, false));
+        otherEntityID = QUuid(
+            EntityDynamicInterface::extractStringArgument("hinge constraint", arguments, "otherEntityID", ok, false));
         if (!ok) {
             otherEntityID = _otherID;
         }
@@ -207,14 +197,8 @@ bool ObjectConstraintHinge::updateArguments(QVariantMap arguments) {
             high = _high;
         }
 
-        if (somethingChanged ||
-            pivotInA != _pivotInA ||
-            axisInA != _axisInA ||
-            otherEntityID != _otherID ||
-            pivotInB != _pivotInB ||
-            axisInB != _axisInB ||
-            low != _low ||
-            high != _high) {
+        if (somethingChanged || pivotInA != _pivotInA || axisInA != _axisInA || otherEntityID != _otherID ||
+            pivotInB != _pivotInB || axisInB != _axisInB || low != _low || high != _high) {
             // something changed
             needUpdate = true;
         }
@@ -253,7 +237,7 @@ bool ObjectConstraintHinge::updateArguments(QVariantMap arguments) {
  * @typedef {object} Entities.ActionArguments-Hinge
  * @property {Vec3} pivot=0,0,0 - The local offset of the joint relative to the entity's position.
  * @property {Vec3} axis=1,0,0 - The axis of the entity that it pivots about. Must be a non-zero vector.
- * @property {Uuid} otherEntityID=null - The ID of the other entity that is connected to the joint, if any. If none is 
+ * @property {Uuid} otherEntityID=null - The ID of the other entity that is connected to the joint, if any. If none is
  *     specified then the first entity simply pivots about its specified <code>axis</code>.
  * @property {Vec3} otherPivot=0,0,0 - The local offset of the joint relative to the other entity's position.
  * @property {Vec3} otherAxis=1,0,0 - The axis of the other entity that it pivots about. Must be a non-zero vector.

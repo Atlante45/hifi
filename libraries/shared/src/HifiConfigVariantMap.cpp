@@ -15,8 +15,8 @@
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
-#include <QtCore/QJsonDocument>
 #include <QtCore/QJsonArray>
+#include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
 #include <QtCore/QStandardPaths>
 #include <QtCore/QVariant>
@@ -25,7 +25,6 @@
 #include "SharedLogging.h"
 
 QVariantMap HifiConfigVariantMap::mergeCLParametersWithJSONConfig(const QStringList& argumentList) {
-
     QVariantMap mergedMap;
 
     // Add anything in the CL parameter list to the variant map.
@@ -59,7 +58,7 @@ QVariantMap HifiConfigVariantMap::mergeCLParametersWithJSONConfig(const QStringL
 
                 // for any extra values, append them, with a space, to the value string
                 for (int i = keyIndex + 2; i < maxIndex; i++) {
-                    value +=  " " + argumentList[i];
+                    value += " " + argumentList[i];
                 }
 
                 // add the finalized value to the merged map
@@ -81,12 +80,10 @@ QVariantMap HifiConfigVariantMap::mergeCLParametersWithJSONConfig(const QStringL
         configFilePath = argumentList[configIndex + 1];
     } else {
         // no config file - try to read a file config.json at the system config path
-        configFilePath = QString("%1/%2/%3/config.json").arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation),
-                                                             QCoreApplication::organizationName(),
-                                                             QCoreApplication::applicationName());
+        configFilePath = QString("%1/%2/%3/config.json")
+                             .arg(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation),
+                                  QCoreApplication::organizationName(), QCoreApplication::applicationName());
     }
-
-
 
     return mergedMap;
 }
@@ -111,7 +108,7 @@ void HifiConfigVariantMap::loadMapFromJSONFile(QVariantMap& existingMap, const Q
 }
 
 void HifiConfigVariantMap::addMissingValuesToExistingMap(QVariantMap& existingMap, const QVariantMap& newMap) {
-    foreach(const QString& key, newMap.keys()) {
+    foreach (const QString& key, newMap.keys()) {
         if (existingMap.contains(key)) {
             // if this is just a regular value, we're done - we don't ovveride
 

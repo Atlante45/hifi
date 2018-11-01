@@ -35,13 +35,15 @@ void GL45Backend::transferTransformState(const Batch& batch) const {
     if (!_transform._cameras.empty()) {
         bufferData.resize(_transform._cameraUboSize * _transform._cameras.size());
         for (size_t i = 0; i < _transform._cameras.size(); ++i) {
-            memcpy(bufferData.data() + (_transform._cameraUboSize * i), &_transform._cameras[i], sizeof(TransformStageState::CameraBufferElement));
+            memcpy(bufferData.data() + (_transform._cameraUboSize * i), &_transform._cameras[i],
+                   sizeof(TransformStageState::CameraBufferElement));
         }
         glNamedBufferData(_transform._cameraBuffer, bufferData.size(), bufferData.data(), GL_STREAM_DRAW);
     }
 
     if (!batch._objects.empty()) {
-        glNamedBufferData(_transform._objectBuffer, batch._objects.size() * sizeof(Batch::TransformObject), batch._objects.data(), GL_STREAM_DRAW);
+        glNamedBufferData(_transform._objectBuffer, batch._objects.size() * sizeof(Batch::TransformObject),
+                          batch._objects.data(), GL_STREAM_DRAW);
     }
 
     if (!batch._namedData.empty()) {
@@ -70,7 +72,6 @@ void GL45Backend::transferTransformState(const Batch& batch) const {
     _transform._currentCameraOffset = INVALID_OFFSET;
 }
 
-
 void GL45Backend::updateTransform(const Batch& batch) {
     _transform.update(_commandIndex, _stereo);
 
@@ -97,7 +98,8 @@ void GL45Backend::updateTransform(const Batch& batch) {
         // NOTE: A stride of zero in BindVertexBuffer signifies that all elements are sourced from the same location,
         //       so we must provide a stride.
         //       This is in contrast to VertexAttrib*Pointer, where a zero signifies tightly-packed elements.
-        glBindVertexBuffer(gpu::Stream::DRAW_CALL_INFO, _transform._drawCallInfoBuffer, (GLintptr)_transform._drawCallInfoOffsets[batch._currentNamedCall], 2 * sizeof(GLushort));
+        glBindVertexBuffer(gpu::Stream::DRAW_CALL_INFO, _transform._drawCallInfoBuffer,
+                           (GLintptr)_transform._drawCallInfoOffsets[batch._currentNamedCall], 2 * sizeof(GLushort));
     }
 
     (void)CHECK_GL_ERROR();

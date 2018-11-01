@@ -1,9 +1,9 @@
 #pragma once
 
-#include <functional>
-#include <QtGui/QWindow>
-#include <QtGui/QOpenGLFunctions_4_1_Core>
 #include <qml/OffscreenSurface.h>
+#include <QtGui/QOpenGLFunctions_4_1_Core>
+#include <QtGui/QWindow>
+#include <functional>
 
 class TestCase {
 public:

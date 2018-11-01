@@ -21,13 +21,13 @@ class ovrHmdInfo;
 // This is set by JNI_OnLoad() when the .so is initially loaded.
 // Must use to attach each thread that will use JNI:
 namespace OVR {
-    // PLATFORMACTIVITY_REMOVAL: Temp workaround for PlatformActivity being
-    // stripped from UnityPlugin. Alternate is to use LOCAL_WHOLE_STATIC_LIBRARIES
-    // but that increases the size of the plugin by ~1MiB
-    extern int linkerPlatformActivity;
-}
+// PLATFORMACTIVITY_REMOVAL: Temp workaround for PlatformActivity being
+// stripped from UnityPlugin. Alternate is to use LOCAL_WHOLE_STATIC_LIBRARIES
+// but that increases the size of the plugin by ~1MiB
+extern int linkerPlatformActivity;
+} // namespace OVR
 
-#endif 
+#endif
 
 class GVRMainWindow;
 class RenderingClient;
@@ -41,30 +41,31 @@ class QKeyEvent;
 class GVRInterface : public QApplication {
     Q_OBJECT
 public:
-    GVRInterface(int argc, char* argv[]);   
+    GVRInterface(int argc, char* argv[]);
     RenderingClient* getClient() { return _client; }
-    
+
     void setMainWindow(GVRMainWindow* mainWindow) { _mainWindow = mainWindow; }
-    
+
 protected:
     void keyPressEvent(QKeyEvent* event);
-        
+
 private slots:
     void handleApplicationStateChange(Qt::ApplicationState state);
     void idle();
+
 private:
     void handleApplicationQuit();
-    
+
     void enterVRMode();
     void leaveVRMode();
-    
+
 #if defined(ANDROID) && defined(HAVE_LIBOVR)
     ovrMobile* _ovr;
     ovrHmdInfo* _hmdInfo;
 #endif
-    
+
     GVRMainWindow* _mainWindow;
-    
+
     RenderingClient* _client;
     bool _inVRMode;
 };

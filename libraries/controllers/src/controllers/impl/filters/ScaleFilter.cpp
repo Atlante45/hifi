@@ -8,8 +8,8 @@
 
 #include "ScaleFilter.h"
 
-#include <QtCore/QJsonObject>
 #include <QtCore/QJsonArray>
+#include <QtCore/QJsonObject>
 
 using namespace controller;
 

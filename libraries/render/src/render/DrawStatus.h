@@ -16,57 +16,63 @@
 #include "gpu/Batch.h"
 
 namespace render {
-    class DrawStatusConfig : public Job::Config {
-        Q_OBJECT
-        Q_PROPERTY(bool showDisplay MEMBER showDisplay WRITE setShowDisplay)
-        Q_PROPERTY(bool showNetwork MEMBER showNetwork WRITE setShowNetwork)
-    public:
-        DrawStatusConfig() : Job::Config(false) {} // FIXME FOR debug
+class DrawStatusConfig : public Job::Config {
+    Q_OBJECT
+    Q_PROPERTY(bool showDisplay MEMBER showDisplay WRITE setShowDisplay)
+    Q_PROPERTY(bool showNetwork MEMBER showNetwork WRITE setShowNetwork)
+public:
+    DrawStatusConfig() : Job::Config(false) {} // FIXME FOR debug
 
-        void dirtyHelper();
+    void dirtyHelper();
 
-        bool showDisplay{ false };
-        bool showNetwork{ false };
+    bool showDisplay { false };
+    bool showNetwork { false };
 
-    public slots:
-        void setShowDisplay(bool enabled) { showDisplay = enabled; dirtyHelper(); }
-        void setShowNetwork(bool enabled) { showNetwork = enabled; dirtyHelper(); }
+public slots:
+    void setShowDisplay(bool enabled) {
+        showDisplay = enabled;
+        dirtyHelper();
+    }
+    void setShowNetwork(bool enabled) {
+        showNetwork = enabled;
+        dirtyHelper();
+    }
 
-    signals:
-        void dirty();
-    };
+signals:
+    void dirty();
+};
 
-    class DrawStatus {
-    public:
-        using Config = DrawStatusConfig;
-        using Input = VaryingSet2<ItemBounds, glm::vec2>;
-        using JobModel = Job::ModelI<DrawStatus, Input, Config>;
+class DrawStatus {
+public:
+    using Config = DrawStatusConfig;
+    using Input = VaryingSet2<ItemBounds, glm::vec2>;
+    using JobModel = Job::ModelI<DrawStatus, Input, Config>;
 
-        DrawStatus() {}
-        DrawStatus(const gpu::TexturePointer statusIconMap) { setStatusIconMap(statusIconMap); }
+    DrawStatus() {}
+    DrawStatus(const gpu::TexturePointer statusIconMap) { setStatusIconMap(statusIconMap); }
 
-        void configure(const Config& config);
-        void run(const RenderContextPointer& renderContext, const Input& input);
+    void configure(const Config& config);
+    void run(const RenderContextPointer& renderContext, const Input& input);
 
-        const gpu::PipelinePointer getDrawItemBoundsPipeline();
-        const gpu::PipelinePointer getDrawItemStatusPipeline();
+    const gpu::PipelinePointer getDrawItemBoundsPipeline();
+    const gpu::PipelinePointer getDrawItemStatusPipeline();
 
-        void setStatusIconMap(const gpu::TexturePointer& map);
-        const gpu::TexturePointer getStatusIconMap() const;
+    void setStatusIconMap(const gpu::TexturePointer& map);
+    const gpu::TexturePointer getStatusIconMap() const;
 
-    protected:
-        bool _showDisplay; // initialized by Config
-        bool _showNetwork; // initialized by Config
+protected:
+    bool _showDisplay; // initialized by Config
+    bool _showNetwork; // initialized by Config
 
-        gpu::Stream::FormatPointer _drawItemFormat;
-        gpu::PipelinePointer _drawItemBoundsPipeline;
-        gpu::PipelinePointer _drawItemStatusPipeline;
+    gpu::Stream::FormatPointer _drawItemFormat;
+    gpu::PipelinePointer _drawItemBoundsPipeline;
+    gpu::PipelinePointer _drawItemStatusPipeline;
 
-        gpu::BufferPointer _boundsBuffer;
-        gpu::BufferPointer _instanceBuffer;
-        gpu::Stream::FormatPointer _vertexFormat;
-        gpu::TexturePointer _statusIconMap;
-    };
-}
+    gpu::BufferPointer _boundsBuffer;
+    gpu::BufferPointer _instanceBuffer;
+    gpu::Stream::FormatPointer _vertexFormat;
+    gpu::TexturePointer _statusIconMap;
+};
+} // namespace render
 
 #endif // hifi_render_DrawStatus_h

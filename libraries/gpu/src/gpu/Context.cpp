@@ -27,11 +27,10 @@ void ContextStats::evalDelta(const ContextStats& begin, const ContextStats& end)
 
     _DSNumAPIDrawcalls = end._DSNumAPIDrawcalls - begin._DSNumAPIDrawcalls;
     _DSNumDrawcalls = end._DSNumDrawcalls - begin._DSNumDrawcalls;
-    _DSNumTriangles= end._DSNumTriangles - begin._DSNumTriangles;
+    _DSNumTriangles = end._DSNumTriangles - begin._DSNumTriangles;
 
     _PSNumSetPipelines = end._PSNumSetPipelines - begin._PSNumSetPipelines;
 }
-
 
 Context::CreateBackend Context::_createBackendCallback = nullptr;
 std::once_flag Context::_initialized;
@@ -221,7 +220,8 @@ const Backend::TransformCamera& Backend::TransformCamera::recomputeDerived(const
     return *this;
 }
 
-Backend::TransformCamera Backend::TransformCamera::getEyeCamera(int eye, const StereoState& _stereo, const Transform& xformView, Vec2 normalizedJitter) const {
+Backend::TransformCamera Backend::TransformCamera::getEyeCamera(int eye, const StereoState& _stereo, const Transform& xformView,
+                                                                Vec2 normalizedJitter) const {
     TransformCamera result = *this;
     Transform offsetTransform = xformView;
     if (!_stereo._skybox) {
@@ -250,26 +250,26 @@ Backend::TransformCamera Backend::TransformCamera::getMonoCamera(const Transform
 
 // Counters for Buffer and Texture usage in GPU/Context
 
-ContextMetricSize  Backend::freeGPUMemSize;
+ContextMetricSize Backend::freeGPUMemSize;
 
 ContextMetricCount Backend::bufferCount;
-ContextMetricSize  Backend::bufferGPUMemSize;
+ContextMetricSize Backend::bufferGPUMemSize;
 
 ContextMetricCount Backend::textureResidentCount;
 ContextMetricCount Backend::textureFramebufferCount;
 ContextMetricCount Backend::textureResourceCount;
 ContextMetricCount Backend::textureExternalCount;
 
-ContextMetricSize  Backend::textureResidentGPUMemSize;
-ContextMetricSize  Backend::textureFramebufferGPUMemSize;
-ContextMetricSize  Backend::textureResourceGPUMemSize;
-ContextMetricSize  Backend::textureExternalGPUMemSize;
+ContextMetricSize Backend::textureResidentGPUMemSize;
+ContextMetricSize Backend::textureFramebufferGPUMemSize;
+ContextMetricSize Backend::textureResourceGPUMemSize;
+ContextMetricSize Backend::textureExternalGPUMemSize;
 
 ContextMetricCount Backend::texturePendingGPUTransferCount;
-ContextMetricSize  Backend::texturePendingGPUTransferMemSize;
+ContextMetricSize Backend::texturePendingGPUTransferMemSize;
 
-ContextMetricSize  Backend::textureResourcePopulatedGPUMemSize;
-ContextMetricSize  Backend::textureResourceIdealGPUMemSize;
+ContextMetricSize Backend::textureResourcePopulatedGPUMemSize;
+ContextMetricSize Backend::textureResourceIdealGPUMemSize;
 
 Size Context::getFreeGPUMemSize() {
     return Backend::freeGPUMemSize.getValue();
@@ -335,7 +335,6 @@ Size Context::getTextureResourceIdealGPUMemSize() {
     return Backend::textureResourceIdealGPUMemSize.getValue();
 }
 
-
 BatchPointer Context::acquireBatch(const char* name) {
     Batch* rawBatch = nullptr;
     {
@@ -358,8 +357,7 @@ void Context::releaseBatch(Batch* batch) {
     _batchPool.push_back(batch);
 }
 
-void gpu::doInBatch(const char* name,
-                    const std::shared_ptr<gpu::Context>& context,
+void gpu::doInBatch(const char* name, const std::shared_ptr<gpu::Context>& context,
                     const std::function<void(Batch& batch)>& f) {
     auto batch = context->acquireBatch(name);
     f(*batch);

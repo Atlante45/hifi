@@ -18,19 +18,19 @@
 
 #include <gpu/gl/GLBackend.h>
 
-#include <GeometryCache.h>
 #include <DeferredLightingEffect.h>
 #include <FramebufferCache.h>
+#include <GeometryCache.h>
 #include <TextureCache.h>
 
 #ifdef DEFERRED_LIGHTING
-extern void initDeferredPipelines(render::ShapePlumber& plumber, const render::ShapePipeline::BatchSetter& batchSetter, const render::ShapePipeline::ItemSetter& itemSetter);
+extern void initDeferredPipelines(render::ShapePlumber& plumber, const render::ShapePipeline::BatchSetter& batchSetter,
+                                  const render::ShapePipeline::ItemSetter& itemSetter);
 extern void initStencilPipeline(gpu::PipelinePointer& pipeline);
 #endif
 
 TestWindow::TestWindow() {
     setSurfaceType(QSurface::OpenGLSurface);
-
 
     auto timer = new QTimer(this);
     timer->setTimerType(Qt::PreciseTimer);
@@ -55,7 +55,7 @@ TestWindow::TestWindow() {
 
     QSurfaceFormat format = getDefaultOpenGLSurfaceFormat();
     format.setOption(QSurfaceFormat::DebugContext);
-    //format.setSwapInterval(0);
+    // format.setSwapInterval(0);
     setFormat(format);
     _glContext.setFormat(format);
     _glContext.create();
@@ -91,7 +91,6 @@ void TestWindow::resizeWindow(const QSize& size) {
 }
 
 void TestWindow::beginFrame() {
-
 #ifdef DEFERRED_LIGHTING
 
     gpu::FramebufferPointer primaryFramebuffer;
@@ -106,7 +105,6 @@ void TestWindow::beginFrame() {
     _prepareDeferredInputs.edit0() = primaryFramebuffer;
     _prepareDeferredInputs.edit1() = lightingModel;
     _prepareDeferred.run(_renderContext, _prepareDeferredInputs, _prepareDeferredOutputs);
-
 
     _renderDeferredInputs.edit0() = frameTransform; // Pass the deferredFrameTransform
     _renderDeferredInputs.edit1() = _prepareDeferredOutputs.get0(); // Pass the deferredFramebuffer
@@ -148,15 +146,13 @@ void TestWindow::endFrame() {
         PROFILE_RANGE_BATCH(batch, "blit");
         // Blit to screen
         auto framebufferCache = DependencyManager::get<FramebufferCache>();
-       // auto framebuffer = framebufferCache->getLightingFramebuffer();
+        // auto framebuffer = framebufferCache->getLightingFramebuffer();
         auto framebuffer = _prepareDeferredOutputs.get0()->getLightingFramebuffer();
         batch.blit(framebuffer, _renderArgs->_viewport, nullptr, _renderArgs->_viewport);
     });
 #endif
 
-    gpu::doInBatch("TestWindow::endFrame::finish", _renderArgs->_context, [&](gpu::Batch& batch) {
-        batch.resetStages();
-    });
+    gpu::doInBatch("TestWindow::endFrame::finish", _renderArgs->_context, [&](gpu::Batch& batch) { batch.resetStages(); });
     _glContext.swapBuffers(this);
 }
 

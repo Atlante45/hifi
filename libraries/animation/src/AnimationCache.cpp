@@ -14,18 +14,16 @@
 #include <QRunnable>
 #include <QThreadPool>
 
-#include <shared/QtHelpers.h>
-#include <Trace.h>
-#include <StatTracker.h>
 #include <Profile.h>
+#include <StatTracker.h>
+#include <Trace.h>
+#include <shared/QtHelpers.h>
 
 #include "AnimationLogging.h"
 
 int animationPointerMetaTypeId = qRegisterMetaType<AnimationPointer>();
 
-AnimationCache::AnimationCache(QObject* parent) :
-    ResourceCache(parent)
-{
+AnimationCache::AnimationCache(QObject* parent) : ResourceCache(parent) {
     const qint64 ANIMATION_DEFAULT_UNUSED_MAX_SIZE = 50 * BYTES_PER_MEGABYTES;
     setUnusedResourceCacheSize(ANIMATION_DEFAULT_UNUSED_MAX_SIZE);
     setObjectName("AnimationCache");
@@ -36,15 +34,14 @@ AnimationPointer AnimationCache::getAnimation(const QUrl& url) {
 }
 
 QSharedPointer<Resource> AnimationCache::createResource(const QUrl& url, const QSharedPointer<Resource>& fallback,
-    const void* extra) {
+                                                        const void* extra) {
     return QSharedPointer<Resource>(new Animation(url), &Resource::deleter);
 }
 
-Animation::Animation(const QUrl& url) : Resource(url) {}
+Animation::Animation(const QUrl& url) : Resource(url) {
+}
 
-AnimationReader::AnimationReader(const QUrl& url, const QByteArray& data) :
-    _url(url),
-    _data(data) {
+AnimationReader::AnimationReader(const QUrl& url, const QByteArray& data) : _url(url), _data(data) {
     DependencyManager::get<StatTracker>()->incrementStat("PendingProcessing");
 }
 
@@ -94,15 +91,12 @@ bool Animation::isLoaded() const {
 QStringList Animation::getJointNames() const {
     if (QThread::currentThread() != thread()) {
         QStringList result;
-        BLOCKING_INVOKE_METHOD(const_cast<Animation*>(this), "getJointNames",
-            Q_RETURN_ARG(QStringList, result));
+        BLOCKING_INVOKE_METHOD(const_cast<Animation*>(this), "getJointNames", Q_RETURN_ARG(QStringList, result));
         return result;
     }
     QStringList names;
     if (_geometry) {
-        foreach (const FBXJoint& joint, _geometry->joints) {
-            names.append(joint.name);
-        }
+        foreach (const FBXJoint& joint, _geometry->joints) { names.append(joint.name); }
     }
     return names;
 }
@@ -110,8 +104,7 @@ QStringList Animation::getJointNames() const {
 QVector<FBXAnimationFrame> Animation::getFrames() const {
     if (QThread::currentThread() != thread()) {
         QVector<FBXAnimationFrame> result;
-        BLOCKING_INVOKE_METHOD(const_cast<Animation*>(this), "getFrames",
-            Q_RETURN_ARG(QVector<FBXAnimationFrame>, result));
+        BLOCKING_INVOKE_METHOD(const_cast<Animation*>(this), "getFrames", Q_RETURN_ARG(QVector<FBXAnimationFrame>, result));
         return result;
     }
     if (_geometry) {
@@ -134,7 +127,6 @@ void Animation::downloadFinished(const QByteArray& data) {
 }
 
 void Animation::animationParseSuccess(FBXGeometry::Pointer geometry) {
-
     qCDebug(animation) << "Animation parse success" << _url.toDisplayString();
 
     _geometry = geometry;
@@ -146,4 +138,3 @@ void Animation::animationParseError(int error, QString str) {
     emit failed(QNetworkReply::UnknownContentError);
     finishedLoading(false);
 }
-

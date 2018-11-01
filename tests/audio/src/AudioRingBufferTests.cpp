@@ -17,8 +17,7 @@
 //  QCOMPARE(<unsigned int>, <int>) => cryptic linker error.
 //  (since QTest::qCompare is defined for (T, T, ...), but not (T, U, ...))
 //
-#define QCOMPARE_WITH_CAST(actual, expected) \
-QCOMPARE(actual, static_cast<decltype(actual)>(expected))
+#define QCOMPARE_WITH_CAST(actual, expected) QCOMPARE(actual, static_cast<decltype(actual)>(expected))
 
 QTEST_MAIN(AudioRingBufferTests)
 
@@ -27,18 +26,17 @@ void AudioRingBufferTests::assertBufferSize(const AudioRingBuffer& buffer, int s
 }
 
 void AudioRingBufferTests::runAllTests() {
-
     int16_t writeData[10000];
-    for (int i = 0; i < 10000; i++) { writeData[i] = i; }
+    for (int i = 0; i < 10000; i++) {
+        writeData[i] = i;
+    }
     int writeIndexAt;
 
     int16_t readData[10000];
     int readIndexAt;
 
-
     AudioRingBuffer ringBuffer(10, 10); // makes buffer of 100 int16_t samples
     for (int T = 0; T < 300; T++) {
-
         writeIndexAt = 0;
         readIndexAt = 0;
 
@@ -57,7 +55,6 @@ void AudioRingBufferTests::runAllTests() {
         // read 100 samples, 0 samples in buffer (empty)
         readIndexAt += ringBuffer.readSamples(&readData[readIndexAt], 100);
         assertBufferSize(ringBuffer, 0);
-
 
         // verify 143 samples of read data
         for (int i = 0; i < 143; i++) {

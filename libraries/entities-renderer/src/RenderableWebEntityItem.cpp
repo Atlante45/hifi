@@ -11,21 +11,20 @@
 #include <QtCore/QTimer>
 #include <QtGui/QOpenGLContext>
 #include <QtGui/QTouchDevice>
+#include <QtQml/QQmlContext>
 #include <QtQuick/QQuickItem>
 #include <QtQuick/QQuickWindow>
-#include <QtQml/QQmlContext>
 
-
+#include <EntityScriptingInterface.h>
 #include <GeometryCache.h>
 #include <PathUtils.h>
 #include <PointerEvent.h>
 #include <gl/GLHelpers.h>
 #include <ui/OffscreenQmlSurface.h>
 #include <ui/TabletScriptingInterface.h>
-#include <EntityScriptingInterface.h>
 
-#include "EntitiesRendererLogging.h"
 #include <NetworkingConstants.h>
+#include "EntitiesRendererLogging.h"
 
 using namespace render;
 using namespace render::entities;
@@ -33,7 +32,7 @@ using namespace render::entities;
 static const QString WEB_ENTITY_QML = "controls/WebEntityView.qml";
 
 const float METERS_TO_INCHES = 39.3701f;
-static uint32_t _currentWebCount{ 0 };
+static uint32_t _currentWebCount { 0 };
 // Don't allow more than 20 concurrent web views
 static const uint32_t MAX_CONCURRENT_WEB_VIEWS = 20;
 // If a web-view hasn't been rendered for 30 seconds, de-allocate the framebuffer
@@ -63,7 +62,7 @@ WebEntityRenderer::ContentType WebEntityRenderer::getContentType(const QString& 
 
 WebEntityRenderer::WebEntityRenderer(const EntityItemPointer& entity) : Parent(entity) {
     static std::once_flag once;
-    std::call_once(once, [&]{
+    std::call_once(once, [&] {
         _touchDevice.setCapabilities(QTouchDevice::Position);
         _touchDevice.setType(QTouchDevice::TouchScreen);
         _touchDevice.setName("WebEntityRendererTouchDevice");
@@ -92,9 +91,7 @@ bool WebEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityPointe
 
     {
         QSharedPointer<OffscreenQmlSurface> webSurface;
-        withReadLock([&] {
-            webSurface = _webSurface;
-        });
+        withReadLock([&] { webSurface = _webSurface; });
         if (webSurface && uvec2(getWindowSize(entity)) != toGlm(webSurface->size())) {
             return true;
         }
@@ -118,9 +115,7 @@ bool WebEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityPointe
 bool WebEntityRenderer::needsRenderUpdate() const {
     {
         QSharedPointer<OffscreenQmlSurface> webSurface;
-        withReadLock([&] {
-            webSurface = _webSurface;
-        });
+        withReadLock([&] { webSurface = _webSurface; });
         if (!webSurface) {
             // If we have rendered recently, and there is no web surface, we're going to create one
             return true;
@@ -131,25 +126,22 @@ bool WebEntityRenderer::needsRenderUpdate() const {
 }
 
 void WebEntityRenderer::onTimeout() {
-    bool needsCheck = resultWithReadLock<bool>([&] {
-        return (_lastRenderTime != 0 && (bool)_webSurface);
-    });
+    bool needsCheck = resultWithReadLock<bool>([&] { return (_lastRenderTime != 0 && (bool)_webSurface); });
 
     if (!needsCheck) {
         return;
     }
 
     uint64_t interval;
-    withReadLock([&] {
-        interval = usecTimestampNow() - _lastRenderTime;
-    });
+    withReadLock([&] { interval = usecTimestampNow() - _lastRenderTime; });
 
     if (interval > MAX_NO_RENDER_INTERVAL) {
         destroyWebSurface();
     }
 }
 
-void WebEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) {
+void WebEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                       const TypedEntityPointer& entity) {
     // If the content type has changed, or the old content type was QML, we need to
     // destroy the existing surface (because surfaces don't support changing the root
     // object, so subsequent loads of content just overlap the existing content
@@ -177,7 +169,6 @@ void WebEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene
         }
     }
 
-
     withWriteLock([&] {
         if (_contentType == ContentType::NoContent) {
             return;
@@ -194,7 +185,7 @@ void WebEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene
         }
 
         void* key = (void*)this;
-        AbstractViewStateInterface::instance()->pushPostUpdateLambda(key, [this, entity] () {
+        AbstractViewStateInterface::instance()->pushPostUpdateLambda(key, [this, entity]() {
             withWriteLock([&] {
                 if (_contextPosition != entity->getWorldPosition()) {
                     // update globalPosition
@@ -216,15 +207,13 @@ void WebEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene
 }
 
 void WebEntityRenderer::doRender(RenderArgs* args) {
-    withWriteLock([&] {
-        _lastRenderTime = usecTimestampNow();
-    });
+    withWriteLock([&] { _lastRenderTime = usecTimestampNow(); });
 
 #ifdef WANT_EXTRA_DEBUGGING
     {
         gpu::Batch& batch = *args->_batch;
         batch.setModelTransform(getTransformToCenter()); // we want to include the scale as well
-        glm::vec4 cubeColor{ 1.0f, 0.0f, 0.0f, 1.0f };
+        glm::vec4 cubeColor { 1.0f, 0.0f, 0.0f, 1.0f };
         DependencyManager::get<GeometryCache>()->renderWireCube(batch, 1.0f, cubeColor);
     }
 #endif
@@ -232,9 +221,7 @@ void WebEntityRenderer::doRender(RenderArgs* args) {
     // Try to update the texture
     {
         QSharedPointer<OffscreenQmlSurface> webSurface;
-        withReadLock([&] {
-            webSurface = _webSurface;
-        });
+        withReadLock([&] { webSurface = _webSurface; });
         if (!webSurface) {
             return;
         }
@@ -250,16 +237,15 @@ void WebEntityRenderer::doRender(RenderArgs* args) {
     static const glm::vec2 texMin(0.0f), texMax(1.0f), topLeft(-0.5f), bottomRight(0.5f);
 
     gpu::Batch& batch = *args->_batch;
-    withReadLock([&] {
-        batch.setModelTransform(_renderTransform);
-    });
+    withReadLock([&] { batch.setModelTransform(_renderTransform); });
     batch.setResourceTexture(0, _texture);
     float fadeRatio = _isFading ? Interpolate::calculateFadeRatio(_fadeStartTime) : 1.0f;
 
     // Turn off jitter for these entities
     batch.pushProjectionJitter();
     DependencyManager::get<GeometryCache>()->bindWebBrowserProgram(batch, fadeRatio < OPAQUE_ALPHA_THRESHOLD);
-    DependencyManager::get<GeometryCache>()->renderQuad(batch, topLeft, bottomRight, texMin, texMax, glm::vec4(1.0f, 1.0f, 1.0f, fadeRatio), _geometryId);
+    DependencyManager::get<GeometryCache>()->renderQuad(batch, topLeft, bottomRight, texMin, texMax,
+                                                        glm::vec4(1.0f, 1.0f, 1.0f, fadeRatio), _geometryId);
     batch.popProjectionJitter();
     batch.setResourceTexture(0, nullptr);
 }
@@ -299,9 +285,8 @@ bool WebEntityRenderer::buildWebSurface(const TypedEntityPointer& entity) {
     // forward web events to EntityScriptingInterface
     auto entities = DependencyManager::get<EntityScriptingInterface>();
     const EntityItemID entityItemID = entity->getID();
-    QObject::connect(_webSurface.data(), &OffscreenQmlSurface::webEventReceived, [=](const QVariant& message) {
-        emit entities->webEventReceived(entityItemID, message);
-    });
+    QObject::connect(_webSurface.data(), &OffscreenQmlSurface::webEventReceived,
+                     [=](const QVariant& message) { emit entities->webEventReceived(entityItemID, message); });
 
     if (_contentType == ContentType::HtmlContent) {
         // We special case YouTube URLs since we know they are videos that we should play with at least 30 FPS.
@@ -312,9 +297,8 @@ bool WebEntityRenderer::buildWebSurface(const TypedEntityPointer& entity) {
         } else {
             _webSurface->setMaxFps(DEFAULT_MAX_FPS);
         }
-        _webSurface->load("controls/WebEntityView.qml", [this](QQmlContext* context, QObject* item) {
-            item->setProperty(URL_PROPERTY, _lastSourceUrl);
-        });
+        _webSurface->load("controls/WebEntityView.qml",
+                          [this](QQmlContext* context, QObject* item) { item->setProperty(URL_PROPERTY, _lastSourceUrl); });
     } else if (_contentType == ContentType::QmlContent) {
         _webSurface->load(_lastSourceUrl);
     }
@@ -326,7 +310,7 @@ bool WebEntityRenderer::buildWebSurface(const TypedEntityPointer& entity) {
 
 void WebEntityRenderer::destroyWebSurface() {
     QSharedPointer<OffscreenQmlSurface> webSurface;
-    ContentType contentType{ ContentType::NoContent };
+    ContentType contentType { ContentType::NoContent };
     withWriteLock([&] {
         webSurface.swap(_webSurface);
         std::swap(contentType, _contentType);
@@ -403,4 +387,3 @@ bool WebEntityRenderer::isTransparent() const {
     float fadeRatio = _isFading ? Interpolate::calculateFadeRatio(_fadeStartTime) : 1.0f;
     return fadeRatio < OPAQUE_ALPHA_THRESHOLD;
 }
-

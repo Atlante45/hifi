@@ -8,7 +8,6 @@
 
 #include "TestFloorGrid.h"
 
-
 TestFloorGrid::TestFloorGrid() {
     auto geometryCache = DependencyManager::get<GeometryCache>();
     // Render grid on xz plane (not the optimal way to do things, but w/e)
@@ -38,13 +37,12 @@ TestFloorGrid::TestFloorGrid() {
             }
         }
     }
-
 }
 
 void TestFloorGrid::renderTest(size_t testId, RenderArgs* args) {
-    //gpu::Batch& batch = *(args->_batch);
-    //auto pipeline = geometryCache->getSimplePipeline();
-    //for (auto& transform : transforms) {
+    // gpu::Batch& batch = *(args->_batch);
+    // auto pipeline = geometryCache->getSimplePipeline();
+    // for (auto& transform : transforms) {
     //    batch.setModelTransform(transform);
     //    batch.setupNamedCalls(GRID_INSTANCE, [=](gpu::Batch& batch, gpu::Batch::NamedBatchData& data) {
     //        batch.setPipeline(_pipeline);

@@ -18,10 +18,9 @@ class GameSpaceToRenderConfig : public workload::Job::Config {
     Q_PROPERTY(bool showProxies MEMBER showProxies NOTIFY dirty)
     Q_PROPERTY(bool showViews MEMBER showViews NOTIFY dirty)
 public:
-
-    bool freezeViews{ false };
-    bool showProxies{ false };
-    bool showViews{ false };
+    bool freezeViews { false };
+    bool showProxies { false };
+    bool showViews { false };
 signals:
     void dirty();
 
@@ -40,12 +39,11 @@ public:
     void run(const workload::WorkloadContextPointer& renderContext, Outputs& outputs);
 
 protected:
-    render::ItemID _spaceRenderItemID{ render::Item::INVALID_ITEM_ID };
-    bool _freezeViews{ false };
-    bool _showAllProxies{ false };
-    bool _showAllViews{ false };
+    render::ItemID _spaceRenderItemID { render::Item::INVALID_ITEM_ID };
+    bool _freezeViews { false };
+    bool _showAllProxies { false };
+    bool _showAllViews { false };
 };
-
 
 class GameWorkloadRenderItem {
 public:
@@ -73,11 +71,11 @@ protected:
 
     workload::Proxy::Vector _myOwnProxies;
     gpu::BufferPointer _allProxiesBuffer;
-    uint32_t _numAllProxies{ 0 };
+    uint32_t _numAllProxies { 0 };
 
     workload::Views _myOwnViews;
     gpu::BufferPointer _allViewsBuffer;
-    uint32_t _numAllViews{ 0 };
+    uint32_t _numAllViews { 0 };
 
     gpu::PipelinePointer _drawAllProxiesPipeline;
     const gpu::PipelinePointer getProxiesPipeline();
@@ -85,20 +83,24 @@ protected:
     gpu::PipelinePointer _drawAllViewsPipeline;
     const gpu::PipelinePointer getViewsPipeline();
 
-    uint32_t _numDrawViewVerts{ 0 };
+    uint32_t _numDrawViewVerts { 0 };
     gpu::BufferPointer _drawViewBuffer;
     const gpu::BufferPointer getDrawViewBuffer();
 
     render::ItemKey _key;
-    bool _showProxies{ true };
-    bool _showViews{ true };
+    bool _showProxies { true };
+    bool _showViews { true };
 };
 
 namespace render {
-    template <> const ItemKey payloadGetKey(const GameWorkloadRenderItem::Pointer& payload);
-    template <> const Item::Bound payloadGetBound(const GameWorkloadRenderItem::Pointer& payload);
-    template <> void payloadRender(const GameWorkloadRenderItem::Pointer& payload, RenderArgs* args);
-    template <> const ShapeKey shapeGetShapeKey(const GameWorkloadRenderItem::Pointer& payload);
-}
+template<>
+const ItemKey payloadGetKey(const GameWorkloadRenderItem::Pointer& payload);
+template<>
+const Item::Bound payloadGetBound(const GameWorkloadRenderItem::Pointer& payload);
+template<>
+void payloadRender(const GameWorkloadRenderItem::Pointer& payload, RenderArgs* args);
+template<>
+const ShapeKey shapeGetShapeKey(const GameWorkloadRenderItem::Pointer& payload);
+} // namespace render
 
 #endif

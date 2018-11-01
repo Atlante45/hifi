@@ -26,7 +26,7 @@ float InputEndpoint::peek() const {
     return deviceProxy->getValue(_input);
 }
 
-float InputEndpoint::value(){
+float InputEndpoint::value() {
     _read = true;
     return peek();
 }
@@ -47,4 +47,3 @@ Pose InputEndpoint::pose() {
     _read = true;
     return peekPose();
 }
-

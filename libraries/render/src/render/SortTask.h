@@ -15,44 +15,45 @@
 #include "Engine.h"
 
 namespace render {
-    void depthSortItems(const RenderContextPointer& renderContext, bool frontToBack, const ItemBounds& inItems, ItemBounds& outItems, AABox* bounds = nullptr);
+void depthSortItems(const RenderContextPointer& renderContext, bool frontToBack, const ItemBounds& inItems,
+                    ItemBounds& outItems, AABox* bounds = nullptr);
 
-    class PipelineSortShapes {
-    public:
-        using JobModel = Job::ModelIO<PipelineSortShapes, ItemBounds, ShapeBounds>;
-        void run(const RenderContextPointer& renderContext, const ItemBounds& inItems, ShapeBounds& outShapes);
-    };
+class PipelineSortShapes {
+public:
+    using JobModel = Job::ModelIO<PipelineSortShapes, ItemBounds, ShapeBounds>;
+    void run(const RenderContextPointer& renderContext, const ItemBounds& inItems, ShapeBounds& outShapes);
+};
 
-    class DepthSortShapes {
-    public:
-        using JobModel = Job::ModelIO<DepthSortShapes, ShapeBounds, ShapeBounds>;
+class DepthSortShapes {
+public:
+    using JobModel = Job::ModelIO<DepthSortShapes, ShapeBounds, ShapeBounds>;
 
-        bool _frontToBack;
-        DepthSortShapes(bool frontToBack = true) : _frontToBack(frontToBack) {}
+    bool _frontToBack;
+    DepthSortShapes(bool frontToBack = true) : _frontToBack(frontToBack) {}
 
-        void run(const RenderContextPointer& renderContext, const ShapeBounds& inShapes, ShapeBounds& outShapes);
-    };
+    void run(const RenderContextPointer& renderContext, const ShapeBounds& inShapes, ShapeBounds& outShapes);
+};
 
-    class DepthSortShapesAndComputeBounds {
-    public:
-        using Outputs = VaryingSet2<ShapeBounds, AABox>;
-        using JobModel = Job::ModelIO<DepthSortShapesAndComputeBounds, ShapeBounds, Outputs>;
+class DepthSortShapesAndComputeBounds {
+public:
+    using Outputs = VaryingSet2<ShapeBounds, AABox>;
+    using JobModel = Job::ModelIO<DepthSortShapesAndComputeBounds, ShapeBounds, Outputs>;
 
-        bool _frontToBack;
-        DepthSortShapesAndComputeBounds(bool frontToBack = true) : _frontToBack(frontToBack) {}
+    bool _frontToBack;
+    DepthSortShapesAndComputeBounds(bool frontToBack = true) : _frontToBack(frontToBack) {}
 
-        void run(const RenderContextPointer& renderContext, const ShapeBounds& inShapes, Outputs& outputs);
-    };
+    void run(const RenderContextPointer& renderContext, const ShapeBounds& inShapes, Outputs& outputs);
+};
 
-    class DepthSortItems {
-    public:
-        using JobModel = Job::ModelIO<DepthSortItems, ItemBounds, ItemBounds>;
+class DepthSortItems {
+public:
+    using JobModel = Job::ModelIO<DepthSortItems, ItemBounds, ItemBounds>;
 
-        bool _frontToBack;
-        DepthSortItems(bool frontToBack = true) : _frontToBack(frontToBack) {}
+    bool _frontToBack;
+    DepthSortItems(bool frontToBack = true) : _frontToBack(frontToBack) {}
 
-        void run(const RenderContextPointer& renderContext, const ItemBounds& inItems, ItemBounds& outItems);
-    };
-}
+    void run(const RenderContextPointer& renderContext, const ItemBounds& inItems, ItemBounds& outItems);
+};
+} // namespace render
 
 #endif // hifi_render_SortTask_h;

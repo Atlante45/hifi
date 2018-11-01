@@ -23,7 +23,7 @@
  * @hifi-interface
  */
 
-class LocationBookmarks : public Bookmarks, public  Dependency  {
+class LocationBookmarks : public Bookmarks, public Dependency {
     Q_OBJECT
     SINGLETON_DEPENDENCY
 

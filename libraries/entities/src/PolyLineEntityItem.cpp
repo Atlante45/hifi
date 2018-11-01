@@ -24,22 +24,22 @@
 const float PolyLineEntityItem::DEFAULT_LINE_WIDTH = 0.1f;
 const int PolyLineEntityItem::MAX_POINTS_PER_LINE = 60;
 
-
 EntityItemPointer PolyLineEntityItem::factory(const EntityItemID& entityID, const EntityItemProperties& properties) {
     EntityItemPointer entity(new PolyLineEntityItem(entityID), [](EntityItem* ptr) { ptr->deleteLater(); });
     entity->setProperties(properties);
     return entity;
 }
 
-
 PolyLineEntityItem::PolyLineEntityItem(const EntityItemID& entityItemID) : EntityItem(entityItemID) {
     _type = EntityTypes::PolyLine;
 }
 
-EntityItemProperties PolyLineEntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
+EntityItemProperties PolyLineEntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                                       bool allowEmptyDesiredProperties) const {
     QWriteLocker lock(&_quadReadWriteLock);
-    EntityItemProperties properties = EntityItem::getProperties(desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
-    
+    EntityItemProperties properties = EntityItem::getProperties(
+        desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
+
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(color, getColor);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(lineWidth, getLineWidth);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(linePoints, getLinePoints);
@@ -70,14 +70,13 @@ bool PolyLineEntityItem::setProperties(const EntityItemProperties& properties) {
         if (wantDebug) {
             uint64_t now = usecTimestampNow();
             int elapsed = now - getLastEdited();
-            qCDebug(entities) << "PolyLineEntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                "now=" << now << " getLastEdited()=" << getLastEdited();
+            qCDebug(entities) << "PolyLineEntityItem::setProperties() AFTER update... edited AGO=" << elapsed << "now=" << now
+                              << " getLastEdited()=" << getLastEdited();
         }
         setLastEdited(properties._lastEdited);
     }
     return somethingChanged;
 }
-
 
 bool PolyLineEntityItem::appendPoint(const glm::vec3& point) {
     if (_points.size() > MAX_POINTS_PER_LINE - 1) {
@@ -92,7 +91,6 @@ bool PolyLineEntityItem::appendPoint(const glm::vec3& point) {
 
     return true;
 }
-
 
 bool PolyLineEntityItem::setStrokeWidths(const QVector<float>& strokeWidths) {
     withWriteLock([&] {
@@ -118,18 +116,17 @@ bool PolyLineEntityItem::setStrokeColors(const QVector<glm::vec3>& strokeColors)
     return true;
 }
 
-
 bool PolyLineEntityItem::setLinePoints(const QVector<glm::vec3>& points) {
     if (points.size() > MAX_POINTS_PER_LINE) {
         return false;
     }
     bool result = false;
     withWriteLock([&] {
-        //Check to see if points actually changed. If they haven't, return before doing anything else
+        // Check to see if points actually changed. If they haven't, return before doing anything else
         if (points.size() != _points.size()) {
             _pointsChanged = true;
         } else if (points.size() == _points.size()) {
-            //same number of points, so now compare every point
+            // same number of points, so now compare every point
             for (int i = 0; i < points.size(); i++) {
                 if (points.at(i) != _points.at(i)) {
                     _pointsChanged = true;
@@ -176,7 +173,8 @@ void PolyLineEntityItem::calculateScaleAndRegistrationPoint() {
 
     const float EPSILON = 0.0001f;
     const float EPSILON_SQUARED = EPSILON * EPSILON;
-    const float HALF_LINE_WIDTH = 0.075f; // sadly _strokeWidths() don't seem to correspond to reality, so just use a flat assumption of the stroke width
+    const float HALF_LINE_WIDTH = 0.075f; // sadly _strokeWidths() don't seem to correspond to reality, so just use a flat
+                                          // assumption of the stroke width
     const vec3 QUARTER_LINE_WIDTH { HALF_LINE_WIDTH * 0.5f };
     if (pointCount > 1 && magnitudeSquared > EPSILON_SQUARED) {
         newScale = glm::abs(high) + glm::abs(low) + vec3(HALF_LINE_WIDTH);
@@ -184,7 +182,7 @@ void PolyLineEntityItem::calculateScaleAndRegistrationPoint() {
         glm::vec3 startPointInScaleSpace = firstPoint - low;
         startPointInScaleSpace += QUARTER_LINE_WIDTH;
         newRegistrationPoint = startPointInScaleSpace / newScale;
-    } 
+    }
 
     // if Polyline has only one or fewer points, use default dimension settings
     setScaledDimensions(newScale);
@@ -192,10 +190,8 @@ void PolyLineEntityItem::calculateScaleAndRegistrationPoint() {
 }
 
 int PolyLineEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                         ReadBitstreamToTreeParams& args,
-                                                         EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                         bool& somethingChanged) {
-
+                                                         ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                         bool overwriteLocalData, bool& somethingChanged) {
     QWriteLocker lock(&_quadReadWriteLock);
     int bytesRead = 0;
     const unsigned char* dataAt = data;
@@ -227,12 +223,9 @@ EntityPropertyFlags PolyLineEntityItem::getEntityProperties(EncodeBitstreamParam
 
 void PolyLineEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                             EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
-                                            EntityPropertyFlags& requestedProperties,
-                                            EntityPropertyFlags& propertyFlags,
-                                            EntityPropertyFlags& propertiesDidntFit,
-                                            int& propertyCount,
+                                            EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                            EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                                             OctreeElement::AppendState& appendState) const {
-
     QWriteLocker lock(&_quadReadWriteLock);
     bool successPropertyFits = true;
 
@@ -255,45 +248,33 @@ void PolyLineEntityItem::debugDump() const {
     qCDebug(entities) << "       getLastEdited:" << debugTime(getLastEdited(), now);
 }
 
-
-
 QVector<glm::vec3> PolyLineEntityItem::getLinePoints() const {
     QVector<glm::vec3> result;
-    withReadLock([&] {
-        result = _points;
-    });
-    return result; 
+    withReadLock([&] { result = _points; });
+    return result;
 }
 
 QVector<glm::vec3> PolyLineEntityItem::getNormals() const {
     QVector<glm::vec3> result;
-    withReadLock([&] {
-        result = _normals;
-    });
+    withReadLock([&] { result = _normals; });
     return result;
 }
 
 QVector<glm::vec3> PolyLineEntityItem::getStrokeColors() const {
     QVector<glm::vec3> result;
-    withReadLock([&] {
-        result = _strokeColors;
-    });
+    withReadLock([&] { result = _strokeColors; });
     return result;
 }
 
-QVector<float> PolyLineEntityItem::getStrokeWidths() const { 
+QVector<float> PolyLineEntityItem::getStrokeWidths() const {
     QVector<float> result;
-    withReadLock([&] {
-        result = _strokeWidths;
-    });
+    withReadLock([&] { result = _strokeWidths; });
     return result;
 }
 
-QString PolyLineEntityItem::getTextures() const { 
+QString PolyLineEntityItem::getTextures() const {
     QString result;
-    withReadLock([&] {
-        result = _textures;
-    });
+    withReadLock([&] { result = _textures; });
     return result;
 }
 
@@ -314,7 +295,5 @@ void PolyLineEntityItem::setColor(const glm::u8vec3& value) {
 }
 
 glm::u8vec3 PolyLineEntityItem::getColor() const {
-    return resultWithReadLock<glm::u8vec3>([&] {
-        return _color;
-    });
+    return resultWithReadLock<glm::u8vec3>([&] { return _color; });
 }

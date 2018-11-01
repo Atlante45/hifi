@@ -15,21 +15,18 @@
 #include <quazip5/quazipfile.h>
 
 ContentSettingsBackupHandler::ContentSettingsBackupHandler(DomainServerSettingsManager& domainServerSettingsManager) :
-    _settingsManager(domainServerSettingsManager)
-{
+    _settingsManager(domainServerSettingsManager) {
 }
 
 static const QString CONTENT_SETTINGS_BACKUP_FILENAME = "content-settings.json";
 
 void ContentSettingsBackupHandler::createBackup(const QString& backupName, QuaZip& zip) {
-
     // grab the content settings as JSON, excluding default values and values hidden from backup
     QJsonObject contentSettingsJSON = _settingsManager.settingsResponseObjectForType(
         "", // include all settings types
         DomainServerSettingsManager::Authenticated, DomainServerSettingsManager::NoDomainSettings,
         DomainServerSettingsManager::IncludeContentSettings, DomainServerSettingsManager::NoDefaultSettings,
-        DomainServerSettingsManager::ForBackup
-    );
+        DomainServerSettingsManager::ForBackup);
 
     // make a QJsonDocument using the object
     QJsonDocument contentSettingsDocument { contentSettingsJSON };

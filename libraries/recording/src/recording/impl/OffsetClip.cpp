@@ -19,11 +19,12 @@
 #include "../Frame.h"
 #include "../Logging.h"
 
-
 using namespace recording;
 
-OffsetClip::OffsetClip(const Clip::Pointer& wrappedClip, float offset)
-    : WrapperClip(wrappedClip), _offset(Frame::secondsToFrameTime(offset)) { }
+OffsetClip::OffsetClip(const Clip::Pointer& wrappedClip, float offset) :
+    WrapperClip(wrappedClip),
+    _offset(Frame::secondsToFrameTime(offset)) {
+}
 
 void OffsetClip::seekFrameTime(Frame::Time offset) {
     _wrappedClip->seekFrameTime(offset - _offset);
@@ -54,9 +55,5 @@ QString OffsetClip::getName() const {
 }
 
 Clip::Pointer OffsetClip::duplicate() const {
-    return std::make_shared<OffsetClip>(
-        _wrappedClip->duplicate(), Frame::frameTimeToSeconds(_offset));
+    return std::make_shared<OffsetClip>(_wrappedClip->duplicate(), Frame::frameTimeToSeconds(_offset));
 }
-
-
-

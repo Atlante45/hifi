@@ -28,7 +28,7 @@ void StateController::setStateVariables(const QStringList& newStateVariables) {
 StateController::StateController() : InputDevice("Application") {
     _deviceID = UserInputMapper::STATE_DEVICE;
     for (const auto& variable : stateVariables) {
-        _namedReadLambdas[variable] = []()->float{ return 0; };
+        _namedReadLambdas[variable] = []() -> float { return 0; };
     }
 }
 
@@ -54,4 +54,4 @@ EndpointPointer StateController::createEndpoint(const Input& input) const {
     return std::make_shared<LambdaRefEndpoint>(readLambda);
 }
 
-}
+} // namespace controller

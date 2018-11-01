@@ -10,12 +10,13 @@
 //
 #include "RenderViewTask.h"
 
-#include "RenderShadowTask.h"
 #include "RenderDeferredTask.h"
 #include "RenderForwardTask.h"
+#include "RenderShadowTask.h"
 
-void RenderViewTask::build(JobModel& task, const render::Varying& input, render::Varying& output, render::CullFunctor cullFunctor, bool isDeferred, uint8_t tagBits, uint8_t tagMask) {
-   // auto items = input.get<Input>();
+void RenderViewTask::build(JobModel& task, const render::Varying& input, render::Varying& output,
+                           render::CullFunctor cullFunctor, bool isDeferred, uint8_t tagBits, uint8_t tagMask) {
+    // auto items = input.get<Input>();
 
     const auto items = task.addJob<RenderFetchCullSortTask>("FetchCullSort", cullFunctor, tagBits, tagMask);
     assert(items.canCast<RenderFetchCullSortTask::Output>());
@@ -30,4 +31,3 @@ void RenderViewTask::build(JobModel& task, const render::Varying& input, render:
         task.addJob<RenderForwardTask>("Forward", items);
     }
 }
-

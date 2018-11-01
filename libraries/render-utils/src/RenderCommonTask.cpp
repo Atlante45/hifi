@@ -11,43 +11,36 @@
 #include <gpu/Context.h>
 #include <graphics/ShaderConstants.h>
 
-#include "render-utils/ShaderConstants.h"
 #include "DeferredLightingEffect.h"
 #include "RenderUtilsLogging.h"
+#include "render-utils/ShaderConstants.h"
 
 namespace ru {
-    using render_utils::slot::texture::Texture;
-    using render_utils::slot::buffer::Buffer;
-}
+using render_utils::slot::buffer::Buffer;
+using render_utils::slot::texture::Texture;
+} // namespace ru
 
 namespace gr {
-    using graphics::slot::texture::Texture;
-    using graphics::slot::buffer::Buffer;
-}
-
+using graphics::slot::buffer::Buffer;
+using graphics::slot::texture::Texture;
+} // namespace gr
 
 using namespace render;
 extern void initForwardPipelines(ShapePlumber& plumber);
 
 void BeginGPURangeTimer::run(const render::RenderContextPointer& renderContext, gpu::RangeTimerPointer& timer) {
     timer = _gpuTimer;
-    gpu::doInBatch("BeginGPURangeTimer", renderContext->args->_context, [&](gpu::Batch& batch) {
-        _gpuTimer->begin(batch);
-    });
+    gpu::doInBatch("BeginGPURangeTimer", renderContext->args->_context, [&](gpu::Batch& batch) { _gpuTimer->begin(batch); });
 }
 
 void EndGPURangeTimer::run(const render::RenderContextPointer& renderContext, const gpu::RangeTimerPointer& timer) {
-    gpu::doInBatch("EndGPURangeTimer", renderContext->args->_context, [&](gpu::Batch& batch) {
-        timer->end(batch);
-    });
-    
+    gpu::doInBatch("EndGPURangeTimer", renderContext->args->_context, [&](gpu::Batch& batch) { timer->end(batch); });
+
     auto config = std::static_pointer_cast<Config>(renderContext->jobConfig);
     config->setGPUBatchRunTime(timer->getGPUAverage(), timer->getBatchAverage());
 }
 
-DrawOverlay3D::DrawOverlay3D(bool opaque) :
-    _shapePlumber(std::make_shared<ShapePlumber>()),
-    _opaquePass(opaque) {
+DrawOverlay3D::DrawOverlay3D(bool opaque) : _shapePlumber(std::make_shared<ShapePlumber>()), _opaquePass(opaque) {
     initForwardPipelines(*_shapePlumber);
 }
 
@@ -60,14 +53,14 @@ void DrawOverlay3D::run(const RenderContextPointer& renderContext, const Inputs&
     const auto& inItems = inputs.get0();
     const auto& lightingModel = inputs.get1();
     const auto jitter = inputs.get2();
-    
+
     config->setNumDrawn((int)inItems.size());
     emit config->numDrawnChanged();
 
     RenderArgs* args = renderContext->args;
 
     // Clear the framebuffer without stereo
-    // Needs to be distinct from the other batch because using the clear call 
+    // Needs to be distinct from the other batch because using the clear call
     // while stereo is enabled triggers a warning
     if (_opaquePass) {
         gpu::doInBatch("DrawOverlay3D::run::clear", args->_context, [&](gpu::Batch& batch) {
@@ -120,7 +113,8 @@ void CompositeHUD::run(const RenderContextPointer& renderContext) {
         batch.setProjectionTransform(projMat);
         batch.setViewTransform(viewMat, true);
         if (renderContext->args->_hudOperator) {
-            renderContext->args->_hudOperator(batch, renderContext->args->_hudTexture, renderContext->args->_renderMode == RenderArgs::RenderMode::MIRROR_RENDER_MODE);
+            renderContext->args->_hudOperator(batch, renderContext->args->_hudTexture,
+                                              renderContext->args->_renderMode == RenderArgs::RenderMode::MIRROR_RENDER_MODE);
         }
     });
 #endif
@@ -216,11 +210,11 @@ void ExtractFrustums::run(const render::RenderContextPointer& renderContext, con
     // Return shadow frustum
     auto lightStage = args->_scene->getStage<LightStage>(LightStage::getName());
     for (auto i = 0; i < SHADOW_CASCADE_FRUSTUM_COUNT; i++) {
-        auto& shadowFrustum = output[SHADOW_CASCADE0_FRUSTUM+i].edit<ViewFrustumPointer>();
+        auto& shadowFrustum = output[SHADOW_CASCADE0_FRUSTUM + i].edit<ViewFrustumPointer>();
         if (lightStage) {
             auto globalShadow = lightStage->getCurrentKeyShadow(*lightFrame);
 
-            if (globalShadow && i<(int)globalShadow->getCascadeCount()) {
+            if (globalShadow && i < (int)globalShadow->getCascadeCount()) {
                 auto& cascade = globalShadow->getCascade(i);
                 shadowFrustum = cascade.getFrustum();
             } else {

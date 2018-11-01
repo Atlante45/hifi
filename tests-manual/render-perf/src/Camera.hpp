@@ -13,9 +13,7 @@ protected:
     }
 
 public:
-    const glm::quat& getOrientation() const {
-        return orientation;
-    }
+    const glm::quat& getOrientation() const { return orientation; }
 
     glm::quat orientation;
     glm::vec3 position;
@@ -42,22 +40,16 @@ public:
 
     std::bitset<KEYS_SIZE> keys;
 
-    SimpleCamera() {
-        matrices.perspective = glm::perspective(glm::radians(fov), aspect, znear, zfar);
-    }
+    SimpleCamera() { matrices.perspective = glm::perspective(glm::radians(fov), aspect, znear, zfar); }
 
-    bool moving() {
-        return keys.any();
-    }
+    bool moving() { return keys.any(); }
 
     void setFieldOfView(float fov) {
         this->fov = fov;
         matrices.perspective = glm::perspective(glm::radians(fov), aspect, znear, zfar);
     }
 
-    void setAspectRatio(const glm::vec2& size) {
-        setAspectRatio(size.x / size.y);
-    }
+    void setAspectRatio(const glm::vec2& size) { setAspectRatio(size.x / size.y); }
 
     void setAspectRatio(float aspect) {
         this->aspect = aspect;
@@ -82,7 +74,6 @@ public:
     }
 
     void rotate(const glm::vec2& delta) {
-
         // create orientation vectors
         auto lookat = orientation * Vectors::UNIT_NEG_Z;
         auto forward = glm::normalize(vec3(lookat.x, 0, lookat.z));

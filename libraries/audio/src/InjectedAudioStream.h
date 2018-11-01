@@ -30,7 +30,7 @@ public:
 private:
     // disallow copying of InjectedAudioStream objects
     InjectedAudioStream(const InjectedAudioStream&);
-    InjectedAudioStream& operator= (const InjectedAudioStream&);
+    InjectedAudioStream& operator=(const InjectedAudioStream&);
 
     AudioStreamStats getAudioStreamStats() const override;
     int parseStreamProperties(PacketType type, const QByteArray& packetAfterSeqNum, int& numAudioSamples) override;

@@ -12,8 +12,8 @@
 #ifndef hifi_OffscreenGLCanvas_h
 #define hifi_OffscreenGLCanvas_h
 
-#include <mutex>
 #include <QObject>
+#include <mutex>
 
 class QOpenGLContext;
 class QOffscreenSurface;
@@ -29,11 +29,9 @@ public:
     bool makeCurrent();
     void doneCurrent();
     void moveToThreadWithContext(QThread* thread);
-    QOpenGLContext* getContext() {
-        return _context;
-    }
+    QOpenGLContext* getContext() { return _context; }
     QObject* getContextObject();
-    
+
     void setThreadContext();
     static bool restoreThreadContext();
 
@@ -41,8 +39,8 @@ protected:
     void clearThreadContext();
 
     std::once_flag _reportOnce;
-    QOpenGLContext* _context{ nullptr };
-    QOffscreenSurface* _offscreenSurface{ nullptr };
+    QOpenGLContext* _context { nullptr };
+    QOffscreenSurface* _offscreenSurface { nullptr };
 };
 
 #endif // hifi_OffscreenGLCanvas_h

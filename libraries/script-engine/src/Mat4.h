@@ -16,8 +16,8 @@
 
 #include <QObject>
 #include <QString>
-#include <QtScript/QScriptable>
 #include <QVector>
+#include <QtScript/QScriptable>
 #include <glm/glm.hpp>
 #include "RegisteredMetaTypes.h"
 
@@ -44,7 +44,6 @@ public slots:
      */
     glm::mat4 multiply(const glm::mat4& m1, const glm::mat4& m2) const;
 
-
     /**jsdoc
      * @function Mat4.createFromRotAndTrans
      * @param {Quat} rot
@@ -70,7 +69,8 @@ public slots:
      * @param {Vec4} col
      * @returns {Mat4}
      */
-    glm::mat4 createFromColumns(const glm::vec4& col0, const glm::vec4& col1, const glm::vec4& col2, const glm::vec4& col3) const;
+    glm::mat4 createFromColumns(const glm::vec4& col0, const glm::vec4& col1, const glm::vec4& col2,
+                                const glm::vec4& col3) const;
 
     /**jsdoc
      * @function Mat4.createFromArray
@@ -78,7 +78,6 @@ public slots:
      * @returns {Mat4}
      */
     glm::mat4 createFromArray(const QVector<float>& floats) const;
-
 
     /**jsdoc
      * @function Mat4.extractTranslation
@@ -101,7 +100,6 @@ public slots:
      */
     glm::vec3 extractScale(const glm::mat4& m) const;
 
-
     /**jsdoc
      * @function Mat4.transformPoint
      * @param {Mat4} m
@@ -118,14 +116,12 @@ public slots:
      */
     glm::vec3 transformVector(const glm::mat4& m, const glm::vec3& vector) const;
 
-
     /**jsdoc
      * @function Mat4.inverse
      * @param {Mat4} m
      * @returns {Mat4}
      */
     glm::mat4 inverse(const glm::mat4& m) const;
-
 
     /**jsdoc
      * @function Mat4.getFront

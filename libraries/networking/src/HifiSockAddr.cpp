@@ -19,25 +19,16 @@
 
 int hifiSockAddrMetaTypeId = qRegisterMetaType<HifiSockAddr>();
 
-HifiSockAddr::HifiSockAddr() :
-    _address(),
-    _port(0)
-{
-
+HifiSockAddr::HifiSockAddr() : _address(), _port(0) {
 }
 
-HifiSockAddr::HifiSockAddr(const QHostAddress& address, quint16 port) :
-    _address(address),
-    _port(port)
-{
-
+HifiSockAddr::HifiSockAddr(const QHostAddress& address, quint16 port) : _address(address), _port(port) {
 }
 
 HifiSockAddr::HifiSockAddr(const HifiSockAddr& otherSockAddr) :
     QObject(),
     _address(otherSockAddr._address),
-    _port(otherSockAddr._port)
-{
+    _port(otherSockAddr._port) {
     setObjectName(otherSockAddr.objectName());
 }
 
@@ -50,8 +41,7 @@ HifiSockAddr& HifiSockAddr::operator=(const HifiSockAddr& rhsSockAddr) {
 
 HifiSockAddr::HifiSockAddr(const QString& hostname, quint16 hostOrderPort, bool shouldBlockForLookup) :
     _address(hostname),
-    _port(hostOrderPort)
-{
+    _port(hostOrderPort) {
     // if we parsed an IPv4 address out of the hostname, don't look it up
     if (_address.protocol() != QAbstractSocket::IPv4Protocol) {
         // lookup the IP by the hostname
@@ -61,7 +51,8 @@ HifiSockAddr::HifiSockAddr(const QString& hostname, quint16 hostOrderPort, bool 
             handleLookupResult(result);
         } else {
             int lookupID = QHostInfo::lookupHost(hostname, this, SLOT(handleLookupResult(QHostInfo)));
-            qCDebug(networking) << "Asynchronously looking up IP address for hostname" << hostname << "- lookup ID is" << lookupID;
+            qCDebug(networking) << "Asynchronously looking up IP address for hostname" << hostname << "- lookup ID is"
+                                << lookupID;
         }
     }
 }
@@ -78,10 +69,10 @@ HifiSockAddr::HifiSockAddr(const sockaddr* sockaddr) {
 
 void HifiSockAddr::swap(HifiSockAddr& otherSockAddr) {
     using std::swap;
-    
+
     swap(_address, otherSockAddr._address);
     swap(_port, otherSockAddr._port);
-    
+
     // Swap objects name
     auto temp = otherSockAddr.objectName();
     otherSockAddr.setObjectName(objectName());
@@ -97,12 +88,12 @@ void HifiSockAddr::handleLookupResult(const QHostInfo& hostInfo) {
         qCDebug(networking) << "Lookup failed for" << hostInfo.lookupId() << ":" << hostInfo.errorString();
         emit lookupFailed();
     } else {
-        foreach(const QHostAddress& address, hostInfo.addresses()) {
+        foreach (const QHostAddress& address, hostInfo.addresses()) {
             // just take the first IPv4 address
             if (address.protocol() == QAbstractSocket::IPv4Protocol) {
                 _address = address;
-                qCDebug(networking) << "QHostInfo lookup result for"
-                    << hostInfo.hostName() << "with lookup ID" << hostInfo.lookupId() << "is" << address.toString();
+                qCDebug(networking) << "QHostInfo lookup result for" << hostInfo.hostName() << "with lookup ID"
+                                    << hostInfo.lookupId() << "is" << address.toString();
                 emit lookupCompleted();
                 break;
             }
@@ -117,13 +108,11 @@ QString HifiSockAddr::toString() const {
 bool HifiSockAddr::hasPrivateAddress() const {
     // an address is private if it is loopback or falls in any of the RFC1918 address spaces
     const QPair<QHostAddress, int> TWENTY_FOUR_BIT_BLOCK = { QHostAddress("10.0.0.0"), 8 };
-    const QPair<QHostAddress, int> TWENTY_BIT_BLOCK = { QHostAddress("172.16.0.0") , 12 };
+    const QPair<QHostAddress, int> TWENTY_BIT_BLOCK = { QHostAddress("172.16.0.0"), 12 };
     const QPair<QHostAddress, int> SIXTEEN_BIT_BLOCK = { QHostAddress("192.168.0.0"), 16 };
 
-    return _address.isLoopback()
-        || _address.isInSubnet(TWENTY_FOUR_BIT_BLOCK)
-        || _address.isInSubnet(TWENTY_BIT_BLOCK)
-        || _address.isInSubnet(SIXTEEN_BIT_BLOCK);
+    return _address.isLoopback() || _address.isInSubnet(TWENTY_FOUR_BIT_BLOCK) || _address.isInSubnet(TWENTY_BIT_BLOCK) ||
+           _address.isInSubnet(SIXTEEN_BIT_BLOCK);
 }
 
 QDebug operator<<(QDebug debug, const HifiSockAddr& sockAddr) {

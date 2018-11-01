@@ -7,9 +7,9 @@
 //
 #pragma once
 
-#include <vector>
-#include <memory>
 #include <functional>
+#include <memory>
+#include <vector>
 
 enum class PluginType {
     DISPLAY_PLUGIN,

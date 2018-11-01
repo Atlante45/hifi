@@ -18,6 +18,7 @@ class GLWindow;
 
 class OculusLegacyDisplayPlugin : public HmdDisplayPlugin {
     using Parent = HmdDisplayPlugin;
+
 public:
     OculusLegacyDisplayPlugin();
     bool isSupported() const override;
@@ -45,7 +46,7 @@ protected:
 private:
     static const char* NAME;
 
-    GLWindow* _hmdWindow{ nullptr };
+    GLWindow* _hmdWindow { nullptr };
     ovrHmd _hmd;
     mutable ovrTrackingState _trackingState;
     ovrEyeRenderDesc _eyeRenderDescs[2];
@@ -56,5 +57,3 @@ private:
     mutable int _hmdScreen { -1 };
     bool _hswDismissed { false };
 };
-
-

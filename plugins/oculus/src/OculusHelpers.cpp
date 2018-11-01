@@ -11,17 +11,17 @@
 #include <atomic>
 
 #include <Windows.h>
-#include <QtCore/QFile>
 #include <QtCore/QDir>
+#include <QtCore/QFile>
 #include <QtCore/QProcessEnvironment>
 
 #define OVRPL_DISABLED
 #include <OVR_Platform.h>
 
+#include <NumericalConstants.h>
 #include <controllers/Input.h>
 #include <controllers/Pose.h>
 #include <shared/GlobalAppProperties.h>
-#include <NumericalConstants.h>
 
 Q_LOGGING_CATEGORY(displayplugins, "hifi.plugins.display")
 Q_LOGGING_CATEGORY(oculusLog, "hifi.plugins.display.oculus")
@@ -33,7 +33,7 @@ static wchar_t FOUND_PATH[MAX_PATH];
 
 bool ovr::available() {
     static std::once_flag once;
-    static bool result{ false };
+    static bool result { false };
     std::call_once(once, [&] {
         static const QString DEBUG_FLAG("HIFI_DEBUG_OPENVR");
         static bool enableDebugOpenVR = QProcessEnvironment::systemEnvironment().contains(DEBUG_FLAG);
@@ -61,15 +61,15 @@ class ovrImpl {
     using Mutex = std::mutex;
     using Lock = std::unique_lock<Mutex>;
     std::mutex mutex;
-    ovrSession session{ nullptr };
-    size_t renderCount{ 0 };
+    ovrSession session { nullptr };
+    size_t renderCount { 0 };
 
 private:
     void setupSession(bool render) {
         if (session) {
             return;
         }
-        ovrInitParams initParams{ ovrInit_RequestVersion | ovrInit_FocusAware, OVR_MINOR_VERSION, nullptr, 0, 0 };
+        ovrInitParams initParams { ovrInit_RequestVersion | ovrInit_FocusAware, OVR_MINOR_VERSION, nullptr, 0, 0 };
         if (render) {
             initParams.Flags |= ovrInit_MixedRendering;
         } else {
@@ -141,7 +141,7 @@ void ovr::withSession(const std::function<void(ovrSession)>& f) {
 }
 
 ovrSessionStatus ovr::getStatus() {
-    ovrSessionStatus status{};
+    ovrSessionStatus status {};
     withSession([&](ovrSession session) {
         if (!OVR_SUCCESS(ovr_GetSessionStatus(session, &status))) {
             qCWarning(oculusLog) << "Failed to get session status" << ovr::getError();
@@ -151,7 +151,7 @@ ovrSessionStatus ovr::getStatus() {
 }
 
 ovrTrackingState ovr::getTrackingState() {
-    ovrTrackingState result{};
+    ovrTrackingState result {};
     withSession([&](ovrSession session) { result = ovr_GetTrackingState(session, 0, ovrFalse); });
     return result;
 }
@@ -221,9 +221,9 @@ controller::Pose hifi::ovr::toControllerPose(ovrHandType hand, const ovrPoseStat
     static const glm::quat leftRotationOffset = glm::inverse(leftQuarterZ) * touchToHand;
     static const glm::quat rightRotationOffset = glm::inverse(rightQuarterZ) * touchToHand;
 
-    static const float CONTROLLER_LENGTH_OFFSET = 0.0762f;  // three inches
-    static const glm::vec3 CONTROLLER_OFFSET =
-        glm::vec3(CONTROLLER_LENGTH_OFFSET / 2.0f, -CONTROLLER_LENGTH_OFFSET / 2.0f, CONTROLLER_LENGTH_OFFSET * 1.5f);
+    static const float CONTROLLER_LENGTH_OFFSET = 0.0762f; // three inches
+    static const glm::vec3 CONTROLLER_OFFSET = glm::vec3(CONTROLLER_LENGTH_OFFSET / 2.0f, -CONTROLLER_LENGTH_OFFSET / 2.0f,
+                                                         CONTROLLER_LENGTH_OFFSET * 1.5f);
     static const glm::vec3 leftTranslationOffset = glm::vec3(-1.0f, 1.0f, 1.0f) * CONTROLLER_OFFSET;
     static const glm::vec3 rightTranslationOffset = CONTROLLER_OFFSET;
 
@@ -242,8 +242,7 @@ controller::Pose hifi::ovr::toControllerPose(ovrHandType hand, const ovrPoseStat
     return pose;
 }
 
-controller::Pose hifi::ovr::toControllerPose(ovrHandType hand,
-                                             const ovrPoseStatef& handPose,
+controller::Pose hifi::ovr::toControllerPose(ovrHandType hand, const ovrPoseStatef& handPose,
                                              const ovrPoseStatef& lastHandPose) {
     static const glm::quat yFlip = glm::angleAxis(PI, Vectors::UNIT_Y);
     static const glm::quat quarterX = glm::angleAxis(PI_OVER_TWO, Vectors::UNIT_X);
@@ -255,9 +254,9 @@ controller::Pose hifi::ovr::toControllerPose(ovrHandType hand,
     static const glm::quat leftRotationOffset = glm::inverse(leftQuarterZ) * touchToHand;
     static const glm::quat rightRotationOffset = glm::inverse(rightQuarterZ) * touchToHand;
 
-    static const float CONTROLLER_LENGTH_OFFSET = 0.0762f;  // three inches
-    static const glm::vec3 CONTROLLER_OFFSET =
-        glm::vec3(CONTROLLER_LENGTH_OFFSET / 2.0f, -CONTROLLER_LENGTH_OFFSET / 2.0f, CONTROLLER_LENGTH_OFFSET * 1.5f);
+    static const float CONTROLLER_LENGTH_OFFSET = 0.0762f; // three inches
+    static const glm::vec3 CONTROLLER_OFFSET = glm::vec3(CONTROLLER_LENGTH_OFFSET / 2.0f, -CONTROLLER_LENGTH_OFFSET / 2.0f,
+                                                         CONTROLLER_LENGTH_OFFSET * 1.5f);
     static const glm::vec3 leftTranslationOffset = glm::vec3(-1.0f, 1.0f, 1.0f) * CONTROLLER_OFFSET;
     static const glm::vec3 rightTranslationOffset = CONTROLLER_OFFSET;
 

@@ -12,8 +12,8 @@
 #ifndef hifi_AssignmentParentFinder_h
 #define hifi_AssignmentParentFinder_h
 
-#include <memory>
 #include <QUuid>
+#include <memory>
 
 #include <EntityTree.h>
 #include <SpatialParentFinder.h>
@@ -23,8 +23,8 @@
 
 class AssignmentParentFinder : public SpatialParentFinder {
 public:
-    AssignmentParentFinder(EntityTreePointer tree) : _tree(tree) { }
-    virtual ~AssignmentParentFinder() { }
+    AssignmentParentFinder(EntityTreePointer tree) : _tree(tree) {}
+    virtual ~AssignmentParentFinder() {}
     virtual SpatiallyNestableWeakPointer find(QUuid parentID, bool& success,
                                               SpatialParentTree* entityTree = nullptr) const override;
 

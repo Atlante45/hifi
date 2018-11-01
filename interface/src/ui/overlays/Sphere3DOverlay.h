@@ -15,23 +15,23 @@
 
 class Sphere3DOverlay : public Volume3DOverlay {
     Q_OBJECT
-    
+
 public:
     static QString const TYPE;
     virtual QString getType() const override { return TYPE; }
 
     Sphere3DOverlay() {}
     Sphere3DOverlay(const Sphere3DOverlay* Sphere3DOverlay);
-    
+
     virtual void render(RenderArgs* args) override;
     virtual const render::ShapeKey getShapeKey() override;
 
     virtual Sphere3DOverlay* createClone() const override;
 
     virtual scriptable::ScriptableModelBase getScriptableModel() override;
+
 protected:
     Transform evalRenderTransform() override;
 };
 
- 
 #endif // hifi_Sphere3DOverlay_h

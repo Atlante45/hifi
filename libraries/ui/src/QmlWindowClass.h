@@ -11,8 +11,8 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QPointer>
-#include <QtScript/QScriptValue>
 #include <QtQuick/QQuickItem>
+#include <QtScript/QScriptValue>
 
 #include <GLMHelpers.h>
 
@@ -31,7 +31,7 @@ class QScriptContext;
  * @property {boolean} visible
  */
 
-// FIXME refactor this class to be a QQuickItem derived type and eliminate the needless wrapping 
+// FIXME refactor this class to be a QQuickItem derived type and eliminate the needless wrapping
 class QmlWindowClass : public QObject {
     Q_OBJECT
     Q_PROPERTY(glm::vec2 position READ getPosition WRITE setPosition NOTIFY positionChanged)
@@ -40,12 +40,13 @@ class QmlWindowClass : public QObject {
 
 private:
     static QScriptValue internal_constructor(QScriptContext* context, QScriptEngine* engine, bool restricted);
+
 public:
     static QScriptValue constructor(QScriptContext* context, QScriptEngine* engine) {
         return internal_constructor(context, engine, false);
     }
 
-    static QScriptValue restricted_constructor(QScriptContext* context, QScriptEngine* engine ){
+    static QScriptValue restricted_constructor(QScriptContext* context, QScriptEngine* engine) {
         return internal_constructor(context, engine, true);
     }
 
@@ -60,8 +61,6 @@ public:
 
     QQuickItem* asQuickItem() const;
 
-
-
 public slots:
 
     /**jsdoc
@@ -75,7 +74,6 @@ public slots:
      * @param {boolean} visible
      */
     void setVisible(bool visible);
-
 
     /**jsdoc
      * @function OverlayWindow.getPosition
@@ -95,7 +93,6 @@ public slots:
      * @param {number} y
      */
     void setPosition(int x, int y);
-
 
     /**jsdoc
      * @function OverlayWindow.getSize
@@ -122,7 +119,6 @@ public slots:
      */
     void setTitle(const QString& title);
 
-
     /**jsdoc
      * @function OverlayWindow.raise
      */
@@ -139,7 +135,6 @@ public slots:
      */
     Q_INVOKABLE QObject* getEventBridge() { return this; };
 
-
     /**jsdoc
      * @function OverlayWindow.sendToQml
      * @param {object} message
@@ -151,7 +146,6 @@ public slots:
      * @function OverlayWindow.clearDebugWindow
      */
     void clearDebugWindow();
-
 
     /**jsdoc
      * @function OverlayWindow.emitScriptEvent
@@ -214,7 +208,6 @@ signals:
     // Scripts can connect to this signal to receive messages from the QML object
     void fromQml(const QVariant& message);
 
-
     /**jsdoc
      * @function OverlayWindow.scriptEventReceived
      * @param {object} message
@@ -254,8 +247,8 @@ protected slots:
 
 protected:
     static QVariantMap parseArguments(QScriptContext* context);
-    static QScriptValue internalConstructor(QScriptContext* context, QScriptEngine* engine, 
-        std::function<QmlWindowClass*(QVariantMap)> function);
+    static QScriptValue internalConstructor(QScriptContext* context, QScriptEngine* engine,
+                                            std::function<QmlWindowClass*(QVariantMap)> function);
 
     virtual QString qmlSource() const { return "QmlWindow.qml"; }
 
@@ -266,7 +259,6 @@ protected:
 private:
     // QmlWindow content may include WebView requiring EventBridge.
     void setKeyboardRaised(QObject* object, bool raised, bool numeric = false);
-
 };
 
 #endif

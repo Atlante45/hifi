@@ -8,14 +8,15 @@
 #ifndef hifi_gpu_gl_GLBuffer_h
 #define hifi_gpu_gl_GLBuffer_h
 
-#include "GLShared.h"
 #include "GLBackend.h"
+#include "GLShared.h"
 
-namespace gpu { namespace gl {
+namespace gpu {
+namespace gl {
 
 class GLBuffer : public GLObject<Buffer> {
 public:
-    template <typename GLBufferType>
+    template<typename GLBufferType>
     static GLBufferType* sync(GLBackend& backend, const Buffer& buffer) {
         if (buffer.getSysmem().getSize() != 0) {
             if (buffer._getUpdateCount == 0) {
@@ -39,7 +40,7 @@ public:
         return object;
     }
 
-    template <typename GLBufferType>
+    template<typename GLBufferType>
     static GLuint getId(GLBackend& backend, const Buffer& buffer) {
         GLBuffer* bo = sync<GLBufferType>(backend, buffer);
         if (bo) {
@@ -49,7 +50,7 @@ public:
         }
     }
 
-    template <typename GLBufferType>
+    template<typename GLBufferType>
     static GLuint getIdUnsynced(GLBackend& backend, const Buffer& buffer) {
         GLBufferType* object = Backend::getGPUObject<GLBufferType>(buffer);
         if (object) {
@@ -71,6 +72,7 @@ protected:
     GLBuffer(const std::weak_ptr<GLBackend>& backend, const Buffer& buffer, GLuint id);
 };
 
-} }
+} // namespace gl
+} // namespace gpu
 
 #endif

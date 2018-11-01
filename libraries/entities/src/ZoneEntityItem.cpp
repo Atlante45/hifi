@@ -16,14 +16,13 @@
 #include <ByteCountCoding.h>
 
 #include "EntitiesLogging.h"
+#include "EntityEditFilters.h"
 #include "EntityItemProperties.h"
 #include "EntityTree.h"
 #include "EntityTreeElement.h"
-#include "EntityEditFilters.h"
 
 bool ZoneEntityItem::_zonesArePickable = false;
 bool ZoneEntityItem::_drawZoneBoundaries = false;
-
 
 const ShapeType ZoneEntityItem::DEFAULT_SHAPE_TYPE = SHAPE_TYPE_BOX;
 const QString ZoneEntityItem::DEFAULT_COMPOUND_SHAPE_URL = "";
@@ -45,8 +44,10 @@ ZoneEntityItem::ZoneEntityItem(const EntityItemID& entityItemID) : EntityItem(en
     _visuallyReady = false;
 }
 
-EntityItemProperties ZoneEntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
-    EntityItemProperties properties = EntityItem::getProperties(desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
+EntityItemProperties ZoneEntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                                   bool allowEmptyDesiredProperties) const {
+    EntityItemProperties properties = EntityItem::getProperties(
+        desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
 
     // Contain QString properties, must be synchronized
     withReadLock([&] {
@@ -82,8 +83,8 @@ bool ZoneEntityItem::setProperties(const EntityItemProperties& properties) {
         if (wantDebug) {
             uint64_t now = usecTimestampNow();
             int elapsed = now - getLastEdited();
-            qCDebug(entities) << "ZoneEntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                    "now=" << now << " getLastEdited()=" << getLastEdited();
+            qCDebug(entities) << "ZoneEntityItem::setProperties() AFTER update... edited AGO=" << elapsed << "now=" << now
+                              << " getLastEdited()=" << getLastEdited();
         }
         setLastEdited(properties._lastEdited);
     }
@@ -117,23 +118,23 @@ bool ZoneEntityItem::setSubClassProperties(const EntityItemProperties& propertie
     SET_ENTITY_PROPERTY_FROM_PROPERTIES(bloomMode, setBloomMode);
 
     somethingChanged = somethingChanged || _keyLightPropertiesChanged || _ambientLightPropertiesChanged ||
-        _stagePropertiesChanged || _skyboxPropertiesChanged || _hazePropertiesChanged || _bloomPropertiesChanged;
+                       _stagePropertiesChanged || _skyboxPropertiesChanged || _hazePropertiesChanged || _bloomPropertiesChanged;
 
     return somethingChanged;
 }
 
-int ZoneEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead, 
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) {
+int ZoneEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
+                                                     ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                     bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 
     {
         int bytesFromKeylight;
         withWriteLock([&] {
-            bytesFromKeylight = _keyLightProperties.readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
-                propertyFlags, overwriteLocalData, _keyLightPropertiesChanged);
+            bytesFromKeylight = _keyLightProperties.readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead),
+                                                                                     args, propertyFlags, overwriteLocalData,
+                                                                                     _keyLightPropertiesChanged);
         });
         somethingChanged = somethingChanged || _keyLightPropertiesChanged;
         bytesRead += bytesFromKeylight;
@@ -143,8 +144,8 @@ int ZoneEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, 
     {
         int bytesFromAmbientlight;
         withWriteLock([&] {
-            bytesFromAmbientlight = _ambientLightProperties.readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
-                propertyFlags, overwriteLocalData, _ambientLightPropertiesChanged);
+            bytesFromAmbientlight = _ambientLightProperties.readEntitySubclassDataFromBuffer(
+                dataAt, (bytesLeftToRead - bytesRead), args, propertyFlags, overwriteLocalData, _ambientLightPropertiesChanged);
         });
         somethingChanged = somethingChanged || _ambientLightPropertiesChanged;
         bytesRead += bytesFromAmbientlight;
@@ -155,7 +156,8 @@ int ZoneEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, 
         int bytesFromSkybox;
         withWriteLock([&] {
             bytesFromSkybox = _skyboxProperties.readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
-                propertyFlags, overwriteLocalData, _skyboxPropertiesChanged);
+                                                                                 propertyFlags, overwriteLocalData,
+                                                                                 _skyboxPropertiesChanged);
         });
         somethingChanged = somethingChanged || _skyboxPropertiesChanged;
         bytesRead += bytesFromSkybox;
@@ -164,7 +166,8 @@ int ZoneEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, 
 
     {
         int bytesFromHaze = _hazeProperties.readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
-            propertyFlags, overwriteLocalData, _hazePropertiesChanged);
+                                                                             propertyFlags, overwriteLocalData,
+                                                                             _hazePropertiesChanged);
         somethingChanged = somethingChanged || _hazePropertiesChanged;
         bytesRead += bytesFromHaze;
         dataAt += bytesFromHaze;
@@ -172,7 +175,8 @@ int ZoneEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, 
 
     {
         int bytesFromBloom = _bloomProperties.readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
-            propertyFlags, overwriteLocalData, _bloomPropertiesChanged);
+                                                                               propertyFlags, overwriteLocalData,
+                                                                               _bloomPropertiesChanged);
         somethingChanged = somethingChanged || _bloomPropertiesChanged;
         bytesRead += bytesFromBloom;
         dataAt += bytesFromBloom;
@@ -221,26 +225,23 @@ EntityPropertyFlags ZoneEntityItem::getEntityProperties(EncodeBitstreamParams& p
     return requestedProperties;
 }
 
-void ZoneEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params, 
-                                    EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount, 
-                                    OctreeElement::AppendState& appendState) const { 
-
+void ZoneEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
+                                        EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
+                                        EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                        EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                        OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     _keyLightProperties.appendSubclassData(packetData, params, modelTreeElementExtraEncodeData, requestedProperties,
-        propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                                           propertyFlags, propertiesDidntFit, propertyCount, appendState);
     _ambientLightProperties.appendSubclassData(packetData, params, modelTreeElementExtraEncodeData, requestedProperties,
-        propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                                               propertyFlags, propertiesDidntFit, propertyCount, appendState);
     _skyboxProperties.appendSubclassData(packetData, params, modelTreeElementExtraEncodeData, requestedProperties,
-        propertyFlags, propertiesDidntFit, propertyCount, appendState);
-    _hazeProperties.appendSubclassData(packetData, params, modelTreeElementExtraEncodeData, requestedProperties,
-        propertyFlags, propertiesDidntFit, propertyCount, appendState);
-    _bloomProperties.appendSubclassData(packetData, params, modelTreeElementExtraEncodeData, requestedProperties,
-        propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                                         propertyFlags, propertiesDidntFit, propertyCount, appendState);
+    _hazeProperties.appendSubclassData(packetData, params, modelTreeElementExtraEncodeData, requestedProperties, propertyFlags,
+                                       propertiesDidntFit, propertyCount, appendState);
+    _bloomProperties.appendSubclassData(packetData, params, modelTreeElementExtraEncodeData, requestedProperties, propertyFlags,
+                                        propertiesDidntFit, propertyCount, appendState);
 
     APPEND_ENTITY_PROPERTY(PROP_SHAPE_TYPE, (uint32_t)getShapeType());
     APPEND_ENTITY_PROPERTY(PROP_COMPOUND_SHAPE_URL, getCompoundShapeURL());
@@ -294,23 +295,21 @@ void ZoneEntityItem::setCompoundShapeURL(const QString& url) {
 }
 
 bool ZoneEntityItem::findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                         OctreeElementPointer& element, float& distance,
-                         BoxFace& face, glm::vec3& surfaceNormal,
-                         QVariantMap& extraInfo, bool precisionPicking) const {
+                                                 OctreeElementPointer& element, float& distance, BoxFace& face,
+                                                 glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                                 bool precisionPicking) const {
     return _zonesArePickable;
 }
 
 bool ZoneEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
-                         const glm::vec3& acceleration, OctreeElementPointer& element, float& parabolicDistance,
-                         BoxFace& face, glm::vec3& surfaceNormal,
-                         QVariantMap& extraInfo, bool precisionPicking) const {
+                                                      const glm::vec3& acceleration, OctreeElementPointer& element,
+                                                      float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+                                                      QVariantMap& extraInfo, bool precisionPicking) const {
     return _zonesArePickable;
 }
 
 void ZoneEntityItem::setFilterURL(QString url) {
-    withWriteLock([&] {
-        _filterURL = url;
-    });
+    withWriteLock([&] { _filterURL = url; });
     if (DependencyManager::isSet<EntityEditFilters>()) {
         auto entityEditFilters = DependencyManager::get<EntityEditFilters>();
         qCDebug(entities) << "adding filter " << url << "for zone" << getEntityItemID();
@@ -318,23 +317,19 @@ void ZoneEntityItem::setFilterURL(QString url) {
     }
 }
 
-QString ZoneEntityItem::getFilterURL() const { 
+QString ZoneEntityItem::getFilterURL() const {
     QString result;
-    withReadLock([&] {
-        result = _filterURL;
-    });
+    withReadLock([&] { result = _filterURL; });
     return result;
 }
 
-bool ZoneEntityItem::hasCompoundShapeURL() const { 
+bool ZoneEntityItem::hasCompoundShapeURL() const {
     return !getCompoundShapeURL().isEmpty();
 }
 
-QString ZoneEntityItem::getCompoundShapeURL() const { 
+QString ZoneEntityItem::getCompoundShapeURL() const {
     QString result;
-    withReadLock([&] {
-        result = _compoundShapeURL;
-    });
+    withReadLock([&] { result = _compoundShapeURL; });
     return result;
 }
 

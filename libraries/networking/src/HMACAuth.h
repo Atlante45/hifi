@@ -12,9 +12,9 @@
 #ifndef hifi_HMACAuth_h
 #define hifi_HMACAuth_h
 
-#include <vector>
-#include <memory>
 #include <QtCore/QMutex>
+#include <memory>
+#include <vector>
 
 class QUuid;
 
@@ -22,7 +22,7 @@ class HMACAuth {
 public:
     enum AuthMethod { MD5, SHA1, SHA224, SHA256, RIPEMD160 };
     using HMACHash = std::vector<unsigned char>;
-    
+
     explicit HMACAuth(AuthMethod authMethod = MD5);
     ~HMACAuth();
 
@@ -44,4 +44,4 @@ private:
     AuthMethod _authMethod;
 };
 
-#endif  // hifi_HMACAuth_h
+#endif // hifi_HMACAuth_h

@@ -12,8 +12,8 @@
 #ifndef hifi_ModelOverlay_h
 #define hifi_ModelOverlay_h
 
-#include <Model.h>
 #include <AnimationCache.h>
+#include <Model.h>
 
 #include "Volume3DOverlay.h"
 
@@ -44,19 +44,25 @@ public:
 
     void setProperties(const QVariantMap& properties) override;
     QVariant getProperty(const QString& property) override;
-    virtual bool findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, float& distance,
-                                     BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking = false) override;
-    virtual bool findRayIntersectionExtraInfo(const glm::vec3& origin, const glm::vec3& direction,
-                                              float& distance, BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo, bool precisionPicking = false) override;
-    virtual bool findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration, float& parabolicDistance,
-                                          BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking = false) override;
-    virtual bool findParabolaIntersectionExtraInfo(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration, float& parabolicDistance,
-                                                   BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo, bool precisionPicking = false) override;
+    virtual bool findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, float& distance, BoxFace& face,
+                                     glm::vec3& surfaceNormal, bool precisionPicking = false) override;
+    virtual bool findRayIntersectionExtraInfo(const glm::vec3& origin, const glm::vec3& direction, float& distance,
+                                              BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                              bool precisionPicking = false) override;
+    virtual bool findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
+                                          float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+                                          bool precisionPicking = false) override;
+    virtual bool findParabolaIntersectionExtraInfo(const glm::vec3& origin, const glm::vec3& velocity,
+                                                   const glm::vec3& acceleration, float& parabolicDistance, BoxFace& face,
+                                                   glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                                   bool precisionPicking = false) override;
 
     virtual ModelOverlay* createClone() const override;
 
-    virtual bool addToScene(Overlay::Pointer overlay, const render::ScenePointer& scene, render::Transaction& transaction) override;
-    virtual void removeFromScene(Overlay::Pointer overlay, const render::ScenePointer& scene, render::Transaction& transaction) override;
+    virtual bool addToScene(Overlay::Pointer overlay, const render::ScenePointer& scene,
+                            render::Transaction& transaction) override;
+    virtual void removeFromScene(Overlay::Pointer overlay, const render::ScenePointer& scene,
+                                 render::Transaction& transaction) override;
 
     void locationChanged(bool tellPhysics) override;
 
@@ -75,26 +81,24 @@ public:
 
     virtual scriptable::ScriptableModelBase getScriptableModel() override;
     virtual bool canReplaceModelMeshPart(int meshIndex, int partIndex) override;
-    virtual bool replaceScriptableModelMeshPart(scriptable::ScriptableModelBasePointer model, int meshIndex, int partIndex) override;
+    virtual bool replaceScriptableModelMeshPart(scriptable::ScriptableModelBasePointer model, int meshIndex,
+                                                int partIndex) override;
 
 protected:
     Transform evalRenderTransform() override;
 
     // helper to extract metadata from our Model's rigged joints
-    template <typename itemType> using mapFunction = std::function<itemType(int jointIndex)>;
-    template <typename vectorType, typename itemType>
-        vectorType mapJoints(mapFunction<itemType> function) const;
+    template<typename itemType>
+    using mapFunction = std::function<itemType(int jointIndex)>;
+    template<typename vectorType, typename itemType>
+    vectorType mapJoints(mapFunction<itemType> function) const;
 
     void animate();
     void mapAnimationJoints(const QStringList& modelJointNames);
-    bool isAnimatingSomething() const {
-        return !_animationURL.isEmpty() && _animationRunning && _animationFPS != 0.0f;
-    }
+    bool isAnimatingSomething() const { return !_animationURL.isEmpty() && _animationRunning && _animationFPS != 0.0f; }
     void copyAnimationJointDataToModel(QVector<JointData> jointsData);
 
-
 private:
-
     ModelPointer _model;
     QVariantMap _modelTextures;
     bool _texturesLoaded { false };
@@ -132,7 +136,6 @@ private:
     bool _groupCulledDirty { false };
 
     void processMaterials();
-
 };
 
 #endif // hifi_ModelOverlay_h

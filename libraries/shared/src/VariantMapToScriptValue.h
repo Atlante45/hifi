@@ -9,9 +9,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-#include <QVariant>
-#include <QScriptValue>
 #include <QScriptEngine>
+#include <QScriptValue>
+#include <QVariant>
 
 QScriptValue variantToScriptValue(QVariant& qValue, QScriptEngine& scriptEngine);
 QScriptValue variantMapToScriptValue(QVariantMap& variantMap, QScriptEngine& scriptEngine);

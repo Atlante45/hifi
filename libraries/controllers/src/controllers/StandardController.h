@@ -30,9 +30,9 @@ public:
     virtual QStringList getDefaultMappingConfigs() const override;
     virtual void focusOutEvent() override;
 
-    StandardController(); 
+    StandardController();
 };
 
-}
+} // namespace controller
 
 #endif // hifi_StandardController_h

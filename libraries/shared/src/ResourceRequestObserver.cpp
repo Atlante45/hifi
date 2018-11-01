@@ -9,20 +9,14 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
+#include "ResourceRequestObserver.h"
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QString>
 #include <QUrl>
-#include "ResourceRequestObserver.h"
 
-void ResourceRequestObserver::update(const QUrl& requestUrl,
-    const qint64 callerId,
-    const QString& extra) {
+void ResourceRequestObserver::update(const QUrl& requestUrl, const qint64 callerId, const QString& extra) {
     QJsonArray array;
-    QJsonObject data { { "url", requestUrl.toString() },
-        { "callerId", callerId },
-        { "extra", extra }
-    };
+    QJsonObject data { { "url", requestUrl.toString() }, { "callerId", callerId }, { "extra", extra } };
     emit resourceRequestEvent(data.toVariantMap());
 }

@@ -9,24 +9,26 @@
 #ifndef hifi_QmlTextureCache_h
 #define hifi_QmlTextureCache_h
 
+#include <cstdint>
+#include <functional>
 #include <list>
 #include <mutex>
-#include <functional>
 #include <unordered_map>
 #include <utility>
-#include <cstdint>
 
 #include <QtCore/QSize>
 
-namespace hifi { namespace qml { namespace impl {
+namespace hifi {
+namespace qml {
+namespace impl {
 
 class TextureAndFence : public std::pair<uint32_t, void*> {
     using Parent = std::pair<uint32_t, void*>;
+
 public:
     TextureAndFence() : Parent(0, 0) {}
     TextureAndFence(uint32_t texture, void* sync) : Parent(texture, sync) {};
 };
-
 
 class TextureCache {
 public:
@@ -37,7 +39,7 @@ public:
     struct TextureSet {
         Size textureSize;
         // The number of surfaces with this size
-        size_t clientCount{ 0 };
+        size_t clientCount { 0 };
         ValueList returnedTextures;
     };
 
@@ -49,6 +51,7 @@ public:
     // For debugging
     void report();
     size_t getUsedTextureMemory();
+
 private:
     static size_t getMemoryForSize(const QSize& size);
 
@@ -66,9 +69,11 @@ private:
     std::unordered_map<uint32_t, QSize> _textureSizes;
     Mutex _mutex;
     std::list<Value> _returnedTextures;
-    size_t _totalTextureUsage{ 0 };
+    size_t _totalTextureUsage { 0 };
 };
 
-}}}  // namespace hifi::qml::impl
+} // namespace impl
+} // namespace qml
+} // namespace hifi
 
 #endif

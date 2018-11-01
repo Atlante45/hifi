@@ -24,10 +24,10 @@ QScriptValue LocationScriptingInterface::locationGetter(QScriptContext* context,
 
 QScriptValue LocationScriptingInterface::locationSetter(QScriptContext* context, QScriptEngine* engine) {
     const QVariant& argumentVariant = context->argument(0).toVariant();
-    
+
     // just try and convert the argument to a string, should be a hifi:// address
     QMetaObject::invokeMethod(DependencyManager::get<AddressManager>().data(), "handleLookupString",
                               Q_ARG(const QString&, argumentVariant.toString()));
-    
+
     return QScriptValue::UndefinedValue;
 }

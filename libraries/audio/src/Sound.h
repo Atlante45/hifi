@@ -12,10 +12,10 @@
 #ifndef hifi_Sound_h
 #define hifi_Sound_h
 
+#include <QtScript/qscriptengine.h>
 #include <QRunnable>
 #include <QtCore/QObject>
 #include <QtNetwork/QNetworkReply>
-#include <QtScript/qscriptengine.h>
 
 #include <ResourceCache.h>
 
@@ -24,12 +24,12 @@ class Sound : public Resource {
 
 public:
     Sound(const QUrl& url, bool isStereo = false, bool isAmbisonic = false);
-    
-    bool isStereo() const { return _isStereo; }    
-    bool isAmbisonic() const { return _isAmbisonic; }    
+
+    bool isStereo() const { return _isStereo; }
+    bool isAmbisonic() const { return _isAmbisonic; }
     bool isReady() const { return _isReady; }
     float getDuration() const { return _duration; }
- 
+
     const QByteArray& getByteArray() const { return _byteArray; }
 
 signals:
@@ -38,14 +38,14 @@ signals:
 protected slots:
     void soundProcessSuccess(QByteArray data, bool stereo, bool ambisonic, float duration);
     void soundProcessError(int error, QString str);
-    
+
 private:
     QByteArray _byteArray;
     bool _isStereo;
     bool _isAmbisonic;
     bool _isReady;
     float _duration; // In seconds
-    
+
     virtual void downloadFinished(const QByteArray& data) override;
 };
 
@@ -53,10 +53,11 @@ class SoundProcessor : public QObject, public QRunnable {
     Q_OBJECT
 
 public:
-    SoundProcessor(const QUrl& url, const QByteArray& data, bool stereo, bool ambisonic)
-        : _url(url), _data(data), _isStereo(stereo), _isAmbisonic(ambisonic)
-    {
-    }
+    SoundProcessor(const QUrl& url, const QByteArray& data, bool stereo, bool ambisonic) :
+        _url(url),
+        _data(data),
+        _isStereo(stereo),
+        _isAmbisonic(ambisonic) {}
 
     virtual void run() override;
 
@@ -88,13 +89,13 @@ typedef QSharedPointer<Sound> SharedSoundPointer;
  * </ul>
  *
  * @class SoundObject
- * 
+ *
  * @hifi-interface
  * @hifi-client-entity
  * @hifi-server-entity
  * @hifi-assignment-client
  *
- * @property {boolean} downloaded - <code>true</code> if the sound has been downloaded and is ready to be played, otherwise 
+ * @property {boolean} downloaded - <code>true</code> if the sound has been downloaded and is ready to be played, otherwise
  *     <code>false</code>.
  * @property {number} duration - The duration of the sound, in seconds.
  */
@@ -111,11 +112,11 @@ public:
     bool isReady() const { return _sound ? _sound->isReady() : false; }
     float getDuration() { return _sound ? _sound->getDuration() : 0.0f; }
 
-/**jsdoc
- * Triggered when the sound has been downloaded and is ready to be played.
- * @function SoundObject.ready
- * @returns {Signal}
- */
+    /**jsdoc
+     * Triggered when the sound has been downloaded and is ready to be played.
+     * @function SoundObject.ready
+     * @returns {Signal}
+     */
 signals:
     void ready();
 

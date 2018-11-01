@@ -18,14 +18,15 @@ class TypedArrayPrototype : public QObject, public QScriptable {
     Q_OBJECT
 public:
     TypedArrayPrototype(QObject* parent = NULL);
-    
+
 public slots:
     void set(QScriptValue array, qint32 offset = 0);
     QScriptValue subarray(qint32 begin);
     QScriptValue subarray(qint32 begin, qint32 end);
-    
+
     QScriptValue get(quint32 index);
     void set(quint32 index, QScriptValue& value);
+
 private:
     QByteArray* thisArrayBuffer() const;
 };

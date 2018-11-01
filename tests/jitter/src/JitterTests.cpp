@@ -12,14 +12,14 @@
 #ifdef _WINDOWS
 #include <WS2tcpip.h>
 #else
-#include <sys/socket.h>
 #include <arpa/inet.h>
+#include <sys/socket.h>
 #endif
-#include <cerrno>
 #include <stdio.h>
+#include <cerrno>
 
-#include <NumericalConstants.h>
 #include <MovingMinMaxAvg.h>
+#include <NumericalConstants.h>
 #include <SequenceNumberStats.h>
 #include <SharedUtil.h> // for usecTimestampNow
 #include <SimpleMovingAverage.h>
@@ -40,10 +40,10 @@ const quint64 LARGE_STATS_TIME = 500; // we don't expect stats calculation to ta
 void runSend(const char* addressOption, int port, int gap, int size, int report);
 void runReceive(const char* addressOption, int port, int gap, int size, int report);
 
-
-int main(int argc, const char * argv[]) {
+int main(int argc, const char* argv[]) {
     if (argc != 7) {
-        printf("usage: jitter-tests <--send|--receive> <address> <port> <gap in usecs> <packet size> <report interval in msecs>\n");
+        printf("usage: jitter-tests <--send|--receive> <address> <port> <gap in usecs> <packet size> <report interval in "
+               "msecs>\n");
         exit(1);
     }
     const char* typeOption = argv[1];
@@ -114,11 +114,10 @@ void runSend(const char* addressOption, int port, int gap, int size, int report)
 
     quint16 outgoingSequenceNumber = 0;
 
-
     StDev stDevReportInterval;
     StDev stDev30s;
     StDev stDev;
-    
+
     SimpleMovingAverage averageNetworkTime(SAMPLES_FOR_30_SECONDS);
     SimpleMovingAverage averageStatsCalcultionTime(SAMPLES_FOR_30_SECONDS);
     float lastStatsCalculationTime = 0.0f; // we add out stats calculation time in the next calculation window
@@ -128,18 +127,15 @@ void runSend(const char* addressOption, int port, int gap, int size, int report)
     quint64 lastReport = 0;
 
     while (true) {
-
         quint64 now = usecTimestampNow();
         int actualGap = now - last;
 
-
         if (actualGap >= gap) {
-
             // pack seq num
             memcpy(outputBuffer, &outgoingSequenceNumber, sizeof(quint16));
 
             quint64 networkStart = usecTimestampNow();
-            int n = sendto(sockfd, outputBuffer, size, 0, (struct sockaddr *)&servaddr, sizeof(servaddr));
+            int n = sendto(sockfd, outputBuffer, size, 0, (struct sockaddr*)&servaddr, sizeof(servaddr));
             quint64 networkEnd = usecTimestampNow();
             float networkElapsed = (float)(networkEnd - networkStart);
 
@@ -158,10 +154,10 @@ void runSend(const char* addressOption, int port, int gap, int size, int report)
             stDev30s.addValue(gapDifferece);
             stDevReportInterval.addValue(gapDifferece);
             last = now;
-            
+
             // track out network time and stats calculation times
             averageNetworkTime.updateAverage(networkElapsed);
-            
+
             // for our stats calculation time, we actually delay the updating by one sample.
             // we do this so that the calculation of the average timing for the stats calculation
             // happen inside of the calculation processing. This ensures that tracking stats on
@@ -171,28 +167,27 @@ void runSend(const char* addressOption, int port, int gap, int size, int report)
             }
 
             if (now - lastReport >= (report * MSEC_TO_USEC)) {
-
                 std::cout << "\n"
-                    << "SEND gap Difference From Expected\n"
-                    << "Overall:\n"
-                    << "min: " << timeGaps.getMin() << " usecs, "
-                    << "max: " << timeGaps.getMax() << " usecs, "
-                    << "avg: " << timeGaps.getAverage() << " usecs, "
-                    << "stdev: " << stDev.getStDev() << " usecs\n"
-                    << "Last 30s:\n"
-                    << "min: " << timeGaps.getWindowMin() << " usecs, "
-                    << "max: " << timeGaps.getWindowMax() << " usecs, "
-                    << "avg: " << timeGaps.getWindowAverage() << " usecs, "
-                    << "stdev: " << stDev30s.getStDev() << " usecs\n"
-                    << "Last report interval:\n"
-                    << "min: " << timeGapsPerReport.getWindowMin() << " usecs, "
-                    << "max: " << timeGapsPerReport.getWindowMax() << " usecs, "
-                    << "avg: " << timeGapsPerReport.getWindowAverage() << " usecs, "
-                    << "stdev: " << stDevReportInterval.getStDev() << " usecs\n"
-                    << "Average Execution Times Last 30s:\n"
-                    << "    network: " << averageNetworkTime.getAverage() << " usecs average\n"
-                    << "      stats: " << averageStatsCalcultionTime.getAverage() << " usecs average"
-                    << "\n";
+                          << "SEND gap Difference From Expected\n"
+                          << "Overall:\n"
+                          << "min: " << timeGaps.getMin() << " usecs, "
+                          << "max: " << timeGaps.getMax() << " usecs, "
+                          << "avg: " << timeGaps.getAverage() << " usecs, "
+                          << "stdev: " << stDev.getStDev() << " usecs\n"
+                          << "Last 30s:\n"
+                          << "min: " << timeGaps.getWindowMin() << " usecs, "
+                          << "max: " << timeGaps.getWindowMax() << " usecs, "
+                          << "avg: " << timeGaps.getWindowAverage() << " usecs, "
+                          << "stdev: " << stDev30s.getStDev() << " usecs\n"
+                          << "Last report interval:\n"
+                          << "min: " << timeGapsPerReport.getWindowMin() << " usecs, "
+                          << "max: " << timeGapsPerReport.getWindowMax() << " usecs, "
+                          << "avg: " << timeGapsPerReport.getWindowAverage() << " usecs, "
+                          << "stdev: " << stDevReportInterval.getStDev() << " usecs\n"
+                          << "Average Execution Times Last 30s:\n"
+                          << "    network: " << averageNetworkTime.getAverage() << " usecs average\n"
+                          << "      stats: " << averageStatsCalcultionTime.getAverage() << " usecs average"
+                          << "\n";
 
                 stDevReportInterval.reset();
                 if (stDev30s.getSamples() > SAMPLES_FOR_30_SECONDS) {
@@ -208,7 +203,6 @@ void runSend(const char* addressOption, int port, int gap, int size, int report)
                 qDebug() << "WARNING -- unexpectedly large lastStatsCalculationTime=" << lastStatsCalculationTime;
             }
             hasStatsCalculationTime = true;
-
         }
     }
     delete[] outputBuffer;
@@ -239,7 +233,6 @@ void runReceive(const char* addressOption, int port, int gap, int size, int repo
     myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     myaddr.sin_port = htons(port);
 
-
     const int SAMPLES_FOR_SECOND = 1000000 / gap;
     std::cout << "SAMPLES_FOR_SECOND:" << SAMPLES_FOR_SECOND << "\n";
     const int INTERVALS_PER_30_SECONDS = 30;
@@ -260,7 +253,6 @@ void runReceive(const char* addressOption, int port, int gap, int size, int repo
     char* inputBuffer = new char[size];
     memset(inputBuffer, 0, size);
 
-
     SequenceNumberStats seqStats(REPORTS_FOR_30_SECONDS);
 
     StDev stDevReportInterval;
@@ -272,16 +264,15 @@ void runReceive(const char* addressOption, int port, int gap, int size, int repo
     float lastStatsCalculationTime = 0.0f; // we add out stats calculation time in the next calculation window
     bool hasStatsCalculationTime = false;
 
-    if (bind(sockfd, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
+    if (bind(sockfd, (struct sockaddr*)&myaddr, sizeof(myaddr)) < 0) {
         std::cout << "bind failed\n";
         return;
     }
 
     quint64 last = 0; // first case
     quint64 lastReport = 0;
-    
+
     while (true) {
-    
         quint64 networkStart = usecTimestampNow();
         n = recvfrom(sockfd, inputBuffer, size, 0, NULL, NULL); // we don't care about where it came from
 
@@ -300,7 +291,6 @@ void runReceive(const char* addressOption, int port, int gap, int size, int repo
             last = usecTimestampNow();
             std::cout << "first packet received\n";
         } else {
-
             quint64 statsCalcultionStart = usecTimestampNow();
             quint64 now = usecTimestampNow();
             int actualGap = now - last;
@@ -312,10 +302,10 @@ void runReceive(const char* addressOption, int port, int gap, int size, int repo
             stDev30s.addValue(gapDifferece);
             stDevReportInterval.addValue(gapDifferece);
             last = now;
-            
+
             // track out network time and stats calculation times
             averageNetworkTime.updateAverage(networkElapsed);
-            
+
             // for our stats calculation time, we actually delay the updating by one sample.
             // we do this so that the calculation of the average timing for the stats calculation
             // happen inside of the calculation processing. This ensures that tracking stats on
@@ -325,29 +315,28 @@ void runReceive(const char* addressOption, int port, int gap, int size, int repo
             }
 
             if (now - lastReport >= (report * MSEC_TO_USEC)) {
-
                 seqStats.pushStatsToHistory();
 
                 std::cout << "RECEIVE gap Difference From Expected\n"
-                    << "Overall:\n"
-                    << "min: " << timeGaps.getMin() << " usecs, "
-                    << "max: " << timeGaps.getMax() << " usecs, "
-                    << "avg: " << timeGaps.getAverage() << " usecs, "
-                    << "stdev: " << stDev.getStDev() << " usecs\n"
-                    << "Last 30s:\n"
-                    << "min: " << timeGaps.getWindowMin() << " usecs, "
-                    << "max: " << timeGaps.getWindowMax() << " usecs, "
-                    << "avg: " << timeGaps.getWindowAverage() << " usecs, "
-                    << "stdev: " << stDev30s.getStDev() << " usecs\n"
-                    << "Last report interval:\n"
-                    << "min: " << timeGapsPerReport.getWindowMin() << " usecs, "
-                    << "max: " << timeGapsPerReport.getWindowMax() << " usecs, "
-                    << "avg: " << timeGapsPerReport.getWindowAverage() << " usecs, "
-                    << "stdev: " << stDevReportInterval.getStDev() << " usecs\n"
-                    << "Average Execution Times Last 30s:\n"
-                    << "    network: " << averageNetworkTime.getAverage() << " usecs average\n"
-                    << "      stats: " << averageStatsCalcultionTime.getAverage() << " usecs average"
-                    << "\n";
+                          << "Overall:\n"
+                          << "min: " << timeGaps.getMin() << " usecs, "
+                          << "max: " << timeGaps.getMax() << " usecs, "
+                          << "avg: " << timeGaps.getAverage() << " usecs, "
+                          << "stdev: " << stDev.getStDev() << " usecs\n"
+                          << "Last 30s:\n"
+                          << "min: " << timeGaps.getWindowMin() << " usecs, "
+                          << "max: " << timeGaps.getWindowMax() << " usecs, "
+                          << "avg: " << timeGaps.getWindowAverage() << " usecs, "
+                          << "stdev: " << stDev30s.getStDev() << " usecs\n"
+                          << "Last report interval:\n"
+                          << "min: " << timeGapsPerReport.getWindowMin() << " usecs, "
+                          << "max: " << timeGapsPerReport.getWindowMax() << " usecs, "
+                          << "avg: " << timeGapsPerReport.getWindowAverage() << " usecs, "
+                          << "stdev: " << stDevReportInterval.getStDev() << " usecs\n"
+                          << "Average Execution Times Last 30s:\n"
+                          << "    network: " << averageNetworkTime.getAverage() << " usecs average\n"
+                          << "      stats: " << averageStatsCalcultionTime.getAverage() << " usecs average"
+                          << "\n";
                 stDevReportInterval.reset();
 
                 if (stDev30s.getSamples() > SAMPLES_FOR_30_SECONDS) {
@@ -358,16 +347,16 @@ void runReceive(const char* addressOption, int port, int gap, int size, int repo
                 PacketStreamStats packetStatsLastReportInterval = seqStats.getStatsForLastHistoryInterval();
 
                 std::cout << "RECEIVE Packet Stats\n"
-                    << "Overall:\n"
-                    << "lost: " << seqStats.getLost() << ", "
-                    << "lost %: " << seqStats.getStats().getLostRate() * 100.0f << "%\n"
-                    << "Last 30s:\n"
-                    << "lost: " << packetStatsLast30s._lost << ", "
-                    << "lost %: " << packetStatsLast30s.getLostRate() * 100.0f << "%\n"
-                    << "Last report interval:\n"
-                    << "lost: " << packetStatsLastReportInterval._lost << ", "
-                    << "lost %: " << packetStatsLastReportInterval.getLostRate() * 100.0f << "%\n"
-                    << "\n\n";
+                          << "Overall:\n"
+                          << "lost: " << seqStats.getLost() << ", "
+                          << "lost %: " << seqStats.getStats().getLostRate() * 100.0f << "%\n"
+                          << "Last 30s:\n"
+                          << "lost: " << packetStatsLast30s._lost << ", "
+                          << "lost %: " << packetStatsLast30s.getLostRate() * 100.0f << "%\n"
+                          << "Last report interval:\n"
+                          << "lost: " << packetStatsLastReportInterval._lost << ", "
+                          << "lost %: " << packetStatsLastReportInterval.getLostRate() * 100.0f << "%\n"
+                          << "\n\n";
 
                 lastReport = now;
             }

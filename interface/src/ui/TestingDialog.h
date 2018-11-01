@@ -13,8 +13,8 @@
 #define hifi_TestingDialog_h
 
 #include <QDialog>
-#include "ScriptEngine.h"
 #include "JSConsole.h"
+#include "ScriptEngine.h"
 
 const QString windowLabel = "Client Script Tests";
 const QString testRunnerRelativePath = "/scripts/developer/tests/unit_tests/testRunner.js";

@@ -40,11 +40,8 @@ public:
     static QOpenGLContext* currentContext();
     static uint32_t currentContextVersion();
 
-    QOpenGLContext* getContext() {
-        return _context;
-    }
+    QOpenGLContext* getContext() { return _context; }
 
-    
 private:
     bool _ownContext { false };
     QOpenGLContext* _context { nullptr };

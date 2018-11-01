@@ -20,13 +20,11 @@
 #include <Application.h>
 #include <OffscreenUi.h>
 
+#include "InterfaceLogging.h"
 #include "MainWindow.h"
 #include "Menu.h"
-#include "InterfaceLogging.h"
 
-Bookmarks::Bookmarks() :
-_isMenuSorted(false)
-{
+Bookmarks::Bookmarks() : _isMenuSorted(false) {
 }
 void Bookmarks::deleteBookmark() {
     QStringList bookmarkList;
@@ -36,7 +34,8 @@ void Bookmarks::deleteBookmark() {
     }
 
     bool ok = false;
-    auto bookmarkName = OffscreenUi::getItem(OffscreenUi::ICON_PLACEMARK, "Delete Bookmark", "Select the bookmark to delete", bookmarkList, 0, false, &ok);
+    auto bookmarkName = OffscreenUi::getItem(OffscreenUi::ICON_PLACEMARK, "Delete Bookmark", "Select the bookmark to delete",
+                                             bookmarkList, 0, false, &ok);
     if (!ok) {
         return;
     }
@@ -63,22 +62,22 @@ void Bookmarks::addBookmarkToFile(const QString& bookmarkName, const QVariant& b
     if (contains(bookmarkName)) {
         auto offscreenUi = DependencyManager::get<OffscreenUi>();
         ModalDialogListener* dlg = OffscreenUi::asyncWarning("Duplicate Bookmark",
-                                  "The bookmark name you entered already exists in your list.",
-                                  QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+                                                             "The bookmark name you entered already exists in your list.",
+                                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
         dlg->setProperty("informativeText", "Would you like to overwrite it?");
-        QObject::connect(dlg, &ModalDialogListener::response, this, [=] (QVariant answer) {
+        QObject::connect(dlg, &ModalDialogListener::response, this, [=](QVariant answer) {
             QObject::disconnect(dlg, &ModalDialogListener::response, this, nullptr);
 
             if (QMessageBox::Yes == static_cast<QMessageBox::StandardButton>(answer.toInt())) {
                 removeBookmarkFromMenu(menubar, bookmarkName);
                 addBookmarkToMenu(menubar, bookmarkName, bookmark);
-                insert(bookmarkName, bookmark);  // Overwrites any item with the same bookmarkName.
+                insert(bookmarkName, bookmark); // Overwrites any item with the same bookmarkName.
                 enableMenuItems(true);
             }
         });
     } else {
         addBookmarkToMenu(menubar, bookmarkName, bookmark);
-        insert(bookmarkName, bookmark);  // Overwrites any item with the same bookmarkName.
+        insert(bookmarkName, bookmark); // Overwrites any item with the same bookmarkName.
         enableMenuItems(true);
     }
 }
@@ -89,8 +88,7 @@ void Bookmarks::insert(const QString& name, const QVariant& bookmark) {
     if (contains(name)) {
         qCDebug(interfaceapp) << "Added bookmark:" << name;
         persistToFile();
-    }
-    else {
+    } else {
         qWarning() << "Couldn't add bookmark: " << name;
     }
 }

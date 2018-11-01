@@ -12,7 +12,6 @@
 #ifndef hifi_AssignmentClientApp_h
 #define hifi_AssignmentClientApp_h
 
-
 #include <QApplication>
 
 const QString ASSIGNMENT_TYPE_OVERRIDE_OPTION = "t";

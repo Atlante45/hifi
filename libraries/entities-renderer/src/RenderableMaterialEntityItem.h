@@ -15,17 +15,20 @@
 
 class NetworkMaterial;
 
-namespace render { namespace entities { 
+namespace render {
+namespace entities {
 
 class MaterialEntityRenderer : public TypedEntityRenderer<MaterialEntityItem> {
     using Parent = TypedEntityRenderer<MaterialEntityItem>;
     using Pointer = std::shared_ptr<MaterialEntityRenderer>;
+
 public:
     MaterialEntityRenderer(const EntityItemPointer& entity) : Parent(entity) {}
 
 private:
     virtual bool needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const override;
-    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) override;
+    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                const TypedEntityPointer& entity) override;
     virtual void doRender(RenderArgs* args) override;
 
     ItemKey getKey() override;
@@ -40,5 +43,6 @@ private:
     std::shared_ptr<NetworkMaterial> _drawMaterial;
 };
 
-} } 
+} // namespace entities
+} // namespace render
 #endif // hifi_RenderableMaterialEntityItem_h

@@ -8,20 +8,20 @@
 #ifndef hifi_gpu_gl_GLFramebuffer_h
 #define hifi_gpu_gl_GLFramebuffer_h
 
-#include "GLShared.h"
 #include "GLBackend.h"
+#include "GLShared.h"
 
-namespace gpu { namespace gl {
+namespace gpu {
+namespace gl {
 
 class GLFramebuffer : public GLObject<Framebuffer> {
 public:
-    template <typename GLFramebufferType>
+    template<typename GLFramebufferType>
     static GLFramebufferType* sync(GLBackend& backend, const Framebuffer& framebuffer) {
         GLFramebufferType* object = Backend::getGPUObject<GLFramebufferType>(framebuffer);
 
         bool needsUpate { false };
-        if (!object ||
-            framebuffer.getDepthStamp() != object->_depthStamp ||
+        if (!object || framebuffer.getDepthStamp() != object->_depthStamp ||
             framebuffer.getColorStamps() != object->_colorStamps) {
             needsUpate = true;
         }
@@ -46,7 +46,7 @@ public:
         return object;
     }
 
-    template <typename GLFramebufferType>
+    template<typename GLFramebufferType>
     static GLuint getId(GLBackend& backend, const Framebuffer& framebuffer) {
         GLFramebufferType* fbo = sync<GLFramebufferType>(backend, framebuffer);
         if (fbo) {
@@ -66,12 +66,12 @@ protected:
     virtual void update() = 0;
     bool checkStatus() const;
 
-    GLFramebuffer(const std::weak_ptr<GLBackend>& backend, const Framebuffer& framebuffer, GLuint id) : GLObject(backend, framebuffer, id) {}
+    GLFramebuffer(const std::weak_ptr<GLBackend>& backend, const Framebuffer& framebuffer, GLuint id) :
+        GLObject(backend, framebuffer, id) {}
     ~GLFramebuffer();
-
 };
 
-} }
-
+} // namespace gl
+} // namespace gpu
 
 #endif

@@ -27,7 +27,6 @@ class SkeletonModel : public CauterizedModel {
     Q_OBJECT
 
 public:
-
     SkeletonModel(Avatar* owningAvatar, QObject* parent = nullptr);
     ~SkeletonModel();
 
@@ -102,7 +101,6 @@ signals:
     void skeletonLoaded();
 
 protected:
-
     void computeBoundingShape();
 
     bool getEyeModelPositions(glm::vec3& firstEyePosition, glm::vec3& secondEyePosition) const;
@@ -115,7 +113,7 @@ protected:
 
     glm::vec3 _defaultEyeModelPosition;
 
-    float _headClipDistance;  // Near clip distance to use if no separate head model
+    float _headClipDistance; // Near clip distance to use if no separate head model
 
 private:
     bool _texturesLoaded { false };

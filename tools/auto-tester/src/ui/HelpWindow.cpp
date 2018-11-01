@@ -9,6 +9,6 @@
 //
 #include "HelpWindow.h"
 
-HelpWindow::HelpWindow(QWidget *parent) {
+HelpWindow::HelpWindow(QWidget* parent) {
     setupUi(this);
 }

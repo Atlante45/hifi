@@ -11,10 +11,10 @@
 // include this before QGLWidget, which includes an earlier version of OpenGL
 #include "Cube3DOverlay.h"
 
+#include <DependencyManager.h>
+#include <GeometryCache.h>
 #include <SharedUtil.h>
 #include <StreamUtils.h>
-#include <GeometryCache.h>
-#include <DependencyManager.h>
 
 QString const Cube3DOverlay::TYPE = "cube";
 
@@ -25,9 +25,7 @@ Cube3DOverlay::Cube3DOverlay() {
     }
 }
 
-Cube3DOverlay::Cube3DOverlay(const Cube3DOverlay* cube3DOverlay) :
-    Volume3DOverlay(cube3DOverlay)
-{
+Cube3DOverlay::Cube3DOverlay(const Cube3DOverlay* cube3DOverlay) : Volume3DOverlay(cube3DOverlay) {
     auto geometryCache = DependencyManager::get<GeometryCache>();
     for (size_t i = 0; i < _geometryIds.size(); ++i) {
         _geometryIds[i] = geometryCache->allocateID();
@@ -127,7 +125,7 @@ void Cube3DOverlay::setProperties(const QVariantMap& properties) {
 /**jsdoc
  * These are the properties of a <code>cube</code> {@link Overlays.OverlayType|OverlayType}.
  * @typedef {object} Overlays.CubeProperties
- * 
+ *
  * @property {string} type=cube - Has the value <code>"cube"</code>. <em>Read-only.</em>
  * @property {Color} color=255,255,255 - The color of the overlay.
  * @property {number} alpha=0.7 - The opacity of the overlay, <code>0.0</code> - <code>1.0</code>.
@@ -157,7 +155,8 @@ void Cube3DOverlay::setProperties(const QVariantMap& properties) {
  *     Antonyms: <code>isWire</code> and <code>wire</code>.
  * @property {boolean} isDashedLine=false - If <code>true</code>, a dashed line is drawn on the overlay's edges. Synonym:
  *     <code>dashed</code>.
- * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.  <code>ignoreRayIntersection</code> is a synonym.
+ * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.
+ * <code>ignoreRayIntersection</code> is a synonym.
  * @property {boolean} drawInFront=false - If <code>true</code>, the overlay is rendered in front of other overlays that don't
  *     have <code>drawInFront</code> set to <code>true</code>, and in front of entities.
  * @property {boolean} grabbable=false - Signal to grabbing scripts whether or not this overlay can be grabbed.

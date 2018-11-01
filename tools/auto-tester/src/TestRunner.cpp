@@ -10,8 +10,8 @@
 #include "TestRunner.h"
 
 #include <QThread>
-#include <QtWidgets/QMessageBox>
 #include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMessageBox>
 
 #include "ui/AutoTester.h"
 extern AutoTester* autoTester;
@@ -23,15 +23,9 @@ extern AutoTester* autoTester;
 // clang-format on
 #endif
 
-TestRunner::TestRunner(std::vector<QCheckBox*> dayCheckboxes,
-                       std::vector<QCheckBox*> timeEditCheckboxes,
-                       std::vector<QTimeEdit*> timeEdits,
-                       QLabel* workingFolderLabel,
-                       QCheckBox* runServerless,
-                       QCheckBox* runLatest,
-                       QLineEdit* url,
-                       QPushButton* runNow,
-                       QObject* parent) :
+TestRunner::TestRunner(std::vector<QCheckBox*> dayCheckboxes, std::vector<QCheckBox*> timeEditCheckboxes,
+                       std::vector<QTimeEdit*> timeEdits, QLabel* workingFolderLabel, QCheckBox* runServerless,
+                       QCheckBox* runLatest, QLineEdit* url, QPushButton* runNow, QObject* parent) :
     QObject(parent) {
     _dayCheckboxes = dayCheckboxes;
     _timeEditCheckboxes = timeEditCheckboxes;
@@ -94,7 +88,7 @@ void TestRunner::setWorkingFolder() {
 
     _timer = new QTimer(this);
     connect(_timer, SIGNAL(timeout()), this, SLOT(checkTime()));
-    _timer->start(30 * 1000);  //time specified in ms
+    _timer->start(30 * 1000); // time specified in ms
 }
 
 void TestRunner::run() {
@@ -174,12 +168,12 @@ void TestRunner::runInstaller() {
     // Qt cannot start an installation process using QProcess::start (Qt Bug 9761)
     // To allow installation, the installer is run using the `system` command
 
-    QStringList arguments{ QStringList() << QString("/S") << QString("/D=") + QDir::toNativeSeparators(_installationFolder) };
+    QStringList arguments { QStringList() << QString("/S") << QString("/D=") + QDir::toNativeSeparators(_installationFolder) };
 
     QString installerFullPath = _workingFolder + "/" + _installerFilename;
 
-    QString commandLine =
-        "\"" + QDir::toNativeSeparators(installerFullPath) + "\"" + " /S /D=" + QDir::toNativeSeparators(_installationFolder);
+    QString commandLine = "\"" + QDir::toNativeSeparators(installerFullPath) + "\"" +
+                          " /S /D=" + QDir::toNativeSeparators(_installationFolder);
 
     installerWorker->setCommandLine(commandLine);
     emit startInstaller();
@@ -215,7 +209,7 @@ void TestRunner::verifyInstallationSucceeded() {
 }
 
 void TestRunner::saveExistingHighFidelityAppDataFolder() {
-    QString dataDirectory{ "NOT FOUND" };
+    QString dataDirectory { "NOT FOUND" };
 
 #ifdef Q_OS_WIN
     dataDirectory = qgetenv("USERPROFILE") + "\\AppData\\Roaming";
@@ -319,8 +313,8 @@ void TestRunner::startLocalServerProcesses() {
     commandLine = "start \"domain-server.exe\" \"" + QDir::toNativeSeparators(_installationFolder) + "\\domain-server.exe\"";
     system(commandLine.toStdString().c_str());
 
-    commandLine =
-        "start \"assignment-client.exe\" \"" + QDir::toNativeSeparators(_installationFolder) + "\\assignment-client.exe\" -n 6";
+    commandLine = "start \"assignment-client.exe\" \"" + QDir::toNativeSeparators(_installationFolder) +
+                  "\\assignment-client.exe\" -n 6";
     system(commandLine.toStdString().c_str());
 #endif
     // Give server processes time to stabilize
@@ -339,8 +333,8 @@ void TestRunner::runInterfaceWithTestScript() {
         url = "hifi://localhost";
     }
 
-    QString testScript =
-        QString("https://raw.githubusercontent.com/") + _user + "/hifi_tests/" + _branch + "/tests/testRecursive.js";
+    QString testScript = QString("https://raw.githubusercontent.com/") + _user + "/hifi_tests/" + _branch +
+                         "/tests/testRecursive.js";
 
     QString commandLine = exeFile + " --url " + url + " --no-updater --no-login" + " --testScript " + testScript +
                           " quitWhenFinished --testResultsLocation " + snapshotFolder;
@@ -352,9 +346,10 @@ void TestRunner::runInterfaceWithTestScript() {
 void TestRunner::interfaceExecutionComplete() {
     killProcesses();
 
-    QFileInfo testCompleted(QDir::toNativeSeparators(_snapshotFolder) +"/tests_completed.txt");
+    QFileInfo testCompleted(QDir::toNativeSeparators(_snapshotFolder) + "/tests_completed.txt");
     if (!testCompleted.exists()) {
-        QMessageBox::critical(0, "Tests not completed", "Interface seems to have crashed before completion of the test scripts");
+        QMessageBox::critical(0, "Tests not completed",
+                              "Interface seems to have crashed before completion of the test scripts");
         _runNow->setEnabled(true);
         return;
     }
@@ -429,8 +424,8 @@ void TestRunner::copyFolder(const QString& source, const QString& destination) {
                 throw("Could not create destination folder '" + destination + "'");
             }
 
-            QStringList fileNames =
-                QDir(source).entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
+            QStringList fileNames = QDir(source).entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden |
+                                                           QDir::System);
 
             foreach (const QString& fileName, fileNames) {
                 copyFolder(QString(source + "/" + fileName), QString(destination + "/" + fileName));
@@ -459,7 +454,7 @@ void TestRunner::checkTime() {
     }
 
     // Check the time
-    bool timeToRun{ false };
+    bool timeToRun { false };
 
     for (size_t i = 0; i < std::min(_timeEditCheckboxes.size(), _timeEdits.size()); ++i) {
         if (_timeEditCheckboxes[i]->isChecked() && (_timeEdits[i]->time().hour() == now.time().hour()) &&
@@ -493,7 +488,8 @@ void TestRunner::appendLog(const QString& message) {
 }
 
 QString TestRunner::getInstallerNameFromURL(const QString& url) {
-    // An example URL: https://deployment.highfidelity.com/jobs/pr-build/label%3Dwindows/13023/HighFidelity-Beta-Interface-PR14006-be76c43.exe
+    // An example URL:
+    // https://deployment.highfidelity.com/jobs/pr-build/label%3Dwindows/13023/HighFidelity-Beta-Interface-PR14006-be76c43.exe
     try {
         QStringList urlParts = url.split("/");
         return urlParts[urlParts.size() - 1];
@@ -511,7 +507,9 @@ QString TestRunner::getPRNumberFromURL(const QString& url) {
         QStringList urlParts = url.split("/");
         QStringList filenameParts = urlParts[urlParts.size() - 1].split("-");
         if (filenameParts.size() <= 3) {
-            throw "URL not in expected format, should look like `https://deployment.highfidelity.com/jobs/pr-build/label%3Dwindows/13023/HighFidelity-Beta-Interface-PR14006-be76c43.exe`";
+            throw "URL not in expected format, should look like "
+                  "`https://deployment.highfidelity.com/jobs/pr-build/label%3Dwindows/13023/"
+                  "HighFidelity-Beta-Interface-PR14006-be76c43.exe`";
         }
         return filenameParts[filenameParts.size() - 2];
     } catch (QString errorMessage) {
@@ -526,7 +524,7 @@ QString TestRunner::getPRNumberFromURL(const QString& url) {
 void TestRunner::parseBuildInformation() {
     try {
         QDomDocument domDocument;
-        QString filename{ _workingFolder + "/" + DEV_BUILD_XML_FILENAME };
+        QString filename { _workingFolder + "/" + DEV_BUILD_XML_FILENAME };
         QFile file(filename);
         if (!file.open(QIODevice::ReadOnly) || !domDocument.setContent(&file)) {
             throw QString("Could not open " + filename);

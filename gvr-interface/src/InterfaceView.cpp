@@ -11,8 +11,5 @@
 
 #include "InterfaceView.h"
 
-InterfaceView::InterfaceView(QWidget* parent,  Qt::WindowFlags flags) :
-    QOpenGLWidget(parent, flags)
-{
-    
+InterfaceView::InterfaceView(QWidget* parent, Qt::WindowFlags flags) : QOpenGLWidget(parent, flags) {
 }

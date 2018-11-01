@@ -11,17 +11,17 @@
 #ifndef DISABLE_QML
 
 #include <gl/Config.h>
-#include <gl/QOpenGLContextWrapper.h>
 #include <gl/GLHelpers.h>
+#include <gl/QOpenGLContextWrapper.h>
 
 #include <QtQuick/QQuickWindow>
 
 #include <shared/NsightHelpers.h>
+#include "../Logging.h"
 #include "Profiling.h"
+#include "RenderControl.h"
 #include "SharedObject.h"
 #include "TextureCache.h"
-#include "RenderControl.h"
-#include "../Logging.h"
 
 using namespace hifi::qml::impl;
 
@@ -45,8 +45,7 @@ bool RenderEventHandler::event(QEvent* e) {
     return QObject::event(e);
 }
 
-RenderEventHandler::RenderEventHandler(SharedObject* shared, QThread* targetThread)
-    : _shared(shared) {
+RenderEventHandler::RenderEventHandler(SharedObject* shared, QThread* targetThread) : _shared(shared) {
     // Create the GL canvas in the same thread as the share canvas
     if (!_canvas.create(SharedObject::getSharedContext())) {
         qFatal("Unable to create new offscreen GL context");

@@ -18,7 +18,6 @@
 #include "ScriptEngine.h"
 #include "TypedArrays.h"
 
-
 static const QString CLASS_NAME = "ArrayBuffer";
 
 // FIXME: Q_DECLARE_METATYPE is global and really belongs in a shared header file, not per .cpp like this
@@ -28,30 +27,26 @@ Q_DECLARE_METATYPE(QByteArray*)
 int qScriptClassPointerMetaTypeId = qRegisterMetaType<QScriptClass*>();
 int qByteArrayPointerMetaTypeId = qRegisterMetaType<QByteArray*>();
 
-ArrayBufferClass::ArrayBufferClass(ScriptEngine* scriptEngine) :
-QObject(scriptEngine),
-QScriptClass(scriptEngine) {
+ArrayBufferClass::ArrayBufferClass(ScriptEngine* scriptEngine) : QObject(scriptEngine), QScriptClass(scriptEngine) {
     qScriptRegisterMetaType<QByteArray>(engine(), toScriptValue, fromScriptValue);
     QScriptValue global = engine()->globalObject();
-    
+
     // Save string handles for quick lookup
     _name = engine()->toStringHandle(CLASS_NAME.toLatin1());
     _byteLength = engine()->toStringHandle(BYTE_LENGTH_PROPERTY_NAME.toLatin1());
-    
+
     // build prototype
-    _proto = engine()->newQObject(new ArrayBufferPrototype(this),
-                                QScriptEngine::QtOwnership,
-                                QScriptEngine::SkipMethodsInEnumeration |
-                                QScriptEngine::ExcludeSuperClassMethods |
-                                QScriptEngine::ExcludeSuperClassProperties);
+    _proto = engine()->newQObject(new ArrayBufferPrototype(this), QScriptEngine::QtOwnership,
+                                  QScriptEngine::SkipMethodsInEnumeration | QScriptEngine::ExcludeSuperClassMethods |
+                                      QScriptEngine::ExcludeSuperClassProperties);
     _proto.setPrototype(global.property("Object").property("prototype"));
-    
+
     // Register constructor
     _ctor = engine()->newFunction(construct, _proto);
     _ctor.setData(engine()->toScriptValue(this));
-    
+
     engine()->globalObject().setProperty(name(), _ctor);
-    
+
     // Registering other array types
     // The script engine is there parent so it'll delete them with itself
     new DataViewClass(scriptEngine);
@@ -76,11 +71,11 @@ QScriptValue ArrayBufferClass::newInstance(qint32 size) {
         engine()->evaluate("throw \"ArgumentError: absurd length\"");
         return QScriptValue();
     }
-    
+
     engine()->reportAdditionalMemoryCost(size);
     QScriptEngine* eng = engine();
     QVariant variant = QVariant::fromValue(QByteArray(size, 0));
-    QScriptValue data =  eng->newVariant(variant);
+    QScriptValue data = eng->newVariant(variant);
     return engine()->newObject(this, data);
 }
 
@@ -99,22 +94,21 @@ QScriptValue ArrayBufferClass::construct(QScriptContext* context, QScriptEngine*
     if (!arg.isValid() || !arg.isNumber()) {
         return QScriptValue();
     }
-    
+
     quint32 size = arg.toInt32();
     QScriptValue newObject = cls->newInstance(size);
-    
+
     if (context->isCalledAsConstructor()) {
         // if called with keyword new, replace this object.
         context->setThisObject(newObject);
         return engine->undefinedValue();
     }
-    
+
     return newObject;
 }
 
-QScriptClass::QueryFlags ArrayBufferClass::queryProperty(const QScriptValue& object,
-                                                    const QScriptString& name,
-                                                    QueryFlags flags, uint* id) {
+QScriptClass::QueryFlags ArrayBufferClass::queryProperty(const QScriptValue& object, const QScriptString& name,
+                                                         QueryFlags flags, uint* id) {
     QByteArray* ba = qscriptvalue_cast<QByteArray*>(object.data());
     if (ba && name == _byteLength) {
         // if the property queried is byteLength, only handle read access
@@ -123,8 +117,7 @@ QScriptClass::QueryFlags ArrayBufferClass::queryProperty(const QScriptValue& obj
     return 0; // No access
 }
 
-QScriptValue ArrayBufferClass::property(const QScriptValue& object,
-                                   const QScriptString& name, uint id) {
+QScriptValue ArrayBufferClass::property(const QScriptValue& object, const QScriptString& name, uint id) {
     QByteArray* ba = qscriptvalue_cast<QByteArray*>(object.data());
     if (ba && name == _byteLength) {
         return ba->length();
@@ -132,8 +125,7 @@ QScriptValue ArrayBufferClass::property(const QScriptValue& object,
     return QScriptValue();
 }
 
-QScriptValue::PropertyFlags ArrayBufferClass::propertyFlags(const QScriptValue& object,
-                                                       const QScriptString& name, uint id) {
+QScriptValue::PropertyFlags ArrayBufferClass::propertyFlags(const QScriptValue& object, const QScriptString& name, uint id) {
     return QScriptValue::Undeletable;
 }
 
@@ -150,7 +142,8 @@ QScriptValue ArrayBufferClass::toScriptValue(QScriptEngine* engine, const QByteA
     ArrayBufferClass* cls = qscriptvalue_cast<ArrayBufferClass*>(ctor.data());
     if (!cls) {
         if (engine->currentContext()) {
-            engine->currentContext()->throwError("arrayBufferClass::toScriptValue -- could not get " + CLASS_NAME + " class constructor");
+            engine->currentContext()->throwError("arrayBufferClass::toScriptValue -- could not get " + CLASS_NAME +
+                                                 " class constructor");
         }
         return QScriptValue::NullValue;
     }
@@ -164,7 +157,7 @@ void ArrayBufferClass::fromScriptValue(const QScriptValue& object, QByteArray& b
     } else if (object.isArray()) {
         // Array of uint8s eg: [ 128, 3, 25, 234 ]
         auto Uint8Array = object.engine()->globalObject().property("Uint8Array");
-        auto typedArray = Uint8Array.construct(QScriptValueList{object});
+        auto typedArray = Uint8Array.construct(QScriptValueList { object });
         if (QByteArray* buffer = qscriptvalue_cast<QByteArray*>(typedArray.property("buffer"))) {
             byteArray = *buffer;
         }
@@ -175,4 +168,3 @@ void ArrayBufferClass::fromScriptValue(const QScriptValue& object, QByteArray& b
         }
     }
 }
-

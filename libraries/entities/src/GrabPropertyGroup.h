@@ -18,8 +18,8 @@
 
 #include <QtScript/QScriptEngine>
 
-#include "PropertyGroup.h"
 #include "EntityItemPropertiesMacros.h"
+#include "PropertyGroup.h"
 
 class EntityItemProperties;
 class EncodeBitstreamParams;
@@ -37,7 +37,6 @@ static const glm::vec3 INITIAL_RIGHT_EQUIPPABLE_POSITION { glm::vec3(0.0f) };
 static const glm::quat INITIAL_RIGHT_EQUIPPABLE_ROTATION { glm::quat() };
 static const glm::vec3 INITIAL_EQUIPPABLE_INDICATOR_SCALE { glm::vec3(1.0f) };
 static const glm::vec3 INITIAL_EQUIPPABLE_INDICATOR_OFFSET { glm::vec3(0.0f) };
-
 
 /**jsdoc
  * Grab is defined by the following properties.
@@ -68,7 +67,6 @@ static const glm::vec3 INITIAL_EQUIPPABLE_INDICATOR_OFFSET { glm::vec3(0.0f) };
        relative offset of the displayed overlay from the equippable entity.
  */
 
-
 class GrabPropertyGroup : public PropertyGroup {
 public:
     // EntityItemProperty related helpers
@@ -82,15 +80,12 @@ public:
     virtual void debugDump() const override;
     virtual void listChangedProperties(QList<QString>& out) override;
 
-    virtual bool appendToEditPacket(OctreePacketData* packetData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
-                                    OctreeElement::AppendState& appendState) const override;
+    virtual bool appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+                                    EntityPropertyFlags& propertyFlags, EntityPropertyFlags& propertiesDidntFit,
+                                    int& propertyCount, OctreeElement::AppendState& appendState) const override;
 
-    virtual bool decodeFromEditPacket(EntityPropertyFlags& propertyFlags,
-                                      const unsigned char*& dataAt, int& processedBytes) override;
+    virtual bool decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt,
+                                      int& processedBytes) override;
     virtual void markAllChanged() override;
     virtual EntityPropertyFlags getChangedProperties() const override;
 
@@ -105,16 +100,13 @@ public:
 
     virtual void appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                     EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
+                                    EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                    EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                                     OctreeElement::AppendState& appendState) const override;
 
     virtual int readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) override;
+                                                 ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                 bool overwriteLocalData, bool& somethingChanged) override;
 
     // grab properties
     DEFINE_PROPERTY(PROP_GRAB_GRABBABLE, Grabbable, grabbable, bool, INITIAL_GRABBABLE);
@@ -123,19 +115,19 @@ public:
                     INITIAL_FOLLOWS_CONTROLLER);
     DEFINE_PROPERTY(PROP_GRAB_TRIGGERABLE, Triggerable, triggerable, bool, INITIAL_TRIGGERABLE);
     DEFINE_PROPERTY(PROP_GRAB_EQUIPPABLE, Equippable, equippable, bool, INITIAL_EQUIPPABLE);
-    DEFINE_PROPERTY_REF(PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET, EquippableLeftPosition, equippableLeftPosition,
-                        glm::vec3, INITIAL_LEFT_EQUIPPABLE_POSITION);
-    DEFINE_PROPERTY_REF(PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET, EquippableLeftRotation, equippableLeftRotation,
-                        glm::quat, INITIAL_LEFT_EQUIPPABLE_ROTATION);
-    DEFINE_PROPERTY_REF(PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET, EquippableRightPosition, equippableRightPosition,
-                        glm::vec3, INITIAL_RIGHT_EQUIPPABLE_POSITION);
-    DEFINE_PROPERTY_REF(PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET, EquippableRightRotation, equippableRightRotation,
-                        glm::quat, INITIAL_RIGHT_EQUIPPABLE_ROTATION);
+    DEFINE_PROPERTY_REF(PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET, EquippableLeftPosition, equippableLeftPosition, glm::vec3,
+                        INITIAL_LEFT_EQUIPPABLE_POSITION);
+    DEFINE_PROPERTY_REF(PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET, EquippableLeftRotation, equippableLeftRotation, glm::quat,
+                        INITIAL_LEFT_EQUIPPABLE_ROTATION);
+    DEFINE_PROPERTY_REF(PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET, EquippableRightPosition, equippableRightPosition, glm::vec3,
+                        INITIAL_RIGHT_EQUIPPABLE_POSITION);
+    DEFINE_PROPERTY_REF(PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET, EquippableRightRotation, equippableRightRotation, glm::quat,
+                        INITIAL_RIGHT_EQUIPPABLE_ROTATION);
     DEFINE_PROPERTY_REF(PROP_GRAB_EQUIPPABLE_INDICATOR_URL, EquippableIndicatorURL, equippableIndicatorURL, QString, "");
-    DEFINE_PROPERTY_REF(PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE, EquippableIndicatorScale, equippableIndicatorScale,
-                        glm::vec3, INITIAL_EQUIPPABLE_INDICATOR_SCALE);
-    DEFINE_PROPERTY_REF(PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET, EquippableIndicatorOffset, equippableIndicatorOffset,
-                        glm::vec3, INITIAL_EQUIPPABLE_INDICATOR_OFFSET);
+    DEFINE_PROPERTY_REF(PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE, EquippableIndicatorScale, equippableIndicatorScale, glm::vec3,
+                        INITIAL_EQUIPPABLE_INDICATOR_SCALE);
+    DEFINE_PROPERTY_REF(PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET, EquippableIndicatorOffset, equippableIndicatorOffset, glm::vec3,
+                        INITIAL_EQUIPPABLE_INDICATOR_OFFSET);
 };
 
 #endif // hifi_GrabPropertyGroup_h

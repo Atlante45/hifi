@@ -10,17 +10,16 @@
 #ifndef hifi_GameWorkload_h
 #define hifi_GameWorkload_h
 
-#include <workload/Space.h>
 #include <workload/Engine.h>
+#include <workload/Space.h>
 
 #include <render/Scene.h>
 #include "PhysicalEntitySimulation.h"
 
 class GameWorkloadContext : public workload::WorkloadContext {
 public:
-    GameWorkloadContext(const workload::SpacePointer& space,
-            const render::ScenePointer& scene,
-            const PhysicalEntitySimulationPointer& simulation);
+    GameWorkloadContext(const workload::SpacePointer& space, const render::ScenePointer& scene,
+                        const PhysicalEntitySimulationPointer& simulation);
     virtual ~GameWorkloadContext();
 
     render::ScenePointer _scene;
@@ -32,9 +31,8 @@ public:
     GameWorkload();
     ~GameWorkload();
 
-    void startup(const workload::SpacePointer& space,
-            const render::ScenePointer& scene,
-            const PhysicalEntitySimulationPointer& simulation);
+    void startup(const workload::SpacePointer& space, const render::ScenePointer& scene,
+                 const PhysicalEntitySimulationPointer& simulation);
     void shutdown();
 
     void updateViews(const ViewFrustum& frustum, const glm::vec3& headPosition);

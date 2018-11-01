@@ -10,16 +10,16 @@
 //
 
 #include "QmlCommerce.h"
-#include "CommerceLogging.h"
+#include <AccountManager.h>
+#include <Application.h>
+#include <ScriptEngines.h>
+#include <UserActivityLogger.h>
+#include <ui/TabletScriptingInterface.h>
 #include "Application.h"
+#include "CommerceLogging.h"
 #include "DependencyManager.h"
 #include "Ledger.h"
 #include "Wallet.h"
-#include <AccountManager.h>
-#include <Application.h>
-#include <UserActivityLogger.h>
-#include <ScriptEngines.h>
-#include <ui/TabletScriptingInterface.h>
 #include "scripting/HMDScriptingInterface.h"
 
 QmlCommerce::QmlCommerce() {
@@ -47,21 +47,13 @@ QmlCommerce::QmlCommerce() {
     _appsPath = PathUtils::getAppDataPath() + "Apps/";
 }
 
-
-
-
 void QmlCommerce::openSystemApp(const QString& appName) {
-    static QMap<QString, QString> systemApps {
-        {"GOTO",        "hifi/tablet/TabletAddressDialog.qml"},
-        {"PEOPLE",      "hifi/Pal.qml"},
-        {"WALLET",      "hifi/commerce/wallet/Wallet.qml"},
-        {"MARKET",      "/marketplace.html"}
-    };
+    static QMap<QString, QString> systemApps { { "GOTO", "hifi/tablet/TabletAddressDialog.qml" },
+                                               { "PEOPLE", "hifi/Pal.qml" },
+                                               { "WALLET", "hifi/commerce/wallet/Wallet.qml" },
+                                               { "MARKET", "/marketplace.html" } };
 
-    static QMap<QString, QString> systemInject{
-        {"MARKET",      "/scripts/system/html/js/marketplacesInject.js"}
-    };
-
+    static QMap<QString, QString> systemInject { { "MARKET", "/scripts/system/html/js/marketplacesInject.js" } };
 
     auto tablet = dynamic_cast<TabletProxy*>(
         DependencyManager::get<TabletScriptingInterface>()->getTablet("com.highfidelity.interface.tablet.system"));
@@ -70,30 +62,25 @@ void QmlCommerce::openSystemApp(const QString& appName) {
     if (appPathIter != systemApps.end()) {
         if (appPathIter->contains(".qml", Qt::CaseInsensitive)) {
             tablet->loadQMLSource(*appPathIter);
-        }
-        else if (appPathIter->contains(".html", Qt::CaseInsensitive)) {
+        } else if (appPathIter->contains(".html", Qt::CaseInsensitive)) {
             QMap<QString, QString>::const_iterator injectIter = systemInject.find(appName);
             if (appPathIter == systemInject.end()) {
                 tablet->gotoWebScreen(NetworkingConstants::METAVERSE_SERVER_URL().toString() + *appPathIter);
-            }
-            else {
+            } else {
                 QString inject = "file:///" + qApp->applicationDirPath() + *injectIter;
                 tablet->gotoWebScreen(NetworkingConstants::METAVERSE_SERVER_URL().toString() + *appPathIter, inject);
             }
-        }
-        else {
+        } else {
             qCDebug(commerce) << "Attempted to open unknown type of URL!";
             return;
         }
-    }
-    else {
+    } else {
         qCDebug(commerce) << "Attempted to open unknown APP!";
         return;
     }
 
     DependencyManager::get<HMDScriptingInterface>()->openTablet();
 }
-
 
 void QmlCommerce::getWalletStatus() {
     auto wallet = DependencyManager::get<Wallet>();
@@ -134,7 +121,7 @@ void QmlCommerce::buy(const QString& assetId, int cost, const bool controlledFai
     auto wallet = DependencyManager::get<Wallet>();
     QStringList keys = wallet->listPublicKeys();
     if (keys.count() == 0) {
-        QJsonObject result{ { "status", "fail" }, { "message", "Uninitialized Wallet." } };
+        QJsonObject result { { "status", "fail" }, { "message", "Uninitialized Wallet." } };
         return emit buyResult(result);
     }
     QString key = keys[0];
@@ -151,11 +138,8 @@ void QmlCommerce::balance() {
     }
 }
 
-void QmlCommerce::inventory(const QString& editionFilter,
-                            const QString& typeFilter,
-                            const QString& titleFilter,
-                            const int& page,
-                            const int& perPage) {
+void QmlCommerce::inventory(const QString& editionFilter, const QString& typeFilter, const QString& titleFilter,
+                            const int& page, const int& perPage) {
     auto ledger = DependencyManager::get<Ledger>();
     auto wallet = DependencyManager::get<Wallet>();
     QStringList cachedPublicKeys = wallet->listPublicKeys();
@@ -216,30 +200,26 @@ void QmlCommerce::certificateInfo(const QString& certificateId) {
     ledger->certificateInfo(certificateId);
 }
 
-void QmlCommerce::transferAssetToNode(const QString& nodeID,
-                                      const QString& certificateID,
-                                      const int& amount,
+void QmlCommerce::transferAssetToNode(const QString& nodeID, const QString& certificateID, const int& amount,
                                       const QString& optionalMessage) {
     auto ledger = DependencyManager::get<Ledger>();
     auto wallet = DependencyManager::get<Wallet>();
     QStringList keys = wallet->listPublicKeys();
     if (keys.count() == 0) {
-        QJsonObject result{ { "status", "fail" }, { "message", "Uninitialized Wallet." } };
+        QJsonObject result { { "status", "fail" }, { "message", "Uninitialized Wallet." } };
         return emit transferAssetToNodeResult(result);
     }
     QString key = keys[0];
     ledger->transferAssetToNode(key, nodeID, certificateID, amount, optionalMessage);
 }
 
-void QmlCommerce::transferAssetToUsername(const QString& username,
-                                          const QString& certificateID,
-                                          const int& amount,
+void QmlCommerce::transferAssetToUsername(const QString& username, const QString& certificateID, const int& amount,
                                           const QString& optionalMessage) {
     auto ledger = DependencyManager::get<Ledger>();
     auto wallet = DependencyManager::get<Wallet>();
     QStringList keys = wallet->listPublicKeys();
     if (keys.count() == 0) {
-        QJsonObject result{ { "status", "fail" }, { "message", "Uninitialized Wallet." } };
+        QJsonObject result { { "status", "fail" }, { "message", "Uninitialized Wallet." } };
         return emit transferAssetToUsernameResult(result);
     }
     QString key = keys[0];
@@ -249,15 +229,10 @@ void QmlCommerce::transferAssetToUsername(const QString& username,
 void QmlCommerce::replaceContentSet(const QString& itemHref, const QString& certificateID) {
     if (!certificateID.isEmpty()) {
         auto ledger = DependencyManager::get<Ledger>();
-        ledger->updateLocation(
-            certificateID,
-            DependencyManager::get<AddressManager>()->getPlaceName(),
-            true);
+        ledger->updateLocation(certificateID, DependencyManager::get<AddressManager>()->getPlaceName(), true);
     }
     qApp->replaceDomainContent(itemHref);
-    QJsonObject messageProperties = {
-        { "status", "SuccessfulRequestToReplaceContent" },
-        { "content_set_url", itemHref } };
+    QJsonObject messageProperties = { { "status", "SuccessfulRequestToReplaceContent" }, { "content_set_url", itemHref } };
     UserActivityLogger::getInstance().logAction("replace_domain_content", messageProperties);
     emit contentSetChanged(itemHref);
 }
@@ -325,8 +300,8 @@ bool QmlCommerce::installApp(const QString& itemHref, const bool& alsoOpenImmedi
 
     QUrl appHref(itemHref);
 
-    auto request =
-        DependencyManager::get<ResourceManager>()->createResourceRequest(this, appHref, true, -1, "QmlCommerce::installApp");
+    auto request = DependencyManager::get<ResourceManager>()->createResourceRequest(this, appHref, true, -1,
+                                                                                    "QmlCommerce::installApp");
 
     if (!request) {
         qCDebug(commerce) << "Couldn't create resource request for app.";
@@ -451,7 +426,7 @@ void QmlCommerce::updateItem(const QString& certificateId) {
     auto wallet = DependencyManager::get<Wallet>();
     QStringList keys = wallet->listPublicKeys();
     if (keys.count() == 0) {
-        QJsonObject result{ { "status", "fail" }, { "message", "Uninitialized Wallet." } };
+        QJsonObject result { { "status", "fail" }, { "message", "Uninitialized Wallet." } };
         return emit updateItemResult(result);
     }
     QString key = keys[0];

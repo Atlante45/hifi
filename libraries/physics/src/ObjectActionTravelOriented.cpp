@@ -13,23 +13,22 @@
 
 #include <glm/gtc/quaternion.hpp>
 
-#include "QVariantGLM.h"
 #include "PhysicsLogging.h"
+#include "QVariantGLM.h"
 
 const uint16_t ObjectActionTravelOriented::actionVersion = 1;
 
-
 ObjectActionTravelOriented::ObjectActionTravelOriented(const QUuid& id, EntityItemPointer ownerEntity) :
     ObjectAction(DYNAMIC_TYPE_TRAVEL_ORIENTED, id, ownerEntity) {
-    #if WANT_DEBUG
+#if WANT_DEBUG
     qCDebug(physics) << "ObjectActionTravelOriented::ObjectActionTravelOriented";
-    #endif
+#endif
 }
 
 ObjectActionTravelOriented::~ObjectActionTravelOriented() {
-    #if WANT_DEBUG
+#if WANT_DEBUG
     qCDebug(physics) << "ObjectActionTravelOriented::~ObjectActionTravelOriented";
-    #endif
+#endif
 }
 
 void ObjectActionTravelOriented::updateActionWorker(btScalar deltaTimeStep) {
@@ -101,29 +100,26 @@ void ObjectActionTravelOriented::updateActionWorker(btScalar deltaTimeStep) {
 
 const float MIN_TIMESCALE = 0.1f;
 
-
 bool ObjectActionTravelOriented::updateArguments(QVariantMap arguments) {
     glm::vec3 forward;
     float angularTimeScale;
 
     bool needUpdate = false;
     bool somethingChanged = ObjectDynamic::updateArguments(arguments);
-    withReadLock([&]{
+    withReadLock([&] {
         bool ok = true;
         forward = EntityDynamicInterface::extractVec3Argument("travel oriented action", arguments, "forward", ok, true);
         if (!ok) {
             forward = _forward;
         }
         ok = true;
-        angularTimeScale =
-            EntityDynamicInterface::extractFloatArgument("travel oriented action", arguments, "angularTimeScale", ok, false);
+        angularTimeScale = EntityDynamicInterface::extractFloatArgument("travel oriented action", arguments, "angularTimeScale",
+                                                                        ok, false);
         if (!ok) {
             angularTimeScale = _angularTimeScale;
         }
 
-        if (somethingChanged ||
-            forward != _forward ||
-            angularTimeScale != _angularTimeScale) {
+        if (somethingChanged || forward != _forward || angularTimeScale != _angularTimeScale) {
             // something changed
             needUpdate = true;
         }
@@ -148,14 +144,14 @@ bool ObjectActionTravelOriented::updateArguments(QVariantMap arguments) {
 }
 
 /**jsdoc
- * The <code>"travel-oriented"</code> {@link Entities.ActionType|ActionType} orients an entity to align with its direction of 
+ * The <code>"travel-oriented"</code> {@link Entities.ActionType|ActionType} orients an entity to align with its direction of
  * travel.
  * It has arguments in addition to the common {@link Entities.ActionArguments|ActionArguments}.
  *
  * @typedef {object} Entities.ActionArguments-TravelOriented
  * @property {Vec3} forward=0,0,0 - The axis of the entity to align with the entity's direction of travel.
- * @property {number} angularTimeScale=0.1 - Controls how long it takes for the entity's orientation to catch up with the 
- *     direction of travel. The value is the time for the action to catch up to 1/e = 0.368 of the target value, where the 
+ * @property {number} angularTimeScale=0.1 - Controls how long it takes for the entity's orientation to catch up with the
+ *     direction of travel. The value is the time for the action to catch up to 1/e = 0.368 of the target value, where the
  *     action is applied using an exponential decay.
  */
 QVariantMap ObjectActionTravelOriented::getArguments() {

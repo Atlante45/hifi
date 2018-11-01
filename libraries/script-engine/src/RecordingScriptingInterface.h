@@ -51,7 +51,6 @@ public slots:
      */
     void loadRecording(const QString& url, QScriptValue callback = QScriptValue());
 
-
     /**jsdoc
      * @function Recording.startPlaying
      */
@@ -79,7 +78,6 @@ public slots:
      */
     bool isPaused() const;
 
-
     /**jsdoc
      * @function Recording.playerElapsed
      * @returns {number}
@@ -91,7 +89,6 @@ public slots:
      * @returns {number}
      */
     float playerLength() const;
-
 
     /**jsdoc
      * @function Recording.setPlayerVolume
@@ -116,7 +113,6 @@ public slots:
      * @param {boolean} loop
      */
     void setPlayerLoop(bool loop);
-
 
     /**jsdoc
      * @function Recording.setPlayerUseDisplayName
@@ -150,7 +146,6 @@ public slots:
      */
     void setPlayFromCurrentLocation(bool playFromCurrentLocation);
 
-
     /**jsdoc
      * @function Recording.getPlayerUseDisplayName
      * @returns {boolean}
@@ -181,7 +176,6 @@ public slots:
      */
     bool getPlayFromCurrentLocation() { return _playFromCurrentLocation; }
 
-
     /**jsdoc
      * @function Recording.startRecording
      */
@@ -198,13 +192,11 @@ public slots:
      */
     bool isRecording() const;
 
-
     /**jsdoc
      * @function Recording.recorderElapsed
      * @returns {number}
      */
     float recorderElapsed() const;
-
 
     /**jsdoc
      * @function Recording.getDefaultRecordingSaveDirectory
@@ -236,7 +228,7 @@ protected:
 
     QSharedPointer<recording::Deck> _player;
     QSharedPointer<recording::Recorder> _recorder;
-    
+
     Flag _playFromCurrentLocation { true };
     Flag _useDisplayName { false };
     Flag _useHeadModel { false };

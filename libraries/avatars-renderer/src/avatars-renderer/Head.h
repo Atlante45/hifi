@@ -12,8 +12,8 @@
 #define hifi_Head_h
 
 #include <GLMHelpers.h>
-#include <SharedUtil.h>
 #include <HeadData.h>
+#include <SharedUtil.h>
 
 const float EYE_EAR_GAP = 0.08f;
 
@@ -29,7 +29,7 @@ public:
     void setScale(float scale);
     void setPosition(const glm::vec3& position) { _position = position; }
     void setAverageLoudness(float averageLoudness) { _averageLoudness = averageLoudness; }
-    void setReturnToCenter (bool returnHeadToCenter) { _returnHeadToCenter = returnHeadToCenter; }
+    void setReturnToCenter(bool returnHeadToCenter) { _returnHeadToCenter = returnHeadToCenter; }
 
     /// \return orientationBase+Delta
     glm::quat getFinalOrientationInLocalFrame() const;
@@ -55,11 +55,19 @@ public:
 
     const glm::vec3& getRightEyePosition() const { return _rightEyePosition; }
     const glm::vec3& getLeftEyePosition() const { return _leftEyePosition; }
-    glm::vec3 getRightEarPosition() const { return _rightEyePosition + (getRightDirection() * EYE_EAR_GAP) + (getForwardDirection() * -EYE_EAR_GAP); }
-    glm::vec3 getLeftEarPosition() const { return _leftEyePosition + (getRightDirection() * -EYE_EAR_GAP) + (getForwardDirection() * -EYE_EAR_GAP); }
-    glm::vec3 getMouthPosition() const { return _eyePosition - getUpDirection() * glm::length(_rightEyePosition - _leftEyePosition); }
+    glm::vec3 getRightEarPosition() const {
+        return _rightEyePosition + (getRightDirection() * EYE_EAR_GAP) + (getForwardDirection() * -EYE_EAR_GAP);
+    }
+    glm::vec3 getLeftEarPosition() const {
+        return _leftEyePosition + (getRightDirection() * -EYE_EAR_GAP) + (getForwardDirection() * -EYE_EAR_GAP);
+    }
+    glm::vec3 getMouthPosition() const {
+        return _eyePosition - getUpDirection() * glm::length(_rightEyePosition - _leftEyePosition);
+    }
 
-    bool getReturnToCenter() const { return _returnHeadToCenter; } // Do you want head to try to return to center (depends on interface detected)
+    bool getReturnToCenter() const {
+        return _returnHeadToCenter;
+    } // Do you want head to try to return to center (depends on interface detected)
     float getAverageLoudness() const { return _averageLoudness; }
 
     void setDeltaPitch(float pitch) { _deltaPitch = pitch; }
@@ -82,7 +90,7 @@ public:
 protected:
     // disallow copies of the Head, copy of owning Avatar is disallowed too
     Head(const Head&);
-    Head& operator= (const Head&);
+    Head& operator=(const Head&);
 
     bool _returnHeadToCenter { false };
     glm::vec3 _position;

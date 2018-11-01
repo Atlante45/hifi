@@ -24,9 +24,10 @@ signals:
     void credentialsEntered(const QString& username, const QString& password);
 private slots:
     void loginButtonClicked();
+
 private:
     void setupGUI();
-    
+
     QLineEdit* _usernameLineEdit;
     QLineEdit* _passwordLineEdit;
 };

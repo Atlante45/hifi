@@ -10,15 +10,15 @@
 #ifndef hifi_GLEscrow_h
 #define hifi_GLEscrow_h
 
-#include <utility>
 #include <algorithm>
 #include <deque>
 #include <forward_list>
 #include <functional>
 #include <mutex>
+#include <utility>
 
-#include <SharedUtil.h>
 #include <NumericalConstants.h>
+#include <SharedUtil.h>
 
 #include "Config.h"
 
@@ -43,16 +43,15 @@
 // to hold resources which the CPU is no longer using, but which might still be
 // in use by the GPU.  Fence sync objects are used to moderate the actual release of
 // resources in either direction.
-template <
-    typename T
-    //,
-    //// Only accept numeric types
-    //typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type
->
+template<typename T
+         //,
+         //// Only accept numeric types
+         // typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type
+         >
 class GLEscrow {
 public:
     static const uint64_t MAX_UNSIGNALED_TIME = USECS_PER_SECOND / 2;
-    
+
     const T& invalid() const {
         static const T INVALID_RESULT;
         return INVALID_RESULT;
@@ -63,14 +62,9 @@ public:
         GLsync _sync;
         const uint64_t _created;
 
-        Item(T value, GLsync sync) :
-            _value(value), _sync(sync), _created(usecTimestampNow()) 
-        {
-        }
+        Item(T value, GLsync sync) : _value(value), _sync(sync), _created(usecTimestampNow()) {}
 
-        uint64_t age() const {
-            return usecTimestampNow() - _created;
-        }
+        uint64_t age() const { return usecTimestampNow() - _created; }
 
         bool signaled() const {
             auto result = glClientWaitSync(_sync, 0, 0);
@@ -86,19 +80,17 @@ public:
     // deque gives us random access, double ended push & pop and size, all in constant time
     using Deque = std::deque<Item>;
     using List = std::forward_list<Item>;
-    
-    void setRecycler(Recycler recycler) {
-        _recycler = recycler;
-    }
 
-    template <typename F> 
+    void setRecycler(Recycler recycler) { _recycler = recycler; }
+
+    template<typename F>
     void withLock(F f) {
         using Lock = std::unique_lock<Mutex>;
         Lock lock(_mutex);
         f();
     }
 
-    template <typename F>
+    template<typename F>
     bool tryLock(F f) {
         using Lock = std::unique_lock<Mutex>;
         bool result = false;
@@ -110,12 +102,9 @@ public:
         return result;
     }
 
-
     size_t depth() {
-        size_t result{ 0 };
-        withLock([&]{
-            result = _submits.size();
-        });
+        size_t result { 0 };
+        withLock([&] { result = _submits.size(); });
         return result;
     }
 
@@ -131,9 +120,7 @@ public:
             glFlush();
         }
 
-        withLock([&]{
-            _submits.push_back(Item(t, writeSync));
-        });
+        withLock([&] { _submits.push_back(Item(t, writeSync)); });
         return cleanTrash();
     }
 
@@ -158,7 +145,7 @@ public:
     }
 
     // Populates t with the next available resource provided by the submitter
-    // and sync with a fence that will be signaled when all write commands for the 
+    // and sync with a fence that will be signaled when all write commands for the
     // item have completed.  Returns false if no resources are available
     bool fetchWithFence(T& t, GLsync& sync) {
         bool result = false;
@@ -188,7 +175,7 @@ public:
     bool fetchWithGpuWait(T& t) {
         GLsync sync { 0 };
         if (fetchWithFence(t, sync)) {
-            // Texture was updated, inject a wait into the GL command stream to ensure 
+            // Texture was updated, inject a wait into the GL command stream to ensure
             // commands on this context until the commands to generate t are finished.
             if (sync != 0) {
                 glWaitSync(sync, 0, GL_TIMEOUT_IGNORED);
@@ -245,16 +232,14 @@ public:
             glFlush();
         }
 
-        withLock([&]{
-            _releases.push_back(Item(t, readSync));
-        });
+        withLock([&] { _releases.push_back(Item(t, readSync)); });
     }
-    
+
 private:
     size_t cleanTrash() {
-        size_t wastedWork{ 0 };
+        size_t wastedWork { 0 };
         List trash;
-        tryLock([&]{
+        tryLock([&] {
             while (!_submits.empty()) {
                 const auto& item = _submits.front();
                 if (!item._sync || item.age() < MAX_UNSIGNALED_TIME) {
@@ -283,7 +268,7 @@ private:
 
             trash.swap(_trash);
         });
-           
+
         // FIXME maybe doing a timing on the deleters and warn if it's taking excessive time?
         // although we are out of the lock, so it shouldn't be blocking anything
         std::for_each(trash.begin(), trash.end(), [&](typename List::const_reference item) {
@@ -302,13 +287,13 @@ private:
         if (i >= deque.size()) {
             return false;
         }
-        
+
         auto& item = deque.at(i);
         // If there's no sync object, either it's not required or it's already been found to be signaled
         if (!item._sync) {
             return true;
         }
-        
+
         // Check the sync value using a zero timeout to ensure we don't block
         // This is critically important as this is the only GL function we'll call
         // inside the locked sections, so it cannot have any latency
@@ -342,4 +327,3 @@ inline const GLuint& GLEscrow<GLuint>::invalid() const {
 using GLTextureEscrow = GLEscrow<GLuint>;
 
 #endif
-

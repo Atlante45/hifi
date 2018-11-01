@@ -46,22 +46,11 @@ void CubicHermiteSplineTests::testCubicHermiteSplineFunctorWithArcLength() {
 
     const float EPSILON = 0.001f;
 
-    float arcLengths[5] = {
-        hermiteSpline.arcLength(0.0f),
-        hermiteSpline.arcLength(0.25f),
-        hermiteSpline.arcLength(0.5f),
-        hermiteSpline.arcLength(0.75f),
-        hermiteSpline.arcLength(1.0f)
-    };
+    float arcLengths[5] = { hermiteSpline.arcLength(0.0f), hermiteSpline.arcLength(0.25f), hermiteSpline.arcLength(0.5f),
+                            hermiteSpline.arcLength(0.75f), hermiteSpline.arcLength(1.0f) };
 
     // these values were computed offline
-    float referenceArcLengths[5] = {
-        0.0f,
-        0.268317f,
-        0.652788f,
-        1.07096f,
-        1.50267f
-    };
+    float referenceArcLengths[5] = { 0.0f, 0.268317f, 0.652788f, 1.07096f, 1.50267f };
 
     QCOMPARE_WITH_ABS_ERROR(arcLengths[0], referenceArcLengths[0], EPSILON);
     QCOMPARE_WITH_ABS_ERROR(arcLengths[1], referenceArcLengths[1], EPSILON);

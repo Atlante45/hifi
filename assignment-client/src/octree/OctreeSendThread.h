@@ -52,15 +52,15 @@ protected:
     /// Implements generic processing behavior for this thread.
     virtual bool process() override;
 
-    virtual bool traverseTreeAndSendContents(SharedNodePointer node, OctreeQueryNode* nodeData,
-            bool viewFrustumChanged, bool isFullScene);
+    virtual bool traverseTreeAndSendContents(SharedNodePointer node, OctreeQueryNode* nodeData, bool viewFrustumChanged,
+                                             bool isFullScene);
     virtual bool traverseTreeAndBuildNextPacketPayload(EncodeBitstreamParams& params, const QJsonObject& jsonFilters) = 0;
 
     OctreePacketData _packetData;
     QWeakPointer<Node> _node;
     OctreeServer* _myServer { nullptr };
     QUuid _nodeUuid;
-    
+
 private:
     /// Called before a packetDistributor pass to allow for pre-distribution processing
     virtual void preDistributionProcessing() = 0;

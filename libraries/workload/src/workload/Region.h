@@ -31,7 +31,6 @@ public:
     static const uint8_t NUM_VIEW_REGIONS = (NUM_CLASSIFICATIONS - 1);
 
     static uint8_t computeTransitionIndex(uint8_t prevIndex, uint8_t newIndex);
-
 };
 
 inline uint8_t Region::computeTransitionIndex(uint8_t prevIndex, uint8_t newIndex) {

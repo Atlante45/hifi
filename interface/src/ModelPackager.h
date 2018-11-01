@@ -24,19 +24,19 @@ class FBXGeometry;
 class ModelPackager : public QObject {
 public:
     static bool package();
-    
+
 private:
     bool selectModel();
-    
+
     bool loadModel();
     bool editProperties();
     bool zipModel();
-    
+
     void populateBasicMapping(QVariantHash& mapping, QString filename, const FBXGeometry& geometry);
-    
+
     void listTextures();
     bool copyTextures(const QString& oldDir, const QDir& newDir);
-    
+
     QFileInfo _modelFile;
     QFileInfo _fbxInfo;
     FSTReader::ModelType _modelType;
@@ -48,8 +48,5 @@ private:
     QStringList _textures;
     QStringList _scripts;
 };
-
-
-
 
 #endif // hifi_ModelPackager_h

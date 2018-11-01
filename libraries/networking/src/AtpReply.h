@@ -12,8 +12,8 @@
 #ifndef hifi_AtpReply_h
 #define hifi_AtpReply_h
 
-#include <QtNetwork/QNetworkReply>
 #include <QUrl>
+#include <QtNetwork/QNetworkReply>
 
 #include "AssetResourceRequest.h"
 
@@ -23,7 +23,7 @@ public:
     AtpReply(const QUrl& url, QObject* parent = Q_NULLPTR);
     ~AtpReply();
     qint64 bytesAvailable() const override;
-    void abort() override { }
+    void abort() override {}
     bool isSequential() const override { return true; }
 
 protected:

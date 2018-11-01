@@ -13,10 +13,10 @@
 #include <render/RenderFetchCullSortTask.h>
 #include "LightingModel.h"
 
-#include "LightStage.h"
 #include "BackgroundStage.h"
-#include "HazeStage.h"
 #include "BloomStage.h"
+#include "HazeStage.h"
+#include "LightStage.h"
 
 class BeginGPURangeTimer {
 public:
@@ -47,20 +47,23 @@ protected:
 
 class DrawOverlay3DConfig : public render::Job::Config {
     Q_OBJECT
-        Q_PROPERTY(int numDrawn READ getNumDrawn NOTIFY numDrawnChanged)
-        Q_PROPERTY(int maxDrawn MEMBER maxDrawn NOTIFY dirty)
+    Q_PROPERTY(int numDrawn READ getNumDrawn NOTIFY numDrawnChanged)
+    Q_PROPERTY(int maxDrawn MEMBER maxDrawn NOTIFY dirty)
 public:
     int getNumDrawn() { return numDrawn; }
-    void setNumDrawn(int num) { numDrawn = num; emit numDrawnChanged(); }
+    void setNumDrawn(int num) {
+        numDrawn = num;
+        emit numDrawnChanged();
+    }
 
-    int maxDrawn{ -1 };
+    int maxDrawn { -1 };
 
 signals:
     void numDrawnChanged();
     void dirty();
 
 protected:
-    int numDrawn{ 0 };
+    int numDrawn { 0 };
 };
 
 class DrawOverlay3D {
@@ -97,7 +100,6 @@ public:
 
 class ExtractFrustums {
 public:
-
     enum Frustum {
         SHADOW_CASCADE0_FRUSTUM = 0,
         SHADOW_CASCADE1_FRUSTUM,
@@ -118,10 +120,10 @@ public:
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& output);
 };
 
-
 class FetchCurrentFrames {
 public:
-    using Outputs = render::VaryingSet4<LightStage::FramePointer, BackgroundStage::FramePointer, HazeStage::FramePointer, BloomStage::FramePointer>;
+    using Outputs = render::VaryingSet4<LightStage::FramePointer, BackgroundStage::FramePointer, HazeStage::FramePointer,
+                                        BloomStage::FramePointer>;
     using JobModel = render::Job::ModelO<FetchCurrentFrames, Outputs>;
 
     FetchCurrentFrames() {}

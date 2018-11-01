@@ -21,57 +21,56 @@
 #include "shared/ReadWriteLockable.h"
 
 namespace Setting {
-    class Interface;
+class Interface;
 
-    class Manager : public QObject, public ReadWriteLockable, public Dependency {
-        Q_OBJECT
+class Manager : public QObject, public ReadWriteLockable, public Dependency {
+    Q_OBJECT
 
-    public:
-        void customDeleter() override;
+public:
+    void customDeleter() override;
 
-        // thread-safe proxies into QSettings
-        QString fileName() const;
-        void remove(const QString &key);
-        QStringList childGroups() const;
-        QStringList childKeys() const;
-        QStringList allKeys() const;
-        bool contains(const QString &key) const;
-        int beginReadArray(const QString &prefix);
-        void beginGroup(const QString &prefix);
-        void beginWriteArray(const QString &prefix, int size = -1);
-        void endArray();
-        void endGroup();
-        void setArrayIndex(int i);
-        void setValue(const QString &key, const QVariant &value);
-        QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
+    // thread-safe proxies into QSettings
+    QString fileName() const;
+    void remove(const QString& key);
+    QStringList childGroups() const;
+    QStringList childKeys() const;
+    QStringList allKeys() const;
+    bool contains(const QString& key) const;
+    int beginReadArray(const QString& prefix);
+    void beginGroup(const QString& prefix);
+    void beginWriteArray(const QString& prefix, int size = -1);
+    void endArray();
+    void endGroup();
+    void setArrayIndex(int i);
+    void setValue(const QString& key, const QVariant& value);
+    QVariant value(const QString& key, const QVariant& defaultValue = QVariant()) const;
 
-    protected:
-        ~Manager();
-        void registerHandle(Interface* handle);
-        void removeHandle(const QString& key);
+protected:
+    ~Manager();
+    void registerHandle(Interface* handle);
+    void removeHandle(const QString& key);
 
-        void loadSetting(Interface* handle);
-        void saveSetting(Interface* handle);
+    void loadSetting(Interface* handle);
+    void saveSetting(Interface* handle);
 
-    private slots:
-        void startTimer();
-        void stopTimer();
+private slots:
+    void startTimer();
+    void stopTimer();
 
-        void saveAll();
+    void saveAll();
 
-    private:
-        QHash<QString, Interface*> _handles;
-        QPointer<QTimer> _saveTimer = nullptr;
-        const QVariant UNSET_VALUE { QUuid::createUuid() };
-        QHash<QString, QVariant> _pendingChanges;
+private:
+    QHash<QString, Interface*> _handles;
+    QPointer<QTimer> _saveTimer = nullptr;
+    const QVariant UNSET_VALUE { QUuid::createUuid() };
+    QHash<QString, QVariant> _pendingChanges;
 
-        friend class Interface;
-        friend void cleanupSettingsSaveThread();
-        friend void setupSettingsSaveThread();
+    friend class Interface;
+    friend void cleanupSettingsSaveThread();
+    friend void setupSettingsSaveThread();
 
-
-        QSettings _qSettings;
-    };
-}
+    QSettings _qSettings;
+};
+} // namespace Setting
 
 #endif // hifi_SettingManager_h

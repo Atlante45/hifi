@@ -6,7 +6,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #include "PathUtilsTests.h"
 
 #include <QtTest/QtTest>
@@ -20,4 +19,3 @@ void PathUtilsTests::testPathUtils() {
     QVERIFY(result.startsWith("qrc:///"));
     QVERIFY(result.endsWith("/"));
 }
-

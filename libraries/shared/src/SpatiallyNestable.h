@@ -14,9 +14,9 @@
 
 #include <QUuid>
 
-#include "Transform.h"
 #include "AACube.h"
 #include "SpatialParentFinder.h"
+#include "Transform.h"
 #include "shared/ReadWriteLockable.h"
 
 class SpatiallyNestable;
@@ -27,11 +27,7 @@ using SpatiallyNestableConstPointer = std::shared_ptr<const SpatiallyNestable>;
 
 static const uint16_t INVALID_JOINT_INDEX = -1;
 
-enum class NestableType {
-    Entity,
-    Avatar,
-    Overlay
-};
+enum class NestableType { Entity, Avatar, Overlay };
 
 class SpatiallyNestable : public std::enable_shared_from_this<SpatiallyNestable> {
 public:
@@ -49,34 +45,31 @@ public:
     virtual quint16 getParentJointIndex() const { return _parentJointIndex; }
     virtual void setParentJointIndex(quint16 parentJointIndex);
 
-    static glm::vec3 worldToLocal(const glm::vec3& position, const QUuid& parentID, int parentJointIndex,
-                                  bool scalesWithParent, bool& success);
+    static glm::vec3 worldToLocal(const glm::vec3& position, const QUuid& parentID, int parentJointIndex, bool scalesWithParent,
+                                  bool& success);
     static glm::quat worldToLocal(const glm::quat& orientation, const QUuid& parentID, int parentJointIndex,
                                   bool scalesWithParent, bool& success);
-    static glm::vec3 worldToLocalVelocity(const glm::vec3& velocity, const QUuid& parentID,
-                                          int parentJointIndex, bool scalesWithParent, bool& success);
-    static glm::vec3 worldToLocalAngularVelocity(const glm::vec3& angularVelocity, const QUuid& parentID,
-                                                 int parentJointIndex, bool scalesWithParent, bool& success);
-    static glm::vec3 worldToLocalDimensions(const glm::vec3& dimensions, const QUuid& parentID,
-                                            int parentJointIndex, bool scalesWithParent, bool& success);
+    static glm::vec3 worldToLocalVelocity(const glm::vec3& velocity, const QUuid& parentID, int parentJointIndex,
+                                          bool scalesWithParent, bool& success);
+    static glm::vec3 worldToLocalAngularVelocity(const glm::vec3& angularVelocity, const QUuid& parentID, int parentJointIndex,
+                                                 bool scalesWithParent, bool& success);
+    static glm::vec3 worldToLocalDimensions(const glm::vec3& dimensions, const QUuid& parentID, int parentJointIndex,
+                                            bool scalesWithParent, bool& success);
 
-    static glm::vec3 localToWorld(const glm::vec3& position, const QUuid& parentID, int parentJointIndex,
-                                  bool scalesWithParent, bool& success);
+    static glm::vec3 localToWorld(const glm::vec3& position, const QUuid& parentID, int parentJointIndex, bool scalesWithParent,
+                                  bool& success);
     static glm::quat localToWorld(const glm::quat& orientation, const QUuid& parentID, int parentJointIndex,
                                   bool scalesWithParent, bool& success);
-    static glm::vec3 localToWorldVelocity(const glm::vec3& velocity,
-                                          const QUuid& parentID, int parentJointIndex, bool scalesWithParent, bool& success);
-    static glm::vec3 localToWorldAngularVelocity(const glm::vec3& angularVelocity,
-                                                 const QUuid& parentID, int parentJointIndex,
+    static glm::vec3 localToWorldVelocity(const glm::vec3& velocity, const QUuid& parentID, int parentJointIndex,
+                                          bool scalesWithParent, bool& success);
+    static glm::vec3 localToWorldAngularVelocity(const glm::vec3& angularVelocity, const QUuid& parentID, int parentJointIndex,
                                                  bool scalesWithParent, bool& success);
-    static glm::vec3 localToWorldDimensions(const glm::vec3& dimensions, const QUuid& parentID,
-                                            int parentJointIndex, bool scalesWithParent, bool& success);
+    static glm::vec3 localToWorldDimensions(const glm::vec3& dimensions, const QUuid& parentID, int parentJointIndex,
+                                            bool scalesWithParent, bool& success);
 
     static QString nestableTypeToString(NestableType nestableType);
 
-
     virtual bool isParentPathComplete() const;
-
 
     // world frame
     virtual const Transform getTransform(bool& success, int depth = 0) const;
@@ -164,10 +157,10 @@ public:
     virtual glm::quat getAbsoluteJointRotationInObjectFrame(int index) const { return glm::quat(); }
     virtual glm::vec3 getAbsoluteJointTranslationInObjectFrame(int index) const { return glm::vec3(); }
     virtual bool setAbsoluteJointRotationInObjectFrame(int index, const glm::quat& rotation) { return false; }
-    virtual bool setAbsoluteJointTranslationInObjectFrame(int index, const glm::vec3& translation) {return false; }
+    virtual bool setAbsoluteJointTranslationInObjectFrame(int index, const glm::vec3& translation) { return false; }
 
-    virtual glm::quat getLocalJointRotation(int index) const {return glm::quat(); }
-    virtual glm::vec3 getLocalJointTranslation(int index) const {return glm::vec3(); }
+    virtual glm::quat getLocalJointRotation(int index) const { return glm::quat(); }
+    virtual glm::vec3 getLocalJointTranslation(int index) const { return glm::vec3(); }
     virtual bool setLocalJointRotation(int index, const glm::quat& rotation) { return false; }
     virtual bool setLocalJointTranslation(int index, const glm::vec3& translation) { return false; }
 
@@ -178,13 +171,17 @@ public:
 
     void forEachChild(const ChildLambda& actor) const;
     void forEachDescendant(const ChildLambda& actor) const;
-    void forEachChildTest(const ChildLambdaTest&  actor) const;
+    void forEachChildTest(const ChildLambdaTest& actor) const;
     void forEachDescendantTest(const ChildLambdaTest& actor) const;
 
     void die() { _isDead = true; }
     bool isDead() const { return _isDead; }
 
-    bool isParentIDValid() const { bool success = false; getParentPointer(success); return success; }
+    bool isParentIDValid() const {
+        bool success = false;
+        getParentPointer(success);
+        return success;
+    }
     virtual SpatialParentTree* getParentTree() const { return nullptr; }
 
     bool hasAncestorOfType(NestableType nestableType) const;
@@ -192,14 +189,11 @@ public:
     SpatiallyNestablePointer getParentPointer(bool& success) const;
     static SpatiallyNestablePointer findByID(QUuid id, bool& success);
 
-    void getLocalTransformAndVelocities(Transform& localTransform,
-                                        glm::vec3& localVelocity,
+    void getLocalTransformAndVelocities(Transform& localTransform, glm::vec3& localVelocity,
                                         glm::vec3& localAngularVelocity) const;
 
-    void setLocalTransformAndVelocities(
-            const Transform& localTransform,
-            const glm::vec3& localVelocity,
-            const glm::vec3& localAngularVelocity);
+    void setLocalTransformAndVelocities(const Transform& localTransform, const glm::vec3& localVelocity,
+                                        const glm::vec3& localAngularVelocity);
 
     bool scaleChangedSince(quint64 time) const { return _scaleChanged > time; }
     bool tranlationChangedSince(quint64 time) const { return _translationChanged > time; }
@@ -209,7 +203,7 @@ public:
 
     virtual void locationChanged(bool tellPhysics = true); // called when a this object's location has changed
     virtual void dimensionsChanged() { _queryAACubeSet = false; } // called when a this object's dimensions have changed
-    virtual void parentDeleted() { } // called on children of a deleted parent
+    virtual void parentDeleted() {} // called on children of a deleted parent
 
 protected:
     QUuid _id;
@@ -217,7 +211,7 @@ protected:
 
     virtual void beParentOfChild(SpatiallyNestablePointer newChild) const;
     virtual void forgetChild(SpatiallyNestablePointer newChild) const;
-    virtual void recalculateChildCauterization() const { }
+    virtual void recalculateChildCauterization() const {}
 
     mutable ReadWriteLockable _childrenLock;
     mutable QHash<QUuid, SpatiallyNestableWeakPointer> _children;
@@ -247,6 +241,5 @@ private:
     bool _isDead { false };
     bool _queryAACubeIsPuffed { false };
 };
-
 
 #endif // hifi_SpatiallyNestable_h

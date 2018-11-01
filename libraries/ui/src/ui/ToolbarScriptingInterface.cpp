@@ -10,34 +10,35 @@
 
 #include <QtCore/QThread>
 #include <QtQuick/QQuickItem>
-#include <QtScript/QScriptValue>
 #include <QtScript/QScriptEngine>
+#include <QtScript/QScriptValue>
 
 #include <shared/QtHelpers.h>
 #include "../OffscreenUi.h"
 
-QScriptValue toolbarToScriptValue(QScriptEngine* engine, ToolbarProxy* const &in) {
+QScriptValue toolbarToScriptValue(QScriptEngine* engine, ToolbarProxy* const& in) {
     if (!in) {
         return engine->undefinedValue();
     }
-    return engine->newQObject(in, QScriptEngine::QtOwnership, QScriptEngine::ExcludeDeleteLater | QScriptEngine::ExcludeChildObjects);
+    return engine->newQObject(in, QScriptEngine::QtOwnership,
+                              QScriptEngine::ExcludeDeleteLater | QScriptEngine::ExcludeChildObjects);
 }
 
-void toolbarFromScriptValue(const QScriptValue& value, ToolbarProxy* &out) {
+void toolbarFromScriptValue(const QScriptValue& value, ToolbarProxy*& out) {
     out = qobject_cast<ToolbarProxy*>(value.toQObject());
 }
 
-QScriptValue toolbarButtonToScriptValue(QScriptEngine* engine, ToolbarButtonProxy* const &in) {
+QScriptValue toolbarButtonToScriptValue(QScriptEngine* engine, ToolbarButtonProxy* const& in) {
     if (!in) {
         return engine->undefinedValue();
     }
-    return engine->newQObject(in, QScriptEngine::QtOwnership, QScriptEngine::ExcludeDeleteLater | QScriptEngine::ExcludeChildObjects);
+    return engine->newQObject(in, QScriptEngine::QtOwnership,
+                              QScriptEngine::ExcludeDeleteLater | QScriptEngine::ExcludeChildObjects);
 }
 
-void toolbarButtonFromScriptValue(const QScriptValue& value, ToolbarButtonProxy* &out) {
+void toolbarButtonFromScriptValue(const QScriptValue& value, ToolbarButtonProxy*& out) {
     out = qobject_cast<ToolbarButtonProxy*>(value.toQObject());
 }
-
 
 ToolbarButtonProxy::ToolbarButtonProxy(QObject* qmlObject, QObject* parent) : QmlWrapper(qmlObject, parent) {
     Q_ASSERT(QThread::currentThread() == qApp->thread());
@@ -55,15 +56,16 @@ void ToolbarButtonProxy::editProperties(const QVariantMap& properties) {
     while (iter != properties.constEnd()) {
         _properties[iter.key()] = iter.value();
         if (_qmlButton) {
-            // [01/25 14:26:20] [WARNING] [default] QMetaObject::invokeMethod: No such method ToolbarButton_QMLTYPE_195::changeProperty(QVariant,QVariant)
-            QMetaObject::invokeMethod(_qmlButton, "changeProperty", Qt::AutoConnection,
-                                        Q_ARG(QVariant, QVariant(iter.key())), Q_ARG(QVariant, iter.value()));
+            // [01/25 14:26:20] [WARNING] [default] QMetaObject::invokeMethod: No such method
+            // ToolbarButton_QMLTYPE_195::changeProperty(QVariant,QVariant)
+            QMetaObject::invokeMethod(_qmlButton, "changeProperty", Qt::AutoConnection, Q_ARG(QVariant, QVariant(iter.key())),
+                                      Q_ARG(QVariant, iter.value()));
         }
         ++iter;
     }
 }
 
-ToolbarProxy::ToolbarProxy(QObject* qmlObject, QObject* parent) : QmlWrapper(qmlObject, parent) { 
+ToolbarProxy::ToolbarProxy(QObject* qmlObject, QObject* parent) : QmlWrapper(qmlObject, parent) {
     Q_ASSERT(QThread::currentThread() == qApp->thread());
 }
 
@@ -75,12 +77,13 @@ ToolbarButtonProxy* ToolbarProxy::addButton(const QVariant& properties) {
     }
 
     QVariant resultVar;
-    bool invokeResult = QMetaObject::invokeMethod(_qmlObject, "addButton", Q_RETURN_ARG(QVariant, resultVar), Q_ARG(QVariant, properties));
+    bool invokeResult = QMetaObject::invokeMethod(_qmlObject, "addButton", Q_RETURN_ARG(QVariant, resultVar),
+                                                  Q_ARG(QVariant, properties));
     if (!invokeResult) {
         return nullptr;
     }
 
-    QObject* rawButton = qvariant_cast<QObject *>(resultVar);
+    QObject* rawButton = qvariant_cast<QObject*>(resultVar);
     if (!rawButton) {
         return nullptr;
     }
@@ -97,7 +100,6 @@ void ToolbarProxy::removeButton(const QVariant& name) {
     QMetaObject::invokeMethod(_qmlObject, "removeButton", Q_ARG(QVariant, name));
 }
 
-
 ToolbarProxy* ToolbarScriptingInterface::getToolbar(const QString& toolbarId) {
     if (QThread::currentThread() != thread()) {
         ToolbarProxy* result = nullptr;
@@ -108,12 +110,13 @@ ToolbarProxy* ToolbarScriptingInterface::getToolbar(const QString& toolbarId) {
     auto offscreenUi = DependencyManager::get<OffscreenUi>();
     auto desktop = offscreenUi->getDesktop();
     QVariant resultVar;
-    bool invokeResult = QMetaObject::invokeMethod(desktop, "getToolbar", Q_RETURN_ARG(QVariant, resultVar), Q_ARG(QVariant, toolbarId));
+    bool invokeResult = QMetaObject::invokeMethod(desktop, "getToolbar", Q_RETURN_ARG(QVariant, resultVar),
+                                                  Q_ARG(QVariant, toolbarId));
     if (!invokeResult) {
         return nullptr;
     }
 
-    QObject* rawToolbar = qvariant_cast<QObject *>(resultVar);
+    QObject* rawToolbar = qvariant_cast<QObject*>(resultVar);
     if (!rawToolbar) {
         return nullptr;
     }

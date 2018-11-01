@@ -12,15 +12,15 @@
 #ifndef hifi_InterfaceParentFinder_h
 #define hifi_InterfaceParentFinder_h
 
-#include <memory>
 #include <QUuid>
+#include <memory>
 
 #include <SpatialParentFinder.h>
 
 class InterfaceParentFinder : public SpatialParentFinder {
 public:
-    InterfaceParentFinder() { }
-    virtual ~InterfaceParentFinder() { }
+    InterfaceParentFinder() {}
+    virtual ~InterfaceParentFinder() {}
     virtual SpatiallyNestableWeakPointer find(QUuid parentID, bool& success,
                                               SpatialParentTree* entityTree = nullptr) const override;
 };

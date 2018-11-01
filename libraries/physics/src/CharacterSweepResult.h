@@ -12,9 +12,8 @@
 #ifndef hifi_CharacterSweepResult_h
 #define hifi_CharacterSweepResult_h
 
-#include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
-
+#include <btBulletDynamicsCommon.h>
 
 class CharacterGhostObject;
 
@@ -23,6 +22,7 @@ public:
     CharacterSweepResult(const CharacterGhostObject* character);
     virtual btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult, bool useWorldFrame) override;
     void resetHitHistory();
+
 protected:
     const CharacterGhostObject* _character;
 
@@ -39,7 +39,6 @@ protected:
     //  btScalar    m_closestHitFraction;
     //  short int   m_collisionFilterGroup;
     //  short int   m_collisionFilterMask;
-
 };
 
 #endif // hifi_CharacterSweepResult_h

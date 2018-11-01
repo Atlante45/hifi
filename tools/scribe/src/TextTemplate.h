@@ -11,22 +11,22 @@
 #ifndef hifi_TEXT_TEMPLATE_H
 #define hifi_TEXT_TEMPLATE_H
 
-#include <list>
-#include <vector>
-#include <map>
-#include <string>
 #include <iostream>
-#include <sstream>
+#include <list>
+#include <map>
 #include <memory>
+#include <sstream>
+#include <string>
 #include <unordered_set>
+#include <vector>
 
 class TextTemplate {
 public:
-    typedef std::shared_ptr< TextTemplate > Pointer;
+    typedef std::shared_ptr<TextTemplate> Pointer;
     typedef std::string String;
-    typedef std::vector< String > StringVector;
-    typedef std::map< String, String > Vars;
-    typedef std::map< String, TextTemplate::Pointer > Includes;
+    typedef std::vector<String> StringVector;
+    typedef std::map<String, String> Vars;
+    typedef std::map<String, TextTemplate::Pointer> Includes;
     using PathSet = std::unordered_set<String>;
 
     class Tag {
@@ -44,13 +44,13 @@ public:
         static const char VAR = '$';
         static const char COM = '@';
         static const char REM = '!';
-        
+
         static const std::string NULL_VAR;
     };
 
     class Command {
     public:
-        typedef std::vector< Command > vector;
+        typedef std::vector<Command> vector;
 
         enum Type {
             VAR = 0,
@@ -69,7 +69,7 @@ public:
         };
 
         Type type;
-        std::vector< String > arguments;
+        std::vector<String> arguments;
 
         bool isBlockEnd() {
             switch (type) {
@@ -89,7 +89,7 @@ public:
     class Block {
     public:
         typedef std::shared_ptr<Block> Pointer;
-        typedef std::vector< Block::Pointer > Vector;
+        typedef std::vector<Block::Pointer> Vector;
 
         Block::Pointer parent;
         Command command;
@@ -98,8 +98,7 @@ public:
 
         String sourceName;
 
-        Block(const String& sourceFilename) :
-            sourceName(sourceFilename) {}
+        Block(const String& sourceFilename) : sourceName(sourceFilename) {}
 
         static void addNewBlock(const Block::Pointer& parent, const Block::Pointer& block);
         static const Block::Pointer& getCurrentBlock(const Block::Pointer& block);
@@ -109,7 +108,7 @@ public:
 
     class Funcs {
     public:
-        typedef std::map< String, Block::Pointer > map;
+        typedef std::map<String, Block::Pointer> map;
 
         Funcs();
         ~Funcs();
@@ -118,20 +117,21 @@ public:
         const Block::Pointer addFunc(const char* func, const Block::Pointer& root);
 
         map _funcs;
+
     protected:
     };
 
     class Config {
     public:
-        typedef std::shared_ptr< Config > Pointer;
-        typedef bool (*IncluderCallback) (const Config::Pointer& config, const char* filename, String& source);
-        PathSet         _includeFullPaths;
-        Includes        _includes;
-        Funcs           _funcs;
-        std::ostream*   _logStream;
-        int             _numErrors;
+        typedef std::shared_ptr<Config> Pointer;
+        typedef bool (*IncluderCallback)(const Config::Pointer& config, const char* filename, String& source);
+        PathSet _includeFullPaths;
+        Includes _includes;
+        Funcs _funcs;
+        std::ostream* _logStream;
+        int _numErrors;
         IncluderCallback _includerCallback;
-        StringVector    _paths;
+        StringVector _paths;
 
         Config();
 
@@ -175,9 +175,9 @@ protected:
     bool stepForward(std::istream* str, String& grabbed, String& tag, Tag::Type& tagType, Tag::Type& nextTagType);
 
     bool grabFirstToken(String& src, String& token, String& reminder);
-    bool convertExpressionToArguments(String& src, std::vector< String >& arguments);
-    bool convertExpressionToDefArguments(String& src, std::vector< String >& arguments);
-    bool convertExpressionToFuncArguments(String& src, std::vector< String >& arguments);
+    bool convertExpressionToArguments(String& src, std::vector<String>& arguments);
+    bool convertExpressionToDefArguments(String& src, std::vector<String>& arguments);
+    bool convertExpressionToFuncArguments(String& src, std::vector<String>& arguments);
 
     // Filter between var, command or comments
     const Block::Pointer processStep(const Block::Pointer& block, String& grabbed, String& tag, Tag::Type& tagType);
@@ -206,7 +206,7 @@ protected:
     int evalBlockGeneration(std::ostream& dst, const Block::Pointer& block, Vars& vars, Block::Pointer& branch);
 
     // Errors
-    std::ostream& log() { return (* _config->_logStream); }
+    std::ostream& log() { return (*_config->_logStream); }
     void logError(const Block::Pointer& block, const char* error, ...);
 };
 

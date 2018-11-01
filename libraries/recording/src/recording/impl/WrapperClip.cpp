@@ -8,7 +8,6 @@
 
 #include "WrapperClip.h"
 
-
 #include <QtCore/QDebug>
 
 #include <Finally.h>
@@ -16,11 +15,10 @@
 #include "../Frame.h"
 #include "../Logging.h"
 
-
 using namespace recording;
 
-WrapperClip::WrapperClip(const Clip::Pointer& wrappedClip)
-    : _wrappedClip(wrappedClip) { }
+WrapperClip::WrapperClip(const Clip::Pointer& wrappedClip) : _wrappedClip(wrappedClip) {
+}
 
 void WrapperClip::seekFrameTime(Frame::Time offset) {
     _wrappedClip->seekFrameTime(offset);
@@ -57,4 +55,3 @@ float WrapperClip::duration() const {
 size_t WrapperClip::frameCount() const {
     return _wrappedClip->frameCount();
 }
-

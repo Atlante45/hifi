@@ -11,9 +11,9 @@
 
 #include "PacketSender.h"
 
-#include <algorithm>
 #include <math.h>
 #include <stdint.h>
+#include <algorithm>
 
 #include "NodeList.h"
 #include "SharedUtil.h"
@@ -41,32 +41,31 @@ PacketSender::PacketSender(int packetsPerSecond) :
     _totalPacketsSent(0),
     _totalBytesSent(0),
     _totalPacketsQueued(0),
-    _totalBytesQueued(0)
-{
+    _totalBytesQueued(0) {
 }
 
 PacketSender::~PacketSender() {
 }
 
-
 void PacketSender::queuePacketForSending(const SharedNodePointer& destinationNode, std::unique_ptr<NLPacket> packet) {
     _totalPacketsQueued++;
     _totalBytesQueued += packet->getDataSize();
-    
+
     lock();
-    _packets.push_back({destinationNode, PacketOrPacketList { std::move(packet), nullptr} });
+    _packets.push_back({ destinationNode, PacketOrPacketList { std::move(packet), nullptr } });
     unlock();
 
     // Make sure to  wake our actual processing thread because we  now have packets for it to process.
     _hasPackets.wakeAll();
 }
 
-void PacketSender::queuePacketListForSending(const SharedNodePointer& destinationNode, std::unique_ptr<NLPacketList> packetList) {
+void PacketSender::queuePacketListForSending(const SharedNodePointer& destinationNode,
+                                             std::unique_ptr<NLPacketList> packetList) {
     _totalPacketsQueued += packetList->getNumPackets();
     _totalBytesQueued += packetList->getMessageSize();
 
     lock();
-    _packets.push_back({ destinationNode, PacketOrPacketList { nullptr, std::move(packetList)} });
+    _packets.push_back({ destinationNode, PacketOrPacketList { nullptr, std::move(packetList) } });
     unlock();
 
     // Make sure to  wake our actual processing thread because we  now have packets for it to process.
@@ -76,7 +75,6 @@ void PacketSender::queuePacketListForSending(const SharedNodePointer& destinatio
 void PacketSender::setPacketsPerSecond(int packetsPerSecond) {
     _packetsPerSecond = std::max(MINIMUM_PACKETS_PER_SECOND, packetsPerSecond);
 }
-
 
 bool PacketSender::process() {
     if (isThreaded()) {
@@ -99,17 +97,18 @@ bool PacketSender::threadedProcess() {
     // in threaded mode, we keep running and just empty our packet queue sleeping enough to keep our PPS on target
     while (_packets.size() > 0) {
         // Recalculate our SEND_INTERVAL_USECS each time, in case the caller has changed it on us..
-        int packetsPerSecondTarget = (_packetsPerSecond > MINIMUM_PACKETS_PER_SECOND)
-                                            ? _packetsPerSecond : MINIMUM_PACKETS_PER_SECOND;
+        int packetsPerSecondTarget = (_packetsPerSecond > MINIMUM_PACKETS_PER_SECOND) ? _packetsPerSecond
+                                                                                      : MINIMUM_PACKETS_PER_SECOND;
 
         quint64 intervalBetweenSends = USECS_PER_SECOND / packetsPerSecondTarget;
-        quint64 sleepInterval = (intervalBetweenSends > SENDING_INTERVAL_ADJUST) ?
-                    intervalBetweenSends - SENDING_INTERVAL_ADJUST : intervalBetweenSends;
+        quint64 sleepInterval = (intervalBetweenSends > SENDING_INTERVAL_ADJUST)
+                                    ? intervalBetweenSends - SENDING_INTERVAL_ADJUST
+                                    : intervalBetweenSends;
 
         // We'll sleep before we send, this way, we can set our last send time to be our ACTUAL last send time
         quint64 now = usecTimestampNow();
         quint64 elapsed = now - _lastSendTime;
-        int usecToSleep =  sleepInterval - elapsed;
+        int usecToSleep = sleepInterval - elapsed;
 
         // If we've never sent, or it's been a long time since we sent, then our elapsed time will be quite large
         // and therefore usecToSleep will be less than 0 and we won't sleep before sending...
@@ -139,7 +138,6 @@ bool PacketSender::threadedProcess() {
 
     return isStillRunning();
 }
-
 
 // We may be called more frequently than we get packets or need to send packets, we may also get called less frequently.
 //
@@ -189,8 +187,7 @@ bool PacketSender::nonThreadedProcess() {
         _started = now - (quint64)averageCallTime;
     }
 
-
-    float averagePacketsPerCall = 0;  // might be less than 1, if our caller calls us more frequently than the target PPS
+    float averagePacketsPerCall = 0; // might be less than 1, if our caller calls us more frequently than the target PPS
     size_t packetsSentThisCall = 0;
     size_t packetsToSendThisCall = 0;
 
@@ -247,7 +244,7 @@ bool PacketSender::nonThreadedProcess() {
     // than 5 times per second) This gives us sufficient smoothing in our packet adjustments
     float callIntervalsPerReset = std::max(callsPerSecond, MIN_CALL_INTERVALS_PER_RESET);
 
-    if  (elapsedSinceLastCheck > (averageCallTime * CALL_INTERVALS_TO_CHECK)) {
+    if (elapsedSinceLastCheck > (averageCallTime * CALL_INTERVALS_TO_CHECK)) {
         float ppsOverCheckInterval = (float)_packetsOverCheckInterval;
         float ppsExpectedForCheckInterval = (float)_packetsPerSecond * ((float)elapsedSinceLastCheck / (float)USECS_PER_SECOND);
 
@@ -283,7 +280,7 @@ bool PacketSender::nonThreadedProcess() {
         unlock();
 
         // send the packet through the NodeList...
-        //PacketOrPacketList packetOrList = packetPair.second;
+        // PacketOrPacketList packetOrList = packetPair.second;
         bool sendAsPacket = packetPair.second.first.get();
         size_t packetSize = sendAsPacket ? packetPair.second.first->getDataSize() : packetPair.second.second->getMessageSize();
         size_t packetCount = sendAsPacket ? 1 : packetPair.second.second->getNumPackets();

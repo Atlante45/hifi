@@ -34,10 +34,11 @@ QUrl const RectangleOverlay::URL(QString("hifi/overlays/RectangleOverlay.qml"));
  *     <em>Write-only.</em>
  */
 
-RectangleOverlay::RectangleOverlay() : QmlOverlay(URL) {}
+RectangleOverlay::RectangleOverlay() : QmlOverlay(URL) {
+}
 
-RectangleOverlay::RectangleOverlay(const RectangleOverlay* rectangleOverlay) 
-    : QmlOverlay(URL, rectangleOverlay) { }
+RectangleOverlay::RectangleOverlay(const RectangleOverlay* rectangleOverlay) : QmlOverlay(URL, rectangleOverlay) {
+}
 
 RectangleOverlay* RectangleOverlay::createClone() const {
     return new RectangleOverlay(this);

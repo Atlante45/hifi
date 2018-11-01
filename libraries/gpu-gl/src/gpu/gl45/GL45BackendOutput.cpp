@@ -8,13 +8,14 @@
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
-#include "GL45Backend.h"
 #include <gpu/gl/GLFramebuffer.h>
 #include <gpu/gl/GLTexture.h>
+#include "GL45Backend.h"
 
 #include <QtGui/QImage>
 
-namespace gpu { namespace gl45 { 
+namespace gpu {
+namespace gl45 {
 
 class GL45Framebuffer : public gl::GLFramebuffer {
     using Parent = gl::GLFramebuffer;
@@ -23,6 +24,7 @@ class GL45Framebuffer : public gl::GLFramebuffer {
         glCreateFramebuffers(1, &result);
         return result;
     }
+
 public:
     void update() override {
         gl::GLTexture* gltexture = nullptr;
@@ -30,23 +32,12 @@ public:
         if (_gpuObject.getColorStamps() != _colorStamps) {
             if (_gpuObject.hasColor()) {
                 _colorBuffers.clear();
-                static const GLenum colorAttachments[] = {
-                    GL_COLOR_ATTACHMENT0,
-                    GL_COLOR_ATTACHMENT1,
-                    GL_COLOR_ATTACHMENT2,
-                    GL_COLOR_ATTACHMENT3,
-                    GL_COLOR_ATTACHMENT4,
-                    GL_COLOR_ATTACHMENT5,
-                    GL_COLOR_ATTACHMENT6,
-                    GL_COLOR_ATTACHMENT7,
-                    GL_COLOR_ATTACHMENT8,
-                    GL_COLOR_ATTACHMENT9,
-                    GL_COLOR_ATTACHMENT10,
-                    GL_COLOR_ATTACHMENT11,
-                    GL_COLOR_ATTACHMENT12,
-                    GL_COLOR_ATTACHMENT13,
-                    GL_COLOR_ATTACHMENT14,
-                    GL_COLOR_ATTACHMENT15 };
+                static const GLenum colorAttachments[] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1,  GL_COLOR_ATTACHMENT2,
+                                                           GL_COLOR_ATTACHMENT3,  GL_COLOR_ATTACHMENT4,  GL_COLOR_ATTACHMENT5,
+                                                           GL_COLOR_ATTACHMENT6,  GL_COLOR_ATTACHMENT7,  GL_COLOR_ATTACHMENT8,
+                                                           GL_COLOR_ATTACHMENT9,  GL_COLOR_ATTACHMENT10, GL_COLOR_ATTACHMENT11,
+                                                           GL_COLOR_ATTACHMENT12, GL_COLOR_ATTACHMENT13, GL_COLOR_ATTACHMENT14,
+                                                           GL_COLOR_ATTACHMENT15 };
 
                 int unit = 0;
                 auto backend = _backend.lock();
@@ -117,10 +108,9 @@ public:
         checkStatus();
     }
 
-
 public:
-    GL45Framebuffer(const std::weak_ptr<gl::GLBackend>& backend, const gpu::Framebuffer& framebuffer)
-        : Parent(backend, framebuffer, allocate()) { }
+    GL45Framebuffer(const std::weak_ptr<gl::GLBackend>& backend, const gpu::Framebuffer& framebuffer) :
+        Parent(backend, framebuffer, allocate()) {}
 };
 
 gl::GLFramebuffer* GL45Backend::syncGPUObject(const Framebuffer& framebuffer) {
@@ -147,11 +137,10 @@ void GL45Backend::do_blit(const Batch& batch, size_t paramOffset) {
     // Assign dest framebuffer if not bound already
     auto destFbo = getFramebufferID(dstframebuffer);
     auto srcFbo = getFramebufferID(srcframebuffer);
-    glBlitNamedFramebuffer(srcFbo, destFbo,
-        srcvp.x, srcvp.y, srcvp.z, srcvp.w,
-        dstvp.x, dstvp.y, dstvp.z, dstvp.w,
-        GL_COLOR_BUFFER_BIT, GL_LINEAR);
-    (void) CHECK_GL_ERROR();
+    glBlitNamedFramebuffer(srcFbo, destFbo, srcvp.x, srcvp.y, srcvp.z, srcvp.w, dstvp.x, dstvp.y, dstvp.z, dstvp.w,
+                           GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    (void)CHECK_GL_ERROR();
 }
 
-} }
+} // namespace gl45
+} // namespace gpu

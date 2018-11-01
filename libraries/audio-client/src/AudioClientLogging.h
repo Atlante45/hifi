@@ -17,4 +17,3 @@
 Q_DECLARE_LOGGING_CATEGORY(audioclient)
 
 #endif // hifi_AudioClientLogging_h
-

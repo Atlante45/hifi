@@ -11,8 +11,7 @@
 
 #include "DirtyOctreeElementOperator.h"
 
-DirtyOctreeElementOperator::DirtyOctreeElementOperator(const OctreeElementPointer& element)
-    :   _element(element) {
+DirtyOctreeElementOperator::DirtyOctreeElementOperator(const OctreeElementPointer& element) : _element(element) {
     assert(_element.get());
     _element->bumpChangedContent();
     _point = _element->getAACube().calcCenter();

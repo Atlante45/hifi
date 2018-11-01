@@ -13,9 +13,9 @@
 
 #include <Application.h>
 #include <AvatarData.h>
-#include <avatar/AvatarManager.h>
 #include <EntityTree.h>
 #include <EntityTreeRenderer.h>
+#include <avatar/AvatarManager.h>
 
 SpatiallyNestableWeakPointer InterfaceParentFinder::find(QUuid parentID, bool& success, SpatialParentTree* entityTree) const {
     SpatiallyNestableWeakPointer parent;

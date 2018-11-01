@@ -12,10 +12,12 @@
 
 #include <gpu/gl/GLQuery.h>
 
-namespace gpu { namespace gl45 { 
+namespace gpu {
+namespace gl45 {
 
 class GL45Query : public gpu::gl::GLQuery {
     using Parent = gpu::gl::GLQuery;
+
 public:
     static GLuint allocateQuery() {
         GLuint result;
@@ -23,9 +25,8 @@ public:
         return result;
     }
 
-    GL45Query(const std::weak_ptr<gl::GLBackend>& backend, const Query& query)
-        : Parent(backend, query, allocateQuery(), allocateQuery()) {
-    }
+    GL45Query(const std::weak_ptr<gl::GLBackend>& backend, const Query& query) :
+        Parent(backend, query, allocateQuery(), allocateQuery()) {}
 };
 
 gl::GLQuery* GL45Backend::syncGPUObject(const Query& query) {
@@ -36,4 +37,5 @@ GLuint GL45Backend::getQueryID(const QueryPointer& query) {
     return GL45Query::getId<GL45Query>(*this, query);
 }
 
-} }
+} // namespace gl45
+} // namespace gpu

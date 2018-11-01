@@ -14,17 +14,17 @@
 #include "PortableHighResolutionClock.h"
 
 namespace {
-    const long long g_Frequency = []() -> long long {
-        LARGE_INTEGER frequency;
-        QueryPerformanceFrequency(&frequency);
-        return frequency.QuadPart;
-    }();
+const long long g_Frequency = []() -> long long {
+    LARGE_INTEGER frequency;
+    QueryPerformanceFrequency(&frequency);
+    return frequency.QuadPart;
+}();
 }
 
 win_high_resolution_clock::time_point win_high_resolution_clock::now() {
     LARGE_INTEGER count;
     QueryPerformanceCounter(&count);
-    return time_point(duration(static_cast<rep>((double) count.QuadPart * (double) period::den / (double)g_Frequency)));
+    return time_point(duration(static_cast<rep>((double)count.QuadPart * (double)period::den / (double)g_Frequency)));
 }
 
 #endif

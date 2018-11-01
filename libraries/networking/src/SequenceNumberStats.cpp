@@ -21,15 +21,14 @@ float PacketStreamStats::getLostRate() const {
     return (_expectedReceived == 0) ? 0.0f : (float)_lost / (float)_expectedReceived;
 }
 
-SequenceNumberStats::SequenceNumberStats(int statsHistoryLength, bool canDetectOutOfSync)
-    : _lastReceivedSequence(0),
+SequenceNumberStats::SequenceNumberStats(int statsHistoryLength, bool canDetectOutOfSync) :
+    _lastReceivedSequence(0),
     _missingSet(),
     _stats(),
     _lastSenderID(NULL_LOCAL_ID),
     _statsHistory(statsHistoryLength),
     _lastUnreasonableSequence(0),
-    _consecutiveUnreasonableOnTime(0)
-{
+    _consecutiveUnreasonableOnTime(0) {
 }
 
 void SequenceNumberStats::reset() {
@@ -43,8 +42,8 @@ void SequenceNumberStats::reset() {
 
 static const int UINT16_RANGE = std::numeric_limits<uint16_t>::max() + 1;
 
-SequenceNumberStats::ArrivalInfo SequenceNumberStats::sequenceNumberReceived(quint16 incoming, NetworkLocalID senderID, const bool wantExtraDebugging) {
-
+SequenceNumberStats::ArrivalInfo SequenceNumberStats::sequenceNumberReceived(quint16 incoming, NetworkLocalID senderID,
+                                                                             const bool wantExtraDebugging) {
     SequenceNumberStats::ArrivalInfo arrivalInfo;
 
     // if the sender node has changed, reset all stats
@@ -80,7 +79,8 @@ SequenceNumberStats::ArrivalInfo SequenceNumberStats::sequenceNumberReceived(qui
         int absGap = abs(incomingInt - expectedInt);
         if (absGap >= UINT16_RANGE - MAX_REASONABLE_SEQUENCE_GAP) {
             // rollover likely occurred between incoming and expected.
-            // correct the larger of the two so that it's within [-UINT16_RANGE, -1] while the other remains within [0, UINT16_RANGE-1]
+            // correct the larger of the two so that it's within [-UINT16_RANGE, -1] while the other remains within [0,
+            // UINT16_RANGE-1]
             if (incomingInt > expectedInt) {
                 incomingInt -= UINT16_RANGE;
             } else {
@@ -92,11 +92,10 @@ SequenceNumberStats::ArrivalInfo SequenceNumberStats::sequenceNumberReceived(qui
             HIFI_FCDEBUG(networking(), "unreasonable sequence number:" << incoming << "previous:" << _lastReceivedSequence);
 
             _stats._unreasonable++;
-            
+
             receivedUnreasonable(incoming);
             return arrivalInfo;
         }
-
 
         // now that rollover has been corrected for (if it occurred), incomingInt and expectedInt can be
         // compared to each other directly, though one of them might be negative
@@ -168,7 +167,6 @@ SequenceNumberStats::ArrivalInfo SequenceNumberStats::sequenceNumberReceived(qui
 }
 
 void SequenceNumberStats::receivedUnreasonable(quint16 incoming) {
-
     const int CONSECUTIVE_UNREASONABLE_ON_TIME_THRESHOLD = 8;
 
     quint16 expected = _consecutiveUnreasonableOnTime > 0 ? _lastUnreasonableSequence + (quint16)1 : incoming;
@@ -252,7 +250,6 @@ void SequenceNumberStats::pruneMissingSet(const bool wantExtraDebugging) {
 }
 
 PacketStreamStats SequenceNumberStats::getStatsForHistoryWindow() const {
-
     const PacketStreamStats* newestStats = _statsHistory.getNewestEntry();
     const PacketStreamStats* oldestStats = _statsHistory.get(_statsHistory.getNumEntries() - 1);
 
@@ -266,7 +263,6 @@ PacketStreamStats SequenceNumberStats::getStatsForHistoryWindow() const {
 }
 
 PacketStreamStats SequenceNumberStats::getStatsForLastHistoryInterval() const {
-
     const PacketStreamStats* newestStats = _statsHistory.getNewestEntry();
     const PacketStreamStats* secondNewestStats = _statsHistory.get(1);
 
@@ -277,4 +273,3 @@ PacketStreamStats SequenceNumberStats::getStatsForLastHistoryInterval() const {
 
     return *newestStats - *secondNewestStats;
 }
-

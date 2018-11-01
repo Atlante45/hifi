@@ -12,22 +12,22 @@
 #ifndef hifi_AssignmentClientMonitor_h
 #define hifi_AssignmentClientMonitor_h
 
-#include <QtCore/QCoreApplication>
 #include <QtCore/qpointer.h>
-#include <QtCore/QProcess>
-#include <QtCore/QDateTime>
 #include <QDir>
+#include <QtCore/QCoreApplication>
+#include <QtCore/QDateTime>
+#include <QtCore/QProcess>
 
 #include <Assignment.h>
 
-#include "AssignmentClientChildData.h"
-#include <HTTPManager.h>
 #include <HTTPConnection.h>
+#include <HTTPManager.h>
+#include "AssignmentClientChildData.h"
 
 extern const char* NUM_FORKS_PARAMETER;
 
 struct ACProcess {
-    QProcess* process; // looks like a dangling pointer, but is parented by the AssignmentClientMonitor 
+    QProcess* process; // looks like a dangling pointer, but is parented by the AssignmentClientMonitor
     QString logStdoutPath;
     QString logStderrPath;
 };

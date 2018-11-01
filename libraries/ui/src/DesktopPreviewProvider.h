@@ -18,8 +18,8 @@ class DesktopPreviewProvider : public QObject, public Dependency {
 
     constexpr static const char* imagePaths[] = {
         "images/preview-disabled.png", // USER
-        "images/preview-privacy.png",  // SECURE_SCREEN
-        "images/preview.png",          // VSYNC
+        "images/preview-privacy.png", // SECURE_SCREEN
+        "images/preview.png", // VSYNC
     };
 
 public:

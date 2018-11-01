@@ -10,8 +10,8 @@
 
 #include "OffscreenQmlDialog.h"
 
-OffscreenQmlDialog::OffscreenQmlDialog(QQuickItem* parent)
-  : QQuickItem(parent) { }
+OffscreenQmlDialog::OffscreenQmlDialog(QQuickItem* parent) : QQuickItem(parent) {
+}
 
 OffscreenQmlDialog::~OffscreenQmlDialog() {
 }

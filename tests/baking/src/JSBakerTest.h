@@ -12,8 +12,8 @@
 #ifndef hifi_JSBakerTest_h
 #define hifi_JSBakerTest_h
 
-#include <QtTest/QtTest>
 #include <JSBaker.h>
+#include <QtTest/QtTest>
 
 class JSBakerTest : public QObject {
     Q_OBJECT

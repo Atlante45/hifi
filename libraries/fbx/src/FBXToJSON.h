@@ -17,16 +17,18 @@
 
 // Forward declarations.
 class FBXNode;
-template<typename T> class QVector;
+template<typename T>
+class QVector;
 
 class FBXToJSON : public std::ostringstream {
 public:
     FBXToJSON& operator<<(const FBXNode& fbxNode);
 
 private:
-    template<typename T> FBXToJSON& operator<<(const QVector<T>& arrayProp);
+    template<typename T>
+    FBXToJSON& operator<<(const QVector<T>& arrayProp);
     static std::string stringEscape(const std::string& in);
     int _indentLevel { 0 };
 };
 
-#endif  // hifi_FBXToJSON_h
+#endif // hifi_FBXToJSON_h

@@ -40,13 +40,12 @@ protected:
     gpu::TextureSourcePointer _textureSource;
 
     Transform _texcoordTransform;
-    glm::vec2 _lightmapOffsetScale{ 0.0f, 1.0f };
+    glm::vec2 _lightmapOffsetScale { 0.0f, 1.0f };
 
-    bool _useAlphaChannel{ false };
+    bool _useAlphaChannel { false };
 };
-typedef std::shared_ptr< TextureMap > TextureMapPointer;
+typedef std::shared_ptr<TextureMap> TextureMapPointer;
 
-};
+}; // namespace graphics
 
 #endif // hifi_model_TextureMap_h
-

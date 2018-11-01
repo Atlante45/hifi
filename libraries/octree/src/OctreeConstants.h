@@ -26,7 +26,7 @@ const float DEFAULT_OCTREE_SIZE_SCALE = TREE_SCALE * MAX_VISIBILITY_DISTANCE_FOR
 
 // Since entities like models live inside of octree cells, and they themselves can have very small mesh parts,
 // we want to have some constant that controls have big a mesh part must be to render even if the octree cell itself
-// would be visible. This constanct controls that. It basically means you must be this many times closer to a mesh 
+// would be visible. This constanct controls that. It basically means you must be this many times closer to a mesh
 // than an octree cell to see the mesh.
 const float OCTREE_TO_MESH_RATIO = 4.0f;
 
@@ -47,7 +47,8 @@ const int UNREASONABLY_DEEP_RECURSION = 29; // use this for something that you w
 const int DANGEROUSLY_DEEP_RECURSION = 200; // use this for something that needs to go deeper
 const float SCALE_AT_UNREASONABLY_DEEP_RECURSION = (TREE_SCALE / powf(2.0f, UNREASONABLY_DEEP_RECURSION));
 const float SCALE_AT_DANGEROUSLY_DEEP_RECURSION = (TREE_SCALE / powf(2.0f, DANGEROUSLY_DEEP_RECURSION));
-const float SMALLEST_REASONABLE_OCTREE_ELEMENT_SCALE = SCALE_AT_UNREASONABLY_DEEP_RECURSION * 2.0f; // 0.00001525878 meter ~1/10,0000th
+const float SMALLEST_REASONABLE_OCTREE_ELEMENT_SCALE = SCALE_AT_UNREASONABLY_DEEP_RECURSION *
+                                                       2.0f; // 0.00001525878 meter ~1/10,0000th
 
 const int DEFAULT_MAX_OCTREE_PPS = 600; // the default maximum PPS we think any octree based server should send to a client
 

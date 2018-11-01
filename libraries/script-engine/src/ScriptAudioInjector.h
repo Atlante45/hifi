@@ -26,9 +26,9 @@
  * @hifi-server-entity
  * @hifi-assignment-client
  *
- * @property {boolean} playing - <code>true</code> if the audio is currently playing, otherwise <code>false</code>. 
+ * @property {boolean} playing - <code>true</code> if the audio is currently playing, otherwise <code>false</code>.
  *     <em>Read-only.</em>
- * @property {number} loudness - The loudness in the last frame of audio, range <code>0.0</code> &ndash; <code>1.0</code>. 
+ * @property {number} loudness - The loudness in the last frame of audio, range <code>0.0</code> &ndash; <code>1.0</code>.
  *     <em>Read-only.</em>
  * @property {AudioInjector.AudioInjectorOptions} options - Configures how the injector plays the audio.
  */
@@ -58,11 +58,11 @@ public slots:
      * var injectorOptions = {
      *     position: MyAvatar.position
      * };
-     * 
+     *
      * Script.setTimeout(function () { // Give the sound time to load.
      *     injector = Audio.playSound(sound, injectorOptions);
      * }, 1000);
-     * 
+     *
      * Script.setTimeout(function () {
      *     injector.stop();
      * }, 2000);
@@ -123,7 +123,7 @@ signals:
      * var injectorOptions = {
      *     position: MyAvatar.position
      * };
-     * 
+     *
      * Script.setTimeout(function () { // Give the sound time to load.
      *     injector = Audio.playSound(sound, injectorOptions);
      *     injector.finished.connect(function () {
@@ -140,6 +140,7 @@ protected slots:
      * @function AudioInjector.stopInjectorImmediately
      */
     void stopInjectorImmediately();
+
 private:
     AudioInjectorPointer _injector;
 

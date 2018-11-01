@@ -10,7 +10,6 @@
 using namespace hifi::qml::impl;
 
 RenderControl::RenderControl(QObject* parent) : QQuickRenderControl(parent) {
-
 }
 
 void RenderControl::setRenderWindow(QWindow* renderWindow) {
@@ -26,4 +25,3 @@ QWindow* RenderControl::renderWindow(QPoint* offset) {
     }
     return _renderWindow;
 }
-

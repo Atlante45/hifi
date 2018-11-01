@@ -11,17 +11,17 @@
 #include <QtCore/QThread>
 #include <QtQml/QQmlProperty>
 
-#include <shared/QtHelpers.h>
-#include <PathUtils.h>
-#include <DependencyManager.h>
 #include <AccountManager.h>
+#include <DependencyManager.h>
+#include <PathUtils.h>
 #include <RegisteredMetaTypes.h>
+#include <shared/QtHelpers.h>
 
-#include "../QmlWindowClass.h"
-#include "../OffscreenUi.h"
 #include "../InfoView.h"
-#include "ToolbarScriptingInterface.h"
+#include "../OffscreenUi.h"
+#include "../QmlWindowClass.h"
 #include "Logging.h"
+#include "ToolbarScriptingInterface.h"
 
 #include <AudioInjector.h>
 
@@ -39,33 +39,30 @@ static QString getUsername() {
     auto accountManager = DependencyManager::get<AccountManager>();
     if (accountManager->isLoggedIn()) {
         username = accountManager->getAccountInfo().getUsername();
-    } 
+    }
     return username;
 }
 
-static Setting::Handle<QStringList> tabletSoundsButtonClick("TabletSounds", QStringList { "/sounds/Button06.wav",
-                                                                               "/sounds/Button04.wav",
-                                                                               "/sounds/Button07.wav",
-                                                                               "/sounds/Tab01.wav",
-                                                                               "/sounds/Tab02.wav" });
+static Setting::Handle<QStringList> tabletSoundsButtonClick("TabletSounds",
+                                                            QStringList { "/sounds/Button06.wav", "/sounds/Button04.wav",
+                                                                          "/sounds/Button07.wav", "/sounds/Tab01.wav",
+                                                                          "/sounds/Tab02.wav" });
 
 TabletButtonListModel::TabletButtonListModel() {
-
 }
 
 TabletButtonListModel::~TabletButtonListModel() {
-
 }
 
 enum ButtonDeviceRole {
     ButtonProxyRole = Qt::UserRole,
 };
 
-QHash<int, QByteArray> TabletButtonListModel::_roles{
+QHash<int, QByteArray> TabletButtonListModel::_roles {
     { ButtonProxyRole, "buttonProxy" },
 };
 
-Qt::ItemFlags TabletButtonListModel::_flags{ Qt::ItemIsSelectable | Qt::ItemIsEnabled };
+Qt::ItemFlags TabletButtonListModel::_flags { Qt::ItemIsSelectable | Qt::ItemIsEnabled };
 
 QVariant TabletButtonListModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid() || index.row() >= rowCount() || role != ButtonProxyRole) {
@@ -107,7 +104,8 @@ void TabletButtonListModel::removeButton(TabletButtonProxy* button) {
 int TabletButtonListModel::computeNewButtonIndex(const QVariantMap& newButtonProperties) {
     int numButtons = (int)_buttons.size();
     int newButtonSortOrder = newButtonProperties[BUTTON_SORT_ORDER_KEY].toInt();
-    if (newButtonSortOrder == DEFAULT_BUTTON_SORT_ORDER) return numButtons;
+    if (newButtonSortOrder == DEFAULT_BUTTON_SORT_ORDER)
+        return numButtons;
     for (int i = 0; i < numButtons; i++) {
         QVariantMap tabletButtonProperties = _buttons[i]->getProperties();
         int tabletButtonSortOrder = tabletButtonProperties[BUTTON_SORT_ORDER_KEY].toInt();
@@ -118,15 +116,14 @@ int TabletButtonListModel::computeNewButtonIndex(const QVariantMap& newButtonPro
     return numButtons;
 }
 
-TabletButtonsProxyModel::TabletButtonsProxyModel(QObject *parent)
-    : QSortFilterProxyModel(parent) {
+TabletButtonsProxyModel::TabletButtonsProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {
 }
 
 int TabletButtonsProxyModel::pageIndex() const {
     return _pageIndex;
 }
 
-int TabletButtonsProxyModel::buttonIndex(const QString &uuid) {
+int TabletButtonsProxyModel::buttonIndex(const QString& uuid) {
     if (!sourceModel() || _pageIndex < 0) {
         return -1;
     }
@@ -134,7 +131,7 @@ int TabletButtonsProxyModel::buttonIndex(const QString &uuid) {
     for (int i = 0; i < model->rowCount(); i++) {
         TabletButtonProxy* bproxy = model->data(model->index(i), ButtonProxyRole).value<TabletButtonProxy*>();
         if (bproxy && bproxy->getUuid().toString().contains(uuid)) {
-            return i - (_pageIndex*TabletScriptingInterface::ButtonsOnPage);
+            return i - (_pageIndex * TabletScriptingInterface::ButtonsOnPage);
         }
     }
     return -1;
@@ -149,11 +146,10 @@ void TabletButtonsProxyModel::setPageIndex(int pageIndex) {
     emit pageIndexChanged(_pageIndex);
 }
 
-bool TabletButtonsProxyModel::filterAcceptsRow(int sourceRow,
-                                               const QModelIndex &sourceParent) const {
+bool TabletButtonsProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const {
     Q_UNUSED(sourceParent);
-    return (sourceRow >= _pageIndex*TabletScriptingInterface::ButtonsOnPage
-            && sourceRow < (_pageIndex + 1)*TabletScriptingInterface::ButtonsOnPage);
+    return (sourceRow >= _pageIndex * TabletScriptingInterface::ButtonsOnPage &&
+            sourceRow < (_pageIndex + 1) * TabletScriptingInterface::ButtonsOnPage);
 }
 
 TabletScriptingInterface::TabletScriptingInterface() {
@@ -175,7 +171,7 @@ TabletProxy* TabletScriptingInterface::getTablet(const QString& tabletId) {
     if (QThread::currentThread() != thread()) {
         BLOCKING_INVOKE_METHOD(this, "getTablet", Q_RETURN_ARG(TabletProxy*, tabletProxy), Q_ARG(QString, tabletId));
         return tabletProxy;
-    } 
+    }
 
     auto iter = _tabletProxies.find(tabletId);
     if (iter != _tabletProxies.end()) {
@@ -194,11 +190,10 @@ TabletProxy* TabletScriptingInterface::getTablet(const QString& tabletId) {
 }
 
 void TabletScriptingInterface::preloadSounds() {
-    //preload audio events
-    const QStringList &audioSettings = tabletSoundsButtonClick.get();
+    // preload audio events
+    const QStringList& audioSettings = tabletSoundsButtonClick.get();
     for (int i = 0; i < TabletAudioEvents::Last; i++) {
-        SharedSoundPointer sound = DependencyManager::get<SoundCache>()->
-                getSound(PathUtils::resourcesUrl(audioSettings.at(i)));
+        SharedSoundPointer sound = DependencyManager::get<SoundCache>()->getSound(PathUtils::resourcesUrl(audioSettings.at(i)));
         _audioEvents.insert(static_cast<TabletAudioEvents>(i), sound);
     }
 }
@@ -333,6 +328,7 @@ static const char* VRMENU_SOURCE_URL = "hifi/tablet/TabletMenu.qml";
 
 class TabletRootWindow : public QmlWindowClass {
     virtual QString qmlSource() const override { return "hifi/tablet/WindowRoot.qml"; }
+
 public:
     TabletRootWindow() : QmlWindowClass(false) {}
 };
@@ -375,7 +371,8 @@ void TabletProxy::setToolbarMode(bool toolbarMode) {
 
         QObject::connect(quickItem, SIGNAL(windowClosed()), this, SLOT(desktopWindowClosed()));
 
-        QObject::connect(tabletRootWindow, SIGNAL(webEventReceived(QVariant)), this, SLOT(emitWebEvent(QVariant)), Qt::DirectConnection);
+        QObject::connect(tabletRootWindow, SIGNAL(webEventReceived(QVariant)), this, SLOT(emitWebEvent(QVariant)),
+                         Qt::DirectConnection);
 
         // forward qml surface events to interface js
         connect(tabletRootWindow, &QmlWindowClass::fromQml, this, &TabletProxy::fromQml);
@@ -383,7 +380,7 @@ void TabletProxy::setToolbarMode(bool toolbarMode) {
         if (_currentPathLoaded != TABLET_HOME_SOURCE_URL) {
             loadHomeScreen(true);
         }
-        //check if running scripts window opened and save it for reopen in Tablet
+        // check if running scripts window opened and save it for reopen in Tablet
         if (offscreenUi->isVisible("RunningScripts")) {
             offscreenUi->hide("RunningScripts");
             _showRunningScripts = true;
@@ -427,8 +424,7 @@ bool TabletProxy::isMessageDialogOpen() {
     }
 
     QVariant result;
-    QMetaObject::invokeMethod(_qmlTabletRoot, "isDialogOpen",Qt::DirectConnection,
-        Q_RETURN_ARG(QVariant, result));
+    QMetaObject::invokeMethod(_qmlTabletRoot, "isDialogOpen", Qt::DirectConnection, Q_RETURN_ARG(QVariant, result));
     return result.toBool();
 }
 
@@ -455,8 +451,8 @@ void TabletProxy::emitWebEvent(const QVariant& msg) {
 
 void TabletProxy::onTabletShown() {
     if (_tabletShown) {
-        Setting::Handle<bool> notificationSounds{ QStringLiteral("play_notification_sounds"), true};
-        Setting::Handle<bool> notificationSoundTablet{ QStringLiteral("play_notification_sounds_tablet"), true};
+        Setting::Handle<bool> notificationSounds { QStringLiteral("play_notification_sounds"), true };
+        Setting::Handle<bool> notificationSoundTablet { QStringLiteral("play_notification_sounds_tablet"), true };
         if (notificationSounds.get() && notificationSoundTablet.get()) {
             dynamic_cast<TabletScriptingInterface*>(parent())->playSound(TabletScriptingInterface::TabletOpen);
         }
@@ -531,7 +527,7 @@ void TabletProxy::setQmlTabletRoot(OffscreenQmlSurface* qmlOffscreenSurface) {
         }
 
         if (_showRunningScripts) {
-            //show Tablet. Make sure, setShown implemented in TabletRoot.qml
+            // show Tablet. Make sure, setShown implemented in TabletRoot.qml
             QMetaObject::invokeMethod(_qmlTabletRoot, "setShown", Q_ARG(const QVariant&, QVariant(true)));
         }
     } else {
@@ -565,7 +561,8 @@ void TabletProxy::gotoMenuScreen(const QString& submenu) {
     if (root) {
         auto offscreenUi = DependencyManager::get<OffscreenUi>();
         QObject* menu = offscreenUi->getRootMenu();
-        QMetaObject::invokeMethod(root, "setMenuProperties", Q_ARG(QVariant, QVariant::fromValue(menu)), Q_ARG(const QVariant&, QVariant(submenu)));
+        QMetaObject::invokeMethod(root, "setMenuProperties", Q_ARG(QVariant, QVariant::fromValue(menu)),
+                                  Q_ARG(const QVariant&, QVariant(submenu)));
         QMetaObject::invokeMethod(root, "loadSource", Q_ARG(const QVariant&, QVariant(VRMENU_SOURCE_URL)));
         _state = State::Menu;
         emit screenChanged(QVariant("Menu"), QVariant(VRMENU_SOURCE_URL));
@@ -621,7 +618,7 @@ void TabletProxy::returnToPreviousApp() {
         qCDebug(uiLogging) << "tablet cannot load QML because _qmlTabletRoot is null";
     }
 }
-    
+
 void TabletProxy::loadQMLSource(const QVariant& path, bool resizable) {
     if (QThread::currentThread() != thread()) {
         QMetaObject::invokeMethod(this, "loadQMLSource", Q_ARG(QVariant, path), Q_ARG(bool, resizable));
@@ -679,7 +676,7 @@ bool TabletProxy::pushOntoStack(const QVariant& path) {
         return result;
     }
 
-    //set landscape off when pushing menu items while in Create mode
+    // set landscape off when pushing menu items while in Create mode
     if (_landscape) {
         setLandscape(false);
     }
@@ -743,7 +740,7 @@ void TabletProxy::loadHomeScreen(bool forceOntoHomeScreen) {
             // close desktop window
             if (_desktopWindow->asQuickItem()) {
                 QMetaObject::invokeMethod(_desktopWindow->asQuickItem(), "setShown", Q_ARG(const QVariant&, QVariant(false)));
-                stopQMLSource();  // Stop the currently loaded QML running.
+                stopQMLSource(); // Stop the currently loaded QML running.
             }
         }
         _state = State::Home;
@@ -779,14 +776,16 @@ void TabletProxy::loadWebScreenOnTop(const QVariant& url, const QString& injectJ
         if (_toolbarMode && _desktopWindow) {
             QMetaObject::invokeMethod(root, "setResizable", Q_ARG(const QVariant&, QVariant(false)));
         }
-        QMetaObject::invokeMethod(root, "loadWebOnTop", Q_ARG(const QVariant&, QVariant(url)), Q_ARG(const QVariant&, QVariant(injectJavaScriptUrl)));
+        QMetaObject::invokeMethod(root, "loadWebOnTop", Q_ARG(const QVariant&, QVariant(url)),
+                                  Q_ARG(const QVariant&, QVariant(injectJavaScriptUrl)));
     }
     _state = State::Web;
 }
 
 void TabletProxy::gotoWebScreen(const QString& url, const QString& injectedJavaScriptUrl, bool loadOtherBase) {
     if (QThread::currentThread() != thread()) {
-        QMetaObject::invokeMethod(this, "gotoWebScreen", Q_ARG(QString, url), Q_ARG(QString, injectedJavaScriptUrl), Q_ARG(bool, loadOtherBase));
+        QMetaObject::invokeMethod(this, "gotoWebScreen", Q_ARG(QString, url), Q_ARG(QString, injectedJavaScriptUrl),
+                                  Q_ARG(bool, loadOtherBase));
         return;
     }
 
@@ -799,9 +798,11 @@ void TabletProxy::gotoWebScreen(const QString& url, const QString& injectedJavaS
 
     if (root) {
         if (loadOtherBase) {
-            QMetaObject::invokeMethod(root, "loadTabletWebBase", Q_ARG(const QVariant&, QVariant(url)), Q_ARG(const QVariant&, QVariant(injectedJavaScriptUrl)));
+            QMetaObject::invokeMethod(root, "loadTabletWebBase", Q_ARG(const QVariant&, QVariant(url)),
+                                      Q_ARG(const QVariant&, QVariant(injectedJavaScriptUrl)));
         } else {
-            QMetaObject::invokeMethod(root, "loadWebBase", Q_ARG(const QVariant&, QVariant(url)), Q_ARG(const QVariant&, QVariant(injectedJavaScriptUrl)));
+            QMetaObject::invokeMethod(root, "loadWebBase", Q_ARG(const QVariant&, QVariant(url)),
+                                      Q_ARG(const QVariant&, QVariant(injectedJavaScriptUrl)));
         }
         QMetaObject::invokeMethod(root, "setShown", Q_ARG(const QVariant&, QVariant(true)));
         if (_toolbarMode && _desktopWindow) {
@@ -818,7 +819,6 @@ void TabletProxy::gotoWebScreen(const QString& url, const QString& injectedJavaS
         _initialWebPathParams.first = injectedJavaScriptUrl;
         _initialWebPathParams.second = loadOtherBase;
         _initialScreen = true;
-
     }
 }
 
@@ -877,17 +877,13 @@ void TabletProxy::sendToQml(const QVariant& msg) {
     }
 }
 
-
-
 OffscreenQmlSurface* TabletProxy::getTabletSurface() {
     return _qmlOffscreenSurface;
 }
 
-
 void TabletProxy::desktopWindowClosed() {
     gotoHomeScreen();
 }
-
 
 QQuickItem* TabletProxy::getQmlTablet() const {
     if (!_qmlTabletRoot) {

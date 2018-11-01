@@ -13,10 +13,9 @@
 
 #include <iostream>
 
-#include <workload/Space.h>
-#include <StreamUtils.h>
 #include <SharedUtil.h>
-
+#include <StreamUtils.h>
+#include <workload/Space.h>
 
 const float INV_SQRT_3 = 1.0f / sqrtf(3.0f);
 
@@ -126,11 +125,8 @@ glm::vec3 randomVec3() {
 void generateSpheres(uint32_t numProxies, std::vector<workload::Space::Sphere>& spheres) {
     spheres.reserve(numProxies);
     for (uint32_t i = 0; i < numProxies; ++i) {
-        workload::Space::Sphere sphere(
-                WORLD_WIDTH * randomFloat(),
-                WORLD_WIDTH * randomFloat(),
-                WORLD_WIDTH * randomFloat(),
-                (MIN_RADIUS + (MAX_RADIUS - MIN_RADIUS)) * randomFloat());
+        workload::Space::Sphere sphere(WORLD_WIDTH * randomFloat(), WORLD_WIDTH * randomFloat(), WORLD_WIDTH * randomFloat(),
+                                       (MIN_RADIUS + (MAX_RADIUS - MIN_RADIUS)) * randomFloat());
         spheres.push_back(sphere);
     }
 }
@@ -157,7 +153,6 @@ void SpaceTests::benchmark() {
     std::vector<uint64_t> timeToMoveProxies;
     std::vector<uint64_t> timeToRemoveAll;
     for (uint32_t i = 0; i < numTests; ++i) {
-
         workload::Space space;
 
         { // build the views

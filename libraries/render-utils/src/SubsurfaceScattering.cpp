@@ -11,9 +11,9 @@
 #include "SubsurfaceScattering.h"
 
 #include <gpu/Context.h>
-#include <shaders/Shaders.h>
-#include <render/ShapePipeline.h>
 #include <graphics/ShaderConstants.h>
+#include <render/ShapePipeline.h>
+#include <shaders/Shaders.h>
 
 #include "render-utils/ShaderConstants.h"
 
@@ -21,22 +21,19 @@
 
 #include "DeferredLightingEffect.h"
 
-
 namespace ru {
-    using render_utils::slot::texture::Texture;
-    using render_utils::slot::buffer::Buffer;
-}
+using render_utils::slot::buffer::Buffer;
+using render_utils::slot::texture::Texture;
+} // namespace ru
 
 namespace gr {
-    using graphics::slot::texture::Texture;
-    using graphics::slot::buffer::Buffer;
-}
-
+using graphics::slot::buffer::Buffer;
+using graphics::slot::texture::Texture;
+} // namespace gr
 
 SubsurfaceScatteringResource::SubsurfaceScatteringResource() {
     Parameters parameters;
-    _parametersBuffer = gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(Parameters), (const gpu::Byte*) &parameters));
-
+    _parametersBuffer = gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(Parameters), (const gpu::Byte*)&parameters));
 }
 
 void SubsurfaceScatteringResource::setBentNormalFactors(const glm::vec4& rgbsBentFactors) {
@@ -58,7 +55,6 @@ void SubsurfaceScatteringResource::setCurvatureFactors(const glm::vec2& sbCurvat
 glm::vec2 SubsurfaceScatteringResource::getCurvatureFactors() const {
     return _parametersBuffer.get<Parameters>().curvatureInfo;
 }
-
 
 void SubsurfaceScatteringResource::setLevel(float level) {
     if (level != getLevel()) {
@@ -113,7 +109,6 @@ SubsurfaceScattering::SubsurfaceScattering() {
 }
 
 void SubsurfaceScattering::configure(const Config& config) {
-
     glm::vec4 bentInfo(config.bentRed, config.bentGreen, config.bentBlue, config.bentScale);
     _scatteringResource->setBentNormalFactors(bentInfo);
 
@@ -129,7 +124,7 @@ void SubsurfaceScattering::configure(const Config& config) {
 void SubsurfaceScattering::run(const render::RenderContextPointer& renderContext, Outputs& outputs) {
     assert(renderContext->args);
     assert(renderContext->args->hasViewFrustum());
-    
+
     if (!_scatteringResource->getScatteringTable()) {
         _scatteringResource->generateScatteringTable(renderContext->args);
     }
@@ -140,30 +135,25 @@ void SubsurfaceScattering::run(const render::RenderContextPointer& renderContext
 #ifdef GENERATE_SCATTERING_RESOURCE_ON_CPU
 
 // Reference: http://www.altdevblogaday.com/2011/12/31/skin-shading-in-unity3d/
-#include <cstdio>
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <cstdio>
 
 #define _PI 3.14159265358979523846
 
 using namespace std;
 
 double gaussian(float v, float r) {
-    double g = (1.0 / sqrt(2.0 * _PI * v)) * exp(-(r*r) / (2.0 * v));
+    double g = (1.0 / sqrt(2.0 * _PI * v)) * exp(-(r * r) / (2.0 * v));
     return g;
 }
 
 vec3 scatter(double r) {
     // Values from GPU Gems 3 "Advanced Skin Rendering".
     // Originally taken from real life samples.
-    static const double profile[][4] = {
-        { 0.0064, 0.233, 0.455, 0.649 },
-        { 0.0484, 0.100, 0.336, 0.344 },
-        { 0.1870, 0.118, 0.198, 0.000 },
-        { 0.5670, 0.113, 0.007, 0.007 },
-        { 1.9900, 0.358, 0.004, 0.000 },
-        { 7.4100, 0.078, 0.000, 0.000 }
-    };
+    static const double profile[][4] = { { 0.0064, 0.233, 0.455, 0.649 }, { 0.0484, 0.100, 0.336, 0.344 },
+                                         { 0.1870, 0.118, 0.198, 0.000 }, { 0.5670, 0.113, 0.007, 0.007 },
+                                         { 1.9900, 0.358, 0.004, 0.000 }, { 7.4100, 0.078, 0.000, 0.000 } };
     static const int profileNum = 6;
     vec3 ret(0.0);
     for (int i = 0; i < profileNum; i++) {
@@ -190,8 +180,10 @@ vec3 integrate(double cosTheta, double skinRadius) {
     while (a <= (_PI)) {
         double sampleAngle = theta + a;
         double diffuse = cos(sampleAngle);
-        if (diffuse < 0.0) diffuse = 0.0;
-        if (diffuse > 1.0) diffuse = 1.0;
+        if (diffuse < 0.0)
+            diffuse = 0.0;
+        if (diffuse > 1.0)
+            diffuse = 1.0;
 
         // Distance.
         double sampleDist = abs(2.0 * skinRadius * sin(a * 0.5));
@@ -217,10 +209,10 @@ vec3 integrate(double cosTheta, double skinRadius) {
 void diffuseScatter(gpu::TexturePointer& lut) {
     int width = lut->getWidth();
     int height = lut->getHeight();
-    
+
     const int COMPONENT_COUNT = 4;
     std::vector<unsigned char> bytes(COMPONENT_COUNT * height * width);
-    
+
     int index = 0;
     for (int j = 0; j < height; j++) {
         for (int i = 0; i < width; i++) {
@@ -230,24 +222,27 @@ void diffuseScatter(gpu::TexturePointer& lut) {
             vec3 val = integrate(x, y);
 
             // Convert to linear
-           // val.x = sqrt(val.x);
-           // val.y = sqrt(val.y);
-           // val.z = sqrt(val.z);
+            // val.x = sqrt(val.x);
+            // val.y = sqrt(val.y);
+            // val.z = sqrt(val.z);
 
             // Convert to 24-bit image.
             unsigned char valI[3];
-            if (val.x > 1.0) val.x = 1.0;
-            if (val.y > 1.0) val.y = 1.0;
-            if (val.z > 1.0) val.z = 1.0;
+            if (val.x > 1.0)
+                val.x = 1.0;
+            if (val.y > 1.0)
+                val.y = 1.0;
+            if (val.z > 1.0)
+                val.z = 1.0;
             valI[0] = (unsigned char)(val.x * 256.0);
             valI[1] = (unsigned char)(val.y * 256.0);
             valI[2] = (unsigned char)(val.z * 256.0);
-            
+
             bytes[COMPONENT_COUNT * index] = valI[0];
             bytes[COMPONENT_COUNT * index + 1] = valI[1];
             bytes[COMPONENT_COUNT * index + 2] = valI[2];
             bytes[COMPONENT_COUNT * index + 3] = 255.0;
-            
+
             index++;
         }
     }
@@ -255,11 +250,10 @@ void diffuseScatter(gpu::TexturePointer& lut) {
     lut->assignStoredMip(0, gpu::Element::COLOR_RGBA_32, bytes.size(), bytes.data());
 }
 
-
 void diffuseProfile(gpu::TexturePointer& profile) {
     int width = profile->getWidth();
     int height = profile->getHeight();
-    
+
     const int COMPONENT_COUNT = 4;
     std::vector<unsigned char> bytes(COMPONENT_COUNT * height * width);
 
@@ -271,9 +265,12 @@ void diffuseProfile(gpu::TexturePointer& profile) {
 
             // Convert to 24-bit image.
             unsigned char valI[3];
-            if (val.x > 1.0) val.x = 1.0;
-            if (val.y > 1.0) val.y = 1.0;
-            if (val.z > 1.0) val.z = 1.0;
+            if (val.x > 1.0)
+                val.x = 1.0;
+            if (val.y > 1.0)
+                val.y = 1.0;
+            if (val.z > 1.0)
+                val.z = 1.0;
             valI[0] = (unsigned char)(val.x * 255.0);
             valI[1] = (unsigned char)(val.y * 255.0);
             valI[2] = (unsigned char)(val.z * 255.0);
@@ -287,7 +284,6 @@ void diffuseProfile(gpu::TexturePointer& profile) {
         }
     }
 
-    
     profile->assignStoredMip(0, gpu::Element::COLOR_RGBA_32, bytes.size(), bytes.data());
 }
 
@@ -299,7 +295,8 @@ void diffuseProfileGPU(gpu::TexturePointer& profileMap, RenderArgs* args) {
 
     gpu::PipelinePointer makePipeline;
     {
-        gpu::ShaderPointer program = gpu::Shader::createProgram(shader::render_utils::program::subsurfaceScattering_makeProfile);
+        gpu::ShaderPointer program = gpu::Shader::createProgram(
+            shader::render_utils::program::subsurfaceScattering_makeProfile);
 
         gpu::StatePointer state = gpu::StatePointer(new gpu::State());
 
@@ -323,7 +320,6 @@ void diffuseProfileGPU(gpu::TexturePointer& profileMap, RenderArgs* args) {
     });
 }
 
-
 void diffuseScatterGPU(const gpu::TexturePointer& profileMap, gpu::TexturePointer& lut, RenderArgs* args) {
     int width = lut->getWidth();
     int height = lut->getHeight();
@@ -333,7 +329,7 @@ void diffuseScatterGPU(const gpu::TexturePointer& profileMap, gpu::TexturePointe
     gpu::StatePointer state = gpu::StatePointer(new gpu::State());
 
     gpu::PipelinePointer makePipeline = gpu::Pipeline::create(program, state);
-    
+
     auto makeFramebuffer = gpu::FramebufferPointer(gpu::Framebuffer::create("diffuseScatter"));
     makeFramebuffer->setRenderBuffer(0, lut);
 
@@ -347,7 +343,6 @@ void diffuseScatterGPU(const gpu::TexturePointer& profileMap, gpu::TexturePointe
         batch.setResourceTexture(0, nullptr);
         batch.setPipeline(nullptr);
         batch.setFramebuffer(nullptr);
-
     });
 }
 
@@ -357,7 +352,8 @@ void computeSpecularBeckmannGPU(gpu::TexturePointer& beckmannMap, RenderArgs* ar
 
     gpu::PipelinePointer makePipeline;
     {
-        gpu::ShaderPointer program = gpu::Shader::createProgram(shader::render_utils::program::subsurfaceScattering_makeSpecularBeckmann);
+        gpu::ShaderPointer program = gpu::Shader::createProgram(
+            shader::render_utils::program::subsurfaceScattering_makeSpecularBeckmann);
 
         gpu::StatePointer state = gpu::StatePointer(new gpu::State());
 
@@ -385,19 +381,24 @@ gpu::TexturePointer SubsurfaceScatteringResource::generateScatteringProfile(Rend
     const int PROFILE_RESOLUTION = 512;
     //  const auto pixelFormat = gpu::Element::COLOR_SRGBA_32;
     const auto pixelFormat = gpu::Element::COLOR_R11G11B10;
-    auto profileMap = gpu::Texture::createRenderBuffer(pixelFormat, PROFILE_RESOLUTION, 1, gpu::Texture::SINGLE_MIP, gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_MIP_LINEAR, gpu::Sampler::WRAP_CLAMP));
+    auto profileMap = gpu::Texture::createRenderBuffer(pixelFormat, PROFILE_RESOLUTION, 1, gpu::Texture::SINGLE_MIP,
+                                                       gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_MIP_LINEAR,
+                                                                    gpu::Sampler::WRAP_CLAMP));
     profileMap->setSource("Generated Scattering Profile");
     diffuseProfileGPU(profileMap, args);
     return profileMap;
 }
 
-gpu::TexturePointer SubsurfaceScatteringResource::generatePreIntegratedScattering(const gpu::TexturePointer& profile, RenderArgs* args) {
-
+gpu::TexturePointer SubsurfaceScatteringResource::generatePreIntegratedScattering(const gpu::TexturePointer& profile,
+                                                                                  RenderArgs* args) {
     const int TABLE_RESOLUTION = 512;
-  //  const auto pixelFormat = gpu::Element::COLOR_SRGBA_32;
+    //  const auto pixelFormat = gpu::Element::COLOR_SRGBA_32;
     const auto pixelFormat = gpu::Element::COLOR_R11G11B10;
-    auto scatteringLUT = gpu::Texture::createRenderBuffer(pixelFormat, TABLE_RESOLUTION, TABLE_RESOLUTION, gpu::Texture::SINGLE_MIP, gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_MIP_LINEAR, gpu::Sampler::WRAP_CLAMP));
-    //diffuseScatter(scatteringLUT);
+    auto scatteringLUT = gpu::Texture::createRenderBuffer(pixelFormat, TABLE_RESOLUTION, TABLE_RESOLUTION,
+                                                          gpu::Texture::SINGLE_MIP,
+                                                          gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_MIP_LINEAR,
+                                                                       gpu::Sampler::WRAP_CLAMP));
+    // diffuseScatter(scatteringLUT);
     scatteringLUT->setSource("Generated pre-integrated scattering");
     diffuseScatterGPU(profile, scatteringLUT, args);
     return scatteringLUT;
@@ -405,7 +406,10 @@ gpu::TexturePointer SubsurfaceScatteringResource::generatePreIntegratedScatterin
 
 gpu::TexturePointer SubsurfaceScatteringResource::generateScatteringSpecularBeckmann(RenderArgs* args) {
     const int SPECULAR_RESOLUTION = 256;
-    auto beckmannMap = gpu::Texture::createRenderBuffer(gpu::Element::COLOR_RGBA_32, SPECULAR_RESOLUTION, SPECULAR_RESOLUTION, gpu::Texture::SINGLE_MIP, gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_MIP_LINEAR, gpu::Sampler::WRAP_CLAMP));
+    auto beckmannMap = gpu::Texture::createRenderBuffer(gpu::Element::COLOR_RGBA_32, SPECULAR_RESOLUTION, SPECULAR_RESOLUTION,
+                                                        gpu::Texture::SINGLE_MIP,
+                                                        gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_MIP_LINEAR,
+                                                                     gpu::Sampler::WRAP_CLAMP));
     beckmannMap->setSource("Generated beckmannMap");
     computeSpecularBeckmannGPU(beckmannMap, args);
     return beckmannMap;
@@ -415,7 +419,6 @@ DebugSubsurfaceScattering::DebugSubsurfaceScattering() {
 }
 
 void DebugSubsurfaceScattering::configure(const Config& config) {
-
     _showProfile = config.showProfile;
     _showLUT = config.showLUT;
     _showSpecularTable = config.showSpecularTable;
@@ -427,11 +430,10 @@ void DebugSubsurfaceScattering::configure(const Config& config) {
     _debugParams->setSubData(0, _debugCursorTexcoord);
 }
 
-
-
 gpu::PipelinePointer DebugSubsurfaceScattering::getScatteringPipeline() {
     if (!_scatteringPipeline) {
-        gpu::ShaderPointer program = gpu::Shader::createProgram(shader::render_utils::program::subsurfaceScattering_drawScattering);
+        gpu::ShaderPointer program = gpu::Shader::createProgram(
+            shader::render_utils::program::subsurfaceScattering_drawScattering);
         gpu::StatePointer state = gpu::StatePointer(new gpu::State());
 
         _scatteringPipeline = gpu::Pipeline::create(program, state);
@@ -452,13 +454,11 @@ gpu::PipelinePointer DebugSubsurfaceScattering::getShowLUTPipeline() {
     return _showLUTPipeline;
 }
 
-
 void DebugSubsurfaceScattering::run(const render::RenderContextPointer& renderContext, const Inputs& inputs) {
     assert(renderContext->args);
     assert(renderContext->args->hasViewFrustum());
 
     RenderArgs* args = renderContext->args;
-
 
     auto& frameTransform = inputs.get0();
     auto& deferredFramebuffer = inputs.get1();
@@ -477,20 +477,17 @@ void DebugSubsurfaceScattering::run(const render::RenderContextPointer& renderCo
     auto scatteringTable = scatteringResource->getScatteringTable();
     auto scatteringSpecular = scatteringResource->getScatteringSpecular();
 
-
-
     auto lightStage = renderContext->_scene->getStage<LightStage>();
     assert(lightStage);
-   // const auto light = DependencyManager::get<DeferredLightingEffect>()->getLightStage()->getLight(0);
+    // const auto light = DependencyManager::get<DeferredLightingEffect>()->getLightStage()->getLight(0);
     const auto light = lightStage->getLight(0);
     if (!_debugParams) {
         _debugParams = std::make_shared<gpu::Buffer>(sizeof(glm::vec4), nullptr);
         _debugParams->setSubData(0, _debugCursorTexcoord);
     }
-    
+
     gpu::doInBatch("DebugSubsurfaceScattering::run", args->_context, [=](gpu::Batch& batch) {
         batch.enableStereo(false);
-
 
         auto viewportSize = std::min(args->_viewport.z, args->_viewport.w) >> 1;
         auto offsetViewport = viewportSize * 0.1;
@@ -509,13 +506,13 @@ void DebugSubsurfaceScattering::run(const render::RenderContextPointer& renderCo
             batch.draw(gpu::TRIANGLE_STRIP, 4);
 
             if (_showCursorPixel) {
-
                 auto debugScatteringPipeline = getScatteringPipeline();
                 batch.setPipeline(debugScatteringPipeline);
 
                 Transform model;
                 model.setTranslation(glm::vec3(0.0, offsetViewport * 1.5 / args->_viewport.w, 0.0));
-                model.setScale(glm::vec3(viewportSize / (float)args->_viewport.z, viewportSize / (float)args->_viewport.w, 1.0));
+                model.setScale(
+                    glm::vec3(viewportSize / (float)args->_viewport.z, viewportSize / (float)args->_viewport.w, 1.0));
                 batch.setModelTransform(model);
 
                 batch.setUniformBuffer(ru::Buffer::DeferredFrameTransform, frameTransform->getFrameTransformBuffer());
@@ -528,20 +525,20 @@ void DebugSubsurfaceScattering::run(const render::RenderContextPointer& renderCo
                 batch.setResourceTexture(ru::Texture::DeferredDiffusedCurvature, diffusedFramebuffer->getRenderBuffer(0));
                 batch.setResourceTexture(ru::Texture::DeferredNormal, deferredFramebuffer->getDeferredNormalTexture());
                 batch.setResourceTexture(ru::Texture::DeferredColor, deferredFramebuffer->getDeferredColorTexture());
-               	batch.setResourceTexture(ru::Texture::DeferredDepth, linearDepthTexture);
+                batch.setResourceTexture(ru::Texture::DeferredDepth, linearDepthTexture);
                 batch.setUniformBuffer(1, _debugParams);
                 batch.draw(gpu::TRIANGLE_STRIP, 4);
             }
         }
 
         if (_showSpecularTable) {
-            batch.setViewportTransform(glm::ivec4(viewportSize + offsetViewport * 0.5, 0, viewportSize * 0.5, viewportSize * 0.5));
+            batch.setViewportTransform(
+                glm::ivec4(viewportSize + offsetViewport * 0.5, 0, viewportSize * 0.5, viewportSize * 0.5));
             batch.setPipeline(getShowLUTPipeline());
             batch.setResourceTexture(0, scatteringSpecular);
             batch.draw(gpu::TRIANGLE_STRIP, 4);
         }
 
         batch.setViewportTransform(args->_viewport);
-
     });
 }

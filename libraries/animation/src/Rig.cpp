@@ -11,29 +11,28 @@
 
 #include "Rig.h"
 
-#include <glm/gtx/vector_angle.hpp>
-#include <queue>
+#include <QReadLocker>
 #include <QScriptValueIterator>
 #include <QWriteLocker>
-#include <QReadLocker>
+#include <glm/gtx/vector_angle.hpp>
+#include <queue>
 
+#include <DebugDraw.h>
 #include <GeometryUtil.h>
 #include <NumericalConstants.h>
-#include <DebugDraw.h>
 #include <PerfStat.h>
 #include <ScriptValueUtils.h>
 #include <shared/NsightHelpers.h>
 
-#include "AnimationLogging.h"
 #include "AnimClip.h"
 #include "AnimInverseKinematics.h"
 #include "AnimOverlay.h"
 #include "AnimSkeleton.h"
 #include "AnimUtil.h"
+#include "AnimationLogging.h"
 #include "AvatarConstants.h"
 #include "IKTarget.h"
 #include "PathUtils.h"
-
 
 static int nextRigId = 1;
 static std::map<int, Rig*> rigRegistry;
@@ -75,7 +74,6 @@ static const QString RIGHT_FOOT_IK_ROTATION_VAR("rightFootIKRotationVar");
 static const QString MAIN_STATE_MACHINE_RIGHT_FOOT_ROTATION("mainStateMachineRightFootRotation");
 static const QString MAIN_STATE_MACHINE_RIGHT_FOOT_POSITION("mainStateMachineRightFootPosition");
 
-
 Rig::Rig() {
     // Ensure thread-safe access to the rigRegistry.
     std::lock_guard<std::mutex> guard(rigRegistryMutex);
@@ -97,7 +95,6 @@ Rig::~Rig() {
 }
 
 void Rig::overrideAnimation(const QString& url, float fps, bool loop, float firstFrame, float lastFrame) {
-
     UserAnimState::ClipNodeEnum clipNodeEnum;
     if (_userAnimState.clipNodeEnum == UserAnimState::None || _userAnimState.clipNodeEnum == UserAnimState::B) {
         clipNodeEnum = UserAnimState::A;
@@ -156,7 +153,6 @@ void Rig::triggerNetworkAnimation(const QString& animName) {
         _networkVars.set("postTransitAnim", true);
         _networkAnimState.clipNodeEnum = NetworkAnimState::PostTransit;
     }
-    
 }
 
 void Rig::restoreAnimation() {
@@ -200,7 +196,8 @@ QStringList Rig::getAnimationRoles() const {
     }
 }
 
-void Rig::overrideRoleAnimation(const QString& role, const QString& url, float fps, bool loop, float firstFrame, float lastFrame) {
+void Rig::overrideRoleAnimation(const QString& role, const QString& url, float fps, bool loop, float firstFrame,
+                                float lastFrame) {
     if (_animNode) {
         AnimNode::Pointer node = _animNode->findByName(role);
         if (node) {
@@ -282,10 +279,10 @@ void Rig::initJointStates(const FBXGeometry& geometry, const glm::mat4& modelOff
 
     _internalPoseSet._overrideFlags.clear();
     _internalPoseSet._overrideFlags.resize(_animSkeleton->getNumJoints(), false);
-    
+
     _networkPoseSet._overridePoses.clear();
     _networkPoseSet._overridePoses = _animSkeleton->getRelativeDefaultPoses();
-    
+
     _networkPoseSet._overrideFlags.clear();
     _networkPoseSet._overrideFlags.resize(_animSkeleton->getNumJoints(), false);
 
@@ -393,10 +390,8 @@ QString Rig::nameOfJoint(int jointIndex) const {
 
 void Rig::setModelOffset(const glm::mat4& modelOffsetMat) {
     AnimPose newModelOffset = AnimPose(modelOffsetMat);
-    if (!isEqual(_modelOffset.trans(), newModelOffset.trans()) ||
-        !isEqual(_modelOffset.rot(), newModelOffset.rot()) ||
+    if (!isEqual(_modelOffset.trans(), newModelOffset.trans()) || !isEqual(_modelOffset.rot(), newModelOffset.rot()) ||
         !isEqual(_modelOffset.scale(), newModelOffset.scale())) {
-
         _modelOffset = newModelOffset;
 
         // compute geometryToAvatarTransforms
@@ -549,12 +544,9 @@ bool Rig::getJointPositionInWorldFrame(int jointIndex, glm::vec3& position, glm:
 
     if (isNaN(position)) {
         qCWarning(animation) << "Rig::getJointPositionInWorldFrame produced NaN."
-                             << " is owner thread = " << onOwnerThread
-                             << " position = " << originalPosition
-                             << " translation = " << translation
-                             << " rotation = " << rotation
-                             << " poseSetTrans = " <<  poseSetTrans
-                             << " success = " << success
+                             << " is owner thread = " << onOwnerThread << " position = " << originalPosition
+                             << " translation = " << translation << " rotation = " << rotation
+                             << " poseSetTrans = " << poseSetTrans << " success = " << success
                              << " jointIndex = " << jointIndex;
         success = false;
         position = glm::vec3(0.0f);
@@ -674,7 +666,6 @@ const AnimPoseVec& Rig::getAbsoluteDefaultPoses() const {
     return _absoluteDefaultPoses;
 }
 
-
 bool Rig::getRelativeDefaultJointRotation(int index, glm::quat& rotationOut) const {
     if (_animSkeleton && index >= 0 && index < _animSkeleton->getNumJoints()) {
         rotationOut = _animSkeleton->getRelativeDefaultPose(index).rot();
@@ -694,8 +685,8 @@ bool Rig::getRelativeDefaultJointTranslation(int index, glm::vec3& translationOu
 }
 
 void Rig::computeMotionAnimationState(float deltaTime, const glm::vec3& worldPosition, const glm::vec3& worldVelocity,
-                                      const glm::quat& worldRotation, CharacterControllerState ccState, float sensorToWorldScale) {
-
+                                      const glm::quat& worldRotation, CharacterControllerState ccState,
+                                      float sensorToWorldScale) {
     glm::vec3 forward = worldRotation * IDENTITY_FORWARD;
     glm::vec3 workingVelocity = worldVelocity;
 
@@ -718,7 +709,7 @@ void Rig::computeMotionAnimationState(float deltaTime, const glm::vec3& worldPos
         _animVars.set("moveLateralSpeed", fabsf(_averageLateralSpeed.getAverage()));
 
         const float MOVE_ENTER_SPEED_THRESHOLD = 0.2f; // m/sec
-        const float MOVE_EXIT_SPEED_THRESHOLD = 0.07f;  // m/sec
+        const float MOVE_EXIT_SPEED_THRESHOLD = 0.07f; // m/sec
         const float TURN_ENTER_SPEED_THRESHOLD = 0.5f; // rad/sec
         const float TURN_EXIT_SPEED_THRESHOLD = 0.2f; // rad/sec
 
@@ -1025,7 +1016,8 @@ QScriptValue Rig::addAnimationStateHandler(QScriptValue handler, QScriptValue pr
     if (handler.isFunction() && (isListOfStrings(propertiesList) || propertiesList.isUndefined() || propertiesList.isNull())) {
         QMutexLocker locker(&_stateMutex);
         // Find a safe id, even if there are lots of many scripts add and remove handlers repeatedly.
-        while (!_nextStateHandlerId || _stateHandlers.contains(_nextStateHandlerId)) { // 0 is unused, and don't reuse existing after wrap.
+        while (!_nextStateHandlerId ||
+               _stateHandlers.contains(_nextStateHandlerId)) { // 0 is unused, and don't reuse existing after wrap.
             _nextStateHandlerId++;
         }
         StateHandler& data = _stateHandlers[_nextStateHandlerId];
@@ -1085,27 +1077,27 @@ void Rig::updateAnimationStateHandlers() { // called on avatar update thread (wh
                 rig->animationStateHandlerResult(identifier, result);
             }
         };
-        // invokeMethod makes a copy of the args, and copies of AnimVariantMap do copy the underlying map, so this will correctly capture
-        // the state of _animVars and allow continued changes to _animVars in this thread without conflict.
-        QMetaObject::invokeMethod(function.engine(), "callAnimationStateHandler",  Qt::QueuedConnection,
-                                  Q_ARG(QScriptValue, function),
-                                  Q_ARG(AnimVariantMap, _animVars),
-                                  Q_ARG(QStringList, value.propertyNames),
-                                  Q_ARG(bool, value.useNames),
+        // invokeMethod makes a copy of the args, and copies of AnimVariantMap do copy the underlying map, so this will
+        // correctly capture the state of _animVars and allow continued changes to _animVars in this thread without conflict.
+        QMetaObject::invokeMethod(function.engine(), "callAnimationStateHandler", Qt::QueuedConnection,
+                                  Q_ARG(QScriptValue, function), Q_ARG(AnimVariantMap, _animVars),
+                                  Q_ARG(QStringList, value.propertyNames), Q_ARG(bool, value.useNames),
                                   Q_ARG(AnimVariantResultHandler, handleResult));
-        // It turns out that, for thread-safety reasons, ScriptEngine::callAnimationStateHandler will invoke itself if called from other
-        // than the script thread. Thus the above _could_ be replaced with an ordinary call, which will then trigger the same
-        // invokeMethod as is done explicitly above. However, the script-engine library depends on this animation library, not vice versa.
-        // We could create an AnimVariantCallingMixin class in shared, with an abstract virtual slot
-        // AnimVariantCallingMixin::callAnimationStateHandler (and move AnimVariantMap/AnimVaraintResultHandler to shared), but the
-        // call site here would look like this instead of the above:
+        // It turns out that, for thread-safety reasons, ScriptEngine::callAnimationStateHandler will invoke itself if called
+        // from other than the script thread. Thus the above _could_ be replaced with an ordinary call, which will then trigger
+        // the same invokeMethod as is done explicitly above. However, the script-engine library depends on this animation
+        // library, not vice versa. We could create an AnimVariantCallingMixin class in shared, with an abstract virtual slot
+        // AnimVariantCallingMixin::callAnimationStateHandler (and move AnimVariantMap/AnimVaraintResultHandler to shared), but
+        // the call site here would look like this instead of the above:
         //   dynamic_cast<AnimVariantCallingMixin*>(function.engine())->callAnimationStateHandler(function, ..., handleResult);
-        // This works (I tried it), but the result would be that we would still have same runtime type checks as the invokeMethod above
-        // (occuring within the ScriptEngine::callAnimationStateHandler invokeMethod trampoline), _plus_ another runtime check for the dynamic_cast.
+        // This works (I tried it), but the result would be that we would still have same runtime type checks as the
+        // invokeMethod above (occuring within the ScriptEngine::callAnimationStateHandler invokeMethod trampoline), _plus_
+        // another runtime check for the dynamic_cast.
 
         // Gather results in (likely from an earlier update).
         // Note: the behavior is undefined if a handler (re-)sets a trigger. Scripts should not be doing that.
-        _animVars.copyVariantsFrom(value.results); // If multiple handlers write the same anim var, the last registgered wins. (_map preserves order).
+        _animVars.copyVariantsFrom(
+            value.results); // If multiple handlers write the same anim var, the last registgered wins. (_map preserves order).
     }
 }
 
@@ -1178,12 +1170,13 @@ void Rig::updateAnimations(float deltaTime, const glm::mat4& rootTransform, cons
 }
 
 void Rig::updateFromEyeParameters(const EyeParameters& params) {
-    updateEyeJoint(params.leftEyeJointIndex, params.modelTranslation, params.modelRotation, params.eyeLookAt, params.eyeSaccade);
-    updateEyeJoint(params.rightEyeJointIndex, params.modelTranslation, params.modelRotation, params.eyeLookAt, params.eyeSaccade);
+    updateEyeJoint(params.leftEyeJointIndex, params.modelTranslation, params.modelRotation, params.eyeLookAt,
+                   params.eyeSaccade);
+    updateEyeJoint(params.rightEyeJointIndex, params.modelTranslation, params.modelRotation, params.eyeLookAt,
+                   params.eyeSaccade);
 }
 
 void Rig::computeHeadFromHMD(const AnimPose& hmdPose, glm::vec3& headPositionOut, glm::quat& headOrientationOut) const {
-
     // the input hmd values are in avatar/rig space
     const glm::vec3& hmdPosition = hmdPose.trans();
 
@@ -1214,9 +1207,10 @@ void Rig::updateHead(bool headEnabled, bool hipsEnabled, const AnimPose& headPos
             _animVars.set("headRotation", headPose.rot());
             if (hipsEnabled) {
                 // Since there is an explicit hips ik target, switch the head to use the more flexible Spline IK chain type.
-                // this will allow the spine to compress/expand and bend more natrually, ensuring that it can reach the head target position.
+                // this will allow the spine to compress/expand and bend more natrually, ensuring that it can reach the head
+                // target position.
                 _animVars.set("headType", (int)IKTarget::Type::Spline);
-                _animVars.unset("headWeight");  // use the default weight for this target.
+                _animVars.unset("headWeight"); // use the default weight for this target.
             } else {
                 // When there is no hips IK target, use the HmdHead IK chain type.  This will make the spine very stiff,
                 // but because the IK _hipsOffset is enabled, the hips will naturally follow underneath the head.
@@ -1233,28 +1227,26 @@ void Rig::updateHead(bool headEnabled, bool hipsEnabled, const AnimPose& headPos
 
 const float INV_SQRT_3 = 1.0f / sqrtf(3.0f);
 const int DOP14_COUNT = 14;
-const glm::vec3 DOP14_NORMALS[DOP14_COUNT] = {
-    Vectors::UNIT_X,
-    -Vectors::UNIT_X,
-    Vectors::UNIT_Y,
-    -Vectors::UNIT_Y,
-    Vectors::UNIT_Z,
-    -Vectors::UNIT_Z,
-    glm::vec3(INV_SQRT_3, INV_SQRT_3, INV_SQRT_3),
-    -glm::vec3(INV_SQRT_3, INV_SQRT_3, INV_SQRT_3),
-    glm::vec3(INV_SQRT_3, -INV_SQRT_3, INV_SQRT_3),
-    -glm::vec3(INV_SQRT_3, -INV_SQRT_3, INV_SQRT_3),
-    glm::vec3(INV_SQRT_3, INV_SQRT_3, -INV_SQRT_3),
-    -glm::vec3(INV_SQRT_3, INV_SQRT_3, -INV_SQRT_3),
-    glm::vec3(INV_SQRT_3, -INV_SQRT_3, -INV_SQRT_3),
-    -glm::vec3(INV_SQRT_3, -INV_SQRT_3, -INV_SQRT_3)
-};
+const glm::vec3 DOP14_NORMALS[DOP14_COUNT] = { Vectors::UNIT_X,
+                                               -Vectors::UNIT_X,
+                                               Vectors::UNIT_Y,
+                                               -Vectors::UNIT_Y,
+                                               Vectors::UNIT_Z,
+                                               -Vectors::UNIT_Z,
+                                               glm::vec3(INV_SQRT_3, INV_SQRT_3, INV_SQRT_3),
+                                               -glm::vec3(INV_SQRT_3, INV_SQRT_3, INV_SQRT_3),
+                                               glm::vec3(INV_SQRT_3, -INV_SQRT_3, INV_SQRT_3),
+                                               -glm::vec3(INV_SQRT_3, -INV_SQRT_3, INV_SQRT_3),
+                                               glm::vec3(INV_SQRT_3, INV_SQRT_3, -INV_SQRT_3),
+                                               -glm::vec3(INV_SQRT_3, INV_SQRT_3, -INV_SQRT_3),
+                                               glm::vec3(INV_SQRT_3, -INV_SQRT_3, -INV_SQRT_3),
+                                               -glm::vec3(INV_SQRT_3, -INV_SQRT_3, -INV_SQRT_3) };
 
 // returns true if the given point lies inside of the k-dop, specified by shapeInfo & shapePose.
 // if the given point does lie within the k-dop, it also returns the amount of displacement necessary to push that point outward
 // such that it lies on the surface of the kdop.
-static bool findPointKDopDisplacement(const glm::vec3& point, const AnimPose& shapePose, const FBXJointShapeInfo& shapeInfo, glm::vec3& displacementOut) {
-
+static bool findPointKDopDisplacement(const glm::vec3& point, const AnimPose& shapePose, const FBXJointShapeInfo& shapeInfo,
+                                      glm::vec3& displacementOut) {
     // transform point into local space of jointShape.
     glm::vec3 localPoint = shapePose.inverse().xformPoint(point);
 
@@ -1299,8 +1291,9 @@ static bool findPointKDopDisplacement(const glm::vec3& point, const AnimPose& sh
     }
 }
 
-glm::vec3 Rig::deflectHandFromTorso(const glm::vec3& handPosition, const FBXJointShapeInfo& hipsShapeInfo, const FBXJointShapeInfo& spineShapeInfo,
-                                    const FBXJointShapeInfo& spine1ShapeInfo, const FBXJointShapeInfo& spine2ShapeInfo) const {
+glm::vec3 Rig::deflectHandFromTorso(const glm::vec3& handPosition, const FBXJointShapeInfo& hipsShapeInfo,
+                                    const FBXJointShapeInfo& spineShapeInfo, const FBXJointShapeInfo& spine1ShapeInfo,
+                                    const FBXJointShapeInfo& spine2ShapeInfo) const {
     glm::vec3 position = handPosition;
     glm::vec3 displacement;
     int hipsJoint = indexOfJoint("Hips");
@@ -1346,17 +1339,15 @@ glm::vec3 Rig::deflectHandFromTorso(const glm::vec3& handPosition, const FBXJoin
     return position;
 }
 
-void Rig::updateHands(bool leftHandEnabled, bool rightHandEnabled, bool hipsEnabled, bool hipsEstimated,
-                      bool leftArmEnabled, bool rightArmEnabled, bool headEnabled, float dt,
-                      const AnimPose& leftHandPose, const AnimPose& rightHandPose,
-                      const FBXJointShapeInfo& hipsShapeInfo, const FBXJointShapeInfo& spineShapeInfo,
-                      const FBXJointShapeInfo& spine1ShapeInfo, const FBXJointShapeInfo& spine2ShapeInfo,
-                      const glm::mat4& rigToSensorMatrix, const glm::mat4& sensorToRigMatrix) {
-
+void Rig::updateHands(bool leftHandEnabled, bool rightHandEnabled, bool hipsEnabled, bool hipsEstimated, bool leftArmEnabled,
+                      bool rightArmEnabled, bool headEnabled, float dt, const AnimPose& leftHandPose,
+                      const AnimPose& rightHandPose, const FBXJointShapeInfo& hipsShapeInfo,
+                      const FBXJointShapeInfo& spineShapeInfo, const FBXJointShapeInfo& spine1ShapeInfo,
+                      const FBXJointShapeInfo& spine2ShapeInfo, const glm::mat4& rigToSensorMatrix,
+                      const glm::mat4& sensorToRigMatrix) {
     const bool ENABLE_POLE_VECTORS = true;
 
     if (leftHandEnabled) {
-
         glm::vec3 handPosition = leftHandPose.trans();
         glm::quat handRotation = leftHandPose.rot();
 
@@ -1374,9 +1365,11 @@ void Rig::updateHands(bool leftHandEnabled, bool rightHandEnabled, bool hipsEnab
         int armJointIndex = _animSkeleton->nameToJointIndex("LeftArm");
         int elbowJointIndex = _animSkeleton->nameToJointIndex("LeftForeArm");
         int oppositeArmJointIndex = _animSkeleton->nameToJointIndex("RightArm");
-        if (ENABLE_POLE_VECTORS && handJointIndex >= 0 && armJointIndex >= 0 && elbowJointIndex >= 0 && oppositeArmJointIndex >= 0) {
+        if (ENABLE_POLE_VECTORS && handJointIndex >= 0 && armJointIndex >= 0 && elbowJointIndex >= 0 &&
+            oppositeArmJointIndex >= 0) {
             glm::vec3 poleVector;
-            bool usePoleVector = calculateElbowPoleVector(handJointIndex, elbowJointIndex, armJointIndex, oppositeArmJointIndex, poleVector);
+            bool usePoleVector = calculateElbowPoleVector(handJointIndex, elbowJointIndex, armJointIndex, oppositeArmJointIndex,
+                                                          poleVector);
             if (usePoleVector) {
                 glm::vec3 sensorPoleVector = transformVectorFast(rigToSensorMatrix, poleVector);
                 _animVars.set("leftHandPoleVectorEnabled", true);
@@ -1403,7 +1396,6 @@ void Rig::updateHands(bool leftHandEnabled, bool rightHandEnabled, bool hipsEnab
     }
 
     if (rightHandEnabled) {
-
         glm::vec3 handPosition = rightHandPose.trans();
         glm::quat handRotation = rightHandPose.rot();
 
@@ -1422,9 +1414,11 @@ void Rig::updateHands(bool leftHandEnabled, bool rightHandEnabled, bool hipsEnab
         int elbowJointIndex = _animSkeleton->nameToJointIndex("RightForeArm");
         int oppositeArmJointIndex = _animSkeleton->nameToJointIndex("LeftArm");
 
-        if (ENABLE_POLE_VECTORS && handJointIndex >= 0 && armJointIndex >= 0 && elbowJointIndex >= 0 && oppositeArmJointIndex >= 0) {
+        if (ENABLE_POLE_VECTORS && handJointIndex >= 0 && armJointIndex >= 0 && elbowJointIndex >= 0 &&
+            oppositeArmJointIndex >= 0) {
             glm::vec3 poleVector;
-            bool usePoleVector = calculateElbowPoleVector(handJointIndex, elbowJointIndex, armJointIndex, oppositeArmJointIndex, poleVector);
+            bool usePoleVector = calculateElbowPoleVector(handJointIndex, elbowJointIndex, armJointIndex, oppositeArmJointIndex,
+                                                          poleVector);
             if (usePoleVector) {
                 glm::vec3 sensorPoleVector = transformVectorFast(rigToSensorMatrix, poleVector);
                 _animVars.set("rightHandPoleVectorEnabled", true);
@@ -1451,10 +1445,8 @@ void Rig::updateHands(bool leftHandEnabled, bool rightHandEnabled, bool hipsEnab
     }
 }
 
-void Rig::updateFeet(bool leftFootEnabled, bool rightFootEnabled, bool headEnabled,
-                     const AnimPose& leftFootPose, const AnimPose& rightFootPose,
-                     const glm::mat4& rigToSensorMatrix, const glm::mat4& sensorToRigMatrix) {
-
+void Rig::updateFeet(bool leftFootEnabled, bool rightFootEnabled, bool headEnabled, const AnimPose& leftFootPose,
+                     const AnimPose& rightFootPose, const glm::mat4& rigToSensorMatrix, const glm::mat4& sensorToRigMatrix) {
     int hipsIndex = indexOfJoint("Hips");
     const float KNEE_POLE_VECTOR_BLEND_FACTOR = 0.85f;
 
@@ -1469,7 +1461,6 @@ void Rig::updateFeet(bool leftFootEnabled, bool rightFootEnabled, bool headEnabl
     }
 
     if (leftFootEnabled) {
-
         _animVars.set(LEFT_FOOT_POSITION, leftFootPose.trans());
         _animVars.set(LEFT_FOOT_ROTATION, leftFootPose.rot());
 
@@ -1480,7 +1471,8 @@ void Rig::updateFeet(bool leftFootEnabled, bool rightFootEnabled, bool headEnabl
         int footJointIndex = _animSkeleton->nameToJointIndex("LeftFoot");
         int kneeJointIndex = _animSkeleton->nameToJointIndex("LeftLeg");
         int upLegJointIndex = _animSkeleton->nameToJointIndex("LeftUpLeg");
-        glm::vec3 poleVector = calculateKneePoleVector(footJointIndex, kneeJointIndex, upLegJointIndex, hipsIndex, leftFootPose);
+        glm::vec3 poleVector = calculateKneePoleVector(footJointIndex, kneeJointIndex, upLegJointIndex, hipsIndex,
+                                                       leftFootPose);
         glm::vec3 sensorPoleVector = transformVectorFast(rigToSensorMatrix, poleVector);
 
         // smooth toward desired pole vector from previous pole vector...  to reduce jitter, but in sensor space.
@@ -1516,7 +1508,8 @@ void Rig::updateFeet(bool leftFootEnabled, bool rightFootEnabled, bool headEnabl
         int footJointIndex = _animSkeleton->nameToJointIndex("RightFoot");
         int kneeJointIndex = _animSkeleton->nameToJointIndex("RightLeg");
         int upLegJointIndex = _animSkeleton->nameToJointIndex("RightUpLeg");
-        glm::vec3 poleVector = calculateKneePoleVector(footJointIndex, kneeJointIndex, upLegJointIndex, hipsIndex, rightFootPose);
+        glm::vec3 poleVector = calculateKneePoleVector(footJointIndex, kneeJointIndex, upLegJointIndex, hipsIndex,
+                                                       rightFootPose);
         glm::vec3 sensorPoleVector = transformVectorFast(rigToSensorMatrix, poleVector);
 
         // smooth toward desired pole vector from previous pole vector...  to reduce jitter
@@ -1542,14 +1535,15 @@ void Rig::updateFeet(bool leftFootEnabled, bool rightFootEnabled, bool headEnabl
     }
 }
 
-void Rig::updateEyeJoint(int index, const glm::vec3& modelTranslation, const glm::quat& modelRotation, const glm::vec3& lookAtSpot, const glm::vec3& saccade) {
-
+void Rig::updateEyeJoint(int index, const glm::vec3& modelTranslation, const glm::quat& modelRotation,
+                         const glm::vec3& lookAtSpot, const glm::vec3& saccade) {
     // TODO: does not properly handle avatar scale.
 
     if (isIndexValid(index)) {
         const glm::mat4 rigToWorld = createMatFromQuatAndPos(modelRotation, modelTranslation);
         const glm::mat4 worldToRig = glm::inverse(rigToWorld);
-        const glm::vec3 lookAtVector = glm::normalize(transformPoint(worldToRig, lookAtSpot) - _internalPoseSet._absolutePoses[index].trans());
+        const glm::vec3 lookAtVector = glm::normalize(transformPoint(worldToRig, lookAtSpot) -
+                                                      _internalPoseSet._absolutePoses[index].trans());
 
         int headIndex = indexOfJoint("Head");
         glm::quat headQuat;
@@ -1580,18 +1574,20 @@ void Rig::updateEyeJoint(int index, const glm::vec3& modelTranslation, const glm
         for (int i = 0; i < (int)children.size(); i++) {
             int jointIndex = children[i];
             int parentIndex = _animSkeleton->getParentIndex(jointIndex);
-            _internalPoseSet._absolutePoses[jointIndex] =
-                _internalPoseSet._absolutePoses[parentIndex] * _internalPoseSet._relativePoses[jointIndex];
+            _internalPoseSet._absolutePoses[jointIndex] = _internalPoseSet._absolutePoses[parentIndex] *
+                                                          _internalPoseSet._relativePoses[jointIndex];
         }
     }
 }
 
-bool Rig::calculateElbowPoleVector(int handIndex, int elbowIndex, int armIndex, int oppositeArmIndex, glm::vec3& poleVector) const {
+bool Rig::calculateElbowPoleVector(int handIndex, int elbowIndex, int armIndex, int oppositeArmIndex,
+                                   glm::vec3& poleVector) const {
     // The resulting Pole Vector is calculated as the sum of a three vectors.
-    // The first is the vector with direction shoulder-hand. The module of this vector is inversely proportional to the strength of the resulting Pole Vector.
-    // The second vector is always perpendicular to previous vector and is part of the plane that contains a point located on the horizontal line,
-    // pointing forward and with height aprox to the avatar head. The position of the horizontal point will be determined by the hands Y component.
-    // The third vector apply a weighted correction to the resulting pole vector to avoid interpenetration and force a more natural pose.
+    // The first is the vector with direction shoulder-hand. The module of this vector is inversely proportional to the strength
+    // of the resulting Pole Vector. The second vector is always perpendicular to previous vector and is part of the plane that
+    // contains a point located on the horizontal line, pointing forward and with height aprox to the avatar head. The position
+    // of the horizontal point will be determined by the hands Y component. The third vector apply a weighted correction to the
+    // resulting pole vector to avoid interpenetration and force a more natural pose.
 
     AnimPose oppositeArmPose = _externalPoseSet._absolutePoses[oppositeArmIndex];
     AnimPose handPose = _externalPoseSet._absolutePoses[handIndex];
@@ -1662,8 +1658,9 @@ bool Rig::calculateElbowPoleVector(int handIndex, int elbowIndex, int armIndex, 
 // returns a poleVector for the knees that is a blend of the foot and the hips.
 // targetFootPose is in rig space
 // result poleVector is also in rig space.
-glm::vec3 Rig::calculateKneePoleVector(int footJointIndex, int kneeIndex, int upLegIndex, int hipsIndex, const AnimPose& targetFootPose) const {
-    const float FOOT_THETA = 0.8969f;  // 51.39 degrees
+glm::vec3 Rig::calculateKneePoleVector(int footJointIndex, int kneeIndex, int upLegIndex, int hipsIndex,
+                                       const AnimPose& targetFootPose) const {
+    const float FOOT_THETA = 0.8969f; // 51.39 degrees
     const glm::vec3 localFootForward(0.0f, cosf(FOOT_THETA), sinf(FOOT_THETA));
 
     glm::vec3 footForward = targetFootPose.rot() * localFootForward;
@@ -1686,26 +1683,28 @@ void Rig::updateFromControllerParameters(const ControllerParameters& params, flo
     bool leftHandEnabled = params.primaryControllerFlags[PrimaryControllerType_LeftHand] & (uint8_t)ControllerFlags::Enabled;
     bool rightHandEnabled = params.primaryControllerFlags[PrimaryControllerType_RightHand] & (uint8_t)ControllerFlags::Enabled;
     bool hipsEnabled = params.primaryControllerFlags[PrimaryControllerType_Hips] & (uint8_t)ControllerFlags::Enabled;
-    bool prevHipsEnabled = _previousControllerParameters.primaryControllerFlags[PrimaryControllerType_Hips] & (uint8_t)ControllerFlags::Enabled;
+    bool prevHipsEnabled = _previousControllerParameters.primaryControllerFlags[PrimaryControllerType_Hips] &
+                           (uint8_t)ControllerFlags::Enabled;
     bool hipsEstimated = params.primaryControllerFlags[PrimaryControllerType_Hips] & (uint8_t)ControllerFlags::Estimated;
-    bool prevHipsEstimated = _previousControllerParameters.primaryControllerFlags[PrimaryControllerType_Hips] & (uint8_t)ControllerFlags::Estimated;
+    bool prevHipsEstimated = _previousControllerParameters.primaryControllerFlags[PrimaryControllerType_Hips] &
+                             (uint8_t)ControllerFlags::Estimated;
     bool leftFootEnabled = params.primaryControllerFlags[PrimaryControllerType_LeftFoot] & (uint8_t)ControllerFlags::Enabled;
     bool rightFootEnabled = params.primaryControllerFlags[PrimaryControllerType_RightFoot] & (uint8_t)ControllerFlags::Enabled;
     bool spine2Enabled = params.primaryControllerFlags[PrimaryControllerType_Spine2] & (uint8_t)ControllerFlags::Enabled;
     bool leftArmEnabled = params.secondaryControllerFlags[SecondaryControllerType_LeftArm] & (uint8_t)ControllerFlags::Enabled;
-    bool rightArmEnabled = params.secondaryControllerFlags[SecondaryControllerType_RightArm] & (uint8_t)ControllerFlags::Enabled;
+    bool rightArmEnabled = params.secondaryControllerFlags[SecondaryControllerType_RightArm] &
+                           (uint8_t)ControllerFlags::Enabled;
     glm::mat4 sensorToRigMatrix = glm::inverse(params.rigToSensorMatrix);
 
     updateHead(_headEnabled, hipsEnabled, params.primaryControllerPoses[PrimaryControllerType_Head]);
 
-    updateHands(leftHandEnabled, rightHandEnabled, hipsEnabled, hipsEstimated, leftArmEnabled, rightArmEnabled, _headEnabled, dt,
-                params.primaryControllerPoses[PrimaryControllerType_LeftHand], params.primaryControllerPoses[PrimaryControllerType_RightHand],
-                params.hipsShapeInfo, params.spineShapeInfo, params.spine1ShapeInfo, params.spine2ShapeInfo,
-                params.rigToSensorMatrix, sensorToRigMatrix);
+    updateHands(leftHandEnabled, rightHandEnabled, hipsEnabled, hipsEstimated, leftArmEnabled, rightArmEnabled, _headEnabled,
+                dt, params.primaryControllerPoses[PrimaryControllerType_LeftHand],
+                params.primaryControllerPoses[PrimaryControllerType_RightHand], params.hipsShapeInfo, params.spineShapeInfo,
+                params.spine1ShapeInfo, params.spine2ShapeInfo, params.rigToSensorMatrix, sensorToRigMatrix);
 
-    updateFeet(leftFootEnabled, rightFootEnabled, _headEnabled,
-               params.primaryControllerPoses[PrimaryControllerType_LeftFoot], params.primaryControllerPoses[PrimaryControllerType_RightFoot],
-               params.rigToSensorMatrix, sensorToRigMatrix);
+    updateFeet(leftFootEnabled, rightFootEnabled, _headEnabled, params.primaryControllerPoses[PrimaryControllerType_LeftFoot],
+               params.primaryControllerPoses[PrimaryControllerType_RightFoot], params.rigToSensorMatrix, sensorToRigMatrix);
 
     if (_headEnabled) {
         // Blend IK chains toward the joint limit centers, this should stablize head and hand ik.
@@ -1727,7 +1726,6 @@ void Rig::updateFromControllerParameters(const ControllerParameters& params, flo
     }
 
     if (hipsEnabled) {
-
         // Apply a bit of smoothing when the hips toggle between estimated and non-estimated poses.
         // This should help smooth out problems with the vive tracker when the sensor is occluded.
         if (prevHipsEnabled && hipsEstimated != prevHipsEstimated) {
@@ -1760,20 +1758,10 @@ void Rig::updateFromControllerParameters(const ControllerParameters& params, flo
     }
 
     // set secondary targets
-    static const std::vector<QString> secondaryControllerJointNames = {
-        "LeftShoulder",
-        "RightShoulder",
-        "LeftArm",
-        "RightArm",
-        "LeftForeArm",
-        "RightForeArm",
-        "LeftUpLeg",
-        "RightUpLeg",
-        "LeftLeg",
-        "RightLeg",
-        "LeftToeBase",
-        "RightToeBase"
-    };
+    static const std::vector<QString> secondaryControllerJointNames = { "LeftShoulder", "RightShoulder", "LeftArm",
+                                                                        "RightArm",     "LeftForeArm",   "RightForeArm",
+                                                                        "LeftUpLeg",    "RightUpLeg",    "LeftLeg",
+                                                                        "RightLeg",     "LeftToeBase",   "RightToeBase" };
 
     std::shared_ptr<AnimInverseKinematics> ikNode = getAnimInverseKinematicsNode();
     for (int i = 0; i < (int)NumSecondaryControllerTypes; i++) {
@@ -1823,7 +1811,8 @@ void Rig::initAnimGraph(const QUrl& url) {
             // restore the role animations we had before reset.
             for (auto& roleAnimState : _roleAnimStates) {
                 auto roleState = roleAnimState.second;
-                overrideRoleAnimation(roleState.role, roleState.url, roleState.fps, roleState.loop, roleState.firstFrame, roleState.lastFrame);
+                overrideRoleAnimation(roleState.role, roleState.url, roleState.fps, roleState.loop, roleState.firstFrame,
+                                      roleState.lastFrame);
             }
 
             emit onLoadComplete();
@@ -1852,7 +1841,6 @@ void Rig::initAnimGraph(const QUrl& url) {
                     triggerNetworkAnimation("postTransitAnim");
                 }
             }
-           
         });
         connect(_networkLoader.get(), &AnimNodeLoader::error, [networkUrl](int error, QString str) {
             qCritical(animation) << "Error loading" << networkUrl.toDisplayString() << "code = " << error << "str =" << str;
@@ -1925,7 +1913,6 @@ AnimPose Rig::getJointPose(int jointIndex) const {
 }
 
 void Rig::copyJointsIntoJointData(QVector<JointData>& jointDataVec) const {
-
     const AnimPose geometryToRigPose(_geometryToRigTransform);
 
     jointDataVec.resize((int)getJointStateCount());
@@ -1934,13 +1921,15 @@ void Rig::copyJointsIntoJointData(QVector<JointData>& jointDataVec) const {
         if (isIndexValid(i)) {
             // rotations are in absolute rig frame.
             glm::quat defaultAbsRot = geometryToRigPose.rot() * _animSkeleton->getAbsoluteDefaultPose(i).rot();
-            data.rotation = !_sendNetworkNode ? _internalPoseSet._absolutePoses[i].rot() : _networkPoseSet._absolutePoses[i].rot();
+            data.rotation = !_sendNetworkNode ? _internalPoseSet._absolutePoses[i].rot()
+                                              : _networkPoseSet._absolutePoses[i].rot();
             data.rotationIsDefaultPose = isEqual(data.rotation, defaultAbsRot);
 
             // translations are in relative frame but scaled so that they are in meters,
             // instead of geometry units.
             glm::vec3 defaultRelTrans = _geometryOffset.scale() * _animSkeleton->getRelativeDefaultPose(i).trans();
-            data.translation = _geometryOffset.scale() * (!_sendNetworkNode ? _internalPoseSet._relativePoses[i].trans() : _networkPoseSet._relativePoses[i].trans());
+            data.translation = _geometryOffset.scale() * (!_sendNetworkNode ? _internalPoseSet._relativePoses[i].trans()
+                                                                            : _networkPoseSet._relativePoses[i].trans());
             data.translationIsDefaultPose = isEqual(data.translation, defaultRelTrans);
         } else {
             data.translationIsDefaultPose = true;
@@ -2007,12 +1996,9 @@ void Rig::computeExternalPoses(const glm::mat4& modelOffsetMat) {
     _externalPoseSet = _internalPoseSet;
 }
 
-void Rig::computeAvatarBoundingCapsule(
-        const FBXGeometry& geometry,
-        float& radiusOut,
-        float& heightOut,
-        glm::vec3& localOffsetOut) const {
-    if (! _animSkeleton) {
+void Rig::computeAvatarBoundingCapsule(const FBXGeometry& geometry, float& radiusOut, float& heightOut,
+                                       glm::vec3& localOffsetOut) const {
+    if (!_animSkeleton) {
         const float DEFAULT_AVATAR_CAPSULE_RADIUS = 0.3f;
         const float DEFAULT_AVATAR_CAPSULE_HEIGHT = 1.3f;
         const glm::vec3 DEFAULT_AVATAR_CAPSULE_LOCAL_OFFSET = glm::vec3(0.0f, -0.25f, 0.0f);

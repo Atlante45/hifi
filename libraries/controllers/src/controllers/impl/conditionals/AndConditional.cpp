@@ -11,11 +11,10 @@
 using namespace controller;
 
 bool AndConditional::satisfied() {
-   for (auto& conditional : _children) {
-       if (!conditional->satisfied()) {
-           return false;
-       }
-   }
-   return true;
+    for (auto& conditional : _children) {
+        if (!conditional->satisfied()) {
+            return false;
+        }
+    }
+    return true;
 }
-

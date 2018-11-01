@@ -13,12 +13,12 @@
 #define hifi_DomainServerSettingsManager_h
 
 #include <QtCore/QJsonArray>
-#include <QtCore/QJsonObject>
 #include <QtCore/QJsonDocument>
+#include <QtCore/QJsonObject>
 #include <QtNetwork/QNetworkReply>
 
-#include <HifiConfigVariantMap.h>
 #include <HTTPManager.h>
+#include <HifiConfigVariantMap.h>
 
 #include <ReceivedMessage.h>
 #include "NodePermissions.h"
@@ -38,10 +38,7 @@ const QString AUTOMATIC_CONTENT_ARCHIVES_GROUP = "automatic_content_archives";
 
 using GroupByUUIDKey = QPair<QUuid, QUuid>; // groupID, rankID
 
-enum SettingsType {
-    DomainSettings,
-    ContentSettings
-};
+enum SettingsType { DomainSettings, ContentSettings };
 
 class DomainServerSettingsManager : public QObject {
     Q_OBJECT
@@ -76,7 +73,9 @@ public:
     NodePermissions getPermissionsForMAC(const QString& macAddress) const;
 
     // these give access to permissions for specific machine fingerprints from the domain-server settings page
-    bool hasPermissionsForMachineFingerprint(const QUuid& machineFingerprint) { return _machineFingerprintPermissions.contains(machineFingerprint.toString(), 0); }
+    bool hasPermissionsForMachineFingerprint(const QUuid& machineFingerprint) {
+        return _machineFingerprintPermissions.contains(machineFingerprint.toString(), 0);
+    }
     NodePermissions getPermissionsForMachineFingerprint(const QUuid& machineFingerprint) const;
 
     // these give access to permissions for specific groups from the domain-server settings page
@@ -201,7 +200,7 @@ private:
     // keep track of answers to api queries about which users are in which groups
     QHash<QString, QHash<QUuid, QUuid>> _groupMembership; // QHash<user-name, QHash<group-id, rank-id>>
 
-    /// guard read/write access from multiple threads to settings 
+    /// guard read/write access from multiple threads to settings
     QReadWriteLock _settingsLock { QReadWriteLock::Recursive };
 };
 

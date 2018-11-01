@@ -153,55 +153,65 @@ public:
 
     const static QSet<PacketTypeEnum::Value> getNonVerifiedPackets() {
         const static QSet<PacketTypeEnum::Value> NON_VERIFIED_PACKETS = QSet<PacketTypeEnum::Value>()
-            << PacketTypeEnum::Value::NodeJsonStats
-            << PacketTypeEnum::Value::EntityQuery
-            << PacketTypeEnum::Value::OctreeDataNack
-            << PacketTypeEnum::Value::EntityEditNack
-            << PacketTypeEnum::Value::DomainListRequest
-            << PacketTypeEnum::Value::StopNode
-            << PacketTypeEnum::Value::DomainDisconnectRequest
-            << PacketTypeEnum::Value::UsernameFromIDRequest
-            << PacketTypeEnum::Value::NodeKickRequest
-            << PacketTypeEnum::Value::NodeMuteRequest;
+                                                                        << PacketTypeEnum::Value::NodeJsonStats
+                                                                        << PacketTypeEnum::Value::EntityQuery
+                                                                        << PacketTypeEnum::Value::OctreeDataNack
+                                                                        << PacketTypeEnum::Value::EntityEditNack
+                                                                        << PacketTypeEnum::Value::DomainListRequest
+                                                                        << PacketTypeEnum::Value::StopNode
+                                                                        << PacketTypeEnum::Value::DomainDisconnectRequest
+                                                                        << PacketTypeEnum::Value::UsernameFromIDRequest
+                                                                        << PacketTypeEnum::Value::NodeKickRequest
+                                                                        << PacketTypeEnum::Value::NodeMuteRequest;
         return NON_VERIFIED_PACKETS;
     }
 
     const static QSet<PacketTypeEnum::Value> getNonSourcedPackets() {
-        const static QSet<PacketTypeEnum::Value> NON_SOURCED_PACKETS = QSet<PacketTypeEnum::Value>()
-            << PacketTypeEnum::Value::StunResponse << PacketTypeEnum::Value::CreateAssignment
-            << PacketTypeEnum::Value::RequestAssignment << PacketTypeEnum::Value::DomainServerRequireDTLS
-            << PacketTypeEnum::Value::DomainConnectRequest << PacketTypeEnum::Value::DomainList
-            << PacketTypeEnum::Value::DomainConnectionDenied << PacketTypeEnum::Value::DomainServerPathQuery
-            << PacketTypeEnum::Value::DomainServerPathResponse << PacketTypeEnum::Value::DomainServerAddedNode
-            << PacketTypeEnum::Value::DomainServerConnectionToken << PacketTypeEnum::Value::DomainSettingsRequest
-            << PacketTypeEnum::Value::OctreeDataFileRequest << PacketTypeEnum::Value::OctreeDataFileReply
-            << PacketTypeEnum::Value::OctreeDataPersist << PacketTypeEnum::Value::DomainContentReplacementFromUrl
-            << PacketTypeEnum::Value::DomainSettings << PacketTypeEnum::Value::ICEServerPeerInformation
-            << PacketTypeEnum::Value::ICEServerQuery << PacketTypeEnum::Value::ICEServerHeartbeat
-            << PacketTypeEnum::Value::ICEServerHeartbeatACK << PacketTypeEnum::Value::ICEPing
-            << PacketTypeEnum::Value::ICEPingReply << PacketTypeEnum::Value::ICEServerHeartbeatDenied
-            << PacketTypeEnum::Value::AssignmentClientStatus << PacketTypeEnum::Value::StopNode
-            << PacketTypeEnum::Value::DomainServerRemovedNode << PacketTypeEnum::Value::UsernameFromIDReply
-            << PacketTypeEnum::Value::OctreeFileReplacement << PacketTypeEnum::Value::ReplicatedMicrophoneAudioNoEcho
-            << PacketTypeEnum::Value::ReplicatedMicrophoneAudioWithEcho << PacketTypeEnum::Value::ReplicatedInjectAudio
-            << PacketTypeEnum::Value::ReplicatedSilentAudioFrame << PacketTypeEnum::Value::ReplicatedAvatarIdentity
-            << PacketTypeEnum::Value::ReplicatedKillAvatar << PacketTypeEnum::Value::ReplicatedBulkAvatarData;
+        const static QSet<PacketTypeEnum::Value>
+            NON_SOURCED_PACKETS = QSet<PacketTypeEnum::Value>()
+                                  << PacketTypeEnum::Value::StunResponse << PacketTypeEnum::Value::CreateAssignment
+                                  << PacketTypeEnum::Value::RequestAssignment << PacketTypeEnum::Value::DomainServerRequireDTLS
+                                  << PacketTypeEnum::Value::DomainConnectRequest << PacketTypeEnum::Value::DomainList
+                                  << PacketTypeEnum::Value::DomainConnectionDenied
+                                  << PacketTypeEnum::Value::DomainServerPathQuery
+                                  << PacketTypeEnum::Value::DomainServerPathResponse
+                                  << PacketTypeEnum::Value::DomainServerAddedNode
+                                  << PacketTypeEnum::Value::DomainServerConnectionToken
+                                  << PacketTypeEnum::Value::DomainSettingsRequest
+                                  << PacketTypeEnum::Value::OctreeDataFileRequest << PacketTypeEnum::Value::OctreeDataFileReply
+                                  << PacketTypeEnum::Value::OctreeDataPersist
+                                  << PacketTypeEnum::Value::DomainContentReplacementFromUrl
+                                  << PacketTypeEnum::Value::DomainSettings << PacketTypeEnum::Value::ICEServerPeerInformation
+                                  << PacketTypeEnum::Value::ICEServerQuery << PacketTypeEnum::Value::ICEServerHeartbeat
+                                  << PacketTypeEnum::Value::ICEServerHeartbeatACK << PacketTypeEnum::Value::ICEPing
+                                  << PacketTypeEnum::Value::ICEPingReply << PacketTypeEnum::Value::ICEServerHeartbeatDenied
+                                  << PacketTypeEnum::Value::AssignmentClientStatus << PacketTypeEnum::Value::StopNode
+                                  << PacketTypeEnum::Value::DomainServerRemovedNode
+                                  << PacketTypeEnum::Value::UsernameFromIDReply << PacketTypeEnum::Value::OctreeFileReplacement
+                                  << PacketTypeEnum::Value::ReplicatedMicrophoneAudioNoEcho
+                                  << PacketTypeEnum::Value::ReplicatedMicrophoneAudioWithEcho
+                                  << PacketTypeEnum::Value::ReplicatedInjectAudio
+                                  << PacketTypeEnum::Value::ReplicatedSilentAudioFrame
+                                  << PacketTypeEnum::Value::ReplicatedAvatarIdentity
+                                  << PacketTypeEnum::Value::ReplicatedKillAvatar
+                                  << PacketTypeEnum::Value::ReplicatedBulkAvatarData;
         return NON_SOURCED_PACKETS;
     }
 
     const static QSet<PacketTypeEnum::Value> getDomainSourcedPackets() {
         const static QSet<PacketTypeEnum::Value> DOMAIN_SOURCED_PACKETS = QSet<PacketTypeEnum::Value>()
-            << PacketTypeEnum::Value::AssetMappingOperation
-            << PacketTypeEnum::Value::AssetGet
-            << PacketTypeEnum::Value::AssetUpload;
+                                                                          << PacketTypeEnum::Value::AssetMappingOperation
+                                                                          << PacketTypeEnum::Value::AssetGet
+                                                                          << PacketTypeEnum::Value::AssetUpload;
         return DOMAIN_SOURCED_PACKETS;
     }
 
     const static QSet<PacketTypeEnum::Value> getDomainIgnoredVerificationPackets() {
-        const static QSet<PacketTypeEnum::Value> DOMAIN_IGNORED_VERIFICATION_PACKETS = QSet<PacketTypeEnum::Value>()
-            << PacketTypeEnum::Value::AssetMappingOperationReply
-            << PacketTypeEnum::Value::AssetGetReply
-            << PacketTypeEnum::Value::AssetUploadReply;
+        const static QSet<PacketTypeEnum::Value>
+            DOMAIN_IGNORED_VERIFICATION_PACKETS = QSet<PacketTypeEnum::Value>()
+                                                  << PacketTypeEnum::Value::AssetMappingOperationReply
+                                                  << PacketTypeEnum::Value::AssetGetReply
+                                                  << PacketTypeEnum::Value::AssetUploadReply;
         return DOMAIN_IGNORED_VERIFICATION_PACKETS;
     }
 };
@@ -248,12 +258,9 @@ enum class EntityVersion : PacketVersion {
     FixedLightSerialization
 };
 
-enum class EntityScriptCallMethodVersion : PacketVersion {
-    ServerCallable = 18,
-    ClientCallable = 19
-};
+enum class EntityScriptCallMethodVersion : PacketVersion { ServerCallable = 18, ClientCallable = 19 };
 
-enum class EntityQueryPacketVersion: PacketVersion {
+enum class EntityQueryPacketVersion : PacketVersion {
     JSONFilter = 18,
     JSONFilterWithFamilyTree = 19,
     ConnectionIdentifier = 20,
@@ -262,7 +269,7 @@ enum class EntityQueryPacketVersion: PacketVersion {
     ConicalFrustums = 23
 };
 
-enum class AssetServerPacketVersion: PacketVersion {
+enum class AssetServerPacketVersion : PacketVersion {
     VegasCongestionControl = 19,
     RangeRequestSupport,
     RedirectedMappings,
@@ -309,16 +316,9 @@ enum class DomainConnectRequestVersion : PacketVersion {
     AlwaysHasMachineFingerprint
 };
 
-enum class DomainConnectionDeniedVersion : PacketVersion {
-    ReasonMessageOnly = 17,
-    IncludesReasonCode,
-    IncludesExtraInfo
-};
+enum class DomainConnectionDeniedVersion : PacketVersion { ReasonMessageOnly = 17, IncludesReasonCode, IncludesExtraInfo };
 
-enum class DomainServerAddedNodeVersion : PacketVersion {
-    PrePermissionsGrid = 17,
-    PermissionsGrid
-};
+enum class DomainServerAddedNodeVersion : PacketVersion { PrePermissionsGrid = 17, PermissionsGrid };
 
 enum class DomainListVersion : PacketVersion {
     PrePermissionsGrid = 18,
@@ -338,21 +338,12 @@ enum class AudioVersion : PacketVersion {
     HighDynamicRangeVolume,
 };
 
-enum class MessageDataVersion : PacketVersion {
-    TextOrBinaryData = 18
-};
+enum class MessageDataVersion : PacketVersion { TextOrBinaryData = 18 };
 
-enum class IcePingVersion : PacketVersion {
-    SendICEPeerID = 18
-};
+enum class IcePingVersion : PacketVersion { SendICEPeerID = 18 };
 
-enum class PingVersion : PacketVersion {
-    IncludeConnectionID = 18
-};
+enum class PingVersion : PacketVersion { IncludeConnectionID = 18 };
 
-enum class AvatarQueryVersion : PacketVersion {
-    SendMultipleFrustums = 21,
-    ConicalFrustums = 22
-};
+enum class AvatarQueryVersion : PacketVersion { SendMultipleFrustums = 21, ConicalFrustums = 22 };
 
 #endif // hifi_PacketHeaders_h

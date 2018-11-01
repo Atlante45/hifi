@@ -12,9 +12,9 @@
 #ifndef hifi_BakerCLI_h
 #define hifi_BakerCLI_h
 
-#include <QtCore/QObject>
 #include <QDir>
 #include <QUrl>
+#include <QtCore/QObject>
 
 #include <memory>
 
@@ -37,7 +37,7 @@ public slots:
     void bakeFile(QUrl inputUrl, const QString& outputPath, const QString& type = QString::null);
 
 private slots:
-    void handleFinishedBaker();  
+    void handleFinishedBaker();
 
 private:
     QDir _outputPath;

@@ -10,7 +10,6 @@
 //
 #include "SceneTask.h"
 
-
 using namespace render;
 
 void PerformSceneTransaction::configure(const Config& config) {

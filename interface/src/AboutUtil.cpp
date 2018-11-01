@@ -13,21 +13,20 @@
 #include <QDate>
 #include <QLocale>
 
-#include <ui/TabletScriptingInterface.h>
 #include <OffscreenQmlDialog.h>
+#include <ui/TabletScriptingInterface.h>
 
+#include "Application.h"
 #include "BuildInfo.h"
 #include "DependencyManager.h"
 #include "scripting/HMDScriptingInterface.h"
-#include "Application.h"
 
-AboutUtil::AboutUtil(QObject *parent) : QObject(parent) {
+AboutUtil::AboutUtil(QObject* parent) : QObject(parent) {
     QLocale locale;
-    _dateConverted = QDate::fromString(BuildInfo::BUILD_TIME, "dd/MM/yyyy").
-            toString(locale.dateFormat(QLocale::ShortFormat));
+    _dateConverted = QDate::fromString(BuildInfo::BUILD_TIME, "dd/MM/yyyy").toString(locale.dateFormat(QLocale::ShortFormat));
 }
 
-AboutUtil *AboutUtil::getInstance() {
+AboutUtil* AboutUtil::getInstance() {
     static AboutUtil instance;
     return &instance;
 }
@@ -50,14 +49,11 @@ void AboutUtil::openUrl(const QString& url) const {
     auto offscreenUi = DependencyManager::get<OffscreenUi>();
 
     if (tablet->getToolbarMode()) {
-        offscreenUi->load("Browser.qml", [=](QQmlContext* context, QObject* newObject) {
-            newObject->setProperty("url", url);
-        });
+        offscreenUi->load("Browser.qml", [=](QQmlContext* context, QObject* newObject) { newObject->setProperty("url", url); });
     } else {
         if (!hmd->getShouldShowTablet() && !qApp->isHMDMode()) {
-            offscreenUi->load("Browser.qml", [=](QQmlContext* context, QObject* newObject) {
-                newObject->setProperty("url", url);
-            });
+            offscreenUi->load("Browser.qml",
+                              [=](QQmlContext* context, QObject* newObject) { newObject->setProperty("url", url); });
         } else {
             tablet->gotoWebScreen(url);
         }

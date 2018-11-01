@@ -43,7 +43,7 @@ void SoftAttachmentModel::updateClusterMatrices() {
 
     const FBXGeometry& geometry = getFBXGeometry();
 
-    for (int i = 0; i < (int) _meshStates.size(); i++) {
+    for (int i = 0; i < (int)_meshStates.size(); i++) {
         MeshState& state = _meshStates[i];
         const FBXMesh& mesh = geometry.meshes.at(i);
 
@@ -78,7 +78,8 @@ void SoftAttachmentModel::updateClusterMatrices() {
 
     // post the blender if we're not currently waiting for one to finish
     auto modelBlender = DependencyManager::get<ModelBlender>();
-    if (_blendshapeOffsetsInitialized && modelBlender->shouldComputeBlendshapes() && geometry.hasBlendedMeshes() && _blendshapeCoefficients != _blendedBlendshapeCoefficients) {
+    if (_blendshapeOffsetsInitialized && modelBlender->shouldComputeBlendshapes() && geometry.hasBlendedMeshes() &&
+        _blendshapeCoefficients != _blendedBlendshapeCoefficients) {
         _blendedBlendshapeCoefficients = _blendshapeCoefficients;
         modelBlender->noteRequiresBlend(getThisPointer());
     }

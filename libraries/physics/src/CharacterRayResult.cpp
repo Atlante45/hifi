@@ -15,10 +15,9 @@
 
 #include "CharacterGhostObject.h"
 
-CharacterRayResult::CharacterRayResult (const CharacterGhostObject* character) :
+CharacterRayResult::CharacterRayResult(const CharacterGhostObject* character) :
     btCollisionWorld::ClosestRayResultCallback(btVector3(0.0f, 0.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)),
-    _character(character)
-{
+    _character(character) {
     assert(_character);
     _character->getCollisionGroupAndMask(m_collisionFilterGroup, m_collisionFilterMask);
 }
@@ -27,5 +26,5 @@ btScalar CharacterRayResult::addSingleResult(btCollisionWorld::LocalRayResult& r
     if (rayResult.m_collisionObject == _character) {
         return 1.0f;
     }
-    return ClosestRayResultCallback::addSingleResult (rayResult, normalInWorldSpace);
+    return ClosestRayResultCallback::addSingleResult(rayResult, normalInWorldSpace);
 }

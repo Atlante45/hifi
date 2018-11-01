@@ -9,8 +9,8 @@
 #ifndef hifi_OffscreenQmlSurface_h
 #define hifi_OffscreenQmlSurface_h
 
-#include <qml/OffscreenSurface.h>
 #include <QtGui/qevent.h>
+#include <qml/OffscreenSurface.h>
 
 #include <QTouchEvent>
 #include "PointerEvent.h"
@@ -25,7 +25,9 @@ public:
     ~OffscreenQmlSurface();
 
     static void addWhitelistContextHandler(const std::initializer_list<QUrl>& urls, const QmlContextCallback& callback);
-    static void addWhitelistContextHandler(const QUrl& url, const QmlContextCallback& callback) { addWhitelistContextHandler({ { url } }, callback); };
+    static void addWhitelistContextHandler(const QUrl& url, const QmlContextCallback& callback) {
+        addWhitelistContextHandler({ { url } }, callback);
+    };
 
     bool isFocusText() const { return _focusText; }
     bool getCleaned() { return _isCleaned; }
@@ -50,7 +52,7 @@ signals:
     void fromQml(const QVariant& message);
 
 public slots:
-    void focusDestroyed(QObject *obj);
+    void focusDestroyed(QObject* obj);
     // script event bridge
     void emitScriptEvent(const QVariant& scriptMessage);
     // web event bridge
@@ -83,7 +85,7 @@ public slots:
 
 private:
     bool _focusText { false };
-    bool _isCleaned{ false };
+    bool _isCleaned { false };
     QQuickItem* _currentFocusItem { nullptr };
 
     struct TouchState {

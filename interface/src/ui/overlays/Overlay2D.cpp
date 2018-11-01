@@ -12,15 +12,11 @@
 
 #include <RegisteredMetaTypes.h>
 
-Overlay2D::Overlay2D(const Overlay2D* overlay2D) :
-    Overlay(overlay2D),
-    _bounds(overlay2D->_bounds)
-{
+Overlay2D::Overlay2D(const Overlay2D* overlay2D) : Overlay(overlay2D), _bounds(overlay2D->_bounds) {
 }
 
 AABox Overlay2D::getBounds() const {
-    return AABox(glm::vec3(_bounds.x(), _bounds.y(), 0.0f),
-                 glm::vec3(_bounds.width(), _bounds.height(), 0.01f));
+    return AABox(glm::vec3(_bounds.x(), _bounds.y(), 0.0f), glm::vec3(_bounds.width(), _bounds.height(), 0.01f));
 }
 
 // JSDoc for copying to @typedefs of overlay types that inherit Overlay2D.
@@ -34,7 +30,7 @@ AABox Overlay2D::getBounds() const {
  */
 void Overlay2D::setProperties(const QVariantMap& properties) {
     Overlay::setProperties(properties);
-    
+
     auto bounds = properties["bounds"];
     if (bounds.isValid()) {
         bool valid;

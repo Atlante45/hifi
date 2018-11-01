@@ -13,13 +13,13 @@
 
 #include <QtCore/QLoggingCategory>
 
-#include <ui-plugins/PluginContainer.h>
-#include <controllers/UserInputMapper.h>
 #include <controllers/StandardControls.h>
+#include <controllers/UserInputMapper.h>
+#include <ui-plugins/PluginContainer.h>
 
-#include <PerfStat.h>
-#include <PathUtils.h>
 #include <NumericalConstants.h>
+#include <PathUtils.h>
+#include <PerfStat.h>
 #include <StreamUtils.h>
 
 #include <ovr_capi.h>
@@ -47,7 +47,7 @@ void OculusControllerManager::checkForConnectedDevices() {
         return;
     }
 
-    ovr::withSession([&] (ovrSession session) {
+    ovr::withSession([&](ovrSession session) {
         unsigned int controllerConnected = ovr_GetConnectedControllerTypes(session);
 
         if (!_remote && (controllerConnected & ovrControllerType_Remote) == ovrControllerType_Remote) {
@@ -102,7 +102,6 @@ void OculusControllerManager::pluginUpdate(float deltaTime, const controller::In
             }
         }
     });
-
 
     if (_touch && updateTouch) {
         _touch->update(deltaTime, inputCalibrationData);
@@ -173,16 +172,11 @@ static const std::vector<std::pair<ovrTouch, StandardButtonChannel>> TOUCH_MAP {
     { ovrTouch_RIndexPointing, RIGHT_INDEX_POINT },
 } };
 
-
 controller::Input::NamedVector OculusControllerManager::RemoteDevice::getAvailableInputs() const {
     using namespace controller;
     QVector<Input::NamedPair> availableInputs {
-        makePair(DU, "DU"),
-        makePair(DD, "DD"),
-        makePair(DL, "DL"),
-        makePair(DR, "DR"),
-        makePair(START, "Start"),
-        makePair(BACK, "Back"),
+        makePair(DU, "DU"), makePair(DD, "DD"),       makePair(DL, "DL"),
+        makePair(DR, "DR"), makePair(START, "Start"), makePair(BACK, "Back"),
     };
     return availableInputs;
 }
@@ -192,7 +186,8 @@ QString OculusControllerManager::RemoteDevice::getDefaultMappingConfig() const {
     return MAPPING_JSON;
 }
 
-void OculusControllerManager::RemoteDevice::update(float deltaTime, const controller::InputCalibrationData& inputCalibrationData) {
+void OculusControllerManager::RemoteDevice::update(float deltaTime,
+                                                   const controller::InputCalibrationData& inputCalibrationData) {
     _buttonPressedMap.clear();
     const auto& inputState = _parent._remoteInputState;
     for (const auto& pair : BUTTON_MAP) {
@@ -316,26 +311,23 @@ void OculusControllerManager::TouchDevice::handlePose(float deltaTime,
 void OculusControllerManager::TouchDevice::handleHeadPose(float deltaTime,
                                                           const controller::InputCalibrationData& inputCalibrationData,
                                                           const ovrPoseStatef& headPose) {
-    glm::mat4 mat = createMatFromQuatAndPos(ovr::toGlm(headPose.ThePose.Orientation),
-                                            ovr::toGlm(headPose.ThePose.Position));
+    glm::mat4 mat = createMatFromQuatAndPos(ovr::toGlm(headPose.ThePose.Orientation), ovr::toGlm(headPose.ThePose.Position));
 
-    //perform a 180 flip to make the HMD face the +z instead of -z, beacuse the head faces +z
+    // perform a 180 flip to make the HMD face the +z instead of -z, beacuse the head faces +z
     glm::mat4 matYFlip = mat * Matrices::Y_180;
-    controller::Pose pose(extractTranslation(matYFlip),
-                          glmExtractRotation(matYFlip),
+    controller::Pose pose(extractTranslation(matYFlip), glmExtractRotation(matYFlip),
                           ovr::toGlm(headPose.LinearVelocity), // XXX * matYFlip ?
                           ovr::toGlm(headPose.AngularVelocity));
 
     glm::mat4 sensorToAvatar = glm::inverse(inputCalibrationData.avatarMat) * inputCalibrationData.sensorToWorldMat;
-    glm::mat4 defaultHeadOffset = glm::inverse(inputCalibrationData.defaultCenterEyeMat) *
-        inputCalibrationData.defaultHeadMat;
+    glm::mat4 defaultHeadOffset = glm::inverse(inputCalibrationData.defaultCenterEyeMat) * inputCalibrationData.defaultHeadMat;
 
     pose.valid = true;
     _poseStateMap[controller::HEAD] = pose.postTransform(defaultHeadOffset).transform(sensorToAvatar);
 }
 
-void OculusControllerManager::TouchDevice::handleRotationForUntrackedHand(const controller::InputCalibrationData& inputCalibrationData,
-                                                                          ovrHandType hand, const ovrPoseStatef& handPose) {
+void OculusControllerManager::TouchDevice::handleRotationForUntrackedHand(
+    const controller::InputCalibrationData& inputCalibrationData, ovrHandType hand, const ovrPoseStatef& handPose) {
     auto poseId = (hand == ovrHand_Left ? controller::LEFT_HAND : controller::RIGHT_HAND);
     auto& pose = _poseStateMap[poseId];
     auto lastHandPose = _lastControllerPose[poseId];
@@ -378,14 +370,12 @@ bool OculusControllerManager::TouchDevice::triggerHapticPulse(float strength, fl
 
 void OculusControllerManager::TouchDevice::stopHapticPulse(bool leftHand) {
     auto handType = (leftHand ? ovrControllerType_LTouch : ovrControllerType_RTouch);
-    ovr::withSession([&](ovrSession session) {
-        ovr_SetControllerVibration(session, handType, 0.0f, 0.0f);
-    });
+    ovr::withSession([&](ovrSession session) { ovr_SetControllerVibration(session, handType, 0.0f, 0.0f); });
 }
 
 /**jsdoc
- * <p>The <code>Controller.Hardware.OculusTouch</code> object has properties representing Oculus Rift. The property values are 
- * integer IDs, uniquely identifying each output. <em>Read-only.</em> These can be mapped to actions or functions or 
+ * <p>The <code>Controller.Hardware.OculusTouch</code> object has properties representing Oculus Rift. The property values are
+ * integer IDs, uniquely identifying each output. <em>Read-only.</em> These can be mapped to actions or functions or
  * <code>Controller.Standard</code> items in a {@link RouteObject} mapping.</p>
  * <table>
  *   <thead>
@@ -416,25 +406,25 @@ void OculusControllerManager::TouchDevice::stopHapticPulse(bool leftHand) {
  *     <tr><td><code>LeftGrip</code></td><td>number</td><td>number</td><td>Left grip scale.</td></tr>
  *     <tr><td><code>RightGrip</code></td><td>number</td><td>number</td><td>Right grip scale.</td></tr>
  *     <tr><td colspan="4"><strong>Finger Abstractions</strong></td></tr>
- *     <tr><td><code>LeftPrimaryThumbTouch</code></td><td>number</td><td>number</td><td>Left thumb touching primary thumb 
+ *     <tr><td><code>LeftPrimaryThumbTouch</code></td><td>number</td><td>number</td><td>Left thumb touching primary thumb
  *       button.</td></tr>
- *     <tr><td><code>LeftSecondaryThumbTouch</code></td><td>number</td><td>number</td><td>Left thumb touching secondary thumb 
+ *     <tr><td><code>LeftSecondaryThumbTouch</code></td><td>number</td><td>number</td><td>Left thumb touching secondary thumb
  *       button.</td></tr>
- *     <tr><td><code>LeftThumbUp</code></td><td>number</td><td>number</td><td>Left thumb not touching primary or secondary 
+ *     <tr><td><code>LeftThumbUp</code></td><td>number</td><td>number</td><td>Left thumb not touching primary or secondary
  *       thumb buttons.</td></tr>
- *     <tr><td><code>RightPrimaryThumbTouch</code></td><td>number</td><td>number</td><td>Right thumb touching primary thumb 
+ *     <tr><td><code>RightPrimaryThumbTouch</code></td><td>number</td><td>number</td><td>Right thumb touching primary thumb
  *       button.</td></tr>
- *     <tr><td><code>RightSecondaryThumbTouch</code></td><td>number</td><td>number</td><td>Right thumb touching secondary thumb 
+ *     <tr><td><code>RightSecondaryThumbTouch</code></td><td>number</td><td>number</td><td>Right thumb touching secondary thumb
  *       button.</td></tr>
- *     <tr><td><code>RightThumbUp</code></td><td>number</td><td>number</td><td>Right thumb not touching primary or secondary 
+ *     <tr><td><code>RightThumbUp</code></td><td>number</td><td>number</td><td>Right thumb not touching primary or secondary
  *       thumb buttons.</td></tr>
- *     <tr><td><code>LeftPrimaryIndexTouch</code></td><td>number</td><td>number</td><td>Left index finger is touching primary 
+ *     <tr><td><code>LeftPrimaryIndexTouch</code></td><td>number</td><td>number</td><td>Left index finger is touching primary
  *       index finger control.</td></tr>
- *     <tr><td><code>LeftIndexPoint</code></td><td>number</td><td>number</td><td>Left index finger is pointing, not touching 
+ *     <tr><td><code>LeftIndexPoint</code></td><td>number</td><td>number</td><td>Left index finger is pointing, not touching
  *       primary or secondary index finger controls.</td></tr>
- *     <tr><td><code>RightPrimaryIndexTouch</code></td><td>number</td><td>number</td><td>Right index finger is touching primary 
+ *     <tr><td><code>RightPrimaryIndexTouch</code></td><td>number</td><td>number</td><td>Right index finger is touching primary
  *       index finger control.</td></tr>
- *     <tr><td><code>RightIndexPoint</code></td><td>number</td><td>number</td><td>Right index finger is pointing, not touching 
+ *     <tr><td><code>RightIndexPoint</code></td><td>number</td><td>number</td><td>Right index finger is pointing, not touching
  *       primary or secondary index finger controls.</td></tr>
  *     <tr><td colspan="4"><strong>Avatar Skeleton</strong></td></tr>
  *     <tr><td><code>Head</code></td><td>number</td><td>{@link Pose}</td><td>Head pose.</td></tr>
@@ -446,7 +436,7 @@ void OculusControllerManager::TouchDevice::stopHapticPulse(bool leftHand) {
  */
 controller::Input::NamedVector OculusControllerManager::TouchDevice::getAvailableInputs() const {
     using namespace controller;
-    QVector<Input::NamedPair> availableInputs{
+    QVector<Input::NamedPair> availableInputs {
         // buttons
         makePair(A, "A"),
         makePair(B, "B"),
@@ -464,8 +454,8 @@ controller::Input::NamedVector OculusControllerManager::TouchDevice::getAvailabl
         makePair(RT, "RT"),
 
         // trigger buttons
-        //makePair(LB, "LB"),
-        //makePair(RB, "RB"),
+        // makePair(LB, "LB"),
+        // makePair(RB, "RB"),
 
         // side grip triggers
         makePair(LEFT_GRIP, "LeftGrip"),
@@ -502,6 +492,3 @@ QString OculusControllerManager::TouchDevice::getDefaultMappingConfig() const {
     static const QString MAPPING_JSON = PathUtils::resourcesPath() + "/controllers/oculus_touch.json";
     return MAPPING_JSON;
 }
-
-
-

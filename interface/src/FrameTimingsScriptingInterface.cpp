@@ -39,7 +39,7 @@ void FrameTimingsScriptingInterface::finish() {
     float deviationTotal = 0;
     for (size_t i = 0; i < count; ++i) {
         float deviation = _values[i] - _mean;
-        deviationTotal += deviation*deviation;
+        deviationTotal += deviation * deviation;
     }
     _stdDev = sqrt(deviationTotal / (float)count);
 }

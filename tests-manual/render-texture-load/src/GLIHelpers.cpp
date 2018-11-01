@@ -10,14 +10,14 @@
 #include <QtCore/QFileInfo>
 #include <QtGui/QImage>
 
-#include <gli/texture2d.hpp>
+#include <gpu/Texture.h>
 #include <gli/convert.hpp>
 #include <gli/generate_mipmaps.hpp>
-#include <gpu/Texture.h>
+#include <gli/texture2d.hpp>
 
 gli::format fromQImageFormat(QImage::Format format) {
     switch (format) {
-        case QImage::Format_RGB32: 
+        case QImage::Format_RGB32:
             return gli::format::FORMAT_BGRA8_UNORM_PACK8;
 
         case QImage::Format_ARGB32:
@@ -44,20 +44,18 @@ QString convertTexture(const QString& sourceFile) {
         return sourceFile;
     }
     QImage sourceImage(sourceFile);
-    gli::texture2d workTexture(
-        fromQImageFormat(sourceImage.format()), 
-        gli::extent2d(sourceImage.width(), sourceImage.height()));
+    gli::texture2d workTexture(fromQImageFormat(sourceImage.format()),
+                               gli::extent2d(sourceImage.width(), sourceImage.height()));
     auto sourceSize = sourceImage.byteCount();
     assert(sourceSize == (int)workTexture[workTexture.base_level()].size());
     memcpy(workTexture[workTexture.base_level()].data(), sourceImage.constBits(), sourceSize);
 
-    QString resultFile = getKtxFileName(sourceFile) ;
+    QString resultFile = getKtxFileName(sourceFile);
     gli::texture2d TextureMipmaped = gli::generate_mipmaps(workTexture, gli::FILTER_LINEAR);
     gli::save(TextureMipmaped, resultFile.toLocal8Bit().data());
     gli::texture loaded = gli::load(resultFile.toLocal8Bit().data());
     return sourceFile;
 }
-
 
 gpu::TexturePointer processTexture(const QString& sourceFile) {
     auto ktxFile = convertTexture(sourceFile);

@@ -8,54 +8,46 @@
 #ifndef hifi_gpu_ResourceSwapChain_h
 #define hifi_gpu_ResourceSwapChain_h
 
-#include <memory>
 #include <array>
+#include <memory>
 
 #include "Texture.h"
 
 namespace gpu {
-    class SwapChain {
-    public:
+class SwapChain {
+public:
+    SwapChain(uint8_t size = 2U) : _size { size } {}
+    virtual ~SwapChain() {}
 
-        SwapChain(uint8_t size = 2U) : _size{ size } {}
-        virtual ~SwapChain() {}
+    void advance() { _frontIndex = (_frontIndex + 1) % _size; }
 
-        void advance() {
-            _frontIndex = (_frontIndex + 1) % _size;
+    uint8_t getSize() const { return _size; }
+
+protected:
+    const uint8_t _size;
+    uint8_t _frontIndex { 0U };
+};
+typedef std::shared_ptr<SwapChain> SwapChainPointer;
+
+template<class R>
+class ResourceSwapChain : public SwapChain {
+public:
+    enum { MAX_SIZE = 4 };
+
+    using Type = R;
+    using TypePointer = std::shared_ptr<R>;
+    using TypeConstPointer = std::shared_ptr<const R>;
+
+    ResourceSwapChain(const std::vector<TypePointer>& v) : SwapChain { std::min<uint8_t>((uint8_t)v.size(), MAX_SIZE) } {
+        for (size_t i = 0; i < _size; ++i) {
+            _resources[i] = v[i];
         }
+    }
+    const TypePointer& get(unsigned int index) const { return _resources[(index + _frontIndex) % _size]; }
 
-        uint8_t getSize() const { return _size; }
-
-    protected:
-        const uint8_t _size;
-        uint8_t _frontIndex{ 0U };
-
-    };
-    typedef std::shared_ptr<SwapChain> SwapChainPointer;
-
-    template <class R>
-    class ResourceSwapChain : public SwapChain {
-    public:
-
-        enum {
-            MAX_SIZE = 4
-        };
-
-        using Type = R;
-        using TypePointer = std::shared_ptr<R>;
-        using TypeConstPointer = std::shared_ptr<const R>;
-
-        ResourceSwapChain(const std::vector<TypePointer>& v) : SwapChain{ std::min<uint8_t>((uint8_t)v.size(), MAX_SIZE) } {
-            for (size_t i = 0; i < _size; ++i) {
-                _resources[i] = v[i];
-            }
-        }
-        const TypePointer& get(unsigned int index) const { return _resources[(index + _frontIndex) % _size]; }
-
-    private:
-
-        std::array<TypePointer, MAX_SIZE> _resources;
-    };
-}
+private:
+    std::array<TypePointer, MAX_SIZE> _resources;
+};
+} // namespace gpu
 
 #endif

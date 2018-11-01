@@ -14,11 +14,10 @@
 #ifndef hifi_UDTTest_h
 #define hifi_UDTTest_h
 
-
 #include <random>
 
-#include <QtCore/QCoreApplication>
 #include <QtCore/QCommandLineParser>
+#include <QtCore/QCoreApplication>
 
 #include <udt/Constants.h>
 #include <udt/Socket.h>
@@ -38,38 +37,38 @@ public:
 public slots:
     void refillPacket() { sendPacket(); } // adds a new packet to the queue when we are told one is sent
     void sampleStats();
-    
+
 private:
     void parseArguments();
     void handleMessage(std::unique_ptr<Message> message);
-    
+
     void sendInitialPackets(); // fills the queue with packets to start
     void sendPacket(); // constructs and sends a packet according to the test parameters
-    
+
     QCommandLineParser _argumentParser;
     udt::Socket _socket;
-    
+
     HifiSockAddr _target; // the target for sent packets
-    
+
     int _minPacketSize { udt::MAX_PACKET_SIZE };
     int _maxPacketSize { udt::MAX_PACKET_SIZE };
     int _maxSendBytes { -1 }; // the number of bytes to send to the target before stopping
     int _maxSendPackets { -1 }; // the number of packets to send to the target before stopping
-    
+
     bool _sendReliable { true }; // whether packets are sent reliably or unreliably
     bool _sendOrdered { false }; // whether to send ordered packets
-    
+
     int _messageSize { 10000000 }; // number of bytes per message while sending ordered
 
     std::unordered_map<udt::Packet::MessageNumber, std::unique_ptr<Message>> _pendingMessages;
-    
+
     std::random_device _randomDevice;
     std::mt19937 _generator { _randomDevice() }; // random number generator for ordered data testing
     std::uniform_int_distribution<uint64_t> _distribution { 1, UINT64_MAX }; // producer of random integer values
-    
+
     int _totalQueuedPackets { 0 }; // keeps track of the number of packets we have already queued
     int _totalQueuedBytes { 0 }; // keeps track of the number of bytes we have already queued
-    
+
     int _statsInterval { 100 }; // recording interval for stats in milliseconds
 };
 

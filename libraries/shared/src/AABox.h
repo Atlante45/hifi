@@ -28,7 +28,6 @@ class Extents;
 class Transform;
 
 class AABox {
-
 public:
     AABox(const AACube& other);
     AABox(const Extents& other);
@@ -69,12 +68,13 @@ public:
 
     bool expandedContains(const glm::vec3& point, float expansion) const;
     bool expandedIntersectsSegment(const glm::vec3& start, const glm::vec3& end, float expansion) const;
-    bool findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& invDirection, float& distance,
-                             BoxFace& face, glm::vec3& surfaceNormal) const;
+    bool findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& invDirection,
+                             float& distance, BoxFace& face, glm::vec3& surfaceNormal) const;
     bool findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
                                   float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal) const;
     bool rayHitsBoundingSphere(const glm::vec3& origin, const glm::vec3& direction) const;
-    bool parabolaPlaneIntersectsBoundingSphere(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration, const glm::vec3& normal) const;
+    bool parabolaPlaneIntersectsBoundingSphere(const glm::vec3& origin, const glm::vec3& velocity,
+                                               const glm::vec3& acceleration, const glm::vec3& normal) const;
     bool touchesSphere(const glm::vec3& center, float radius) const; // fast but may generate false positives
     bool touchesAAEllipsoid(const glm::vec3& center, const glm::vec3& radials) const;
     bool findSpherePenetration(const glm::vec3& center, float radius, glm::vec3& penetration) const;
@@ -131,7 +131,10 @@ public:
 
     bool isInvalid() const { return _corner.x == std::numeric_limits<float>::infinity(); }
 
-    void clear() { _corner = INFINITY_VECTOR; _scale = glm::vec3(0.0f); }
+    void clear() {
+        _corner = INFINITY_VECTOR;
+        _scale = glm::vec3(0.0f);
+    }
 
     typedef enum {
         topLeftNear,
@@ -154,8 +157,8 @@ private:
 
     static BoxFace getOppositeFace(BoxFace face);
 
-    void checkPossibleParabolicIntersection(float t, int i, float& minDistance,
-        const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration, bool& hit) const;
+    void checkPossibleParabolicIntersection(float t, int i, float& minDistance, const glm::vec3& origin,
+                                            const glm::vec3& velocity, const glm::vec3& acceleration, bool& hit) const;
 
     glm::vec3 _corner;
     glm::vec3 _scale;
@@ -166,11 +169,10 @@ inline bool operator==(const AABox& a, const AABox& b) {
 }
 
 inline QDebug operator<<(QDebug debug, const AABox& box) {
-    debug << "AABox[ ("
-            << box.getCorner().x << "," << box.getCorner().y << "," << box.getCorner().z << " ) to ("
-            << box.calcTopFarLeft().x << "," << box.calcTopFarLeft().y << "," << box.calcTopFarLeft().z << ") size: ("
-            << box.getDimensions().x << "," << box.getDimensions().y << "," << box.getDimensions().z << ")"
-            << "]";
+    debug << "AABox[ (" << box.getCorner().x << "," << box.getCorner().y << "," << box.getCorner().z << " ) to ("
+          << box.calcTopFarLeft().x << "," << box.calcTopFarLeft().y << "," << box.calcTopFarLeft().z << ") size: ("
+          << box.getDimensions().x << "," << box.getDimensions().y << "," << box.getDimensions().z << ")"
+          << "]";
 
     return debug;
 }

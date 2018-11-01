@@ -13,8 +13,8 @@
 #define hifi_SnapshotUploader_h
 
 #include <QObject>
-#include <QtNetwork/QNetworkReply>
 #include <QtCore/QUrl>
+#include <QtNetwork/QNetworkReply>
 
 class SnapshotUploader : public QObject {
     Q_OBJECT
@@ -25,6 +25,7 @@ public slots:
     void uploadFailure(QNetworkReply* reply);
     void createStorySuccess(QNetworkReply* reply);
     void createStoryFailure(QNetworkReply* reply);
+
 private:
     QUrl _inWorldLocation;
     QString _pathname;

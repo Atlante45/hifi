@@ -10,7 +10,8 @@
 
 using namespace gpu;
 
-PageManager::PageManager(Size pageSize) : _pageSize(pageSize) {}
+PageManager::PageManager(Size pageSize) : _pageSize(pageSize) {
+}
 
 PageManager& PageManager::operator=(const PageManager& other) {
     assert(other._pageSize == _pageSize);

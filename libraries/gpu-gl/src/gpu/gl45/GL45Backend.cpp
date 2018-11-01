@@ -7,19 +7,19 @@
 //
 #include "GL45Backend.h"
 
-#include <mutex>
-#include <queue>
-#include <list>
 #include <functional>
 #include <glm/gtc/type_ptr.hpp>
+#include <list>
+#include <mutex>
+#include <queue>
 
 Q_LOGGING_CATEGORY(gpugl45logging, "hifi.gpu.gl45")
 
 using namespace gpu;
 using namespace gpu::gl45;
 
-GLint GL45Backend::MAX_COMBINED_SHADER_STORAGE_BLOCKS{ 0 };
-GLint GL45Backend::MAX_UNIFORM_LOCATIONS{ 0 };
+GLint GL45Backend::MAX_COMBINED_SHADER_STORAGE_BLOCKS { 0 };
+GLint GL45Backend::MAX_UNIFORM_LOCATIONS { 0 };
 
 static void staticInit() {
     static std::once_flag once;
@@ -92,7 +92,7 @@ void GL45Backend::do_draw(const Batch& batch, size_t paramOffset) {
     }
     _stats._DSNumAPIDrawcalls++;
 
-    (void) CHECK_GL_ERROR();
+    (void)CHECK_GL_ERROR();
 }
 
 void GL45Backend::do_drawIndexed(const Batch& batch, size_t paramOffset) {
@@ -102,7 +102,7 @@ void GL45Backend::do_drawIndexed(const Batch& batch, size_t paramOffset) {
     uint32 startIndex = batch._params[paramOffset + 0]._uint;
 
     GLenum glType = gl::ELEMENT_TYPE_TO_GL[_input._indexBufferType];
-    
+
     auto typeByteSize = TYPE_SIZE[_input._indexBufferType];
     GLvoid* indexBufferByteOffset = reinterpret_cast<GLvoid*>(startIndex * typeByteSize + _input._indexBufferOffset);
 
@@ -124,7 +124,7 @@ void GL45Backend::do_drawIndexed(const Batch& batch, size_t paramOffset) {
     }
     _stats._DSNumAPIDrawcalls++;
 
-    (void) CHECK_GL_ERROR();
+    (void)CHECK_GL_ERROR();
 }
 
 void GL45Backend::do_drawInstanced(const Batch& batch, size_t paramOffset) {
@@ -133,7 +133,6 @@ void GL45Backend::do_drawInstanced(const Batch& batch, size_t paramOffset) {
     GLenum mode = gl::PRIMITIVE_TO_GL[primitiveType];
     uint32 numVertices = batch._params[paramOffset + 2]._uint;
     uint32 startVertex = batch._params[paramOffset + 1]._uint;
-
 
     if (isStereo()) {
         GLint trueNumInstances = 2 * numInstances;
@@ -156,7 +155,7 @@ void GL45Backend::do_drawInstanced(const Batch& batch, size_t paramOffset) {
     }
     _stats._DSNumAPIDrawcalls++;
 
-    (void) CHECK_GL_ERROR();
+    (void)CHECK_GL_ERROR();
 }
 
 void GL45Backend::do_drawIndexedInstanced(const Batch& batch, size_t paramOffset) {
@@ -168,22 +167,26 @@ void GL45Backend::do_drawIndexedInstanced(const Batch& batch, size_t paramOffset
     GLenum glType = gl::ELEMENT_TYPE_TO_GL[_input._indexBufferType];
     auto typeByteSize = TYPE_SIZE[_input._indexBufferType];
     GLvoid* indexBufferByteOffset = reinterpret_cast<GLvoid*>(startIndex * typeByteSize + _input._indexBufferOffset);
- 
+
     if (isStereo()) {
         GLint trueNumInstances = 2 * numInstances;
 
 #ifdef GPU_STEREO_DRAWCALL_INSTANCED
-        glDrawElementsInstancedBaseVertexBaseInstance(mode, numIndices, glType, indexBufferByteOffset, trueNumInstances, 0, startInstance);
+        glDrawElementsInstancedBaseVertexBaseInstance(mode, numIndices, glType, indexBufferByteOffset, trueNumInstances, 0,
+                                                      startInstance);
 #else
         setupStereoSide(0);
-        glDrawElementsInstancedBaseVertexBaseInstance(mode, numIndices, glType, indexBufferByteOffset, numInstances, 0, startInstance);
+        glDrawElementsInstancedBaseVertexBaseInstance(mode, numIndices, glType, indexBufferByteOffset, numInstances, 0,
+                                                      startInstance);
         setupStereoSide(1);
-        glDrawElementsInstancedBaseVertexBaseInstance(mode, numIndices, glType, indexBufferByteOffset, numInstances, 0, startInstance);
+        glDrawElementsInstancedBaseVertexBaseInstance(mode, numIndices, glType, indexBufferByteOffset, numInstances, 0,
+                                                      startInstance);
 #endif
         _stats._DSNumTriangles += (trueNumInstances * numIndices) / 3;
         _stats._DSNumDrawcalls += trueNumInstances;
     } else {
-        glDrawElementsInstancedBaseVertexBaseInstance(mode, numIndices, glType, indexBufferByteOffset, numInstances, 0, startInstance);
+        glDrawElementsInstancedBaseVertexBaseInstance(mode, numIndices, glType, indexBufferByteOffset, numInstances, 0,
+                                                      startInstance);
         _stats._DSNumTriangles += (numInstances * numIndices) / 3;
         _stats._DSNumDrawcalls += numInstances;
     }
@@ -196,7 +199,8 @@ void GL45Backend::do_drawIndexedInstanced(const Batch& batch, size_t paramOffset
 void GL45Backend::do_multiDrawIndirect(const Batch& batch, size_t paramOffset) {
     uint commandCount = batch._params[paramOffset + 0]._uint;
     GLenum mode = gl::PRIMITIVE_TO_GL[(Primitive)batch._params[paramOffset + 1]._uint];
-    glMultiDrawArraysIndirect(mode, reinterpret_cast<GLvoid*>(_input._indirectBufferOffset), commandCount, (GLsizei)_input._indirectBufferStride);
+    glMultiDrawArraysIndirect(mode, reinterpret_cast<GLvoid*>(_input._indirectBufferOffset), commandCount,
+                              (GLsizei)_input._indirectBufferStride);
     _stats._DSNumDrawcalls += commandCount;
     _stats._DSNumAPIDrawcalls++;
     (void)CHECK_GL_ERROR();
@@ -206,7 +210,8 @@ void GL45Backend::do_multiDrawIndexedIndirect(const Batch& batch, size_t paramOf
     uint commandCount = batch._params[paramOffset + 0]._uint;
     GLenum mode = gl::PRIMITIVE_TO_GL[(Primitive)batch._params[paramOffset + 1]._uint];
     GLenum indexType = gl::ELEMENT_TYPE_TO_GL[_input._indexBufferType];
-    glMultiDrawElementsIndirect(mode, indexType, reinterpret_cast<GLvoid*>(_input._indirectBufferOffset), commandCount, (GLsizei)_input._indirectBufferStride);
+    glMultiDrawElementsIndirect(mode, indexType, reinterpret_cast<GLvoid*>(_input._indirectBufferOffset), commandCount,
+                                (GLsizei)_input._indirectBufferStride);
     _stats._DSNumDrawcalls += commandCount;
     _stats._DSNumAPIDrawcalls++;
     (void)CHECK_GL_ERROR();

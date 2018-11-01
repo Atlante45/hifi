@@ -15,8 +15,8 @@
 #include <QtCore/QFile>
 
 #include <AssetUtils.h>
-#include <NodeList.h>
 #include <NLPacketList.h>
+#include <NodeList.h>
 
 #include "ClientServerUtils.h"
 
@@ -25,50 +25,50 @@ UploadAssetTask::UploadAssetTask(QSharedPointer<ReceivedMessage> receivedMessage
     _receivedMessage(receivedMessage),
     _senderNode(senderNode),
     _resourcesDir(resourcesDir),
-    _filesizeLimit(filesizeLimit)
-{
-    
+    _filesizeLimit(filesizeLimit) {
 }
 
 void UploadAssetTask::run() {
     auto data = _receivedMessage->getMessage();
-    
+
     QBuffer buffer { &data };
     buffer.open(QIODevice::ReadOnly);
-    
+
     MessageID messageID;
     buffer.read(reinterpret_cast<char*>(&messageID), sizeof(messageID));
-    
+
     uint64_t fileSize;
     buffer.read(reinterpret_cast<char*>(&fileSize), sizeof(fileSize));
 
     if (_senderNode) {
-        qDebug() << "UploadAssetTask reading a file of " << fileSize << "bytes from" << uuidStringWithoutCurlyBraces(_senderNode->getUUID());
+        qDebug() << "UploadAssetTask reading a file of " << fileSize << "bytes from"
+                 << uuidStringWithoutCurlyBraces(_senderNode->getUUID());
     } else {
         qDebug() << "UploadAssetTask reading a file of " << fileSize << "bytes from" << _receivedMessage->getSenderSockAddr();
     }
-    
+
     auto replyPacket = NLPacket::create(PacketType::AssetUploadReply, -1, true);
     replyPacket->writePrimitive(messageID);
-    
+
     if (fileSize > _filesizeLimit) {
         replyPacket->writePrimitive(AssetUtils::AssetServerError::AssetTooLarge);
     } else {
         QByteArray fileData = buffer.read(fileSize);
-        
+
         auto hash = AssetUtils::hashData(fileData);
         auto hexHash = hash.toHex();
 
         if (_senderNode) {
-            qDebug() << "Hash for uploaded file from" << uuidStringWithoutCurlyBraces(_senderNode->getUUID()) << "is: (" << hexHash << ")";
+            qDebug() << "Hash for uploaded file from" << uuidStringWithoutCurlyBraces(_senderNode->getUUID()) << "is: ("
+                     << hexHash << ")";
         } else {
             qDebug() << "Hash for uploaded file from" << _receivedMessage->getSenderSockAddr() << "is: (" << hexHash << ")";
         }
-        
+
         QFile file { _resourcesDir.filePath(QString(hexHash)) };
 
         bool existingCorrectFile = false;
-        
+
         if (file.exists()) {
             // check if the local file has the correct contents, otherwise we overwrite
             if (file.open(QIODevice::ReadOnly) && AssetUtils::hashData(file.readAll()) == hash) {
@@ -100,14 +100,12 @@ void UploadAssetTask::run() {
                 if (!removed) {
                     qWarning() << "Removal of failed upload file" << hexHash << "failed.";
                 }
-                
+
                 replyPacket->writePrimitive(AssetUtils::AssetServerError::FileOperationFailed);
             }
         }
-
-
     }
-    
+
     auto nodeList = DependencyManager::get<NodeList>();
     if (_senderNode) {
         nodeList->sendPacket(std::move(replyPacket), *_senderNode);

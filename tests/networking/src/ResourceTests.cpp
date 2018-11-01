@@ -11,18 +11,17 @@
 
 #include <QNetworkDiskCache>
 
-#include <ResourceCache.h>
-#include <LimitedNodeList.h>
-#include <NodeList.h>
-#include <NetworkAccessManager.h>
 #include <DependencyManager.h>
+#include <LimitedNodeList.h>
+#include <NetworkAccessManager.h>
+#include <NodeList.h>
+#include <ResourceCache.h>
 #include <StatTracker.h>
 
 QTEST_MAIN(ResourceTests)
 
 void ResourceTests::initTestCase() {
-
-    //DependencyManager::set<AddressManager>();
+    // DependencyManager::set<AddressManager>();
     DependencyManager::set<StatTracker>();
     DependencyManager::registerInheritance<LimitedNodeList, NodeList>();
     DependencyManager::set<NodeList>(NodeType::Agent, INVALID_PORT);
@@ -31,7 +30,7 @@ void ResourceTests::initTestCase() {
     const qint64 MAXIMUM_CACHE_SIZE = 1024 * 1024 * 1024; // 1GB
 
     // set up the file cache
-    //QString cachePath = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+    // QString cachePath = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
     QString cachePath = "./resourceTestCache";
     QNetworkAccessManager& networkAccessManager = NetworkAccessManager::getInstance();
     QNetworkDiskCache* cache = new QNetworkDiskCache();
@@ -47,10 +46,10 @@ void ResourceTests::cleanupTestCase() {
 
 static QSharedPointer<Resource> resource;
 
-
 void ResourceTests::downloadFirst() {
     // download the Mery fst file
-    QUrl meryUrl = QUrl("http://hifi-public.s3.amazonaws.com/marketplace/contents/e21c0b95-e502-4d15-8c41-ea2fc40f1125/3585ddf674869a67d31d5964f7b52de1.fst");
+    QUrl meryUrl = QUrl("http://hifi-public.s3.amazonaws.com/marketplace/contents/e21c0b95-e502-4d15-8c41-ea2fc40f1125/"
+                        "3585ddf674869a67d31d5964f7b52de1.fst");
     resource = QSharedPointer<Resource>::create(meryUrl);
     resource->setSelf(resource);
 
@@ -73,7 +72,8 @@ void ResourceTests::downloadFirst() {
 
 void ResourceTests::downloadAgain() {
     // download the Mery fst file
-    QUrl meryUrl = QUrl("http://hifi-public.s3.amazonaws.com/marketplace/contents/e21c0b95-e502-4d15-8c41-ea2fc40f1125/3585ddf674869a67d31d5964f7b52de1.fst");
+    QUrl meryUrl = QUrl("http://hifi-public.s3.amazonaws.com/marketplace/contents/e21c0b95-e502-4d15-8c41-ea2fc40f1125/"
+                        "3585ddf674869a67d31d5964f7b52de1.fst");
     resource = QSharedPointer<Resource>::create(meryUrl);
     resource->setSelf(resource);
 

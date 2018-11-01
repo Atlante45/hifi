@@ -25,7 +25,7 @@
 class DownloadInfoResult {
 public:
     DownloadInfoResult();
-    QList<float> downloading;  // List of percentages
+    QList<float> downloading; // List of percentages
     float pending;
 };
 
@@ -39,7 +39,7 @@ class AccountServicesScriptingInterface : public QObject {
 
     /**jsdoc
      * The AccountServices API contains helper functions related to user connectivity
-     * 
+     *
      * @hifi-interface
      * @hifi-client-entity
      *
@@ -54,14 +54,14 @@ class AccountServicesScriptingInterface : public QObject {
     Q_PROPERTY(bool loggedIn READ loggedIn NOTIFY loggedInChanged)
     Q_PROPERTY(QString findableBy READ getFindableBy WRITE setFindableBy NOTIFY findableByChanged)
     Q_PROPERTY(QUrl metaverseServerURL READ getMetaverseServerURL CONSTANT)
-    
+
 public:
     static AccountServicesScriptingInterface* getInstance();
 
     const QString getUsername() const;
     bool loggedIn() const { return _loggedIn; }
     QUrl getMetaverseServerURL() { return DependencyManager::get<AccountManager>()->getMetaverseServerURL(); }
-    
+
 public slots:
 
     /**jsdoc
@@ -91,11 +91,11 @@ public slots:
      * @function AccountServices.logOut
      */
     void logOut();
-    
+
 private slots:
     void loggedOut();
     void checkDownloadInfo();
-    
+
     QString getFindableBy() const;
     void setFindableBy(const QString& discoverabilityMode);
     void discoverabilityModeChanged(Discoverability::Mode discoverabilityMode);
@@ -148,9 +148,9 @@ signals:
 private:
     AccountServicesScriptingInterface();
     ~AccountServicesScriptingInterface();
-    
+
     bool _downloading;
-    bool _loggedIn{ false };
+    bool _loggedIn { false };
 };
 
 #endif // hifi_AccountServicesScriptingInterface_h

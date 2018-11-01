@@ -14,9 +14,9 @@
 #ifndef hifi_SimpleMovingAverage_h
 #define hifi_SimpleMovingAverage_h
 
-#include <mutex>
 #include <stdint.h>
 #include <atomic>
+#include <mutex>
 
 class SimpleMovingAverage {
 public:
@@ -34,7 +34,6 @@ public:
 
     uint64_t getUsecsSinceLastEvent() const;
 
-
 private:
     std::atomic<int> _numSamples;
     std::atomic<uint64_t> _lastEventTimestamp;
@@ -45,13 +44,11 @@ private:
     float ONE_MINUS_WEIGHTING;
 };
 
-
-template <class T, int MAX_NUM_SAMPLES> class MovingAverage {
+template<class T, int MAX_NUM_SAMPLES>
+class MovingAverage {
 public:
     MovingAverage<T, MAX_NUM_SAMPLES>() {}
-    MovingAverage<T, MAX_NUM_SAMPLES>(const MovingAverage<T, MAX_NUM_SAMPLES>& other) {
-        *this = other;
-    }
+    MovingAverage<T, MAX_NUM_SAMPLES>(const MovingAverage<T, MAX_NUM_SAMPLES>& other) { *this = other; }
     MovingAverage<T, MAX_NUM_SAMPLES>& operator=(const MovingAverage<T, MAX_NUM_SAMPLES>& other) {
         numSamples = (int)other.numSamples;
         average = (T)other.average;
@@ -60,12 +57,10 @@ public:
 
     const float WEIGHTING = 1.0f / (float)MAX_NUM_SAMPLES;
     const float ONE_MINUS_WEIGHTING = 1.0f - WEIGHTING;
-    std::atomic<int> numSamples{ 0 };
+    std::atomic<int> numSamples { 0 };
     std::atomic<T> average;
 
-    void clear() {
-        numSamples = 0;
-    }
+    void clear() { numSamples = 0; }
 
     bool isAverageValid() const { return (numSamples > 0); }
 
@@ -79,7 +74,8 @@ public:
     }
 };
 
-template <class T, int MAX_NUM_SAMPLES> class ThreadSafeMovingAverage {
+template<class T, int MAX_NUM_SAMPLES>
+class ThreadSafeMovingAverage {
 public:
     void clear() {
         std::unique_lock<std::mutex> lock(_lock);
@@ -118,6 +114,5 @@ private:
     T _average;
     mutable std::mutex _lock;
 };
-
 
 #endif // hifi_SimpleMovingAverage_h

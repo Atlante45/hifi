@@ -6,7 +6,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #include "AvatarInputs.h"
 
 #include <AudioClient.h>
@@ -16,7 +15,7 @@
 #include "Application.h"
 #include "Menu.h"
 
-static AvatarInputs* INSTANCE{ nullptr };
+static AvatarInputs* INSTANCE { nullptr };
 
 Setting::Handle<bool> showAudioToolsSetting { QStringList { "AvatarInputs", "showAudioTools" }, true };
 
@@ -32,13 +31,13 @@ AvatarInputs::AvatarInputs(QObject* parent) : QObject(parent) {
     _showAudioTools = showAudioToolsSetting.get();
 }
 
-#define AI_UPDATE(name, src) \
-    { \
-        auto val = src; \
-        if (_##name != val) { \
-            _##name = val; \
-            emit name##Changed(); \
-        } \
+#define AI_UPDATE(name, src)                                                                                                   \
+    {                                                                                                                          \
+        auto val = src;                                                                                                        \
+        if (_##name != val) {                                                                                                  \
+            _##name = val;                                                                                                     \
+            emit name##Changed();                                                                                              \
+        }                                                                                                                      \
     }
 
 float AvatarInputs::loudnessToAudioLevel(float loudness) {

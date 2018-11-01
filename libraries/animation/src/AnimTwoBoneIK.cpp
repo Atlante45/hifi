@@ -12,16 +12,15 @@
 
 #include <DebugDraw.h>
 
-#include "AnimationLogging.h"
 #include "AnimUtil.h"
+#include "AnimationLogging.h"
 
 const float FRAMES_PER_SECOND = 30.0f;
 
-AnimTwoBoneIK::AnimTwoBoneIK(const QString& id, float alpha, bool enabled, float interpDuration,
-                             const QString& baseJointName, const QString& midJointName,
-                             const QString& tipJointName, const glm::vec3& midHingeAxis,
-                             const QString& alphaVar, const QString& enabledVar,
-                             const QString& endEffectorRotationVarVar, const QString& endEffectorPositionVarVar) :
+AnimTwoBoneIK::AnimTwoBoneIK(const QString& id, float alpha, bool enabled, float interpDuration, const QString& baseJointName,
+                             const QString& midJointName, const QString& tipJointName, const glm::vec3& midHingeAxis,
+                             const QString& alphaVar, const QString& enabledVar, const QString& endEffectorRotationVarVar,
+                             const QString& endEffectorPositionVarVar) :
     AnimNode(AnimNode::Type::TwoBoneIK, id),
     _alpha(alpha),
     _enabled(enabled),
@@ -35,17 +34,14 @@ AnimTwoBoneIK::AnimTwoBoneIK(const QString& id, float alpha, bool enabled, float
     _endEffectorRotationVarVar(endEffectorRotationVarVar),
     _endEffectorPositionVarVar(endEffectorPositionVarVar),
     _prevEndEffectorRotationVar(),
-    _prevEndEffectorPositionVar()
-{
-
+    _prevEndEffectorPositionVar() {
 }
 
 AnimTwoBoneIK::~AnimTwoBoneIK() {
-
 }
 
-const AnimPoseVec& AnimTwoBoneIK::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) {
-
+const AnimPoseVec& AnimTwoBoneIK::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                           AnimVariantMap& triggersOut) {
     assert(_children.size() == 1);
     if (_children.size() != 1) {
         return _poses;
@@ -171,7 +167,8 @@ const AnimPoseVec& AnimTwoBoneIK::evaluate(const AnimVariantMap& animVars, const
     const float MIN_AXIS_LENGTH = 1.0e-4f;
     if (axisLength > MIN_AXIS_LENGTH) {
         axis /= axisLength;
-        float cosAngle = glm::clamp(glm::dot(leverArm, targetLine) / (glm::length(leverArm) * glm::length(targetLine)), -1.0f, 1.0f);
+        float cosAngle = glm::clamp(glm::dot(leverArm, targetLine) / (glm::length(leverArm) * glm::length(targetLine)), -1.0f,
+                                    1.0f);
         float angle = acosf(cosAngle);
         glm::quat deltaRot = glm::angleAxis(angle, axis);
 
@@ -274,7 +271,7 @@ void AnimTwoBoneIK::lookUpIndices() {
     assert(_skeleton);
 
     // look up bone indices by name
-    std::vector<int> indices = _skeleton->lookUpJointIndices({_baseJointName, _midJointName, _tipJointName});
+    std::vector<int> indices = _skeleton->lookUpJointIndices({ _baseJointName, _midJointName, _tipJointName });
 
     // cache the results
     _baseJointIndex = indices[0];

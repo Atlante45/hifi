@@ -15,32 +15,29 @@
 #include <qbuffer.h>
 #include <qcoreapplication.h>
 #include <qlocale.h>
-#include <qnetworkrequest.h>
 #include <qnetworkreply.h>
+#include <qnetworkrequest.h>
 #include <qregexp.h>
 #include <qstringlist.h>
 
-#include <QUrlQuery>
 #include <QJsonDocument>
+#include <QUrlQuery>
 
 #include <NetworkAccessManager.h>
 
 static const QString GoogleSuggestionsUrl = "https://suggestqueries.google.com/complete/search?output=firefox&q=%1";
 static const int SUGGESTIONS_LIST_INDEX = 1;
 
-WebBrowserSuggestionsEngine::WebBrowserSuggestionsEngine(QObject* parent)
-    : QObject(parent)
-    , _suggestionsReply(0) {
+WebBrowserSuggestionsEngine::WebBrowserSuggestionsEngine(QObject* parent) : QObject(parent), _suggestionsReply(0) {
     _currentNAM = &NetworkAccessManager::getInstance();
     connect(_currentNAM, &QNetworkAccessManager::finished, this, &WebBrowserSuggestionsEngine::suggestionsFinished);
 }
-
 
 WebBrowserSuggestionsEngine::~WebBrowserSuggestionsEngine() {
     disconnect(_currentNAM, &QNetworkAccessManager::finished, this, &WebBrowserSuggestionsEngine::suggestionsFinished);
 }
 
-void WebBrowserSuggestionsEngine::querySuggestions(const QString &searchString) {
+void WebBrowserSuggestionsEngine::querySuggestions(const QString& searchString) {
     if (_suggestionsReply) {
         _suggestionsReply->disconnect(this);
         _suggestionsReply->abort();
@@ -51,10 +48,9 @@ void WebBrowserSuggestionsEngine::querySuggestions(const QString &searchString) 
     _suggestionsReply = _currentNAM->get(QNetworkRequest(url));
 }
 
-void WebBrowserSuggestionsEngine::suggestionsFinished(QNetworkReply *reply) {
-
+void WebBrowserSuggestionsEngine::suggestionsFinished(QNetworkReply* reply) {
     if (reply != _suggestionsReply) {
-        return; //invalid reply. ignore
+        return; // invalid reply. ignore
     }
 
     const QByteArray response = _suggestionsReply->readAll();
@@ -80,9 +76,7 @@ void WebBrowserSuggestionsEngine::suggestionsFinished(QNetworkReply *reply) {
     QStringList out;
     const QVariantList& suggList = list.at(SUGGESTIONS_LIST_INDEX).toList();
 
-    foreach (const QVariant &v, suggList) {
-        out.append(v.toString());
-    }
+    foreach (const QVariant& v, suggList) { out.append(v.toString()); }
 
     emit suggestions(out);
 }

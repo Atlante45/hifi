@@ -17,16 +17,19 @@
 
 class Overlay2D : public Overlay {
     Q_OBJECT
-    
+
 public:
     Overlay2D() {}
     Overlay2D(const Overlay2D* overlay2D);
-    
+
     virtual AABox getBounds() const override;
-    
+
     virtual bool is3D() const override { return false; }
 
-    virtual uint32_t fetchMetaSubItems(render::ItemIDs& subItems) const override { subItems.push_back(getRenderItemID()); return 1; }
+    virtual uint32_t fetchMetaSubItems(render::ItemIDs& subItems) const override {
+        subItems.push_back(getRenderItemID());
+        return 1;
+    }
 
     // getters
     int getX() const { return _bounds.x(); }
@@ -34,10 +37,10 @@ public:
     int getWidth() const { return _bounds.width(); }
     int getHeight() const { return _bounds.height(); }
     const QRect& getBoundingRect() const { return _bounds; }
-    
+
     // setters
     void setX(int x) { _bounds.setX(x); }
-    void setY(int y) { _bounds.setY(y);  }
+    void setY(int y) { _bounds.setY(y); }
     void setWidth(int width) { _bounds.setWidth(width); }
     void setHeight(int height) { _bounds.setHeight(height); }
     void setBounds(const QRect& bounds) { _bounds = bounds; }
@@ -49,5 +52,4 @@ protected:
     QRect _bounds; // where on the screen to draw
 };
 
- 
 #endif // hifi_Overlay2D_h

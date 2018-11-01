@@ -14,9 +14,8 @@ class FloorTextureTest : public GpuTestBase {
     gpu::BufferPointer indexBuffer { std::make_shared<gpu::Buffer>() };
     gpu::Stream::FormatPointer vertexFormat { std::make_shared<gpu::Stream::Format>() };
     gpu::TexturePointer texture;
+
 public:
     FloorTextureTest();
     void renderTest(size_t testId, RenderArgs* args) override;
 };
-
-

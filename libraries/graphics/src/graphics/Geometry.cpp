@@ -37,8 +37,9 @@ void Mesh::setVertexFormatAndStream(const gpu::Stream::FormatPointer& vf, const 
     _vertexStream = (*vbs);
 
     auto attrib = _vertexFormat->getAttribute(gpu::Stream::POSITION);
-    _vertexBuffer = BufferView(vbs->getBuffers()[attrib._channel], vbs->getOffsets()[attrib._channel], vbs->getBuffers()[attrib._channel]->getSize(),
-        (gpu::uint16) vbs->getStrides()[attrib._channel], attrib._element);
+    _vertexBuffer = BufferView(vbs->getBuffers()[attrib._channel], vbs->getOffsets()[attrib._channel],
+                               vbs->getBuffers()[attrib._channel]->getSize(), (gpu::uint16)vbs->getStrides()[attrib._channel],
+                               attrib._element);
 }
 
 void Mesh::setVertexBuffer(const BufferView& buffer) {
@@ -82,7 +83,6 @@ void Mesh::evalVertexFormat() {
     evalVertexStream();
 }
 
-
 void Mesh::evalVertexStream() {
     _vertexStream.clear();
 
@@ -116,7 +116,7 @@ Box Mesh::evalPartBound(int partNum) const {
         index += part._startIndex;
         auto endIndex = index;
         endIndex += part._numIndices;
-        for (;index != endIndex; index++) {
+        for (; index != endIndex; index++) {
             // skip primitive restart indices
             if ((*index) != PRIMITIVE_RESTART_INDEX) {
                 box += _vertexBuffer.get<Vec3>(part._baseVertex + (*index));
@@ -131,14 +131,13 @@ Box Mesh::evalPartsBound(int partStart, int partEnd) const {
     auto part = _partBuffer.cbegin<Part>() + partStart;
     auto partItEnd = _partBuffer.cbegin<Part>() + partEnd;
 
-    for (;part != partItEnd; part++) {
-
+    for (; part != partItEnd; part++) {
         Box partBound;
         auto index = _indexBuffer.cbegin<uint>() + (*part)._startIndex;
         auto endIndex = index + (*part)._numIndices;
-        for (;index != endIndex; index++) {
+        for (; index != endIndex; index++) {
             // skip primitive restart indices
-            if ((*index) != (uint) PRIMITIVE_RESTART_INDEX) {
+            if ((*index) != (uint)PRIMITIVE_RESTART_INDEX) {
                 partBound += _vertexBuffer.get<Vec3>((*part)._baseVertex + (*index));
             }
         }
@@ -148,11 +147,9 @@ Box Mesh::evalPartsBound(int partStart, int partEnd) const {
     return totalBound;
 }
 
-
-graphics::MeshPointer Mesh::map(std::function<glm::vec3(glm::vec3)> vertexFunc,
-                             std::function<glm::vec3(glm::vec3)> colorFunc,
-                             std::function<glm::vec3(glm::vec3)> normalFunc,
-                             std::function<uint32_t(uint32_t)> indexFunc) const {
+graphics::MeshPointer Mesh::map(std::function<glm::vec3(glm::vec3)> vertexFunc, std::function<glm::vec3(glm::vec3)> colorFunc,
+                                std::function<glm::vec3(glm::vec3)> normalFunc,
+                                std::function<uint32_t(uint32_t)> indexFunc) const {
     const auto vertexFormat = getVertexFormat();
 
     // vertex data
@@ -160,7 +157,7 @@ graphics::MeshPointer Mesh::map(std::function<glm::vec3(glm::vec3)> vertexFunc,
     gpu::BufferView::Index numVertices = (gpu::BufferView::Index)getNumVertices();
 
     gpu::Resource::Size vertexSize = numVertices * sizeof(glm::vec3);
-    std::unique_ptr<unsigned char> resultVertexData{ new unsigned char[vertexSize] };
+    std::unique_ptr<unsigned char> resultVertexData { new unsigned char[vertexSize] };
     unsigned char* vertexDataCursor = resultVertexData.get();
 
     for (gpu::BufferView::Index i = 0; i < numVertices; i++) {
@@ -175,7 +172,7 @@ graphics::MeshPointer Mesh::map(std::function<glm::vec3(glm::vec3)> vertexFunc,
     gpu::BufferView::Index numColors = (gpu::BufferView::Index)colorsBufferView.getNumElements();
 
     gpu::Resource::Size colorSize = numColors * sizeof(glm::vec3);
-    std::unique_ptr<unsigned char> resultColorData{ new unsigned char[colorSize] };
+    std::unique_ptr<unsigned char> resultColorData { new unsigned char[colorSize] };
     unsigned char* colorDataCursor = resultColorData.get();
     auto colorAttribute = vertexFormat->getAttribute(attributeTypeColor);
 
@@ -200,7 +197,7 @@ graphics::MeshPointer Mesh::map(std::function<glm::vec3(glm::vec3)> vertexFunc,
     const gpu::BufferView& normalsBufferView = getAttributeBuffer(attributeTypeNormal);
     gpu::BufferView::Index numNormals = (gpu::BufferView::Index)normalsBufferView.getNumElements();
     gpu::Resource::Size normalSize = numNormals * sizeof(glm::vec3);
-    std::unique_ptr<unsigned char> resultNormalData{ new unsigned char[normalSize] };
+    std::unique_ptr<unsigned char> resultNormalData { new unsigned char[normalSize] };
     unsigned char* normalDataCursor = resultNormalData.get();
     auto normalAttribute = vertexFormat->getAttribute(attributeTypeNormal);
 
@@ -226,7 +223,7 @@ graphics::MeshPointer Mesh::map(std::function<glm::vec3(glm::vec3)> vertexFunc,
     const gpu::BufferView& indexBufferView = getIndexBuffer();
     gpu::BufferView::Index numIndexes = (gpu::BufferView::Index)getNumIndices();
     gpu::Resource::Size indexSize = numIndexes * sizeof(uint32_t);
-    std::unique_ptr<unsigned char> resultIndexData{ new unsigned char[indexSize] };
+    std::unique_ptr<unsigned char> resultIndexData { new unsigned char[indexSize] };
     unsigned char* indexDataCursor = resultIndexData.get();
 
     for (gpu::BufferView::Index i = 0; i < numIndexes; i++) {
@@ -262,25 +259,22 @@ graphics::MeshPointer Mesh::map(std::function<glm::vec3(glm::vec3)> vertexFunc,
     gpu::BufferView resultIndexesBufferView(resultIndexesBufferPointer, indexElement);
     result->setIndexBuffer(resultIndexesBufferView);
 
-
     // TODO -- shouldn't assume just one part
 
     std::vector<graphics::Mesh::Part> parts;
     parts.emplace_back(graphics::Mesh::Part((graphics::Index)0, // startIndex
-                                         (graphics::Index)result->getNumIndices(), // numIndices
-                                         (graphics::Index)0, // baseVertex
-                                         graphics::Mesh::TRIANGLES)); // topology
-    result->setPartBuffer(gpu::BufferView(new gpu::Buffer(parts.size() * sizeof(graphics::Mesh::Part),
-                                                          (gpu::Byte*) parts.data()), gpu::Element::PART_DRAWCALL));
+                                            (graphics::Index)result->getNumIndices(), // numIndices
+                                            (graphics::Index)0, // baseVertex
+                                            graphics::Mesh::TRIANGLES)); // topology
+    result->setPartBuffer(
+        gpu::BufferView(new gpu::Buffer(parts.size() * sizeof(graphics::Mesh::Part), (gpu::Byte*)parts.data()),
+                        gpu::Element::PART_DRAWCALL));
 
     return result;
 }
 
-
-void Mesh::forEach(std::function<void(glm::vec3)> vertexFunc,
-                   std::function<void(glm::vec3)> colorFunc,
-                   std::function<void(glm::vec3)> normalFunc,
-                   std::function<void(uint32_t)> indexFunc) {
+void Mesh::forEach(std::function<void(glm::vec3)> vertexFunc, std::function<void(glm::vec3)> colorFunc,
+                   std::function<void(glm::vec3)> normalFunc, std::function<void(uint32_t)> indexFunc) {
     const auto vertexFormat = getVertexFormat();
 
     // vertex data
@@ -293,7 +287,7 @@ void Mesh::forEach(std::function<void(glm::vec3)> vertexFunc,
     // color data
     int attributeTypeColor = gpu::Stream::InputSlot::COLOR; // libraries/gpu/src/gpu/Stream.h
     const gpu::BufferView& colorsBufferView = getAttributeBuffer(attributeTypeColor);
-    gpu::BufferView::Index numColors =  (gpu::BufferView::Index)colorsBufferView.getNumElements();
+    gpu::BufferView::Index numColors = (gpu::BufferView::Index)colorsBufferView.getNumElements();
     auto colorAttribute = vertexFormat->getAttribute(attributeTypeColor);
     if (colorAttribute._element == gpu::Element::VEC3F_XYZ) {
         for (gpu::BufferView::Index i = 0; i < numColors; i++) {
@@ -310,7 +304,7 @@ void Mesh::forEach(std::function<void(glm::vec3)> vertexFunc,
     // normal data
     int attributeTypeNormal = gpu::Stream::InputSlot::NORMAL; // libraries/gpu/src/gpu/Stream.h
     const gpu::BufferView& normalsBufferView = getAttributeBuffer(attributeTypeNormal);
-    gpu::BufferView::Index numNormals =  (gpu::BufferView::Index)normalsBufferView.getNumElements();
+    gpu::BufferView::Index numNormals = (gpu::BufferView::Index)normalsBufferView.getNumElements();
     auto normalAttribute = vertexFormat->getAttribute(attributeTypeNormal);
     if (normalAttribute._element == gpu::Element::VEC3F_XYZ) {
         for (gpu::BufferView::Index i = 0; i < numNormals; i++) {
@@ -334,15 +328,21 @@ void Mesh::forEach(std::function<void(glm::vec3)> vertexFunc,
     }
 }
 
-MeshPointer Mesh::createIndexedTriangles_P3F(uint32_t numVertices, uint32_t numIndices, const glm::vec3* vertices, const uint32_t* indices) {
+MeshPointer Mesh::createIndexedTriangles_P3F(uint32_t numVertices, uint32_t numIndices, const glm::vec3* vertices,
+                                             const uint32_t* indices) {
     MeshPointer mesh;
-    if (numVertices == 0) { return mesh; }
-    if (numIndices < 3) { return mesh; }
+    if (numVertices == 0) {
+        return mesh;
+    }
+    if (numIndices < 3) {
+        return mesh;
+    }
 
     mesh = std::make_shared<Mesh>();
 
     // Vertex buffer
-    mesh->setVertexBuffer(gpu::BufferView(new gpu::Buffer(numVertices * sizeof(glm::vec3), (gpu::Byte*) vertices), gpu::Element::VEC3F_XYZ));
+    mesh->setVertexBuffer(
+        gpu::BufferView(new gpu::Buffer(numVertices * sizeof(glm::vec3), (gpu::Byte*)vertices), gpu::Element::VEC3F_XYZ));
 
     // trim down the indices to shorts if possible
     if (numIndices < std::numeric_limits<uint16_t>::max()) {
@@ -356,27 +356,25 @@ MeshPointer Mesh::createIndexedTriangles_P3F(uint32_t numVertices, uint32_t numI
             shortIndices = shortIndicesVector.data();
         }
 
-        mesh->setIndexBuffer(gpu::BufferView(new gpu::Buffer(numIndices * sizeof(uint16_t), (gpu::Byte*) shortIndices), gpu::Element::INDEX_UINT16));
+        mesh->setIndexBuffer(gpu::BufferView(new gpu::Buffer(numIndices * sizeof(uint16_t), (gpu::Byte*)shortIndices),
+                                             gpu::Element::INDEX_UINT16));
     } else {
-
-        mesh->setIndexBuffer(gpu::BufferView(new gpu::Buffer(numIndices * sizeof(uint32_t), (gpu::Byte*) indices), gpu::Element::INDEX_INT32));
+        mesh->setIndexBuffer(
+            gpu::BufferView(new gpu::Buffer(numIndices * sizeof(uint32_t), (gpu::Byte*)indices), gpu::Element::INDEX_INT32));
     }
 
-    
     std::vector<graphics::Mesh::Part> parts;
     parts.push_back(graphics::Mesh::Part(0, numIndices, 0, graphics::Mesh::TRIANGLES));
-    mesh->setPartBuffer(gpu::BufferView(new gpu::Buffer(parts.size() * sizeof(graphics::Mesh::Part), (gpu::Byte*) parts.data()), gpu::Element::PART_DRAWCALL));
+    mesh->setPartBuffer(gpu::BufferView(new gpu::Buffer(parts.size() * sizeof(graphics::Mesh::Part), (gpu::Byte*)parts.data()),
+                                        gpu::Element::PART_DRAWCALL));
 
     return mesh;
 }
 
-
 Geometry::Geometry() {
 }
 
-Geometry::Geometry(const Geometry& geometry):
-    _mesh(geometry._mesh),
-    _boxes(geometry._boxes) {
+Geometry::Geometry(const Geometry& geometry) : _mesh(geometry._mesh), _boxes(geometry._boxes) {
 }
 
 Geometry::~Geometry() {
@@ -385,5 +383,3 @@ Geometry::~Geometry() {
 void Geometry::setMesh(const MeshPointer& mesh) {
     _mesh = mesh;
 }
-
-

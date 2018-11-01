@@ -11,16 +11,14 @@
 
 #include "KTX.h"
 
-#include <algorithm> //min max and more
 #include <QDebug>
+#include <algorithm> //min max and more
 
 using namespace ktx;
 
 int ktxDescriptorMetaTypeId = qRegisterMetaType<KTXDescriptor*>();
 
-const Header::Identifier ktx::Header::IDENTIFIER {{
-    0xAB, 0x4B, 0x54, 0x58, 0x20, 0x31, 0x31, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A
-}};
+const Header::Identifier ktx::Header::IDENTIFIER { { 0xAB, 0x4B, 0x54, 0x58, 0x20, 0x31, 0x31, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A } };
 
 Header::Header() {
     memcpy(identifier, IDENTIFIER.data(), IDENTIFIER_LENGTH);
@@ -33,7 +31,7 @@ uint32_t Header::evalMaxDimension() const {
 uint32_t Header::evalPixelOrBlockDimension(uint32_t pixelDimension) const {
     if (isCompressed()) {
         return khronos::gl::texture::evalCompressedBlockCount(getGLInternaFormat(), pixelDimension);
-    } 
+    }
     return pixelDimension;
 }
 
@@ -100,7 +98,6 @@ size_t Header::evalImageSize(uint32_t level) const {
     }
 }
 
-
 size_t KTXDescriptor::getValueOffsetForKey(const std::string& key) const {
     size_t offset { 0 };
     for (auto& kv : keyValues) {
@@ -124,12 +121,7 @@ ImageDescriptors Header::generateImageDescriptors() const {
         if (imageSize == 0) {
             return ImageDescriptors();
         }
-        ImageHeader header {
-            numberOfFaces == NUM_CUBEMAPFACES,
-            imageOffset,
-            imageSize,
-            0
-        };
+        ImageHeader header { numberOfFaces == NUM_CUBEMAPFACES, imageOffset, imageSize, 0 };
 
         imageOffset += (imageSize * numberOfFaces) + ktx::IMAGE_SIZE_WIDTH;
 
@@ -144,21 +136,17 @@ ImageDescriptors Header::generateImageDescriptors() const {
     return descriptors;
 }
 
-
 KeyValue::KeyValue(const std::string& key, uint32_t valueByteSize, const Byte* value) :
-    _byteSize((uint32_t) key.size() + 1 + valueByteSize), // keyString size + '\0' ending char + the value size
+    _byteSize((uint32_t)key.size() + 1 + valueByteSize), // keyString size + '\0' ending char + the value size
     _key(key),
-    _value(valueByteSize)
-{
+    _value(valueByteSize) {
     if (_value.size() && value) {
         memcpy(_value.data(), value, valueByteSize);
     }
 }
 
 KeyValue::KeyValue(const std::string& key, const std::string& value) :
-    KeyValue(key, (uint32_t) value.size(), (const Byte*) value.data())
-{
-
+    KeyValue(key, (uint32_t)value.size(), (const Byte*)value.data()) {
 }
 
 uint32_t KeyValue::serializedByteSize() const {
@@ -185,7 +173,6 @@ const Header& KTX::getHeader() const {
     return _header;
 }
 
-
 size_t KTX::getKeyValueDataSize() const {
     return _header.bytesOfKeyValueData;
 }
@@ -194,7 +181,7 @@ size_t KTX::getTexelsDataSize() const {
     if (!_storage) {
         return 0;
     }
-    return  _storage->size() - sizeof(Header) - getKeyValueDataSize();
+    return _storage->size() - sizeof(Header) - getKeyValueDataSize();
 }
 
 const Byte* KTX::getKeyValueData() const {
@@ -275,6 +262,9 @@ KTXDescriptor KTX::toDescriptor() const {
     return { this->_header, this->_keyValues, newDescriptors };
 }
 
-KTX::KTX(const StoragePointer& storage, const Header& header, const KeyValues& keyValues, const Images& images)
-    : _header(header), _storage(storage), _keyValues(keyValues), _images(images) {
+KTX::KTX(const StoragePointer& storage, const Header& header, const KeyValues& keyValues, const Images& images) :
+    _header(header),
+    _storage(storage),
+    _keyValues(keyValues),
+    _images(images) {
 }

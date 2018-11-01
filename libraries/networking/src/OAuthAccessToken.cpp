@@ -13,22 +13,14 @@
 
 #include <QtCore/QDataStream>
 
-OAuthAccessToken::OAuthAccessToken() :
-    token(),
-    refreshToken(),
-    expiryTimestamp(-1),
-    tokenType()
-{
-    
+OAuthAccessToken::OAuthAccessToken() : token(), refreshToken(), expiryTimestamp(-1), tokenType() {
 }
 
 OAuthAccessToken::OAuthAccessToken(const QJsonObject& jsonObject) :
     token(jsonObject["access_token"].toString()),
     refreshToken(jsonObject["refresh_token"].toString()),
     expiryTimestamp(QDateTime::currentMSecsSinceEpoch() + (jsonObject["expires_in"].toDouble() * 1000)),
-    tokenType(jsonObject["token_type"].toString())
-{
-    
+    tokenType(jsonObject["token_type"].toString()) {
 }
 
 OAuthAccessToken::OAuthAccessToken(const OAuthAccessToken& otherToken) : QObject() {
@@ -46,19 +38,19 @@ OAuthAccessToken& OAuthAccessToken::operator=(const OAuthAccessToken& otherToken
 
 void OAuthAccessToken::swap(OAuthAccessToken& otherToken) {
     using std::swap;
-    
+
     swap(token, otherToken.token);
     swap(refreshToken, otherToken.refreshToken);
     swap(expiryTimestamp, otherToken.expiryTimestamp);
     swap(tokenType, otherToken.tokenType);
 }
 
-QDataStream& operator<<(QDataStream &out, const OAuthAccessToken& token) {
+QDataStream& operator<<(QDataStream& out, const OAuthAccessToken& token) {
     out << token.token << token.expiryTimestamp << token.tokenType << token.refreshToken;
     return out;
 }
 
-QDataStream& operator>>(QDataStream &in, OAuthAccessToken& token) {
+QDataStream& operator>>(QDataStream& in, OAuthAccessToken& token) {
     in >> token.token >> token.expiryTimestamp >> token.tokenType >> token.refreshToken;
     return in;
 }

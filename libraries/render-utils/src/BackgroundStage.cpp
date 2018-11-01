@@ -13,7 +13,7 @@
 
 #include <gpu/Context.h>
 
-std::string BackgroundStage::_stageName { "BACKGROUND_STAGE"};
+std::string BackgroundStage::_stageName { "BACKGROUND_STAGE" };
 const BackgroundStage::Index BackgroundStage::INVALID_INDEX { render::indexed_container::INVALID_INDEX };
 
 BackgroundStage::Index BackgroundStage::findBackground(const BackgroundPointer& background) const {
@@ -23,17 +23,14 @@ BackgroundStage::Index BackgroundStage::findBackground(const BackgroundPointer& 
     } else {
         return (*found).second;
     }
-
 }
 
 BackgroundStage::Index BackgroundStage::addBackground(const BackgroundPointer& background) {
-
     auto found = _backgroundMap.find(background);
     if (found == _backgroundMap.end()) {
         auto backgroundId = _backgrounds.newElement(background);
         // Avoid failing to allocate a background, just pass
         if (backgroundId != INVALID_INDEX) {
-
             // Insert the background and its index in the reverse map
             _backgroundMap.insert(BackgroundMap::value_type(background, backgroundId));
         }
@@ -43,16 +40,14 @@ BackgroundStage::Index BackgroundStage::addBackground(const BackgroundPointer& b
     }
 }
 
-
 BackgroundStage::BackgroundPointer BackgroundStage::removeBackground(Index index) {
     BackgroundPointer removed = _backgrounds.freeElement(index);
-    
+
     if (removed) {
         _backgroundMap.erase(removed);
     }
     return removed;
 }
-
 
 void DrawBackgroundStage::run(const render::RenderContextPointer& renderContext, const Inputs& inputs) {
     const auto& lightingModel = inputs.get0();
@@ -68,7 +63,7 @@ void DrawBackgroundStage::run(const render::RenderContextPointer& renderContext,
         const auto& background = backgroundStage->getBackground(backgroundFrame->_backgrounds.front());
         if (background) {
             skybox = background->getSkybox();
-        }   
+        }
     }
 
     if (skybox && !skybox->empty()) {
@@ -106,4 +101,3 @@ void BackgroundStageSetup::run(const render::RenderContextPointer& renderContext
         renderContext->_scene->resetStage(BackgroundStage::getName(), std::make_shared<BackgroundStage>());
     }
 }
-

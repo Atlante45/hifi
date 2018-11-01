@@ -14,8 +14,8 @@
 
 #include <DependencyManager.h>
 #include <GeometryCache.h>
-#include <gpu/Batch.h>
 #include <RegisteredMetaTypes.h>
+#include <gpu/Batch.h>
 
 #include "GeometryUtil.h"
 
@@ -33,8 +33,7 @@ Image3DOverlay::Image3DOverlay(const Image3DOverlay* image3DOverlay) :
     _url(image3DOverlay->_url),
     _texture(image3DOverlay->_texture),
     _emissive(image3DOverlay->_emissive),
-    _fromImage(image3DOverlay->_fromImage)
-{
+    _fromImage(image3DOverlay->_fromImage) {
     _geometryId = DependencyManager::get<GeometryCache>()->allocateID();
 }
 
@@ -114,10 +113,8 @@ void Image3DOverlay::render(RenderArgs* args) {
     batch->setModelTransform(getRenderTransform());
     batch->setResourceTexture(0, _texture->getGPUTexture());
 
-    DependencyManager::get<GeometryCache>()->renderQuad(
-        *batch, topLeft, bottomRight, texCoordTopLeft, texCoordBottomRight,
-        imageColor, _geometryId
-    );
+    DependencyManager::get<GeometryCache>()->renderQuad(*batch, topLeft, bottomRight, texCoordTopLeft, texCoordBottomRight,
+                                                        imageColor, _geometryId);
 
     batch->setResourceTexture(0, nullptr); // restore default white color after me
 }
@@ -204,7 +201,7 @@ void Image3DOverlay::setProperties(const QVariantMap& properties) {
  * @property {boolean} visible=true - If <code>true</code>, the overlay is rendered, otherwise it is not rendered.
  *
  * @property {string} name="" - A friendly name for the overlay.
- * @property {Vec3} position - The position of the overlay center. Synonyms: <code>p1</code>, <code>point</code>, and 
+ * @property {Vec3} position - The position of the overlay center. Synonyms: <code>p1</code>, <code>point</code>, and
  *     <code>start</code>.
  * @property {Vec3} localPosition - The local position of the overlay relative to its parent if the overlay has a
  *     <code>parentID</code> set, otherwise the same value as <code>position</code>.
@@ -215,7 +212,8 @@ void Image3DOverlay::setProperties(const QVariantMap& properties) {
  *     Antonyms: <code>isWire</code> and <code>wire</code>.
  * @property {boolean} isDashedLine=false - If <code>true</code>, a dashed line is drawn on the overlay's edges. Synonym:
  *     <code>dashed</code>.
- * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.  <code>ignoreRayIntersection</code> is a synonym.
+ * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.
+ * <code>ignoreRayIntersection</code> is a synonym.
  * @property {boolean} drawInFront=false - If <code>true</code>, the overlay is rendered in front of other overlays that don't
  *     have <code>drawInFront</code> set to <code>true</code>, and in front of entities.
  * @property {boolean} grabbable=false - Signal to grabbing scripts whether or not this overlay can be grabbed.
@@ -255,8 +253,8 @@ void Image3DOverlay::setURL(const QString& url) {
     _isLoaded = false;
 }
 
-bool Image3DOverlay::findRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                                         float& distance, BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking) {
+bool Image3DOverlay::findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, float& distance, BoxFace& face,
+                                         glm::vec3& surfaceNormal, bool precisionPicking) {
     if (_texture && _texture->isLoaded()) {
         Transform transform = getTransform();
 
@@ -285,7 +283,8 @@ bool Image3DOverlay::findRayIntersection(const glm::vec3& origin, const glm::vec
 }
 
 bool Image3DOverlay::findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                              float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking) {
+                                              float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+                                              bool precisionPicking) {
     if (_texture && _texture->isLoaded()) {
         Transform transform = getTransform();
 

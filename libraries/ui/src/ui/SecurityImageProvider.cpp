@@ -33,7 +33,6 @@ void SecurityImageProvider::setSecurityImage(const QPixmap* pixmap) {
 }
 
 QPixmap SecurityImageProvider::requestPixmap(const QString& id, QSize* size, const QSize& requestedSize) {
-
     // adjust the internal pixmap to have the requested size
     QReadLocker lock(&_rwLock);
     if (id == "securityImage") {

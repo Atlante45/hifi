@@ -19,10 +19,9 @@
 
 #include <shared/ReadWriteLockable.h>
 
-#include "ObjectMotionState.h"
 #include "BulletUtil.h"
 #include "EntityDynamicInterface.h"
-
+#include "ObjectMotionState.h"
 
 class ObjectDynamic : public EntityDynamicInterface, public ReadWriteLockable {
 public:
@@ -39,7 +38,6 @@ public:
 
     virtual bool updateArguments(QVariantMap arguments) override;
     virtual QVariantMap getArguments() override;
-
 
     virtual QByteArray serialize() const override = 0;
     virtual void deserialize(QByteArray serializedArguments) override = 0;

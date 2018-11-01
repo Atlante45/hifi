@@ -12,11 +12,11 @@
 #ifndef hifi_TextureBaker_h
 #define hifi_TextureBaker_h
 
-#include <QtCore/QObject>
-#include <QtCore/QUrl>
-#include <QtCore/QRunnable>
 #include <QDir>
 #include <QImageReader>
+#include <QtCore/QObject>
+#include <QtCore/QRunnable>
+#include <QtCore/QUrl>
 
 #include <image/Image.h>
 
@@ -29,9 +29,9 @@ class TextureBaker : public Baker {
     Q_OBJECT
 
 public:
-    TextureBaker(const QUrl& textureURL, image::TextureUsage::Type textureType,
-                 const QDir& outputDirectory, const QString& metaTexturePathPrefix = "",
-                 const QString& baseFilename = QString(), const QByteArray& textureContent = QByteArray());
+    TextureBaker(const QUrl& textureURL, image::TextureUsage::Type textureType, const QDir& outputDirectory,
+                 const QString& metaTexturePathPrefix = "", const QString& baseFilename = QString(),
+                 const QByteArray& textureContent = QByteArray());
 
     const QByteArray& getOriginalTexture() const { return _originalTexture; }
 
@@ -45,7 +45,7 @@ public:
 
 public slots:
     virtual void bake() override;
-    virtual void abort() override; 
+    virtual void abort() override;
 
 signals:
     void originalTextureLoaded();

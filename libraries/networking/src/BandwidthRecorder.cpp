@@ -42,7 +42,6 @@ float BandwidthRecorder::Channel::getAverageOutputKilobitsPerSecond() const {
     return (_output.getAverageSampleValuePerSecond() * (8.0f / 1000));
 }
 
-
 void BandwidthRecorder::Channel::updateInputAverage(const float sample) {
     _input.updateAverage(sample);
 }
@@ -52,54 +51,54 @@ void BandwidthRecorder::Channel::updateOutputAverage(const float sample) {
 }
 
 BandwidthRecorder::BandwidthRecorder() {
-    for (uint i=0; i<CHANNEL_COUNT; i++) {
-        _channels[ i ] = NULL;
+    for (uint i = 0; i < CHANNEL_COUNT; i++) {
+        _channels[i] = NULL;
     }
 }
 
 BandwidthRecorder::~BandwidthRecorder() {
-    for (uint i=0; i<CHANNEL_COUNT; i++) {
-        delete _channels[ i ];
+    for (uint i = 0; i < CHANNEL_COUNT; i++) {
+        delete _channels[i];
     }
 }
 
 void BandwidthRecorder::updateInboundData(const quint8 channelType, const int sample) {
-    if (! _channels[channelType]) {
+    if (!_channels[channelType]) {
         _channels[channelType] = new Channel();
     }
     _channels[channelType]->updateInputAverage(sample);
 }
 
 void BandwidthRecorder::updateOutboundData(const quint8 channelType, const int sample) {
-    if (! _channels[channelType]) {
+    if (!_channels[channelType]) {
         _channels[channelType] = new Channel();
     }
     _channels[channelType]->updateOutputAverage(sample);
 }
 
 float BandwidthRecorder::getAverageInputPacketsPerSecond(const quint8 channelType) const {
-    if (! _channels[channelType]) {
+    if (!_channels[channelType]) {
         return 0.0f;
     }
     return _channels[channelType]->getAverageInputPacketsPerSecond();
 }
 
 float BandwidthRecorder::getAverageOutputPacketsPerSecond(const quint8 channelType) const {
-    if (! _channels[channelType]) {
+    if (!_channels[channelType]) {
         return 0.0f;
     }
     return _channels[channelType]->getAverageOutputPacketsPerSecond();
 }
 
 float BandwidthRecorder::getAverageInputKilobitsPerSecond(const quint8 channelType) const {
-    if (! _channels[channelType]) {
+    if (!_channels[channelType]) {
         return 0.0f;
     }
     return _channels[channelType]->getAverageInputKilobitsPerSecond();
 }
 
 float BandwidthRecorder::getAverageOutputKilobitsPerSecond(const quint8 channelType) const {
-    if (! _channels[channelType]) {
+    if (!_channels[channelType]) {
         return 0.0f;
     }
     return _channels[channelType]->getAverageOutputKilobitsPerSecond();
@@ -107,7 +106,7 @@ float BandwidthRecorder::getAverageOutputKilobitsPerSecond(const quint8 channelT
 
 float BandwidthRecorder::getTotalAverageInputPacketsPerSecond() const {
     float result = 0.0f;
-    for (uint i=0; i<CHANNEL_COUNT; i++) {
+    for (uint i = 0; i < CHANNEL_COUNT; i++) {
         if (_channels[i]) {
             result += _channels[i]->getAverageInputPacketsPerSecond();
         }
@@ -117,7 +116,7 @@ float BandwidthRecorder::getTotalAverageInputPacketsPerSecond() const {
 
 float BandwidthRecorder::getTotalAverageOutputPacketsPerSecond() const {
     float result = 0.0f;
-    for (uint i=0; i<CHANNEL_COUNT; i++) {
+    for (uint i = 0; i < CHANNEL_COUNT; i++) {
         if (_channels[i]) {
             result += _channels[i]->getAverageOutputPacketsPerSecond();
         }
@@ -127,7 +126,7 @@ float BandwidthRecorder::getTotalAverageOutputPacketsPerSecond() const {
 
 float BandwidthRecorder::getTotalAverageInputKilobitsPerSecond() const {
     float result = 0.0f;
-    for (uint i=0; i<CHANNEL_COUNT; i++) {
+    for (uint i = 0; i < CHANNEL_COUNT; i++) {
         if (_channels[i]) {
             result += _channels[i]->getAverageInputKilobitsPerSecond();
         }
@@ -137,7 +136,7 @@ float BandwidthRecorder::getTotalAverageInputKilobitsPerSecond() const {
 
 float BandwidthRecorder::getTotalAverageOutputKilobitsPerSecond() const {
     float result = 0.0f;
-    for (uint i=0; i<CHANNEL_COUNT; i++) {
+    for (uint i = 0; i < CHANNEL_COUNT; i++) {
         if (_channels[i]) {
             result += _channels[i]->getAverageOutputKilobitsPerSecond();
         }

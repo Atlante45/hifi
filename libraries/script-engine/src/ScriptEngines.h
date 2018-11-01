@@ -9,16 +9,16 @@
 #ifndef hifi_ScriptEngines_h
 #define hifi_ScriptEngines_h
 
-#include <functional>
 #include <atomic>
+#include <functional>
 #include <memory>
 
-#include <QtCore/QObject>
 #include <QtCore/QMutex>
+#include <QtCore/QObject>
 #include <QtCore/QReadWriteLock>
 
-#include <SettingHandle.h>
 #include <DependencyManager.h>
+#include <SettingHandle.h>
 #include <shared/ScriptInitializerMixin.h>
 
 #include "ScriptEngine.h"
@@ -91,8 +91,9 @@ public:
      * @param {boolean} [quitWhenFinished=false]
      * @returns {boolean}
      */
-    Q_INVOKABLE ScriptEnginePointer loadScript(const QUrl& scriptFilename = QString(),
-        bool isUserLoaded = true, bool loadScriptFromEditor = false, bool activateMainWindow = false, bool reload = false, bool quitWhenFinished = false);
+    Q_INVOKABLE ScriptEnginePointer loadScript(const QUrl& scriptFilename = QString(), bool isUserLoaded = true,
+                                               bool loadScriptFromEditor = false, bool activateMainWindow = false,
+                                               bool reload = false, bool quitWhenFinished = false);
 
     /**jsdoc
      * @function ScriptDiscoveryService.stopScript
@@ -102,10 +103,9 @@ public:
      */
     Q_INVOKABLE bool stopScript(const QString& scriptHash, bool restart = false);
 
-
     /**jsdoc
-    * @function ScriptDiscoveryService.reloadAllScripts
-    */
+     * @function ScriptDiscoveryService.reloadAllScripts
+     */
     Q_INVOKABLE void reloadAllScripts();
 
     /**jsdoc
@@ -113,7 +113,6 @@ public:
      * @param {boolean} [restart=false]
      */
     Q_INVOKABLE void stopAllScripts(bool restart = false);
-
 
     /**jsdoc
      * @function ScriptDiscoveryService.getRunning
@@ -264,7 +263,9 @@ protected slots:
 protected:
     friend class ScriptEngine;
 
-    ScriptEnginePointer reloadScript(const QString& scriptName, bool isUserLoaded = true) { return loadScript(scriptName, isUserLoaded, false, false, true); }
+    ScriptEnginePointer reloadScript(const QString& scriptName, bool isUserLoaded = true) {
+        return loadScript(scriptName, isUserLoaded, false, false, true);
+    }
     void removeScriptEngine(ScriptEnginePointer);
     void onScriptEngineLoaded(const QString& scriptFilename);
     void quitWhenFinished();

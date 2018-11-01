@@ -15,9 +15,9 @@
 #ifndef hifi_workload_Space_h
 #define hifi_workload_Space_h
 
+#include <glm/glm.hpp>
 #include <memory>
 #include <vector>
-#include <glm/glm.hpp>
 
 #include "Transaction.h"
 
@@ -52,8 +52,8 @@ public:
     uint8_t getRegion(int32_t proxyID) const;
 
     void clear() override;
-private:
 
+private:
     void processTransactionFrame(const Transaction& transaction) override;
     void processResets(const Transaction::Resets& transactions);
     void processRemoves(const Transaction::Removes& transactions);

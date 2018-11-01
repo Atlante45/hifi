@@ -18,5 +18,4 @@ public:
     static void bindMaterial(const graphics::MaterialPointer& material, gpu::Batch& batch, bool enableTextures);
 };
 
-
 #endif // hifi_RenderPipelines_h

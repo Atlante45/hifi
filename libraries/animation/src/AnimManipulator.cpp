@@ -20,23 +20,22 @@ AnimManipulator::JointVar::JointVar(const QString& jointNameIn, Type rotationTyp
     rotationVar(rotationVarIn),
     translationVar(translationVarIn),
     jointIndex(-1),
-    hasPerformedJointLookup(false) {}
+    hasPerformedJointLookup(false) {
+}
 
-AnimManipulator::AnimManipulator(const QString& id, float alpha) :
-    AnimNode(AnimNode::Type::Manipulator, id),
-    _alpha(alpha) {
-
+AnimManipulator::AnimManipulator(const QString& id, float alpha) : AnimNode(AnimNode::Type::Manipulator, id), _alpha(alpha) {
 }
 
 AnimManipulator::~AnimManipulator() {
-
 }
 
-const AnimPoseVec& AnimManipulator::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) {
+const AnimPoseVec& AnimManipulator::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                             AnimVariantMap& triggersOut) {
     return overlay(animVars, context, dt, triggersOut, _skeleton->getRelativeDefaultPoses());
 }
 
-const AnimPoseVec& AnimManipulator::overlay(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut, const AnimPoseVec& underPoses) {
+const AnimPoseVec& AnimManipulator::overlay(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                            AnimVariantMap& triggersOut, const AnimPoseVec& underPoses) {
     _alpha = animVars.lookup(_alphaVar, _alpha);
 
     _poses = underPoses;
@@ -46,9 +45,7 @@ const AnimPoseVec& AnimManipulator::overlay(const AnimVariantMap& animVars, cons
     }
 
     for (auto& jointVar : _jointVars) {
-
         if (!jointVar.hasPerformedJointLookup) {
-
             // map from joint name to joint index and cache the result.
             jointVar.jointIndex = _skeleton->nameToJointIndex(jointVar.jointName);
             if (jointVar.jointIndex < 0) {
@@ -58,7 +55,6 @@ const AnimPoseVec& AnimManipulator::overlay(const AnimVariantMap& animVars, cons
         }
 
         if (jointVar.jointIndex >= 0) {
-
             // use the underPose as our default value if we can.
             AnimPose defaultRelPose;
             if (jointVar.jointIndex <= (int)underPoses.size()) {
@@ -112,7 +108,6 @@ void AnimManipulator::removeAllJointVars() {
 
 AnimPose AnimManipulator::computeRelativePoseFromJointVar(const AnimVariantMap& animVars, const JointVar& jointVar,
                                                           const AnimPose& defaultRelPose, const AnimPoseVec& underPoses) {
-
     AnimPose defaultAbsPose = _skeleton->getAbsolutePose(jointVar.jointIndex, underPoses);
 
     // compute relative translation

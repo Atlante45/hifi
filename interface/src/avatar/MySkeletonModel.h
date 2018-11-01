@@ -9,8 +9,8 @@
 #ifndef hifi_MySkeletonModel_h
 #define hifi_MySkeletonModel_h
 
-#include <avatars-renderer/SkeletonModel.h>
 #include <AnimUtil.h>
+#include <avatars-renderer/SkeletonModel.h>
 #include "MyAvatar.h"
 
 /// A skeleton loaded from a model.
@@ -27,7 +27,7 @@ public:
 private:
     void updateFingers();
 
-    CriticallyDampedSpringPoseHelper _smoothHipsHelper;  // sensor frame
+    CriticallyDampedSpringPoseHelper _smoothHipsHelper; // sensor frame
     bool _prevIsFlying { false };
     float _flyIdleTimer { 0.0f };
 

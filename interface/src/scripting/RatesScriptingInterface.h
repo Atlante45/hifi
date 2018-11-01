@@ -1,5 +1,5 @@
 //
-//  RatesScriptingInterface.h 
+//  RatesScriptingInterface.h
 //  interface/src/scripting
 //
 //  Created by Zach Pomerantz on 4/20/16.

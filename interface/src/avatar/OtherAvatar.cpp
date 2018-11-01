@@ -12,21 +12,20 @@
 #include "AvatarMotionState.h"
 
 static glm::u8vec3 getLoadingOrbColor(Avatar::LoadingStatus loadingStatus) {
-
     const glm::u8vec3 NO_MODEL_COLOR(0xe3, 0xe3, 0xe3);
     const glm::u8vec3 LOAD_MODEL_COLOR(0xef, 0x93, 0xd1);
     const glm::u8vec3 LOAD_SUCCESS_COLOR(0x1f, 0xc6, 0xa6);
     const glm::u8vec3 LOAD_FAILURE_COLOR(0xc6, 0x21, 0x47);
     switch (loadingStatus) {
-    case Avatar::LoadingStatus::NoModel:
-        return NO_MODEL_COLOR;
-    case Avatar::LoadingStatus::LoadModel:
-        return LOAD_MODEL_COLOR;
-    case Avatar::LoadingStatus::LoadSuccess:
-        return LOAD_SUCCESS_COLOR;
-    case Avatar::LoadingStatus::LoadFailure:
-    default:
-        return LOAD_FAILURE_COLOR;
+        case Avatar::LoadingStatus::NoModel:
+            return NO_MODEL_COLOR;
+        case Avatar::LoadingStatus::LoadModel:
+            return LOAD_MODEL_COLOR;
+        case Avatar::LoadingStatus::LoadSuccess:
+            return LOAD_SUCCESS_COLOR;
+        case Avatar::LoadingStatus::LoadFailure:
+        default:
+            return LOAD_FAILURE_COLOR;
     }
 }
 

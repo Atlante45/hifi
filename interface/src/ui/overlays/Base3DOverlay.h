@@ -11,8 +11,8 @@
 #ifndef hifi_Base3DOverlay_h
 #define hifi_Base3DOverlay_h
 
-#include <Transform.h>
 #include <SpatiallyNestable.h>
+#include <Transform.h>
 #include <graphics-scripting/Forward.h>
 #include "Overlay.h"
 
@@ -36,7 +36,10 @@ public:
     virtual bool is3D() const override { return true; }
 
     virtual render::ItemKey getKey() override;
-    virtual uint32_t fetchMetaSubItems(render::ItemIDs& subItems) const override { subItems.push_back(getRenderItemID()); return (uint32_t) subItems.size(); }
+    virtual uint32_t fetchMetaSubItems(render::ItemIDs& subItems) const override {
+        subItems.push_back(getRenderItemID());
+        return (uint32_t)subItems.size();
+    }
     virtual scriptable::ScriptableModelBase getScriptableModel() override { return scriptable::ScriptableModelBase(); }
 
     // TODO: consider implementing registration points in this class
@@ -68,20 +71,29 @@ public:
     virtual void setProperties(const QVariantMap& properties) override;
     virtual QVariant getProperty(const QString& property) override;
 
-    virtual bool findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, float& distance,
-                                     BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking = false) { return false; }
+    virtual bool findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, float& distance, BoxFace& face,
+                                     glm::vec3& surfaceNormal, bool precisionPicking = false) {
+        return false;
+    }
 
-    virtual bool findRayIntersectionExtraInfo(const glm::vec3& origin, const glm::vec3& direction,
-                                              float& distance, BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo, bool precisionPicking = false) {
+    virtual bool findRayIntersectionExtraInfo(const glm::vec3& origin, const glm::vec3& direction, float& distance,
+                                              BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                              bool precisionPicking = false) {
         return findRayIntersection(origin, direction, distance, face, surfaceNormal, precisionPicking);
     }
 
-    virtual bool findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration, float& parabolicDistance,
-                                          BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking = false) { return false; }
+    virtual bool findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
+                                          float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+                                          bool precisionPicking = false) {
+        return false;
+    }
 
-    virtual bool findParabolaIntersectionExtraInfo(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                                   float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo, bool precisionPicking = false) {
-        return findParabolaIntersection(origin, velocity, acceleration, parabolicDistance, face, surfaceNormal, precisionPicking);
+    virtual bool findParabolaIntersectionExtraInfo(const glm::vec3& origin, const glm::vec3& velocity,
+                                                   const glm::vec3& acceleration, float& parabolicDistance, BoxFace& face,
+                                                   glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                                   bool precisionPicking = false) {
+        return findParabolaIntersection(origin, velocity, acceleration, parabolicDistance, face, surfaceNormal,
+                                        precisionPicking);
     }
 
     virtual SpatialParentTree* getParentTree() const override;

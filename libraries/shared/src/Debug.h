@@ -17,15 +17,15 @@
 
 #ifdef DEBUG
 
-#include <atomic>
 #include <QDebug>
+#include <atomic>
 
 // Return a string suffixed with a monotonically increasing ID, as string(ID).
 // Useful for Tracker<std::string> instances, when many instances share the same "name".
 //
 // K must have an implemented streaming operator for QDebug operator<<. (Done for std::string in this header.)
 static std::string getUniqString(const std::string& s) {
-    static std::atomic<size_t> counter{ 0 };
+    static std::atomic<size_t> counter { 0 };
     return s + '(' + std::to_string(counter.fetch_add(1)) + ')';
 }
 
@@ -37,7 +37,7 @@ static QDebug operator<<(QDebug debug, const std::string& s) {
 }
 
 // A counter. Prints out counts for each key on destruction.
-template <class K>
+template<class K>
 class Counter {
     using Map = std::map<K, size_t>;
 
@@ -49,10 +49,7 @@ public:
         DETAILED,
     };
 
-    Counter(const std::string& name, LogLevel logLevel = LogLevel::DETAILED) :
-        _logLevel{ logLevel } {
-        _name = name;
-    }
+    Counter(const std::string& name, LogLevel logLevel = LogLevel::DETAILED) : _logLevel { logLevel } { _name = name; }
     ~Counter() { log(); }
 
     // Increase the count for key (by inc).
@@ -79,7 +76,7 @@ private:
 // K must have an implemented streaming operator for QDebug operator<<. (Done for std::string in this header.)
 //
 // Useful cases may be tracking pointers' ctor/dtor (K = size_t or K = uintptr_t), or tracking resource names (K = std::string).
-template <class K>
+template<class K>
 class Tracker {
     using Map = std::map<K, size_t>;
     using DuplicateValueMap = std::map<size_t, size_t>;
@@ -96,10 +93,13 @@ public:
     };
 
     // Create a new tracker.
-    // legend:      defines a mapping from state (size_t) to that state's name. The final state is assumed to be the last state in the legend.
-    // allowReuse:  if true, keys in the last state may be set to a different state.
-    Tracker(const std::string& name, const std::vector<std::string>& legend, LogLevel logLevel = SUMMARY, bool allowReuse = true) :
-        _logLevel{ logLevel }, _allowReuse{ allowReuse }, _max{ legend.size() - 1 } {
+    // legend:      defines a mapping from state (size_t) to that state's name. The final state is assumed to be the last state
+    // in the legend. allowReuse:  if true, keys in the last state may be set to a different state.
+    Tracker(const std::string& name, const std::vector<std::string>& legend, LogLevel logLevel = SUMMARY,
+            bool allowReuse = true) :
+        _logLevel { logLevel },
+        _allowReuse { allowReuse },
+        _max { legend.size() - 1 } {
         _name = name;
         _legend = legend;
     }
@@ -145,10 +145,11 @@ void Counter<K>::sub(const K& k, size_t dec) {
     add(k, -dec);
 }
 
-template <class K>
+template<class K>
 void Counter<K>::log() {
     // Avoid logging nothing
-    if (!_map.size()) return;
+    if (!_map.size())
+        return;
 
     std::map<size_t, size_t> results;
     for (const auto& entry : _map) {
@@ -161,16 +162,18 @@ void Counter<K>::log() {
     for (const auto& entry : results) {
         qCDebug(shared) << entry.first << '\t' << entry.second << "entries";
     }
-    if (_logLevel == LogLevel::SUMMARY) return;
+    if (_logLevel == LogLevel::SUMMARY)
+        return;
 
     qCDebug(shared) << "Entries";
     for (const auto& entry : _map) {
         qCDebug(shared) << entry.first << '\t' << entry.second;
     }
-    if (_logLevel == LogLevel::DETAILED) return;
+    if (_logLevel == LogLevel::DETAILED)
+        return;
 }
 
-template <class K>
+template<class K>
 void Tracker<K>::set(const K& k, const size_t& v) {
     std::lock_guard<std::mutex> lock(_mutex);
 
@@ -188,7 +191,7 @@ void Tracker<K>::set(const K& k, const size_t& v) {
 
         if (dit == _duplicates.end()) {
             // No duplicate value map for k; add it
-            DuplicateValueMap duplicateValueMap{ std::pair<size_t, size_t>(v, 1) };
+            DuplicateValueMap duplicateValueMap { std::pair<size_t, size_t>(v, 1) };
             _duplicates.insert(std::pair<K, DuplicateValueMap>(k, duplicateValueMap));
         } else {
             // Duplicate value map for k; update it
@@ -208,18 +211,19 @@ void Tracker<K>::set(const K& k, const size_t& v) {
             it->second = v;
         } else {
             // Unordered entry for k; dump log and fail
-            qCDebug(shared) << "Badly ordered entry detected:" <<
-                k << _legend.at(it->second).c_str() << "->" << _legend.at(v).c_str();
+            qCDebug(shared) << "Badly ordered entry detected:" << k << _legend.at(it->second).c_str() << "->"
+                            << _legend.at(v).c_str();
             log();
             assert(false);
         }
     }
 }
 
-template <class K>
+template<class K>
 void Tracker<K>::log() {
     // Avoid logging nothing
-    if (!_map.size()) return;
+    if (!_map.size())
+        return;
 
     std::vector<std::vector<K>> results(_max + 1);
     for (const auto& entry : _map) {
@@ -230,7 +234,8 @@ void Tracker<K>::log() {
     for (auto i = 0; i < results.size(); ++i) {
         qCDebug(shared) << _legend.at(i) << '\t' << results[i].size() << "entries";
     }
-    if (_logLevel == LogLevel::SUMMARY) return;
+    if (_logLevel == LogLevel::SUMMARY)
+        return;
 
     size_t size = 0;
     for (const auto& entry : _duplicates) {
@@ -238,7 +243,8 @@ void Tracker<K>::log() {
     }
     qCDebug(shared) << "Duplicates" << size << "entries";
     // TODO: Add more detail to duplicate logging
-    if (_logLevel <= LogLevel::DUPLICATES) return;
+    if (_logLevel <= LogLevel::DUPLICATES)
+        return;
 
     qCDebug(shared) << "Entries";
     // Don't log the terminal case
@@ -248,10 +254,10 @@ void Tracker<K>::log() {
             qCDebug(shared) << "\t" << entry;
         }
     }
-    if (_logLevel <= LogLevel::DETAILED) return;
+    if (_logLevel <= LogLevel::DETAILED)
+        return;
 }
 
 #endif // DEBUG
 
 #endif // hifi_Debug_h
-

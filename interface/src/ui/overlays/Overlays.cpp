@@ -65,12 +65,8 @@ void Overlays::cleanupAllOverlays() {
         overlaysWorld.swap(_overlaysWorld);
     }
 
-    foreach(Overlay::Pointer overlay, overlaysHUD) {
-        _overlaysToDelete.push_back(overlay);
-    }
-    foreach(Overlay::Pointer overlay, overlaysWorld) {
-        _overlaysToDelete.push_back(overlay);
-    }
+    foreach (Overlay::Pointer overlay, overlaysHUD) { _overlaysToDelete.push_back(overlay); }
+    foreach (Overlay::Pointer overlay, overlaysWorld) { _overlaysToDelete.push_back(overlay); }
     cleanupOverlaysToDelete();
 }
 
@@ -80,12 +76,8 @@ void Overlays::init() {
 void Overlays::update(float deltatime) {
     {
         QMutexLocker locker(&_mutex);
-        foreach(const auto& thisOverlay, _overlaysHUD) {
-            thisOverlay->update(deltatime);
-        }
-        foreach(const auto& thisOverlay, _overlaysWorld) {
-            thisOverlay->update(deltatime);
-        }
+        foreach (const auto& thisOverlay, _overlaysHUD) { thisOverlay->update(deltatime); }
+        foreach (const auto& thisOverlay, _overlaysWorld) { thisOverlay->update(deltatime); }
     }
 
     cleanupOverlaysToDelete();
@@ -126,8 +118,7 @@ void Overlays::renderHUD(RenderArgs* renderArgs) {
     mat4 legacyProjection = glm::ortho<float>(0, width, height, 0, -1000, 1000);
 
     QMutexLocker locker(&_mutex);
-    foreach(Overlay::Pointer thisOverlay, _overlaysHUD) {
-
+    foreach (Overlay::Pointer thisOverlay, _overlaysHUD) {
         // Reset all batch pipeline settings between overlay
         geometryCache->useSimpleDrawPipeline(batch);
         batch.setResourceTexture(0, textureCache->getWhiteTexture()); // FIXME - do we really need to do this??
@@ -171,7 +162,8 @@ OverlayID Overlays::addOverlay(const QString& type, const QVariant& properties) 
     if (QThread::currentThread() != thread()) {
         OverlayID result;
         PROFILE_RANGE(script, __FUNCTION__);
-        BLOCKING_INVOKE_METHOD(this, "addOverlay", Q_RETURN_ARG(OverlayID, result), Q_ARG(QString, type), Q_ARG(QVariant, properties));
+        BLOCKING_INVOKE_METHOD(this, "addOverlay", Q_RETURN_ARG(OverlayID, result), Q_ARG(QString, type),
+                               Q_ARG(QVariant, properties));
         return result;
     }
 
@@ -185,7 +177,7 @@ OverlayID Overlays::addOverlay(const QString& type, const QVariant& properties) 
      *   </thead>
      *   <tbody>
      *     <tr><td><code>circle3d</code></td><td>3D</td><td>A circle.</td></tr>
-     *     <tr><td><code>cube</code></td><td>3D</td><td>A cube. Can also use a <code>shape</code> overlay to create a 
+     *     <tr><td><code>cube</code></td><td>3D</td><td>A cube. Can also use a <code>shape</code> overlay to create a
      *     cube.</td></tr>
      *     <tr><td><code>grid</code></td><td>3D</td><td>A grid of lines in a plane.</td></tr>
      *     <tr><td><code>image</code></td><td>2D</td><td>An image. Synonym: <code>billboard</code>.</td></tr>
@@ -195,7 +187,7 @@ OverlayID Overlays::addOverlay(const QString& type, const QVariant& properties) 
      *     <tr><td><code>rectangle</code></td><td>2D</td><td>A rectangle.</td></tr>
      *     <tr><td><code>rectangle3d</code></td><td>3D</td><td>A rectangle.</td></tr>
      *     <tr><td><code>shape</code></td><td>3D</td><td>A geometric shape, such as a cube, sphere, or cylinder.</td></tr>
-     *     <tr><td><code>sphere</code></td><td>3D</td><td>A sphere. Can also use a <code>shape</code> overlay to create a 
+     *     <tr><td><code>sphere</code></td><td>3D</td><td>A sphere. Can also use a <code>shape</code> overlay to create a
      *     sphere.</td></tr>
      *     <tr><td><code>text</code></td><td>2D</td><td>Text.</td></tr>
      *     <tr><td><code>text3d</code></td><td>3D</td><td>Text.</td></tr>
@@ -208,7 +200,7 @@ OverlayID Overlays::addOverlay(const QString& type, const QVariant& properties) 
      * @typedef {string} Overlays.OverlayType
      */
 
-     /**jsdoc
+    /**jsdoc
      * <p>Different overlay types have different properties:</p>
      * <table>
      *   <thead>
@@ -316,7 +308,7 @@ OverlayID Overlays::cloneOverlay(OverlayID id) {
         return cloneId;
     }
 
-    return UNKNOWN_OVERLAY_ID;  // Not found
+    return UNKNOWN_OVERLAY_ID; // Not found
 }
 
 bool Overlays::editOverlay(OverlayID id, const QVariant& properties) {
@@ -517,18 +509,15 @@ void OverlayPropertyResultFromScriptValue(const QScriptValue& object, OverlayPro
     value.value = object.toVariant();
 }
 
-
 RayToOverlayIntersectionResult Overlays::findRayIntersection(const PickRay& ray, bool precisionPicking,
                                                              const QScriptValue& overlayIDsToInclude,
-                                                             const QScriptValue& overlayIDsToDiscard,
-                                                             bool visibleOnly, bool collidableOnly) {
+                                                             const QScriptValue& overlayIDsToDiscard, bool visibleOnly,
+                                                             bool collidableOnly) {
     const QVector<OverlayID> overlaysToInclude = qVectorOverlayIDFromScriptValue(overlayIDsToInclude);
     const QVector<OverlayID> overlaysToDiscard = qVectorOverlayIDFromScriptValue(overlayIDsToDiscard);
 
-    return findRayIntersectionVector(ray, precisionPicking,
-                                     overlaysToInclude, overlaysToDiscard, visibleOnly, collidableOnly);
+    return findRayIntersectionVector(ray, precisionPicking, overlaysToInclude, overlaysToDiscard, visibleOnly, collidableOnly);
 }
-
 
 RayToOverlayIntersectionResult Overlays::findRayIntersectionVector(const PickRay& ray, bool precisionPicking,
                                                                    const QVector<OverlayID>& overlaysToInclude,
@@ -557,12 +546,12 @@ RayToOverlayIntersectionResult Overlays::findRayIntersectionVector(const PickRay
             BoxFace thisFace;
             glm::vec3 thisSurfaceNormal;
             QVariantMap thisExtraInfo;
-            if (thisOverlay->findRayIntersectionExtraInfo(ray.origin, ray.direction, thisDistance,
-                                                          thisFace, thisSurfaceNormal, thisExtraInfo, precisionPicking)) {
+            if (thisOverlay->findRayIntersectionExtraInfo(ray.origin, ray.direction, thisDistance, thisFace, thisSurfaceNormal,
+                                                          thisExtraInfo, precisionPicking)) {
                 bool isDrawInFront = thisOverlay->getDrawInFront();
                 bool isTablet = tabletIDs.contains(thisID);
-                if ((isDrawInFront && !bestIsFront && !bestIsTablet)
-                        || ((isTablet || isDrawInFront || !bestIsFront) && thisDistance < bestDistance)) {
+                if ((isDrawInFront && !bestIsFront && !bestIsTablet) ||
+                    ((isTablet || isDrawInFront || !bestIsFront) && thisDistance < bestDistance)) {
                     bestIsFront = isDrawInFront;
                     bestIsTablet = isTablet;
                     bestDistance = thisDistance;
@@ -580,7 +569,8 @@ RayToOverlayIntersectionResult Overlays::findRayIntersectionVector(const PickRay
     return result;
 }
 
-ParabolaToOverlayIntersectionResult Overlays::findParabolaIntersectionVector(const PickParabola& parabola, bool precisionPicking,
+ParabolaToOverlayIntersectionResult Overlays::findParabolaIntersectionVector(const PickParabola& parabola,
+                                                                             bool precisionPicking,
                                                                              const QVector<OverlayID>& overlaysToInclude,
                                                                              const QVector<OverlayID>& overlaysToDiscard,
                                                                              bool visibleOnly, bool collidableOnly) {
@@ -605,12 +595,12 @@ ParabolaToOverlayIntersectionResult Overlays::findParabolaIntersectionVector(con
             BoxFace thisFace;
             glm::vec3 thisSurfaceNormal;
             QVariantMap thisExtraInfo;
-            if (thisOverlay->findParabolaIntersectionExtraInfo(parabola.origin, parabola.velocity, parabola.acceleration, thisDistance,
-                thisFace, thisSurfaceNormal, thisExtraInfo, precisionPicking)) {
+            if (thisOverlay->findParabolaIntersectionExtraInfo(parabola.origin, parabola.velocity, parabola.acceleration,
+                                                               thisDistance, thisFace, thisSurfaceNormal, thisExtraInfo,
+                                                               precisionPicking)) {
                 bool isDrawInFront = thisOverlay->getDrawInFront();
-                if ((bestIsFront && isDrawInFront && thisDistance < bestDistance)
-                    || (!bestIsFront && (isDrawInFront || thisDistance < bestDistance))) {
-
+                if ((bestIsFront && isDrawInFront && thisDistance < bestDistance) ||
+                    (!bestIsFront && (isDrawInFront || thisDistance < bestDistance))) {
                     bestIsFront = isDrawInFront;
                     bestDistance = thisDistance;
                     result.intersects = true;
@@ -618,7 +608,8 @@ ParabolaToOverlayIntersectionResult Overlays::findParabolaIntersectionVector(con
                     result.face = thisFace;
                     result.surfaceNormal = thisSurfaceNormal;
                     result.overlayID = thisID;
-                    result.intersection = parabola.origin + parabola.velocity * thisDistance + 0.5f * parabola.acceleration * thisDistance * thisDistance;
+                    result.intersection = parabola.origin + parabola.velocity * thisDistance +
+                                          0.5f * parabola.acceleration * thisDistance * thisDistance;
                     result.distance = glm::distance(result.intersection, parabola.origin);
                     result.extraInfo = thisExtraInfo;
                 }
@@ -769,8 +760,7 @@ float Overlays::height() {
 }
 
 static glm::vec2 projectOntoOverlayXYPlane(glm::vec3 position, glm::quat rotation, glm::vec2 dimensions, const PickRay& pickRay,
-    const RayToOverlayIntersectionResult& rayPickResult) {
-
+                                           const RayToOverlayIntersectionResult& rayPickResult) {
     // Project the intersection point onto the local xy plane of the overlay.
     float distance;
     glm::vec3 planePosition = position;
@@ -787,7 +777,7 @@ static glm::vec2 projectOntoOverlayXYPlane(glm::vec3 position, glm::quat rotatio
     glm::vec3 localP = glm::inverse(rotation) * (p - position);
     glm::vec3 normalizedP = (localP / overlayDimensions) + glm::vec3(0.5f);
     return glm::vec2(normalizedP.x * overlayDimensions.x,
-        (1.0f - normalizedP.y) * overlayDimensions.y);  // flip y-axis
+                     (1.0f - normalizedP.y) * overlayDimensions.y); // flip y-axis
 }
 
 static uint32_t toPointerButtons(const QMouseEvent& event) {
@@ -812,8 +802,8 @@ static PointerEvent::Button toPointerButton(const QMouseEvent& event) {
 }
 
 PointerEvent Overlays::calculateOverlayPointerEvent(OverlayID overlayID, PickRay ray,
-                                             RayToOverlayIntersectionResult rayPickResult, QMouseEvent* event,
-                                             PointerEvent::EventType eventType) {
+                                                    RayToOverlayIntersectionResult rayPickResult, QMouseEvent* event,
+                                                    PointerEvent::EventType eventType) {
     auto overlay = std::dynamic_pointer_cast<Planar3DOverlay>(getOverlay(overlayID));
     if (getOverlayType(overlayID) == "web3d") {
         overlay = std::dynamic_pointer_cast<Web3DOverlay>(getOverlay(overlayID));
@@ -825,26 +815,26 @@ PointerEvent Overlays::calculateOverlayPointerEvent(OverlayID overlayID, PickRay
     glm::quat rotation = overlay->getWorldOrientation();
     glm::vec2 dimensions = overlay->getSize();
 
-
     glm::vec2 pos2D = projectOntoOverlayXYPlane(position, rotation, dimensions, ray, rayPickResult);
 
-    PointerEvent pointerEvent(eventType, PointerManager::MOUSE_POINTER_ID, pos2D, rayPickResult.intersection, rayPickResult.surfaceNormal,
-                              ray.direction, toPointerButton(*event), toPointerButtons(*event), event->modifiers());
+    PointerEvent pointerEvent(eventType, PointerManager::MOUSE_POINTER_ID, pos2D, rayPickResult.intersection,
+                              rayPickResult.surfaceNormal, ray.direction, toPointerButton(*event), toPointerButtons(*event),
+                              event->modifiers());
 
     return pointerEvent;
 }
-
 
 bool Overlays::mousePressEvent(QMouseEvent* event) {
     PerformanceTimer perfTimer("Overlays::mousePressEvent");
 
     PickRay ray = qApp->computePickRay(event->x(), event->y());
     RayToOverlayIntersectionResult rayPickResult = findRayIntersectionVector(ray, true, QVector<OverlayID>(),
-        QVector<OverlayID>());
+                                                                             QVector<OverlayID>());
     if (rayPickResult.intersects) {
         _currentClickingOnOverlayID = rayPickResult.overlayID;
 
-        PointerEvent pointerEvent = calculateOverlayPointerEvent(_currentClickingOnOverlayID, ray, rayPickResult, event, PointerEvent::Press);
+        PointerEvent pointerEvent = calculateOverlayPointerEvent(_currentClickingOnOverlayID, ray, rayPickResult, event,
+                                                                 PointerEvent::Press);
         mousePressPointerEvent(_currentClickingOnOverlayID, pointerEvent);
         return true;
     }
@@ -881,11 +871,12 @@ bool Overlays::mouseDoublePressEvent(QMouseEvent* event) {
 
     PickRay ray = qApp->computePickRay(event->x(), event->y());
     RayToOverlayIntersectionResult rayPickResult = findRayIntersectionVector(ray, true, QVector<OverlayID>(),
-        QVector<OverlayID>());
+                                                                             QVector<OverlayID>());
     if (rayPickResult.intersects) {
         _currentClickingOnOverlayID = rayPickResult.overlayID;
 
-        auto pointerEvent = calculateOverlayPointerEvent(_currentClickingOnOverlayID, ray, rayPickResult, event, PointerEvent::Press);
+        auto pointerEvent = calculateOverlayPointerEvent(_currentClickingOnOverlayID, ray, rayPickResult, event,
+                                                         PointerEvent::Press);
         // emit to scripts
         emit mouseDoublePressOnOverlay(_currentClickingOnOverlayID, pointerEvent);
         return true;
@@ -945,9 +936,10 @@ bool Overlays::mouseReleaseEvent(QMouseEvent* event) {
 
     PickRay ray = qApp->computePickRay(event->x(), event->y());
     RayToOverlayIntersectionResult rayPickResult = findRayIntersectionVector(ray, true, QVector<OverlayID>(),
-        QVector<OverlayID>());
+                                                                             QVector<OverlayID>());
     if (rayPickResult.intersects) {
-        auto pointerEvent = calculateOverlayPointerEvent(rayPickResult.overlayID, ray, rayPickResult, event, PointerEvent::Release);
+        auto pointerEvent = calculateOverlayPointerEvent(rayPickResult.overlayID, ray, rayPickResult, event,
+                                                         PointerEvent::Release);
         mouseReleasePointerEvent(rayPickResult.overlayID, pointerEvent);
     }
 
@@ -975,14 +967,16 @@ bool Overlays::mouseMoveEvent(QMouseEvent* event) {
 
     PickRay ray = qApp->computePickRay(event->x(), event->y());
     RayToOverlayIntersectionResult rayPickResult = findRayIntersectionVector(ray, true, QVector<OverlayID>(),
-        QVector<OverlayID>());
+                                                                             QVector<OverlayID>());
     if (rayPickResult.intersects) {
-        auto pointerEvent = calculateOverlayPointerEvent(rayPickResult.overlayID, ray, rayPickResult, event, PointerEvent::Move);
+        auto pointerEvent = calculateOverlayPointerEvent(rayPickResult.overlayID, ray, rayPickResult, event,
+                                                         PointerEvent::Move);
         mouseMovePointerEvent(rayPickResult.overlayID, pointerEvent);
 
         // If previously hovering over a different overlay then leave hover on that overlay.
         if (_currentHoverOverOverlayID != UNKNOWN_OVERLAY_ID && rayPickResult.overlayID != _currentHoverOverOverlayID) {
-            auto pointerEvent = calculateOverlayPointerEvent(_currentHoverOverOverlayID, ray, rayPickResult, event, PointerEvent::Move);
+            auto pointerEvent = calculateOverlayPointerEvent(_currentHoverOverOverlayID, ray, rayPickResult, event,
+                                                             PointerEvent::Move);
             hoverLeavePointerEvent(_currentHoverOverOverlayID, pointerEvent);
         }
 
@@ -998,7 +992,8 @@ bool Overlays::mouseMoveEvent(QMouseEvent* event) {
     } else {
         // If previously hovering an overlay then leave hover.
         if (_currentHoverOverOverlayID != UNKNOWN_OVERLAY_ID) {
-            auto pointerEvent = calculateOverlayPointerEvent(_currentHoverOverOverlayID, ray, rayPickResult, event, PointerEvent::Move);
+            auto pointerEvent = calculateOverlayPointerEvent(_currentHoverOverOverlayID, ray, rayPickResult, event,
+                                                             PointerEvent::Move);
             hoverLeavePointerEvent(_currentHoverOverOverlayID, pointerEvent);
 
             _currentHoverOverOverlayID = UNKNOWN_OVERLAY_ID;
@@ -1024,10 +1019,10 @@ void Overlays::mouseMovePointerEvent(const OverlayID& overlayID, const PointerEv
 
 QVector<QUuid> Overlays::findOverlays(const glm::vec3& center, float radius) {
     QVector<QUuid> result;
-    //if (QThread::currentThread() != thread()) {
+    // if (QThread::currentThread() != thread()) {
     //    PROFILE_RANGE(script, __FUNCTION__);
-    //    BLOCKING_INVOKE_METHOD(this, "findOverlays", Q_RETURN_ARG(QVector<QUuid>, result), Q_ARG(glm::vec3, center), Q_ARG(float, radius));
-    //    return result;
+    //    BLOCKING_INVOKE_METHOD(this, "findOverlays", Q_RETURN_ARG(QVector<QUuid>, result), Q_ARG(glm::vec3, center),
+    //    Q_ARG(float, radius)); return result;
     //}
 
     QMutexLocker locker(&_mutex);
@@ -1046,7 +1041,7 @@ QVector<QUuid> Overlays::findOverlays(const glm::vec3& center, float radius) {
             AABox overlayFrameBox(low, dimensions);
 
             Transform overlayToWorldMatrix = overlay->getTransform();
-            overlayToWorldMatrix.setScale(1.0f);  // ignore inherited scale factor from parents
+            overlayToWorldMatrix.setScale(1.0f); // ignore inherited scale factor from parents
             glm::mat4 worldToOverlayMatrix = glm::inverse(overlayToWorldMatrix.getMatrix());
             glm::vec3 overlayFrameSearchPosition = glm::vec3(worldToOverlayMatrix * glm::vec4(center, 1.0f));
             glm::vec3 penetration;

@@ -9,8 +9,8 @@
 #include <mutex>
 
 #include <QtCore/QObject>
-#include <QtCore/QtPlugin>
 #include <QtCore/QStringList>
+#include <QtCore/QtPlugin>
 
 #include <plugins/RuntimePlugin.h>
 #include <plugins/SteamClientPlugin.h>
@@ -28,9 +28,7 @@ public:
 
     virtual SteamClientPluginPointer getSteamClientPlugin() override {
         static std::once_flag once;
-        std::call_once(once, [&] {
-            _steamClientPlugin = std::make_shared<SteamAPIPlugin>();
-        });
+        std::call_once(once, [&] { _steamClientPlugin = std::make_shared<SteamAPIPlugin>(); });
         return _steamClientPlugin;
     }
 

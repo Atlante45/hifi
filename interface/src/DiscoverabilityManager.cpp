@@ -11,26 +11,24 @@
 
 #include "DiscoverabilityManager.h"
 
-#include <QtCore/QJsonDocument>
 #include <QThread>
+#include <QtCore/QJsonDocument>
 
 #include <AccountManager.h>
 #include <AddressManager.h>
 #include <DomainHandler.h>
 #include <NodeList.h>
+#include <UUID.h>
+#include <UserActivityLogger.h>
 #include <plugins/PluginManager.h>
 #include <plugins/SteamClientPlugin.h>
-#include <UserActivityLogger.h>
-#include <UUID.h>
 
 #include "CrashHandler.h"
 #include "Menu.h"
 
 const Discoverability::Mode DEFAULT_DISCOVERABILITY_MODE = Discoverability::Connections;
 
-DiscoverabilityManager::DiscoverabilityManager() :
-    _mode("discoverabilityMode", DEFAULT_DISCOVERABILITY_MODE)
-{
+DiscoverabilityManager::DiscoverabilityManager() : _mode("discoverabilityMode", DEFAULT_DISCOVERABILITY_MODE) {
     qRegisterMetaType<Discoverability::Mode>("Discoverability::Mode");
 }
 
@@ -52,7 +50,6 @@ void DiscoverabilityManager::updateLocation() {
     auto& domainHandler = DependencyManager::get<NodeList>()->getDomainHandler();
     bool discoverable = (_mode.get() != Discoverability::None) && !domainHandler.isServerless();
 
-
     if (accountManager->isLoggedIn()) {
         // construct a QJsonObject given the user's current address information
         QJsonObject rootObject;
@@ -64,20 +61,19 @@ void DiscoverabilityManager::updateLocation() {
         const QString CONNECTED_KEY_IN_LOCATION = "connected";
         locationObject.insert(CONNECTED_KEY_IN_LOCATION, discoverable && domainHandler.isConnected());
 
-        if (discoverable || _lastLocationObject.isEmpty()) { // Don't consider changes to these as update-worthy if we're not discoverable.
+        if (discoverable ||
+            _lastLocationObject.isEmpty()) { // Don't consider changes to these as update-worthy if we're not discoverable.
             const QString PATH_KEY_IN_LOCATION = "path";
             locationObject.insert(PATH_KEY_IN_LOCATION, pathString);
 
             if (!addressManager->getRootPlaceID().isNull()) {
                 const QString PLACE_ID_KEY_IN_LOCATION = "place_id";
-                locationObject.insert(PLACE_ID_KEY_IN_LOCATION,
-                                      uuidStringWithoutCurlyBraces(addressManager->getRootPlaceID()));
+                locationObject.insert(PLACE_ID_KEY_IN_LOCATION, uuidStringWithoutCurlyBraces(addressManager->getRootPlaceID()));
             }
 
             if (!domainHandler.getUUID().isNull()) {
                 const QString DOMAIN_ID_KEY_IN_LOCATION = "domain_id";
-                locationObject.insert(DOMAIN_ID_KEY_IN_LOCATION,
-                                      uuidStringWithoutCurlyBraces(domainHandler.getUUID()));
+                locationObject.insert(DOMAIN_ID_KEY_IN_LOCATION, uuidStringWithoutCurlyBraces(domainHandler.getUUID()));
             }
 
             // in case the place/domain isn't in the database, we send the network address and port
@@ -90,7 +86,8 @@ void DiscoverabilityManager::updateLocation() {
 
             const QString NODE_ID_IN_LOCATION = "node_id";
             const int UUID_REAL_LENGTH = 36;
-            locationObject.insert(NODE_ID_IN_LOCATION, DependencyManager::get<NodeList>()->getSessionUUID().toString().mid(1, UUID_REAL_LENGTH));
+            locationObject.insert(NODE_ID_IN_LOCATION,
+                                  DependencyManager::get<NodeList>()->getSessionUUID().toString().mid(1, UUID_REAL_LENGTH));
         }
 
         const QString AVAILABILITY_KEY_IN_LOCATION = "availability";
@@ -113,9 +110,8 @@ void DiscoverabilityManager::updateLocation() {
             apiPath = API_USER_LOCATION_PATH;
         }
 
-        accountManager->sendRequest(apiPath, AccountManagerAuth::Required,
-                                   QNetworkAccessManager::PutOperation,
-                                   callbackParameters, QJsonDocument(rootObject).toJson());
+        accountManager->sendRequest(apiPath, AccountManagerAuth::Required, QNetworkAccessManager::PutOperation,
+                                    callbackParameters, QJsonDocument(rootObject).toJson());
 
     } else if (UserActivityLogger::getInstance().isEnabled()) {
         // we still send a heartbeat to the metaverse server for stats collection
@@ -124,8 +120,8 @@ void DiscoverabilityManager::updateLocation() {
         callbackParameters.callbackReceiver = this;
         callbackParameters.jsonCallbackMethod = "handleHeartbeatResponse";
 
-        accountManager->sendRequest(API_USER_HEARTBEAT_PATH, AccountManagerAuth::Optional,
-                                   QNetworkAccessManager::PutOperation, callbackParameters);
+        accountManager->sendRequest(API_USER_HEARTBEAT_PATH, AccountManagerAuth::Optional, QNetworkAccessManager::PutOperation,
+                                    callbackParameters);
     }
 
     // Update Steam and crash logger
@@ -155,15 +151,13 @@ void DiscoverabilityManager::removeLocation() {
 
 void DiscoverabilityManager::setDiscoverabilityMode(Discoverability::Mode discoverabilityMode) {
     if (static_cast<Discoverability::Mode>(_mode.get()) != discoverabilityMode) {
-
         // update the setting to the new value
         _mode.set(static_cast<int>(discoverabilityMode));
-        updateLocation();  // update right away
+        updateLocation(); // update right away
 
         emit discoverabilityModeChanged(discoverabilityMode);
     }
 }
-
 
 QString DiscoverabilityManager::findableByString(Discoverability::Mode discoverabilityMode) {
     if (discoverabilityMode == Discoverability::None) {
@@ -179,7 +173,6 @@ QString DiscoverabilityManager::findableByString(Discoverability::Mode discovera
         return "";
     }
 }
-
 
 void DiscoverabilityManager::setVisibility() {
     Menu* menu = Menu::getInstance();

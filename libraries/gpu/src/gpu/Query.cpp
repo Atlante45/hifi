@@ -10,19 +10,15 @@
 //
 #include "Query.h"
 
-#include "GPULogging.h"
 #include "Batch.h"
+#include "GPULogging.h"
 
 using namespace gpu;
 
-Query::Query(const Handler& returnHandler, const std::string& name) :
-    _returnHandler(returnHandler),
-    _name(name)
-{
+Query::Query(const Handler& returnHandler, const std::string& name) : _returnHandler(returnHandler), _name(name) {
 }
 
-Query::~Query()
-{
+Query::~Query() {
 }
 
 double Query::getGPUElapsedTime() const {
@@ -41,16 +37,16 @@ void Query::triggerReturnHandler(uint64_t queryResult, uint64_t batchElapsedTime
     }
 }
 
-
-RangeTimer::RangeTimer(const std::string& name) :
-    _name(name) {
+RangeTimer::RangeTimer(const std::string& name) : _name(name) {
     for (int i = 0; i < QUERY_QUEUE_SIZE; i++) {
-        _timerQueries.push_back(std::make_shared<gpu::Query>([this] (const Query& query) {
-            _tailIndex++;
+        _timerQueries.push_back(std::make_shared<gpu::Query>(
+            [this](const Query& query) {
+                _tailIndex++;
 
-            _movingAverageGPU.addSample(query.getGPUElapsedTime());
-            _movingAverageBatch.addSample(query.getBatchElapsedTime());
-        }, _name));
+                _movingAverageGPU.addSample(query.getGPUElapsedTime());
+                _movingAverageBatch.addSample(query.getBatchElapsedTime());
+            },
+            _name));
     }
 }
 
@@ -63,11 +59,11 @@ void RangeTimer::end(gpu::Batch& batch) {
         return;
     }
     batch.endQuery(_timerQueries[rangeIndex(_headIndex)]);
-    
+
     if (_tailIndex < 0) {
         _tailIndex = _headIndex;
     }
-    
+
     // Pull the previous tail query hopping to see it return
     if (_tailIndex != _headIndex) {
         batch.getQuery(_timerQueries[rangeIndex(_tailIndex)]);

@@ -14,9 +14,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "AnimUtil.h"
 
-const AnimPose AnimPose::identity = AnimPose(glm::vec3(1.0f),
-                                             glm::quat(),
-                                             glm::vec3(0.0f));
+const AnimPose AnimPose::identity = AnimPose(glm::vec3(1.0f), glm::quat(), glm::vec3(0.0f));
 
 AnimPose::AnimPose(const glm::mat4& mat) {
     static const float EPSILON = 0.0001f;
@@ -74,8 +72,7 @@ AnimPose::operator glm::mat4() const {
     glm::vec3 xAxis = _rot * glm::vec3(_scale.x, 0.0f, 0.0f);
     glm::vec3 yAxis = _rot * glm::vec3(0.0f, _scale.y, 0.0f);
     glm::vec3 zAxis = _rot * glm::vec3(0.0f, 0.0f, _scale.z);
-    return glm::mat4(glm::vec4(xAxis, 0.0f), glm::vec4(yAxis, 0.0f),
-        glm::vec4(zAxis, 0.0f), glm::vec4(_trans, 1.0f));
+    return glm::mat4(glm::vec4(xAxis, 0.0f), glm::vec4(yAxis, 0.0f), glm::vec4(zAxis, 0.0f), glm::vec4(_trans, 1.0f));
 }
 
 void AnimPose::blend(const AnimPose& srcPose, float alpha) {

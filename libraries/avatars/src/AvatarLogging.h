@@ -17,4 +17,3 @@
 Q_DECLARE_LOGGING_CATEGORY(avatars)
 
 #endif // hifi_AvatarLogging_h
-

@@ -20,12 +20,7 @@
 class QNetworkReply;
 
 namespace Discoverability {
-    enum Mode {
-        None,
-        Friends,
-        Connections,
-        All
-    };
+enum Mode { None, Friends, Connections, All };
 }
 
 Q_DECLARE_METATYPE(Discoverability::Mode);
@@ -33,11 +28,11 @@ Q_DECLARE_METATYPE(Discoverability::Mode);
 class DiscoverabilityManager : public QObject, public Dependency {
     Q_OBJECT
     SINGLETON_DEPENDENCY
-    
+
 public slots:
     void updateLocation();
     void removeLocation();
-    
+
     Discoverability::Mode getDiscoverabilityMode() { return static_cast<Discoverability::Mode>(_mode.get()); }
     void setDiscoverabilityMode(Discoverability::Mode discoverabilityMode);
 
@@ -52,10 +47,10 @@ public:
 
 private slots:
     void handleHeartbeatResponse(QNetworkReply* requestReply);
-    
+
 private:
     DiscoverabilityManager();
-    
+
     Setting::Handle<int> _mode;
     QJsonObject _lastLocationObject;
 };

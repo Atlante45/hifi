@@ -9,8 +9,8 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 #include "GLBackend.h"
-#include "GLShared.h"
 #include "GLFramebuffer.h"
+#include "GLShared.h"
 
 #include <QtGui/QImage>
 
@@ -97,7 +97,7 @@ void GLBackend::do_clearFramebuffer(const Batch& batch, size_t paramOffset) {
         cacheStencilMask = _pipeline._stateCache.stencilActivation.getWriteMaskFront();
         if (cacheStencilMask != 0xFF) {
             restoreStencilMask = true;
-            glStencilMask( 0xFF);
+            glStencilMask(0xFF);
         }
     }
 
@@ -105,7 +105,7 @@ void GLBackend::do_clearFramebuffer(const Batch& batch, size_t paramOffset) {
     if (masks & Framebuffer::BUFFER_DEPTH) {
         glClearDepth(depth);
         glmask |= GL_DEPTH_BUFFER_BIT;
-        
+
         bool cacheDepthMask = _pipeline._stateCache.depthTest.getWriteMask();
         if (!cacheDepthMask) {
             restoreDepthMask = true;
@@ -127,14 +127,14 @@ void GLBackend::do_clearFramebuffer(const Batch& batch, size_t paramOffset) {
                 glDrawBuffers((GLsizei)drawBuffers.size(), drawBuffers.data());
                 glClearColor(color.x, color.y, color.z, color.w);
                 glmask |= GL_COLOR_BUFFER_BIT;
-            
-                (void) CHECK_GL_ERROR();
+
+                (void)CHECK_GL_ERROR();
             }
         } else {
             glClearColor(color.x, color.y, color.z, color.w);
             glmask |= GL_COLOR_BUFFER_BIT;
         }
-        
+
         // Force the color mask cache to WRITE_ALL if not the case
         do_setStateColorWriteMask(State::ColorMask::WRITE_ALL);
     }
@@ -162,7 +162,7 @@ void GLBackend::do_clearFramebuffer(const Batch& batch, size_t paramOffset) {
     if (restoreDepthMask) {
         glDepthMask(GL_FALSE);
     }
-    
+
     // Restore the color draw buffers only if a frmaebuffer is bound
     if (framebuffer && !drawBuffers.empty()) {
         auto glFramebuffer = syncGPUObject(*framebuffer);
@@ -171,36 +171,39 @@ void GLBackend::do_clearFramebuffer(const Batch& batch, size_t paramOffset) {
         }
     }
 
-    (void) CHECK_GL_ERROR();
+    (void)CHECK_GL_ERROR();
 }
 
 void GLBackend::downloadFramebuffer(const FramebufferPointer& srcFramebuffer, const Vec4i& region, QImage& destImage) {
     auto readFBO = getFramebufferID(srcFramebuffer);
     if (srcFramebuffer && readFBO) {
         if ((srcFramebuffer->getWidth() < (region.x + region.z)) || (srcFramebuffer->getHeight() < (region.y + region.w))) {
-          qCWarning(gpugllogging) << "GLBackend::downloadFramebuffer : srcFramebuffer is too small to provide the region queried";
-          return;
+            qCWarning(gpugllogging)
+                << "GLBackend::downloadFramebuffer : srcFramebuffer is too small to provide the region queried";
+            return;
         }
     }
 
     if ((destImage.width() < region.z) || (destImage.height() < region.w)) {
-          qCWarning(gpugllogging) << "GLBackend::downloadFramebuffer : destImage is too small to receive the region of the framebuffer";
-          return;
+        qCWarning(gpugllogging)
+            << "GLBackend::downloadFramebuffer : destImage is too small to receive the region of the framebuffer";
+        return;
     }
 
-#if defined(USE_GLES)    
+#if defined(USE_GLES)
     GLenum format = GL_RGBA;
 #else
     GLenum format = GL_BGRA;
 #endif
     if (destImage.format() != QImage::Format_ARGB32) {
-          qCWarning(gpugllogging) << "GLBackend::downloadFramebuffer : destImage format must be FORMAT_ARGB32 to receive the region of the framebuffer";
-          return;
+        qCWarning(gpugllogging) << "GLBackend::downloadFramebuffer : destImage format must be FORMAT_ARGB32 to receive the "
+                                   "region of the framebuffer";
+        return;
     }
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, getFramebufferID(srcFramebuffer));
     glReadPixels(region.x, region.y, region.z, region.w, format, GL_UNSIGNED_BYTE, destImage.bits());
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 
-    (void) CHECK_GL_ERROR();
+    (void)CHECK_GL_ERROR();
 }

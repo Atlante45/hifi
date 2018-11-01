@@ -15,21 +15,23 @@
 #include <QtCore/QString>
 #include <QtCore/QThread>
 #include <QtCore/QUrl>
+#include <QtScript/QScriptContextInfo>
 #include <QtScript/QScriptValue>
 #include <QtScript/QScriptValueIterator>
-#include <QtScript/QScriptContextInfo>
 
 #include "Profile.h"
 
 const QString BaseScriptEngine::SCRIPT_EXCEPTION_FORMAT { "[%0] %1 in %2:%3" };
 const QString BaseScriptEngine::SCRIPT_BACKTRACE_SEP { "\n    " };
 
-bool BaseScriptEngine::IS_THREADSAFE_INVOCATION(const QThread *thread, const QString& method) {
+bool BaseScriptEngine::IS_THREADSAFE_INVOCATION(const QThread* thread, const QString& method) {
     if (QThread::currentThread() == thread) {
         return true;
     }
     qCCritical(shared) << QString("Scripting::%1 @ %2 -- ignoring thread-unsafe call from %3")
-        .arg(method).arg(thread ? thread->objectName() : "(!thread)").arg(QThread::currentThread()->objectName());
+                              .arg(method)
+                              .arg(thread ? thread->objectName() : "(!thread)")
+                              .arg(QThread::currentThread()->objectName());
     qCDebug(shared) << "(please resolve on the calling side by using invokeMethod, executeOnScriptThread, etc.)";
     Q_ASSERT(false);
     return false;
@@ -61,7 +63,7 @@ QScriptValue BaseScriptEngine::makeError(const QScriptValue& _other, const QStri
         other = toScriptValue(other.toVariant());
     }
     // ~ var err = new Error(other.message)
-    auto err = proto.construct(QScriptValueList({other.property("message")}));
+    auto err = proto.construct(QScriptValueList({ other.property("message") }));
 
     // transfer over any existing properties
     QScriptValueIterator it(other);
@@ -79,8 +81,7 @@ QScriptValue BaseScriptEngine::lintScript(const QString& sourceCode, const QStri
     }
     const auto syntaxCheck = checkSyntax(sourceCode);
     if (syntaxCheck.state() != QScriptSyntaxCheckResult::Valid) {
-        auto err = globalObject().property("SyntaxError")
-            .construct(QScriptValueList({syntaxCheck.errorMessage()}));
+        auto err = globalObject().property("SyntaxError").construct(QScriptValueList({ syntaxCheck.errorMessage() }));
         err.setProperty("fileName", fileName);
         err.setProperty("lineNumber", syntaxCheck.errorLineNumber());
         err.setProperty("expressionBeginOffset", syntaxCheck.errorColumnNumber());
@@ -148,7 +149,7 @@ QScriptValue BaseScriptEngine::cloneUncaughtException(const QString& extraDetail
         }
     }
     err.setProperty("fileName", fileName);
-    err.setProperty("lineNumber", lineNumber );
+    err.setProperty("lineNumber", lineNumber);
     err.setProperty("detail", detail);
     err.setProperty("stack", backtrace.join(SCRIPT_BACKTRACE_SEP));
 
@@ -173,13 +174,14 @@ QString BaseScriptEngine::formatException(const QScriptValue& exception, bool in
     const auto message = exception.toString();
     const auto fileName = exception.property("fileName").toString();
     const auto lineNumber = exception.property("lineNumber").toString();
-    const auto stacktrace =  exception.property("stack").toString();
+    const auto stacktrace = exception.property("stack").toString();
 
     if (includeExtendedDetails) {
         // Display additional exception / troubleshooting hints that can be added via the custom Error .detail property
         // Example difference:
         //   [UncaughtExceptions] Error: Can't find variable: foobar in atp:/myentity.js\n...
-        //   [UncaughtException (construct {1eb5d3fa-23b1-411c-af83-163af7220e3f})] Error: Can't find variable: foobar in atp:/myentity.js\n...
+        //   [UncaughtException (construct {1eb5d3fa-23b1-411c-af83-163af7220e3f})] Error: Can't find variable: foobar in
+        //   atp:/myentity.js\n...
         if (exception.property("detail").isValid()) {
             note += " " + exception.property("detail").toString();
         }
@@ -280,12 +282,13 @@ QScriptValue BaseScriptEngine::evaluateInClosure(const QScriptValue& closure, co
 }
 
 // Lambda
-QScriptValue BaseScriptEngine::newLambdaFunction(std::function<QScriptValue(QScriptContext *, QScriptEngine*)> operation, const QScriptValue& data, const QScriptEngine::ValueOwnership& ownership) {
+QScriptValue BaseScriptEngine::newLambdaFunction(std::function<QScriptValue(QScriptContext*, QScriptEngine*)> operation,
+                                                 const QScriptValue& data, const QScriptEngine::ValueOwnership& ownership) {
     auto lambda = new Lambda(this, operation, data);
     auto object = newQObject(lambda, ownership);
     auto call = object.property("call");
     call.setPrototype(object); // context->callee().prototype() === Lambda QObject
-    call.setData(data);        // context->callee().data() will === data param
+    call.setData(data); // context->callee().data() will === data param
     return call;
 }
 QString Lambda::toString() const {
@@ -294,12 +297,16 @@ QString Lambda::toString() const {
 
 Lambda::~Lambda() {
 #ifdef DEBUG_JS_LAMBDA_FUNCS
-    qDebug() << "~Lambda" << "this" << this;
+    qDebug() << "~Lambda"
+             << "this" << this;
 #endif
 }
 
-Lambda::Lambda(QScriptEngine *engine, std::function<QScriptValue(QScriptContext *, QScriptEngine*)> operation, QScriptValue data)
-    : engine(engine), operation(operation), data(data) {
+Lambda::Lambda(QScriptEngine* engine, std::function<QScriptValue(QScriptContext*, QScriptEngine*)> operation,
+               QScriptValue data) :
+    engine(engine),
+    operation(operation),
+    data(data) {
 #ifdef DEBUG_JS_LAMBDA_FUNCS
     qDebug() << "Lambda" << data.toString();
 #endif

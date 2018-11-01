@@ -23,11 +23,8 @@ MouseEvent::MouseEvent() :
     isShifted(false),
     isControl(false),
     isMeta(false),
-    isAlt(false)
-{
-    
+    isAlt(false) {
 }
-
 
 MouseEvent::MouseEvent(const QMouseEvent& event) :
     x(event.x()),
@@ -38,8 +35,7 @@ MouseEvent::MouseEvent(const QMouseEvent& event) :
     isShifted(event.modifiers().testFlag(Qt::ShiftModifier)),
     isControl(event.modifiers().testFlag(Qt::ControlModifier)),
     isMeta(event.modifiers().testFlag(Qt::MetaModifier)),
-    isAlt(event.modifiers().testFlag(Qt::AltModifier))
-{
+    isAlt(event.modifiers().testFlag(Qt::AltModifier)) {
     // single button that caused the event
     switch (event.button()) {
         case Qt::LeftButton:
@@ -65,13 +61,13 @@ MouseEvent::MouseEvent(const QMouseEvent& event) :
  * @typedef {object} MouseEvent
  * @property {number} x - Integer x-coordinate of the event on the Interface window or HMD HUD.
  * @property {number} y - Integer y-coordinate of the event on the Interface window or HMD HUD.
- * @property {string} button - <code>"LEFT"</code>, <code>"MIDDLE"</code>, or <code>"RIGHT"</code> if a button press or release 
+ * @property {string} button - <code>"LEFT"</code>, <code>"MIDDLE"</code>, or <code>"RIGHT"</code> if a button press or release
  *     caused the event, otherwise <code>"NONE"</code>.
- * @property {boolean} isLeftButton - <code>true</code> if the left button was pressed when the event was generated, otherwise 
+ * @property {boolean} isLeftButton - <code>true</code> if the left button was pressed when the event was generated, otherwise
  *     <code>false</code>.
- * @property {boolean} isMiddleButton - <code>true</code> if the middle button was pressed when the event was generated, 
+ * @property {boolean} isMiddleButton - <code>true</code> if the middle button was pressed when the event was generated,
  *     otherwise <code>false</code>.
- * @property {boolean} isRightButton - <code>true</code> if the right button was pressed when the event was generated, 
+ * @property {boolean} isRightButton - <code>true</code> if the right button was pressed when the event was generated,
  *     otherwise <code>false</code>.
  * @property {boolean} isShifted - <code>true</code> if the Shift key was pressed when the event was generated, otherwise
  *     <code>false</code>.
@@ -98,7 +94,7 @@ QScriptValue MouseEvent::toScriptValue(QScriptEngine* engine, const MouseEvent& 
     obj.setProperty("isMeta", event.isMeta);
     obj.setProperty("isControl", event.isControl);
     obj.setProperty("isAlt", event.isAlt);
-    
+
     return obj;
 }
 

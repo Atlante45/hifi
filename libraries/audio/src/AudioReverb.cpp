@@ -8,22 +8,22 @@
 
 #include "AudioReverb.h"
 
+#include <math.h>
 #include <stdint.h>
 #include <string.h>
-#include <math.h>
 
 #ifdef _MSC_VER
 #include <intrin.h>
-#define MULHI(a,b)  ((int32_t)(__emul(a, b) >> 32))
+#define MULHI(a, b) ((int32_t)(__emul(a, b) >> 32))
 #else
-#define MULHI(a,b)  ((int32_t)(((int64_t)(a) * (int64_t)(b)) >> 32))
+#define MULHI(a, b) ((int32_t)(((int64_t)(a) * (int64_t)(b)) >> 32))
 #endif
 
 #ifndef MAX
-#define MAX(a,b)    (((a) > (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 #ifndef MIN
-#define MIN(a,b)    (((a) < (b)) ? (a) : (b))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
 static const float PHI = 0.6180339887f; // maximum allpass diffusion
@@ -38,12 +38,12 @@ static const double FIXQ32 = 4294967296.0;
 // Round an integer to the next power-of-two, at compile time.
 // VS2013 does not support constexpr so macros are used instead.
 #define SETBITS0(x) (x)
-#define SETBITS1(x) (SETBITS0(x) | (SETBITS0(x) >>  1))
-#define SETBITS2(x) (SETBITS1(x) | (SETBITS1(x) >>  2))
-#define SETBITS3(x) (SETBITS2(x) | (SETBITS2(x) >>  4))
-#define SETBITS4(x) (SETBITS3(x) | (SETBITS3(x) >>  8))
+#define SETBITS1(x) (SETBITS0(x) | (SETBITS0(x) >> 1))
+#define SETBITS2(x) (SETBITS1(x) | (SETBITS1(x) >> 2))
+#define SETBITS3(x) (SETBITS2(x) | (SETBITS2(x) >> 4))
+#define SETBITS4(x) (SETBITS3(x) | (SETBITS3(x) >> 8))
 #define SETBITS5(x) (SETBITS4(x) | (SETBITS4(x) >> 16))
-#define NEXTPOW2(x) (SETBITS5((x) - 1) + 1)
+#define NEXTPOW2(x) (SETBITS5((x)-1) + 1)
 
 //
 // Allpass delay modulation
@@ -92,7 +92,7 @@ static const int M_AP15 = 2205;
 static const int M_AP16 = 1773;
 static const int M_AP17 = 981;
 
-static const int M_AP7_MAX = M_AP7 + (1 << MOD_INTBITS) + 1;    // include max excursion
+static const int M_AP7_MAX = M_AP7 + (1 << MOD_INTBITS) + 1; // include max excursion
 static const int M_AP9_MAX = M_AP9 + (1 << MOD_INTBITS) + 1;
 
 static const int M_MT6 = 6863;
@@ -100,7 +100,7 @@ static const int M_MT7 = 7639;
 static const int M_MT8 = 3019;
 static const int M_MT9 = 2875;
 
-static const int M_LD0 = 8000;  // max late delay = 166ms
+static const int M_LD0 = 8000; // max late delay = 166ms
 static const int M_MT6_MAX = MAX(M_MT6, M_LD0);
 static const int M_MT7_MAX = MAX(M_MT7, M_LD0);
 static const int M_MT8_MAX = MAX(M_MT8, M_LD0);
@@ -117,11 +117,11 @@ static const int M_AP21 = 127;
 //
 
 static float dBToGain(float dB) {
-    return powf(10.0f, dB * (1/20.0f));
+    return powf(10.0f, dB * (1 / 20.0f));
 }
 
 static double dBToGain(double dB) {
-    return pow(10.0, dB * (1/20.0));
+    return pow(10.0, dB * (1 / 20.0));
 }
 
 // Returns the gain of analog (s-plane) peak-filter evaluated at w
@@ -147,15 +147,15 @@ static double analogShelf(double w0, double G, double resonance, int isHigh, dou
     double num, den;
 
     resonance = MIN(MAX(resonance, 0.0), 1.0);
-    Qrsq = 2.0 * pow(G, 1.0 - resonance);   // resonant 1/Q^2
+    Qrsq = 2.0 * pow(G, 1.0 - resonance); // resonant 1/Q^2
 
     w0sq = w0 * w0;
     wsq = w * w;
 
     if (isHigh) {
-        num = (G*wsq - w0sq) * (G*wsq - w0sq) + wsq * w0sq * Qrsq;
+        num = (G * wsq - w0sq) * (G * wsq - w0sq) + wsq * w0sq * Qrsq;
     } else {
-        num = (wsq - G*w0sq) * (wsq - G*w0sq) + wsq * w0sq * Qrsq;
+        num = (wsq - G * w0sq) * (wsq - G * w0sq) + wsq * w0sq * Qrsq;
     }
     den = wsq * wsq + w0sq * w0sq;
 
@@ -202,7 +202,7 @@ static void BQPeakBelowPi(double coef[5], double w0, double dbgain, double Q) {
     G = MAX(G, 1.001);
 
     // compute the Nyquist gain
-    wpi = w0 + 2.8 * (1.0 - w0/PI); // minimax-like error
+    wpi = w0 + 2.8 * (1.0 - w0 / PI); // minimax-like error
     wpi = MIN(wpi, PI);
     G1 = analogPeak(w0, G, Q, wpi);
 
@@ -243,7 +243,7 @@ static void BQPeakBelowPi(double coef[5], double w0, double dbgain, double Q) {
     b1 = 2.0 * (Wsq - G1);
     b2 = G1 - B + Wsq;
     a0 = 1.0 + A + Wsq;
-    a1 = 2.0 * (Wsq -  1.0);
+    a1 = 2.0 * (Wsq - 1.0);
     a2 = 1.0 - A + Wsq;
 
     // for unity gain, ensure poles/zeros in the right place.
@@ -256,9 +256,15 @@ static void BQPeakBelowPi(double coef[5], double w0, double dbgain, double Q) {
 
     // invert filter for cut
     if (dbgain < 0.0) {
-        temp = b0; b0 = a0; a0 = temp;
-        temp = b1; b1 = a1; a1 = temp;
-        temp = b2; b2 = a2; a2 = temp;
+        temp = b0;
+        b0 = a0;
+        a0 = temp;
+        temp = b1;
+        b1 = a1;
+        a1 = temp;
+        temp = b2;
+        b2 = a2;
+        a2 = temp;
     }
 
     // normalize
@@ -301,7 +307,7 @@ static void BQPeakAbovePi(double coef[5], double w0, double dbgain, double Q) {
     // compute the Nyquist gain
     wpi = PI;
     if (w0 < PI) {
-        G1 = G;                         // use the peak gain
+        G1 = G; // use the peak gain
     } else {
         G1 = analogPeak(w0, G, Q, wpi); // use Nyquist gain of analog response
     }
@@ -346,7 +352,7 @@ static void BQPeakAbovePi(double coef[5], double w0, double dbgain, double Q) {
     b1 = G1 * 2.0 * (Wnsq - 1.0);
     b2 = G1 * (1.0 - B + Wnsq);
     a0 = 1.0 + A + Wdsq;
-    a1 = 2.0 * (Wdsq -  1.0);
+    a1 = 2.0 * (Wdsq - 1.0);
     a2 = 1.0 - A + Wdsq;
 
     // for unity gain, ensure poles/zeros are in the right place.
@@ -359,9 +365,15 @@ static void BQPeakAbovePi(double coef[5], double w0, double dbgain, double Q) {
 
     // invert filter for cut
     if (dbgain < 0.0) {
-        temp = b0; b0 = a0; a0 = temp;
-        temp = b1; b1 = a1; a1 = temp;
-        temp = b2; b2 = a2; a2 = temp;
+        temp = b0;
+        b0 = a0;
+        a0 = temp;
+        temp = b1;
+        b1 = a1;
+        a1 = temp;
+        temp = b2;
+        b2 = a2;
+        a2 = temp;
     }
 
     // normalize
@@ -378,7 +390,7 @@ static void BQPeakAbovePi(double coef[5], double w0, double dbgain, double Q) {
 // Supports full range of w0.
 //
 void BQPeak(double coef[5], double w0, double dbgain, double Q) {
-    w0 = MAX(w0, 0.0);  // allow w0 > pi
+    w0 = MAX(w0, 0.0); // allow w0 > pi
 
     Q = MIN(MAX(Q, 1.0e-6), 1.0e+6);
 
@@ -407,7 +419,7 @@ void BQShelf(double coef[5], double w0, double dbgain, double resonance, int isH
     double temp, scale;
     int isUnity;
 
-    w0 = MAX(w0, 0.0);  // allow w0 > pi
+    w0 = MAX(w0, 0.0); // allow w0 > pi
 
     resonance = MIN(MAX(resonance, 0.0), 1.0);
 
@@ -419,7 +431,7 @@ void BQShelf(double coef[5], double w0, double dbgain, double resonance, int isH
     G = MAX(G, 1.001);
 
     // compute the Nyquist gain
-    wpi = w0 + 2.8 * (1.0 - w0/PI); // minimax-like error
+    wpi = w0 + 2.8 * (1.0 - w0 / PI); // minimax-like error
     wpi = MIN(wpi, PI);
     G1 = analogShelf(w0, G, resonance, isHigh, wpi);
 
@@ -431,7 +443,7 @@ void BQShelf(double coef[5], double w0, double dbgain, double resonance, int isH
     } else {
         // use wd as mapping
         wd = 0.5 * w0;
-        wn = wd * sqrt(G/G1);
+        wn = wd * sqrt(G / G1);
     }
     Wnsq = wn * wn;
     Wdsq = wd * wd;
@@ -462,7 +474,7 @@ void BQShelf(double coef[5], double w0, double dbgain, double resonance, int isH
     b1 = G1 * 2.0 * (Wnsq - 1.0);
     b2 = G1 * (1.0 - B + Wnsq);
     a0 = 1.0 + A + Wdsq;
-    a1 = 2.0 * (Wdsq -  1.0);
+    a1 = 2.0 * (Wdsq - 1.0);
     a2 = 1.0 - A + Wdsq;
 
     // for unity gain, ensure poles/zeros in the right place.
@@ -475,9 +487,15 @@ void BQShelf(double coef[5], double w0, double dbgain, double resonance, int isH
 
     // invert filter for cut
     if (dbgain < 0.0) {
-        temp = b0; b0 = a0; a0 = temp;
-        temp = b1; b1 = a1; a1 = temp;
-        temp = b2; b2 = a2; a2 = temp;
+        temp = b0;
+        b0 = a0;
+        a0 = temp;
+        temp = b1;
+        b1 = a1;
+        a1 = temp;
+        temp = b2;
+        b2 = a2;
+        a2 = temp;
     }
 
     // normalize
@@ -503,18 +521,17 @@ void BQFilter(double coef[5], double w0, int isHigh) {
     double b0, b1, b2, a0, a1, a2;
     double temp, scale;
 
-    w0 = MAX(w0, 0.0);  // allow w0 > pi for lowpass
+    w0 = MAX(w0, 0.0); // allow w0 > pi for lowpass
 
     if (isHigh) {
-
-        w0 = MIN(w0, PI);   // disallow w0 > pi for highpass
+        w0 = MIN(w0, PI); // disallow w0 > pi for highpass
 
         // compute the Nyquist gain
         wpi = PI;
         G1 = analogFilter(w0, isHigh, wpi);
 
         // approximate wn and wd
-        wn = 0.0;   // zeros at zero
+        wn = 0.0; // zeros at zero
         wd = 0.5 * w0;
 
         Wnsq = wn * wn;
@@ -522,18 +539,17 @@ void BQFilter(double coef[5], double w0, int isHigh) {
 
         // compute B and A
         B = 0.0;
-        A = SQRT2 * Wdsq / atan(wd);    // Qd = sqrt(0.5) * atan(wd)/wd;
+        A = SQRT2 * Wdsq / atan(wd); // Qd = sqrt(0.5) * atan(wd)/wd;
 
     } else {
-
         // compute the Nyquist gain
-        wpi = w0 + 2.8 * (1.0 - w0/PI); // minimax-like error
+        wpi = w0 + 2.8 * (1.0 - w0 / PI); // minimax-like error
         wpi = MIN(wpi, PI);
         G1 = analogFilter(w0, isHigh, wpi);
 
         // approximate wn and wd
         wd = 0.5 * w0;
-        wn = wd * sqrt(1.0/G1); // down G1 at pi, instead of zeros
+        wn = wd * sqrt(1.0 / G1); // down G1 at pi, instead of zeros
 
         Wnsq = wn * wn;
         Wdsq = wd * wd;
@@ -565,7 +581,7 @@ void BQFilter(double coef[5], double w0, int isHigh) {
     b1 = G1 * 2.0 * (Wnsq - 1.0);
     b2 = G1 * (1.0 - B + Wnsq);
     a0 = 1.0 + A + Wdsq;
-    a1 = 2.0 * (Wdsq -  1.0);
+    a1 = 2.0 * (Wdsq - 1.0);
     a2 = 1.0 - A + Wdsq;
 
     // normalize
@@ -586,14 +602,14 @@ void PZShelf(double coef[3], double w0, double dbgain, int isHigh) {
     double b0, b1, a0, a1;
     double temp, scale;
 
-    w0 = MAX(w0, 0.0);  // allow w0 > pi
+    w0 = MAX(w0, 0.0); // allow w0 > pi
 
     // convert boost into cut, invert later
     G = dBToGain(-fabs(dbgain));
 
     if (isHigh) {
-        G0 = 1.0;   // gain at DC
-        G1 = G;     // gain at Nyquist
+        G0 = 1.0; // gain at DC
+        G1 = G; // gain at Nyquist
     } else {
         G0 = G;
         G1 = 1.0;
@@ -604,7 +620,7 @@ void PZShelf(double coef[3], double w0, double dbgain, int isHigh) {
     b1 = -exp(-w0 * G0 / G1);
     a1 = -exp(-w0);
 
-    b1 += 0.12 * (1.0 + b1) * (1.0 + b1) * (1.0 - G1);  // analog-matched gain near Nyquist
+    b1 += 0.12 * (1.0 + b1) * (1.0 + b1) * (1.0 - G1); // analog-matched gain near Nyquist
 
     scale = G0 * (1.0 + a1) / (1.0 + b1);
     b0 *= scale;
@@ -612,8 +628,12 @@ void PZShelf(double coef[3], double w0, double dbgain, int isHigh) {
 
     // invert filter for boost
     if (dbgain > 0.0) {
-        temp = b0; b0 = a0; a0 = temp;
-        temp = b1; b1 = a1; a1 = temp;
+        temp = b0;
+        b0 = a0;
+        a0 = temp;
+        temp = b1;
+        b1 = a1;
+        a1 = temp;
     }
 
     // normalize
@@ -624,7 +644,6 @@ void PZShelf(double coef[3], double w0, double dbgain, int isHigh) {
 }
 
 class BandwidthEQ {
-
     float _buffer[4] {};
 
     float _output0 = 0.0f;
@@ -674,11 +693,11 @@ public:
         _dcR += _alpha * input1;
 
         // transposed Direct Form II
-        _output0   = _b0 * input0 + _buffer[0];
+        _output0 = _b0 * input0 + _buffer[0];
         _buffer[0] = _b1 * input0 - _a1 * _output0 + _buffer[1];
         _buffer[1] = _b2 * input0 - _a2 * _output0;
 
-        _output1   = _b0 * input1 + _buffer[2];
+        _output1 = _b0 * input1 + _buffer[2];
         _buffer[2] = _b1 * input1 - _a1 * _output1 + _buffer[3];
         _buffer[3] = _b2 * input1 - _a2 * _output1;
     }
@@ -694,7 +713,6 @@ public:
 
 template<int N>
 class DelayLine {
-
     float _buffer[N] {};
 
     float _output = 0.0f;
@@ -728,7 +746,6 @@ public:
 
 template<int N>
 class Allpass {
-
     float _buffer[N] {};
 
     float _output = 0.0f;
@@ -739,16 +756,14 @@ class Allpass {
     int _delay = N;
 
 public:
-    void setDelay(int d) {   
+    void setDelay(int d) {
         d = MIN(MAX(d, 1), N);
 
         _index1 = (_index0 - d) & (N - 1);
-        _delay = d; 
+        _delay = d;
     }
 
-    int getDelay() {
-        return _delay;
-    }
+    int getDelay() { return _delay; }
 
     void setCoef(float coef) {
         coef = MIN(MAX(coef, -1.0f), 1.0f);
@@ -766,9 +781,7 @@ public:
         _index1 = (_index1 + 1) & (N - 1);
     }
 
-    void getOutput(float& output) {
-        output = _output;
-    }
+    void getOutput(float& output) { output = _output; }
 
     void reset() {
         memset(_buffer, 0, sizeof(_buffer));
@@ -777,7 +790,6 @@ public:
 };
 
 class RandomLFO {
-
     int32_t _y0 = 0;
     int32_t _y1 = 0;
     int32_t _k = 0;
@@ -785,21 +797,21 @@ class RandomLFO {
     int32_t _gain = 0;
 
     uint32_t _rand0 = 0;
-    int32_t _q0 = 0;                // prev
-    int32_t _r0 = 0;                // next
-    int32_t _m0 = _r0/2 - _q0/2;    // slope
-    int32_t _b0 = _r0/2 + _q0/2;    // offset
+    int32_t _q0 = 0; // prev
+    int32_t _r0 = 0; // next
+    int32_t _m0 = _r0 / 2 - _q0 / 2; // slope
+    int32_t _b0 = _r0 / 2 + _q0 / 2; // offset
 
     uint32_t _rand1 = 0;
     int32_t _q1 = 0;
     int32_t _r1 = 0;
-    int32_t _m1 = _q1/2 - _r1/2;
-    int32_t _b1 = _q1/2 + _r1/2;
+    int32_t _m1 = _q1 / 2 - _r1 / 2;
+    int32_t _b1 = _q1 / 2 + _r1 / 2;
 
 public:
     void setFreq(float freq, float sampleRate) {
-        freq = MIN(freq, 1/16.0f * sampleRate);
-        freq = MAX(freq, 1/16777216.0f * sampleRate);
+        freq = MIN(freq, 1 / 16.0f * sampleRate);
+        freq = MAX(freq, 1 / 16777216.0f * sampleRate);
 
         double w = PI * (double)freq / (double)sampleRate;
 
@@ -827,41 +839,40 @@ public:
         // since the oscillators are in quadrature, zero-crossing in one detects a peak in the other
         if ((lfoCos ^ _y1) < 0) {
             //_rand0 = 69069 * _rand0 + 1;
-            _rand0 = (11 * _rand0 + 0x04000000) & 0xfc000000;   // periodic version
+            _rand0 = (11 * _rand0 + 0x04000000) & 0xfc000000; // periodic version
 
             _q0 = _r0;
-            _r0 = 2 * MULHI((int32_t)_rand0, _gain);    // Q31
+            _r0 = 2 * MULHI((int32_t)_rand0, _gain); // Q31
 
             // scale the peak-to-peak segment to traverse from q0 to r0
-            _m0 = _r0/2 - _q0/2;  // slope in Q31
-            _b0 = _r0/2 + _q0/2;  // offset in Q31
+            _m0 = _r0 / 2 - _q0 / 2; // slope in Q31
+            _b0 = _r0 / 2 + _q0 / 2; // offset in Q31
 
             int32_t sign = _y1 >> 31;
             _m0 = (_m0 ^ sign) - sign;
         }
         if ((lfoSin ^ _y0) < 0) {
             //_rand1 = 69069 * _rand1 + 1;
-            _rand1 = (11 * _rand1 + 0x04000000) & 0xfc000000;   // periodic version
+            _rand1 = (11 * _rand1 + 0x04000000) & 0xfc000000; // periodic version
 
             _q1 = _r1;
-            _r1 = 2 * MULHI((int32_t)_rand1, _gain);    // Q31
+            _r1 = 2 * MULHI((int32_t)_rand1, _gain); // Q31
 
             // scale the peak-to-peak segment to traverse from q1 to r1
-            _m1 = _q1/2 - _r1/2;  // slope in Q31
-            _b1 = _q1/2 + _r1/2;  // offset in Q31
+            _m1 = _q1 / 2 - _r1 / 2; // slope in Q31
+            _b1 = _q1 / 2 + _r1 / 2; // offset in Q31
 
             int32_t sign = _y0 >> 31;
             _m1 = (_m1 ^ sign) - sign;
         }
 
-        lfoSin = 2 * MULHI(lfoSin, _m0) + _b0;  // Q31
-        lfoCos = 2 * MULHI(lfoCos, _m1) + _b1;  // Q31
+        lfoSin = 2 * MULHI(lfoSin, _m0) + _b0; // Q31
+        lfoCos = 2 * MULHI(lfoCos, _m1) + _b1; // Q31
     }
 };
 
 template<int N>
 class AllPassMod {
-
     float _buffer[N] {};
 
     float _output = 0.0f;
@@ -871,15 +882,13 @@ class AllPassMod {
     int _delay = N;
 
 public:
-    void setDelay(int d) {   
+    void setDelay(int d) {
         d = MIN(MAX(d, 1), N);
 
-        _delay = d; 
+        _delay = d;
     }
 
-    int getDelay() {
-        return _delay;
-    }
+    int getDelay() { return _delay; }
 
     void setCoef(float coef) {
         coef = MIN(MAX(coef, -1.0f), 1.0f);
@@ -895,10 +904,10 @@ public:
         float frac = (mod & MOD_FRACMASK) * QMOD_TO_FLOAT;
 
         // 3rd-order Lagrange interpolation
-        int k0 = (_index - (offset-1)) & (N - 1);
-        int k1 = (_index - (offset+0)) & (N - 1);
-        int k2 = (_index - (offset+1)) & (N - 1);
-        int k3 = (_index - (offset+2)) & (N - 1);
+        int k0 = (_index - (offset - 1)) & (N - 1);
+        int k1 = (_index - (offset + 0)) & (N - 1);
+        int k2 = (_index - (offset + 1)) & (N - 1);
+        int k3 = (_index - (offset + 2)) & (N - 1);
 
         float x0 = _buffer[k0];
         float x1 = _buffer[k1];
@@ -906,16 +915,16 @@ public:
         float x3 = _buffer[k3];
 
         // compute the polynomial coefficients
-        float c0 = (1/6.0f) * (x3 - x0) + (1/2.0f) * (x1 - x2);
-        float c1 = (1/2.0f) * (x0 + x2) - x1;
-        float c2 = x2 - (1/3.0f) * x0 - (1/2.0f) * x1 - (1/6.0f) * x3;
+        float c0 = (1 / 6.0f) * (x3 - x0) + (1 / 2.0f) * (x1 - x2);
+        float c1 = (1 / 2.0f) * (x0 + x2) - x1;
+        float c2 = x2 - (1 / 3.0f) * x0 - (1 / 2.0f) * x1 - (1 / 6.0f) * x3;
         float c3 = x1;
 
         // compute the polynomial
         float delayMod = ((c0 * frac + c1) * frac + c2) * frac + c3;
 
-        _output = delayMod - _coef * input;         // feedforward path
-        _buffer[_index] = input + _coef * _output;  // feedback path
+        _output = delayMod - _coef * input; // feedforward path
+        _buffer[_index] = input + _coef * _output; // feedback path
 
         _index = (_index + 1) & (N - 1);
     }
@@ -927,7 +936,6 @@ public:
 };
 
 class LowpassEQ {
-
     float _buffer[2] {};
 
     float _output = 0.0f;
@@ -943,7 +951,7 @@ public:
         // two-zero lowpass filter, with zeros at approximately 12khz
         // zero radius is adjusted to match the response from 0..9khz
         _b0 = 0.5f;
-        _b1 = 0.5f * sqrtf(2.0f * 12000.0f/(0.5f * sampleRate) - 1.0f);
+        _b1 = 0.5f * sqrtf(2.0f * 12000.0f / (0.5f * sampleRate) - 1.0f);
         _b2 = 0.5f - _b1;
     }
 
@@ -962,7 +970,6 @@ public:
 };
 
 class DampingEQ {
-
     float _buffer[2] {};
 
     float _output = 0.0f;
@@ -981,8 +988,8 @@ public:
         freq1 = MIN(MAX(freq1, 1.0f), 24000.0f);
 
         double coefLo[3], coefHi[3];
-        PZShelf(coefLo, TWOPI * freq0 / sampleRate, dBgain0, 0);    // low shelf
-        PZShelf(coefHi, TWOPI * freq1 / sampleRate, dBgain1, 1);    // high shelf
+        PZShelf(coefLo, TWOPI * freq0 / sampleRate, dBgain0, 0); // low shelf
+        PZShelf(coefHi, TWOPI * freq1 / sampleRate, dBgain1, 1); // high shelf
 
         // convolve into a single biquad
         _b0 = (float)(coefLo[0] * coefHi[0]);
@@ -996,7 +1003,7 @@ public:
         output = _output;
 
         // transposed Direct Form II
-        _output    = _b0 * input + _buffer[0];
+        _output = _b0 * input + _buffer[0];
         _buffer[0] = _b1 * input - _a1 * _output + _buffer[1];
         _buffer[1] = _b2 * input - _a2 * _output;
     }
@@ -1009,7 +1016,6 @@ public:
 
 template<int N>
 class MultiTap2 {
-
     float _buffer[N] {};
 
     float _output0 = 0.0f;
@@ -1033,9 +1039,12 @@ public:
 
     int getDelay(int k) {
         switch (k) {
-            case 0: return _delay0;
-            case 1: return _delay1;
-            default: return 0;
+            case 0:
+                return _delay0;
+            case 1:
+                return _delay1;
+            default:
+                return 0;
         }
     }
 
@@ -1067,7 +1076,6 @@ public:
 
 template<int N>
 class MultiTap3 {
-
     float _buffer[N] {};
 
     float _output0 = 0.0f;
@@ -1095,10 +1103,14 @@ public:
 
     int getDelay(int k) {
         switch (k) {
-            case 0: return _delay0;
-            case 1: return _delay1;
-            case 2: return _delay2;
-            default: return 0;
+            case 0:
+                return _delay0;
+            case 1:
+                return _delay1;
+            case 2:
+                return _delay2;
+            default:
+                return 0;
         }
     }
 
@@ -1137,7 +1149,6 @@ public:
 // Stereo Reverb
 //
 class ReverbImpl {
-
     // Preprocess
     BandwidthEQ _bw;
     DelayLine<NEXTPOW2(M_PD0)> _dl0;
@@ -1204,86 +1215,69 @@ class ReverbImpl {
     float _wetDryMix = 0.0f;
 
 public:
-    void setParameters(ReverbParameters *p);
+    void setParameters(ReverbParameters* p);
     void process(float** inputs, float** outputs, int numFrames);
     void reset();
 };
 
 static const short primeTable[] = {
-       1,    2,    3,    5,    7,   11,   13,   17,   19,   23,   29,   31,   37,   41,   43, 
-      47,   53,   59,   61,   67,   71,   73,   79,   83,   89,   97,  101,  103,  107,  109, 
-     113,  127,  131,  137,  139,  149,  151,  157,  163,  167,  173,  179,  181,  191,  193, 
-     197,  199,  211,  223,  227,  229,  233,  239,  241,  251,  257,  263,  269,  271,  277, 
-     281,  283,  293,  307,  311,  313,  317,  331,  337,  347,  349,  353,  359,  367,  373, 
-     379,  383,  389,  397,  401,  409,  419,  421,  431,  433,  439,  443,  449,  457,  461, 
-     463,  467,  479,  487,  491,  499,  503,  509,  521,  523,  541,  547,  557,  563,  569, 
-     571,  577,  587,  593,  599,  601,  607,  613,  617,  619,  631,  641,  643,  647,  653, 
-     659,  661,  673,  677,  683,  691,  701,  709,  719,  727,  733,  739,  743,  751,  757, 
-     761,  769,  773,  787,  797,  809,  811,  821,  823,  827,  829,  839,  853,  857,  859, 
-     863,  877,  881,  883,  887,  907,  911,  919,  929,  937,  941,  947,  953,  967,  971, 
-     977,  983,  991,  997, 1009, 1013, 1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 
-    1069, 1087, 1091, 1093, 1097, 1103, 1109, 1117, 1123, 1129, 1151, 1153, 1163, 1171, 1181, 
-    1187, 1193, 1201, 1213, 1217, 1223, 1229, 1231, 1237, 1249, 1259, 1277, 1279, 1283, 1289, 
-    1291, 1297, 1301, 1303, 1307, 1319, 1321, 1327, 1361, 1367, 1373, 1381, 1399, 1409, 1423, 
-    1427, 1429, 1433, 1439, 1447, 1451, 1453, 1459, 1471, 1481, 1483, 1487, 1489, 1493, 1499, 
-    1511, 1523, 1531, 1543, 1549, 1553, 1559, 1567, 1571, 1579, 1583, 1597, 1601, 1607, 1609, 
-    1613, 1619, 1621, 1627, 1637, 1657, 1663, 1667, 1669, 1693, 1697, 1699, 1709, 1721, 1723, 
-    1733, 1741, 1747, 1753, 1759, 1777, 1783, 1787, 1789, 1801, 1811, 1823, 1831, 1847, 1861, 
-    1867, 1871, 1873, 1877, 1879, 1889, 1901, 1907, 1913, 1931, 1933, 1949, 1951, 1973, 1979, 
-    1987, 1993, 1997, 1999, 2003, 2011, 2017, 2027, 2029, 2039, 2053, 2063, 2069, 2081, 2083, 
-    2087, 2089, 2099, 2111, 2113, 2129, 2131, 2137, 2141, 2143, 2153, 2161, 2179, 2203, 2207, 
-    2213, 2221, 2237, 2239, 2243, 2251, 2267, 2269, 2273, 2281, 2287, 2293, 2297, 2309, 2311, 
-    2333, 2339, 2341, 2347, 2351, 2357, 2371, 2377, 2381, 2383, 2389, 2393, 2399, 2411, 2417, 
-    2423, 2437, 2441, 2447, 2459, 2467, 2473, 2477, 2503, 2521, 2531, 2539, 2543, 2549, 2551, 
-    2557, 2579, 2591, 2593, 2609, 2617, 2621, 2633, 2647, 2657, 2659, 2663, 2671, 2677, 2683, 
-    2687, 2689, 2693, 2699, 2707, 2711, 2713, 2719, 2729, 2731, 2741, 2749, 2753, 2767, 2777, 
-    2789, 2791, 2797, 2801, 2803, 2819, 2833, 2837, 2843, 2851, 2857, 2861, 2879, 2887, 2897, 
-    2903, 2909, 2917, 2927, 2939, 2953, 2957, 2963, 2969, 2971, 2999, 3001, 3011, 3019, 3023, 
-    3037, 3041, 3049, 3061, 3067, 3079, 3083, 3089, 3109, 3119, 3121, 3137, 3163, 3167, 3169, 
-    3181, 3187, 3191, 3203, 3209, 3217, 3221, 3229, 3251, 3253, 3257, 3259, 3271, 3299, 3301, 
-    3307, 3313, 3319, 3323, 3329, 3331, 3343, 3347, 3359, 3361, 3371, 3373, 3389, 3391, 3407, 
-    3413, 3433, 3449, 3457, 3461, 3463, 3467, 3469, 3491, 3499, 3511, 3517, 3527, 3529, 3533, 
-    3539, 3541, 3547, 3557, 3559, 3571, 3581, 3583, 3593, 3607, 3613, 3617, 3623, 3631, 3637, 
-    3643, 3659, 3671, 3673, 3677, 3691, 3697, 3701, 3709, 3719, 3727, 3733, 3739, 3761, 3767, 
-    3769, 3779, 3793, 3797, 3803, 3821, 3823, 3833, 3847, 3851, 3853, 3863, 3877, 3881, 3889, 
-    3907, 3911, 3917, 3919, 3923, 3929, 3931, 3943, 3947, 3967, 3989, 4001, 4003, 4007, 4013, 
-    4019, 4021, 4027, 4049, 4051, 4057, 4073, 4079, 4091, 4093, 4099, 4111, 4127, 4129, 4133, 
-    4139, 4153, 4157, 4159, 4177, 4201, 4211, 4217, 4219, 4229, 4231, 4241, 4243, 4253, 4259, 
-    4261, 4271, 4273, 4283, 4289, 4297, 4327, 4337, 4339, 4349, 4357, 4363, 4373, 4391, 4397, 
-    4409, 4421, 4423, 4441, 4447, 4451, 4457, 4463, 4481, 4483, 4493, 4507, 4513, 4517, 4519, 
-    4523, 4547, 4549, 4561, 4567, 4583, 4591, 4597, 4603, 4621, 4637, 4639, 4643, 4649, 4651, 
-    4657, 4663, 4673, 4679, 4691, 4703, 4721, 4723, 4729, 4733, 4751, 4759, 4783, 4787, 4789, 
-    4793, 4799, 4801, 4813, 4817, 4831, 4861, 4871, 4877, 4889, 4903, 4909, 4919, 4931, 4933, 
-    4937, 4943, 4951, 4957, 4967, 4969, 4973, 4987, 4993, 4999, 5003, 5009, 5011, 5021, 5023, 
-    5039, 5051, 5059, 5077, 5081, 5087, 5099, 5101, 5107, 5113, 5119, 5147, 5153, 5167, 5171, 
-    5179, 5189, 5197, 5209, 5227, 5231, 5233, 5237, 5261, 5273, 5279, 5281, 5297, 5303, 5309, 
-    5323, 5333, 5347, 5351, 5381, 5387, 5393, 5399, 5407, 5413, 5417, 5419, 5431, 5437, 5441, 
-    5443, 5449, 5471, 5477, 5479, 5483, 5501, 5503, 5507, 5519, 5521, 5527, 5531, 5557, 5563, 
-    5569, 5573, 5581, 5591, 5623, 5639, 5641, 5647, 5651, 5653, 5657, 5659, 5669, 5683, 5689, 
-    5693, 5701, 5711, 5717, 5737, 5741, 5743, 5749, 5779, 5783, 5791, 5801, 5807, 5813, 5821, 
-    5827, 5839, 5843, 5849, 5851, 5857, 5861, 5867, 5869, 5879, 5881, 5897, 5903, 5923, 5927, 
-    5939, 5953, 5981, 5987, 6007, 6011, 6029, 6037, 6043, 6047, 6053, 6067, 6073, 6079, 6089, 
-    6091, 6101, 6113, 6121, 6131, 6133, 6143, 6151, 6163, 6173, 6197, 6199, 6203, 6211, 6217, 
-    6221, 6229, 6247, 6257, 6263, 6269, 6271, 6277, 6287, 6299, 6301, 6311, 6317, 6323, 6329, 
-    6337, 6343, 6353, 6359, 6361, 6367, 6373, 6379, 6389, 6397, 6421, 6427, 6449, 6451, 6469, 
-    6473, 6481, 6491, 6521, 6529, 6547, 6551, 6553, 6563, 6569, 6571, 6577, 6581, 6599, 6607, 
-    6619, 6637, 6653, 6659, 6661, 6673, 6679, 6689, 6691, 6701, 6703, 6709, 6719, 6733, 6737, 
-    6761, 6763, 6779, 6781, 6791, 6793, 6803, 6823, 6827, 6829, 6833, 6841, 6857, 6863, 6869, 
-    6871, 6883, 6899, 6907, 6911, 6917, 6947, 6949, 6959, 6961, 6967, 6971, 6977, 6983, 6991, 
-    6997, 7001, 7013, 7019, 7027, 7039, 7043, 7057, 7069, 7079, 7103, 7109, 7121, 7127, 7129, 
-    7151, 7159, 7177, 7187, 7193, 7207, 7211, 7213, 7219, 7229, 7237, 7243, 7247, 7253, 7283, 
-    7297, 7307, 7309, 7321, 7331, 7333, 7349, 7351, 7369, 7393, 7411, 7417, 7433, 7451, 7457, 
-    7459, 7477, 7481, 7487, 7489, 7499, 7507, 7517, 7523, 7529, 7537, 7541, 7547, 7549, 7559, 
-    7561, 7573, 7577, 7583, 7589, 7591, 7603, 7607, 7621, 7639, 7643, 7649, 7669, 7673, 7681, 
-    7687, 7691, 7699, 7703, 7717, 7723, 7727, 7741, 7753, 7757, 7759, 7789, 7793, 7817, 7823, 
-    7829, 7841, 7853, 7867, 7873, 7877, 7879, 7883, 7901, 7907, 7919, 7927, 7933, 7937, 7949, 
-    7951, 7963, 7993, 8009, 8011, 8017, 8039, 8053, 8059, 8069, 8081, 8087, 8089, 8093, 8101, 
-    8111, 8117, 8123, 8147, 8161, 8167, 8171, 8179, 8191,  
+    1,    2,    3,    5,    7,    11,   13,   17,   19,   23,   29,   31,   37,   41,   43,   47,   53,   59,   61,   67,
+    71,   73,   79,   83,   89,   97,   101,  103,  107,  109,  113,  127,  131,  137,  139,  149,  151,  157,  163,  167,
+    173,  179,  181,  191,  193,  197,  199,  211,  223,  227,  229,  233,  239,  241,  251,  257,  263,  269,  271,  277,
+    281,  283,  293,  307,  311,  313,  317,  331,  337,  347,  349,  353,  359,  367,  373,  379,  383,  389,  397,  401,
+    409,  419,  421,  431,  433,  439,  443,  449,  457,  461,  463,  467,  479,  487,  491,  499,  503,  509,  521,  523,
+    541,  547,  557,  563,  569,  571,  577,  587,  593,  599,  601,  607,  613,  617,  619,  631,  641,  643,  647,  653,
+    659,  661,  673,  677,  683,  691,  701,  709,  719,  727,  733,  739,  743,  751,  757,  761,  769,  773,  787,  797,
+    809,  811,  821,  823,  827,  829,  839,  853,  857,  859,  863,  877,  881,  883,  887,  907,  911,  919,  929,  937,
+    941,  947,  953,  967,  971,  977,  983,  991,  997,  1009, 1013, 1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063,
+    1069, 1087, 1091, 1093, 1097, 1103, 1109, 1117, 1123, 1129, 1151, 1153, 1163, 1171, 1181, 1187, 1193, 1201, 1213, 1217,
+    1223, 1229, 1231, 1237, 1249, 1259, 1277, 1279, 1283, 1289, 1291, 1297, 1301, 1303, 1307, 1319, 1321, 1327, 1361, 1367,
+    1373, 1381, 1399, 1409, 1423, 1427, 1429, 1433, 1439, 1447, 1451, 1453, 1459, 1471, 1481, 1483, 1487, 1489, 1493, 1499,
+    1511, 1523, 1531, 1543, 1549, 1553, 1559, 1567, 1571, 1579, 1583, 1597, 1601, 1607, 1609, 1613, 1619, 1621, 1627, 1637,
+    1657, 1663, 1667, 1669, 1693, 1697, 1699, 1709, 1721, 1723, 1733, 1741, 1747, 1753, 1759, 1777, 1783, 1787, 1789, 1801,
+    1811, 1823, 1831, 1847, 1861, 1867, 1871, 1873, 1877, 1879, 1889, 1901, 1907, 1913, 1931, 1933, 1949, 1951, 1973, 1979,
+    1987, 1993, 1997, 1999, 2003, 2011, 2017, 2027, 2029, 2039, 2053, 2063, 2069, 2081, 2083, 2087, 2089, 2099, 2111, 2113,
+    2129, 2131, 2137, 2141, 2143, 2153, 2161, 2179, 2203, 2207, 2213, 2221, 2237, 2239, 2243, 2251, 2267, 2269, 2273, 2281,
+    2287, 2293, 2297, 2309, 2311, 2333, 2339, 2341, 2347, 2351, 2357, 2371, 2377, 2381, 2383, 2389, 2393, 2399, 2411, 2417,
+    2423, 2437, 2441, 2447, 2459, 2467, 2473, 2477, 2503, 2521, 2531, 2539, 2543, 2549, 2551, 2557, 2579, 2591, 2593, 2609,
+    2617, 2621, 2633, 2647, 2657, 2659, 2663, 2671, 2677, 2683, 2687, 2689, 2693, 2699, 2707, 2711, 2713, 2719, 2729, 2731,
+    2741, 2749, 2753, 2767, 2777, 2789, 2791, 2797, 2801, 2803, 2819, 2833, 2837, 2843, 2851, 2857, 2861, 2879, 2887, 2897,
+    2903, 2909, 2917, 2927, 2939, 2953, 2957, 2963, 2969, 2971, 2999, 3001, 3011, 3019, 3023, 3037, 3041, 3049, 3061, 3067,
+    3079, 3083, 3089, 3109, 3119, 3121, 3137, 3163, 3167, 3169, 3181, 3187, 3191, 3203, 3209, 3217, 3221, 3229, 3251, 3253,
+    3257, 3259, 3271, 3299, 3301, 3307, 3313, 3319, 3323, 3329, 3331, 3343, 3347, 3359, 3361, 3371, 3373, 3389, 3391, 3407,
+    3413, 3433, 3449, 3457, 3461, 3463, 3467, 3469, 3491, 3499, 3511, 3517, 3527, 3529, 3533, 3539, 3541, 3547, 3557, 3559,
+    3571, 3581, 3583, 3593, 3607, 3613, 3617, 3623, 3631, 3637, 3643, 3659, 3671, 3673, 3677, 3691, 3697, 3701, 3709, 3719,
+    3727, 3733, 3739, 3761, 3767, 3769, 3779, 3793, 3797, 3803, 3821, 3823, 3833, 3847, 3851, 3853, 3863, 3877, 3881, 3889,
+    3907, 3911, 3917, 3919, 3923, 3929, 3931, 3943, 3947, 3967, 3989, 4001, 4003, 4007, 4013, 4019, 4021, 4027, 4049, 4051,
+    4057, 4073, 4079, 4091, 4093, 4099, 4111, 4127, 4129, 4133, 4139, 4153, 4157, 4159, 4177, 4201, 4211, 4217, 4219, 4229,
+    4231, 4241, 4243, 4253, 4259, 4261, 4271, 4273, 4283, 4289, 4297, 4327, 4337, 4339, 4349, 4357, 4363, 4373, 4391, 4397,
+    4409, 4421, 4423, 4441, 4447, 4451, 4457, 4463, 4481, 4483, 4493, 4507, 4513, 4517, 4519, 4523, 4547, 4549, 4561, 4567,
+    4583, 4591, 4597, 4603, 4621, 4637, 4639, 4643, 4649, 4651, 4657, 4663, 4673, 4679, 4691, 4703, 4721, 4723, 4729, 4733,
+    4751, 4759, 4783, 4787, 4789, 4793, 4799, 4801, 4813, 4817, 4831, 4861, 4871, 4877, 4889, 4903, 4909, 4919, 4931, 4933,
+    4937, 4943, 4951, 4957, 4967, 4969, 4973, 4987, 4993, 4999, 5003, 5009, 5011, 5021, 5023, 5039, 5051, 5059, 5077, 5081,
+    5087, 5099, 5101, 5107, 5113, 5119, 5147, 5153, 5167, 5171, 5179, 5189, 5197, 5209, 5227, 5231, 5233, 5237, 5261, 5273,
+    5279, 5281, 5297, 5303, 5309, 5323, 5333, 5347, 5351, 5381, 5387, 5393, 5399, 5407, 5413, 5417, 5419, 5431, 5437, 5441,
+    5443, 5449, 5471, 5477, 5479, 5483, 5501, 5503, 5507, 5519, 5521, 5527, 5531, 5557, 5563, 5569, 5573, 5581, 5591, 5623,
+    5639, 5641, 5647, 5651, 5653, 5657, 5659, 5669, 5683, 5689, 5693, 5701, 5711, 5717, 5737, 5741, 5743, 5749, 5779, 5783,
+    5791, 5801, 5807, 5813, 5821, 5827, 5839, 5843, 5849, 5851, 5857, 5861, 5867, 5869, 5879, 5881, 5897, 5903, 5923, 5927,
+    5939, 5953, 5981, 5987, 6007, 6011, 6029, 6037, 6043, 6047, 6053, 6067, 6073, 6079, 6089, 6091, 6101, 6113, 6121, 6131,
+    6133, 6143, 6151, 6163, 6173, 6197, 6199, 6203, 6211, 6217, 6221, 6229, 6247, 6257, 6263, 6269, 6271, 6277, 6287, 6299,
+    6301, 6311, 6317, 6323, 6329, 6337, 6343, 6353, 6359, 6361, 6367, 6373, 6379, 6389, 6397, 6421, 6427, 6449, 6451, 6469,
+    6473, 6481, 6491, 6521, 6529, 6547, 6551, 6553, 6563, 6569, 6571, 6577, 6581, 6599, 6607, 6619, 6637, 6653, 6659, 6661,
+    6673, 6679, 6689, 6691, 6701, 6703, 6709, 6719, 6733, 6737, 6761, 6763, 6779, 6781, 6791, 6793, 6803, 6823, 6827, 6829,
+    6833, 6841, 6857, 6863, 6869, 6871, 6883, 6899, 6907, 6911, 6917, 6947, 6949, 6959, 6961, 6967, 6971, 6977, 6983, 6991,
+    6997, 7001, 7013, 7019, 7027, 7039, 7043, 7057, 7069, 7079, 7103, 7109, 7121, 7127, 7129, 7151, 7159, 7177, 7187, 7193,
+    7207, 7211, 7213, 7219, 7229, 7237, 7243, 7247, 7253, 7283, 7297, 7307, 7309, 7321, 7331, 7333, 7349, 7351, 7369, 7393,
+    7411, 7417, 7433, 7451, 7457, 7459, 7477, 7481, 7487, 7489, 7499, 7507, 7517, 7523, 7529, 7537, 7541, 7547, 7549, 7559,
+    7561, 7573, 7577, 7583, 7589, 7591, 7603, 7607, 7621, 7639, 7643, 7649, 7669, 7673, 7681, 7687, 7691, 7699, 7703, 7717,
+    7723, 7727, 7741, 7753, 7757, 7759, 7789, 7793, 7817, 7823, 7829, 7841, 7853, 7867, 7873, 7877, 7879, 7883, 7901, 7907,
+    7919, 7927, 7933, 7937, 7949, 7951, 7963, 7993, 8009, 8011, 8017, 8039, 8053, 8059, 8069, 8081, 8087, 8089, 8093, 8101,
+    8111, 8117, 8123, 8147, 8161, 8167, 8171, 8179, 8191,
 };
 
 static int getPrime(int n) {
     int low = 0;
-    int high = sizeof(primeTable) / sizeof(primeTable[0]) -  1;
+    int high = sizeof(primeTable) / sizeof(primeTable[0]) - 1;
 
     // clip to table limits
     if (n <= primeTable[low]) {
@@ -1302,17 +1296,17 @@ static int getPrime(int n) {
         } else if (n > primeTable[mid]) {
             low = mid + 1;
         } else {
-            return n;   // found it
+            return n; // found it
         }
     }
 
-    //return primeTable[high];  // lower prime
-    //return (n - primeTable[high]) < (primeTable[low] - n) ? primeTable[high] : primeTable[low]; // nearest prime
-    return primeTable[low];     // higher prime
+    // return primeTable[high];  // lower prime
+    // return (n - primeTable[high]) < (primeTable[low] - n) ? primeTable[high] : primeTable[low]; // nearest prime
+    return primeTable[low]; // higher prime
 }
 
 static int scaleDelay(float delay, float sampleRate) {
-    return getPrime((int)(delay * (sampleRate/48000.0f) + 0.5f));
+    return getPrime((int)(delay * (sampleRate / 48000.0f) + 0.5f));
 }
 
 //
@@ -1320,64 +1314,50 @@ static int scaleDelay(float delay, float sampleRate) {
 // input clamped to [0.0f, 100.0f]
 //
 static const float earlyMix0Table[][2] = {
-    {0.0000f, 0.6000f},
-   {63.3333f, 0.0800f},
-   {83.3333f, 0.0200f},
-   {93.3333f, 0.0048f},
-  {100.0000f, 0.0048f},
+    { 0.0000f, 0.6000f }, { 63.3333f, 0.0800f }, { 83.3333f, 0.0200f }, { 93.3333f, 0.0048f }, { 100.0000f, 0.0048f },
 };
 
 static const float earlyMix1Table[][2] = {
-    {0.0000f, 0.3360f},
-   {20.0000f, 0.6000f},
-  {100.0000f, 0.0240f},
+    { 0.0000f, 0.3360f },
+    { 20.0000f, 0.6000f },
+    { 100.0000f, 0.0240f },
 };
 
 static const float earlyMix2Table[][2] = {
-    {0.0000f, 0.0480f},
-   {13.3333f, 0.0960f},
-   {53.3333f, 0.9600f},
-  {100.0000f, 0.1200f},
+    { 0.0000f, 0.0480f },
+    { 13.3333f, 0.0960f },
+    { 53.3333f, 0.9600f },
+    { 100.0000f, 0.1200f },
 };
 
 static const float lateMix0Table[][2] = {
-    {0.0000f, 0.1250f},
-   {13.3333f, 0.1875f},
-   {66.6666f, 0.7500f},
-  {100.0000f, 0.8750f},
+    { 0.0000f, 0.1250f },
+    { 13.3333f, 0.1875f },
+    { 66.6666f, 0.7500f },
+    { 100.0000f, 0.8750f },
 };
 
 static const float lateMix1Table[][2] = {
-    {0.0000f, 0.9990f},
-   {33.3333f, 0.5000f},
-   {66.6666f, 0.9990f},
-   {93.3333f, 0.6000f},
-  {100.0000f, 0.6000f},
+    { 0.0000f, 0.9990f }, { 33.3333f, 0.5000f }, { 66.6666f, 0.9990f }, { 93.3333f, 0.6000f }, { 100.0000f, 0.6000f },
 };
 
 static const float lateMix2Table[][2] = {
-    {0.0000f, 0.9990f},
-   {33.3333f, 0.9990f},
-   {63.3333f, 0.4500f},
-  {100.0000f, 0.9990f},
+    { 0.0000f, 0.9990f },
+    { 33.3333f, 0.9990f },
+    { 63.3333f, 0.4500f },
+    { 100.0000f, 0.9990f },
 };
 
 static const float diffusionCoefTable[][2] = {
-    {0.0000f, 0.0000f},
-   {20.0000f, 0.0470f},
-   {33.3333f, 0.0938f},
-   {46.6666f, 0.1563f},
-   {60.0000f, 0.2344f},
-   {73.3333f, 0.3125f},
-   {93.3333f, 0.5000f},
-  {100.0000f, PHI},
+    { 0.0000f, 0.0000f },  { 20.0000f, 0.0470f }, { 33.3333f, 0.0938f }, { 46.6666f, 0.1563f },
+    { 60.0000f, 0.2344f }, { 73.3333f, 0.3125f }, { 93.3333f, 0.5000f }, { 100.0000f, PHI },
 };
 
 static const float roomSizeTable[][2] = {
-    {0.0000f, 0.1500f},
-   {25.0000f, 0.3000f},
-   {50.0000f, 0.5000f},
-  {100.0000f, 1.0000f},
+    { 0.0000f, 0.1500f },
+    { 25.0000f, 0.3000f },
+    { 50.0000f, 0.5000f },
+    { 100.0000f, 1.0000f },
 };
 
 static float interpolateTable(const float table[][2], float x) {
@@ -1385,17 +1365,16 @@ static float interpolateTable(const float table[][2], float x) {
 
     // locate the segment in the table
     int i = 0;
-    while (x > table[i+1][0]) {
+    while (x > table[i + 1][0]) {
         i++;
     }
 
     // linear interpolate
-    float frac = (x - table[i+0][0]) / (table[i+1][0] - table[i+0][0]);
-    return table[i+0][1] + frac * (table[i+1][1] - table[i+0][1]);
+    float frac = (x - table[i + 0][0]) / (table[i + 1][0] - table[i + 0][0]);
+    return table[i + 0][1] + frac * (table[i + 1][1] - table[i + 0][1]);
 }
 
-void ReverbImpl::setParameters(ReverbParameters *p) {
-
+void ReverbImpl::setParameters(ReverbParameters* p) {
     float sampleRate = MIN(MAX(p->sampleRate, 24000.0f), 48000.0f);
 
     // Bandwidth
@@ -1403,12 +1382,12 @@ void ReverbImpl::setParameters(ReverbParameters *p) {
 
     // Modulation
     _lfo.setFreq(p->modRate, sampleRate);
-    _lfo.setGain((int32_t)MIN(MAX((double)p->modDepth * (1/100.0) * FIXQ31, 0.0), (double)0x7fffffff));
+    _lfo.setGain((int32_t)MIN(MAX((double)p->modDepth * (1 / 100.0) * FIXQ31, 0.0), (double)0x7fffffff));
 
     //
     // Set delays
     //
-    int preDelay = (int)(p->preDelay * (1/1000.0f) * sampleRate + 0.5f);
+    int preDelay = (int)(p->preDelay * (1 / 1000.0f) * sampleRate + 0.5f);
     preDelay = MIN(MAX(preDelay, 1), M_PD0);
     _dl0.setDelay(preDelay);
     _dl1.setDelay(preDelay);
@@ -1417,10 +1396,10 @@ void ReverbImpl::setParameters(ReverbParameters *p) {
     float roomSize = interpolateTable(roomSizeTable, p->roomSize);
 
     // Density scalefactors
-    float density0 = p->density * (1/25.0f) - 0.0f;
-    float density1 = p->density * (1/25.0f) - 1.0f;
-    float density2 = p->density * (1/25.0f) - 2.0f;
-    float density3 = p->density * (1/25.0f) - 3.0f;
+    float density0 = p->density * (1 / 25.0f) - 0.0f;
+    float density1 = p->density * (1 / 25.0f) - 1.0f;
+    float density2 = p->density * (1 / 25.0f) - 2.0f;
+    float density3 = p->density * (1 / 25.0f) - 3.0f;
     density0 = MIN(MAX(density0, 0.0f), 1.0f);
     density1 = MIN(MAX(density1, 0.0f), 1.0f);
     density2 = MIN(MAX(density2, 0.0f), 1.0f);
@@ -1455,7 +1434,7 @@ void ReverbImpl::setParameters(ReverbParameters *p) {
     _ap16.setDelay(scaleDelay(M_AP16 * roomSize * density3, sampleRate));
     _ap17.setDelay(scaleDelay(M_AP17 * roomSize * density3, sampleRate));
 
-    int lateDelay = scaleDelay(p->lateDelay * (1/1000.0f) * 48000, sampleRate);
+    int lateDelay = scaleDelay(p->lateDelay * (1 / 1000.0f) * 48000, sampleRate);
     lateDelay = MIN(MAX(lateDelay, 1), M_LD0);
 
     _mt6.setDelay(scaleDelay(M_MT6 * roomSize * density3, sampleRate), lateDelay);
@@ -1493,12 +1472,12 @@ void ReverbImpl::setParameters(ReverbParameters *p) {
     // Set gains
     //
     float rt60 = MIN(MAX(p->reverbTime, 0.01f), 100.0f);
-    float rt60Gain = -60.0f * loopDelay / (rt60 * sampleRate);  // feedback gain (dB) for desired RT
+    float rt60Gain = -60.0f * loopDelay / (rt60 * sampleRate); // feedback gain (dB) for desired RT
 
     float bassMult = MIN(MAX(p->bassMult, 0.1f), 10.0f);
-    float bassGain = (1.0f / bassMult - 1.0f) * rt60Gain;       // filter gain (dB) that results in RT *= mult
+    float bassGain = (1.0f / bassMult - 1.0f) * rt60Gain; // filter gain (dB) that results in RT *= mult
 
-    float loopGain1 = sqrtf(0.5f * dBToGain(rt60Gain));         // distributed (series-parallel) loop gain
+    float loopGain1 = sqrtf(0.5f * dBToGain(rt60Gain)); // distributed (series-parallel) loop gain
     float loopGain2 = 0.9f - (0.63f * loopGain1);
 
     // Damping
@@ -1521,7 +1500,7 @@ void ReverbImpl::setParameters(ReverbParameters *p) {
 
     _mt1.setGain(0.2f, 0.6f, interpolateTable(lateMix0Table, p->lateMixLeft) * 0.125f);
 
-    _mt2.setGain(interpolateTable(lateMix1Table, p->lateMixLeft) * loopGain2, 
+    _mt2.setGain(interpolateTable(lateMix1Table, p->lateMixLeft) * loopGain2,
                  interpolateTable(lateMix2Table, p->lateMixLeft) * loopGain2);
 
     // Early Right
@@ -1536,7 +1515,7 @@ void ReverbImpl::setParameters(ReverbParameters *p) {
 
     _mt4.setGain(0.2f, 0.6f, interpolateTable(lateMix0Table, p->lateMixRight) * 0.125f);
 
-    _mt5.setGain(interpolateTable(lateMix1Table, p->lateMixRight) * loopGain2, 
+    _mt5.setGain(interpolateTable(lateMix1Table, p->lateMixRight) * loopGain2,
                  interpolateTable(lateMix2Table, p->lateMixRight) * loopGain2);
 
     _earlyGain = dBToGain(p->earlyGain);
@@ -1571,12 +1550,11 @@ void ReverbImpl::setParameters(ReverbParameters *p) {
     _ap20.setCoef(outputDiffusionCoef);
     _ap21.setCoef(outputDiffusionCoef);
 
-    _wetDryMix = p->wetDryMix * (1/100.0f);
+    _wetDryMix = p->wetDryMix * (1 / 100.0f);
     _wetDryMix = MIN(MAX(_wetDryMix, 0.0f), 1.0f);
 }
 
 void ReverbImpl::process(float** inputs, float** outputs, int numFrames) {
-
     for (int i = 0; i < numFrames; i++) {
         float x0, x1, y0, y1, y2, y3;
 
@@ -1667,7 +1645,6 @@ void ReverbImpl::process(float** inputs, float** outputs, int numFrames) {
 
 // clear internal state, but retain settings
 void ReverbImpl::reset() {
-
     _bw.reset();
 
     _dl0.reset();
@@ -1721,7 +1698,6 @@ void ReverbImpl::reset() {
 static const int REVERB_BLOCK = 256;
 
 AudioReverb::AudioReverb(float sampleRate) {
-
     _impl = new ReverbImpl;
 
     // format conversion buffers
@@ -1772,12 +1748,12 @@ AudioReverb::~AudioReverb() {
     delete[] _inout[1];
 }
 
-void AudioReverb::setParameters(ReverbParameters *p) {
+void AudioReverb::setParameters(ReverbParameters* p) {
     _params = *p;
     _impl->setParameters(p);
 };
 
-void AudioReverb::getParameters(ReverbParameters *p) {
+void AudioReverb::getParameters(ReverbParameters* p) {
     *p = _params;
 };
 
@@ -1798,11 +1774,11 @@ void AudioReverb::render(float** inputs, float** outputs, int numFrames) {
 
 // convert int16_t to float, deinterleave stereo
 void AudioReverb::convertInput(const int16_t* input, float** outputs, int numFrames) {
-    __m128 scale = _mm_set1_ps(1/32768.0f);
+    __m128 scale = _mm_set1_ps(1 / 32768.0f);
 
     int i = 0;
     for (; i < numFrames - 3; i += 4) {
-        __m128i a0 = _mm_loadu_si128((__m128i*)&input[2*i]);
+        __m128i a0 = _mm_loadu_si128((__m128i*)&input[2 * i]);
         __m128i a1 = a0;
 
         // deinterleave and sign-extend
@@ -1816,7 +1792,7 @@ void AudioReverb::convertInput(const int16_t* input, float** outputs, int numFra
         _mm_storeu_ps(&outputs[1][i], f1);
     }
     for (; i < numFrames; i++) {
-        __m128i a0 = _mm_cvtsi32_si128(*(int32_t*)&input[2*i]);
+        __m128i a0 = _mm_cvtsi32_si128(*(int32_t*)&input[2 * i]);
         __m128i a1 = a0;
 
         // deinterleave and sign-extend
@@ -1845,7 +1821,7 @@ static inline __m128 dither4() {
 
     // return (r0 - r1) * (1/65536.0f);
     __m128 d0 = _mm_cvtepi32_ps(_mm_sub_epi32(r0, r1));
-    return _mm_mul_ps(d0, _mm_set1_ps(1/65536.0f));
+    return _mm_mul_ps(d0, _mm_set1_ps(1 / 65536.0f));
 }
 
 // convert float to int16_t with dither, interleave stereo
@@ -1869,7 +1845,7 @@ void AudioReverb::convertOutput(float** inputs, int16_t* output, int numFrames) 
 
         // interleave
         a0 = _mm_unpacklo_epi16(a0, a1);
-        _mm_storeu_si128((__m128i*)&output[2*i], a0);
+        _mm_storeu_si128((__m128i*)&output[2 * i], a0);
     }
     for (; i < numFrames; i++) {
         __m128 f0 = _mm_mul_ps(_mm_load_ss(&inputs[0][i]), scale);
@@ -1887,45 +1863,43 @@ void AudioReverb::convertOutput(float** inputs, int16_t* output, int numFrames) 
 
         // interleave
         a0 = _mm_unpacklo_epi16(a0, a1);
-        *(int32_t*)&output[2*i] = _mm_cvtsi128_si32(a0);
+        *(int32_t*)&output[2 * i] = _mm_cvtsi128_si32(a0);
     }
 }
 
 // deinterleave stereo
 void AudioReverb::convertInput(const float* input, float** outputs, int numFrames) {
-
     int i = 0;
     for (; i < numFrames - 3; i += 4) {
-        __m128 f0 = _mm_loadu_ps(&input[2*i + 0]);
-        __m128 f1 = _mm_loadu_ps(&input[2*i + 4]);
+        __m128 f0 = _mm_loadu_ps(&input[2 * i + 0]);
+        __m128 f1 = _mm_loadu_ps(&input[2 * i + 4]);
 
         // deinterleave
-        _mm_storeu_ps(&outputs[0][i], _mm_shuffle_ps(f0, f1, _MM_SHUFFLE(2,0,2,0)));
-        _mm_storeu_ps(&outputs[1][i], _mm_shuffle_ps(f0, f1, _MM_SHUFFLE(3,1,3,1)));
+        _mm_storeu_ps(&outputs[0][i], _mm_shuffle_ps(f0, f1, _MM_SHUFFLE(2, 0, 2, 0)));
+        _mm_storeu_ps(&outputs[1][i], _mm_shuffle_ps(f0, f1, _MM_SHUFFLE(3, 1, 3, 1)));
     }
     for (; i < numFrames; i++) {
         // deinterleave
-        outputs[0][i] = input[2*i + 0];
-        outputs[1][i] = input[2*i + 1];
+        outputs[0][i] = input[2 * i + 0];
+        outputs[1][i] = input[2 * i + 1];
     }
 }
 
 // interleave stereo
 void AudioReverb::convertOutput(float** inputs, float* output, int numFrames) {
-
     int i = 0;
-    for(; i < numFrames - 3; i += 4) {
+    for (; i < numFrames - 3; i += 4) {
         __m128 f0 = _mm_loadu_ps(&inputs[0][i]);
         __m128 f1 = _mm_loadu_ps(&inputs[1][i]);
 
         // interleave
-        _mm_storeu_ps(&output[2*i + 0],_mm_unpacklo_ps(f0,f1));
-        _mm_storeu_ps(&output[2*i + 4],_mm_unpackhi_ps(f0,f1));
+        _mm_storeu_ps(&output[2 * i + 0], _mm_unpacklo_ps(f0, f1));
+        _mm_storeu_ps(&output[2 * i + 4], _mm_unpackhi_ps(f0, f1));
     }
-    for(; i < numFrames; i++) {
+    for (; i < numFrames; i++) {
         // interleave
-        output[2*i + 0] = inputs[0][i];
-        output[2*i + 1] = inputs[1][i];
+        output[2 * i + 0] = inputs[0][i];
+        output[2 * i + 1] = inputs[1][i];
     }
 }
 
@@ -1933,11 +1907,11 @@ void AudioReverb::convertOutput(float** inputs, float* output, int numFrames) {
 
 // convert int16_t to float, deinterleave stereo
 void AudioReverb::convertInput(const int16_t* input, float** outputs, int numFrames) {
-    const float scale = 1/32768.0f;
+    const float scale = 1 / 32768.0f;
 
     for (int i = 0; i < numFrames; i++) {
-        outputs[0][i] = (float)input[2*i + 0] * scale;
-        outputs[1][i] = (float)input[2*i + 1] * scale;
+        outputs[0][i] = (float)input[2 * i + 0] * scale;
+        outputs[1][i] = (float)input[2 * i + 1] * scale;
     }
 }
 
@@ -1947,7 +1921,7 @@ static inline float dither() {
     rz = rz * 69069 + 1;
     int32_t r0 = rz & 0xffff;
     int32_t r1 = rz >> 16;
-    return (r0 - r1) * (1/65536.0f);
+    return (r0 - r1) * (1 / 65536.0f);
 }
 
 // convert float to int16_t with dither, interleave stereo
@@ -1955,7 +1929,6 @@ void AudioReverb::convertOutput(float** inputs, int16_t* output, int numFrames) 
     const float scale = 32768.0f;
 
     for (int i = 0; i < numFrames; i++) {
-
         float f0 = inputs[0][i] * scale;
         float f1 = inputs[1][i] * scale;
 
@@ -1970,28 +1943,26 @@ void AudioReverb::convertOutput(float** inputs, int16_t* output, int numFrames) 
         f1 = MIN(MAX(f1, -32768.0f), 32767.0f);
 
         // interleave
-        output[2*i + 0] = (int16_t)f0;
-        output[2*i + 1] = (int16_t)f1;
+        output[2 * i + 0] = (int16_t)f0;
+        output[2 * i + 1] = (int16_t)f1;
     }
 }
 
 // deinterleave stereo
 void AudioReverb::convertInput(const float* input, float** outputs, int numFrames) {
-
     for (int i = 0; i < numFrames; i++) {
         // deinterleave
-        outputs[0][i] = input[2*i + 0];
-        outputs[1][i] = input[2*i + 1];
+        outputs[0][i] = input[2 * i + 0];
+        outputs[1][i] = input[2 * i + 1];
     }
 }
 
 // interleave stereo
 void AudioReverb::convertOutput(float** inputs, float* output, int numFrames) {
-
     for (int i = 0; i < numFrames; i++) {
         // interleave
-        output[2*i + 0] = inputs[0][i];
-        output[2*i + 1] = inputs[1][i];
+        output[2 * i + 0] = inputs[0][i];
+        output[2 * i + 1] = inputs[1][i];
     }
 }
 
@@ -2001,9 +1972,7 @@ void AudioReverb::convertOutput(float** inputs, float* output, int numFrames) {
 // This version handles input/output as interleaved int16_t
 //
 void AudioReverb::render(const int16_t* input, int16_t* output, int numFrames) {
-
     while (numFrames) {
-
         int n = MIN(numFrames, REVERB_BLOCK);
 
         convertInput(input, _inout, n);
@@ -2022,9 +1991,7 @@ void AudioReverb::render(const int16_t* input, int16_t* output, int numFrames) {
 // This version handles input/output as interleaved float
 //
 void AudioReverb::render(const float* input, float* output, int numFrames) {
-
     while (numFrames) {
-
         int n = MIN(numFrames, REVERB_BLOCK);
 
         convertInput(input, _inout, n);

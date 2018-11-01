@@ -24,4 +24,3 @@ int SimpleMeshProxy::getNumVertices() const {
 glm::vec3 SimpleMeshProxy::getPos(int index) const {
     return _mesh->getPos(index);
 }
-

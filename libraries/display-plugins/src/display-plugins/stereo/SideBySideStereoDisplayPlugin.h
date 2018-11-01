@@ -14,6 +14,7 @@ class QScreen;
 class SideBySideStereoDisplayPlugin : public StereoDisplayPlugin {
     Q_OBJECT
     using Parent = StereoDisplayPlugin;
+
 public:
     virtual const QString getName() const override { return NAME; }
     virtual grouping getGrouping() const override { return ADVANCED; }

@@ -10,11 +10,11 @@
 
 #include <glm/gtx/quaternion.hpp>
 
-#include <gpu/Batch.h>
 #include <DependencyManager.h>
-#include <StencilMaskPass.h>
 #include <GeometryCache.h>
 #include <PerfStat.h>
+#include <StencilMaskPass.h>
+#include <gpu/Batch.h>
 #include <shaders/Shaders.h>
 
 #include "RenderPipelines.h"
@@ -26,7 +26,7 @@
 using namespace render;
 using namespace render::entities;
 
-// Sphere entities should fit inside a cube entity of the same size, so a sphere that has dimensions 1x1x1 
+// Sphere entities should fit inside a cube entity of the same size, so a sphere that has dimensions 1x1x1
 // is a half unit sphere.  However, the geometry cache renders a UNIT sphere, so we need to scale down.
 static const float SPHERE_ENTITY_SCALE = 0.5f;
 
@@ -41,15 +41,15 @@ ShapeEntityRenderer::ShapeEntityRenderer(const EntityItemPointer& entity) : Pare
     _procedural._opaqueState->setCullMode(gpu::State::CULL_NONE);
     _procedural._opaqueState->setDepthTest(true, true, gpu::LESS_EQUAL);
     PrepareStencil::testMaskDrawShape(*_procedural._opaqueState);
-    _procedural._opaqueState->setBlendFunction(false,
-        gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
-        gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
+    _procedural._opaqueState->setBlendFunction(false, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD,
+                                               gpu::State::INV_SRC_ALPHA, gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD,
+                                               gpu::State::ONE);
     _procedural._transparentState->setCullMode(gpu::State::CULL_BACK);
     _procedural._transparentState->setDepthTest(true, true, gpu::LESS_EQUAL);
     PrepareStencil::testMask(*_procedural._transparentState);
-    _procedural._transparentState->setBlendFunction(true,
-        gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
-        gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
+    _procedural._transparentState->setBlendFunction(true, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD,
+                                                    gpu::State::INV_SRC_ALPHA, gpu::State::FACTOR_ALPHA,
+                                                    gpu::State::BLEND_OP_ADD, gpu::State::ONE);
 }
 
 bool ShapeEntityRenderer::needsRenderUpdate() const {
@@ -79,7 +79,8 @@ bool ShapeEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityPoin
     return false;
 }
 
-void ShapeEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) {
+void ShapeEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                         const TypedEntityPointer& entity) {
     withWriteLock([&] {
         auto userData = entity->getUserData();
         if (_lastUserData != userData) {
@@ -95,7 +96,7 @@ void ShapeEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& sce
     });
 
     void* key = (void*)this;
-    AbstractViewStateInterface::instance()->pushPostUpdateLambda(key, [this] () {
+    AbstractViewStateInterface::instance()->pushPostUpdateLambda(key, [this]() {
         withWriteLock([&] {
             auto entity = getEntity();
             _position = entity->getWorldPosition();
@@ -108,7 +109,8 @@ void ShapeEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& sce
             }
 
             _renderTransform.postScale(_dimensions);
-        });;
+        });
+        ;
     });
 }
 
@@ -155,9 +157,7 @@ ItemKey ShapeEntityRenderer::getKey() {
 }
 
 bool ShapeEntityRenderer::useMaterialPipeline() const {
-    bool proceduralReady = resultWithReadLock<bool>([&] {
-        return _procedural.isReady();
-    });
+    bool proceduralReady = resultWithReadLock<bool>([&] { return _procedural.isReady(); });
     if (proceduralReady) {
         return false;
     }
@@ -168,7 +168,8 @@ bool ShapeEntityRenderer::useMaterialPipeline() const {
         drawMaterialKey = mat->second.top().material->getKey();
     }
 
-    if (drawMaterialKey.isEmissive() || drawMaterialKey.isUnlit() || drawMaterialKey.isMetallic() || drawMaterialKey.isScattering()) {
+    if (drawMaterialKey.isEmissive() || drawMaterialKey.isUnlit() || drawMaterialKey.isMetallic() ||
+        drawMaterialKey.isScattering()) {
         return true;
     }
 
@@ -261,7 +262,8 @@ void ShapeEntityRenderer::doRender(RenderArgs* args) {
     } else if (!useMaterialPipeline()) {
         // FIXME, support instanced multi-shape rendering using multidraw indirect
         outColor.a *= _isFading ? Interpolate::calculateFadeRatio(_fadeStartTime) : 1.0f;
-        auto pipeline = outColor.a < 1.0f ? geometryCache->getTransparentShapePipeline() : geometryCache->getOpaqueShapePipeline();
+        auto pipeline = outColor.a < 1.0f ? geometryCache->getTransparentShapePipeline()
+                                          : geometryCache->getOpaqueShapePipeline();
         if (render::ShapeKey(args->_globalShapeKey).isWireframe()) {
             geometryCache->renderWireShapeInstance(args, batch, geometryShape, outColor, pipeline);
         } else {
@@ -280,7 +282,7 @@ void ShapeEntityRenderer::doRender(RenderArgs* args) {
     args->_details._trianglesRendered += (int)triCount;
 }
 
-scriptable::ScriptableModelBase ShapeEntityRenderer::getScriptableModel()  {
+scriptable::ScriptableModelBase ShapeEntityRenderer::getScriptableModel() {
     scriptable::ScriptableModelBase result;
     auto geometryCache = DependencyManager::get<GeometryCache>();
     auto geometryShape = geometryCache->getShapeForEntityShape(_shape);

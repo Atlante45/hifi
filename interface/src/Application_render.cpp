@@ -8,16 +8,15 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-#include "Application.h"
 #include <MainWindow.h>
+#include "Application.h"
 
-#include <display-plugins/CompositorHelper.h>
 #include <FramebufferCache.h>
-#include <plugins/PluginManager.h>
 #include <SceneScriptingInterface.h>
-#include "ui/Stats.h"
+#include <display-plugins/CompositorHelper.h>
+#include <plugins/PluginManager.h>
 #include "Util.h"
-
+#include "ui/Stats.h"
 
 // Statically provided display and input plugins
 extern DisplayPluginList getDisplayPlugins();
@@ -25,7 +24,6 @@ extern DisplayPluginList getDisplayPlugins();
 void Application::editRenderArgs(RenderArgsEditor editor) {
     QMutexLocker renderLocker(&_renderArgsMutex);
     editor(_appRenderArgs);
-
 }
 
 void Application::paintGL() {
@@ -59,13 +57,13 @@ void Application::paintGL() {
     }
 
     RenderArgs renderArgs;
-    glm::mat4  HMDSensorPose;
-    glm::mat4  eyeToWorld;
-    glm::mat4  sensorToWorld;
+    glm::mat4 HMDSensorPose;
+    glm::mat4 eyeToWorld;
+    glm::mat4 sensorToWorld;
 
     bool isStereo;
-    glm::mat4  stereoEyeOffsets[2];
-    glm::mat4  stereoEyeProjections[2];
+    glm::mat4 stereoEyeOffsets[2];
+    glm::mat4 stereoEyeProjections[2];
 
     {
         QMutexLocker viewLocker(&_renderArgsMutex);
@@ -91,11 +89,8 @@ void Application::paintGL() {
         _gpuContext->beginFrame(_appRenderArgs._view, HMDSensorPose);
         // Reset the gpu::Context Stages
         // Back to the default framebuffer;
-        gpu::doInBatch("Application_render::gpuContextReset", _gpuContext, [&](gpu::Batch& batch) {
-            batch.resetStages();
-        });
+        gpu::doInBatch("Application_render::gpuContextReset", _gpuContext, [&](gpu::Batch& batch) { batch.resetStages(); });
     }
-
 
     {
         PROFILE_RANGE(render, "/renderOverlay");
@@ -167,7 +162,6 @@ void Application::paintGL() {
     _frameTimingsScriptingInterface.addValue(lastPaintDuration);
 }
 
-
 // WorldBox Render Data & rendering functions
 
 class WorldBoxRenderData {
@@ -179,26 +173,34 @@ public:
     static render::ItemID _item; // unique WorldBoxRenderData
 };
 
-render::ItemID WorldBoxRenderData::_item{ render::Item::INVALID_ITEM_ID };
+render::ItemID WorldBoxRenderData::_item { render::Item::INVALID_ITEM_ID };
 
 namespace render {
-    template <> const ItemKey payloadGetKey(const WorldBoxRenderData::Pointer& stuff) { return ItemKey::Builder::opaqueShape().withTagBits(ItemKey::TAG_BITS_0 | ItemKey::TAG_BITS_1); }
-    template <> const Item::Bound payloadGetBound(const WorldBoxRenderData::Pointer& stuff) { return Item::Bound(); }
-    template <> void payloadRender(const WorldBoxRenderData::Pointer& stuff, RenderArgs* args) {
-        if (Menu::getInstance()->isOptionChecked(MenuOption::WorldAxes)) {
-            PerformanceTimer perfTimer("worldBox");
+template<>
+const ItemKey payloadGetKey(const WorldBoxRenderData::Pointer& stuff) {
+    return ItemKey::Builder::opaqueShape().withTagBits(ItemKey::TAG_BITS_0 | ItemKey::TAG_BITS_1);
+}
+template<>
+const Item::Bound payloadGetBound(const WorldBoxRenderData::Pointer& stuff) {
+    return Item::Bound();
+}
+template<>
+void payloadRender(const WorldBoxRenderData::Pointer& stuff, RenderArgs* args) {
+    if (Menu::getInstance()->isOptionChecked(MenuOption::WorldAxes)) {
+        PerformanceTimer perfTimer("worldBox");
 
-            auto& batch = *args->_batch;
-            DependencyManager::get<GeometryCache>()->bindSimpleProgram(batch);
-            renderWorldBox(args, batch);
-        }
+        auto& batch = *args->_batch;
+        DependencyManager::get<GeometryCache>()->bindSimpleProgram(batch);
+        renderWorldBox(args, batch);
     }
 }
+} // namespace render
 
 void Application::runRenderFrame(RenderArgs* renderArgs) {
     PROFILE_RANGE(render, __FUNCTION__);
     PerformanceTimer perfTimer("display");
-    PerformanceWarning warn(Menu::getInstance()->isOptionChecked(MenuOption::PipelineWarnings), "Application::runRenderFrame()");
+    PerformanceWarning warn(Menu::getInstance()->isOptionChecked(MenuOption::PipelineWarnings),
+                            "Application::runRenderFrame()");
 
     // The pending changes collecting the changes here
     render::Transaction transaction;
@@ -207,7 +209,7 @@ void Application::runRenderFrame(RenderArgs* renderArgs) {
         // render models...
         PerformanceTimer perfTimer("entities");
         PerformanceWarning warn(Menu::getInstance()->isOptionChecked(MenuOption::PipelineWarnings),
-            "Application::runRenderFrame() ... entities...");
+                                "Application::runRenderFrame() ... entities...");
 
         RenderArgs::DebugFlags renderDebugFlags = RenderArgs::RENDER_DEBUG_NONE;
 
@@ -233,4 +235,3 @@ void Application::runRenderFrame(RenderArgs* renderArgs) {
         _renderEngine->run();
     }
 }
-

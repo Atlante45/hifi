@@ -12,8 +12,8 @@
 #ifndef hifi_AmbientOcclusionEffect_h
 #define hifi_AmbientOcclusionEffect_h
 
-#include <string>
 #include <DependencyManager.h>
+#include <string>
 
 #include "render/DrawTask.h"
 
@@ -27,28 +27,27 @@ public:
 
     gpu::FramebufferPointer getOcclusionFramebuffer();
     gpu::TexturePointer getOcclusionTexture();
-    
+
     gpu::FramebufferPointer getOcclusionBlurredFramebuffer();
     gpu::TexturePointer getOcclusionBlurredTexture();
-    
+
     // Update the source framebuffer size which will drive the allocation of all the other resources.
     void updateLinearDepth(const gpu::TexturePointer& linearDepthBuffer);
     gpu::TexturePointer getLinearDepthTexture();
     const glm::ivec2& getSourceFrameSize() const { return _frameSize; }
-        
+
 protected:
     void clear();
     void allocate();
-    
+
     gpu::TexturePointer _linearDepthTexture;
-    
+
     gpu::FramebufferPointer _occlusionFramebuffer;
     gpu::TexturePointer _occlusionTexture;
-    
+
     gpu::FramebufferPointer _occlusionBlurredFramebuffer;
     gpu::TexturePointer _occlusionBlurredTexture;
-    
-    
+
     glm::ivec2 _frameSize;
 };
 
@@ -71,34 +70,67 @@ class AmbientOcclusionEffectConfig : public render::GPUJobConfig::Persistent {
     Q_PROPERTY(int blurRadius MEMBER blurRadius WRITE setBlurRadius)
 
 public:
-    AmbientOcclusionEffectConfig() : render::GPUJobConfig::Persistent(QStringList() << "Render" << "Engine" << "Ambient Occlusion", false) {}
+    AmbientOcclusionEffectConfig() :
+        render::GPUJobConfig::Persistent(QStringList() << "Render"
+                                                       << "Engine"
+                                                       << "Ambient Occlusion",
+                                         false) {}
 
     const int MAX_RESOLUTION_LEVEL = 4;
     const int MAX_BLUR_RADIUS = 6;
 
-    void setRadius(float newRadius) { radius = std::max(0.01f, newRadius); emit dirty(); }
-    void setObscuranceLevel(float level) { obscuranceLevel = std::max(0.01f, level); emit dirty(); }
-    void setFalloffBias(float bias) { falloffBias = std::max(0.0f, std::min(bias, 0.2f)); emit dirty(); }
-    void setEdgeSharpness(float sharpness) { edgeSharpness = std::max(0.0f, (float)sharpness); emit dirty(); }
-    void setBlurDeviation(float deviation) { blurDeviation = std::max(0.0f, deviation); emit dirty(); }
-    void setNumSpiralTurns(float turns) { numSpiralTurns = std::max(0.0f, (float)turns); emit dirty(); }
-    void setNumSamples(int samples) { numSamples = std::max(1.0f, (float)samples); emit dirty(); }
-    void setResolutionLevel(int level) { resolutionLevel = std::max(0, std::min(level, MAX_RESOLUTION_LEVEL)); emit dirty(); }
-    void setBlurRadius(int radius) { blurRadius = std::max(0, std::min(MAX_BLUR_RADIUS, radius)); emit dirty(); }
+    void setRadius(float newRadius) {
+        radius = std::max(0.01f, newRadius);
+        emit dirty();
+    }
+    void setObscuranceLevel(float level) {
+        obscuranceLevel = std::max(0.01f, level);
+        emit dirty();
+    }
+    void setFalloffBias(float bias) {
+        falloffBias = std::max(0.0f, std::min(bias, 0.2f));
+        emit dirty();
+    }
+    void setEdgeSharpness(float sharpness) {
+        edgeSharpness = std::max(0.0f, (float)sharpness);
+        emit dirty();
+    }
+    void setBlurDeviation(float deviation) {
+        blurDeviation = std::max(0.0f, deviation);
+        emit dirty();
+    }
+    void setNumSpiralTurns(float turns) {
+        numSpiralTurns = std::max(0.0f, (float)turns);
+        emit dirty();
+    }
+    void setNumSamples(int samples) {
+        numSamples = std::max(1.0f, (float)samples);
+        emit dirty();
+    }
+    void setResolutionLevel(int level) {
+        resolutionLevel = std::max(0, std::min(level, MAX_RESOLUTION_LEVEL));
+        emit dirty();
+    }
+    void setBlurRadius(int radius) {
+        blurRadius = std::max(0, std::min(MAX_BLUR_RADIUS, radius));
+        emit dirty();
+    }
 
-    float radius{ 0.5f };
-    float perspectiveScale{ 1.0f };
-    float obscuranceLevel{ 0.5f }; // intensify or dim down the obscurance effect
-    float falloffBias{ 0.01f };
-    float edgeSharpness{ 1.0f };
-    float blurDeviation{ 2.5f };
-    float numSpiralTurns{ 7.0f }; // defining an angle span to distribute the samples ray directions
-    int numSamples{ 16 };
-    int resolutionLevel{ 1 };
-    int blurRadius{ 4 }; // 0 means no blurring
-    bool ditheringEnabled{ true }; // randomize the distribution of taps per pixel, should always be true
-    bool borderingEnabled{ true }; // avoid evaluating information from non existing pixels out of the frame, should always be true
-    bool fetchMipsEnabled{ true }; // fetch taps in sub mips to otpimize cache, should always be true
+    float radius { 0.5f };
+    float perspectiveScale { 1.0f };
+    float obscuranceLevel { 0.5f }; // intensify or dim down the obscurance effect
+    float falloffBias { 0.01f };
+    float edgeSharpness { 1.0f };
+    float blurDeviation { 2.5f };
+    float numSpiralTurns { 7.0f }; // defining an angle span to distribute the samples ray directions
+    int numSamples { 16 };
+    int resolutionLevel { 1 };
+    int blurRadius { 4 }; // 0 means no blurring
+    bool ditheringEnabled { true }; // randomize the distribution of taps per pixel, should always be true
+    bool borderingEnabled {
+        true
+    }; // avoid evaluating information from non existing pixels out of the frame, should always be true
+    bool fetchMipsEnabled { true }; // fetch taps in sub mips to otpimize cache, should always be true
 
 signals:
     void dirty();
@@ -106,7 +138,8 @@ signals:
 
 class AmbientOcclusionEffect {
 public:
-    using Inputs = render::VaryingSet3<DeferredFrameTransformPointer, DeferredFramebufferPointer, LinearDepthFramebufferPointer>;
+    using Inputs = render::VaryingSet3<DeferredFrameTransformPointer, DeferredFramebufferPointer,
+                                       LinearDepthFramebufferPointer>;
     using Outputs = render::VaryingSet2<AmbientOcclusionFramebufferPointer, gpu::BufferView>;
     using Config = AmbientOcclusionEffectConfig;
     using JobModel = render::Job::ModelIO<AmbientOcclusionEffect, Inputs, Outputs, Config>;
@@ -115,7 +148,6 @@ public:
 
     void configure(const Config& config);
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs);
-    
 
     // Class describing the uniform buffer with all the parameters common to the AO shaders
     class Parameters {
@@ -123,17 +155,17 @@ public:
         // Resolution info
         glm::vec4 resolutionInfo { -1.0f, 0.0f, 1.0f, 0.0f };
         // radius info is { R, R^2, 1 / R^6, ObscuranceScale}
-        glm::vec4 radiusInfo{ 0.5f, 0.5f * 0.5f, 1.0f / (0.25f * 0.25f * 0.25f), 1.0f };
-        // Dithering info 
+        glm::vec4 radiusInfo { 0.5f, 0.5f * 0.5f, 1.0f / (0.25f * 0.25f * 0.25f), 1.0f };
+        // Dithering info
         glm::vec4 ditheringInfo { 0.0f, 0.0f, 0.01f, 1.0f };
         // Sampling info
-        glm::vec4 sampleInfo { 11.0f, 1.0f/11.0f, 7.0f, 1.0f };
+        glm::vec4 sampleInfo { 11.0f, 1.0f / 11.0f, 7.0f, 1.0f };
         // Blurring info
         glm::vec4 blurInfo { 1.0f, 3.0f, 2.0f, 0.0f };
-         // gaussian distribution coefficients first is the sampling radius (max is 6)
+        // gaussian distribution coefficients first is the sampling radius (max is 6)
         const static int GAUSSIAN_COEFS_LENGTH = 8;
         float _gaussianCoefs[GAUSSIAN_COEFS_LENGTH];
-         
+
         Parameters() {}
 
         int getResolutionLevel() const { return resolutionInfo.x; }
@@ -143,7 +175,7 @@ public:
         float getFalloffBias() const { return (float)ditheringInfo.z; }
         float getEdgeSharpness() const { return (float)blurInfo.x; }
         float getBlurDeviation() const { return blurInfo.z; }
-        
+
         float getNumSpiralTurns() const { return sampleInfo.z; }
         int getNumSamples() const { return (int)sampleInfo.x; }
         bool isFetchMipsEnabled() const { return sampleInfo.w; }
@@ -156,7 +188,7 @@ public:
 
 private:
     void updateGaussianDistribution();
-   
+
     ParametersBuffer _parametersBuffer;
 
     const gpu::PipelinePointer& getOcclusionPipeline();
@@ -168,12 +200,11 @@ private:
     gpu::PipelinePointer _vBlurPipeline;
 
     AmbientOcclusionFramebufferPointer _framebuffer;
-    
+
     gpu::RangeTimerPointer _gpuTimer;
 
     friend class DebugAmbientOcclusion;
 };
-
 
 class DebugAmbientOcclusionConfig : public render::Job::Config {
     Q_OBJECT
@@ -183,17 +214,17 @@ class DebugAmbientOcclusionConfig : public render::Job::Config {
 public:
     DebugAmbientOcclusionConfig() : render::Job::Config(false) {}
 
-    bool showCursorPixel{ false };
-    glm::vec2 debugCursorTexcoord{ 0.5f, 0.5f };
+    bool showCursorPixel { false };
+    glm::vec2 debugCursorTexcoord { 0.5f, 0.5f };
 
 signals:
     void dirty();
 };
 
-
 class DebugAmbientOcclusion {
 public:
-    using Inputs = render::VaryingSet4<DeferredFrameTransformPointer, DeferredFramebufferPointer, LinearDepthFramebufferPointer, AmbientOcclusionEffect::ParametersBuffer>;
+    using Inputs = render::VaryingSet4<DeferredFrameTransformPointer, DeferredFramebufferPointer, LinearDepthFramebufferPointer,
+                                       AmbientOcclusionEffect::ParametersBuffer>;
     using Config = DebugAmbientOcclusionConfig;
     using JobModel = render::Job::ModelI<DebugAmbientOcclusion, Inputs, Config>;
 
@@ -201,15 +232,14 @@ public:
 
     void configure(const Config& config);
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs);
-    
+
 private:
-       
     // Class describing the uniform buffer with all the parameters common to the debug AO shaders
     class Parameters {
     public:
         // Pixel info
         glm::vec4 pixelInfo { 0.0f, 0.0f, 0.0f, 0.0f };
-        
+
         Parameters() {}
     };
     gpu::StructBuffer<Parameters> _parametersBuffer;
@@ -218,7 +248,7 @@ private:
 
     gpu::PipelinePointer _debugPipeline;
 
-    bool _showCursorPixel{ false };
+    bool _showCursorPixel { false };
 };
 
 #endif // hifi_AmbientOcclusionEffect_h

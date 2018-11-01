@@ -10,10 +10,10 @@
 
 #include <QtCore/QObject>
 
-#include <RegisteredMetaTypes.h>
 #include <DependencyManager.h>
 #include <PhysicsEngine.h>
 #include <Pick.h>
+#include <RegisteredMetaTypes.h>
 
 /**jsdoc
  * The Picks API lets you create and manage objects for repeatedly calculating intersections in different ways.
@@ -30,10 +30,10 @@
  * @property {number} PICK_HUD A filter flag. Include the HUD sphere when intersecting in HMD mode. <em>Read-only.</em>
  * @property {number} PICK_COARSE A filter flag. Pick against coarse meshes, instead of exact meshes. <em>Read-only.</em>
  * @property {number} PICK_INCLUDE_INVISIBLE A filter flag. Include invisible objects when intersecting. <em>Read-only.</em>
- * @property {number} PICK_INCLUDE_NONCOLLIDABLE A filter flag. Include non-collidable objects when intersecting. 
+ * @property {number} PICK_INCLUDE_NONCOLLIDABLE A filter flag. Include non-collidable objects when intersecting.
  *     <em>Read-only.</em>
  * @property {number} PICK_ALL_INTERSECTIONS <em>Read-only.</em>
- * @property {number} INTERSECTED_NONE An intersection type. Intersected nothing with the given filter flags. 
+ * @property {number} INTERSECTED_NONE An intersection type. Intersected nothing with the given filter flags.
  *     <em>Read-only.</em>
  * @property {number} INTERSECTED_ENTITY An intersection type. Intersected an entity. <em>Read-only.</em>
  * @property {number} INTERSECTED_OVERLAY An intersection type. Intersected an overlay. <em>Read-only.</em>
@@ -70,11 +70,13 @@ public:
 
     /**jsdoc
      * Adds a new Pick.
-     * Different {@link PickType}s use different properties, and within one PickType, the properties you choose can lead to a wide range of behaviors.  For example,
-     *   with PickType.Ray, depending on which optional parameters you pass, you could create a Static Ray Pick, a Mouse Ray Pick, or a Joint Ray Pick.
+     * Different {@link PickType}s use different properties, and within one PickType, the properties you choose can lead to a
+     * wide range of behaviors.  For example, with PickType.Ray, depending on which optional parameters you pass, you could
+     * create a Static Ray Pick, a Mouse Ray Pick, or a Joint Ray Pick.
      * @function Picks.createPick
      * @param {PickType} type A PickType that specifies the method of picking to use
-     * @param {Picks.RayPickProperties|Picks.StylusPickProperties|Picks.ParabolaPickProperties|Picks.CollisionPickProperties} properties A PickProperties object, containing all the properties for initializing this Pick
+     * @param {Picks.RayPickProperties|Picks.StylusPickProperties|Picks.ParabolaPickProperties|Picks.CollisionPickProperties}
+     * properties A PickProperties object, containing all the properties for initializing this Pick
      * @returns {number} The ID of the created Pick.  Used for managing the Pick.  0 if invalid.
      */
     Q_INVOKABLE unsigned int createPick(const PickQuery::PickType type, const QVariant& properties);
@@ -128,45 +130,52 @@ public:
      * @property {StylusTip} stylusTip The StylusTip that was used.  Valid even if there was no intersection.
      */
 
-     /**jsdoc
+    /**jsdoc
      * An intersection result for a Parabola Pick.
      *
      * @typedef {object} ParabolaPickResult
      * @property {number} type The intersection type.
      * @property {boolean} intersects If there was a valid intersection (type != INTERSECTED_NONE)
      * @property {Uuid} objectID The ID of the intersected object.  Uuid.NULL for the HUD or invalid intersections.
-     * @property {number} distance The distance to the intersection point from the origin of the parabola, not along the parabola.
-     * @property {number} parabolicDistance The distance to the intersection point from the origin of the parabola, along the parabola.
+     * @property {number} distance The distance to the intersection point from the origin of the parabola, not along the
+     * parabola.
+     * @property {number} parabolicDistance The distance to the intersection point from the origin of the parabola, along the
+     * parabola.
      * @property {Vec3} intersection The intersection point in world-space.
      * @property {Vec3} surfaceNormal The surface normal at the intersected point.  All NANs if type == INTERSECTED_HUD.
      * @property {Variant} extraInfo Additional intersection details when available for Model objects.
      * @property {PickParabola} parabola The PickParabola that was used.  Valid even if there was no intersection.
      */
 
-     /**jsdoc
+    /**jsdoc
      * An intersection result for a Collision Pick.
      *
      * @typedef {object} CollisionPickResult
      * @property {boolean} intersects If there was at least one valid intersection (intersectingObjects.length > 0)
-     * @property {IntersectingObject[]} intersectingObjects The collision information of each object which intersect with the CollisionRegion.
+     * @property {IntersectingObject[]} intersectingObjects The collision information of each object which intersect with the
+     * CollisionRegion.
      * @property {CollisionRegion} collisionRegion The CollisionRegion that was used. Valid even if there was no intersection.
      */
 
     /**jsdoc
-    * Information about the Collision Pick's intersection with an object
-    *
-    * @typedef {object} IntersectingObject
-    * @property {QUuid} id The ID of the object.
-    * @property {number} type The type of the object, either Picks.INTERSECTED_ENTITY() or Picks.INTERSECTED_AVATAR()
-    * @property {CollisionContact[]} collisionContacts Pairs of points representing penetration information between the pick and the object
-    */
+     * Information about the Collision Pick's intersection with an object
+     *
+     * @typedef {object} IntersectingObject
+     * @property {QUuid} id The ID of the object.
+     * @property {number} type The type of the object, either Picks.INTERSECTED_ENTITY() or Picks.INTERSECTED_AVATAR()
+     * @property {CollisionContact[]} collisionContacts Pairs of points representing penetration information between the pick
+     * and the object
+     */
 
-     /**jsdoc
-     * A pair of points that represents part of an overlap between a Collision Pick and an object in the physics engine. Points which are further apart represent deeper overlap
+    /**jsdoc
+     * A pair of points that represents part of an overlap between a Collision Pick and an object in the physics engine. Points
+     * which are further apart represent deeper overlap
      *
      * @typedef {object} CollisionContact
-     * @property {Vec3} pointOnPick A point representing a penetration of the object's surface into the volume of the pick, in world space.
-     * @property {Vec3} pointOnObject A point representing a penetration of the pick's surface into the volume of the found object, in world space.
+     * @property {Vec3} pointOnPick A point representing a penetration of the object's surface into the volume of the pick, in
+     * world space.
+     * @property {Vec3} pointOnObject A point representing a penetration of the pick's surface into the volume of the found
+     * object, in world space.
      * @property {Vec3} normalOnPick The normalized vector pointing away from the pick, representing the direction of collision.
      */
 
@@ -174,7 +183,8 @@ public:
      * Get the most recent pick result from this Pick.  This will be updated as long as the Pick is enabled.
      * @function Picks.getPrevPickResult
      * @param {number} uid The ID of the Pick, as returned by {@link Picks.createPick}.
-     * @returns {RayPickResult|StylusPickResult|ParabolaPickResult|CollisionPickResult} The most recent intersection result.  This will be different for different PickTypes.
+     * @returns {RayPickResult|StylusPickResult|ParabolaPickResult|CollisionPickResult} The most recent intersection result.
+     * This will be different for different PickTypes.
      */
     Q_INVOKABLE QVariantMap getPrevPickResult(unsigned int uid);
 
@@ -195,8 +205,8 @@ public:
     Q_INVOKABLE void setIgnoreItems(unsigned int uid, const QScriptValue& ignoreItems);
 
     /**jsdoc
-     * Sets a list of Entity IDs, Overlay IDs, and/or Avatar IDs to include during intersection, instead of intersecting with everything.  Stylus
-     *   Picks <b>only</b> intersect with objects in their include list.
+     * Sets a list of Entity IDs, Overlay IDs, and/or Avatar IDs to include during intersection, instead of intersecting with
+     * everything.  Stylus Picks <b>only</b> intersect with objects in their include list.
      * @function Picks.setIncludeItems
      * @param {number} uid The ID of the Pick, as returned by {@link Picks.createPick}.
      * @param {Uuid[]} includeItems A list of IDs to include.
@@ -207,7 +217,8 @@ public:
      * Check if a Pick is associated with the left hand.
      * @function Picks.isLeftHand
      * @param {number} uid The ID of the Pick, as returned by {@link Picks.createPick}.
-     * @returns {boolean} True if the Pick is a Joint Ray or Parabola Pick with joint == "_CONTROLLER_LEFTHAND" or "_CAMERA_RELATIVE_CONTROLLER_LEFTHAND", or a Stylus Pick with hand == 0.
+     * @returns {boolean} True if the Pick is a Joint Ray or Parabola Pick with joint == "_CONTROLLER_LEFTHAND" or
+     * "_CAMERA_RELATIVE_CONTROLLER_LEFTHAND", or a Stylus Pick with hand == 0.
      */
     Q_INVOKABLE bool isLeftHand(unsigned int uid);
 
@@ -215,7 +226,8 @@ public:
      * Check if a Pick is associated with the right hand.
      * @function Picks.isRightHand
      * @param {number} uid The ID of the Pick, as returned by {@link Picks.createPick}.
-     * @returns {boolean} True if the Pick is a Joint Ray or Parabola Pick with joint == "_CONTROLLER_RIGHTHAND" or "_CAMERA_RELATIVE_CONTROLLER_RIGHTHAND", or a Stylus Pick with hand == 1.
+     * @returns {boolean} True if the Pick is a Joint Ray or Parabola Pick with joint == "_CONTROLLER_RIGHTHAND" or
+     * "_CAMERA_RELATIVE_CONTROLLER_RIGHTHAND", or a Stylus Pick with hand == 1.
      */
     Q_INVOKABLE bool isRightHand(unsigned int uid);
 
@@ -275,19 +287,25 @@ public slots:
      * @function Picks.PICK_INCLUDE_INVISIBLE
      * @returns {number}
      */
-    static constexpr unsigned int PICK_INCLUDE_INVISIBLE() { return PickFilter::getBitMask(PickFilter::FlagBit::PICK_INCLUDE_INVISIBLE); }
+    static constexpr unsigned int PICK_INCLUDE_INVISIBLE() {
+        return PickFilter::getBitMask(PickFilter::FlagBit::PICK_INCLUDE_INVISIBLE);
+    }
 
     /**jsdoc
      * @function Picks.PICK_INCLUDE_NONCOLLIDABLE
      * @returns {number}
      */
-    static constexpr unsigned int PICK_INCLUDE_NONCOLLIDABLE() { return PickFilter::getBitMask(PickFilter::FlagBit::PICK_INCLUDE_NONCOLLIDABLE); }
+    static constexpr unsigned int PICK_INCLUDE_NONCOLLIDABLE() {
+        return PickFilter::getBitMask(PickFilter::FlagBit::PICK_INCLUDE_NONCOLLIDABLE);
+    }
 
     /**jsdoc
      * @function Picks.PICK_ALL_INTERSECTIONS
      * @returns {number}
      */
-    static constexpr unsigned int PICK_ALL_INTERSECTIONS() { return PickFilter::getBitMask(PickFilter::FlagBit::PICK_ALL_INTERSECTIONS); }
+    static constexpr unsigned int PICK_ALL_INTERSECTIONS() {
+        return PickFilter::getBitMask(PickFilter::FlagBit::PICK_ALL_INTERSECTIONS);
+    }
 
     /**jsdoc
      * @function Picks.INTERSECTED_NONE

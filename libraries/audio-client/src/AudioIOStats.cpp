@@ -25,7 +25,6 @@ static const int OUTPUT_UNPLAYED_WINDOW = 5;
 
 static const int APPROXIMATELY_30_SECONDS_OF_AUDIO_PACKETS = (int)(30.0f * 1000.0f / AudioConstants::NETWORK_FRAME_MSECS);
 
-
 AudioIOStats::AudioIOStats(MixedProcessedAudioStream* receivedAudioStream) :
     _interface(new AudioStatsInterface(this)),
     _inputMsRead(1, INPUT_READS_WINDOW),
@@ -33,9 +32,7 @@ AudioIOStats::AudioIOStats(MixedProcessedAudioStream* receivedAudioStream) :
     _outputMsUnplayed(1, OUTPUT_UNPLAYED_WINDOW),
     _lastSentPacketTime(0),
     _packetTimegaps(1, APPROXIMATELY_30_SECONDS_OF_AUDIO_PACKETS),
-    _receivedAudioStream(receivedAudioStream)
-{
-
+    _receivedAudioStream(receivedAudioStream) {
 }
 
 void AudioIOStats::reset() {
@@ -129,8 +126,8 @@ void AudioIOStats::publish() {
     nodeList->sendPacket(std::move(statsPacket), *audioMixer);
 }
 
-AudioStreamStatsInterface::AudioStreamStatsInterface(QObject* parent) :
-    QObject(parent) {}
+AudioStreamStatsInterface::AudioStreamStatsInterface(QObject* parent) : QObject(parent) {
+}
 
 void AudioStreamStatsInterface::updateStream(const AudioStreamStats& stats) {
     lossRate(stats._packetStreamStats.getLostRate());
@@ -159,13 +156,13 @@ AudioStatsInterface::AudioStatsInterface(QObject* parent) :
     QObject(parent),
     _client(new AudioStreamStatsInterface(this)),
     _mixer(new AudioStreamStatsInterface(this)),
-    _injectors(new QObject(this)) {}
-
+    _injectors(new QObject(this)) {
+}
 
 void AudioStatsInterface::updateLocalBuffers(const MovingMinMaxAvg<float>& inputMsRead,
-    const MovingMinMaxAvg<float>& inputMsUnplayed,
-    const MovingMinMaxAvg<float>& outputMsUnplayed,
-    const MovingMinMaxAvg<quint64>& timegaps) {
+                                             const MovingMinMaxAvg<float>& inputMsUnplayed,
+                                             const MovingMinMaxAvg<float>& outputMsUnplayed,
+                                             const MovingMinMaxAvg<quint64>& timegaps) {
     if (SharedNodePointer audioNode = DependencyManager::get<NodeList>()->soloNodeOfType(NodeType::AudioMixer)) {
         pingMs(audioNode->getPingMs());
     }

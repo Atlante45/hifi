@@ -10,27 +10,27 @@
 //
 
 #ifdef _WIN32
-#pragma warning( push )
-#pragma warning( disable : 4267 )
+#pragma warning(push)
+#pragma warning(disable : 4267)
 #endif
 
 #include <draco/compression/decode.h>
 
 #ifdef _WIN32
-#pragma warning( pop )
+#pragma warning(pop)
 #endif
 
-#include <iostream>
+#include <LogHandler.h>
 #include <QBuffer>
 #include <QDataStream>
+#include <QFileInfo>
+#include <QHash>
 #include <QIODevice>
 #include <QStringList>
 #include <QTextStream>
 #include <QtDebug>
 #include <QtEndian>
-#include <QFileInfo>
-#include <QHash>
-#include <LogHandler.h>
+#include <iostream>
 #include "ModelFormatLogging.h"
 
 #include "FBXReader.h"
@@ -85,7 +85,7 @@ public:
     QVector<int> normalIndices;
 
     bool colorsByVertex;
-    glm::vec4 averageColor{1.0f, 1.0f, 1.0f, 1.0f};
+    glm::vec4 averageColor { 1.0f, 1.0f, 1.0f, 1.0f };
     QVector<glm::vec4> colors;
     QVector<int> colorIndices;
 
@@ -97,7 +97,6 @@ public:
     std::vector<AttributeData> attributes;
 };
 
-
 void appendIndex(MeshData& data, QVector<int>& indices, int index, bool deduplicate) {
     if (index >= data.polygonIndices.size()) {
         return;
@@ -108,7 +107,7 @@ void appendIndex(MeshData& data, QVector<int>& indices, int index, bool deduplic
     }
     Vertex vertex;
     vertex.originalIndex = vertexIndex;
-    
+
     glm::vec3 position;
     if (vertexIndex < data.vertices.size()) {
         position = data.vertices.at(vertexIndex);
@@ -116,7 +115,7 @@ void appendIndex(MeshData& data, QVector<int>& indices, int index, bool deduplic
 
     glm::vec3 normal;
     int normalIndex = data.normalsByVertex ? vertexIndex : index;
-    if (data.normalIndices.isEmpty()) {    
+    if (data.normalIndices.isEmpty()) {
         if (normalIndex < data.normals.size()) {
             normal = data.normals.at(normalIndex);
         }
@@ -127,12 +126,11 @@ void appendIndex(MeshData& data, QVector<int>& indices, int index, bool deduplic
         }
     }
 
-
     glm::vec4 color;
     bool hasColors = (data.colors.size() > 1);
     if (hasColors) {
         int colorIndex = data.colorsByVertex ? vertexIndex : index;
-        if (data.colorIndices.isEmpty()) {    
+        if (data.colorIndices.isEmpty()) {
             if (colorIndex < data.colors.size()) {
                 color = data.colors.at(colorIndex);
             }
@@ -154,7 +152,7 @@ void appendIndex(MeshData& data, QVector<int>& indices, int index, bool deduplic
             vertex.texCoord = data.texCoords.at(texCoordIndex);
         }
     }
-    
+
     bool hasMoreTexcoords = (data.attributes.size() > 1);
     if (hasMoreTexcoords) {
         if (data.attributes[1].texCoordIndices.empty()) {
@@ -224,7 +222,7 @@ ExtractedMesh FBXReader::extractMesh(const FBXNode& object, unsigned int& meshIn
 
                 } else if (subdata.name == "MappingInformationType" && subdata.properties.at(0) == BY_VERTICE) {
                     data.normalsByVertex = true;
-                    
+
                 } else if (subdata.name == "ReferenceInformationType" && subdata.properties.at(0) == INDEX_TO_DIRECT) {
                     indexToDirect = true;
                 }
@@ -244,7 +242,7 @@ ExtractedMesh FBXReader::extractMesh(const FBXNode& object, unsigned int& meshIn
 
                 } else if (subdata.name == "MappingInformationType" && subdata.properties.at(0) == BY_VERTICE) {
                     data.colorsByVertex = true;
-                    
+
                 } else if (subdata.name == "ReferenceInformationType" && subdata.properties.at(0) == INDEX_TO_DIRECT) {
                     indexToDirect = true;
                 }
@@ -266,7 +264,7 @@ ExtractedMesh FBXReader::extractMesh(const FBXNode& object, unsigned int& meshIn
                 qCDebug(modelformat) << "LayerElementColor has an average value of 0.0f... let's forget it.";
             }
 #endif
-         
+
         } else if (child.name == "LayerElementUV") {
             if (child.properties.at(0).toInt() == 0) {
                 AttributeData attrib;
@@ -280,14 +278,13 @@ ExtractedMesh FBXReader::extractMesh(const FBXNode& object, unsigned int& meshIn
                         attrib.texCoordIndices = getIntVector(subdata);
                     } else if (subdata.name == "Name") {
                         attrib.name = subdata.properties.at(0).toString();
-                    } 
+                    }
 #if defined(DEBUG_FBXREADER)
                     else {
                         int unknown = 0;
                         QString subname = subdata.name.data();
-                        if ( (subdata.name == "Version")
-                             || (subdata.name == "MappingInformationType")
-                             || (subdata.name == "ReferenceInformationType") ) {
+                        if ((subdata.name == "Version") || (subdata.name == "MappingInformationType") ||
+                            (subdata.name == "ReferenceInformationType")) {
                         } else {
                             unknown++;
                         }
@@ -304,16 +301,15 @@ ExtractedMesh FBXReader::extractMesh(const FBXNode& object, unsigned int& meshIn
                         attrib.texCoords = createVec2Vector(getDoubleVector(subdata));
                     } else if (subdata.name == "UVIndex") {
                         attrib.texCoordIndices = getIntVector(subdata);
-                    } else if  (subdata.name == "Name") {
+                    } else if (subdata.name == "Name") {
                         attrib.name = subdata.properties.at(0).toString();
                     }
 #if defined(DEBUG_FBXREADER)
                     else {
                         int unknown = 0;
                         QString subname = subdata.name.data();
-                        if ( (subdata.name == "Version")
-                             || (subdata.name == "MappingInformationType")
-                             || (subdata.name == "ReferenceInformationType") ) {
+                        if ((subdata.name == "Version") || (subdata.name == "MappingInformationType") ||
+                            (subdata.name == "ReferenceInformationType")) {
                         } else {
                             unknown++;
                         }
@@ -327,7 +323,8 @@ ExtractedMesh FBXReader::extractMesh(const FBXNode& object, unsigned int& meshIn
                     data.attributes.push_back(attrib);
                 } else {
                     // WTF same names for different UVs?
-                    qCDebug(modelformat) << "LayerElementUV #" << attrib.index << " is reusing the same name as #" << (*it) << ". Skip this texcoord attribute.";
+                    qCDebug(modelformat) << "LayerElementUV #" << attrib.index << " is reusing the same name as #" << (*it)
+                                         << ". Skip this texcoord attribute.";
                 }
             }
         } else if (child.name == "LayerElementMaterial") {
@@ -343,7 +340,6 @@ ExtractedMesh FBXReader::extractMesh(const FBXNode& object, unsigned int& meshIn
                     isMaterialPerPolygon = false;
                 }
             }
-
 
         } else if (child.name == "LayerElementTexture") {
             foreach (const FBXNode& subdata, child.children) {
@@ -428,8 +424,8 @@ ExtractedMesh FBXReader::extractMesh(const FBXNode& object, unsigned int& meshIn
                     // some meshes have a second set of UVs, read those to extracted mesh
                     auto mappedIndex = extraTexCoordAttribute->mapped_index(vertexIndex);
 
-                    extraTexCoordAttribute->ConvertValue<float, 2>(mappedIndex,
-                                                                   reinterpret_cast<float*>(&data.extracted.mesh.texCoords1[i]));
+                    extraTexCoordAttribute->ConvertValue<float, 2>(mappedIndex, reinterpret_cast<float*>(
+                                                                                    &data.extracted.mesh.texCoords1[i]));
                 }
 
                 if (colorAttribute) {
@@ -501,7 +497,8 @@ ExtractedMesh FBXReader::extractMesh(const FBXNode& object, unsigned int& meshIn
         QHash<QPair<int, int>, int> materialTextureParts;
         for (int beginIndex = 0; beginIndex < data.polygonIndices.size(); polygonIndex++) {
             int endIndex = beginIndex;
-            while (endIndex < data.polygonIndices.size() && data.polygonIndices.at(endIndex++) >= 0);
+            while (endIndex < data.polygonIndices.size() && data.polygonIndices.at(endIndex++) >= 0)
+                ;
 
             QPair<int, int> materialTexture((polygonIndex < materials.size()) ? materials.at(polygonIndex) : 0,
                                             (polygonIndex < textures.size()) ? textures.at(polygonIndex) : 0);
@@ -541,7 +538,7 @@ ExtractedMesh FBXReader::extractMesh(const FBXNode& object, unsigned int& meshIn
                 part.quadTrianglesIndices.append(i3);
 
             } else {
-                for (int nextIndex = beginIndex + 1;; ) {
+                for (int nextIndex = beginIndex + 1;;) {
                     appendIndex(data, part.triangleIndices, beginIndex, deduplicate);
                     appendIndex(data, part.triangleIndices, nextIndex++, deduplicate);
                     appendIndex(data, part.triangleIndices, nextIndex, deduplicate);
@@ -553,7 +550,7 @@ ExtractedMesh FBXReader::extractMesh(const FBXNode& object, unsigned int& meshIn
             }
         }
     }
-    
+
     return data.extracted;
 }
 
@@ -567,7 +564,7 @@ glm::vec3 FBXReader::normalizeDirForPacking(const glm::vec3& dir) {
 
 void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
     unsigned int totalSourceIndices = 0;
-    foreach(const FBXMeshPart& part, extractedMesh.parts) {
+    foreach (const FBXMeshPart& part, extractedMesh.parts) {
         totalSourceIndices += (part.quadTrianglesIndices.size() + part.triangleIndices.size());
     }
 
@@ -604,7 +601,7 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
     // evaluate all attribute elements and data sizes
 
     // Position is a vec3
-    const auto positionElement = gpu::Element(gpu::VEC3, gpu::FLOAT, gpu::XYZ); 
+    const auto positionElement = gpu::Element(gpu::VEC3, gpu::FLOAT, gpu::XYZ);
     const int positionsSize = numVerts * positionElement.getSize();
 
     // Normal and tangent are always there together packed in normalized xyz32bits word (times 2)
@@ -621,7 +618,7 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
     // Color attrib
     const auto colorElement = FBX_COLOR_ELEMENT;
     const int colorsSize = fbxMesh.colors.size() * colorElement.getSize();
-   
+
     // Texture coordinates are stored in 2 half floats
     const auto texCoordsElement = gpu::Element(gpu::VEC2, gpu::HALF, gpu::UV);
     const int texCoordsSize = fbxMesh.texCoords.size() * texCoordsElement.getSize();
@@ -629,13 +626,16 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
 
     // Support for 4 skinning clusters:
     // 4 Indices are uint8 ideally, uint16 if more than 256.
-    const auto clusterIndiceElement = (fbxMesh.clusters.size() < UINT8_MAX ? gpu::Element(gpu::VEC4, gpu::UINT8, gpu::XYZW) : gpu::Element(gpu::VEC4, gpu::UINT16, gpu::XYZW));
+    const auto clusterIndiceElement = (fbxMesh.clusters.size() < UINT8_MAX ? gpu::Element(gpu::VEC4, gpu::UINT8, gpu::XYZW)
+                                                                           : gpu::Element(gpu::VEC4, gpu::UINT16, gpu::XYZW));
     // 4 Weights are normalized 16bits
     const auto clusterWeightElement = gpu::Element(gpu::VEC4, gpu::NUINT16, gpu::XYZW);
 
     // Cluster indices and weights must be the same sizes
     const int NUM_CLUSTERS_PER_VERT = 4;
-    const int numVertClusters = (fbxMesh.clusterIndices.size() == fbxMesh.clusterWeights.size() ? fbxMesh.clusterIndices.size() / NUM_CLUSTERS_PER_VERT : 0);
+    const int numVertClusters = (fbxMesh.clusterIndices.size() == fbxMesh.clusterWeights.size()
+                                     ? fbxMesh.clusterIndices.size() / NUM_CLUSTERS_PER_VERT
+                                     : 0);
     const int clusterIndicesSize = numVertClusters * clusterIndiceElement.getSize();
     const int clusterWeightsSize = numVertClusters * clusterWeightElement.getSize();
 
@@ -654,7 +654,7 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
     vertBuffer->resize(totalVertsSize);
 
     // First positions
-    vertBuffer->setSubData(positionsOffset, positionsSize, (const gpu::Byte*) extractedMesh.vertices.data());
+    vertBuffer->setSubData(positionsOffset, positionsSize, (const gpu::Byte*)extractedMesh.vertices.data());
 
     // Interleave normals and tangents
     if (normalsSize > 0) {
@@ -662,8 +662,7 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
 
         normalsAndTangents.reserve(fbxMesh.normals.size() + fbxMesh.tangents.size());
         for (auto normalIt = fbxMesh.normals.constBegin(), tangentIt = fbxMesh.tangents.constBegin();
-            normalIt != fbxMesh.normals.constEnd();
-            ++normalIt, ++tangentIt) {
+             normalIt != fbxMesh.normals.constEnd(); ++normalIt, ++tangentIt) {
 #if FBX_PACK_NORMALS
             const auto normal = normalizeDirForPacking(*normalIt);
             const auto tangent = normalizeDirForPacking(*tangentIt);
@@ -676,7 +675,7 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
             normalsAndTangents.push_back(packedNormal);
             normalsAndTangents.push_back(packedTangent);
         }
-        vertBuffer->setSubData(normalsAndTangentsOffset, normalsAndTangentsSize, (const gpu::Byte*) normalsAndTangents.data());
+        vertBuffer->setSubData(normalsAndTangentsOffset, normalsAndTangentsSize, (const gpu::Byte*)normalsAndTangents.data());
     }
 
     // Pack colors
@@ -688,9 +687,9 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
         for (const auto& color : fbxMesh.colors) {
             colors.push_back(glm::packUnorm4x8(glm::vec4(color, 1.0f)));
         }
-        vertBuffer->setSubData(colorsOffset, colorsSize, (const gpu::Byte*) colors.data());
+        vertBuffer->setSubData(colorsOffset, colorsSize, (const gpu::Byte*)colors.data());
 #else
-        vertBuffer->setSubData(colorsOffset, colorsSize, (const gpu::Byte*) fbxMesh.colors.constData());
+        vertBuffer->setSubData(colorsOffset, colorsSize, (const gpu::Byte*)fbxMesh.colors.constData());
 #endif
     }
 
@@ -705,7 +704,7 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
             texCoordVec2h.y = glm::detail::toFloat16(texCoordVec2f.y);
             texCoordData.push_back(texCoordVec2h);
         }
-        vertBuffer->setSubData(texCoordsOffset, texCoordsSize, (const gpu::Byte*) texCoordData.constData());
+        vertBuffer->setSubData(texCoordsOffset, texCoordsSize, (const gpu::Byte*)texCoordData.constData());
     }
     if (texCoords1Size > 0) {
         QVector<vec2h> texCoordData;
@@ -717,7 +716,7 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
             texCoordVec2h.y = glm::detail::toFloat16(texCoordVec2f.y);
             texCoordData.push_back(texCoordVec2h);
         }
-        vertBuffer->setSubData(texCoords1Offset, texCoords1Size, (const gpu::Byte*) texCoordData.constData());
+        vertBuffer->setSubData(texCoords1Offset, texCoords1Size, (const gpu::Byte*)texCoordData.constData());
     }
 
     // Clusters data
@@ -731,15 +730,15 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
                 assert(fbxMesh.clusterIndices[i] <= UINT8_MAX);
                 clusterIndices[i] = (uint8_t)(fbxMesh.clusterIndices[i]);
             }
-            vertBuffer->setSubData(clusterIndicesOffset, clusterIndicesSize, (const gpu::Byte*) clusterIndices.constData());
+            vertBuffer->setSubData(clusterIndicesOffset, clusterIndicesSize, (const gpu::Byte*)clusterIndices.constData());
         } else {
-            vertBuffer->setSubData(clusterIndicesOffset, clusterIndicesSize, (const gpu::Byte*) fbxMesh.clusterIndices.constData());
+            vertBuffer->setSubData(clusterIndicesOffset, clusterIndicesSize,
+                                   (const gpu::Byte*)fbxMesh.clusterIndices.constData());
         }
     }
     if (clusterWeightsSize > 0) {
-        vertBuffer->setSubData(clusterWeightsOffset, clusterWeightsSize, (const gpu::Byte*) fbxMesh.clusterWeights.constData());
+        vertBuffer->setSubData(clusterWeightsOffset, clusterWeightsSize, (const gpu::Byte*)fbxMesh.clusterWeights.constData());
     }
-
 
     // Now we decide on how to interleave the attributes and provide the vertices among bufers:
     // Aka the Vertex format and the vertexBufferStream
@@ -749,7 +748,7 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
     // Decision time:
     // if blendshapes then keep position and normals/tangents as separated channel buffers from interleaved attributes
     // else everything is interleaved in one buffer
-    
+
     // Default case is no blend shapes
     gpu::BufferPointer attribBuffer;
     int totalAttribBufferSize = totalVertsSize;
@@ -759,7 +758,7 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
     bool interleavePositions = true;
     bool interleaveNormalsTangents = true;
 
-     // Define the vertex format, compute the offset for each attributes as we append them to the vertex format
+    // Define the vertex format, compute the offset for each attributes as we append them to the vertex format
     gpu::Offset bufOffset = 0;
     if (positionsSize) {
         vertexFormat->setAttribute(gpu::Stream::POSITION, posChannel, positionElement, bufOffset);
@@ -791,7 +790,8 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
         vertexFormat->setAttribute(gpu::Stream::TEXCOORD1, attribChannel, texCoordsElement, bufOffset);
         bufOffset += texCoordsElement.getSize();
     } else if (texCoordsSize) {
-        vertexFormat->setAttribute(gpu::Stream::TEXCOORD1, attribChannel, texCoordsElement, bufOffset - texCoordsElement.getSize());
+        vertexFormat->setAttribute(gpu::Stream::TEXCOORD1, attribChannel, texCoordsElement,
+                                   bufOffset - texCoordsElement.getSize());
     }
     if (clusterIndicesSize) {
         vertexFormat->setAttribute(gpu::Stream::SKIN_CLUSTER_INDEX, attribChannel, clusterIndiceElement, bufOffset);
@@ -812,7 +812,7 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
 
         auto vColorOffset = vNormalsAndTangentsOffset + vNormalsAndTangentsSize;
         auto vColorSize = colorsSize / numVerts;
-    
+
         auto vTexcoord0Offset = vColorOffset + vColorSize;
         auto vTexcoord0Size = texCoordsSize / numVerts;
 
@@ -834,14 +834,23 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
         auto source = vertBuffer->getData();
 
         for (int i = 0; i < numVerts; i++) {
-            
-            if (vPositionSize) memcpy(vDest + vPositionOffset, source + positionsOffset + i * vPositionSize, vPositionSize);
-            if (vNormalsAndTangentsSize) memcpy(vDest + vNormalsAndTangentsOffset, source + normalsAndTangentsOffset + i * vNormalsAndTangentsSize, vNormalsAndTangentsSize);
-            if (vColorSize) memcpy(vDest + vColorOffset, source + colorsOffset + i * vColorSize, vColorSize);
-            if (vTexcoord0Size) memcpy(vDest + vTexcoord0Offset, source + texCoordsOffset + i * vTexcoord0Size, vTexcoord0Size);
-            if (vTexcoord1Size) memcpy(vDest + vTexcoord1Offset, source + texCoords1Offset + i * vTexcoord1Size, vTexcoord1Size);
-            if (vClusterIndiceSize) memcpy(vDest + vClusterIndiceOffset, source + clusterIndicesOffset + i * vClusterIndiceSize, vClusterIndiceSize);
-            if (vClusterWeightSize) memcpy(vDest + vClusterWeightOffset, source + clusterWeightsOffset + i * vClusterWeightSize, vClusterWeightSize);
+            if (vPositionSize)
+                memcpy(vDest + vPositionOffset, source + positionsOffset + i * vPositionSize, vPositionSize);
+            if (vNormalsAndTangentsSize)
+                memcpy(vDest + vNormalsAndTangentsOffset, source + normalsAndTangentsOffset + i * vNormalsAndTangentsSize,
+                       vNormalsAndTangentsSize);
+            if (vColorSize)
+                memcpy(vDest + vColorOffset, source + colorsOffset + i * vColorSize, vColorSize);
+            if (vTexcoord0Size)
+                memcpy(vDest + vTexcoord0Offset, source + texCoordsOffset + i * vTexcoord0Size, vTexcoord0Size);
+            if (vTexcoord1Size)
+                memcpy(vDest + vTexcoord1Offset, source + texCoords1Offset + i * vTexcoord1Size, vTexcoord1Size);
+            if (vClusterIndiceSize)
+                memcpy(vDest + vClusterIndiceOffset, source + clusterIndicesOffset + i * vClusterIndiceSize,
+                       vClusterIndiceSize);
+            if (vClusterWeightSize)
+                memcpy(vDest + vClusterWeightOffset, source + clusterWeightsOffset + i * vClusterWeightSize,
+                       vClusterWeightSize);
 
             vDest += vStride;
         }
@@ -856,11 +865,11 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
 
     // Index and Part Buffers
     unsigned int totalIndices = 0;
-    foreach(const FBXMeshPart& part, extractedMesh.parts) {
+    foreach (const FBXMeshPart& part, extractedMesh.parts) {
         totalIndices += (part.quadTrianglesIndices.size() + part.triangleIndices.size());
     }
 
-    if (! totalIndices) {
+    if (!totalIndices) {
         qCDebug(modelformat) << "buildModelMesh failed -- no indices, url = " << url;
         return;
     }
@@ -871,26 +880,24 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
     int indexNum = 0;
     int offset = 0;
 
-    std::vector< graphics::Mesh::Part > parts;
+    std::vector<graphics::Mesh::Part> parts;
     if (extractedMesh.parts.size() > 1) {
         indexNum = 0;
     }
-    foreach(const FBXMeshPart& part, extractedMesh.parts) {
+    foreach (const FBXMeshPart& part, extractedMesh.parts) {
         graphics::Mesh::Part modelPart(indexNum, 0, 0, graphics::Mesh::TRIANGLES);
-        
+
         if (part.quadTrianglesIndices.size()) {
-            indexBuffer->setSubData(offset,
-                            part.quadTrianglesIndices.size() * sizeof(int),
-                            (gpu::Byte*) part.quadTrianglesIndices.constData());
+            indexBuffer->setSubData(offset, part.quadTrianglesIndices.size() * sizeof(int),
+                                    (gpu::Byte*)part.quadTrianglesIndices.constData());
             offset += part.quadTrianglesIndices.size() * sizeof(int);
             indexNum += part.quadTrianglesIndices.size();
             modelPart._numIndices += part.quadTrianglesIndices.size();
         }
 
         if (part.triangleIndices.size()) {
-            indexBuffer->setSubData(offset,
-                            part.triangleIndices.size() * sizeof(int),
-                            (gpu::Byte*) part.triangleIndices.constData());
+            indexBuffer->setSubData(offset, part.triangleIndices.size() * sizeof(int),
+                                    (gpu::Byte*)part.triangleIndices.constData());
             offset += part.triangleIndices.size() * sizeof(int);
             indexNum += part.triangleIndices.size();
             modelPart._numIndices += part.triangleIndices.size();
@@ -904,7 +911,7 @@ void FBXReader::buildModelMesh(FBXMesh& extractedMesh, const QString& url) {
 
     if (parts.size()) {
         auto pb = std::make_shared<gpu::Buffer>();
-        pb->setData(parts.size() * sizeof(graphics::Mesh::Part), (const gpu::Byte*) parts.data());
+        pb->setData(parts.size() * sizeof(graphics::Mesh::Part), (const gpu::Byte*)parts.data());
         gpu::BufferView pbv(pb, gpu::Element(gpu::VEC4, gpu::UINT32, gpu::XYZW));
         mesh->setPartBuffer(pbv);
     } else {

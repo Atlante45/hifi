@@ -15,7 +15,7 @@
 #include <QtCore/QtGlobal>
 
 #if defined(Q_OS_WIN) || defined(Q_OS_OSX)
-    #define HAVE_DDE
+#define HAVE_DDE
 #endif
 
 #include <QProcess>
@@ -26,8 +26,8 @@
 
 #include <trackers/FaceTracker.h>
 
-/**jsdoc 
- * The FaceTracker API helps manage facial tracking hardware. 
+/**jsdoc
+ * The FaceTracker API helps manage facial tracking hardware.
  * @namespace FaceTracker
  *
  * @hifi-interface
@@ -66,7 +66,7 @@ public:
 
 public slots:
 
-    /**jsdoc 
+    /**jsdoc
      * @function FaceTracker.setEnabled
      * @param {boolean} enabled
      */
@@ -80,7 +80,7 @@ public slots:
 private slots:
     void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
-    //sockets
+    // sockets
     void socketErrorOccurred(QAbstractSocket::SocketError socketError);
     void readPendingDatagrams();
     void socketStateChanged(QAbstractSocket::SocketState socketState);
@@ -139,7 +139,7 @@ private:
     float _lastBrowUp;
     float _filteredBrowUp;
 
-    float _eyePitch;  // Degrees, relative to screen
+    float _eyePitch; // Degrees, relative to screen
     float _eyeYaw;
     float _lastEyePitch;
     float _lastEyeYaw;
@@ -149,13 +149,7 @@ private:
     float _longTermAverageEyeYaw = 0.0f;
     bool _longTermAverageInitialized = false;
 
-    enum EyeState {
-        EYE_UNCONTROLLED,
-        EYE_OPEN,
-        EYE_CLOSING,
-        EYE_CLOSED,
-        EYE_OPENING
-    };
+    enum EyeState { EYE_UNCONTROLLED, EYE_OPEN, EYE_CLOSING, EYE_CLOSED, EYE_OPENING };
     EyeState _eyeStates[2];
     float _lastEyeBlinks[2];
     float _filteredEyeBlinks[2];

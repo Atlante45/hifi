@@ -35,13 +35,13 @@ AutoTester::AutoTester(QWidget* parent) : QMainWindow(parent) {
     _ui.tabWidget->removeTab(1);
 #endif
 
-   _ui.statusLabel->setText("");
-   _ui.plainTextEdit->setReadOnly(true);
+    _ui.statusLabel->setText("");
+    _ui.plainTextEdit->setReadOnly(true);
 
-   setWindowTitle("Auto Tester - v6.7");
+    setWindowTitle("Auto Tester - v6.7");
 
-   // Coming soon to an auto-tester near you...
-   //// _helpWindow.textBrowser->setText()
+    // Coming soon to an auto-tester near you...
+    //// _helpWindow.textBrowser->setText()
 }
 
 AutoTester::~AutoTester() {
@@ -86,15 +86,12 @@ void AutoTester::setup() {
     if (_testRunner) {
         delete _testRunner;
     }
-    _testRunner = new TestRunner(dayCheckboxes, timeEditCheckboxes, timeEdits, _ui.workingFolderLabel, _ui.checkBoxServerless, _ui.checkBoxRunLatest, _ui.urlLineEdit, _ui.runNowButton);
+    _testRunner = new TestRunner(dayCheckboxes, timeEditCheckboxes, timeEdits, _ui.workingFolderLabel, _ui.checkBoxServerless,
+                                 _ui.checkBoxRunLatest, _ui.urlLineEdit, _ui.runNowButton);
 }
 
-void AutoTester::startTestsEvaluation(const bool isRunningFromCommandLine,
-                                      const bool isRunningInAutomaticTestRun,
-                                      const QString& snapshotDirectory,
-                                      const QString& branch,
-                                      const QString& user
-) {
+void AutoTester::startTestsEvaluation(const bool isRunningFromCommandLine, const bool isRunningInAutomaticTestRun,
+                                      const QString& snapshotDirectory, const QString& branch, const QString& user) {
     _test->startTestsEvaluation(isRunningFromCommandLine, isRunningInAutomaticTestRun, snapshotDirectory, branch, user);
 }
 
@@ -227,9 +224,10 @@ void AutoTester::downloadFile(const QUrl& url) {
     ++_index;
 }
 
-void AutoTester::downloadFiles(const QStringList& URLs, const QString& directoryName, const QStringList& filenames, void *caller) {
+void AutoTester::downloadFiles(const QStringList& URLs, const QString& directoryName, const QStringList& filenames,
+                               void* caller) {
     connect(_signalMapper, SIGNAL(mapped(int)), this, SLOT(saveFile(int)));
-    
+
     _directoryName = directoryName;
     _filenames = filenames;
     _caller = caller;
@@ -243,9 +241,7 @@ void AutoTester::downloadFiles(const QStringList& URLs, const QString& directory
     _ui.progressBar->setValue(0);
     _ui.progressBar->setVisible(true);
 
-    foreach (auto downloader, _downloaders) {
-        delete downloader;
-    }
+    foreach (auto downloader, _downloaders) { delete downloader; }
 
     _downloaders.clear();
     for (int i = 0; i < _numberOfFilesToDownload; ++i) {

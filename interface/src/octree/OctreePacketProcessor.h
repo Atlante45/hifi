@@ -12,8 +12,8 @@
 #ifndef hifi_OctreePacketProcessor_h
 #define hifi_OctreePacketProcessor_h
 
-#include <ReceivedPacketProcessor.h>
 #include <ReceivedMessage.h>
+#include <ReceivedPacketProcessor.h>
 
 #include "SafeLanding.h"
 
@@ -41,4 +41,4 @@ private slots:
 private:
     std::unique_ptr<SafeLanding> _safeLanding;
 };
-#endif  // hifi_OctreePacketProcessor_h
+#endif // hifi_OctreePacketProcessor_h

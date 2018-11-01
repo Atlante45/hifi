@@ -20,6 +20,7 @@
 
 class HFWebEngineProfile : public ContextAwareProfile {
     using Parent = ContextAwareProfile;
+
 public:
     static void registerWithContext(QQmlContext* parent);
 

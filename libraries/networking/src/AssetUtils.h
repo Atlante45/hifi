@@ -49,23 +49,9 @@ enum AssetServerError : uint8_t {
     LostConnection
 };
 
-enum AssetMappingOperationType : uint8_t {
-    Get = 0,
-    GetAll,
-    Set,
-    Delete,
-    Rename,
-    SetBakingEnabled
-};
+enum AssetMappingOperationType : uint8_t { Get = 0, GetAll, Set, Delete, Rename, SetBakingEnabled };
 
-enum BakingStatus {
-    Irrelevant,
-    NotBaked,
-    Pending,
-    Baking,
-    Baked,
-    Error
-};
+enum BakingStatus { Irrelevant, NotBaked, Pending, Baking, Baked, Error };
 
 struct MappingInfo {
     AssetHash hash;

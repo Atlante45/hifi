@@ -18,10 +18,8 @@
 
 namespace render {
 
-
 class BlurParams {
 public:
-
     void setWidthHeight(int width, int height, bool isStereo);
 
     void setTexcoordTransform(const glm::vec4 texcoordTransformViewport);
@@ -42,22 +40,22 @@ public:
     class Params {
     public:
         // Resolution info (width, height, inverse of width, inverse of height)
-        glm::vec4 resolutionInfo{ 0.0f, 0.0f, 0.0f, 0.0f };
+        glm::vec4 resolutionInfo { 0.0f, 0.0f, 0.0f, 0.0f };
 
         // Viewport to Texcoord info, if the region of the blur (viewport) is smaller than the full frame
-        glm::vec4 texcoordTransform{ 0.0f, 0.0f, 1.0f, 1.0f };
+        glm::vec4 texcoordTransform { 0.0f, 0.0f, 1.0f, 1.0f };
 
         // Filter info (radius scale, number of taps, output alpha)
-        glm::vec4 filterInfo{ 1.0f, 0.0f, 0.0f, 0.0f };
+        glm::vec4 filterInfo { 1.0f, 0.0f, 0.0f, 0.0f };
 
         // Depth info (radius scale
-        glm::vec4 depthInfo{ 1.0f, 0.0f, 0.0f, 0.0f };
+        glm::vec4 depthInfo { 1.0f, 0.0f, 0.0f, 0.0f };
 
         // stereo info if blurring a stereo render
-        glm::vec4 stereoInfo{ 0.0f };
+        glm::vec4 stereoInfo { 0.0f };
 
         // LinearDepth info is { f }
-        glm::vec4 linearDepthInfo{ 0.0f };
+        glm::vec4 linearDepthInfo { 0.0f };
 
         // Taps (offset, weight)
         glm::vec2 filterTaps[BLUR_MAX_NUM_TAPS];
@@ -86,12 +84,12 @@ public:
 
     gpu::FramebufferPointer _blurredFramebuffer;
 
-    // the output framebuffer defined if the job needs to output the result in a new framebuffer and not in place in the input buffer
+    // the output framebuffer defined if the job needs to output the result in a new framebuffer and not in place in the input
+    // buffer
     gpu::FramebufferPointer _outputFramebuffer;
-    unsigned int _downsampleFactor{ 1U };
-    bool _generateOutputFramebuffer{ false };
+    unsigned int _downsampleFactor { 1U };
+    bool _generateOutputFramebuffer { false };
 };
-
 
 class BlurGaussianConfig : public Job::Config {
     Q_OBJECT
@@ -99,18 +97,16 @@ class BlurGaussianConfig : public Job::Config {
     Q_PROPERTY(float filterScale MEMBER filterScale NOTIFY dirty)
     Q_PROPERTY(float mix MEMBER mix NOTIFY dirty)
 public:
-
     BlurGaussianConfig() : Job::Config(true) {}
 
-    float filterScale{ 0.2f };
-    float mix{ 1.0f };
+    float filterScale { 0.2f };
+    float mix { 1.0f };
 
-signals :
+signals:
     void dirty();
 
 protected:
 };
-
 
 class BlurGaussian {
 public:
@@ -126,7 +122,6 @@ public:
     BlurParamsPointer getParameters() const { return _parameters; }
 
 protected:
-
     BlurParamsPointer _parameters;
 
     gpu::PipelinePointer _blurVPipeline;
@@ -140,13 +135,14 @@ protected:
 
 class BlurGaussianDepthAwareConfig : public BlurGaussianConfig {
     Q_OBJECT
-        Q_PROPERTY(float depthThreshold MEMBER depthThreshold NOTIFY dirty) // expose enabled flag
+    Q_PROPERTY(float depthThreshold MEMBER depthThreshold NOTIFY dirty) // expose enabled flag
 public:
     BlurGaussianDepthAwareConfig() : BlurGaussianConfig() {}
 
-    float depthThreshold{ 1.0f };
+    float depthThreshold { 1.0f };
 signals:
-    void dirty(); 
+    void dirty();
+
 protected:
 };
 
@@ -159,10 +155,11 @@ public:
     BlurGaussianDepthAware(bool generateNewOutput = false, const BlurParamsPointer& params = BlurParamsPointer());
 
     void configure(const Config& config);
-    void run(const RenderContextPointer& renderContext, const Inputs& SourceAndDepth, gpu::FramebufferPointer& blurredFramebuffer);
+    void run(const RenderContextPointer& renderContext, const Inputs& SourceAndDepth,
+             gpu::FramebufferPointer& blurredFramebuffer);
 
     const BlurParamsPointer& getParameters() const { return _parameters; }
- 
+
     gpu::PipelinePointer getBlurVPipeline();
     gpu::PipelinePointer getBlurHPipeline();
 
@@ -174,6 +171,6 @@ protected:
     BlurParamsPointer _parameters;
 };
 
-}
+} // namespace render
 
 #endif // hifi_render_BlurTask_h

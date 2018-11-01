@@ -11,28 +11,26 @@
 
 #include "ATPClientApp.h"
 
+#include <QCommandLineParser>
 #include <QDataStream>
-#include <QTextStream>
-#include <QThread>
 #include <QFile>
 #include <QLoggingCategory>
-#include <QCommandLineParser>
+#include <QTextStream>
+#include <QThread>
 
+#include <AddressManager.h>
+#include <AssetUpload.h>
+#include <DependencyManager.h>
 #include <NetworkLogging.h>
 #include <NetworkingConstants.h>
-#include <SharedLogging.h>
-#include <AddressManager.h>
-#include <DependencyManager.h>
 #include <SettingHandle.h>
-#include <AssetUpload.h>
+#include <SharedLogging.h>
 #include <StatTracker.h>
 
 #define HIGH_FIDELITY_ATP_CLIENT_USER_AGENT "Mozilla/5.0 (HighFidelityATPClient)"
 #define TIMEOUT_MILLISECONDS 8000
 
-ATPClientApp::ATPClientApp(int argc, char* argv[]) :
-    QCoreApplication(argc, argv)
-{
+ATPClientApp::ATPClientApp(int argc, char* argv[]) : QCoreApplication(argc, argv) {
     // parse command-line
     QCommandLineParser parser;
     parser.setApplicationDescription("High Fidelity ATP-Client");
@@ -138,7 +136,7 @@ ATPClientApp::ATPClientApp(int argc, char* argv[]) :
     DependencyManager::registerInheritance<LimitedNodeList, NodeList>();
 
     DependencyManager::set<StatTracker>();
-    DependencyManager::set<AccountManager>([&]{ return QString(HIGH_FIDELITY_ATP_CLIENT_USER_AGENT); });
+    DependencyManager::set<AccountManager>([&] { return QString(HIGH_FIDELITY_ATP_CLIENT_USER_AGENT); });
     DependencyManager::set<AddressManager>();
     DependencyManager::set<NodeList>(NodeType::Agent, _listenPort);
 
@@ -165,8 +163,9 @@ ATPClientApp::ATPClientApp(int argc, char* argv[]) :
     connect(nodeList.data(), &NodeList::nodeKilled, this, &ATPClientApp::nodeKilled);
     connect(nodeList.data(), &NodeList::nodeActivated, this, &ATPClientApp::nodeActivated);
     connect(nodeList.data(), &NodeList::packetVersionMismatch, this, &ATPClientApp::notifyPacketVersionMismatch);
-    nodeList->addSetOfNodeTypesToNodeInterestSet(NodeSet() << NodeType::AudioMixer << NodeType::AvatarMixer
-                                                 << NodeType::EntityServer << NodeType::AssetServer << NodeType::MessagesMixer);
+    nodeList->addSetOfNodeTypesToNodeInterestSet(NodeSet()
+                                                 << NodeType::AudioMixer << NodeType::AvatarMixer << NodeType::EntityServer
+                                                 << NodeType::AssetServer << NodeType::MessagesMixer);
 
     if (_verbose) {
         QString username = accountManager->getAccountInfo().getUsername();
@@ -174,21 +173,20 @@ ATPClientApp::ATPClientApp(int argc, char* argv[]) :
     }
 
     if (!_username.isEmpty()) {
-
-        connect(accountManager.data(), &AccountManager::newKeypair, this, [&](){
+        connect(accountManager.data(), &AccountManager::newKeypair, this, [&]() {
             if (_verbose) {
                 qDebug() << "new keypair has been created.";
             }
         });
 
-        connect(accountManager.data(), &AccountManager::loginComplete, this, [&](){
+        connect(accountManager.data(), &AccountManager::loginComplete, this, [&]() {
             if (_verbose) {
                 qDebug() << "login successful";
             }
             _waitingForLogin = false;
             go();
         });
-        connect(accountManager.data(), &AccountManager::loginFailed, this, [&](){
+        connect(accountManager.data(), &AccountManager::loginFailed, this, [&]() {
             qDebug() << "login failed.";
             _waitingForLogin = false;
             go();
@@ -330,7 +328,7 @@ void ATPClientApp::listAssets() {
             qDebug() << "not found: " << request->getErrorString();
         } else if (result == GetAllMappingsRequest::NoError) {
             auto mappings = request->getMappings();
-            for (auto& kv : mappings ) {
+            for (auto& kv : mappings) {
                 qDebug() << kv.first << kv.second.hash;
             }
         } else {
@@ -375,7 +373,7 @@ void ATPClientApp::download(AssetUtils::AssetHash hash) {
             } else {
                 QFile outputHandle(_localOutputFile);
                 if (outputHandle.open(QIODevice::ReadWrite)) {
-                    QTextStream stream( &outputHandle );
+                    QTextStream stream(&outputHandle);
                     stream << data;
                 } else {
                     qDebug() << "couldn't open output file:" << _localOutputFile;

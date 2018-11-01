@@ -49,8 +49,7 @@ struct FrameHeader {
     Time timeOffset { 0 }; // milliseconds
 
     FrameHeader() {}
-    FrameHeader(FrameType type, Time timeOffset)
-        : type(type), timeOffset(timeOffset) { }
+    FrameHeader(FrameType type, Time timeOffset) : type(type), timeOffset(timeOffset) {}
 };
 
 struct Frame : public FrameHeader {
@@ -62,8 +61,7 @@ public:
     QByteArray data;
 
     Frame() {}
-    Frame(FrameType type, float timeOffset, const QByteArray& data)
-        : FrameHeader(type, timeOffset), data(data) { }
+    Frame(FrameType type, float timeOffset, const QByteArray& data) : FrameHeader(type, timeOffset), data(data) {}
 
     static FrameType registerFrameType(const QString& frameTypeName);
     static Handler registerFrameHandler(FrameType type, Handler handler);
@@ -75,6 +73,6 @@ public:
     static void handleFrame(const ConstPointer& frame);
 };
 
-}
+} // namespace recording
 
 #endif

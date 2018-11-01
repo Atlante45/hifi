@@ -32,18 +32,16 @@ void UserActivityLoggerScriptingInterface::toggledAway(bool isAway) {
     doLogAction("toggled_away", { { "is_away", isAway } });
 }
 
-void UserActivityLoggerScriptingInterface::tutorialProgress( QString stepName, int stepNumber, float secondsToComplete,
-        float tutorialElapsedTime, QString tutorialRunID, int tutorialVersion, QString controllerType) {
-    doLogAction("tutorial_progress", {
-        { "tutorial_run_id", tutorialRunID },
-        { "tutorial_version", tutorialVersion },
-        { "step", stepName },
-        { "step_number", stepNumber },
-        { "seconds_to_complete", secondsToComplete },
-        { "tutorial_elapsed_seconds", tutorialElapsedTime },
-        { "controller_type", controllerType }
-    });
-
+void UserActivityLoggerScriptingInterface::tutorialProgress(QString stepName, int stepNumber, float secondsToComplete,
+                                                            float tutorialElapsedTime, QString tutorialRunID,
+                                                            int tutorialVersion, QString controllerType) {
+    doLogAction("tutorial_progress", { { "tutorial_run_id", tutorialRunID },
+                                       { "tutorial_version", tutorialVersion },
+                                       { "step", stepName },
+                                       { "step_number", stepNumber },
+                                       { "seconds_to_complete", secondsToComplete },
+                                       { "tutorial_elapsed_seconds", tutorialElapsedTime },
+                                       { "controller_type", controllerType } });
 }
 
 void UserActivityLoggerScriptingInterface::palAction(QString action, QString target) {
@@ -56,9 +54,7 @@ void UserActivityLoggerScriptingInterface::palAction(QString action, QString tar
 }
 
 void UserActivityLoggerScriptingInterface::palOpened(float secondsOpened) {
-    doLogAction("pal_opened", {
-        { "seconds_opened", secondsOpened }
-    });
+    doLogAction("pal_opened", { { "seconds_opened", secondsOpened } });
 }
 
 void UserActivityLoggerScriptingInterface::makeUserConnection(QString otherID, bool success, QString detailsString) {
@@ -84,12 +80,12 @@ void UserActivityLoggerScriptingInterface::logAction(QString action, QVariantMap
 }
 
 void UserActivityLoggerScriptingInterface::doLogAction(QString action, QJsonObject details) {
-    QMetaObject::invokeMethod(&UserActivityLogger::getInstance(), "logAction",
-                              Q_ARG(QString, action),
+    QMetaObject::invokeMethod(&UserActivityLogger::getInstance(), "logAction", Q_ARG(QString, action),
                               Q_ARG(QJsonObject, details));
 }
 
-void UserActivityLoggerScriptingInterface::commercePurchaseSuccess(QString marketplaceID, QString contentCreator, int cost, bool firstPurchaseOfThisItem) {
+void UserActivityLoggerScriptingInterface::commercePurchaseSuccess(QString marketplaceID, QString contentCreator, int cost,
+                                                                   bool firstPurchaseOfThisItem) {
     QJsonObject payload;
     payload["marketplaceID"] = marketplaceID;
     payload["contentCreator"] = contentCreator;
@@ -98,7 +94,8 @@ void UserActivityLoggerScriptingInterface::commercePurchaseSuccess(QString marke
     doLogAction("commercePurchaseSuccess", payload);
 }
 
-void UserActivityLoggerScriptingInterface::commercePurchaseFailure(QString marketplaceID, QString contentCreator, int cost, bool firstPurchaseOfThisItem, QString errorDetails) {
+void UserActivityLoggerScriptingInterface::commercePurchaseFailure(QString marketplaceID, QString contentCreator, int cost,
+                                                                   bool firstPurchaseOfThisItem, QString errorDetails) {
     QJsonObject payload;
     payload["marketplaceID"] = marketplaceID;
     payload["contentCreator"] = contentCreator;
@@ -116,7 +113,9 @@ void UserActivityLoggerScriptingInterface::commerceEntityRezzed(QString marketpl
     doLogAction("commerceEntityRezzed", payload);
 }
 
-void UserActivityLoggerScriptingInterface::commerceWalletSetupStarted(int timestamp, QString setupAttemptID, int setupFlowVersion, QString referrer, QString currentDomain) {
+void UserActivityLoggerScriptingInterface::commerceWalletSetupStarted(int timestamp, QString setupAttemptID,
+                                                                      int setupFlowVersion, QString referrer,
+                                                                      QString currentDomain) {
     QJsonObject payload;
     payload["timestamp"] = timestamp;
     payload["setupAttemptID"] = setupAttemptID;
@@ -126,7 +125,9 @@ void UserActivityLoggerScriptingInterface::commerceWalletSetupStarted(int timest
     doLogAction("commerceWalletSetupStarted", payload);
 }
 
-void UserActivityLoggerScriptingInterface::commerceWalletSetupProgress(int timestamp, QString setupAttemptID, int secondsElapsed, int currentStepNumber, QString currentStepName) {
+void UserActivityLoggerScriptingInterface::commerceWalletSetupProgress(int timestamp, QString setupAttemptID,
+                                                                       int secondsElapsed, int currentStepNumber,
+                                                                       QString currentStepName) {
     QJsonObject payload;
     payload["timestamp"] = timestamp;
     payload["setupAttemptID"] = setupAttemptID;
@@ -136,7 +137,8 @@ void UserActivityLoggerScriptingInterface::commerceWalletSetupProgress(int times
     doLogAction("commerceWalletSetupProgress", payload);
 }
 
-void UserActivityLoggerScriptingInterface::commerceWalletSetupFinished(int timestamp, QString setupAttemptID, int secondsToComplete) {
+void UserActivityLoggerScriptingInterface::commerceWalletSetupFinished(int timestamp, QString setupAttemptID,
+                                                                       int secondsToComplete) {
     QJsonObject payload;
     payload["timestamp"] = timestamp;
     payload["setupAttemptID"] = setupAttemptID;
@@ -154,5 +156,4 @@ void UserActivityLoggerScriptingInterface::commercePassphraseAuthenticationStatu
     QJsonObject payload;
     payload["status"] = status;
     doLogAction("commercePassphraseAuthenticationStatus", payload);
-
 }

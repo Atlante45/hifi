@@ -15,6 +15,7 @@
 
 class OculusBaseDisplayPlugin : public HmdDisplayPlugin {
     using Parent = HmdDisplayPlugin;
+
 public:
     bool isSupported() const override;
     bool hasAsyncReprojection() const override { return true; }
@@ -30,7 +31,7 @@ public:
 
     QRectF getPlayAreaRect() override;
     QVector<glm::vec3> getSensorPositions() override;
-   
+
 protected:
     void customizeContext() override;
     void uncustomizeContext() override;
@@ -39,7 +40,7 @@ protected:
     void updatePresentPose() override;
 
 protected:
-    ovrSession _session{ nullptr };
+    ovrSession _session { nullptr };
     ovrGraphicsLuid _luid;
     std::array<ovrEyeRenderDesc, 2> _eyeRenderDescs;
     std::array<ovrFovPort, 2> _eyeFovs;

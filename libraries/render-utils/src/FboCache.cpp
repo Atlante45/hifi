@@ -9,13 +9,12 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #include "FboCache.h"
 
-#include <QOpenGLFramebufferObject>
 #include <QDebug>
-#include "ThreadHelpers.h"
+#include <QOpenGLFramebufferObject>
 #include "RenderUtilsLogging.h"
+#include "ThreadHelpers.h"
 
 FboCache::FboCache() {
     // Why do we even HAVE that lever?
@@ -43,7 +42,7 @@ void FboCache::releaseTexture(int texture) {
             auto fbo = _fboMap[texture].data();
             if (fbo->size() != _size) {
                 // Move the old FBO to the destruction queue.
-                // We can't destroy the FBO here because we might 
+                // We can't destroy the FBO here because we might
                 // not be on the right thread or have the context active
                 _destroyFboQueue.push_back(_fboMap[texture]);
                 _fboMap.remove(texture);
@@ -81,22 +80,19 @@ void FboCache::setSize(const QSize& newSize) {
     withLock(_lock, [&] {
         // Clear out any fbos with the old id
         _readyFboQueue.clear();
- 
+
         QSet<int> outdatedFbos;
         // FBOs that are locked will be removed as they are unlocked
-        foreach(int texture, _fboMap.keys()) {
+        foreach (int texture, _fboMap.keys()) {
             if (!_fboLocks.count(texture)) {
                 outdatedFbos.insert(texture);
             }
         }
         // Implicitly deletes the FBO via the shared pointer destruction mechanism
-        foreach(int texture, outdatedFbos) {
-            _fboMap.remove(texture);
-        }
+        foreach (int texture, outdatedFbos) { _fboMap.remove(texture); }
     });
 }
 
 const QSize& FboCache::getSize() {
     return _size;
 }
-

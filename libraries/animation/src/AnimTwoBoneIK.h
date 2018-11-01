@@ -20,23 +20,17 @@ class AnimTwoBoneIK : public AnimNode {
 public:
     friend class AnimTests;
 
-    AnimTwoBoneIK(const QString& id, float alpha, bool enabled, float interpDuration,
-                  const QString& baseJointName, const QString& midJointName,
-                  const QString& tipJointName, const glm::vec3& midHingeAxis,
-                  const QString& alphaVar, const QString& enabledVar,
-                  const QString& endEffectorRotationVarVar, const QString& endEffectorPositionVarVar);
+    AnimTwoBoneIK(const QString& id, float alpha, bool enabled, float interpDuration, const QString& baseJointName,
+                  const QString& midJointName, const QString& tipJointName, const glm::vec3& midHingeAxis,
+                  const QString& alphaVar, const QString& enabledVar, const QString& endEffectorRotationVarVar,
+                  const QString& endEffectorPositionVarVar);
     virtual ~AnimTwoBoneIK() override;
 
-    virtual const AnimPoseVec& evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) override;
+    virtual const AnimPoseVec& evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                        AnimVariantMap& triggersOut) override;
 
 protected:
-
-    enum class InterpType {
-        None = 0,
-        SnapshotToUnderPoses,
-        SnapshotToSolve,
-        NumTypes
-    };
+    enum class InterpType { None = 0, SnapshotToUnderPoses, SnapshotToSolve, NumTypes };
 
     // for AnimDebugDraw rendering
     virtual const AnimPoseVec& getPosesInternal() const override;
@@ -49,19 +43,19 @@ protected:
 
     float _alpha;
     bool _enabled;
-    float _interpDuration;  // in frames (1/30 sec)
+    float _interpDuration; // in frames (1/30 sec)
     QString _baseJointName;
     QString _midJointName;
     QString _tipJointName;
-    glm::vec3 _midHingeAxis;  // in baseJoint relative frame, should be normalized
+    glm::vec3 _midHingeAxis; // in baseJoint relative frame, should be normalized
 
     int _baseParentJointIndex { -1 };
     int _baseJointIndex { -1 };
     int _midJointIndex { -1 };
     int _tipJointIndex { -1 };
 
-    QString _alphaVar;  // float - (0, 1) 0 means underPoses only, 1 means IK only.
-    QString _enabledVar;  // bool
+    QString _alphaVar; // float - (0, 1) 0 means underPoses only, 1 means IK only.
+    QString _enabledVar; // bool
     QString _endEffectorRotationVarVar; // string
     QString _endEffectorPositionVarVar; // string
 

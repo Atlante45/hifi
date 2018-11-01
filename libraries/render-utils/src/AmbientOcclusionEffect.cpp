@@ -18,25 +18,23 @@
 #include <PathUtils.h>
 #include <SharedUtil.h>
 #include <gpu/Context.h>
-#include <shaders/Shaders.h>
 #include <render/ShapePipeline.h>
+#include <shaders/Shaders.h>
 
 #include "RenderUtilsLogging.h"
 
-#include "render-utils/ShaderConstants.h"
 #include "DeferredLightingEffect.h"
-#include "TextureCache.h"
-#include "FramebufferCache.h"
 #include "DependencyManager.h"
+#include "FramebufferCache.h"
+#include "TextureCache.h"
 #include "ViewFrustum.h"
-
-
+#include "render-utils/ShaderConstants.h"
 
 AmbientOcclusionFramebuffer::AmbientOcclusionFramebuffer() {
 }
 
 void AmbientOcclusionFramebuffer::updateLinearDepth(const gpu::TexturePointer& linearDepthBuffer) {
-    //If the depth buffer or size changed, we need to delete our FBOs
+    // If the depth buffer or size changed, we need to delete our FBOs
     bool reset = false;
     if ((_linearDepthTexture != linearDepthBuffer)) {
         _linearDepthTexture = linearDepthBuffer;
@@ -49,7 +47,7 @@ void AmbientOcclusionFramebuffer::updateLinearDepth(const gpu::TexturePointer& l
             reset = true;
         }
     }
-    
+
     if (reset) {
         clear();
     }
@@ -67,15 +65,17 @@ gpu::TexturePointer AmbientOcclusionFramebuffer::getLinearDepthTexture() {
 }
 
 void AmbientOcclusionFramebuffer::allocate() {
-    
     auto width = _frameSize.x;
     auto height = _frameSize.y;
 
-    _occlusionTexture = gpu::Texture::createRenderBuffer(gpu::Element::COLOR_RGBA_32, width, height, gpu::Texture::SINGLE_MIP, gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_LINEAR_MIP_POINT));
+    _occlusionTexture = gpu::Texture::createRenderBuffer(gpu::Element::COLOR_RGBA_32, width, height, gpu::Texture::SINGLE_MIP,
+                                                         gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_LINEAR_MIP_POINT));
     _occlusionFramebuffer = gpu::FramebufferPointer(gpu::Framebuffer::create("occlusion"));
     _occlusionFramebuffer->setRenderBuffer(0, _occlusionTexture);
 
-    _occlusionBlurredTexture = gpu::Texture::createRenderBuffer(gpu::Element::COLOR_RGBA_32, width, height, gpu::Texture::SINGLE_MIP, gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_LINEAR_MIP_POINT));
+    _occlusionBlurredTexture = gpu::Texture::createRenderBuffer(gpu::Element::COLOR_RGBA_32, width, height,
+                                                                gpu::Texture::SINGLE_MIP,
+                                                                gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_LINEAR_MIP_POINT));
     _occlusionBlurredFramebuffer = gpu::FramebufferPointer(gpu::Framebuffer::create("occlusionBlurred"));
     _occlusionBlurredFramebuffer->setRenderBuffer(0, _occlusionBlurredTexture);
 }
@@ -108,56 +108,52 @@ gpu::TexturePointer AmbientOcclusionFramebuffer::getOcclusionBlurredTexture() {
     return _occlusionBlurredTexture;
 }
 
-
 class GaussianDistribution {
 public:
-    
-    static double integral(float x, float deviation) {
-        return 0.5 * erf((double)x / ((double)deviation * sqrt(2.0)));
-    }
-    
+    static double integral(float x, float deviation) { return 0.5 * erf((double)x / ((double)deviation * sqrt(2.0))); }
+
     static double rangeIntegral(float x0, float x1, float deviation) {
         return integral(x1, deviation) - integral(x0, deviation);
     }
-    
+
     static std::vector<float> evalSampling(int samplingRadius, float deviation) {
         std::vector<float> coefs(samplingRadius + 1, 0.0f);
-        
+
         // corner case when radius is 0 or under
         if (samplingRadius <= 0) {
             coefs[0] = 1.0f;
             return coefs;
         }
-        
+
         // Evaluate all the samples range integral of width 1 from center until the penultimate one
         float halfWidth = 0.5f;
         double sum = 0.0;
         for (int i = 0; i < samplingRadius; i++) {
-            float x = (float) i;
+            float x = (float)i;
             double sample = rangeIntegral(x - halfWidth, x + halfWidth, deviation);
             coefs[i] = sample;
             sum += sample;
         }
-        
+
         // last sample goes to infinity
-        float lastSampleX0 = (float) samplingRadius - halfWidth;
+        float lastSampleX0 = (float)samplingRadius - halfWidth;
         float largeEnough = lastSampleX0 + 1000.0f * deviation;
         double sample = rangeIntegral(lastSampleX0, largeEnough, deviation);
         coefs[samplingRadius] = sample;
         sum += sample;
-        
+
         return coefs;
     }
-    
+
     static void evalSampling(float* coefs, unsigned int coefsLength, int samplingRadius, float deviation) {
         auto coefsVector = evalSampling(samplingRadius, deviation);
-        if (coefsLength> coefsVector.size() + 1) {
+        if (coefsLength > coefsVector.size() + 1) {
             unsigned int coefsNum = 0;
             for (auto s : coefsVector) {
                 coefs[coefsNum] = s;
                 coefsNum++;
             }
-            for (;coefsNum < coefsLength; coefsNum++) {
+            for (; coefsNum < coefsLength; coefsNum++) {
                 coefs[coefsNum] = 0.0f;
             }
         }
@@ -221,15 +217,15 @@ void AmbientOcclusionEffect::configure(const Config& config) {
     if (!_framebuffer) {
         _framebuffer = std::make_shared<AmbientOcclusionFramebuffer>();
     }
-    
+
     if (config.perspectiveScale != _parametersBuffer->getPerspectiveScale()) {
         _parametersBuffer.edit().resolutionInfo.z = config.perspectiveScale;
     }
     if (config.resolutionLevel != _parametersBuffer->getResolutionLevel()) {
         auto& current = _parametersBuffer.edit().resolutionInfo;
-        current.x = (float) config.resolutionLevel;
+        current.x = (float)config.resolutionLevel;
     }
- 
+
     if (config.blurRadius != _parametersBuffer->getBlurRadius()) {
         auto& current = _parametersBuffer.edit().blurInfo;
         current.y = (float)config.blurRadius;
@@ -264,14 +260,13 @@ const gpu::PipelinePointer& AmbientOcclusionEffect::getOcclusionPipeline() {
     return _occlusionPipeline;
 }
 
-
 const gpu::PipelinePointer& AmbientOcclusionEffect::getHBlurPipeline() {
     if (!_hBlurPipeline) {
         gpu::ShaderPointer program = gpu::Shader::createProgram(shader::render_utils::program::ssao_makeHorizontalBlur);
         gpu::StatePointer state = gpu::StatePointer(new gpu::State());
 
         state->setColorWriteMask(true, true, true, false);
-        
+
         // Good to go add the brand new pipeline
         _hBlurPipeline = gpu::Pipeline::create(program, state);
     }
@@ -282,7 +277,7 @@ const gpu::PipelinePointer& AmbientOcclusionEffect::getVBlurPipeline() {
     if (!_vBlurPipeline) {
         gpu::ShaderPointer program = gpu::Shader::createProgram(shader::render_utils::program::ssao_makeVerticalBlur);
         gpu::StatePointer state = gpu::StatePointer(new gpu::State());
-        
+
         // Vertical blur write just the final result Occlusion value in the alpha channel
         state->setColorWriteMask(true, true, true, false);
 
@@ -294,7 +289,8 @@ const gpu::PipelinePointer& AmbientOcclusionEffect::getVBlurPipeline() {
 
 void AmbientOcclusionEffect::updateGaussianDistribution() {
     auto coefs = _parametersBuffer.edit()._gaussianCoefs;
-    GaussianDistribution::evalSampling(coefs, Parameters::GAUSSIAN_COEFS_LENGTH, _parametersBuffer->getBlurRadius(), _parametersBuffer->getBlurDeviation());
+    GaussianDistribution::evalSampling(coefs, Parameters::GAUSSIAN_COEFS_LENGTH, _parametersBuffer->getBlurRadius(),
+                                       _parametersBuffer->getBlurDeviation());
 }
 
 void AmbientOcclusionEffect::run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs) {
@@ -305,45 +301,43 @@ void AmbientOcclusionEffect::run(const render::RenderContextPointer& renderConte
 
     const auto& frameTransform = inputs.get0();
     const auto& linearDepthFramebuffer = inputs.get2();
-    
+
     auto linearDepthTexture = linearDepthFramebuffer->getLinearDepthTexture();
     auto sourceViewport = args->_viewport;
     auto occlusionViewport = sourceViewport;
 
     if (!_gpuTimer) {
-        _gpuTimer = std::make_shared < gpu::RangeTimer>(__FUNCTION__);
+        _gpuTimer = std::make_shared<gpu::RangeTimer>(__FUNCTION__);
     }
 
     if (!_framebuffer) {
         _framebuffer = std::make_shared<AmbientOcclusionFramebuffer>();
     }
-    
+
     if (_parametersBuffer->getResolutionLevel() > 0) {
         linearDepthTexture = linearDepthFramebuffer->getHalfLinearDepthTexture();
         occlusionViewport = occlusionViewport >> _parametersBuffer->getResolutionLevel();
     }
 
     _framebuffer->updateLinearDepth(linearDepthTexture);
-  
-    
+
     auto occlusionFBO = _framebuffer->getOcclusionFramebuffer();
     auto occlusionBlurredFBO = _framebuffer->getOcclusionBlurredFramebuffer();
-    
+
     outputs.edit0() = _framebuffer;
     outputs.edit1() = _parametersBuffer;
 
     auto framebufferSize = _framebuffer->getSourceFrameSize();
-    
+
     float sMin = occlusionViewport.x / (float)framebufferSize.x;
     float sWidth = occlusionViewport.z / (float)framebufferSize.x;
     float tMin = occlusionViewport.y / (float)framebufferSize.y;
     float tHeight = occlusionViewport.w / (float)framebufferSize.y;
 
-
     auto occlusionPipeline = getOcclusionPipeline();
     auto firstHBlurPipeline = getHBlurPipeline();
     auto lastVBlurPipeline = getVBlurPipeline();
-    
+
     gpu::doInBatch("AmbientOcclusionEffect::run", args->_context, [=](gpu::Batch& batch) {
         batch.enableStereo(false);
 
@@ -361,10 +355,9 @@ void AmbientOcclusionEffect::run(const render::RenderContextPointer& renderConte
         batch.setUniformBuffer(render_utils::slot::buffer::DeferredFrameTransform, frameTransform->getFrameTransformBuffer());
         batch.setUniformBuffer(render_utils::slot::buffer::SsaoParams, _parametersBuffer);
 
-      
-        // We need this with the mips levels  
+        // We need this with the mips levels
         batch.generateTextureMips(_framebuffer->getLinearDepthTexture());
-        
+
         // Occlusion pass
         batch.setFramebuffer(occlusionFBO);
         batch.clearColorFramebuffer(gpu::Framebuffer::BUFFER_COLOR0, glm::vec4(1.0f));
@@ -372,7 +365,6 @@ void AmbientOcclusionEffect::run(const render::RenderContextPointer& renderConte
         batch.setResourceTexture(render_utils::slot::texture::SsaoPyramid, _framebuffer->getLinearDepthTexture());
         batch.draw(gpu::TRIANGLE_STRIP, 4);
 
-        
         if (_parametersBuffer->getBlurRadius() > 0) {
             // Blur 1st pass
             batch.setFramebuffer(occlusionBlurredFBO);
@@ -386,11 +378,10 @@ void AmbientOcclusionEffect::run(const render::RenderContextPointer& renderConte
             batch.setResourceTexture(render_utils::slot::texture::SsaoOcclusion, occlusionBlurredFBO->getRenderBuffer(0));
             batch.draw(gpu::TRIANGLE_STRIP, 4);
         }
-        
-        
+
         batch.setResourceTexture(render_utils::slot::texture::SsaoPyramid, nullptr);
         batch.setResourceTexture(render_utils::slot::texture::SsaoOcclusion, nullptr);
-        
+
         _gpuTimer->end(batch);
     });
 
@@ -399,13 +390,10 @@ void AmbientOcclusionEffect::run(const render::RenderContextPointer& renderConte
     config->setGPUBatchRunTime(_gpuTimer->getGPUAverage(), _gpuTimer->getBatchAverage());
 }
 
-
-
 DebugAmbientOcclusion::DebugAmbientOcclusion() {
 }
 
 void DebugAmbientOcclusion::configure(const Config& config) {
-
     _showCursorPixel = config.showCursorPixel;
 
     auto cursorPos = glm::vec2(_parametersBuffer->pixelInfo);
@@ -440,7 +428,7 @@ void DebugAmbientOcclusion::run(const render::RenderContextPointer& renderContex
     const auto& frameTransform = inputs.get0();
     const auto& linearDepthFramebuffer = inputs.get2();
     const auto& ambientOcclusionUniforms = inputs.get3();
-    
+
     // Skip if AO is not started yet
     if (!ambientOcclusionUniforms._buffer) {
         return;
@@ -451,22 +439,21 @@ void DebugAmbientOcclusion::run(const render::RenderContextPointer& renderContex
     auto occlusionViewport = sourceViewport;
 
     auto resolutionLevel = ambientOcclusionUniforms->getResolutionLevel();
-    
+
     if (resolutionLevel > 0) {
         linearDepthTexture = linearDepthFramebuffer->getHalfLinearDepthTexture();
         occlusionViewport = occlusionViewport >> ambientOcclusionUniforms->getResolutionLevel();
     }
-        
 
     auto framebufferSize = glm::ivec2(linearDepthTexture->getDimensions());
-    
+
     float sMin = occlusionViewport.x / (float)framebufferSize.x;
     float sWidth = occlusionViewport.z / (float)framebufferSize.x;
     float tMin = occlusionViewport.y / (float)framebufferSize.y;
     float tHeight = occlusionViewport.w / (float)framebufferSize.y;
-    
+
     auto debugPipeline = getDebugPipeline();
-    
+
     gpu::doInBatch("DebugAmbientOcclusion::run", args->_context, [=](gpu::Batch& batch) {
         batch.enableStereo(false);
 
@@ -482,14 +469,11 @@ void DebugAmbientOcclusion::run(const render::RenderContextPointer& renderContex
         batch.setUniformBuffer(render_utils::slot::buffer::DeferredFrameTransform, frameTransform->getFrameTransformBuffer());
         batch.setUniformBuffer(render_utils::slot::buffer::SsaoParams, ambientOcclusionUniforms);
         batch.setUniformBuffer(2, _parametersBuffer);
-        
+
         batch.setPipeline(debugPipeline);
         batch.setResourceTexture(render_utils::slot::texture::SsaoPyramid, linearDepthTexture);
         batch.draw(gpu::TRIANGLE_STRIP, 4);
 
-        
         batch.setResourceTexture(render_utils::slot::texture::SsaoPyramid, nullptr);
     });
-
 }
- 

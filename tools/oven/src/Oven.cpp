@@ -17,8 +17,8 @@
 #include <image/Image.h>
 
 #include <DependencyManager.h>
-#include <StatTracker.h>
 #include <ResourceManager.h>
+#include <StatTracker.h>
 
 Oven* Oven::_staticInstance { nullptr };
 
@@ -41,7 +41,7 @@ Oven::~Oven() {
         thread->quit();
     }
 
-    for (auto& thread: _workerThreads) {
+    for (auto& thread : _workerThreads) {
         thread->wait();
     }
 
@@ -76,4 +76,3 @@ QThread* Oven::getNextWorkerThread() {
 
     return nextThread.get();
 }
-

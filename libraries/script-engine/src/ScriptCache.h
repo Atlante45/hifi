@@ -12,10 +12,11 @@
 #ifndef hifi_ScriptCache_h
 #define hifi_ScriptCache_h
 
-#include <mutex>
 #include <ResourceCache.h>
+#include <mutex>
 
-using contentAvailableCallback = std::function<void(const QString& scriptOrURL, const QString& contents, bool isURL, bool contentAvailable, const QString& status)>;
+using contentAvailableCallback = std::function<void(const QString& scriptOrURL, const QString& contents, bool isURL,
+                                                    bool contentAvailable, const QString& status)>;
 
 class ScriptUser {
 public:
@@ -27,7 +28,7 @@ class ScriptRequest {
 public:
     static const int MAX_RETRIES { 5 };
     static const int START_DELAY_BETWEEN_RETRIES { 200 };
-    std::vector<contentAvailableCallback> scriptUsers { };
+    std::vector<contentAvailableCallback> scriptUsers {};
     int numRetries { 0 };
     int maxRetries { MAX_RETRIES };
 };
@@ -49,17 +50,18 @@ public:
 
     void clearCache();
     Q_INVOKABLE void clearATPScriptsFromCache();
-    void getScriptContents(const QString& scriptOrURL, contentAvailableCallback contentAvailable, bool forceDownload = false, int maxRetries = ScriptRequest::MAX_RETRIES);
+    void getScriptContents(const QString& scriptOrURL, contentAvailableCallback contentAvailable, bool forceDownload = false,
+                           int maxRetries = ScriptRequest::MAX_RETRIES);
 
     void deleteScript(const QUrl& unnormalizedURL);
 
 private:
     void scriptContentAvailable(int maxRetries); // new version
     ScriptCache(QObject* parent = NULL);
-    
+
     Mutex _containerLock;
     QMap<QUrl, ScriptRequest> _activeScriptRequests;
-    
+
     QHash<QUrl, QString> _scriptCache;
     QMultiMap<QUrl, ScriptUser*> _scriptUsers;
 };

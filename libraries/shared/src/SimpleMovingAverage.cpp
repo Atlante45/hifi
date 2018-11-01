@@ -36,7 +36,6 @@ SimpleMovingAverage& SimpleMovingAverage::operator=(const SimpleMovingAverage& o
     return *this;
 }
 
-
 int SimpleMovingAverage::updateAverage(float sample) {
     if (_numSamples > 0) {
         _average = (ONE_MINUS_WEIGHTING * _average) + (WEIGHTING * sample);
@@ -44,8 +43,7 @@ int SimpleMovingAverage::updateAverage(float sample) {
         float eventDelta = (usecTimestampNow() - _lastEventTimestamp) / 1000000.0f;
 
         if (_numSamples > 1) {
-            _eventDeltaAverage = (ONE_MINUS_WEIGHTING * _eventDeltaAverage) +
-                (WEIGHTING * eventDelta);
+            _eventDeltaAverage = (ONE_MINUS_WEIGHTING * _eventDeltaAverage) + (WEIGHTING * eventDelta);
         } else {
             _eventDeltaAverage = eventDelta;
         }
@@ -53,9 +51,9 @@ int SimpleMovingAverage::updateAverage(float sample) {
         _average = sample;
         _eventDeltaAverage = 0;
     }
-    
-    _lastEventTimestamp =  usecTimestampNow();
-    
+
+    _lastEventTimestamp = usecTimestampNow();
+
     return ++_numSamples;
 }
 
@@ -66,10 +64,9 @@ void SimpleMovingAverage::reset() {
 }
 
 float SimpleMovingAverage::getEventDeltaAverage() const {
-    return (ONE_MINUS_WEIGHTING * _eventDeltaAverage) +
-        (WEIGHTING * ((usecTimestampNow() - _lastEventTimestamp) / 1000000.0f));
+    return (ONE_MINUS_WEIGHTING * _eventDeltaAverage) + (WEIGHTING * ((usecTimestampNow() - _lastEventTimestamp) / 1000000.0f));
 }
 
 uint64_t SimpleMovingAverage::getUsecsSinceLastEvent() const {
-    return usecTimestampNow() - _lastEventTimestamp; 
+    return usecTimestampNow() - _lastEventTimestamp;
 }

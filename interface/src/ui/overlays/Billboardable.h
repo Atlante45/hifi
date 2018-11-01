@@ -12,8 +12,8 @@
 #ifndef hifi_Billboardable_h
 #define hifi_Billboardable_h
 
-#include <glm/gtc/quaternion.hpp>
 #include <QVariant>
+#include <glm/gtc/quaternion.hpp>
 
 class QString;
 class Transform;
@@ -27,7 +27,7 @@ protected:
     void setProperties(const QVariantMap& properties);
     QVariant getProperty(const QString& property);
 
-    bool pointTransformAtCamera(Transform& transform, glm::quat offsetRotation = {1, 0, 0, 0});
+    bool pointTransformAtCamera(Transform& transform, glm::quat offsetRotation = { 1, 0, 0, 0 });
 
 private:
     bool _isFacingAvatar = false;

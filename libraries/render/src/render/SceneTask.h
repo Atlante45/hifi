@@ -16,26 +16,26 @@
 
 namespace render {
 
-    class PerformSceneTransactionConfig : public Job::Config {
-        Q_OBJECT
-    public:
-    signals:
-        void dirty();
+class PerformSceneTransactionConfig : public Job::Config {
+    Q_OBJECT
+public:
+signals:
+    void dirty();
 
-    protected:
-    };
+protected:
+};
 
-    class PerformSceneTransaction {
-    public:
-        using Config = PerformSceneTransactionConfig;
-        using JobModel = Job::Model<PerformSceneTransaction, Config>;
+class PerformSceneTransaction {
+public:
+    using Config = PerformSceneTransactionConfig;
+    using JobModel = Job::Model<PerformSceneTransaction, Config>;
 
-        void configure(const Config& config);
-        void run(const RenderContextPointer& renderContext);
-    protected:
-    };
+    void configure(const Config& config);
+    void run(const RenderContextPointer& renderContext);
 
+protected:
+};
 
-}
+} // namespace render
 
 #endif // hifi_render_SceneTask_h

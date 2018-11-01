@@ -10,18 +10,18 @@
 
 #include <QtCore/QSharedPointer>
 
-#include <Node.h>
-#include <NodeType.h>
 #include <DependencyManager.h>
-#include <NodeList.h>
 #include <NLPacket.h>
+#include <Node.h>
+#include <NodeList.h>
+#include <NodeType.h>
 #include <Transform.h>
 
 #include "AudioConstants.h"
 
 void AbstractAudioInterface::emitAudioPacket(const void* audioData, size_t bytes, quint16& sequenceNumber, bool isStereo,
-                                             const Transform& transform, glm::vec3 avatarBoundingBoxCorner, glm::vec3 avatarBoundingBoxScale,
-                                             PacketType packetType, QString codecName) {
+                                             const Transform& transform, glm::vec3 avatarBoundingBoxCorner,
+                                             glm::vec3 avatarBoundingBoxScale, PacketType packetType, QString codecName) {
     static std::mutex _mutex;
     using Locker = std::unique_lock<std::mutex>;
     auto nodeList = DependencyManager::get<NodeList>();
@@ -39,9 +39,8 @@ void AbstractAudioInterface::emitAudioPacket(const void* audioData, size_t bytes
 
         if (packetType == PacketType::SilentAudioFrame) {
             // pack num silent samples
-            quint16 numSilentSamples = isStereo ?
-                AudioConstants::NETWORK_FRAME_SAMPLES_STEREO :
-                AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL;
+            quint16 numSilentSamples = isStereo ? AudioConstants::NETWORK_FRAME_SAMPLES_STEREO
+                                                : AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL;
             audioPacket->writePrimitive(numSilentSamples);
         } else {
             // set the mono/stereo byte
@@ -59,7 +58,6 @@ void AbstractAudioInterface::emitAudioPacket(const void* audioData, size_t bytes
 
         audioPacket->writePrimitive(avatarBoundingBoxCorner);
         audioPacket->writePrimitive(avatarBoundingBoxScale);
-
 
         if (audioPacket->getType() != PacketType::SilentAudioFrame) {
             // audio samples have already been packed (written to networkAudioSamples)

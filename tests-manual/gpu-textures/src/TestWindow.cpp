@@ -19,7 +19,6 @@
 #include <gpu/gl/GLBackend.h>
 
 TestWindow::TestWindow() {
-
     auto timer = new QTimer(this);
     timer->setTimerType(Qt::PreciseTimer);
     timer->setInterval(5);
@@ -74,9 +73,7 @@ void TestWindow::beginFrame() {
 }
 
 void TestWindow::endFrame() {
-    gpu::doInBatch("TestWindow::endFrame::finish", _renderArgs->_context, [&](gpu::Batch& batch) {
-        batch.resetStages();
-    });
+    gpu::doInBatch("TestWindow::endFrame::finish", _renderArgs->_context, [&](gpu::Batch& batch) { batch.resetStages(); });
     auto framePointer = _renderArgs->_context->endFrame();
     _renderArgs->_context->consumeFrameUpdates(framePointer);
     _renderArgs->_context->executeFrame(framePointer);

@@ -14,19 +14,18 @@
 
 #include <stdint.h>
 
-static const int FOA_TAPS = 273;    // FIR coefs
-static const int FOA_NFFT = 512;    // FFT length
+static const int FOA_TAPS = 273; // FIR coefs
+static const int FOA_NFFT = 512; // FFT length
 static const int FOA_OVERLAP = FOA_TAPS - 1;
-static const int FOA_TABLES = 25;   // number of HRTF subjects
+static const int FOA_TABLES = 25; // number of HRTF subjects
 
-static const int FOA_BLOCK = 240;   // block processing size
+static const int FOA_BLOCK = 240; // block processing size
 
 static const float FOA_GAIN = 1.0f; // FOA global gain adjustment
 
 static_assert((FOA_BLOCK + FOA_OVERLAP) == FOA_NFFT, "FFT convolution requires L+M-1 == NFFT");
 
 class AudioFOA {
-
 public:
     AudioFOA() {
         // identity matrix

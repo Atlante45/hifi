@@ -16,7 +16,7 @@
 
 class AudioClient;
 
-class MixedProcessedAudioStream  : public InboundAudioStream {
+class MixedProcessedAudioStream : public InboundAudioStream {
     Q_OBJECT
 public:
     MixedProcessedAudioStream(int numFramesCapacity, int numStaticJitterFrames = -1);

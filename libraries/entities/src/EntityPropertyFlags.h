@@ -62,11 +62,11 @@ enum EntityPropertyList {
     PROP_CUTOFF,
 
     // available to all entities
-    PROP_LOCKED,  // 34
+    PROP_LOCKED, // 34
 
-    PROP_TEXTURES,  // used by Model entities
-    PROP_ANIMATION_SETTINGS_UNUSED,  // FIXME - No longer used, can remove and bump protocol
-    PROP_USER_DATA,  // all entities -- 37
+    PROP_TEXTURES, // used by Model entities
+    PROP_ANIMATION_SETTINGS_UNUSED, // FIXME - No longer used, can remove and bump protocol
+    PROP_USER_DATA, // all entities -- 37
     PROP_SHAPE_TYPE, // used by Model + zones entities
 
     // used by ParticleEffect entities
@@ -76,7 +76,7 @@ enum EntityPropertyList {
     PROP_EMIT_SPEED,
     PROP_EMIT_STRENGTH,
     PROP_EMIT_ACCELERATION, // FIXME - doesn't seem to get set in mark all changed????
-    PROP_PARTICLE_RADIUS,  // 45!!
+    PROP_PARTICLE_RADIUS, // 45!!
 
     PROP_COMPOUND_SHAPE_URL, // used by Model + zones entities
     PROP_MARKETPLACE_ID, // all entities
@@ -91,7 +91,7 @@ enum EntityPropertyList {
     PROP_VOXEL_DATA,
     PROP_VOXEL_SURFACE_STYLE,
 
-    //for lines
+    // for lines
     PROP_LINE_WIDTH,
     PROP_LINE_POINTS,
 
@@ -130,9 +130,9 @@ enum EntityPropertyList {
     PROP_RADIUS_START,
     PROP_RADIUS_FINISH,
 
-    PROP_ALPHA,  // Supported by some derived classes
+    PROP_ALPHA, // Supported by some derived classes
 
-    //Used by particles
+    // Used by particles
     PROP_COLOR_SPREAD,
     PROP_COLOR_START,
     PROP_COLOR_FINISH,
@@ -301,11 +301,11 @@ enum EntityPropertyList {
     PROP_AMBIENT_LIGHT_URL = PROP_ANIMATION_PLAYING,
 
     // Aliases/Piggyback properties for Web. These properties intentionally reuse the enum values for
-    // other properties which will never overlap with each other. 
+    // other properties which will never overlap with each other.
     PROP_SOURCE_URL = PROP_MODEL_URL,
 
     // Aliases/Piggyback properties for Particle Emmitter. These properties intentionally reuse the enum values for
-    // other properties which will never overlap with each other. 
+    // other properties which will never overlap with each other.
     PROP_EMITTING_PARTICLES = PROP_ANIMATION_PLAYING,
 
     // WARNING!!! DO NOT ADD PROPS_xxx here unless you really really meant to.... Add them UP above
@@ -319,8 +319,6 @@ extern EntityPropertyList PROP_LAST_ITEM;
 
 QString EntityPropertyFlagsToString(EntityPropertyFlags propertiesFlags);
 
-
 QDebug& operator<<(QDebug& dbg, const EntityPropertyFlags& f);
-
 
 #endif // hifi_EntityPropertyFlags_h

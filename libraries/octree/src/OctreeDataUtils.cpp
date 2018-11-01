@@ -14,9 +14,9 @@
 #include <udt/PacketHeaders.h>
 
 #include <QDebug>
-#include <QJsonObject>
-#include <QJsonDocument>
 #include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 // Reads octree file and parses it into a QJsonDocument. Handles both gzipped and non-gzipped files.
 // Returns true if the file was successfully opened and parsed, otherwise false.
@@ -125,4 +125,6 @@ void OctreeUtils::RawEntityData::writeSubclassData(QJsonObject& root) const {
     root["Entities"] = entityData;
 }
 
-PacketType OctreeUtils::RawEntityData::dataPacketType() const { return PacketType::EntityData; }
+PacketType OctreeUtils::RawEntityData::dataPacketType() const {
+    return PacketType::EntityData;
+}

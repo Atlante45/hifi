@@ -20,8 +20,8 @@
 
 #include <QDebug>
 #include <QMap>
-#include <QtCore/QFileInfo>
 #include <QtAndroidExtras/QAndroidJniObject>
+#include <QtCore/QFileInfo>
 
 #include <BuildInfo.h>
 #include <FingerprintUtils.h>
@@ -38,11 +38,13 @@ static bool breakpad_dumpCallback(const google_breakpad::MinidumpDescriptor& des
 }
 
 QString obbDir() {
-    QAndroidJniObject mediaDir = QAndroidJniObject::callStaticObjectMethod("android/os/Environment", "getExternalStorageDirectory", "()Ljava/io/File;");
-    QAndroidJniObject mediaPath = mediaDir.callObjectMethod( "getAbsolutePath", "()Ljava/lang/String;" );
-    QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
+    QAndroidJniObject mediaDir = QAndroidJniObject::callStaticObjectMethod("android/os/Environment",
+                                                                           "getExternalStorageDirectory", "()Ljava/io/File;");
+    QAndroidJniObject mediaPath = mediaDir.callObjectMethod("getAbsolutePath", "()Ljava/lang/String;");
+    QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative", "activity",
+                                                                           "()Landroid/app/Activity;");
     QAndroidJniObject package = activity.callObjectMethod("getPackageName", "()Ljava/lang/String;");
-    QString dataAbsPath = mediaPath.toString()+"/Android/obb/" + package.toString();
+    QString dataAbsPath = mediaPath.toString() + "/Android/obb/" + package.toString();
     return dataAbsPath;
 }
 
@@ -67,9 +69,8 @@ bool startCrashHandler(std::string appPath) {
 
     flushAnnotations();
 
-    gBreakpadHandler = new google_breakpad::ExceptionHandler(
-            google_breakpad::MinidumpDescriptor(obbDir().toStdString()),
-            nullptr, breakpad_dumpCallback, nullptr, true, -1);
+    gBreakpadHandler = new google_breakpad::ExceptionHandler(google_breakpad::MinidumpDescriptor(obbDir().toStdString()),
+                                                             nullptr, breakpad_dumpCallback, nullptr, true, -1);
     return true;
 }
 

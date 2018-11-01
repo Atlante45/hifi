@@ -9,26 +9,26 @@
 #ifndef hifi_TabletScriptingInterface_h
 #define hifi_TabletScriptingInterface_h
 
-#include <mutex>
 #include <atomic>
+#include <mutex>
 
+#include <QSortFilterProxyModel>
+#include <QtCore/QAbstractListModel>
 #include <QtCore/QObject>
 #include <QtCore/QUuid>
 #include <QtCore/QVariant>
-#include <QtCore/QAbstractListModel>
-#include <QSortFilterProxyModel>
 
-#include <QtScript/QScriptValue>
 #include <QtScript/QScriptEngine>
+#include <QtScript/QScriptValue>
 #include <QtScript/QScriptValueIterator>
 
 #include <QtQuick/QQuickItem>
 
+#include <DependencyManager.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include "SoundCache.h"
-#include <DependencyManager.h>
 
 class ToolbarProxy;
 class ToolbarScriptingInterface;
@@ -55,7 +55,6 @@ class OffscreenQmlSurface;
 class TabletScriptingInterface : public QObject, public Dependency {
     Q_OBJECT
 public:
-
     /**jsdoc
      * <table>
      *   <thead>
@@ -72,10 +71,10 @@ public:
      * </table>
      * @typedef {number} Tablet.AudioEvents
      */
-    enum TabletAudioEvents { ButtonClick, ButtonHover, TabletOpen, TabletHandsIn, TabletHandsOut, Last};
+    enum TabletAudioEvents { ButtonClick, ButtonHover, TabletOpen, TabletHandsIn, TabletHandsOut, Last };
     Q_ENUM(TabletAudioEvents)
 
-    //Different useful constants
+    // Different useful constants
     enum TabletConstants { ButtonsColumnsOnPage = 3, ButtonsRowsOnPage = 4, ButtonsOnPage = 12 };
     Q_ENUM(TabletConstants)
 
@@ -83,7 +82,9 @@ public:
     virtual ~TabletScriptingInterface();
     static const QString QML;
 
-    void setToolbarScriptingInterface(ToolbarScriptingInterface* toolbarScriptingInterface) { _toolbarScriptingInterface = toolbarScriptingInterface; }
+    void setToolbarScriptingInterface(ToolbarScriptingInterface* toolbarScriptingInterface) {
+        _toolbarScriptingInterface = toolbarScriptingInterface;
+    }
 
     /**jsdoc
      * Creates or returns a new TabletProxy and returns it.
@@ -143,6 +144,7 @@ private:
     ToolbarProxy* getSystemToolbarProxy();
 
     QMap<TabletAudioEvents, SharedSoundPointer> _audioEvents;
+
 protected:
     std::map<QString, TabletProxy*> _tabletProxies;
     ToolbarScriptingInterface* _toolbarScriptingInterface { nullptr };
@@ -159,11 +161,13 @@ public:
     TabletButtonListModel();
     ~TabletButtonListModel();
 
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override { Q_UNUSED(parent); return (int)_buttons.size(); }
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override {
+        Q_UNUSED(parent);
+        return (int)_buttons.size();
+    }
     QHash<int, QByteArray> roleNames() const override { return _roles; }
     Qt::ItemFlags flags(const QModelIndex& index) const override { return _flags; }
     QVariant data(const QModelIndex& index, int role) const override;
-
 
 protected:
     friend class TabletProxy;
@@ -178,8 +182,7 @@ protected:
 
 Q_DECLARE_METATYPE(TabletButtonListModel*);
 
-class TabletButtonsProxyModel : public QSortFilterProxyModel
-{
+class TabletButtonsProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
 
     Q_PROPERTY(int pageIndex READ pageIndex WRITE setPageIndex NOTIFY pageIndexChanged)
@@ -195,7 +198,7 @@ signals:
     void pageIndexChanged(int pageIndex);
 
 protected:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 
 private:
     int _pageIndex { -1 };
@@ -205,7 +208,7 @@ Q_DECLARE_METATYPE(TabletButtonsProxyModel*);
 
 /**jsdoc
  * @class TabletProxy
-  *
+ *
  * @hifi-interface
  * @hifi-client-entity
  *
@@ -309,9 +312,9 @@ public:
     Q_INVOKABLE bool isMessageDialogOpen();
 
     /**jsdoc
-    * Close any open dialogs.
-    * @function TabletProxy#closeDialog
-    */
+     * Close any open dialogs.
+     * @function TabletProxy#closeDialog
+     */
     Q_INVOKABLE void closeDialog();
 
     /**jsdoc
@@ -320,7 +323,7 @@ public:
      * @param {object} properties - Button properties.
      * @returns {TabletButtonProxy}
      */
-    //FIXME: UI_TABLET_HACK: enumerate the button properties when we figure out what they should be!
+    // FIXME: UI_TABLET_HACK: enumerate the button properties when we figure out what they should be!
     Q_INVOKABLE TabletButtonProxy* addButton(const QVariant& properties);
 
     /**jsdoc
@@ -512,7 +515,7 @@ protected:
      * @property {string} activeText - Button caption when button is active.
      * @property {string} activeHoverText - Button caption when button is active and during mouse hover.
      * @property {boolean} isActive - <code>true</code> when button is active.
-     * @property {number} sortOrder - Determines sort order on tablet.  lower numbers will appear before larger numbers. 
+     * @property {number} sortOrder - Determines sort order on tablet.  lower numbers will appear before larger numbers.
      *     Default is 100.
      */
     // FIXME: There are additional properties.

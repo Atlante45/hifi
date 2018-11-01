@@ -10,8 +10,8 @@
 #ifndef hifi_ResourceTests_h
 #define hifi_ResourceTests_h
 
-#include <QtTest/QtTest>
 #include <QtCore/QTemporaryDir>
+#include <QtTest/QtTest>
 
 class FileCacheTests : public QObject {
     Q_OBJECT

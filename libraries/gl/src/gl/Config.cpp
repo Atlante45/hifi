@@ -16,20 +16,18 @@
 #if defined(Q_OS_WIN)
 #elif defined(Q_OS_ANDROID)
 #elif defined(Q_OS_MAC)
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/CGLTypes.h>
 #include <OpenGL/CGLCurrent.h>
+#include <OpenGL/CGLTypes.h>
+#include <OpenGL/OpenGL.h>
 #include <dlfcn.h>
 #else
 #include <GL/glx.h>
 #include <dlfcn.h>
 #endif
 
-
-
 #if defined(Q_OS_WIN)
 
-static void* getGlProcessAddress(const char *namez) {
+static void* getGlProcessAddress(const char* namez) {
     auto result = wglGetProcAddress(namez);
     if (!result) {
         static HMODULE glModule = nullptr;
@@ -46,9 +44,10 @@ static void* getGlProcessAddress(const char *namez) {
 }
 
 typedef BOOL(APIENTRYP PFNWGLSWAPINTERVALEXTPROC)(int interval);
-typedef int (APIENTRYP PFNWGLGETSWAPINTERVALEXTPROC) (void);
-typedef BOOL(APIENTRYP PFNWGLCHOOSEPIXELFORMATARBPROC)(HDC hdc, const int *piAttribIList, const FLOAT *pfAttribFList, UINT nMaxFormats, int *piFormats, UINT *nNumFormats);
-typedef HGLRC(APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int *attribList);
+typedef int(APIENTRYP PFNWGLGETSWAPINTERVALEXTPROC)(void);
+typedef BOOL(APIENTRYP PFNWGLCHOOSEPIXELFORMATARBPROC)(HDC hdc, const int* piAttribIList, const FLOAT* pfAttribFList,
+                                                       UINT nMaxFormats, int* piFormats, UINT* nNumFormats);
+typedef HGLRC(APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int* attribList);
 
 PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;
 PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapIntervalEXT;
@@ -57,14 +56,14 @@ PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
 
 #elif defined(Q_OS_ANDROID)
 
-static void* getGlProcessAddress(const char *namez) {
+static void* getGlProcessAddress(const char* namez) {
     auto result = eglGetProcAddress(namez);
     return (void*)result;
 }
 
 #elif defined(Q_OS_MAC)
 
-static void* getGlProcessAddress(const char *namez) {
+static void* getGlProcessAddress(const char* namez) {
     static void* GL_LIB = nullptr;
     if (nullptr == GL_LIB) {
         GL_LIB = dlopen("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL", RTLD_NOW | RTLD_GLOBAL);
@@ -74,13 +73,11 @@ static void* getGlProcessAddress(const char *namez) {
 
 #else
 
-static void* getGlProcessAddress(const char *namez) {
+static void* getGlProcessAddress(const char* namez) {
     return (void*)glXGetProcAddressARB((const GLubyte*)namez);
 }
 
 #endif
-
-
 
 void gl::initModuleGl() {
     static std::once_flag once;
@@ -107,7 +104,7 @@ int gl::getSwapInterval() {
     GLint interval;
     CGLGetParameter(CGLGetCurrentContext(), kCGLCPSwapInterval, &interval);
     return interval;
-#else 
+#else
     // TODO: Fill in for linux
     return 1;
 #endif

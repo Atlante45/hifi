@@ -10,15 +10,15 @@
 #define hifi_qml_OffscreenSurface_h
 
 #include <atomic>
-#include <queue>
-#include <map>
 #include <functional>
+#include <map>
+#include <queue>
 
-#include <QtCore/QUrl>
-#include <QtCore/QSize>
 #include <QtCore/QPointF>
 #include <QtCore/QSharedPointer>
+#include <QtCore/QSize>
 #include <QtCore/QTimer>
+#include <QtCore/QUrl>
 
 #include <QtQml/QJSValue>
 
@@ -31,7 +31,8 @@ class QQuickWindow;
 class QQuickItem;
 class OffscreenQmlSharedObject;
 
-namespace hifi { namespace qml {
+namespace hifi {
+namespace qml {
 
 namespace impl {
 class SharedObject;
@@ -88,8 +89,7 @@ public:
 
     // For use from C++
     Q_INVOKABLE void load(const QUrl& qmlSource, const QmlContextObjectCallback& callback = DEFAULT_CONTEXT_OBJECT_CALLBACK);
-    Q_INVOKABLE void load(const QUrl& qmlSource,
-                          bool createNewContext,
+    Q_INVOKABLE void load(const QUrl& qmlSource, bool createNewContext,
                           const QmlContextObjectCallback& callback = DEFAULT_CONTEXT_OBJECT_CALLBACK);
     Q_INVOKABLE void load(const QString& qmlSourceFile,
                           const QmlContextObjectCallback& callback = DEFAULT_CONTEXT_OBJECT_CALLBACK);
@@ -109,14 +109,10 @@ protected:
     bool filterEnabled(QObject* originalDestination, QEvent* event) const;
 
     virtual void initializeEngine(QQmlEngine* engine);
-    virtual void loadInternal(const QUrl& qmlSource,
-                              bool createNewContext,
-                              QQuickItem* parent,
+    virtual void loadInternal(const QUrl& qmlSource, bool createNewContext, QQuickItem* parent,
                               const QmlContextObjectCallback& callback,
                               const QmlContextCallback& contextCallback = DEFAULT_CONTEXT_CALLBACK) final;
-    virtual void finishQmlLoad(QQmlComponent* qmlComponent,
-                               QQmlContext* qmlContext,
-                               QQuickItem* parent,
+    virtual void finishQmlLoad(QQmlComponent* qmlComponent, QQmlContext* qmlContext, QQuickItem* parent,
                                const QmlContextObjectCallback& onQmlLoadedCallback) final;
 
     virtual void onRootCreated() {}
@@ -126,11 +122,12 @@ protected:
     virtual QQmlContext* contextForUrl(const QUrl& qmlSource, QQuickItem* parent, bool forceNewContext);
 
 private:
-    MouseTranslator _mouseTranslator{ [](const QPointF& p) { return p.toPoint(); } };
+    MouseTranslator _mouseTranslator { [](const QPointF& p) { return p.toPoint(); } };
     friend class hifi::qml::impl::SharedObject;
     impl::SharedObject* const _sharedObject;
 };
 
-}}  // namespace hifi::qml
+} // namespace qml
+} // namespace hifi
 
 #endif

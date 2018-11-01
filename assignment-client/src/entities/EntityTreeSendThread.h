@@ -20,7 +20,6 @@
 #include <EntityPriorityQueue.h>
 #include <shared/ConicalViewFrustum.h>
 
-
 class EntityNodeData;
 class EntityItem;
 
@@ -31,8 +30,8 @@ public:
     EntityTreeSendThread(OctreeServer* myServer, const SharedNodePointer& node);
 
 protected:
-    bool traverseTreeAndSendContents(SharedNodePointer node, OctreeQueryNode* nodeData,
-            bool viewFrustumChanged, bool isFullScene) override;
+    bool traverseTreeAndSendContents(SharedNodePointer node, OctreeQueryNode* nodeData, bool viewFrustumChanged,
+                                     bool isFullScene) override;
 
 private slots:
     void resetState(); // clears our known state forcing entities to appear unsent
@@ -47,7 +46,9 @@ private:
 
     void preDistributionProcessing() override;
     bool hasSomethingToSend(OctreeQueryNode* nodeData) override { return !_sendQueue.empty(); }
-    bool shouldStartNewTraversal(OctreeQueryNode* nodeData, bool viewFrustumChanged) override { return viewFrustumChanged || _traversal.finished(); }
+    bool shouldStartNewTraversal(OctreeQueryNode* nodeData, bool viewFrustumChanged) override {
+        return viewFrustumChanged || _traversal.finished();
+    }
 
     DiffTraversal _traversal;
     EntityPriorityQueue _sendQueue;

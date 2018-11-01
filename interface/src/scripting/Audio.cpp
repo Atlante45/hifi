@@ -60,27 +60,19 @@ Audio::Audio() : _devices(_contextIsHMD) {
 }
 
 bool Audio::startRecording(const QString& filepath) {
-    return resultWithWriteLock<bool>([&] {
-        return DependencyManager::get<AudioClient>()->startRecording(filepath);
-    });
+    return resultWithWriteLock<bool>([&] { return DependencyManager::get<AudioClient>()->startRecording(filepath); });
 }
 
 bool Audio::getRecording() {
-    return resultWithReadLock<bool>([&] {
-        return DependencyManager::get<AudioClient>()->getRecording();
-    });
+    return resultWithReadLock<bool>([&] { return DependencyManager::get<AudioClient>()->getRecording(); });
 }
 
 void Audio::stopRecording() {
-    withWriteLock([&] {
-        DependencyManager::get<AudioClient>()->stopRecording();
-    });
+    withWriteLock([&] { DependencyManager::get<AudioClient>()->stopRecording(); });
 }
 
 bool Audio::isMuted() const {
-    return resultWithReadLock<bool>([&] {
-        return _isMuted;
-    });
+    return resultWithReadLock<bool>([&] { return _isMuted; });
 }
 
 void Audio::setMuted(bool isMuted) {
@@ -99,9 +91,7 @@ void Audio::setMuted(bool isMuted) {
 }
 
 bool Audio::noiseReductionEnabled() const {
-    return resultWithReadLock<bool>([&] {
-        return _enableNoiseReduction;
-    });
+    return resultWithReadLock<bool>([&] { return _enableNoiseReduction; });
 }
 
 void Audio::enableNoiseReduction(bool enable) {
@@ -121,9 +111,7 @@ void Audio::enableNoiseReduction(bool enable) {
 }
 
 float Audio::getInputVolume() const {
-    return resultWithReadLock<bool>([&] {
-        return _inputVolume;
-    });
+    return resultWithReadLock<bool>([&] { return _inputVolume; });
 }
 
 void Audio::setInputVolume(float volume) {
@@ -145,9 +133,7 @@ void Audio::setInputVolume(float volume) {
 }
 
 float Audio::getInputLevel() const {
-    return resultWithReadLock<float>([&] {
-        return _inputLevel;
-    });
+    return resultWithReadLock<float>([&] { return _inputLevel; });
 }
 
 void Audio::onInputLoudnessChanged(float loudness) {
@@ -165,9 +151,7 @@ void Audio::onInputLoudnessChanged(float loudness) {
 }
 
 QString Audio::getContext() const {
-    return resultWithReadLock<QString>([&] {
-        return _contextIsHMD ? Audio::HMD : Audio::DESKTOP;
-    });
+    return resultWithReadLock<QString>([&] { return _contextIsHMD ? Audio::HMD : Audio::DESKTOP; });
 }
 
 void Audio::onContextChanged() {
@@ -185,25 +169,17 @@ void Audio::onContextChanged() {
 }
 
 void Audio::setReverb(bool enable) {
-    withWriteLock([&] {
-        DependencyManager::get<AudioClient>()->setReverb(enable);
-    });
+    withWriteLock([&] { DependencyManager::get<AudioClient>()->setReverb(enable); });
 }
 
 void Audio::setReverbOptions(const AudioEffectOptions* options) {
-    withWriteLock([&] {
-        DependencyManager::get<AudioClient>()->setReverbOptions(options);
-    });
+    withWriteLock([&] { DependencyManager::get<AudioClient>()->setReverbOptions(options); });
 }
 
 void Audio::setInputDevice(const QAudioDeviceInfo& device, bool isHMD) {
-    withWriteLock([&] {
-        _devices.chooseInputDevice(device, isHMD);
-    });
+    withWriteLock([&] { _devices.chooseInputDevice(device, isHMD); });
 }
 
 void Audio::setOutputDevice(const QAudioDeviceInfo& device, bool isHMD) {
-    withWriteLock([&] {
-        _devices.chooseOutputDevice(device, isHMD);
-    });
+    withWriteLock([&] { _devices.chooseOutputDevice(device, isHMD); });
 }

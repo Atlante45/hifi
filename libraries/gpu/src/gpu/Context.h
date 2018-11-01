@@ -16,13 +16,13 @@
 
 #include <GLMHelpers.h>
 
-#include "Forward.h"
 #include "Batch.h"
 #include "Buffer.h"
-#include "Texture.h"
-#include "Pipeline.h"
-#include "Framebuffer.h"
+#include "Forward.h"
 #include "Frame.h"
+#include "Framebuffer.h"
+#include "Pipeline.h"
+#include "Texture.h"
 
 class QImage;
 
@@ -52,7 +52,7 @@ public:
 
 class Backend {
 public:
-    virtual ~Backend(){};
+    virtual ~Backend() {};
 
     virtual void shutdown() {}
     virtual const std::string& getVersion() const = 0;
@@ -75,14 +75,15 @@ public:
         // Jitter should be divided by framebuffer size
         TransformCamera getMonoCamera(const Transform& xformView, Vec2 normalizedJitter) const;
         // Jitter should be divided by framebuffer size
-        TransformCamera getEyeCamera(int eye, const StereoState& stereo, const Transform& xformView, Vec2 normalizedJitter) const;
+        TransformCamera getEyeCamera(int eye, const StereoState& stereo, const Transform& xformView,
+                                     Vec2 normalizedJitter) const;
     };
 
-    template <typename T, typename U>
+    template<typename T, typename U>
     static void setGPUObject(const U& object, T* gpuObject) {
         object.gpuObject.setGPUObject(gpuObject);
     }
-    template <typename T, typename U>
+    template<typename T, typename U>
     static T* getGPUObject(const U& object) {
         return reinterpret_cast<T*>(object.gpuObject.getGPUObject());
     }
@@ -115,9 +116,7 @@ public:
     static ContextMetricSize textureResourceIdealGPUMemSize;
 
 protected:
-    virtual bool isStereo() const {
-        return _stereo.isStereo();
-    }
+    virtual bool isStereo() const { return _stereo.isStereo(); }
 
     void getStereoProjections(mat4* eyeProjections) const {
         for (int i = 0; i < 2; ++i) {
@@ -141,8 +140,9 @@ public:
     using Size = Resource::Size;
     typedef BackendPointer (*CreateBackend)();
 
-    // This one call must happen before any context is created or used (Shader::MakeProgram) in order to setup the Backend and any singleton data needed
-    template <class T>
+    // This one call must happen before any context is created or used (Shader::MakeProgram) in order to setup the Backend and
+    // any singleton data needed
+    template<class T>
     static void init() {
         std::call_once(_initialized, [] {
             _createBackendCallback = T::createBackend;
@@ -251,7 +251,7 @@ protected:
     std::shared_ptr<Backend> _backend;
     std::mutex _batchPoolMutex;
     std::list<Batch*> _batchPool;
-    bool _frameActive{ false };
+    bool _frameActive { false };
     FramePointer _currentFrame;
     RangeTimerPointer _frameRangeTimer;
     StereoState _stereo;
@@ -269,6 +269,6 @@ typedef std::shared_ptr<Context> ContextPointer;
 
 void doInBatch(const char* name, const std::shared_ptr<gpu::Context>& context, const std::function<void(Batch& batch)>& f);
 
-};  // namespace gpu
+}; // namespace gpu
 
 #endif

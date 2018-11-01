@@ -18,8 +18,7 @@ public:
         _error(error),
         _pathname(pathname),
         _expectedImageFilename(expectedImageFilename),
-        _actualImageFilename(actualImageFilename)
-    {}
+        _actualImageFilename(actualImageFilename) {}
 
     double _error;
     QString _pathname;
@@ -27,12 +26,7 @@ public:
     QString _actualImageFilename;
 };
 
-enum UserResponse {
-    USER_RESPONSE_INVALID,
-    USER_RESPONSE_PASS,
-    USE_RESPONSE_FAIL,
-    USER_RESPONSE_ABORT
-};
+enum UserResponse { USER_RESPONSE_INVALID, USER_RESPONSE_PASS, USE_RESPONSE_FAIL, USER_RESPONSE_ABORT };
 
 // Coefficients for luminosity calculation
 const double R_Y = 0.212655f;

@@ -21,5 +21,4 @@ public:
     virtual void registerScriptEngineWithApplicationServices(ScriptEnginePointer scriptEngine) = 0;
 };
 
-
 #endif // hifi_AbstractScriptingServicesInterface_h

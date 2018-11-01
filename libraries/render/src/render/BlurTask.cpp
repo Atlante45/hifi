@@ -25,7 +25,7 @@ enum BlurShaderMapSlots {
 
 BlurParams::BlurParams() {
     Params params;
-    _parametersBuffer = gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(Params), (const gpu::Byte*) &params));
+    _parametersBuffer = gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(Params), (const gpu::Byte*)&params));
     setFilterGaussianTaps(3);
 }
 
@@ -34,11 +34,13 @@ void BlurParams::setWidthHeight(int width, int height, bool isStereo) {
     bool resChanged = false;
     if (width != resolutionInfo.x || height != resolutionInfo.y) {
         resChanged = true;
-        _parametersBuffer.edit<Params>().resolutionInfo = glm::vec4((float) width, (float) height, 1.0f / (float) width, 1.0f / (float) height);
+        _parametersBuffer.edit<Params>().resolutionInfo = glm::vec4((float)width, (float)height, 1.0f / (float)width,
+                                                                    1.0f / (float)height);
     }
 
     if (isStereo || resChanged) {
-        _parametersBuffer.edit<Params>().stereoInfo = glm::vec4((float)width, (float)height, 1.0f / (float)width, 1.0f / (float)height);
+        _parametersBuffer.edit<Params>().stereoInfo = glm::vec4((float)width, (float)height, 1.0f / (float)width,
+                                                                1.0f / (float)height);
     }
 }
 
@@ -76,7 +78,7 @@ void BlurParams::setFilterGaussianTaps(int numHalfTaps, float sigma) {
     const int numTaps = 2 * numHalfTaps + 1;
     assert(numTaps <= BLUR_MAX_NUM_TAPS);
     assert(sigma > 0.0f);
-    const float inverseTwoSigmaSquared = float(0.5 / double(sigma*sigma));
+    const float inverseTwoSigmaSquared = float(0.5 / double(sigma * sigma));
     float totalWeight = 1.0f;
     float weight;
     float offset;
@@ -88,7 +90,7 @@ void BlurParams::setFilterGaussianTaps(int numHalfTaps, float sigma) {
 
     for (i = 0; i < numHalfTaps; i++) {
         offset = i + 1;
-        weight = (float)exp(-offset*offset * inverseTwoSigmaSquared);
+        weight = (float)exp(-offset * offset * inverseTwoSigmaSquared);
         params.filterTaps[i + 1].x = offset;
         params.filterTaps[i + 1].y = weight;
         params.filterTaps[i + 1 + numHalfTaps].x = -offset;
@@ -129,7 +131,6 @@ void BlurParams::setLinearDepthPosFar(float farPosDepth) {
     }
 }
 
-
 BlurInOutResource::BlurInOutResource(bool generateOutputFramebuffer, unsigned int downsampleFactor) :
     _downsampleFactor(downsampleFactor),
     _generateOutputFramebuffer(generateOutputFramebuffer) {
@@ -142,7 +143,7 @@ bool BlurInOutResource::updateResources(const gpu::FramebufferPointer& sourceFra
     }
 
     auto blurBufferSize = sourceFramebuffer->getSize();
-    
+
     blurBufferSize.x /= _downsampleFactor;
     blurBufferSize.y /= _downsampleFactor;
 
@@ -154,13 +155,16 @@ bool BlurInOutResource::updateResources(const gpu::FramebufferPointer& sourceFra
         _blurredFramebuffer = gpu::FramebufferPointer(gpu::Framebuffer::create("blur"));
 
         // attach depthStencil if present in source
-        //if (sourceFramebuffer->hasDepthStencil()) {
-        //    _blurredFramebuffer->setDepthStencilBuffer(sourceFramebuffer->getDepthStencilBuffer(), sourceFramebuffer->getDepthStencilBufferFormat());
+        // if (sourceFramebuffer->hasDepthStencil()) {
+        //    _blurredFramebuffer->setDepthStencilBuffer(sourceFramebuffer->getDepthStencilBuffer(),
+        //    sourceFramebuffer->getDepthStencilBufferFormat());
         //}
         auto blurringSampler = gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_LINEAR_MIP_POINT, gpu::Sampler::WRAP_CLAMP);
-        auto blurringTarget = gpu::Texture::createRenderBuffer(sourceFramebuffer->getRenderBuffer(0)->getTexelFormat(), blurBufferSize.x, blurBufferSize.y, gpu::Texture::SINGLE_MIP, blurringSampler);
+        auto blurringTarget = gpu::Texture::createRenderBuffer(sourceFramebuffer->getRenderBuffer(0)->getTexelFormat(),
+                                                               blurBufferSize.x, blurBufferSize.y, gpu::Texture::SINGLE_MIP,
+                                                               blurringSampler);
         _blurredFramebuffer->setRenderBuffer(0, blurringTarget);
-    } 
+    }
 
     blurringResources.sourceTexture = sourceFramebuffer->getRenderBuffer(0);
     blurringResources.blurringFramebuffer = _blurredFramebuffer;
@@ -177,11 +181,14 @@ bool BlurInOutResource::updateResources(const gpu::FramebufferPointer& sourceFra
             _outputFramebuffer = gpu::FramebufferPointer(gpu::Framebuffer::create("blurOutput"));
 
             // attach depthStencil if present in source
-         /*   if (sourceFramebuffer->hasDepthStencil()) {
-                _outputFramebuffer->setDepthStencilBuffer(sourceFramebuffer->getDepthStencilBuffer(), sourceFramebuffer->getDepthStencilBufferFormat());
-            }*/
+            /*   if (sourceFramebuffer->hasDepthStencil()) {
+                   _outputFramebuffer->setDepthStencilBuffer(sourceFramebuffer->getDepthStencilBuffer(),
+               sourceFramebuffer->getDepthStencilBufferFormat());
+               }*/
             auto blurringSampler = gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_LINEAR_MIP_POINT, gpu::Sampler::WRAP_CLAMP);
-            auto blurringTarget = gpu::Texture::createRenderBuffer(sourceFramebuffer->getRenderBuffer(0)->getTexelFormat(), blurBufferSize.x, blurBufferSize.y, gpu::Texture::SINGLE_MIP, blurringSampler);
+            auto blurringTarget = gpu::Texture::createRenderBuffer(sourceFramebuffer->getRenderBuffer(0)->getTexelFormat(),
+                                                                   blurBufferSize.x, blurBufferSize.y, gpu::Texture::SINGLE_MIP,
+                                                                   blurringSampler);
             _outputFramebuffer->setRenderBuffer(0, blurringTarget);
         }
 
@@ -205,7 +212,8 @@ gpu::PipelinePointer BlurGaussian::getBlurVPipeline() {
         gpu::StatePointer state = gpu::StatePointer(new gpu::State());
 
         // Stencil test the curvature pass for objects pixels only, not the background
-      //  state->setStencilTest(true, 0xFF, gpu::State::StencilTest(0, 0xFF, gpu::NOT_EQUAL, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
+        //  state->setStencilTest(true, 0xFF, gpu::State::StencilTest(0, 0xFF, gpu::NOT_EQUAL, gpu::State::STENCIL_OP_KEEP,
+        //  gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
 
         _blurVPipeline = gpu::Pipeline::create(program, state);
     }
@@ -219,7 +227,8 @@ gpu::PipelinePointer BlurGaussian::getBlurHPipeline() {
         gpu::StatePointer state = gpu::StatePointer(new gpu::State());
 
         // Stencil test the curvature pass for objects pixels only, not the background
-       // state->setStencilTest(true, 0xFF, gpu::State::StencilTest(0, 0xFF, gpu::NOT_EQUAL, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
+        // state->setStencilTest(true, 0xFF, gpu::State::StencilTest(0, 0xFF, gpu::NOT_EQUAL, gpu::State::STENCIL_OP_KEEP,
+        // gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
 
         _blurHPipeline = gpu::Pipeline::create(program, state);
     }
@@ -240,8 +249,8 @@ void BlurGaussian::configure(const Config& config) {
     }
 }
 
-
-void BlurGaussian::run(const RenderContextPointer& renderContext, const Inputs& inputs, gpu::FramebufferPointer& blurredFramebuffer) {
+void BlurGaussian::run(const RenderContextPointer& renderContext, const Inputs& inputs,
+                       gpu::FramebufferPointer& blurredFramebuffer) {
     assert(renderContext->args);
     assert(renderContext->args->hasViewFrustum());
 
@@ -294,12 +303,9 @@ void BlurGaussian::run(const RenderContextPointer& renderContext, const Inputs& 
     });
 }
 
-
-
 BlurGaussianDepthAware::BlurGaussianDepthAware(bool generateOutputFramebuffer, const BlurParamsPointer& params) :
     _inOutResources(generateOutputFramebuffer, 1U),
-    _parameters((params ? params : std::make_shared<BlurParams>()))
-{
+    _parameters((params ? params : std::make_shared<BlurParams>())) {
 }
 
 gpu::PipelinePointer BlurGaussianDepthAware::getBlurVPipeline() {
@@ -308,7 +314,8 @@ gpu::PipelinePointer BlurGaussianDepthAware::getBlurVPipeline() {
         gpu::StatePointer state = gpu::StatePointer(new gpu::State());
 
         // Stencil test the curvature pass for objects pixels only, not the background
-      //  state->setStencilTest(true, 0xFF, gpu::State::StencilTest(0, 0xFF, gpu::NOT_EQUAL, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
+        //  state->setStencilTest(true, 0xFF, gpu::State::StencilTest(0, 0xFF, gpu::NOT_EQUAL, gpu::State::STENCIL_OP_KEEP,
+        //  gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
 
         _blurVPipeline = gpu::Pipeline::create(program, state);
     }
@@ -322,7 +329,8 @@ gpu::PipelinePointer BlurGaussianDepthAware::getBlurHPipeline() {
         gpu::StatePointer state = gpu::StatePointer(new gpu::State());
 
         // Stencil test the curvature pass for objects pixels only, not the background
-    //    state->setStencilTest(true, 0xFF, gpu::State::StencilTest(0, 0xFF, gpu::NOT_EQUAL, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
+        //    state->setStencilTest(true, 0xFF, gpu::State::StencilTest(0, 0xFF, gpu::NOT_EQUAL, gpu::State::STENCIL_OP_KEEP,
+        //    gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
 
         _blurHPipeline = gpu::Pipeline::create(program, state);
     }
@@ -335,8 +343,8 @@ void BlurGaussianDepthAware::configure(const Config& config) {
     _parameters->setDepthThreshold(config.depthThreshold);
 }
 
-
-void BlurGaussianDepthAware::run(const RenderContextPointer& renderContext, const Inputs& SourceAndDepth, gpu::FramebufferPointer& blurredFramebuffer) {
+void BlurGaussianDepthAware::run(const RenderContextPointer& renderContext, const Inputs& SourceAndDepth,
+                                 gpu::FramebufferPointer& blurredFramebuffer) {
     assert(renderContext->args);
     assert(renderContext->args->hasViewFrustum());
 
@@ -350,7 +358,7 @@ void BlurGaussianDepthAware::run(const RenderContextPointer& renderContext, cons
         // early exit if no valid blurring resources
         return;
     }
-    
+
     blurredFramebuffer = blurringResources.finalFramebuffer;
 
     auto blurVPipeline = getBlurVPipeline();
@@ -360,7 +368,8 @@ void BlurGaussianDepthAware::run(const RenderContextPointer& renderContext, cons
 
     _parameters->setWidthHeight(sourceViewport.z, sourceViewport.w, args->isStereo());
     glm::ivec2 textureSize(blurringResources.sourceTexture->getDimensions());
-    _parameters->setTexcoordTransform(gpu::Framebuffer::evalSubregionTexcoordTransformCoefficients(textureSize, sourceViewport));
+    _parameters->setTexcoordTransform(
+        gpu::Framebuffer::evalSubregionTexcoordTransformCoefficients(textureSize, sourceViewport));
     _parameters->setDepthPerspective(args->getViewFrustum().getProjection()[1][1]);
     _parameters->setLinearDepthPosFar(args->getViewFrustum().getFarClip());
 
@@ -393,5 +402,3 @@ void BlurGaussianDepthAware::run(const RenderContextPointer& renderContext, cons
         batch.setUniformBuffer(BlurTask_ParamsSlot, nullptr);
     });
 }
-
-

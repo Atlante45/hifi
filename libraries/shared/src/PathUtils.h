@@ -12,9 +12,9 @@
 #ifndef hifi_PathUtils_h
 #define hifi_PathUtils_h
 
+#include <QtCore/QDir>
 #include <QtCore/QObject>
 #include <QtCore/QUrl>
-#include <QtCore/QDir>
 
 #include "DependencyManager.h"
 

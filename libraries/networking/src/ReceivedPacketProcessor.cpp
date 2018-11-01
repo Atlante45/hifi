@@ -20,7 +20,6 @@ ReceivedPacketProcessor::ReceivedPacketProcessor() {
     _lastWindowAt = usecTimestampNow();
 }
 
-
 void ReceivedPacketProcessor::terminating() {
     _hasPackets.wakeAll();
 }
@@ -71,20 +70,20 @@ bool ReceivedPacketProcessor::process() {
     currentPackets.swap(_packets);
     unlock();
 
-    for(auto& packetPair : currentPackets) {
+    for (auto& packetPair : currentPackets) {
         processPacket(packetPair.second, packetPair.first);
         _lastWindowProcessedPackets++;
         midProcess();
     }
 
     lock();
-    for(auto& packetPair : currentPackets) {
+    for (auto& packetPair : currentPackets) {
         _nodePacketCounts[packetPair.first->getUUID()]--;
     }
     unlock();
 
     postProcess();
-    return isStillRunning();  // keep running till they terminate us
+    return isStillRunning(); // keep running till they terminate us
 }
 
 void ReceivedPacketProcessor::nodeKilled(SharedNodePointer node) {

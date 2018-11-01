@@ -11,15 +11,15 @@
 
 #include "Util.h"
 
-#include <iostream>
-#include <cstring>
-#include <time.h>
 #include <math.h>
+#include <time.h>
+#include <cstring>
+#include <iostream>
 
+#include <glm/detail/func_common.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/noise.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <glm/detail/func_common.hpp>
 
 #include <QElapsedTimer>
 #include <QThread>
@@ -27,9 +27,9 @@
 #include <ByteCountCoding.h>
 #include <GeometryCache.h>
 #include <OctreeConstants.h>
-#include <SharedUtil.h>
 #include <ShapeEntityItem.h>
 #include <ShapeInfo.h>
+#include <SharedUtil.h>
 
 #include "InterfaceLogging.h"
 #include "world.h"
@@ -51,7 +51,7 @@ void renderWorldBox(RenderArgs* args, gpu::Batch& batch) {
     static const glm::vec4 DASHED_BLUE(0.0f, 0.0f, 1.0f, 1.0f);
     static const float DASH_LENGTH = 1.0f;
     static const float GAP_LENGTH = 1.0f;
-    auto transform = Transform{};
+    auto transform = Transform {};
     static std::array<int, 18> geometryIds;
     static std::once_flag initGeometryIds;
     std::call_once(initGeometryIds, [&] {
@@ -66,7 +66,8 @@ void renderWorldBox(RenderArgs* args, gpu::Batch& batch) {
     geometryCache->renderDashedLine(batch, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-HALF_TREE_SCALE, 0.0f, 0.0f), DASHED_RED,
                                     DASH_LENGTH, GAP_LENGTH, geometryIds[1]);
 
-    geometryCache->renderLine(batch, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, HALF_TREE_SCALE, 0.0f), GREEN, geometryIds[2]);
+    geometryCache->renderLine(batch, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, HALF_TREE_SCALE, 0.0f), GREEN,
+                              geometryIds[2]);
     geometryCache->renderDashedLine(batch, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -HALF_TREE_SCALE, 0.0f), DASHED_GREEN,
                                     DASH_LENGTH, GAP_LENGTH, geometryIds[3]);
 
@@ -76,47 +77,34 @@ void renderWorldBox(RenderArgs* args, gpu::Batch& batch) {
 
     // X center boundaries
     geometryCache->renderLine(batch, glm::vec3(-HALF_TREE_SCALE, -HALF_TREE_SCALE, 0.0f),
-                              glm::vec3(HALF_TREE_SCALE, -HALF_TREE_SCALE, 0.0f), GREY,
-                              geometryIds[6]);
+                              glm::vec3(HALF_TREE_SCALE, -HALF_TREE_SCALE, 0.0f), GREY, geometryIds[6]);
     geometryCache->renderLine(batch, glm::vec3(-HALF_TREE_SCALE, -HALF_TREE_SCALE, 0.0f),
-                              glm::vec3(-HALF_TREE_SCALE, HALF_TREE_SCALE, 0.0f), GREY,
-                              geometryIds[7]);
+                              glm::vec3(-HALF_TREE_SCALE, HALF_TREE_SCALE, 0.0f), GREY, geometryIds[7]);
     geometryCache->renderLine(batch, glm::vec3(-HALF_TREE_SCALE, HALF_TREE_SCALE, 0.0f),
-                              glm::vec3(HALF_TREE_SCALE, HALF_TREE_SCALE, 0.0f), GREY,
-                              geometryIds[8]);
+                              glm::vec3(HALF_TREE_SCALE, HALF_TREE_SCALE, 0.0f), GREY, geometryIds[8]);
     geometryCache->renderLine(batch, glm::vec3(HALF_TREE_SCALE, -HALF_TREE_SCALE, 0.0f),
-                              glm::vec3(HALF_TREE_SCALE, HALF_TREE_SCALE, 0.0f), GREY,
-                              geometryIds[9]);
+                              glm::vec3(HALF_TREE_SCALE, HALF_TREE_SCALE, 0.0f), GREY, geometryIds[9]);
 
     // Z center boundaries
     geometryCache->renderLine(batch, glm::vec3(0.0f, -HALF_TREE_SCALE, -HALF_TREE_SCALE),
-                              glm::vec3(0.0f, -HALF_TREE_SCALE, HALF_TREE_SCALE), GREY,
-                              geometryIds[10]);
+                              glm::vec3(0.0f, -HALF_TREE_SCALE, HALF_TREE_SCALE), GREY, geometryIds[10]);
     geometryCache->renderLine(batch, glm::vec3(0.0f, -HALF_TREE_SCALE, -HALF_TREE_SCALE),
-                              glm::vec3(0.0f, HALF_TREE_SCALE, -HALF_TREE_SCALE), GREY,
-                              geometryIds[11]);
+                              glm::vec3(0.0f, HALF_TREE_SCALE, -HALF_TREE_SCALE), GREY, geometryIds[11]);
     geometryCache->renderLine(batch, glm::vec3(0.0f, HALF_TREE_SCALE, -HALF_TREE_SCALE),
-                              glm::vec3(0.0f, HALF_TREE_SCALE, HALF_TREE_SCALE), GREY,
-                              geometryIds[12]);
+                              glm::vec3(0.0f, HALF_TREE_SCALE, HALF_TREE_SCALE), GREY, geometryIds[12]);
     geometryCache->renderLine(batch, glm::vec3(0.0f, -HALF_TREE_SCALE, HALF_TREE_SCALE),
-                              glm::vec3(0.0f, HALF_TREE_SCALE, HALF_TREE_SCALE), GREY,
-                              geometryIds[13]);
+                              glm::vec3(0.0f, HALF_TREE_SCALE, HALF_TREE_SCALE), GREY, geometryIds[13]);
 
     // Center boundaries
     geometryCache->renderLine(batch, glm::vec3(-HALF_TREE_SCALE, 0.0f, -HALF_TREE_SCALE),
-                              glm::vec3(-HALF_TREE_SCALE, 0.0f, HALF_TREE_SCALE), GREY,
-                              geometryIds[14]);
+                              glm::vec3(-HALF_TREE_SCALE, 0.0f, HALF_TREE_SCALE), GREY, geometryIds[14]);
     geometryCache->renderLine(batch, glm::vec3(-HALF_TREE_SCALE, 0.0f, -HALF_TREE_SCALE),
-                              glm::vec3(HALF_TREE_SCALE, 0.0f, -HALF_TREE_SCALE), GREY,
-                              geometryIds[15]);
+                              glm::vec3(HALF_TREE_SCALE, 0.0f, -HALF_TREE_SCALE), GREY, geometryIds[15]);
     geometryCache->renderLine(batch, glm::vec3(HALF_TREE_SCALE, 0.0f, -HALF_TREE_SCALE),
-                              glm::vec3(HALF_TREE_SCALE, 0.0f, HALF_TREE_SCALE), GREY,
-                              geometryIds[16]);
+                              glm::vec3(HALF_TREE_SCALE, 0.0f, HALF_TREE_SCALE), GREY, geometryIds[16]);
     geometryCache->renderLine(batch, glm::vec3(-HALF_TREE_SCALE, 0.0f, HALF_TREE_SCALE),
-                              glm::vec3(HALF_TREE_SCALE, 0.0f, HALF_TREE_SCALE), GREY,
-                              geometryIds[17]);
+                              glm::vec3(HALF_TREE_SCALE, 0.0f, HALF_TREE_SCALE), GREY, geometryIds[17]);
 
-    
     geometryCache->renderWireCubeInstance(args, batch, GREY4);
 
     //  Draw meter markers along the 3 axis to help with measuring things
@@ -171,7 +159,8 @@ void runTimingTests() {
         QThread::sleep(1);
     }
     elapsedNSecs = (float)startTime.nsecsElapsed();
-    qCDebug(interfaceapp, "QThread::sleep(1) s: %f", (double)(elapsedNSecs / NSECS_PER_MSEC / MSECS_PER_SECOND / numTimingTests));
+    qCDebug(interfaceapp, "QThread::sleep(1) s: %f",
+            (double)(elapsedNSecs / NSECS_PER_MSEC / MSECS_PER_SECOND / numTimingTests));
 
     const int numUsecTests = 1000;
     startTime.start();
@@ -232,8 +221,7 @@ void runTimingTests() {
         iResults[i] = rand();
     }
     elapsedUSecs = (float)startTime.nsecsElapsed() / NSECS_PER_USEC;
-    qCDebug(interfaceapp, "rand() stored in array usecs: %f, first result:%d",
-            (double)(elapsedUSecs / numTests), iResults[0]);
+    qCDebug(interfaceapp, "rand() stored in array usecs: %f, first result:%d", (double)(elapsedUSecs / numTests), iResults[0]);
 
     // Random number generation using randFloat()
     startTime.start();
@@ -241,8 +229,8 @@ void runTimingTests() {
         fResults[i] = randFloat();
     }
     elapsedUSecs = (float)startTime.nsecsElapsed() / NSECS_PER_USEC;
-    qCDebug(interfaceapp, "randFloat() stored in array usecs: %f, first result: %f",
-            (double)(elapsedUSecs / numTests), (double)(fResults[0]));
+    qCDebug(interfaceapp, "randFloat() stored in array usecs: %f, first result: %f", (double)(elapsedUSecs / numTests),
+            (double)(fResults[0]));
 
     free(iResults);
     free(fResults);
@@ -254,20 +242,20 @@ void runTimingTests() {
         fTest = powf(fTest, 0.5f);
     }
     elapsedUSecs = (float)startTime.nsecsElapsed() / NSECS_PER_USEC;
-    qCDebug(interfaceapp, "powf(f, 0.5) usecs: %f", (double)(elapsedUSecs / (float) numTests));
+    qCDebug(interfaceapp, "powf(f, 0.5) usecs: %f", (double)(elapsedUSecs / (float)numTests));
 
     //  Vector Math
     float distance;
     glm::vec3 pointA(randVector()), pointB(randVector());
     startTime.start();
     for (int i = 0; i < numTests; i++) {
-        //glm::vec3 temp = pointA - pointB;
-        //float distanceSquared = glm::dot(temp, temp);
+        // glm::vec3 temp = pointA - pointB;
+        // float distanceSquared = glm::dot(temp, temp);
         distance = glm::distance(pointA, pointB);
     }
     elapsedUSecs = (float)startTime.nsecsElapsed() / NSECS_PER_USEC;
     qCDebug(interfaceapp, "vector math usecs: %f [%f usecs total for %d tests], last result:%f",
-            (double)(elapsedUSecs / (float) numTests), (double)elapsedUSecs, numTests, (double)distance);
+            (double)(elapsedUSecs / (float)numTests), (double)elapsedUSecs, numTests, (double)distance);
 
     //  Vec3 test
     glm::vec3 vecA(randVector()), vecB(randVector());
@@ -275,13 +263,11 @@ void runTimingTests() {
 
     startTime.start();
     for (int i = 0; i < numTests; i++) {
-        glm::vec3 temp = vecA-vecB;
-        result = glm::dot(temp,temp);
+        glm::vec3 temp = vecA - vecB;
+        result = glm::dot(temp, temp);
     }
     elapsedUSecs = (float)startTime.nsecsElapsed() / NSECS_PER_USEC;
-    qCDebug(interfaceapp, "vec3 assign and dot() usecs: %f, last result:%f",
-            (double)(elapsedUSecs / numTests), (double)result);
-
+    qCDebug(interfaceapp, "vec3 assign and dot() usecs: %f, last result:%f", (double)(elapsedUSecs / numTests), (double)result);
 
     quint64 BYTE_CODE_MAX_TEST_VALUE = 99999999;
     quint64 BYTE_CODE_TESTS_SKIP = 999;
@@ -310,18 +296,15 @@ void runTimingTests() {
                 qDebug() << "FAILED! value:" << valueA << "decoded:" << valueADecoded;
                 failed++;
             }
-
         }
         elapsedUSecs = (float)startTime.nsecsElapsed() / NSECS_PER_USEC;
         qCDebug(interfaceapp) << "ByteCountCoded<quint64> usecs: " << elapsedUSecs
-                                << "per test:" << (double) (elapsedUSecs / tests)
-                                << "tests:" << tests
-                                << "failed:" << failed;
+                              << "per test:" << (double)(elapsedUSecs / tests) << "tests:" << tests << "failed:" << failed;
     }
 }
 
-bool rayIntersectsSphere(const glm::vec3& rayStarting, const glm::vec3& rayNormalizedDirection,
-        const glm::vec3& sphereCenter, float sphereRadius, float& distance) {
+bool rayIntersectsSphere(const glm::vec3& rayStarting, const glm::vec3& rayNormalizedDirection, const glm::vec3& sphereCenter,
+                         float sphereRadius, float& distance) {
     glm::vec3 relativeOrigin = rayStarting - sphereCenter;
 
     // compute the b, c terms of the quadratic equation (a is dot(direction, direction), which is one)
@@ -362,43 +345,38 @@ bool pointInSphere(glm::vec3& point, glm::vec3& sphereCenter, double sphereRadiu
 }
 
 void runUnitTests() {
-
     quint64 LAST_TEST = 10;
     quint64 SKIP_BY = 1;
-    
+
     for (quint64 value = 0; value <= LAST_TEST; value += SKIP_BY) {
         qDebug() << "value:" << value;
 
         ByteCountCoded<quint64> codedValue = value;
-    
+
         QByteArray codedValueBuffer = codedValue;
-        
+
         codedValueBuffer.append((unsigned char)255);
         codedValueBuffer.append(QString("junk"));
-        
+
         qDebug() << "codedValueBuffer:";
         outputBufferBits((const unsigned char*)codedValueBuffer.constData(), codedValueBuffer.size());
 
         ByteCountCoded<quint64> valueDecoder;
-        size_t bytesConsumed =  valueDecoder.decode(codedValueBuffer);
+        size_t bytesConsumed = valueDecoder.decode(codedValueBuffer);
         quint64 valueDecoded = valueDecoder;
         qDebug() << "valueDecoded:" << valueDecoded;
         qDebug() << "bytesConsumed:" << bytesConsumed;
-        
 
         if (value == valueDecoded) {
             qDebug() << "SUCCESS!";
         } else {
             qDebug() << "FAILED!";
         }
-
     }
 }
 
-void shapeInfoCalculator(const ShapeEntityItem * const shapeEntity, ShapeInfo &shapeInfo) {
-
+void shapeInfoCalculator(const ShapeEntityItem* const shapeEntity, ShapeInfo& shapeInfo) {
     if (shapeEntity == nullptr) {
-
         //--EARLY EXIT--
         return;
     }
@@ -407,8 +385,7 @@ void shapeInfoCalculator(const ShapeEntityItem * const shapeEntity, ShapeInfo &s
     ShapeInfo::PointList points;
     pointCollection.push_back(points);
 
-    GeometryCache::computeSimpleHullPointListForShape((int)shapeEntity->getShape(), shapeEntity->getScaledDimensions(), pointCollection.back());
+    GeometryCache::computeSimpleHullPointListForShape((int)shapeEntity->getShape(), shapeEntity->getScaledDimensions(),
+                                                      pointCollection.back());
     shapeInfo.setPointCollection(pointCollection);
 }
-
-

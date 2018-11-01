@@ -14,7 +14,7 @@
 
 AbstractLoggerInterface* AbstractLoggerInterface::get() {
     QVariant loggerVar = qApp->property(hifi::properties::LOGGER);
-    QObject* loggerObject = qvariant_cast<QObject *>(loggerVar);
+    QObject* loggerObject = qvariant_cast<QObject*>(loggerVar);
     return qobject_cast<AbstractLoggerInterface*>(loggerObject);
 }
 
@@ -27,4 +27,3 @@ AbstractLoggerInterface::~AbstractLoggerInterface() {
         qApp->setProperty(hifi::properties::LOGGER, QVariant());
     }
 }
-

@@ -41,8 +41,10 @@ void WebEntityItem::setUnscaledDimensions(const glm::vec3& value) {
     EntityItem::setUnscaledDimensions(glm::vec3(value.x, value.y, WEB_ENTITY_ITEM_FIXED_DEPTH));
 }
 
-EntityItemProperties WebEntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
-    EntityItemProperties properties = EntityItem::getProperties(desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
+EntityItemProperties WebEntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                                  bool allowEmptyDesiredProperties) const {
+    EntityItemProperties properties = EntityItem::getProperties(
+        desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(sourceUrl, getSourceUrl);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(dpi, getDPI);
     return properties;
@@ -60,8 +62,8 @@ bool WebEntityItem::setProperties(const EntityItemProperties& properties) {
         if (wantDebug) {
             uint64_t now = usecTimestampNow();
             int elapsed = now - getLastEdited();
-            qCDebug(entities) << "WebEntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                    "now=" << now << " getLastEdited()=" << getLastEdited();
+            qCDebug(entities) << "WebEntityItem::setProperties() AFTER update... edited AGO=" << elapsed << "now=" << now
+                              << " getLastEdited()=" << getLastEdited();
         }
         setLastEdited(properties._lastEdited);
     }
@@ -70,10 +72,8 @@ bool WebEntityItem::setProperties(const EntityItemProperties& properties) {
 }
 
 int WebEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) {
-
+                                                    ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                    bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 
@@ -91,26 +91,23 @@ EntityPropertyFlags WebEntityItem::getEntityProperties(EncodeBitstreamParams& pa
 }
 
 void WebEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
-                                    EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
-                                    OctreeElement::AppendState& appendState) const {
-
+                                       EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
+                                       EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                       EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                       OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
     APPEND_ENTITY_PROPERTY(PROP_SOURCE_URL, _sourceUrl);
     APPEND_ENTITY_PROPERTY(PROP_DPI, _dpi);
 }
 
 bool WebEntityItem::findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                                                OctreeElementPointer& element, float& distance,
-                                                BoxFace& face, glm::vec3& surfaceNormal,
-                                                QVariantMap& extraInfo, bool precisionPicking) const {
+                                                OctreeElementPointer& element, float& distance, BoxFace& face,
+                                                glm::vec3& surfaceNormal, QVariantMap& extraInfo, bool precisionPicking) const {
     glm::vec3 dimensions = getScaledDimensions();
     glm::vec2 xyDimensions(dimensions.x, dimensions.y);
     glm::quat rotation = getWorldOrientation();
-    glm::vec3 position = getWorldPosition() + rotation * (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint()));
+    glm::vec3 position = getWorldPosition() +
+                         rotation * (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint()));
 
     if (findRayRectangleIntersection(origin, direction, rotation, position, xyDimensions, distance)) {
         glm::vec3 forward = rotation * Vectors::FRONT;
@@ -127,14 +124,15 @@ bool WebEntityItem::findDetailedRayIntersection(const glm::vec3& origin, const g
     }
 }
 
-bool WebEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                                     OctreeElementPointer& element, float& parabolicDistance,
-                                                     BoxFace& face, glm::vec3& surfaceNormal,
+bool WebEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
+                                                     const glm::vec3& acceleration, OctreeElementPointer& element,
+                                                     float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
                                                      QVariantMap& extraInfo, bool precisionPicking) const {
     glm::vec3 dimensions = getScaledDimensions();
     glm::vec2 xyDimensions(dimensions.x, dimensions.y);
     glm::quat rotation = getWorldOrientation();
-    glm::vec3 position = getWorldPosition() + rotation * (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint()));
+    glm::vec3 position = getWorldPosition() +
+                         rotation * (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint()));
 
     glm::quat inverseRot = glm::inverse(rotation);
     glm::vec3 localOrigin = inverseRot * (origin - position);
@@ -171,11 +169,9 @@ void WebEntityItem::setSourceUrl(const QString& value) {
     });
 }
 
-QString WebEntityItem::getSourceUrl() const { 
+QString WebEntityItem::getSourceUrl() const {
     QString result;
-    withReadLock([&] {
-        result = _sourceUrl;
-    });
+    withReadLock([&] { result = _sourceUrl; });
     return result;
 }
 

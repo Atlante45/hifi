@@ -12,26 +12,25 @@
 #include "MainWindow.h"
 
 #include <QApplication>
+#include <QDebug>
 #include <QDesktopWidget>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QEvent>
+#include <QHideEvent>
+#include <QMimeData>
 #include <QMoveEvent>
 #include <QResizeEvent>
 #include <QShowEvent>
-#include <QHideEvent>
-#include <QWindowStateChangeEvent>
-#include <QDragEnterEvent>
-#include <QDropEvent>
-#include <QMimeData>
 #include <QWindow>
-#include <QDebug>
+#include <QWindowStateChangeEvent>
 
 #include "ui/Logging.h"
 
 MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
     _windowGeometry("WindowGeometry"),
-    _windowState("WindowState", 0)
-{
+    _windowState("WindowState", 0) {
     setAttribute(Qt::WA_NoSystemBackground);
     setAcceptDrops(true);
 }
@@ -92,12 +91,12 @@ void MainWindow::closeEvent(QCloseEvent* event) {
 }
 
 void MainWindow::moveEvent(QMoveEvent* event) {
-    emit windowGeometryChanged(QRect(QPoint(geometry().x(), geometry().y()), size()));  // Geometry excluding the window frame.
+    emit windowGeometryChanged(QRect(QPoint(geometry().x(), geometry().y()), size())); // Geometry excluding the window frame.
     QMainWindow::moveEvent(event);
 }
 
 void MainWindow::resizeEvent(QResizeEvent* event) {
-    emit windowGeometryChanged(QRect(QPoint(geometry().x(), geometry().y()), size()));  // Geometry excluding the window frame.
+    emit windowGeometryChanged(QRect(QPoint(geometry().x(), geometry().y()), size())); // Geometry excluding the window frame.
     QMainWindow::resizeEvent(event);
 }
 
@@ -118,8 +117,7 @@ void MainWindow::hideEvent(QHideEvent* event) {
 void MainWindow::changeEvent(QEvent* event) {
     if (event->type() == QEvent::WindowStateChange) {
         QWindowStateChangeEvent* stateChangeEvent = static_cast<QWindowStateChangeEvent*>(event);
-        if ((stateChangeEvent->oldState() == Qt::WindowNoState ||
-            stateChangeEvent->oldState() == Qt::WindowMaximized) &&
+        if ((stateChangeEvent->oldState() == Qt::WindowNoState || stateChangeEvent->oldState() == Qt::WindowMaximized) &&
             (windowState() & Qt::WindowMinimized) == Qt::WindowMinimized) {
             emit windowShown(false);
             emit windowMinimizedChanged(true);

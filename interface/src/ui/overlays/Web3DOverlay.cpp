@@ -15,51 +15,49 @@
 
 #include <QQuickWindow>
 #include <QtGui/QOpenGLContext>
-#include <QtQuick/QQuickItem>
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlEngine>
+#include <QtQuick/QQuickItem>
 
 #include <AbstractViewStateInterface.h>
-#include <gpu/Batch.h>
+#include <AddressManager.h>
+#include <AvatarBookmarks.h>
 #include <DependencyManager.h>
 #include <GeometryCache.h>
 #include <GeometryUtil.h>
+#include <PathUtils.h>
+#include <Preferences.h>
+#include <RegisteredMetaTypes.h>
+#include <ScriptEngines.h>
+#include <TextureCache.h>
+#include <UserActivityLoggerScriptingInterface.h>
+#include <UsersScriptingInterface.h>
+#include <display-plugins/CompositorHelper.h>
 #include <gl/GLHelpers.h>
+#include <gpu/Batch.h>
+#include <plugins/InputConfiguration.h>
 #include <scripting/HMDScriptingInterface.h>
 #include <scripting/WindowScriptingInterface.h>
 #include <ui/OffscreenQmlSurface.h>
 #include <ui/OffscreenQmlSurfaceCache.h>
 #include <ui/TabletScriptingInterface.h>
-#include <PathUtils.h>
-#include <RegisteredMetaTypes.h>
-#include <TextureCache.h>
-#include <UsersScriptingInterface.h>
-#include <UserActivityLoggerScriptingInterface.h>
-#include <AbstractViewStateInterface.h>
-#include <AddressManager.h>
-#include "scripting/HMDScriptingInterface.h"
+#include "AboutUtil.h"
+#include "AudioClient.h"
+#include "FileDialogHelper.h"
+#include "LODManager.h"
+#include "ResourceRequestObserver.h"
+#include "SoundCacheScriptingInterface.h"
+#include "avatar/AvatarManager.h"
+#include "raypick/PointerScriptingInterface.h"
+#include "scripting/AccountServicesScriptingInterface.h"
 #include "scripting/AssetMappingsScriptingInterface.h"
+#include "scripting/HMDScriptingInterface.h"
 #include "scripting/MenuScriptingInterface.h"
 #include "scripting/SettingsScriptingInterface.h"
-#include <Preferences.h>
-#include <AvatarBookmarks.h>
-#include <ScriptEngines.h>
-#include "FileDialogHelper.h"
-#include "avatar/AvatarManager.h"
-#include "AudioClient.h"
-#include "LODManager.h"
-#include "ui/OctreeStatsProvider.h"
-#include "ui/DomainConnectionModel.h"
 #include "ui/AvatarInputs.h"
-#include "avatar/AvatarManager.h"
-#include "scripting/AccountServicesScriptingInterface.h"
-#include <plugins/InputConfiguration.h>
+#include "ui/DomainConnectionModel.h"
+#include "ui/OctreeStatsProvider.h"
 #include "ui/Snapshot.h"
-#include "SoundCacheScriptingInterface.h"
-#include "raypick/PointerScriptingInterface.h"
-#include <display-plugins/CompositorHelper.h>
-#include "AboutUtil.h"
-#include "ResourceRequestObserver.h"
 
 static int MAX_WINDOW_SIZE = 4096;
 static const float METERS_TO_INCHES = 39.3701f;
@@ -87,12 +85,14 @@ Web3DOverlay::Web3DOverlay() {
     connect(this, &Web3DOverlay::releaseWebSurface, this, &Web3DOverlay::destroyWebSurface);
     connect(this, &Web3DOverlay::resizeWebSurface, this, &Web3DOverlay::onResizeWebSurface);
 
-    //need to be intialized before Tablet 1st open
+    // need to be intialized before Tablet 1st open
     _webSurface = DependencyManager::get<OffscreenQmlSurfaceCache>()->acquire(QML);
     _cachedWebSurface = true;
     _webSurface->getSurfaceContext()->setContextProperty("HMD", DependencyManager::get<HMDScriptingInterface>().data());
-    _webSurface->getSurfaceContext()->setContextProperty("Account", AccountServicesScriptingInterface::getInstance()); // DEPRECATED - TO BE REMOVED
-    _webSurface->getSurfaceContext()->setContextProperty("GlobalServices", AccountServicesScriptingInterface::getInstance()); // DEPRECATED - TO BE REMOVED
+    _webSurface->getSurfaceContext()->setContextProperty(
+        "Account", AccountServicesScriptingInterface::getInstance()); // DEPRECATED - TO BE REMOVED
+    _webSurface->getSurfaceContext()->setContextProperty(
+        "GlobalServices", AccountServicesScriptingInterface::getInstance()); // DEPRECATED - TO BE REMOVED
     _webSurface->getSurfaceContext()->setContextProperty("AccountServices", AccountServicesScriptingInterface::getInstance());
     _webSurface->getSurfaceContext()->setContextProperty("AddressManager", DependencyManager::get<AddressManager>().data());
 }
@@ -102,8 +102,7 @@ Web3DOverlay::Web3DOverlay(const Web3DOverlay* Web3DOverlay) :
     _url(Web3DOverlay->_url),
     _scriptURL(Web3DOverlay->_scriptURL),
     _dpi(Web3DOverlay->_dpi),
-    _showKeyboardFocusHighlight(Web3DOverlay->_showKeyboardFocusHighlight)
-{
+    _showKeyboardFocusHighlight(Web3DOverlay->_showKeyboardFocusHighlight) {
     _geometryId = DependencyManager::get<GeometryCache>()->allocateID();
 }
 
@@ -187,9 +186,8 @@ void Web3DOverlay::buildWebSurface() {
             _webSurface->getRootItem()->setProperty("scriptURL", _scriptURL);
         } else {
             _webSurface = QSharedPointer<OffscreenQmlSurface>(new OffscreenQmlSurface(), qmlSurfaceDeleter);
-            connect(_webSurface.data(), &hifi::qml::OffscreenSurface::rootContextCreated, [this](QQmlContext* surfaceContext) {
-                setupQmlSurface(_url == TabletScriptingInterface::QML);
-            });
+            connect(_webSurface.data(), &hifi::qml::OffscreenSurface::rootContextCreated,
+                    [this](QQmlContext* surfaceContext) { setupQmlSurface(_url == TabletScriptingInterface::QML); });
             _webSurface->load(_url);
             _cachedWebSurface = false;
         }
@@ -212,8 +210,8 @@ void Web3DOverlay::update(float deltatime) {
 
 bool Web3DOverlay::isWebContent() const {
     QUrl sourceUrl(_url);
-    if (sourceUrl.scheme() == "http" || sourceUrl.scheme() == "https" ||
-        _url.toLower().endsWith(".htm") || _url.toLower().endsWith(".html")) {
+    if (sourceUrl.scheme() == "http" || sourceUrl.scheme() == "https" || _url.toLower().endsWith(".htm") ||
+        _url.toLower().endsWith(".html")) {
         return true;
     }
     return false;
@@ -222,11 +220,13 @@ bool Web3DOverlay::isWebContent() const {
 void Web3DOverlay::setupQmlSurface(bool isTablet) {
     _webSurface->getSurfaceContext()->setContextProperty("Users", DependencyManager::get<UsersScriptingInterface>().data());
     _webSurface->getSurfaceContext()->setContextProperty("HMD", DependencyManager::get<HMDScriptingInterface>().data());
-    _webSurface->getSurfaceContext()->setContextProperty("UserActivityLogger", DependencyManager::get<UserActivityLoggerScriptingInterface>().data());
+    _webSurface->getSurfaceContext()->setContextProperty("UserActivityLogger",
+                                                         DependencyManager::get<UserActivityLoggerScriptingInterface>().data());
     _webSurface->getSurfaceContext()->setContextProperty("Preferences", DependencyManager::get<Preferences>().data());
     _webSurface->getSurfaceContext()->setContextProperty("Vec3", new Vec3());
     _webSurface->getSurfaceContext()->setContextProperty("Quat", new Quat());
-    _webSurface->getSurfaceContext()->setContextProperty("MyAvatar", DependencyManager::get<AvatarManager>()->getMyAvatar().get());
+    _webSurface->getSurfaceContext()->setContextProperty("MyAvatar",
+                                                         DependencyManager::get<AvatarManager>()->getMyAvatar().get());
     _webSurface->getSurfaceContext()->setContextProperty("Entities", DependencyManager::get<EntityScriptingInterface>().data());
     _webSurface->getSurfaceContext()->setContextProperty("Snapshot", DependencyManager::get<Snapshot>().data());
 
@@ -237,40 +237,58 @@ void Web3DOverlay::setupQmlSurface(bool isTablet) {
         _webSurface->getSurfaceContext()->setContextProperty("offscreenFlags", flags);
         _webSurface->getSurfaceContext()->setContextProperty("AddressManager", DependencyManager::get<AddressManager>().data());
 
-        _webSurface->getSurfaceContext()->setContextProperty("Account", AccountServicesScriptingInterface::getInstance()); // DEPRECATED - TO BE REMOVED
-        _webSurface->getSurfaceContext()->setContextProperty("GlobalServices", AccountServicesScriptingInterface::getInstance()); // DEPRECATED - TO BE REMOVED
-        _webSurface->getSurfaceContext()->setContextProperty("AccountServices", AccountServicesScriptingInterface::getInstance());
+        _webSurface->getSurfaceContext()->setContextProperty(
+            "Account", AccountServicesScriptingInterface::getInstance()); // DEPRECATED - TO BE REMOVED
+        _webSurface->getSurfaceContext()->setContextProperty(
+            "GlobalServices", AccountServicesScriptingInterface::getInstance()); // DEPRECATED - TO BE REMOVED
+        _webSurface->getSurfaceContext()->setContextProperty("AccountServices",
+                                                             AccountServicesScriptingInterface::getInstance());
 
         // in Qt 5.10.0 there is already an "Audio" object in the QML context
         // though I failed to find it (from QtMultimedia??). So..  let it be "AudioScriptingInterface"
-        _webSurface->getSurfaceContext()->setContextProperty("AudioScriptingInterface", DependencyManager::get<AudioScriptingInterface>().data());
+        _webSurface->getSurfaceContext()->setContextProperty("AudioScriptingInterface",
+                                                             DependencyManager::get<AudioScriptingInterface>().data());
 
-        _webSurface->getSurfaceContext()->setContextProperty("AudioStats", DependencyManager::get<AudioClient>()->getStats().data());
+        _webSurface->getSurfaceContext()->setContextProperty("AudioStats",
+                                                             DependencyManager::get<AudioClient>()->getStats().data());
         _webSurface->getSurfaceContext()->setContextProperty("HMD", DependencyManager::get<HMDScriptingInterface>().data());
         _webSurface->getSurfaceContext()->setContextProperty("fileDialogHelper", new FileDialogHelper());
-        _webSurface->getSurfaceContext()->setContextProperty("MyAvatar", DependencyManager::get<AvatarManager>()->getMyAvatar().get());
-        _webSurface->getSurfaceContext()->setContextProperty("ScriptDiscoveryService", DependencyManager::get<ScriptEngines>().data());
-        _webSurface->getSurfaceContext()->setContextProperty("Assets", DependencyManager::get<AssetMappingsScriptingInterface>().data());
+        _webSurface->getSurfaceContext()->setContextProperty("MyAvatar",
+                                                             DependencyManager::get<AvatarManager>()->getMyAvatar().get());
+        _webSurface->getSurfaceContext()->setContextProperty("ScriptDiscoveryService",
+                                                             DependencyManager::get<ScriptEngines>().data());
+        _webSurface->getSurfaceContext()->setContextProperty("Assets",
+                                                             DependencyManager::get<AssetMappingsScriptingInterface>().data());
         _webSurface->getSurfaceContext()->setContextProperty("LODManager", DependencyManager::get<LODManager>().data());
-        _webSurface->getSurfaceContext()->setContextProperty("OctreeStats", DependencyManager::get<OctreeStatsProvider>().data());
+        _webSurface->getSurfaceContext()->setContextProperty("OctreeStats",
+                                                             DependencyManager::get<OctreeStatsProvider>().data());
         _webSurface->getSurfaceContext()->setContextProperty("DCModel", DependencyManager::get<DomainConnectionModel>().data());
         _webSurface->getSurfaceContext()->setContextProperty("AvatarInputs", AvatarInputs::getInstance());
         _webSurface->getSurfaceContext()->setContextProperty("AvatarList", DependencyManager::get<AvatarManager>().data());
         _webSurface->getSurfaceContext()->setContextProperty("DialogsManager", DialogsManagerScriptingInterface::getInstance());
-        _webSurface->getSurfaceContext()->setContextProperty("InputConfiguration", DependencyManager::get<InputConfiguration>().data());
-        _webSurface->getSurfaceContext()->setContextProperty("SoundCache", DependencyManager::get<SoundCacheScriptingInterface>().data());
+        _webSurface->getSurfaceContext()->setContextProperty("InputConfiguration",
+                                                             DependencyManager::get<InputConfiguration>().data());
+        _webSurface->getSurfaceContext()->setContextProperty("SoundCache",
+                                                             DependencyManager::get<SoundCacheScriptingInterface>().data());
         _webSurface->getSurfaceContext()->setContextProperty("MenuInterface", MenuScriptingInterface::getInstance());
         _webSurface->getSurfaceContext()->setContextProperty("Settings", SettingsScriptingInterface::getInstance());
-        _webSurface->getSurfaceContext()->setContextProperty("AvatarBookmarks", DependencyManager::get<AvatarBookmarks>().data());
-        _webSurface->getSurfaceContext()->setContextProperty("Render", AbstractViewStateInterface::instance()->getRenderEngine()->getConfiguration().get());
-        _webSurface->getSurfaceContext()->setContextProperty("Workload", qApp->getGameWorkload()._engine->getConfiguration().get());
-        _webSurface->getSurfaceContext()->setContextProperty("Controller", DependencyManager::get<controller::ScriptingInterface>().data());
-        _webSurface->getSurfaceContext()->setContextProperty("Pointers", DependencyManager::get<PointerScriptingInterface>().data());
+        _webSurface->getSurfaceContext()->setContextProperty("AvatarBookmarks",
+                                                             DependencyManager::get<AvatarBookmarks>().data());
+        _webSurface->getSurfaceContext()->setContextProperty(
+            "Render", AbstractViewStateInterface::instance()->getRenderEngine()->getConfiguration().get());
+        _webSurface->getSurfaceContext()->setContextProperty("Workload",
+                                                             qApp->getGameWorkload()._engine->getConfiguration().get());
+        _webSurface->getSurfaceContext()->setContextProperty("Controller",
+                                                             DependencyManager::get<controller::ScriptingInterface>().data());
+        _webSurface->getSurfaceContext()->setContextProperty("Pointers",
+                                                             DependencyManager::get<PointerScriptingInterface>().data());
         _webSurface->getSurfaceContext()->setContextProperty("Web3DOverlay", this);
-        _webSurface->getSurfaceContext()->setContextProperty("Window", DependencyManager::get<WindowScriptingInterface>().data());
+        _webSurface->getSurfaceContext()->setContextProperty("Window",
+                                                             DependencyManager::get<WindowScriptingInterface>().data());
         _webSurface->getSurfaceContext()->setContextProperty("Reticle", qApp->getApplicationCompositor().getReticleInterface());
         _webSurface->getSurfaceContext()->setContextProperty("HiFiAbout", AboutUtil::getInstance());
-        _webSurface->getSurfaceContext()->setContextProperty("ResourceRequestObserver", DependencyManager::get<ResourceRequestObserver>().data());
+        _webSurface->getSurfaceContext()->setContextProperty("ResourceRequestObserver",
+                                                             DependencyManager::get<ResourceRequestObserver>().data());
 
         // Override min fps for tablet UI, for silky smooth scrolling
         setMaxFPS(90);
@@ -358,7 +376,6 @@ void Web3DOverlay::render(RenderArgs* args) {
     geometryCache->renderQuad(batch, halfSize * -1.0f, halfSize, vec2(0), vec2(1), color, _geometryId);
     batch.popProjectionJitter(); // Restore jitter
     batch.setResourceTexture(0, nullptr); // restore default white color after me
-
 }
 
 Transform Web3DOverlay::evalRenderTransform() {
@@ -403,10 +420,11 @@ void Web3DOverlay::hoverEnterOverlay(const PointerEvent& event) {
 
 void Web3DOverlay::hoverLeaveOverlay(const PointerEvent& event) {
     if (_inputMode == Mouse) {
-        PointerEvent endEvent(PointerEvent::Release, event.getID(), event.getPos2D(), event.getPos3D(), event.getNormal(), event.getDirection(),
-            event.getButton(), event.getButtons(), event.getKeyboardModifiers());
+        PointerEvent endEvent(PointerEvent::Release, event.getID(), event.getPos2D(), event.getPos3D(), event.getNormal(),
+                              event.getDirection(), event.getButton(), event.getButtons(), event.getKeyboardModifiers());
         handlePointerEvent(endEvent);
-        // QML onReleased is only triggered if a click has happened first.  We need to send this "fake" mouse move event to properly trigger an onExited.
+        // QML onReleased is only triggered if a click has happened first.  We need to send this "fake" mouse move event to
+        // properly trigger an onExited.
         PointerEvent endMoveEvent(PointerEvent::Move, event.getID());
         handlePointerEvent(endMoveEvent);
     } else if (_webSurface) {
@@ -538,7 +556,7 @@ void Web3DOverlay::setProperties(const QVariantMap& properties) {
  * @property {boolean} visible=true - If <code>true</code>, the overlay is rendered, otherwise it is not rendered.
  *
  * @property {string} name="" - A friendly name for the overlay.
- * @property {Vec3} position - The position of the overlay center. Synonyms: <code>p1</code>, <code>point</code>, and 
+ * @property {Vec3} position - The position of the overlay center. Synonyms: <code>p1</code>, <code>point</code>, and
  *     <code>start</code>.
  * @property {Vec3} localPosition - The local position of the overlay relative to its parent if the overlay has a
  *     <code>parentID</code> set, otherwise the same value as <code>position</code>.
@@ -549,7 +567,8 @@ void Web3DOverlay::setProperties(const QVariantMap& properties) {
  *     Antonyms: <code>isWire</code> and <code>wire</code>.
  * @property {boolean} isDashedLine=false - If <code>true</code>, a dashed line is drawn on the overlay's edges. Synonym:
  *     <code>dashed</code>.
- * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.  <code>ignoreRayIntersection</code> is a synonym.
+ * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.
+ * <code>ignoreRayIntersection</code> is a synonym.
  * @property {boolean} drawInFront=false - If <code>true</code>, the overlay is rendered in front of other overlays that don't
  *     have <code>drawInFront</code> set to <code>true</code>, and in front of entities.
  * @property {boolean} grabbable=false - Signal to grabbing scripts whether or not this overlay can be grabbed.
@@ -563,7 +582,7 @@ void Web3DOverlay::setProperties(const QVariantMap& properties) {
  * @property {string} url - The URL of the Web page to display.
  * @property {string} scriptURL="" - The URL of a JavaScript file to inject into the Web page.
  * @property {number} dpi=30 - The dots per inch to display the Web page at, on the overlay.
- * @property {Vec2} dimensions=1,1 - The size of the overlay to display the Web page on, in meters. Synonyms: 
+ * @property {Vec2} dimensions=1,1 - The size of the overlay to display the Web page on, in meters. Synonyms:
  *     <code>scale</code>, <code>size</code>.
  * @property {number} maxFPS=10 - The maximum update rate for the Web overlay content, in frames/second.
  * @property {boolean} showKeyboardFocusHighlight=true - If <code>true</code>, the Web overlay is highlighted when it has
@@ -612,9 +631,7 @@ void Web3DOverlay::setURL(const QString& url) {
             } else {
                 // If we're switching to or from web content, or between different QML content
                 // we need to destroy and rebuild the entire QML surface
-                AbstractViewStateInterface::instance()->postLambdaEvent([this, url] {
-                    rebuildWebSurface();
-                });
+                AbstractViewStateInterface::instance()->postLambdaEvent([this, url] { rebuildWebSurface(); });
             }
         }
     }

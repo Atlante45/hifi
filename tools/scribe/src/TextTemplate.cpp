@@ -10,9 +10,9 @@
 #include "TextTemplate.h"
 
 #include <stdarg.h>
+#include <algorithm>
 #include <fstream>
 #include <sstream>
-#include <algorithm>
 
 typedef TextTemplate::Block::Pointer BlockPointer;
 typedef TextTemplate::Config::Pointer ConfigPointer;
@@ -92,13 +92,11 @@ bool TextTemplate::loadFile(const ConfigPointer& config, const char* filename, S
     return false;
 }
 
-TextTemplate::Funcs::Funcs() :
-    _funcs() {
+TextTemplate::Funcs::Funcs() : _funcs() {
 }
 
 TextTemplate::Funcs::~Funcs() {
 }
-
 
 const BlockPointer TextTemplate::Funcs::findFunc(const char* func) {
     map::iterator it = _funcs.find(String(func));
@@ -111,7 +109,7 @@ const BlockPointer TextTemplate::Funcs::findFunc(const char* func) {
 
 const BlockPointer TextTemplate::Funcs::addFunc(const char* func, const BlockPointer& funcBlock) {
     BlockPointer included = findFunc(func);
-    if (! included) {
+    if (!included) {
         _funcs.insert(map::value_type(func, funcBlock));
     }
     return included;
@@ -144,17 +142,15 @@ void TextTemplate::logError(const Block::Pointer& block, const char* fmt, ...) {
 
     int level = 1;
     displayTree(std::cerr, level);
-
 }
 
 bool TextTemplate::grabUntilBeginTag(std::istream* str, std::string& grabbed, Tag::Type& tagType) {
     std::stringstream dst;
     while (!str->eof()) {
-        
         std::string datatoken;
         getline((*str), datatoken, Tag::BEGIN);
         dst << datatoken;
-            
+
         char next = str->peek();
         if (next == Tag::VAR) {
             tagType = Tag::VARIABLE;
@@ -222,11 +218,11 @@ bool TextTemplate::grabUntilEndTag(std::istream* str, std::string& grabbed, Tag:
 }
 
 bool TextTemplate::stepForward(std::istream* str, std::string& grabbed, std::string& tag, Tag::Type& tagType,
-    Tag::Type& nextTagType) {
+                               Tag::Type& nextTagType) {
     if (str->eof()) {
         return false;
     }
-            
+
     if (!_steppingStarted) {
         _steppingStarted = true;
         return grabUntilBeginTag(str, grabbed, nextTagType);
@@ -249,11 +245,11 @@ bool TextTemplate::stepForward(std::istream* str, std::string& grabbed, std::str
         grabUntilBeginTag(str, grabbed, nextTagType);
     }
 
-    return true; //hasElement;
+    return true; // hasElement;
 }
 
 const BlockPointer TextTemplate::processStep(const BlockPointer& block, std::string& grabbed, std::string& tag,
-    Tag::Type& tagType) {
+                                             Tag::Type& tagType) {
     switch (tagType) {
         case Tag::INVALID:
             block->ostr << grabbed;
@@ -279,7 +275,8 @@ bool TextTemplate::grabFirstToken(String& src, String& token, String& reminder) 
     std::string::size_type i = 0;
     while (goOn && (i < src.length())) {
         char c = src[i];
-        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c == '_') || (c == '.') || (c == '[') || (c == ']')) {
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c == '_') || (c == '.') ||
+            (c == '[') || (c == ']')) {
             token += c;
         } else {
             if (!token.empty()) {
@@ -293,7 +290,7 @@ bool TextTemplate::grabFirstToken(String& src, String& token, String& reminder) 
     return (!token.empty());
 }
 
-bool TextTemplate::convertExpressionToArguments(String& src, std::vector< String >& arguments) {
+bool TextTemplate::convertExpressionToArguments(String& src, std::vector<String>& arguments) {
     std::stringstream str(src);
     String token;
 
@@ -307,7 +304,7 @@ bool TextTemplate::convertExpressionToArguments(String& src, std::vector< String
     return true;
 }
 
-bool TextTemplate::convertExpressionToDefArguments(String& src, std::vector< String >& arguments) {
+bool TextTemplate::convertExpressionToDefArguments(String& src, std::vector<String>& arguments) {
     if (src.empty()) {
         return false;
     }
@@ -352,7 +349,7 @@ bool TextTemplate::convertExpressionToDefArguments(String& src, std::vector< Str
     return true;
 }
 
-bool TextTemplate::convertExpressionToFuncArguments(String& src, std::vector< String >& arguments) {
+bool TextTemplate::convertExpressionToFuncArguments(String& src, std::vector<String>& arguments) {
     if (src.empty()) {
         return false;
     }
@@ -369,7 +366,8 @@ bool TextTemplate::convertExpressionToFuncArguments(String& src, std::vector< St
     int nbTokens = 0;
     while (!str.eof()) {
         char c = str.peek();
-        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c == '_') || (c == '.') || (c == Tag::VAR)  || (c == '[') || (c == ']')) {
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c == '_') || (c == '.') ||
+            (c == Tag::VAR) || (c == '[') || (c == ']')) {
             token += c;
         } else if (c == ',') {
             if (!token.empty()) {
@@ -404,7 +402,7 @@ const BlockPointer TextTemplate::processStepVar(const BlockPointer& block, Strin
         if (!varName.empty()) {
             BlockPointer parent = Block::getCurrentBlock(block);
 
-            // Add a new BLock 
+            // Add a new BLock
             BlockPointer newBlock = std::make_shared<Block>(_root->sourceName);
             (newBlock->ostr) << grabbed;
 
@@ -466,7 +464,7 @@ const BlockPointer TextTemplate::processStepDef(const BlockPointer& block, Strin
 
     BlockPointer parent = Block::getCurrentBlock(block);
 
-    // Add a new BLock 
+    // Add a new BLock
     BlockPointer newBlock = std::make_shared<Block>(_root->sourceName);
     (newBlock->ostr) << grabbed;
 
@@ -483,7 +481,6 @@ const BlockPointer TextTemplate::processStepDef(const BlockPointer& block, Strin
     // dive in the new block
     return newBlock;
 }
-
 
 const BlockPointer TextTemplate::processStepCommandIf(const BlockPointer& block, String& grabbed, String& expression) {
     BlockPointer parent = Block::getCurrentBlock(block);
@@ -510,9 +507,8 @@ const BlockPointer TextTemplate::processStepCommandEndIf(const BlockPointer& blo
     BlockPointer parent = Block::getCurrentBlock(block);
 
     // are we in a if block ?
-    if ((parent->command.type == Command::IF) 
-        ||  (parent->command.type == Command::ELIF)
-        ||  (parent->command.type == Command::ELSE)) {
+    if ((parent->command.type == Command::IF) || (parent->command.type == Command::ELIF) ||
+        (parent->command.type == Command::ELSE)) {
         BlockPointer newBlock = std::make_shared<Block>(_root->sourceName);
         (newBlock->ostr) << grabbed;
 
@@ -534,8 +530,7 @@ const BlockPointer TextTemplate::processStepCommandElse(const BlockPointer& bloc
     BlockPointer parent = Block::getCurrentBlock(block);
 
     // are we in a if block ?
-    if ((parent->command.type == Command::IF) 
-        ||  (parent->command.type == Command::ELIF)) {
+    if ((parent->command.type == Command::IF) || (parent->command.type == Command::ELIF)) {
         // All good go back to the IfBlock
         parent = parent->parent;
 
@@ -563,8 +558,7 @@ const BlockPointer TextTemplate::processStepCommandElif(const BlockPointer& bloc
     BlockPointer parent = Block::getCurrentBlock(block);
 
     // are we in a if block ?
-    if ((parent->command.type == Command::IF)
-        ||  (parent->command.type == Command::ELIF)) {
+    if ((parent->command.type == Command::IF) || (parent->command.type == Command::ELIF)) {
         // All good go back to the IfBlock
         parent = parent->parent;
 
@@ -601,7 +595,7 @@ const BlockPointer TextTemplate::processStepRemark(const BlockPointer& block, St
 const BlockPointer TextTemplate::processStepInclude(const BlockPointer& block, String& grabbed, String& include) {
     BlockPointer parent = Block::getCurrentBlock(block);
 
-    // Add a new BLock 
+    // Add a new BLock
     BlockPointer newBlock = std::make_shared<Block>(_root->sourceName);
     (newBlock->ostr) << grabbed;
 
@@ -637,7 +631,7 @@ const BlockPointer TextTemplate::processStepFunc(const BlockPointer& block, Stri
 
     BlockPointer parent = Block::getCurrentBlock(block);
 
-    // Add a new BLock 
+    // Add a new BLock
     BlockPointer newBlock = std::make_shared<Block>(_root->sourceName);
     (newBlock->ostr) << grabbed;
 
@@ -711,7 +705,7 @@ int TextTemplate::scribe(std::ostream& dst, std::istream& src, Vars& vars) {
 int TextTemplate::generateTree(std::ostream& dst, const BlockPointer& block, Vars& vars) {
     BlockPointer newCurrentBlock;
     int numPasses = evalBlockGeneration(dst, block, vars, newCurrentBlock);
-    for (int passNum= 0; passNum < numPasses; passNum++) {
+    for (int passNum = 0; passNum < numPasses; passNum++) {
         dst << newCurrentBlock->ostr.str();
 
         for (auto child : newCurrentBlock->blocks) {
@@ -727,8 +721,7 @@ int TextTemplate::evalBlockGeneration(std::ostream& dst, const BlockPointer& blo
         case Command::BLOCK: {
             branch = block;
             return 1;
-        }
-        break;
+        } break;
         case Command::VAR: {
             Vars::iterator it = vars.find(block->command.arguments.front());
             if (it != vars.end()) {
@@ -737,15 +730,14 @@ int TextTemplate::evalBlockGeneration(std::ostream& dst, const BlockPointer& blo
                 BlockPointer funcBlock = _config->_funcs.findFunc(block->command.arguments.front().c_str());
                 if (funcBlock) {
                     // before diving in the func tree, let's modify the vars with the local defs:
-                    int nbParams = (int)std::min(block->command.arguments.size(),
-                                                 funcBlock->command.arguments.size());
-                    std::vector< String > paramCache;
+                    int nbParams = (int)std::min(block->command.arguments.size(), funcBlock->command.arguments.size());
+                    std::vector<String> paramCache;
                     paramCache.push_back("");
                     String val;
                     for (int i = 1; i < nbParams; i++) {
                         val = block->command.arguments[i];
-                        if ((val[0] == Tag::VAR) && (val[val.length()-1] == Tag::VAR)) {
-                            val = val.substr(1, val.length()-2);
+                        if ((val[0] == Tag::VAR) && (val[val.length() - 1] == Tag::VAR)) {
+                            val = val.substr(1, val.length() - 2);
                             Vars::iterator it = vars.find(val);
                             if (it != vars.end()) {
                                 val = (*it).second;
@@ -780,18 +772,16 @@ int TextTemplate::evalBlockGeneration(std::ostream& dst, const BlockPointer& blo
             }
             branch = block;
             return 1;
-        }
-        break;
+        } break;
         case Command::IFBLOCK: {
             // ok, go through the branches and pick the first one that goes
-            for (auto child: block->blocks) {
+            for (auto child : block->blocks) {
                 int numPasses = evalBlockGeneration(dst, child, vars, branch);
                 if (numPasses > 0) {
                     return numPasses;
                 }
             }
-        }
-        break;
+        } break;
         case Command::IF:
         case Command::ELIF: {
             if (!block->command.arguments.empty()) {
@@ -835,21 +825,17 @@ int TextTemplate::evalBlockGeneration(std::ostream& dst, const BlockPointer& blo
                         }
                     }
                 }
-
             }
             return 0;
-        }
-        break;
+        } break;
         case Command::ELSE: {
             branch = block;
             return 1;
-        }
-        break;
+        } break;
         case Command::ENDIF: {
             branch = block;
             return 1;
-        }
-        break;
+        } break;
         case Command::DEF: {
             if (block->command.arguments.size()) {
                 // THe actual value of the var defined sneeds to be evaluated:
@@ -857,8 +843,7 @@ int TextTemplate::evalBlockGeneration(std::ostream& dst, const BlockPointer& blo
                 for (unsigned int t = 1; t < block->command.arguments.size(); t++) {
                     // detect if a param is a var
                     auto len = block->command.arguments[t].length();
-                    if ((block->command.arguments[t][0] == Tag::VAR)
-                        && (block->command.arguments[t][len - 1] == Tag::VAR)) {
+                    if ((block->command.arguments[t][0] == Tag::VAR) && (block->command.arguments[t][len - 1] == Tag::VAR)) {
                         String var = block->command.arguments[t].substr(1, len - 2);
                         Vars::iterator it = vars.find(var);
                         if (it != vars.end()) {
@@ -882,8 +867,7 @@ int TextTemplate::evalBlockGeneration(std::ostream& dst, const BlockPointer& blo
                 branch = block;
                 return 0;
             }
-        }
-        break;
+        } break;
 
         case Command::INCLUDE: {
             TextTemplatePointer include = _config->findInclude(block->command.arguments.front().c_str());
@@ -895,28 +879,23 @@ int TextTemplate::evalBlockGeneration(std::ostream& dst, const BlockPointer& blo
 
             branch = block;
             return 1;
-        }
-        break;
+        } break;
 
         case Command::FUNC: {
             branch = block;
             return 1;
-        }
-        break;
+        } break;
 
         case Command::ENDFUNC: {
             branch = block;
             return 1;
-        }
-        break;
+        } break;
 
-        default: {
-        }
+        default: {}
     }
 
     return 0;
 }
-
 
 int TextTemplate::parse(std::istream& src) {
     _root->command.type = Command::BLOCK;
@@ -955,32 +934,19 @@ void TextTemplate::displayTree(std::ostream& dst, int& level) const {
 void TextTemplate::Block::displayTree(const BlockPointer& block, std::ostream& dst, int& level) {
     String tab(level * 2, ' ');
 
-    const String BLOCK_TYPE_NAMES[] = {
-        "VAR",
-        "BLOCK",
-        "FUNC",
-        "ENDFUNC",
-        "IFBLOCK",
-        "IF",
-        "ELIF",
-        "ELSE",
-        "ENDIF",
-        "FOR",
-        "ENDFOR",
-        "INCLUDE",
-        "DEF"
-    };
+    const String BLOCK_TYPE_NAMES[] = { "VAR",  "BLOCK", "FUNC", "ENDFUNC", "IFBLOCK", "IF", "ELIF",
+                                        "ELSE", "ENDIF", "FOR",  "ENDFOR",  "INCLUDE", "DEF" };
 
     dst << tab << "{ " << BLOCK_TYPE_NAMES[block->command.type] << ":";
     if (!block->command.arguments.empty()) {
-        for (auto arg: block->command.arguments) {
+        for (auto arg : block->command.arguments) {
             dst << " " << arg;
         }
     }
     dst << std::endl;
 
     level++;
-    for (auto sub: block->blocks) {
+    for (auto sub : block->blocks) {
         displayTree(sub, dst, level);
     }
     level--;
@@ -993,14 +959,14 @@ void TextTemplate::Config::displayTree(std::ostream& dst, int& level) const {
 
     level++;
     dst << tab << "Includes:" << std::endl;
-    for (auto inc: _includes) {
+    for (auto inc : _includes) {
         dst << tab << tab << inc.first << std::endl;
         inc.second->displayTree(dst, level);
     }
     dst << tab << "Funcs:" << std::endl;
-    for (auto func: _funcs._funcs) {
+    for (auto func : _funcs._funcs) {
         dst << tab << tab << func.first << std::endl;
-        TextTemplate::Block::displayTree( func.second, dst, level);
+        TextTemplate::Block::displayTree(func.second, dst, level);
     }
     level--;
 }

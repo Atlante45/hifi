@@ -15,12 +15,10 @@
 
 using namespace gpu;
 
-Pipeline::Pipeline()
-{
+Pipeline::Pipeline() {
 }
 
-Pipeline::~Pipeline()
-{
+Pipeline::~Pipeline() {
 }
 
 Pipeline::Pointer Pipeline::create(const ShaderPointer& program, const StatePointer& state) {

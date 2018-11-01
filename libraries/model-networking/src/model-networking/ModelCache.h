@@ -15,8 +15,8 @@
 #include <DependencyManager.h>
 #include <ResourceCache.h>
 
-#include <graphics/Material.h>
 #include <graphics/Asset.h>
+#include <graphics/Material.h>
 
 #include "FBXReader.h"
 #include "TextureCache.h"
@@ -70,7 +70,7 @@ protected:
     NetworkMaterials _materials;
 
     QUrl _animGraphOverrideUrl;
-    QVariantHash _mapping;  // parsed contents of FST file.
+    QVariantHash _mapping; // parsed contents of FST file.
 
 private:
     mutable bool _areTexturesLoaded { false };
@@ -81,8 +81,7 @@ class GeometryResource : public Resource, public Geometry {
 public:
     using Pointer = QSharedPointer<GeometryResource>;
 
-    GeometryResource(const QUrl& url, const QUrl& textureBaseUrl = QUrl()) :
-        Resource(url), _textureBaseUrl(textureBaseUrl) {}
+    GeometryResource(const QUrl& url, const QUrl& textureBaseUrl = QUrl()) : Resource(url), _textureBaseUrl(textureBaseUrl) {}
 
     virtual bool areTexturesLoaded() const override { return isLoaded() && Geometry::areTexturesLoaded(); }
 
@@ -140,13 +139,10 @@ class ModelCache : public ResourceCache, public Dependency {
     SINGLETON_DEPENDENCY
 
 public:
-
-    GeometryResource::Pointer getGeometryResource(const QUrl& url,
-                                                  const QVariantHash& mapping = QVariantHash(),
+    GeometryResource::Pointer getGeometryResource(const QUrl& url, const QVariantHash& mapping = QVariantHash(),
                                                   const QUrl& textureBaseUrl = QUrl());
 
-    GeometryResource::Pointer getCollisionGeometryResource(const QUrl& url,
-                                                           const QVariantHash& mapping = QVariantHash(),
+    GeometryResource::Pointer getCollisionGeometryResource(const QUrl& url, const QVariantHash& mapping = QVariantHash(),
                                                            const QUrl& textureBaseUrl = QUrl());
 
 protected:
@@ -203,7 +199,7 @@ private:
     // Helpers for the ctors
     QUrl getTextureUrl(const QUrl& baseUrl, const FBXTexture& fbxTexture);
     graphics::TextureMapPointer fetchTextureMap(const QUrl& baseUrl, const FBXTexture& fbxTexture,
-                                             image::TextureUsage::Type type, MapChannel channel);
+                                                image::TextureUsage::Type type, MapChannel channel);
     graphics::TextureMapPointer fetchTextureMap(const QUrl& url, image::TextureUsage::Type type, MapChannel channel);
 
     Transform _albedoTransform;

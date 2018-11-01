@@ -17,23 +17,17 @@
 
 #include <qvector.h>
 
-template <typename T>
+template<typename T>
 class RingBufferHistory {
-
 public:
-
-    RingBufferHistory(int capacity = 10)
-        : _size(capacity + 1),
+    RingBufferHistory(int capacity = 10) :
+        _size(capacity + 1),
         _capacity(capacity),
         _newestEntryAtIndex(0),
         _numEntries(0),
-        _buffer(capacity + 1)
-    {
-    }
+        _buffer(capacity + 1) {}
 
-    void clear() {
-        _numEntries = 0;
-    }
+    void clear() { _numEntries = 0; }
 
     void setCapacity(int capacity) {
         _size = capacity + 1;
@@ -79,17 +73,11 @@ public:
         return &_buffer[entryAt];
     }
 
-    T* get(int entryAge) {
-        return const_cast<T*>((static_cast<const RingBufferHistory*>(this))->get(entryAge));
-    }
+    T* get(int entryAge) { return const_cast<T*>((static_cast<const RingBufferHistory*>(this))->get(entryAge)); }
 
-    const T* getNewestEntry() const {
-        return _numEntries == 0 ? NULL : &_buffer[_newestEntryAtIndex];
-    }
+    const T* getNewestEntry() const { return _numEntries == 0 ? NULL : &_buffer[_newestEntryAtIndex]; }
 
-    T* getNewestEntry() {
-        return _numEntries == 0 ? NULL : &_buffer[_newestEntryAtIndex];
-    }
+    T* getNewestEntry() { return _numEntries == 0 ? NULL : &_buffer[_newestEntryAtIndex]; }
 
     int getCapacity() const { return _capacity; }
     int getNumEntries() const { return _numEntries; }
@@ -103,10 +91,10 @@ private:
     std::vector<T> _buffer;
 
 public:
-    class Iterator : public std::iterator < std::random_access_iterator_tag, T > {
+    class Iterator : public std::iterator<std::random_access_iterator_tag, T> {
     public:
-        Iterator(T* bufferFirst, T* bufferLast, T* newestAt, T* at)
-            : _bufferFirst(bufferFirst),
+        Iterator(T* bufferFirst, T* bufferLast, T* newestAt, T* at) :
+            _bufferFirst(bufferFirst),
             _bufferLast(bufferLast),
             _bufferLength(bufferLast - bufferFirst + 1),
             _newestAt(newestAt),
@@ -161,29 +149,17 @@ public:
             return *this;
         }
 
-        T& operator[](int i) {
-            return *(atShiftedBy(i));
-        }
+        T& operator[](int i) { return *(atShiftedBy(i)); }
 
-        bool operator<(const Iterator& rhs) {
-            return age() < rhs.age();
-        }
+        bool operator<(const Iterator& rhs) { return age() < rhs.age(); }
 
-        bool operator>(const Iterator& rhs) {
-            return age() > rhs.age();
-        }
+        bool operator>(const Iterator& rhs) { return age() > rhs.age(); }
 
-        bool operator<=(const Iterator& rhs) {
-            return age() <= rhs.age();
-        }
+        bool operator<=(const Iterator& rhs) { return age() <= rhs.age(); }
 
-        bool operator>=(const Iterator& rhs) {
-            return age() >= rhs.age();
-        }
+        bool operator>=(const Iterator& rhs) { return age() >= rhs.age(); }
 
-        int operator-(const Iterator& rhs) {
-            return age() - rhs.age();
-        }
+        int operator-(const Iterator& rhs) { return age() - rhs.age(); }
 
     private:
         T* atShiftedBy(int i) { // shifts i places towards _bufferFirst (towards older entries)
@@ -209,7 +185,9 @@ public:
         T* _at;
     };
 
-    Iterator begin() { return Iterator(&_buffer.front(), &_buffer.back(), &_buffer[_newestEntryAtIndex], &_buffer[_newestEntryAtIndex]); }
+    Iterator begin() {
+        return Iterator(&_buffer.front(), &_buffer.back(), &_buffer[_newestEntryAtIndex], &_buffer[_newestEntryAtIndex]);
+    }
 
     Iterator end() {
         int endAtIndex = _newestEntryAtIndex - _numEntries;

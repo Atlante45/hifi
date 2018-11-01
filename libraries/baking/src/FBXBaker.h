@@ -12,17 +12,17 @@
 #ifndef hifi_FBXBaker_h
 #define hifi_FBXBaker_h
 
-#include <QtCore/QFutureSynchronizer>
 #include <QtCore/QDir>
+#include <QtCore/QFutureSynchronizer>
 #include <QtCore/QUrl>
 #include <QtNetwork/QNetworkReply>
 
 #include "Baker.h"
-#include "TextureBaker.h"
 #include "ModelBaker.h"
 #include "ModelBakingLoggingCategory.h"
+#include "TextureBaker.h"
 
-#include <gpu/Texture.h> 
+#include <gpu/Texture.h>
 
 #include <FBX.h>
 

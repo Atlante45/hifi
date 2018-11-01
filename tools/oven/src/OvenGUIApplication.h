@@ -24,8 +24,9 @@ public:
     OvenGUIApplication(int argc, char* argv[]);
 
     static OvenGUIApplication* instance() { return dynamic_cast<OvenGUIApplication*>(QApplication::instance()); }
-    
+
     OvenMainWindow* getMainWindow() { return &_mainWindow; }
+
 private:
     OvenMainWindow _mainWindow;
 };

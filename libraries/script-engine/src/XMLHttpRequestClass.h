@@ -46,13 +46,7 @@ public:
     ~XMLHttpRequestClass();
 
     static const int MAXIMUM_REDIRECTS = 5;
-    enum ReadyState {
-        UNSENT = 0,
-        OPENED,
-        HEADERS_RECEIVED,
-        LOADING,
-        DONE
-    };
+    enum ReadyState { UNSENT = 0, OPENED, HEADERS_RECEIVED, LOADING, DONE };
 
     int getUnsent() const { return UNSENT; };
     int getOpened() const { return OPENED; };

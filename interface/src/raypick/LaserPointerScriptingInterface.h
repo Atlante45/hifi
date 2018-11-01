@@ -13,23 +13,22 @@
 
 #include <QtCore/QObject>
 
-#include "DependencyManager.h"
 #include <PointerManager.h>
+#include "DependencyManager.h"
 
 class LaserPointerScriptingInterface : public QObject, public Dependency {
     Q_OBJECT
     SINGLETON_DEPENDENCY
 
-/**jsdoc
- * Synonym for {@link Pointers} as used for laser pointers.
- *
- * @namespace LaserPointers
- *
- * @hifi-interface
- * @hifi-client-entity
- */
+    /**jsdoc
+     * Synonym for {@link Pointers} as used for laser pointers.
+     *
+     * @namespace LaserPointers
+     *
+     * @hifi-interface
+     * @hifi-client-entity
+     */
 public:
-
     /**jsdoc
      * @function LaserPointers.createLaserPointer
      * @param {Pointers.LaserPointerProperties} properties
@@ -41,19 +40,25 @@ public:
      * @function LaserPointers.enableLaserPointer
      * @param {number} id
      */
-    Q_INVOKABLE void enableLaserPointer(unsigned int uid) const { DependencyManager::get<PointerManager>()->enablePointer(uid); }
+    Q_INVOKABLE void enableLaserPointer(unsigned int uid) const {
+        DependencyManager::get<PointerManager>()->enablePointer(uid);
+    }
 
     /**jsdoc
      * @function LaserPointers.disableLaserPointer
      * @param {number} id
      */
-    Q_INVOKABLE void disableLaserPointer(unsigned int uid) const { DependencyManager::get<PointerManager>()->disablePointer(uid); }
+    Q_INVOKABLE void disableLaserPointer(unsigned int uid) const {
+        DependencyManager::get<PointerManager>()->disablePointer(uid);
+    }
 
     /**jsdoc
      * @function LaserPointers.removeLaserPointer
      * @param {number} id
      */
-    Q_INVOKABLE void removeLaserPointer(unsigned int uid) const { DependencyManager::get<PointerManager>()->removePointer(uid); }
+    Q_INVOKABLE void removeLaserPointer(unsigned int uid) const {
+        DependencyManager::get<PointerManager>()->removePointer(uid);
+    }
 
     /**jsdoc
      * @function LaserPointers.editRenderState
@@ -68,7 +73,9 @@ public:
      * @param {string} renderState
      * @param {number} id
      */
-    Q_INVOKABLE void setRenderState(unsigned int uid, const QString& renderState) const { DependencyManager::get<PointerManager>()->setRenderState(uid, renderState.toStdString()); }
+    Q_INVOKABLE void setRenderState(unsigned int uid, const QString& renderState) const {
+        DependencyManager::get<PointerManager>()->setRenderState(uid, renderState.toStdString());
+    }
 
     /**jsdoc
      * @function LaserPointers.getPrevRayPickResult
@@ -77,20 +84,23 @@ public:
      */
     Q_INVOKABLE QVariantMap getPrevRayPickResult(unsigned int uid) const;
 
-
     /**jsdoc
      * @function LaserPointers.setPrecisionPicking
      * @param {number} id
      * @param {boolean} precisionPicking
      */
-    Q_INVOKABLE void setPrecisionPicking(unsigned int uid, bool precisionPicking) const { DependencyManager::get<PointerManager>()->setPrecisionPicking(uid, precisionPicking); }
+    Q_INVOKABLE void setPrecisionPicking(unsigned int uid, bool precisionPicking) const {
+        DependencyManager::get<PointerManager>()->setPrecisionPicking(uid, precisionPicking);
+    }
 
     /**jsdoc
      * @function LaserPointers.setLaserLength
      * @param {number} id
      * @param {number} laserLength
      */
-    Q_INVOKABLE void setLaserLength(unsigned int uid, float laserLength) const { DependencyManager::get<PointerManager>()->setLength(uid, laserLength); }
+    Q_INVOKABLE void setLaserLength(unsigned int uid, float laserLength) const {
+        DependencyManager::get<PointerManager>()->setLength(uid, laserLength);
+    }
 
     /**jsdoc
      * @function LaserPointers.setIgnoreItems
@@ -106,7 +116,6 @@ public:
      */
     Q_INVOKABLE void setIncludeItems(unsigned int uid, const QScriptValue& includeEntities) const;
 
-
     /**jsdoc
      * @function LaserPointers.setLockEndUUID
      * @param {number} id
@@ -114,8 +123,10 @@ public:
      * @param {boolean} isOverlay
      * @param {Mat4} [offsetMat]
      */
-    Q_INVOKABLE void setLockEndUUID(unsigned int uid, const QUuid& objectID, bool isOverlay, const glm::mat4& offsetMat = glm::mat4()) const { DependencyManager::get<PointerManager>()->setLockEndUUID(uid, objectID, isOverlay, offsetMat); }
-
+    Q_INVOKABLE void setLockEndUUID(unsigned int uid, const QUuid& objectID, bool isOverlay,
+                                    const glm::mat4& offsetMat = glm::mat4()) const {
+        DependencyManager::get<PointerManager>()->setLockEndUUID(uid, objectID, isOverlay, offsetMat);
+    }
 
     /**jsdoc
      * @function LaserPointers.isLeftHand

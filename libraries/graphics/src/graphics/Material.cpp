@@ -17,28 +17,20 @@
 using namespace graphics;
 using namespace gpu;
 
-Material::Material() :
-    _key(0),
-    _schemaBuffer(),
-    _textureMaps()
-{
+Material::Material() : _key(0), _schemaBuffer(), _textureMaps() {
     // created from nothing: create the Buffer to store the properties
     Schema schema;
-    _schemaBuffer = gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(Schema), (const gpu::Byte*) &schema, sizeof(Schema)));
+    _schemaBuffer = gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(Schema), (const gpu::Byte*)&schema, sizeof(Schema)));
 }
 
-Material::Material(const Material& material) :
-    _name(material._name),
-    _key(material._key),
-    _textureMaps(material._textureMaps)
-{
+Material::Material(const Material& material) : _name(material._name), _key(material._key), _textureMaps(material._textureMaps) {
     // copied: create the Buffer to store the properties, avoid holding a ref to the old Buffer
     Schema schema;
-    _schemaBuffer = gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(Schema), (const gpu::Byte*) &schema, sizeof(Schema)));
+    _schemaBuffer = gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(Schema), (const gpu::Byte*)&schema, sizeof(Schema)));
     _schemaBuffer.edit<Schema>() = material._schemaBuffer.get<Schema>();
 }
 
-Material& Material::operator= (const Material& material) {
+Material& Material::operator=(const Material& material) {
     QMutexLocker locker(&_textureMapsMutex);
 
     _name = material._name;
@@ -49,7 +41,7 @@ Material& Material::operator= (const Material& material) {
 
     // copied: create the Buffer to store the properties, avoid holding a ref to the old Buffer
     Schema schema;
-    _schemaBuffer = gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(Schema), (const gpu::Byte*) &schema, sizeof(Schema)));
+    _schemaBuffer = gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(Schema), (const gpu::Byte*)&schema, sizeof(Schema)));
     _schemaBuffer.edit<Schema>() = material._schemaBuffer.get<Schema>();
 
     return (*this);
@@ -58,9 +50,9 @@ Material& Material::operator= (const Material& material) {
 Material::~Material() {
 }
 
-void Material::setEmissive(const Color&  emissive, bool isSRGB) {
+void Material::setEmissive(const Color& emissive, bool isSRGB) {
     _key.setEmissive(glm::any(glm::greaterThan(emissive, Color(0.0f))));
-    _schemaBuffer.edit<Schema>()._key = (uint32) _key._flags.to_ulong();
+    _schemaBuffer.edit<Schema>()._key = (uint32)_key._flags.to_ulong();
     _schemaBuffer.edit<Schema>()._emissive = (isSRGB ? ColorUtils::sRGBToLinearVec3(emissive) : emissive);
 }
 
@@ -125,21 +117,24 @@ void Material::setTextureMap(MapChannel channel, const TextureMapPointer& textur
         resetOpacityMap();
 
         // update the texcoord0 with albedo
-        _schemaBuffer.edit<Schema>()._texcoordTransforms[0] = (textureMap ? textureMap->getTextureTransform().getMatrix() : glm::mat4());
+        _schemaBuffer.edit<Schema>()._texcoordTransforms[0] = (textureMap ? textureMap->getTextureTransform().getMatrix()
+                                                                          : glm::mat4());
     }
 
     if (channel == MaterialKey::OCCLUSION_MAP) {
-        _schemaBuffer.edit<Schema>()._texcoordTransforms[1] = (textureMap ? textureMap->getTextureTransform().getMatrix() : glm::mat4());
+        _schemaBuffer.edit<Schema>()._texcoordTransforms[1] = (textureMap ? textureMap->getTextureTransform().getMatrix()
+                                                                          : glm::mat4());
     }
 
     if (channel == MaterialKey::LIGHTMAP_MAP) {
         // update the texcoord1 with lightmap
-        _schemaBuffer.edit<Schema>()._texcoordTransforms[1] = (textureMap ? textureMap->getTextureTransform().getMatrix() : glm::mat4());
-        _schemaBuffer.edit<Schema>()._lightmapParams = (textureMap ? glm::vec4(textureMap->getLightmapOffsetScale(), 0.0, 0.0) : glm::vec4(0.0, 1.0, 0.0, 0.0));
+        _schemaBuffer.edit<Schema>()._texcoordTransforms[1] = (textureMap ? textureMap->getTextureTransform().getMatrix()
+                                                                          : glm::mat4());
+        _schemaBuffer.edit<Schema>()._lightmapParams = (textureMap ? glm::vec4(textureMap->getLightmapOffsetScale(), 0.0, 0.0)
+                                                                   : glm::vec4(0.0, 1.0, 0.0, 0.0));
     }
 
     _schemaBuffer.edit<Schema>()._key = (uint32)_key._flags.to_ulong();
-
 }
 
 void Material::resetOpacityMap() const {
@@ -148,11 +143,7 @@ void Material::resetOpacityMap() const {
     _key.setTranslucentMap(false);
 
     const auto& textureMap = getTextureMap(MaterialKey::ALBEDO_MAP);
-    if (textureMap &&
-        textureMap->useAlphaChannel() &&
-        textureMap->isDefined() &&
-        textureMap->getTextureView().isValid()) {
-
+    if (textureMap && textureMap->useAlphaChannel() && textureMap->isDefined() && textureMap->getTextureView().isValid()) {
         auto usage = textureMap->getTextureView()._texture->getUsage();
         if (usage.isAlpha()) {
             if (usage.isAlphaMask()) {
@@ -170,7 +161,6 @@ void Material::resetOpacityMap() const {
     _schemaBuffer.edit<Schema>()._key = (uint32)_key._flags.to_ulong();
 }
 
-
 const TextureMapPointer Material::getTextureMap(MapChannel channel) const {
     QMutexLocker locker(&_textureMapsMutex);
 
@@ -182,7 +172,6 @@ const TextureMapPointer Material::getTextureMap(MapChannel channel) const {
     }
 }
 
-
 bool Material::calculateMaterialInfo() const {
     if (!_hasCalculatedTextureInfo) {
         QMutexLocker locker(&_textureMapsMutex);
@@ -191,7 +180,7 @@ bool Material::calculateMaterialInfo() const {
         _textureSize = 0;
         _textureCount = 0;
 
-        for (auto const &textureMapItem : _textureMaps) {
+        for (auto const& textureMapItem : _textureMaps) {
             auto textureMap = textureMapItem.second;
             if (textureMap) {
                 auto textureSoure = textureMap->getTextureSource();
@@ -217,7 +206,7 @@ bool Material::calculateMaterialInfo() const {
 }
 
 void Material::setTextureTransforms(const Transform& transform) {
-    for (auto &textureMapItem : _textureMaps) {
+    for (auto& textureMapItem : _textureMaps) {
         if (textureMapItem.second) {
             textureMapItem.second->setTextureTransform(transform);
         }

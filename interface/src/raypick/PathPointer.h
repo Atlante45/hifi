@@ -8,14 +8,14 @@
 #ifndef hifi_PathPointer_h
 #define hifi_PathPointer_h
 
-#include <QVariant>
 #include <QString>
+#include <QVariant>
 #include <glm/glm.hpp>
 
 #include "ui/overlays/Overlay.h"
 
-#include <Pointer.h>
 #include <Pick.h>
+#include <Pointer.h>
 
 struct LockEndObject {
     QUuid id { QUuid() };
@@ -45,8 +45,9 @@ public:
 
     virtual void cleanup();
     virtual void disable();
-    virtual void update(const glm::vec3& origin, const glm::vec3& end, const glm::vec3& surfaceNormal, float parentScale, bool distanceScaleEnd, bool centerEndY,
-                        bool faceAvatar, bool followNormal, float followNormalStrength, float distance, const PickResultPointer& pickResult);
+    virtual void update(const glm::vec3& origin, const glm::vec3& end, const glm::vec3& surfaceNormal, float parentScale,
+                        bool distanceScaleEnd, bool centerEndY, bool faceAvatar, bool followNormal, float followNormalStrength,
+                        float distance, const PickResultPointer& pickResult);
 
     bool isEnabled() const { return _enabled; }
 
@@ -71,15 +72,19 @@ typedef std::unordered_map<std::string, std::pair<float, std::shared_ptr<StartEn
 
 class PathPointer : public Pointer {
     using Parent = Pointer;
+
 public:
-    PathPointer(PickQuery::PickType type, const QVariant& rayProps, const RenderStateMap& renderStates, const DefaultRenderStateMap& defaultRenderStates,
-                bool hover, const PointerTriggers& triggers, bool faceAvatar, bool followNormal, float followNormalStrength, bool centerEndY, bool lockEnd,
-                bool distanceScaleEnd, bool scaleWithParent, bool enabled);
+    PathPointer(PickQuery::PickType type, const QVariant& rayProps, const RenderStateMap& renderStates,
+                const DefaultRenderStateMap& defaultRenderStates, bool hover, const PointerTriggers& triggers, bool faceAvatar,
+                bool followNormal, float followNormalStrength, bool centerEndY, bool lockEnd, bool distanceScaleEnd,
+                bool scaleWithParent, bool enabled);
     virtual ~PathPointer();
 
     void setRenderState(const std::string& state) override;
-    // You cannot use editRenderState to change the type of any part of the pointer.  You can only edit the properties of the existing overlays.
-    void editRenderState(const std::string& state, const QVariant& startProps, const QVariant& pathProps, const QVariant& endProps) override;
+    // You cannot use editRenderState to change the type of any part of the pointer.  You can only edit the properties of the
+    // existing overlays.
+    void editRenderState(const std::string& state, const QVariant& startProps, const QVariant& pathProps,
+                         const QVariant& endProps) override;
 
     void setLength(float length) override;
     void setLockEndUUID(const QUuid& objectID, bool isOverlay, const glm::mat4& offsetMat = glm::mat4()) override;

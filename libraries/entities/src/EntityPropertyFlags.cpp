@@ -1,7 +1,6 @@
 
 #include "EntityPropertyFlags.h"
 
-
 QDebug& operator<<(QDebug& dbg, const EntityPropertyFlags& f) {
     QString result = "[ ";
 
@@ -189,14 +188,14 @@ QDebug& operator<<(QDebug& dbg, const EntityPropertyFlags& f) {
     result = f.getHasProperty(PROP_GRAB_FOLLOWS_CONTROLLER) ? result + "grab.FollowsController " : result;
     result = f.getHasProperty(PROP_GRAB_TRIGGERABLE) ? result + "grab.Triggerable " : result;
     result = f.getHasProperty(PROP_GRAB_EQUIPPABLE) ? result + "grab.Equippable " : result;
-    result =
-        f.getHasProperty(PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET) ? result + "grab.LeftEquippablePositionOffset " : result;
-    result =
-        f.getHasProperty(PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET) ? result + "grab.LeftEquippableRotationOffset " : result;
-    result =
-        f.getHasProperty(PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET) ? result + "grab.RightEquippablePositionOffset " : result;
-    result =
-        f.getHasProperty(PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET) ? result + "grab.RightEquippableRotationOffset " : result;
+    result = f.getHasProperty(PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET) ? result + "grab.LeftEquippablePositionOffset "
+                                                                         : result;
+    result = f.getHasProperty(PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET) ? result + "grab.LeftEquippableRotationOffset "
+                                                                         : result;
+    result = f.getHasProperty(PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET) ? result + "grab.RightEquippablePositionOffset "
+                                                                          : result;
+    result = f.getHasProperty(PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET) ? result + "grab.RightEquippableRotationOffset "
+                                                                          : result;
     result = f.getHasProperty(PROP_GRAB_EQUIPPABLE_INDICATOR_URL) ? result + "grab.EquippableIndicatorURL " : result;
     result = f.getHasProperty(PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE) ? result + "grab.EquippableIndicatorScale " : result;
     result = f.getHasProperty(PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET) ? result + "grab.EquippableIndicatorOffset " : result;

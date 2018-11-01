@@ -19,7 +19,6 @@
 
 #include <ByteCountCoding.h>
 
-
 #include "EntitiesLogging.h"
 #include "EntityItemProperties.h"
 #include "EntityTree.h"
@@ -40,8 +39,8 @@ bool PolyVoxEntityItem::isEdged(PolyVoxSurfaceStyle surfaceStyle) {
 const glm::vec3 PolyVoxEntityItem::DEFAULT_VOXEL_VOLUME_SIZE = glm::vec3(32, 32, 32);
 const float PolyVoxEntityItem::MAX_VOXEL_DIMENSION = 128.0f;
 const QByteArray PolyVoxEntityItem::DEFAULT_VOXEL_DATA(PolyVoxEntityItem::makeEmptyVoxelData());
-const PolyVoxEntityItem::PolyVoxSurfaceStyle PolyVoxEntityItem::DEFAULT_VOXEL_SURFACE_STYLE =
-    PolyVoxEntityItem::SURFACE_EDGED_CUBIC;
+const PolyVoxEntityItem::PolyVoxSurfaceStyle
+    PolyVoxEntityItem::DEFAULT_VOXEL_SURFACE_STYLE = PolyVoxEntityItem::SURFACE_EDGED_CUBIC;
 const QString PolyVoxEntityItem::DEFAULT_X_TEXTURE_URL = QString("");
 const QString PolyVoxEntityItem::DEFAULT_Y_TEXTURE_URL = QString("");
 const QString PolyVoxEntityItem::DEFAULT_Z_TEXTURE_URL = QString("");
@@ -106,15 +105,14 @@ void PolyVoxEntityItem::setVoxelVolumeSize(const glm::vec3& voxelVolumeSize) {
 
 glm::vec3 PolyVoxEntityItem::getVoxelVolumeSize() const {
     glm::vec3 voxelVolumeSize;
-    withReadLock([&] {
-        voxelVolumeSize = _voxelVolumeSize;
-    });
+    withReadLock([&] { voxelVolumeSize = _voxelVolumeSize; });
     return voxelVolumeSize;
 }
 
-
-EntityItemProperties PolyVoxEntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
-    EntityItemProperties properties = EntityItem::getProperties(desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
+EntityItemProperties PolyVoxEntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                                      bool allowEmptyDesiredProperties) const {
+    EntityItemProperties properties = EntityItem::getProperties(
+        desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(voxelVolumeSize, getVoxelVolumeSize);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(voxelData, getVoxelData);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(voxelSurfaceStyle, getVoxelSurfaceStyle);
@@ -151,19 +149,17 @@ bool PolyVoxEntityItem::setProperties(const EntityItemProperties& properties) {
         if (wantDebug) {
             uint64_t now = usecTimestampNow();
             int elapsed = now - getLastEdited();
-            qCDebug(entities) << "PolyVoxEntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                "now=" << now << " getLastEdited()=" << getLastEdited();
+            qCDebug(entities) << "PolyVoxEntityItem::setProperties() AFTER update... edited AGO=" << elapsed << "now=" << now
+                              << " getLastEdited()=" << getLastEdited();
         }
         setLastEdited(properties._lastEdited);
     }
     return somethingChanged;
 }
 
-int PolyVoxEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead, 
-                                                        ReadBitstreamToTreeParams& args,
-                                                        EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                        bool& somethingChanged) {
-
+int PolyVoxEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
+                                                        ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                        bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 
@@ -202,16 +198,14 @@ EntityPropertyFlags PolyVoxEntityItem::getEntityProperties(EncodeBitstreamParams
 
 void PolyVoxEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                            EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
-                                           EntityPropertyFlags& requestedProperties,
-                                           EntityPropertyFlags& propertyFlags,
-                                           EntityPropertyFlags& propertiesDidntFit,
-                                           int& propertyCount,
+                                           EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                           EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                                            OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_VOXEL_VOLUME_SIZE, getVoxelVolumeSize());
     APPEND_ENTITY_PROPERTY(PROP_VOXEL_DATA, getVoxelData());
-    APPEND_ENTITY_PROPERTY(PROP_VOXEL_SURFACE_STYLE, (uint16_t) getVoxelSurfaceStyle());
+    APPEND_ENTITY_PROPERTY(PROP_VOXEL_SURFACE_STYLE, (uint16_t)getVoxelSurfaceStyle());
     APPEND_ENTITY_PROPERTY(PROP_X_TEXTURE_URL, getXTextureURL());
     APPEND_ENTITY_PROPERTY(PROP_Y_TEXTURE_URL, getYTextureURL());
     APPEND_ENTITY_PROPERTY(PROP_Z_TEXTURE_URL, getZTextureURL());
@@ -240,135 +234,96 @@ void PolyVoxEntityItem::setVoxelData(const QByteArray& voxelData) {
 
 QByteArray PolyVoxEntityItem::getVoxelData() const {
     QByteArray voxelDataCopy;
-    withReadLock([&] {
-        voxelDataCopy = _voxelData;
-    });
+    withReadLock([&] { voxelDataCopy = _voxelData; });
     return voxelDataCopy;
 }
 
-
-void PolyVoxEntityItem::setXTextureURL(const QString& xTextureURL) { 
-    withWriteLock([&] {
-        _xTextureURL = xTextureURL;
-    });
+void PolyVoxEntityItem::setXTextureURL(const QString& xTextureURL) {
+    withWriteLock([&] { _xTextureURL = xTextureURL; });
 }
 
-QString PolyVoxEntityItem::getXTextureURL() const { 
+QString PolyVoxEntityItem::getXTextureURL() const {
     QString result;
-    withReadLock([&] {
-        result = _xTextureURL;
-    });
+    withReadLock([&] { result = _xTextureURL; });
     return result;
 }
 
 void PolyVoxEntityItem::setYTextureURL(const QString& yTextureURL) {
-    withWriteLock([&] {
-        _yTextureURL = yTextureURL;
-    });
+    withWriteLock([&] { _yTextureURL = yTextureURL; });
 }
 
-QString PolyVoxEntityItem::getYTextureURL() const { 
+QString PolyVoxEntityItem::getYTextureURL() const {
     QString result;
-    withReadLock([&] {
-        result = _yTextureURL;
-    });
+    withReadLock([&] { result = _yTextureURL; });
     return result;
 }
 
 void PolyVoxEntityItem::setZTextureURL(const QString& zTextureURL) {
-    withWriteLock([&] {
-        _zTextureURL = zTextureURL;
-    });
+    withWriteLock([&] { _zTextureURL = zTextureURL; });
 }
-QString PolyVoxEntityItem::getZTextureURL() const { 
+QString PolyVoxEntityItem::getZTextureURL() const {
     QString result;
-    withReadLock([&] {
-        result = _zTextureURL;
-    });
+    withReadLock([&] { result = _zTextureURL; });
     return result;
 }
 
-void PolyVoxEntityItem::setXNNeighborID(const EntityItemID& xNNeighborID) { 
-    withWriteLock([&] {
-        _xNNeighborID = xNNeighborID;
-    });
+void PolyVoxEntityItem::setXNNeighborID(const EntityItemID& xNNeighborID) {
+    withWriteLock([&] { _xNNeighborID = xNNeighborID; });
 }
 
-EntityItemID PolyVoxEntityItem::getXNNeighborID() const { 
+EntityItemID PolyVoxEntityItem::getXNNeighborID() const {
     EntityItemID result;
-    withReadLock([&] {
-        result = _xNNeighborID;
-    });
+    withReadLock([&] { result = _xNNeighborID; });
     return result;
 }
 
-void PolyVoxEntityItem::setYNNeighborID(const EntityItemID& yNNeighborID) { 
-    withWriteLock([&] {
-        _yNNeighborID = yNNeighborID;
-    });
+void PolyVoxEntityItem::setYNNeighborID(const EntityItemID& yNNeighborID) {
+    withWriteLock([&] { _yNNeighborID = yNNeighborID; });
 }
 
-EntityItemID PolyVoxEntityItem::getYNNeighborID() const { 
+EntityItemID PolyVoxEntityItem::getYNNeighborID() const {
     EntityItemID result;
-    withReadLock([&] {
-        result = _yNNeighborID;
-    });
+    withReadLock([&] { result = _yNNeighborID; });
     return result;
 }
 
-void PolyVoxEntityItem::setZNNeighborID(const EntityItemID& zNNeighborID) { 
-    withWriteLock([&] {
-        _zNNeighborID = zNNeighborID;
-    });
+void PolyVoxEntityItem::setZNNeighborID(const EntityItemID& zNNeighborID) {
+    withWriteLock([&] { _zNNeighborID = zNNeighborID; });
 }
 
-EntityItemID PolyVoxEntityItem::getZNNeighborID() const { 
+EntityItemID PolyVoxEntityItem::getZNNeighborID() const {
     EntityItemID result;
-    withReadLock([&] {
-        result = _zNNeighborID;
-    });
+    withReadLock([&] { result = _zNNeighborID; });
     return result;
 }
 
-void PolyVoxEntityItem::setXPNeighborID(const EntityItemID& xPNeighborID) { 
-    withWriteLock([&] {
-        _xPNeighborID = xPNeighborID;
-    });
+void PolyVoxEntityItem::setXPNeighborID(const EntityItemID& xPNeighborID) {
+    withWriteLock([&] { _xPNeighborID = xPNeighborID; });
 }
 
-EntityItemID PolyVoxEntityItem::getXPNeighborID() const { 
+EntityItemID PolyVoxEntityItem::getXPNeighborID() const {
     EntityItemID result;
-    withReadLock([&] {
-        result = _xPNeighborID;
-    });
+    withReadLock([&] { result = _xPNeighborID; });
     return result;
 }
 
-void PolyVoxEntityItem::setYPNeighborID(const EntityItemID& yPNeighborID) { 
-    withWriteLock([&] {
-        _yPNeighborID = yPNeighborID;
-    });
+void PolyVoxEntityItem::setYPNeighborID(const EntityItemID& yPNeighborID) {
+    withWriteLock([&] { _yPNeighborID = yPNeighborID; });
 }
 
-EntityItemID PolyVoxEntityItem::getYPNeighborID() const { 
+EntityItemID PolyVoxEntityItem::getYPNeighborID() const {
     EntityItemID result;
-    withReadLock([&] {
-        result = _yPNeighborID;
-    });
+    withReadLock([&] { result = _yPNeighborID; });
     return result;
 }
 
-void PolyVoxEntityItem::setZPNeighborID(const EntityItemID& zPNeighborID) { 
-    withWriteLock([&] {
-        _zPNeighborID = zPNeighborID;
-    });
+void PolyVoxEntityItem::setZPNeighborID(const EntityItemID& zPNeighborID) {
+    withWriteLock([&] { _zPNeighborID = zPNeighborID; });
 }
 
-EntityItemID PolyVoxEntityItem::getZPNeighborID() const { 
+EntityItemID PolyVoxEntityItem::getZPNeighborID() const {
     EntityItemID result;
-    withReadLock([&] {
-        result = _zPNeighborID;
-    });
+    withReadLock([&] { result = _zPNeighborID; });
     return result;
 }
 
@@ -386,9 +341,7 @@ glm::vec3 PolyVoxEntityItem::getSurfacePositionAdjustment() const {
 
 glm::mat4 PolyVoxEntityItem::voxelToLocalMatrix() const {
     glm::vec3 voxelVolumeSize;
-    withReadLock([&] {
-        voxelVolumeSize = _voxelVolumeSize;
-    });
+    withReadLock([&] { voxelVolumeSize = _voxelVolumeSize; });
 
     glm::vec3 dimensions = getScaledDimensions();
     glm::vec3 scale = dimensions / voxelVolumeSize; // meters / voxel-units
@@ -458,16 +411,12 @@ bool PolyVoxEntityItem::isEdged() const {
 
 std::array<EntityItemID, 3> PolyVoxEntityItem::getNNeigborIDs() const {
     std::array<EntityItemID, 3> result;
-    withReadLock([&] {
-        result = { { _xNNeighborID, _yNNeighborID, _zNNeighborID } };
-    });
+    withReadLock([&] { result = { { _xNNeighborID, _yNNeighborID, _zNNeighborID } }; });
     return result;
 }
 
 std::array<EntityItemID, 3> PolyVoxEntityItem::getPNeigborIDs() const {
     std::array<EntityItemID, 3> result;
-    withReadLock([&] {
-        result = { { _xPNeighborID, _yPNeighborID, _zPNeighborID } };
-    });
+    withReadLock([&] { result = { { _xPNeighborID, _yPNeighborID, _zPNeighborID } }; });
     return result;
 }

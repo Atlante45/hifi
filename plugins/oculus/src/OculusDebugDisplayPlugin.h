@@ -22,4 +22,3 @@ protected:
 private:
     static const char* NAME;
 };
-

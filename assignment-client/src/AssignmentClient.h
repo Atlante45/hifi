@@ -22,10 +22,8 @@ class QSharedMemory;
 class AssignmentClient : public QObject {
     Q_OBJECT
 public:
-    AssignmentClient(Assignment::Type requestAssignmentType, QString assignmentPool,
-                     quint16 listenPort,
-                     QUuid walletUUID, QString assignmentServerHostname, quint16 assignmentServerPort,
-                     quint16 assignmentMonitorPort);
+    AssignmentClient(Assignment::Type requestAssignmentType, QString assignmentPool, quint16 listenPort, QUuid walletUUID,
+                     QString assignmentServerHostname, quint16 assignmentServerPort, quint16 assignmentMonitorPort);
     ~AssignmentClient();
 
 private slots:
@@ -54,7 +52,7 @@ private:
     QTimer _statsTimerACM; // timer for sending stats to assignment client monitor
     QUuid _childAssignmentUUID = QUuid::createUuid();
 
- protected:
+protected:
     HifiSockAddr _assignmentClientMonitorSocket;
 };
 

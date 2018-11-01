@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <QString>
 #include <QObject>
+#include <QString>
 
 #include "Forward.h"
 
@@ -26,7 +26,10 @@ public:
     virtual grouping getGrouping() const { return STANDARD; }
 
     /// \return string ID (not necessarily human-readable)
-    virtual const QString getID() const { assert(false); return UNKNOWN_PLUGIN_ID; }
+    virtual const QString getID() const {
+        assert(false);
+        return UNKNOWN_PLUGIN_ID;
+    }
 
     virtual bool isSupported() const;
 
@@ -46,25 +49,17 @@ public:
     }
 
     /// Called when a plugin is no longer being used.  May be called multiple times.
-    virtual void deactivate() {
-        _active = false;
-    }
+    virtual void deactivate() { _active = false; }
 
-    virtual bool isActive() {
-        return _active;
-    }
+    virtual bool isActive() { return _active; }
     virtual bool startStandBySession() {
         _sessionStatus = true;
         return _sessionStatus;
     }
 
-    virtual void endSession() {
-        _sessionStatus = false;
-    }
+    virtual void endSession() { _sessionStatus = false; }
 
-    virtual bool isSessionActive() {
-        return _sessionStatus;
-    }
+    virtual bool isSessionActive() { return _sessionStatus; }
 
     /**
      * Called by the application during it's idle phase.  If the plugin needs to do
@@ -92,5 +87,4 @@ protected:
     bool _sessionStatus { false };
     PluginContainer* _container { nullptr };
     static const char* UNKNOWN_PLUGIN_ID;
-
 };

@@ -41,7 +41,6 @@ public:
     virtual void loadSettings() override;
 
 protected:
-
     struct NeuronJoint {
         glm::vec3 pos;
         glm::vec3 euler;
@@ -60,7 +59,9 @@ protected:
         virtual void update(float deltaTime, const controller::InputCalibrationData& inputCalibrationData) override {};
         virtual void focusOutEvent() override {};
 
-        void update(float deltaTime, const controller::InputCalibrationData& inputCalibrationData, const std::vector<NeuronPlugin::NeuronJoint>& joints, const std::vector<NeuronPlugin::NeuronJoint>& prevJoints);
+        void update(float deltaTime, const controller::InputCalibrationData& inputCalibrationData,
+                    const std::vector<NeuronPlugin::NeuronJoint>& joints,
+                    const std::vector<NeuronPlugin::NeuronJoint>& prevJoints);
     };
 
     std::shared_ptr<InputDevice> _inputDevice { std::make_shared<InputDevice>() };
@@ -83,4 +84,3 @@ protected:
 };
 
 #endif // hifi_NeuronPlugin_h
-

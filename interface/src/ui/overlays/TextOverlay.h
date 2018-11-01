@@ -19,7 +19,6 @@ public:
     QString getType() const override { return TYPE; }
     static QUrl const URL;
 
-
     TextOverlay();
     TextOverlay(const TextOverlay* textOverlay);
     ~TextOverlay();
@@ -29,10 +28,8 @@ public:
     void setFontSize(float size);
     void setText(const QString& text);
 
-
     TextOverlay* createClone() const override;
-    QSizeF textSize(const QString& text) const;  // Pixels
+    QSizeF textSize(const QString& text) const; // Pixels
 };
 
- 
 #endif // hifi_TextOverlay_h

@@ -11,12 +11,12 @@
 #include <vector>
 
 #include <GLMHelpers.h>
-#include <Transform.h>
 #include <GeometryCache.h>
 #include <NumericalConstants.h>
+#include <Transform.h>
 
-#include <gpu/Resource.h>
 #include <gpu/Forward.h>
+#include <gpu/Resource.h>
 #include <gpu/Shader.h>
 #include <gpu/Stream.h>
 
@@ -29,4 +29,3 @@ public:
 };
 
 uint32_t toCompactColor(const glm::vec4& color);
-

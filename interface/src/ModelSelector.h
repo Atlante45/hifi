@@ -31,10 +31,10 @@ public:
     QFileInfo getFileInfo() const;
     FSTReader::ModelType getModelType() const;
 
-    public slots:
+public slots:
     virtual void accept() override;
 
-    private slots:
+private slots:
     void browse();
 
 private:

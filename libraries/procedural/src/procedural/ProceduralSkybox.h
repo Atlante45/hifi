@@ -17,10 +17,10 @@
 
 #include "Procedural.h"
 
-class ProceduralSkybox: public graphics::Skybox {
+class ProceduralSkybox : public graphics::Skybox {
 public:
     ProceduralSkybox();
-    
+
     void parse(const QString& userData) { _procedural.setProceduralData(ProceduralData::parse(userData)); }
 
     bool empty() override;
@@ -32,6 +32,6 @@ public:
 protected:
     mutable Procedural _procedural;
 };
-typedef std::shared_ptr< ProceduralSkybox > ProceduralSkyboxPointer;
+typedef std::shared_ptr<ProceduralSkybox> ProceduralSkyboxPointer;
 
 #endif

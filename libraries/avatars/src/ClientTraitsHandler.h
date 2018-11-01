@@ -41,11 +41,7 @@ private:
     using Mutex = std::recursive_mutex;
     using Lock = std::lock_guard<Mutex>;
 
-    enum ClientTraitStatus {
-        Unchanged,
-        Updated,
-        Deleted
-    };
+    enum ClientTraitStatus { Unchanged, Updated, Deleted };
 
     AvatarData* const _owningAvatar;
 
@@ -54,7 +50,7 @@ private:
 
     AvatarTraits::TraitVersion _currentTraitVersion { AvatarTraits::DEFAULT_TRAIT_VERSION };
     AvatarTraits::TraitVersion _currentSkeletonVersion { AvatarTraits::NULL_TRAIT_VERSION };
-    
+
     bool _shouldPerformInitialSend { false };
     bool _hasChangedTraits { false };
 };

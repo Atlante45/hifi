@@ -15,12 +15,11 @@
 
 Volume3DOverlay::Volume3DOverlay(const Volume3DOverlay* volume3DOverlay) :
     Base3DOverlay(volume3DOverlay),
-    _localBoundingBox(volume3DOverlay->_localBoundingBox)
-{
+    _localBoundingBox(volume3DOverlay->_localBoundingBox) {
 }
 
 AABox Volume3DOverlay::getBounds() const {
-    auto extents = Extents{_localBoundingBox};
+    auto extents = Extents { _localBoundingBox };
     extents.rotate(getWorldOrientation());
     extents.shiftBy(getWorldPosition());
 
@@ -75,12 +74,12 @@ QVariant Volume3DOverlay::getProperty(const QString& property) {
     return Base3DOverlay::getProperty(property);
 }
 
-bool Volume3DOverlay::findRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                                          float& distance, BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking) {
+bool Volume3DOverlay::findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, float& distance, BoxFace& face,
+                                          glm::vec3& surfaceNormal, bool precisionPicking) {
     // extents is the entity relative, scaled, centered extents of the entity
     glm::mat4 worldToEntityMatrix;
     Transform transform = getTransform();
-    transform.setScale(1.0f);  // ignore any inherited scale from SpatiallyNestable
+    transform.setScale(1.0f); // ignore any inherited scale from SpatiallyNestable
     transform.getInverseMatrix(worldToEntityMatrix);
 
     glm::vec3 overlayFrameOrigin = glm::vec3(worldToEntityMatrix * glm::vec4(origin, 1.0f));
@@ -88,7 +87,8 @@ bool Volume3DOverlay::findRayIntersection(const glm::vec3& origin, const glm::ve
 
     // we can use the AABox's ray intersection by mapping our origin and direction into the overlays frame
     // and testing intersection there.
-    bool hit = _localBoundingBox.findRayIntersection(overlayFrameOrigin, overlayFrameDirection, 1.0f / overlayFrameDirection, distance, face, surfaceNormal);
+    bool hit = _localBoundingBox.findRayIntersection(overlayFrameOrigin, overlayFrameDirection, 1.0f / overlayFrameDirection,
+                                                     distance, face, surfaceNormal);
 
     if (hit) {
         surfaceNormal = transform.getRotation() * surfaceNormal;
@@ -96,12 +96,13 @@ bool Volume3DOverlay::findRayIntersection(const glm::vec3& origin, const glm::ve
     return hit;
 }
 
-bool Volume3DOverlay::findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                               float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking) {
+bool Volume3DOverlay::findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
+                                               const glm::vec3& acceleration, float& parabolicDistance, BoxFace& face,
+                                               glm::vec3& surfaceNormal, bool precisionPicking) {
     // extents is the entity relative, scaled, centered extents of the entity
     glm::mat4 worldToEntityMatrix;
     Transform transform = getTransform();
-    transform.setScale(1.0f);  // ignore any inherited scale from SpatiallyNestable
+    transform.setScale(1.0f); // ignore any inherited scale from SpatiallyNestable
     transform.getInverseMatrix(worldToEntityMatrix);
 
     glm::vec3 overlayFrameOrigin = glm::vec3(worldToEntityMatrix * glm::vec4(origin, 1.0f));
@@ -110,7 +111,8 @@ bool Volume3DOverlay::findParabolaIntersection(const glm::vec3& origin, const gl
 
     // we can use the AABox's ray intersection by mapping our origin and direction into the overlays frame
     // and testing intersection there.
-    bool hit = _localBoundingBox.findParabolaIntersection(overlayFrameOrigin, overlayFrameVelocity, overlayFrameAcceleration, parabolicDistance, face, surfaceNormal);
+    bool hit = _localBoundingBox.findParabolaIntersection(overlayFrameOrigin, overlayFrameVelocity, overlayFrameAcceleration,
+                                                          parabolicDistance, face, surfaceNormal);
 
     if (hit) {
         surfaceNormal = transform.getRotation() * surfaceNormal;
@@ -121,7 +123,7 @@ bool Volume3DOverlay::findParabolaIntersection(const glm::vec3& origin, const gl
 Transform Volume3DOverlay::evalRenderTransform() {
     Transform transform = getTransform();
 #ifndef USE_SN_SCALE
-    transform.setScale(1.0f);  // ignore any inherited scale from SpatiallyNestable
+    transform.setScale(1.0f); // ignore any inherited scale from SpatiallyNestable
 #endif
     return transform;
 }

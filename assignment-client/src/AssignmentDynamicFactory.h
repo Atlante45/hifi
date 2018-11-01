@@ -12,17 +12,15 @@
 #ifndef hifi_AssignmentDynamicFactory_h
 #define hifi_AssignmentDynamicFactory_h
 
-#include "EntityDynamicFactoryInterface.h"
 #include "AssignmentDynamic.h"
+#include "EntityDynamicFactoryInterface.h"
 
 class AssignmentDynamicFactory : public EntityDynamicFactoryInterface {
 public:
-    AssignmentDynamicFactory() : EntityDynamicFactoryInterface() { }
-    virtual ~AssignmentDynamicFactory() { }
-    virtual EntityDynamicPointer factory(EntityDynamicType type,
-                                        const QUuid& id,
-                                        EntityItemPointer ownerEntity,
-                                        QVariantMap arguments) override;
+    AssignmentDynamicFactory() : EntityDynamicFactoryInterface() {}
+    virtual ~AssignmentDynamicFactory() {}
+    virtual EntityDynamicPointer factory(EntityDynamicType type, const QUuid& id, EntityItemPointer ownerEntity,
+                                         QVariantMap arguments) override;
     virtual EntityDynamicPointer factoryBA(EntityItemPointer ownerEntity, QByteArray data) override;
 };
 

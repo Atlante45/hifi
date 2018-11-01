@@ -14,7 +14,6 @@
 
 #include <Assignment.h>
 
-
 class AssignmentClientChildData : public NodeData {
 public:
     AssignmentClientChildData(Assignment::Type childType);

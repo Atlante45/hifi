@@ -8,8 +8,8 @@
 
 #include "MyAvatarHeadTransformNode.h"
 
-#include "DependencyManager.h"
 #include "AvatarManager.h"
+#include "DependencyManager.h"
 #include "MyAvatar.h"
 
 Transform MyAvatarHeadTransformNode::getTransform() {

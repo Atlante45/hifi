@@ -13,13 +13,13 @@
 
 #include <glm/gtx/transform.hpp>
 
+#include <Extents.h>
 #include <GeometryUtil.h>
 #include <OctreeUtils.h>
-#include <Extents.h>
 
 #include "EntitiesLogging.h"
-#include "EntityNodeData.h"
 #include "EntityItemProperties.h"
+#include "EntityNodeData.h"
 #include "EntityTree.h"
 #include "EntityTypes.h"
 
@@ -59,8 +59,9 @@ void EntityTreeElement::debugExtraEncodeData(EncodeBitstreamParams& params) cons
     assert(extraEncodeData); // EntityTrees always require extra encode data on their encoding passes
 
     if (extraEncodeData->contains(this)) {
-        EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData
-            = std::static_pointer_cast<EntityTreeElementExtraEncodeData>((*extraEncodeData)[this]);
+        EntityTreeElementExtraEncodeDataPointer
+            entityTreeElementExtraEncodeData = std::static_pointer_cast<EntityTreeElementExtraEncodeData>(
+                (*extraEncodeData)[this]);
         qCDebug(entities) << "    encode data:" << &(*entityTreeElementExtraEncodeData);
     } else {
         qCDebug(entities) << "    encode data: MISSING!!";
@@ -80,7 +81,8 @@ bool EntityTreeElement::bestFitEntityBounds(EntityItemPointer entity) const {
     bool success;
     auto queryCube = entity->getQueryAACube(success);
     if (!success) {
-        qCDebug(entities) << "EntityTreeElement::bestFitEntityBounds couldn't get queryCube for" << entity->getName() << entity->getID();
+        qCDebug(entities) << "EntityTreeElement::bestFitEntityBounds couldn't get queryCube for" << entity->getName()
+                          << entity->getID();
         return false;
     }
     return bestFitBounds(queryCube);
@@ -121,7 +123,6 @@ bool EntityTreeElement::bestFitBounds(const glm::vec3& minPoint, const glm::vec3
     glm::vec3 clampedMax = glm::clamp(maxPoint, (float)-HALF_TREE_SCALE, (float)HALF_TREE_SCALE);
 
     if (_cube.contains(clampedMin) && _cube.contains(clampedMax)) {
-
         // If our child would be smaller than our smallest reasonable element, then we are the best fit.
         float childScale = _cube.getScale() / 2.0f;
         if (childScale <= SMALLEST_REASONABLE_OCTREE_ELEMENT_SCALE) {
@@ -140,10 +141,10 @@ bool EntityTreeElement::bestFitBounds(const glm::vec3& minPoint, const glm::vec3
 }
 
 EntityItemID EntityTreeElement::findRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-    OctreeElementPointer& element, float& distance, BoxFace& face, glm::vec3& surfaceNormal,
-    const QVector<EntityItemID>& entityIdsToInclude, const QVector<EntityItemID>& entityIdsToDiscard,
-    bool visibleOnly, bool collidableOnly, QVariantMap& extraInfo, bool precisionPicking) {
-
+                                                    OctreeElementPointer& element, float& distance, BoxFace& face,
+                                                    glm::vec3& surfaceNormal, const QVector<EntityItemID>& entityIdsToInclude,
+                                                    const QVector<EntityItemID>& entityIdsToDiscard, bool visibleOnly,
+                                                    bool collidableOnly, QVariantMap& extraInfo, bool precisionPicking) {
     EntityItemID result;
     BoxFace localFace { UNKNOWN_FACE };
     glm::vec3 localSurfaceNormal;
@@ -154,9 +155,9 @@ EntityItemID EntityTreeElement::findRayIntersection(const glm::vec3& origin, con
 
     QVariantMap localExtraInfo;
     float distanceToElementDetails = distance;
-    EntityItemID entityID = findDetailedRayIntersection(origin, direction, element, distanceToElementDetails,
-            localFace, localSurfaceNormal, entityIdsToInclude, entityIdsToDiscard, visibleOnly, collidableOnly,
-            localExtraInfo, precisionPicking);
+    EntityItemID entityID = findDetailedRayIntersection(origin, direction, element, distanceToElementDetails, localFace,
+                                                        localSurfaceNormal, entityIdsToInclude, entityIdsToDiscard, visibleOnly,
+                                                        collidableOnly, localExtraInfo, precisionPicking);
     if (!entityID.isNull() && distanceToElementDetails < distance) {
         distance = distanceToElementDetails;
         face = localFace;
@@ -167,11 +168,10 @@ EntityItemID EntityTreeElement::findRayIntersection(const glm::vec3& origin, con
     return result;
 }
 
-EntityItemID EntityTreeElement::findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                                    OctreeElementPointer& element, float& distance, BoxFace& face, glm::vec3& surfaceNormal,
-                                    const QVector<EntityItemID>& entityIdsToInclude, const QVector<EntityItemID>& entityIDsToDiscard,
-                                    bool visibleOnly, bool collidableOnly, QVariantMap& extraInfo, bool precisionPicking) {
-
+EntityItemID EntityTreeElement::findDetailedRayIntersection(
+    const glm::vec3& origin, const glm::vec3& direction, OctreeElementPointer& element, float& distance, BoxFace& face,
+    glm::vec3& surfaceNormal, const QVector<EntityItemID>& entityIdsToInclude, const QVector<EntityItemID>& entityIDsToDiscard,
+    bool visibleOnly, bool collidableOnly, QVariantMap& extraInfo, bool precisionPicking) {
     // only called if we do intersect our bounding cube, but find if we actually intersect with entities...
     int entityNumber = 0;
     EntityItemID entityID;
@@ -188,10 +188,10 @@ EntityItemID EntityTreeElement::findDetailedRayIntersection(const glm::vec3& ori
         }
 
         // check RayPick filter settings
-        if ((visibleOnly && !entity->isVisible())
-                || (collidableOnly && (entity->getCollisionless() || entity->getShapeType() == SHAPE_TYPE_NONE))
-                || (entityIdsToInclude.size() > 0 && !entityIdsToInclude.contains(entity->getID()))
-                || (entityIDsToDiscard.size() > 0 && entityIDsToDiscard.contains(entity->getID())) ) {
+        if ((visibleOnly && !entity->isVisible()) ||
+            (collidableOnly && (entity->getCollisionless() || entity->getShapeType() == SHAPE_TYPE_NONE)) ||
+            (entityIdsToInclude.size() > 0 && !entityIdsToInclude.contains(entity->getID())) ||
+            (entityIDsToDiscard.size() > 0 && entityIDsToDiscard.contains(entity->getID()))) {
             return;
         }
 
@@ -215,14 +215,14 @@ EntityItemID EntityTreeElement::findDetailedRayIntersection(const glm::vec3& ori
         float localDistance;
         BoxFace localFace { UNKNOWN_FACE };
         glm::vec3 localSurfaceNormal;
-        if (entityFrameBox.findRayIntersection(entityFrameOrigin, entityFrameDirection, 1.0f / entityFrameDirection, localDistance,
-                                                localFace, localSurfaceNormal)) {
+        if (entityFrameBox.findRayIntersection(entityFrameOrigin, entityFrameDirection, 1.0f / entityFrameDirection,
+                                               localDistance, localFace, localSurfaceNormal)) {
             if (entityFrameBox.contains(entityFrameOrigin) || localDistance < distance) {
                 // now ask the entity if we actually intersect
                 if (entity->supportsDetailedIntersection()) {
                     QVariantMap localExtraInfo;
-                    if (entity->findDetailedRayIntersection(origin, direction, element, localDistance,
-                            localFace, localSurfaceNormal, localExtraInfo, precisionPicking)) {
+                    if (entity->findDetailedRayIntersection(origin, direction, element, localDistance, localFace,
+                                                            localSurfaceNormal, localExtraInfo, precisionPicking)) {
                         if (localDistance < distance) {
                             distance = localDistance;
                             face = localFace;
@@ -250,11 +250,11 @@ EntityItemID EntityTreeElement::findDetailedRayIntersection(const glm::vec3& ori
 }
 
 // TODO: change this to use better bounding shape for entity than sphere
-bool EntityTreeElement::findSpherePenetration(const glm::vec3& center, float radius,
-                                    glm::vec3& penetration, void** penetratedObject) const {
+bool EntityTreeElement::findSpherePenetration(const glm::vec3& center, float radius, glm::vec3& penetration,
+                                              void** penetratedObject) const {
     bool result = false;
     withReadLock([&] {
-        foreach(EntityItemPointer entity, _entityItems) {
+        foreach (EntityItemPointer entity, _entityItems) {
             glm::vec3 entityCenter = entity->getWorldPosition();
             float entityRadius = entity->getRadius();
 
@@ -276,11 +276,11 @@ bool EntityTreeElement::findSpherePenetration(const glm::vec3& center, float rad
 }
 
 EntityItemID EntityTreeElement::findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
-    const glm::vec3& acceleration, OctreeElementPointer& element, float& parabolicDistance,
-    BoxFace& face, glm::vec3& surfaceNormal, const QVector<EntityItemID>& entityIdsToInclude,
-    const QVector<EntityItemID>& entityIdsToDiscard, bool visibleOnly, bool collidableOnly,
-    QVariantMap& extraInfo, bool precisionPicking) {
-
+                                                         const glm::vec3& acceleration, OctreeElementPointer& element,
+                                                         float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+                                                         const QVector<EntityItemID>& entityIdsToInclude,
+                                                         const QVector<EntityItemID>& entityIdsToDiscard, bool visibleOnly,
+                                                         bool collidableOnly, QVariantMap& extraInfo, bool precisionPicking) {
     EntityItemID result;
     BoxFace localFace;
     glm::vec3 localSurfaceNormal;
@@ -300,9 +300,10 @@ EntityItemID EntityTreeElement::findParabolaIntersection(const glm::vec3& origin
     }
     // Get the normal of the plane, the cross product of two vectors on the plane
     glm::vec3 normal = glm::normalize(glm::cross(vectorOnPlane, acceleration));
-    EntityItemID entityID = findDetailedParabolaIntersection(origin, velocity, acceleration, normal, element, distanceToElementDetails,
-            localFace, localSurfaceNormal, entityIdsToInclude, entityIdsToDiscard, visibleOnly, collidableOnly,
-            localExtraInfo, precisionPicking);
+    EntityItemID entityID = findDetailedParabolaIntersection(origin, velocity, acceleration, normal, element,
+                                                             distanceToElementDetails, localFace, localSurfaceNormal,
+                                                             entityIdsToInclude, entityIdsToDiscard, visibleOnly,
+                                                             collidableOnly, localExtraInfo, precisionPicking);
     if (!entityID.isNull() && distanceToElementDetails < parabolicDistance) {
         parabolicDistance = distanceToElementDetails;
         face = localFace;
@@ -313,11 +314,11 @@ EntityItemID EntityTreeElement::findParabolaIntersection(const glm::vec3& origin
     return result;
 }
 
-EntityItemID EntityTreeElement::findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                    const glm::vec3& normal, OctreeElementPointer& element, float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
-                                    const QVector<EntityItemID>& entityIdsToInclude, const QVector<EntityItemID>& entityIDsToDiscard,
-                                    bool visibleOnly, bool collidableOnly, QVariantMap& extraInfo, bool precisionPicking) {
-
+EntityItemID EntityTreeElement::findDetailedParabolaIntersection(
+    const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration, const glm::vec3& normal,
+    OctreeElementPointer& element, float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+    const QVector<EntityItemID>& entityIdsToInclude, const QVector<EntityItemID>& entityIDsToDiscard, bool visibleOnly,
+    bool collidableOnly, QVariantMap& extraInfo, bool precisionPicking) {
     // only called if we do intersect our bounding cube, but find if we actually intersect with entities...
     int entityNumber = 0;
     EntityItemID entityID;
@@ -339,10 +340,10 @@ EntityItemID EntityTreeElement::findDetailedParabolaIntersection(const glm::vec3
         }
 
         // check RayPick filter settings
-        if ((visibleOnly && !entity->isVisible())
-                || (collidableOnly && (entity->getCollisionless() || entity->getShapeType() == SHAPE_TYPE_NONE))
-                || (entityIdsToInclude.size() > 0 && !entityIdsToInclude.contains(entity->getID()))
-                || (entityIDsToDiscard.size() > 0 && entityIDsToDiscard.contains(entity->getID())) ) {
+        if ((visibleOnly && !entity->isVisible()) ||
+            (collidableOnly && (entity->getCollisionless() || entity->getShapeType() == SHAPE_TYPE_NONE)) ||
+            (entityIdsToInclude.size() > 0 && !entityIdsToInclude.contains(entity->getID())) ||
+            (entityIDsToDiscard.size() > 0 && entityIDsToDiscard.contains(entity->getID()))) {
             return;
         }
 
@@ -367,14 +368,15 @@ EntityItemID EntityTreeElement::findDetailedParabolaIntersection(const glm::vec3
         float localDistance;
         BoxFace localFace;
         glm::vec3 localSurfaceNormal;
-        if (entityFrameBox.findParabolaIntersection(entityFrameOrigin, entityFrameVelocity, entityFrameAcceleration, localDistance,
-                                                localFace, localSurfaceNormal)) {
+        if (entityFrameBox.findParabolaIntersection(entityFrameOrigin, entityFrameVelocity, entityFrameAcceleration,
+                                                    localDistance, localFace, localSurfaceNormal)) {
             if (entityFrameBox.contains(entityFrameOrigin) || localDistance < parabolicDistance) {
                 // now ask the entity if we actually intersect
                 if (entity->supportsDetailedIntersection()) {
                     QVariantMap localExtraInfo;
                     if (entity->findDetailedParabolaIntersection(origin, velocity, acceleration, element, localDistance,
-                            localFace, localSurfaceNormal, localExtraInfo, precisionPicking)) {
+                                                                 localFace, localSurfaceNormal, localExtraInfo,
+                                                                 precisionPicking)) {
                         if (localDistance < parabolicDistance) {
                             parabolicDistance = localDistance;
                             face = localFace;
@@ -405,7 +407,7 @@ EntityItemPointer EntityTreeElement::getClosestEntity(glm::vec3 position) const 
     EntityItemPointer closestEntity = NULL;
     float closestEntityDistance = FLT_MAX;
     withReadLock([&] {
-        foreach(EntityItemPointer entity, _entityItems) {
+        foreach (EntityItemPointer entity, _entityItems) {
             float distanceToEntity = glm::distance2(position, entity->getWorldPosition());
             if (distanceToEntity < closestEntityDistance) {
                 closestEntity = entity;
@@ -416,16 +418,15 @@ EntityItemPointer EntityTreeElement::getClosestEntity(glm::vec3 position) const 
 }
 
 // TODO: change this to use better bounding shape for entity than sphere
-void EntityTreeElement::getEntities(const glm::vec3& searchPosition, float searchRadius, QVector<EntityItemPointer>& foundEntities) const {
+void EntityTreeElement::getEntities(const glm::vec3& searchPosition, float searchRadius,
+                                    QVector<EntityItemPointer>& foundEntities) const {
     forEachEntity([&](EntityItemPointer entity) {
-
         bool success;
         AABox entityBox = entity->getAABox(success);
 
         // if the sphere doesn't intersect with our world frame AABox, we don't need to consider the more complex case
         glm::vec3 penetration;
         if (!success || entityBox.findSpherePenetration(searchPosition, searchRadius, penetration)) {
-
             glm::vec3 dimensions = entity->getRaycastDimensions();
 
             // FIXME - consider allowing the entity to determine penetration so that
@@ -433,16 +434,14 @@ void EntityTreeElement::getEntities(const glm::vec3& searchPosition, float searc
             // FIXME - handle entity->getShapeType() == SHAPE_TYPE_SPHERE case better in particular
             //         can we handle the ellipsoid case better? We only currently handle perfect spheres
             //         with centered registration points
-            if (entity->getShapeType() == SHAPE_TYPE_SPHERE &&
-                (dimensions.x == dimensions.y && dimensions.y == dimensions.z)) {
-
+            if (entity->getShapeType() == SHAPE_TYPE_SPHERE && (dimensions.x == dimensions.y && dimensions.y == dimensions.z)) {
                 // NOTE: entity->getRadius() doesn't return the true radius, it returns the radius of the
                 //       maximum bounding sphere, which is actually larger than our actual radius
                 float entityTrueRadius = dimensions.x / 2.0f;
 
                 bool success;
-                if (findSphereSpherePenetration(searchPosition, searchRadius,
-                        entity->getCenterPosition(success), entityTrueRadius, penetration)) {
+                if (findSphereSpherePenetration(searchPosition, searchRadius, entity->getCenterPosition(success),
+                                                entityTrueRadius, penetration)) {
                     if (success) {
                         foundEntities.push_back(entity);
                     }
@@ -532,7 +531,7 @@ void EntityTreeElement::getEntities(const ViewFrustum& frustum, QVector<EntityIt
     });
 }
 
-void EntityTreeElement::getEntities(EntityItemFilter& filter,  QVector<EntityItemPointer>& foundEntities) {
+void EntityTreeElement::getEntities(EntityItemFilter& filter, QVector<EntityItemPointer>& foundEntities) {
     forEachEntity([&](EntityItemPointer entity) {
         if (filter(entity)) {
             foundEntities.push_back(entity);
@@ -543,7 +542,7 @@ void EntityTreeElement::getEntities(EntityItemFilter& filter,  QVector<EntityIte
 EntityItemPointer EntityTreeElement::getEntityWithEntityItemID(const EntityItemID& id) const {
     EntityItemPointer foundEntity = NULL;
     withReadLock([&] {
-        foreach(EntityItemPointer entity, _entityItems) {
+        foreach (EntityItemPointer entity, _entityItems) {
             if (entity->getEntityItemID() == id) {
                 foundEntity = entity;
                 break;
@@ -555,7 +554,7 @@ EntityItemPointer EntityTreeElement::getEntityWithEntityItemID(const EntityItemI
 
 void EntityTreeElement::cleanupEntities() {
     withWriteLock([&] {
-        foreach(EntityItemPointer entity, _entityItems) {
+        foreach (EntityItemPointer entity, _entityItems) {
             entity->preDelete();
             // NOTE: only EntityTreeElement should ever be changing the value of entity->_element
             // NOTE: We explicitly don't delete the EntityItem here because since we only
@@ -573,9 +572,7 @@ bool EntityTreeElement::removeEntityItem(EntityItemPointer entity, bool deletion
         entity->preDelete();
     }
     int numEntries = 0;
-    withWriteLock([&] {
-        numEntries = _entityItems.removeAll(entity);
-    });
+    withWriteLock([&] { numEntries = _entityItems.removeAll(entity); });
     if (numEntries > 0) {
         // NOTE: only EntityTreeElement should ever be changing the value of entity->_element
         assert(entity->_element.get() == this);
@@ -586,18 +583,15 @@ bool EntityTreeElement::removeEntityItem(EntityItemPointer entity, bool deletion
     return false;
 }
 
-
 int EntityTreeElement::readElementDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-            ReadBitstreamToTreeParams& args) {
+                                                 ReadBitstreamToTreeParams& args) {
     return _myTree->readEntityDataFromBuffer(data, bytesLeftToRead, args);
 }
 
 void EntityTreeElement::addEntityItem(EntityItemPointer entity) {
     assert(entity);
     assert(entity->_element == nullptr);
-    withWriteLock([&] {
-        _entityItems.push_back(entity);
-    });
+    withWriteLock([&] { _entityItems.push_back(entity); });
     bumpChangedContent();
     entity->_element = getThisPointer();
 }
@@ -632,7 +626,7 @@ bool EntityTreeElement::pruneChildren() {
 
 void EntityTreeElement::expandExtentsToContents(Extents& extents) {
     withReadLock([&] {
-        foreach(EntityItemPointer entity, _entityItems) {
+        foreach (EntityItemPointer entity, _entityItems) {
             bool success;
             AABox aaBox = entity->getAABox(success);
             if (success) {
@@ -644,12 +638,9 @@ void EntityTreeElement::expandExtentsToContents(Extents& extents) {
 
 uint16_t EntityTreeElement::size() const {
     uint16_t result = 0;
-    withReadLock([&] {
-        result = _entityItems.size();
-    });
+    withReadLock([&] { result = _entityItems.size(); });
     return result;
 }
-
 
 void EntityTreeElement::debugDump() {
     qCDebug(entities) << "EntityTreeElement...";
@@ -670,4 +661,3 @@ void EntityTreeElement::debugDump() {
         }
     });
 }
-

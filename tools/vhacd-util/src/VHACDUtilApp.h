@@ -9,7 +9,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef hifi_VHACDUtilApp_h
 #define hifi_VHACDUtilApp_h
 
@@ -20,7 +19,6 @@
 const int VHACD_RETURN_CODE_FAILURE_TO_READ = 1;
 const int VHACD_RETURN_CODE_FAILURE_TO_WRITE = 2;
 const int VHACD_RETURN_CODE_FAILURE_TO_CONVEXIFY = 3;
-
 
 class VHACDUtilApp : public QCoreApplication {
     Q_OBJECT
@@ -36,6 +34,4 @@ private:
     int _returnCode { 0 };
 };
 
-
-
-#endif //hifi_VHACDUtilApp_h
+#endif // hifi_VHACDUtilApp_h

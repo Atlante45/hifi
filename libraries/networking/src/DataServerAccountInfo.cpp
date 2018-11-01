@@ -14,10 +14,10 @@
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
 
-#include <QtCore/QJsonDocument>
-#include <QtCore/QDebug>
-#include <QtCore/QDataStream>
 #include <QtCore/QCryptographicHash>
+#include <QtCore/QDataStream>
+#include <QtCore/QDebug>
+#include <QtCore/QJsonDocument>
 
 #include <UUID.h>
 
@@ -68,15 +68,15 @@ void DataServerAccountInfo::setAccessTokenFromJSON(const QJsonObject& jsonObject
 void DataServerAccountInfo::setUsername(const QString& username) {
     if (_username != username) {
         _username = username;
-        
+
         qCDebug(networking) << "Username changed to" << username;
     }
 }
 
 void DataServerAccountInfo::setXMPPPassword(const QString& xmppPassword) {
-     if (_xmppPassword != xmppPassword) {
-         _xmppPassword = xmppPassword;
-     }
+    if (_xmppPassword != xmppPassword) {
+        _xmppPassword = xmppPassword;
+    }
 }
 
 void DataServerAccountInfo::setDiscourseApiKey(const QString& discourseApiKey) {
@@ -109,8 +109,8 @@ QByteArray DataServerAccountInfo::getUsernameSignature(const QUuid& connectionTo
 
     auto signature = signPlaintext(plaintext);
     if (!signature.isEmpty()) {
-        qDebug(networking) << "Returning username" << _username
-            << "signed with connection UUID" << uuidStringWithoutCurlyBraces(connectionToken);
+        qDebug(networking) << "Returning username" << _username << "signed with connection UUID"
+                           << uuidStringWithoutCurlyBraces(connectionToken);
     } else {
         qCDebug(networking) << "Error signing username with connection token";
         qCDebug(networking) << "Will re-attempt on next domain-server check in.";
@@ -122,8 +122,7 @@ QByteArray DataServerAccountInfo::getUsernameSignature(const QUuid& connectionTo
 QByteArray DataServerAccountInfo::signPlaintext(const QByteArray& plaintext) {
     if (!_privateKey.isEmpty()) {
         const char* privateKeyData = _privateKey.constData();
-        RSA* rsaPrivateKey = d2i_RSAPrivateKey(NULL,
-                                               reinterpret_cast<const unsigned char**>(&privateKeyData),
+        RSA* rsaPrivateKey = d2i_RSAPrivateKey(NULL, reinterpret_cast<const unsigned char**>(&privateKeyData),
                                                _privateKey.size());
         if (rsaPrivateKey) {
             QByteArray signature(RSA_size(rsaPrivateKey), 0);
@@ -131,12 +130,9 @@ QByteArray DataServerAccountInfo::signPlaintext(const QByteArray& plaintext) {
 
             QByteArray hashedPlaintext = QCryptographicHash::hash(plaintext, QCryptographicHash::Sha256);
 
-            int encryptReturn = RSA_sign(NID_sha256,
-                                         reinterpret_cast<const unsigned char*>(hashedPlaintext.constData()),
-                                         hashedPlaintext.size(),
-                                         reinterpret_cast<unsigned char*>(signature.data()),
-                                         &signatureBytes,
-                                         rsaPrivateKey);
+            int encryptReturn = RSA_sign(NID_sha256, reinterpret_cast<const unsigned char*>(hashedPlaintext.constData()),
+                                         hashedPlaintext.size(), reinterpret_cast<unsigned char*>(signature.data()),
+                                         &signatureBytes, rsaPrivateKey);
 
             // free the private key RSA struct now that we are done with it
             RSA_free(rsaPrivateKey);
@@ -151,16 +147,14 @@ QByteArray DataServerAccountInfo::signPlaintext(const QByteArray& plaintext) {
     return QByteArray();
 }
 
-QDataStream& operator<<(QDataStream &out, const DataServerAccountInfo& info) {
-    out << info._accessToken << info._username << info._xmppPassword << info._discourseApiKey
-        << info._walletID << info._privateKey << info._domainID
-        << info._temporaryDomainID << info._temporaryDomainApiKey;
+QDataStream& operator<<(QDataStream& out, const DataServerAccountInfo& info) {
+    out << info._accessToken << info._username << info._xmppPassword << info._discourseApiKey << info._walletID
+        << info._privateKey << info._domainID << info._temporaryDomainID << info._temporaryDomainApiKey;
     return out;
 }
 
-QDataStream& operator>>(QDataStream &in, DataServerAccountInfo& info) {
-    in >> info._accessToken >> info._username >> info._xmppPassword >> info._discourseApiKey
-        >> info._walletID >> info._privateKey >> info._domainID
-        >> info._temporaryDomainID >> info._temporaryDomainApiKey;
+QDataStream& operator>>(QDataStream& in, DataServerAccountInfo& info) {
+    in >> info._accessToken >> info._username >> info._xmppPassword >> info._discourseApiKey >> info._walletID >>
+        info._privateKey >> info._domainID >> info._temporaryDomainID >> info._temporaryDomainApiKey;
     return in;
 }

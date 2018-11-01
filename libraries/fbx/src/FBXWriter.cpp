@@ -14,16 +14,16 @@
 #include <QDebug>
 
 #ifdef USE_FBX_2016_FORMAT
-    using FBXEndOffset = int64_t;
-    using FBXPropertyCount = uint64_t;
-    using FBXListLength = uint64_t;
+using FBXEndOffset = int64_t;
+using FBXPropertyCount = uint64_t;
+using FBXListLength = uint64_t;
 #else
-    using FBXEndOffset = int32_t;
-    using FBXPropertyCount = uint32_t;
-    using FBXListLength = uint32_t;
+using FBXEndOffset = int32_t;
+using FBXPropertyCount = uint32_t;
+using FBXListLength = uint32_t;
 #endif
 
-template <typename T>
+template<typename T>
 void writeVector(QDataStream& out, char ch, QVector<T> vec) {
     // Minimum number of bytes to consider compressing
     const int ATTEMPT_COMPRESSION_THRESHOLD_BYTES = 2000;
@@ -38,8 +38,8 @@ void writeVector(QDataStream& out, char ch, QVector<T> vec) {
 
         // qCompress packs a length uint32 at the beginning of the buffer, but the FBX format
         // does not expect it. This removes it.
-        auto compressedData = QByteArray::fromRawData(
-            compressedDataWithLength.constData() + sizeof(uint32_t), compressedDataWithLength.size() - sizeof(uint32_t));
+        auto compressedData = QByteArray::fromRawData(compressedDataWithLength.constData() + sizeof(uint32_t),
+                                                      compressedDataWithLength.size() - sizeof(uint32_t));
 
         if (compressedData.size() < data.size()) {
             out << FBX_PROPERTY_COMPRESSED_FLAG;
@@ -53,7 +53,6 @@ void writeVector(QDataStream& out, char ch, QVector<T> vec) {
     out << (int32_t)0;
     out.writeRawData(data.constData(), data.size());
 }
-
 
 QByteArray FBXWriter::encodeFBX(const FBXNode& root) {
     QByteArray data;
@@ -156,24 +155,21 @@ void FBXWriter::encodeFBXProperty(QDataStream& out, const QVariant& prop) {
             out << prop.toLongLong();
             break;
 
-        case QMetaType::QString:
-        {
+        case QMetaType::QString: {
             auto bytes = prop.toString().toUtf8();
             out.device()->write("S", 1);
             out << (int32_t)bytes.size();
             out.writeRawData(bytes, bytes.size());
             break;
         }
-        case QMetaType::QByteArray:
-        {
+        case QMetaType::QByteArray: {
             auto bytes = prop.toByteArray();
             out.device()->write("S", 1);
             out << (int32_t)bytes.size();
             out.writeRawData(bytes, bytes.size());
             break;
         }
-        default:
-        {
+        default: {
             if (prop.canConvert<QVector<float>>()) {
                 writeVector(out, 'f', prop.value<QVector<float>>());
             } else if (prop.canConvert<QVector<double>>()) {
@@ -189,6 +185,5 @@ void FBXWriter::encodeFBXProperty(QDataStream& out, const QVariant& prop) {
                 throw("Unsupported property type in FBXWriter::encodeNode: " + QString::number(type) + " " + prop.toString());
             }
         }
-
     }
 }

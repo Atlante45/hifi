@@ -17,8 +17,8 @@ from linter import parallel  # pylint: disable=wrong-import-position
 # Constants for clang-format
 
 # Expected version of clang-format
-CLANG_FORMAT_VERSION = "7.0.0"
-CLANG_FORMAT_SHORT_VERSION = "7.0"
+CLANG_FORMAT_VERSION = "8.0.0"
+CLANG_FORMAT_SHORT_VERSION = "8.0"
 
 # Name of clang-format as a binary
 CLANG_FORMAT_PROGNAME = "clang-format"

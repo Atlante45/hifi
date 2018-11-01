@@ -13,12 +13,9 @@
 #include <GeometryCache.h>
 #include <SharedUtil.h>
 
-
 QString const Rectangle3DOverlay::TYPE = "rectangle3d";
 
-Rectangle3DOverlay::Rectangle3DOverlay() :
-    _geometryCacheID(DependencyManager::get<GeometryCache>()->allocateID())
-{
+Rectangle3DOverlay::Rectangle3DOverlay() : _geometryCacheID(DependencyManager::get<GeometryCache>()->allocateID()) {
     auto geometryCache = DependencyManager::get<GeometryCache>();
     for (size_t i = 0; i < _rectGeometryIds.size(); ++i) {
         _rectGeometryIds[i] = geometryCache->allocateID();
@@ -27,8 +24,7 @@ Rectangle3DOverlay::Rectangle3DOverlay() :
 
 Rectangle3DOverlay::Rectangle3DOverlay(const Rectangle3DOverlay* rectangle3DOverlay) :
     Planar3DOverlay(rectangle3DOverlay),
-    _geometryCacheID(DependencyManager::get<GeometryCache>()->allocateID())
-{
+    _geometryCacheID(DependencyManager::get<GeometryCache>()->allocateID()) {
     auto geometryCache = DependencyManager::get<GeometryCache>();
     for (size_t i = 0; i < _rectGeometryIds.size(); ++i) {
         _rectGeometryIds[i] = geometryCache->allocateID();
@@ -109,7 +105,7 @@ const render::ShapeKey Rectangle3DOverlay::getShapeKey() {
 /**jsdoc
  * These are the properties of a <code>rectangle3d</code> {@link Overlays.OverlayType|OverlayType}.
  * @typedef {object} Overlays.Rectangle3DProperties
- * 
+ *
  * @property {string} type=rectangle3d - Has the value <code>"rectangle3d"</code>. <em>Read-only.</em>
  * @property {Color} color=255,255,255 - The color of the overlay.
  * @property {number} alpha=0.7 - The opacity of the overlay, <code>0.0</code> - <code>1.0</code>.
@@ -139,14 +135,15 @@ const render::ShapeKey Rectangle3DOverlay::getShapeKey() {
  *     Antonyms: <code>isWire</code> and <code>wire</code>.
  * @property {boolean} isDashedLine=false - If <code>true</code>, a dashed line is drawn on the overlay's edges. Synonym:
  *     <code>dashed</code>.
- * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.  <code>ignoreRayIntersection</code> is a synonym.
+ * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.
+ * <code>ignoreRayIntersection</code> is a synonym.
  * @property {boolean} drawInFront=false - If <code>true</code>, the overlay is rendered in front of other overlays that don't
  *     have <code>drawInFront</code> set to <code>true</code>, and in front of entities.
  * @property {boolean} grabbable=false - Signal to grabbing scripts whether or not this overlay can be grabbed.
  * @property {Uuid} parentID=null - The avatar, entity, or overlay that the overlay is parented to.
  * @property {number} parentJointIndex=65535 - Integer value specifying the skeleton joint that the overlay is attached to if
  *     <code>parentID</code> is an avatar skeleton. A value of <code>65535</code> means "no joint".
- * 
+ *
  * @property {Vec2} dimensions=1,1 - The dimensions of the overlay. Synonyms: <code>scale</code>, <code>size</code>.
  */
 void Rectangle3DOverlay::setProperties(const QVariantMap& properties) {

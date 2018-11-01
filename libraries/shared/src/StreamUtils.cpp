@@ -15,13 +15,12 @@
 
 #include <QDataStream>
 
-
 void StreamUtil::dump(std::ostream& s, const QByteArray& buffer) {
     const char* hex_digits = "0123456789abcdef";
     int row_size = 32;
     int i = 0;
     while (i < buffer.size()) {
-        for(int j = 0; i < buffer.size() && j < row_size; ++j) {
+        for (int j = 0; i < buffer.size() && j < row_size; ++j) {
             char byte = buffer[i];
             s << hex_digits[(byte >> 4) & 0x0f] << hex_digits[byte & 0x0f] << ' ';
             ++i;

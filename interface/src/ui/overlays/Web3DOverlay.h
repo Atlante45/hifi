@@ -22,7 +22,6 @@ class Web3DOverlay : public Billboard3DOverlay {
     using Parent = Billboard3DOverlay;
 
 public:
-
     static const QString QML;
     static QString const TYPE;
     virtual QString getType() const override { return TYPE; }
@@ -54,10 +53,7 @@ public:
 
     virtual Web3DOverlay* createClone() const override;
 
-    enum InputMode {
-        Touch,
-        Mouse
-    };
+    enum InputMode { Touch, Mouse };
 
     void buildWebSurface();
     void destroyWebSurface();
@@ -85,7 +81,7 @@ private:
 
     InputMode _inputMode { Touch };
     QSharedPointer<OffscreenQmlSurface> _webSurface;
-    bool _cachedWebSurface{ false };
+    bool _cachedWebSurface { false };
     gpu::TexturePointer _texture;
     QString _url;
     QString _scriptURL;

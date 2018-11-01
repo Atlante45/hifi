@@ -13,20 +13,19 @@
 
 #include <sstream>
 
-#include <QFormLayout>
-#include <QDialogButtonBox>
-#include <QPalette>
 #include <QColor>
+#include <QDialogButtonBox>
+#include <QFormLayout>
+#include <QPalette>
 
 #include <OctreeSceneStats.h>
 
-#include "Application.h"
 #include "../octree/OctreePacketProcessor.h"
+#include "Application.h"
 
 OctreeStatsDialog::OctreeStatsDialog(QWidget* parent, NodeToOctreeSceneStats* model) :
     QDialog(parent, Qt::Window | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint),
-    _model(model)
-{
+    _model(model) {
     for (int i = 0; i < MAX_STATS; i++) {
         _labels[i] = nullptr;
     }
@@ -53,14 +52,12 @@ OctreeStatsDialog::OctreeStatsDialog(QWidget* parent, NodeToOctreeSceneStats* mo
     _entityUpdateTime = AddStatItem("Entity Update Time");
     _entityUpdates = AddStatItem("Entity Updates");
 
-
     _octreeServerLabel = AddStatItem("Entity Server");
     _labels[_octreeServerLabel]->setTextFormat(Qt::RichText);
     _labels[_octreeServerLabel]->setTextInteractionFlags(Qt::TextBrowserInteraction);
-    connect(_labels[_octreeServerLabel], SIGNAL(linkActivated(const QString&)),
-            this, SLOT(moreless(const QString&)));
+    connect(_labels[_octreeServerLabel], SIGNAL(linkActivated(const QString&)), this, SLOT(moreless(const QString&)));
 
-    layout()->setSizeConstraint(QLayout::SetFixedSize); 
+    layout()->setSizeConstraint(QLayout::SetFixedSize);
 }
 
 void OctreeStatsDialog::RemoveStatItem(int item) {
@@ -83,21 +80,20 @@ void OctreeStatsDialog::moreless(const QString& link) {
     }
 }
 
-
 int OctreeStatsDialog::AddStatItem(const char* caption, unsigned colorRGBA) {
     const int STATS_LABEL_WIDTH = 600;
-    
+
     _statCount++; // increment our current stat count
-    
+
     if (colorRGBA == 0) {
         static unsigned rotatingColors[] = { GREENISH, YELLOWISH, GREYISH };
-        colorRGBA = rotatingColors[_statCount % (sizeof(rotatingColors)/sizeof(rotatingColors[0]))];
+        colorRGBA = rotatingColors[_statCount % (sizeof(rotatingColors) / sizeof(rotatingColors[0]))];
     }
-    QLabel* label = _labels[_statCount] = new QLabel();  
+    QLabel* label = _labels[_statCount] = new QLabel();
 
     // Set foreground color to 62.5% brightness of the meter (otherwise will be hard to read on the bright background)
     QPalette palette = label->palette();
-    
+
     // This goofiness came from the bandwidth meter code, it basically stores a color in an unsigned and extracts it
     unsigned rgb = colorRGBA >> 8;
     const unsigned colorpart1 = 0xfefefeu;
@@ -107,7 +103,7 @@ int OctreeStatsDialog::AddStatItem(const char* caption, unsigned colorRGBA) {
     label->setPalette(palette);
     _form->addRow(QString(" %1:").arg(caption), label);
     label->setFixedWidth(STATS_LABEL_WIDTH);
-    
+
     return _statCount;
 }
 
@@ -118,14 +114,13 @@ OctreeStatsDialog::~OctreeStatsDialog() {
 }
 
 void OctreeStatsDialog::paintEvent(QPaintEvent* event) {
-
     // Processed Entities Related stats
     auto entities = qApp->getEntities();
     auto entitiesTree = entities->getTree();
 
     // Do this ever paint event... even if we don't update
     auto totalTrackedEdits = entitiesTree->getTotalTrackedEdits();
-    
+
     // track our updated per second
     const quint64 SAMPLING_WINDOW = USECS_PER_SECOND / SAMPLES_PER_SECOND;
     quint64 now = usecTimestampNow();
@@ -172,10 +167,9 @@ void OctreeStatsDialog::paintEvent(QPaintEvent* event) {
     QString localLeavesString = locale.toString((uint)localLeaves);
 
     statsValue.str("");
-    statsValue << 
-        "Total: " << qPrintable(localTotalString) << " / " <<
-        "Internal: " << qPrintable(localInternalString) << " / " <<
-        "Leaves: " << qPrintable(localLeavesString) << "";
+    statsValue << "Total: " << qPrintable(localTotalString) << " / "
+               << "Internal: " << qPrintable(localInternalString) << " / "
+               << "Leaves: " << qPrintable(localLeavesString) << "";
     label->setText(statsValue.str().c_str());
 
     // iterate all the current octree stats, and list their sending modes, total their octree elements, etc...
@@ -190,7 +184,7 @@ void OctreeStatsDialog::paintEvent(QPaintEvent* event) {
     NodeToOctreeSceneStats* sceneStats = qApp->getOcteeSceneStats();
     sceneStats->withReadLock([&] {
         for (NodeToOctreeSceneStatsIterator i = sceneStats->begin(); i != sceneStats->end(); i++) {
-            //const QUuid& uuid = i->first;
+            // const QUuid& uuid = i->first;
             OctreeSceneStats& stats = i->second;
             serverCount++;
 
@@ -225,17 +219,16 @@ void OctreeStatsDialog::paintEvent(QPaintEvent* event) {
 
     label = _labels[_sendingMode];
     label->setText(sendingMode.str().c_str());
-    
+
     // Server Elements
     QString serversTotalString = locale.toString((uint)totalNodes); // consider adding: .rightJustified(10, ' ');
     QString serversInternalString = locale.toString((uint)totalInternal);
     QString serversLeavesString = locale.toString((uint)totalLeaves);
     label = _labels[_serverElements];
     statsValue.str("");
-    statsValue << 
-        "Total: " << qPrintable(serversTotalString) << " / " <<
-        "Internal: " << qPrintable(serversInternalString) << " / " <<
-        "Leaves: " << qPrintable(serversLeavesString) << "";
+    statsValue << "Total: " << qPrintable(serversTotalString) << " / "
+               << "Internal: " << qPrintable(serversInternalString) << " / "
+               << "Leaves: " << qPrintable(serversLeavesString) << "";
     label->setText(statsValue.str().c_str());
 
     // Processed Packets Elements
@@ -260,7 +253,7 @@ void OctreeStatsDialog::paintEvent(QPaintEvent* event) {
     QString averageReadBitstreamPerPacketString = locale.toString(averageReadBitstreamPerPacket);
 
     label = _labels[_processedPackets];
-    const OctreePacketProcessor& entitiesPacketProcessor =  qApp->getOctreePacketProcessor();
+    const OctreePacketProcessor& entitiesPacketProcessor = qApp->getOctreePacketProcessor();
 
     auto incomingPacketsDepth = entitiesPacketProcessor.packetsToProcessCount();
     auto incomingPPS = entitiesPacketProcessor.getIncomingPPS();
@@ -272,37 +265,33 @@ void OctreeStatsDialog::paintEvent(QPaintEvent* event) {
     QString treeProcessedPPSString = locale.toString(treeProcessedPPS, 'f', FLOATING_POINT_PRECISION);
 
     statsValue.str("");
-    statsValue << 
-        "Queue Size: " << incomingPacketsDepth << " Packets / " <<
-        "Network IN: " << qPrintable(incomingPPSString) << " PPS / " <<
-        "Queue OUT: " << qPrintable(processedPPSString) << " PPS / " <<
-        "Tree IN: " << qPrintable(treeProcessedPPSString) << " PPS";
-        
+    statsValue << "Queue Size: " << incomingPacketsDepth << " Packets / "
+               << "Network IN: " << qPrintable(incomingPPSString) << " PPS / "
+               << "Queue OUT: " << qPrintable(processedPPSString) << " PPS / "
+               << "Tree IN: " << qPrintable(treeProcessedPPSString) << " PPS";
+
     label->setText(statsValue.str().c_str());
 
     label = _labels[_processedPacketsElements];
     statsValue.str("");
-    statsValue << 
-        "" << qPrintable(averageElementsPerPacketString) << " per packet / " <<
-        "" << qPrintable(averageElementsPerSecondString) << " per second";
-        
+    statsValue << "" << qPrintable(averageElementsPerPacketString) << " per packet / "
+               << "" << qPrintable(averageElementsPerSecondString) << " per second";
+
     label->setText(statsValue.str().c_str());
 
     label = _labels[_processedPacketsEntities];
     statsValue.str("");
-    statsValue << 
-        "" << qPrintable(averageEntitiesPerPacketString) << " per packet / " <<
-        "" << qPrintable(averageEntitiesPerSecondString) << " per second";
-        
+    statsValue << "" << qPrintable(averageEntitiesPerPacketString) << " per packet / "
+               << "" << qPrintable(averageEntitiesPerSecondString) << " per second";
+
     label->setText(statsValue.str().c_str());
 
     label = _labels[_processedPacketsTiming];
     statsValue.str("");
-    statsValue << 
-        "Lock Wait: " << qPrintable(averageWaitLockPerPacketString) << " (usecs) / " <<
-        "Uncompress: " << qPrintable(averageUncompressPerPacketString) << " (usecs) / " <<
-        "Process: " << qPrintable(averageReadBitstreamPerPacketString) << " (usecs)";
-        
+    statsValue << "Lock Wait: " << qPrintable(averageWaitLockPerPacketString) << " (usecs) / "
+               << "Uncompress: " << qPrintable(averageUncompressPerPacketString) << " (usecs) / "
+               << "Process: " << qPrintable(averageReadBitstreamPerPacketString) << " (usecs)";
+
     label->setText(statsValue.str().c_str());
 
     auto entitiesEditPacketSender = qApp->getEntityEditPacketSender();
@@ -316,14 +305,12 @@ void OctreeStatsDialog::paintEvent(QPaintEvent* event) {
 
     label = _labels[_outboundEditPackets];
     statsValue.str("");
-    statsValue <<
-        "Queue Size: " << outboundPacketsDepth << " packets / " <<
-        "Queued IN: " << qPrintable(outboundQueuedPPSString) << " PPS / " <<
-        "Sent OUT: " << qPrintable(outboundSentPPSString) << " PPS";
+    statsValue << "Queue Size: " << outboundPacketsDepth << " packets / "
+               << "Queued IN: " << qPrintable(outboundQueuedPPSString) << " PPS / "
+               << "Sent OUT: " << qPrintable(outboundSentPPSString) << " PPS";
 
     label->setText(statsValue.str().c_str());
 
-    
     // Entity Edits update time
     label = _labels[_entityUpdateTime];
     auto averageEditDelta = entitiesTree->getAverageEditDeltas();
@@ -333,16 +320,15 @@ void OctreeStatsDialog::paintEvent(QPaintEvent* event) {
     QString maxEditDeltaString = locale.toString((uint)maxEditDelta);
 
     statsValue.str("");
-    statsValue << 
-        "Average: " << qPrintable(averageEditDeltaString) << " (usecs) / " <<
-        "Max: " << qPrintable(maxEditDeltaString) << " (usecs)";
-        
+    statsValue << "Average: " << qPrintable(averageEditDeltaString) << " (usecs) / "
+               << "Max: " << qPrintable(maxEditDeltaString) << " (usecs)";
+
     label->setText(statsValue.str().c_str());
 
     // Entity Edits
     label = _labels[_entityUpdates];
     auto bytesPerEdit = entitiesTree->getAverageEditBytes();
-    
+
     auto updatesPerSecond = _averageUpdatesPerSecond.getAverage();
     if (updatesPerSecond < 1) {
         updatesPerSecond = 0; // we don't really care about small updates per second so suppress those
@@ -353,11 +339,10 @@ void OctreeStatsDialog::paintEvent(QPaintEvent* event) {
     QString bytesPerEditString = locale.toString(bytesPerEdit);
 
     statsValue.str("");
-    statsValue << 
-        "" << qPrintable(updatesPerSecondString) << " updates per second / " <<
-        "" << qPrintable(totalTrackedEditsString) << " total updates / " <<
-        "Average Size: " << qPrintable(bytesPerEditString) << " bytes ";
-        
+    statsValue << "" << qPrintable(updatesPerSecondString) << " updates per second / "
+               << "" << qPrintable(totalTrackedEditsString) << " total updates / "
+               << "Average Size: " << qPrintable(bytesPerEditString) << " bytes ";
+
     label->setText(statsValue.str().c_str());
 
     showAllOctreeServers();
@@ -370,7 +355,7 @@ void OctreeStatsDialog::showAllOctreeServers() {
 
 void OctreeStatsDialog::showOctreeServersOfType(NodeType_t serverType) {
     QLocale locale(QLocale::English);
-    
+
     auto node = DependencyManager::get<NodeList>()->soloNodeOfType(serverType);
     if (node) {
         std::stringstream serverDetails("");
@@ -411,12 +396,13 @@ void OctreeStatsDialog::showOctreeServersOfType(NodeType_t serverType) {
                             QString lastFullBytesString = locale.toString((uint)stats.getLastFullTotalBytes());
                             QString lastFullPPSString = locale.toString(lastFullPPS);
 
-                            extraDetails << "<br/>" << "Last Full Scene... " <<
-                                "Encode: " << qPrintable(lastFullEncodeString) << " ms " <<
-                                "Send: " << qPrintable(lastFullSendString) << " ms " <<
-                                "Packets: " << qPrintable(lastFullPacketsString) << " " <<
-                                "Bytes: " << qPrintable(lastFullBytesString) << " " <<
-                                "Rate: " << qPrintable(lastFullPPSString) << " PPS";
+                            extraDetails << "<br/>"
+                                         << "Last Full Scene... "
+                                         << "Encode: " << qPrintable(lastFullEncodeString) << " ms "
+                                         << "Send: " << qPrintable(lastFullSendString) << " ms "
+                                         << "Packets: " << qPrintable(lastFullPacketsString) << " "
+                                         << "Bytes: " << qPrintable(lastFullBytesString) << " "
+                                         << "Rate: " << qPrintable(lastFullPPSString) << " PPS";
 
                             for (int i = 0; i < OctreeSceneStats::ITEM_COUNT; i++) {
                                 OctreeSceneStats::Item item = (OctreeSceneStats::Item)(i);
@@ -429,12 +415,12 @@ void OctreeStatsDialog::showOctreeServersOfType(NodeType_t serverType) {
                             QString internalString = locale.toString((uint)stats.getTotalInternal());
                             QString leavesString = locale.toString((uint)stats.getTotalLeaves());
 
-                            serverDetails << "<br/>" << "Node UUID: " << qPrintable(nodeUUID.toString()) << " ";
+                            serverDetails << "<br/>"
+                                          << "Node UUID: " << qPrintable(nodeUUID.toString()) << " ";
 
-                            serverDetails << "<br/>" << "Elements: " <<
-                                qPrintable(totalString) << " total " <<
-                                qPrintable(internalString) << " internal " <<
-                                qPrintable(leavesString) << " leaves ";
+                            serverDetails << "<br/>"
+                                          << "Elements: " << qPrintable(totalString) << " total " << qPrintable(internalString)
+                                          << " internal " << qPrintable(leavesString) << " leaves ";
 
                             QString incomingPacketsString = locale.toString((uint)stats.getIncomingPackets());
                             QString incomingBytesString = locale.toString((uint)stats.getIncomingBytes());
@@ -454,29 +440,31 @@ void OctreeStatsDialog::showOctreeServersOfType(NodeType_t serverType) {
                             QString incomingPingTimeString = locale.toString(node->getPingMs());
                             QString incomingClockSkewString = locale.toString(clockSkewInMS);
 
-                            serverDetails << "<br/>" << "Incoming Packets: " << qPrintable(incomingPacketsString) <<
-                                "/ Lost: " << qPrintable(incomingLikelyLostString) <<
-                                "/ Recovered: " << qPrintable(incomingRecovered);
+                            serverDetails << "<br/>"
+                                          << "Incoming Packets: " << qPrintable(incomingPacketsString)
+                                          << "/ Lost: " << qPrintable(incomingLikelyLostString)
+                                          << "/ Recovered: " << qPrintable(incomingRecovered);
 
-                            serverDetails << "<br/>" << " Out of Order: " << qPrintable(incomingOutOfOrderString) <<
-                                "/ Early: " << qPrintable(incomingEarlyString) <<
-                                "/ Late: " << qPrintable(incomingLateString) <<
-                                "/ Unreasonable: " << qPrintable(incomingUnreasonableString);
+                            serverDetails << "<br/>"
+                                          << " Out of Order: " << qPrintable(incomingOutOfOrderString)
+                                          << "/ Early: " << qPrintable(incomingEarlyString)
+                                          << "/ Late: " << qPrintable(incomingLateString)
+                                          << "/ Unreasonable: " << qPrintable(incomingUnreasonableString);
 
-                            serverDetails << "<br/>" <<
-                                " Average Flight Time: " << qPrintable(incomingFlightTimeString) << " msecs";
+                            serverDetails << "<br/>"
+                                          << " Average Flight Time: " << qPrintable(incomingFlightTimeString) << " msecs";
 
-                            serverDetails << "<br/>" <<
-                                " Average Ping Time: " << qPrintable(incomingPingTimeString) << " msecs";
+                            serverDetails << "<br/>"
+                                          << " Average Ping Time: " << qPrintable(incomingPingTimeString) << " msecs";
 
-                            serverDetails << "<br/>" <<
-                                " Average Clock Skew: " << qPrintable(incomingClockSkewString) << " msecs" <<
-                                " [" << qPrintable(formattedClockSkewString) << "]";
+                            serverDetails << "<br/>"
+                                          << " Average Clock Skew: " << qPrintable(incomingClockSkewString) << " msecs"
+                                          << " [" << qPrintable(formattedClockSkewString) << "]";
 
-
-                            serverDetails << "<br/>" << "Incoming" <<
-                                " Bytes: " << qPrintable(incomingBytesString) <<
-                                " Wasted Bytes: " << qPrintable(incomingWastedBytesString);
+                            serverDetails << "<br/>"
+                                          << "Incoming"
+                                          << " Bytes: " << qPrintable(incomingBytesString)
+                                          << " Wasted Bytes: " << qPrintable(incomingWastedBytesString);
 
                             serverDetails << extraDetails.str();
                             if (_extraServerDetails == MORE) {
@@ -512,5 +500,3 @@ void OctreeStatsDialog::closeEvent(QCloseEvent* event) {
     QDialog::closeEvent(event);
     emit closed();
 }
-
-

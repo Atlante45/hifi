@@ -12,9 +12,9 @@
 #ifndef hifi_Billboard3DOverlay_h
 #define hifi_Billboard3DOverlay_h
 
-#include "Planar3DOverlay.h"
-#include "PanelAttachable.h"
 #include "Billboardable.h"
+#include "PanelAttachable.h"
+#include "Planar3DOverlay.h"
 
 class Billboard3DOverlay : public Planar3DOverlay, public PanelAttachable, public Billboardable {
     Q_OBJECT

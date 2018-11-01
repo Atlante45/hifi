@@ -44,7 +44,9 @@ public:
     bool isPlayingAvatarSound() const { return _agent->isPlayingAvatarSound(); }
 
     bool isListeningToAudioStream() const { return _agent->isListeningToAudioStream(); }
-    void setIsListeningToAudioStream(bool isListeningToAudioStream) const { _agent->setIsListeningToAudioStream(isListeningToAudioStream); }
+    void setIsListeningToAudioStream(bool isListeningToAudioStream) const {
+        _agent->setIsListeningToAudioStream(isListeningToAudioStream);
+    }
 
     bool isNoiseGateEnabled() const { return _agent->isNoiseGateEnabled(); }
     void setIsNoiseGateEnabled(bool isNoiseGateEnabled) const { _agent->setIsNoiseGateEnabled(isNoiseGateEnabled); }
@@ -73,8 +75,6 @@ public slots:
 
 private:
     Agent* _agent;
-
 };
-
 
 #endif // hifi_AgentScriptingInterface_h

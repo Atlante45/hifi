@@ -62,6 +62,7 @@ private:
         InputDevice() : controller::InputDevice("Hydra") {}
         void setDebugDrawRaw(bool flag);
         void setDebugDrawCalibrated(bool flag);
+
     private:
         // Device functions
         virtual controller::Input::NamedVector getAvailableInputs() const override;
@@ -70,7 +71,8 @@ private:
         virtual void focusOutEvent() override;
 
         void handleButtonEvent(unsigned int buttons, bool left);
-        void handlePoseEvent(float deltaTime, const controller::InputCalibrationData& inputCalibrationData, const glm::vec3& position, const glm::quat& rotation, bool left);
+        void handlePoseEvent(float deltaTime, const controller::InputCalibrationData& inputCalibrationData,
+                             const glm::vec3& position, const glm::quat& rotation, bool left);
         void updateCalibration(SixenseControllerData* controllers);
 
         friend class SixenseManager;
@@ -102,4 +104,3 @@ private:
 };
 
 #endif // hifi_SixenseManager_h
-

@@ -12,11 +12,11 @@
 
 #include <QLoggingCategory>
 
-#include <controllers/UserInputMapper.h>
 #include <NumericalConstants.h>
 #include <PathUtils.h>
 #include <Preferences.h>
 #include <SettingHandle.h>
+#include <controllers/UserInputMapper.h>
 
 Q_DECLARE_LOGGING_CATEGORY(inputplugins)
 Q_LOGGING_CATEGORY(inputplugins, "hifi.inputplugins")
@@ -77,51 +77,23 @@ enum LeapMotionJointIndex {
 };
 
 static controller::StandardPoseChannel LeapMotionJointIndexToPoseIndexMap[LeapMotionJointIndex::Size] = {
-    controller::LEFT_HAND,
-    controller::LEFT_HAND_THUMB1,
-    controller::LEFT_HAND_THUMB2,
-    controller::LEFT_HAND_THUMB3,
-    controller::LEFT_HAND_THUMB4,
-    controller::LEFT_HAND_INDEX1,
-    controller::LEFT_HAND_INDEX2,
-    controller::LEFT_HAND_INDEX3,
-    controller::LEFT_HAND_INDEX4,
-    controller::LEFT_HAND_MIDDLE1,
-    controller::LEFT_HAND_MIDDLE2,
-    controller::LEFT_HAND_MIDDLE3,
-    controller::LEFT_HAND_MIDDLE4,
-    controller::LEFT_HAND_RING1,
-    controller::LEFT_HAND_RING2,
-    controller::LEFT_HAND_RING3,
-    controller::LEFT_HAND_RING4,
-    controller::LEFT_HAND_PINKY1,
-    controller::LEFT_HAND_PINKY2,
-    controller::LEFT_HAND_PINKY3,
-    controller::LEFT_HAND_PINKY4,
-    controller::RIGHT_HAND,
-    controller::RIGHT_HAND_THUMB1,
-    controller::RIGHT_HAND_THUMB2,
-    controller::RIGHT_HAND_THUMB3,
-    controller::RIGHT_HAND_THUMB4,
-    controller::RIGHT_HAND_INDEX1,
-    controller::RIGHT_HAND_INDEX2,
-    controller::RIGHT_HAND_INDEX3,
-    controller::RIGHT_HAND_INDEX4,
-    controller::RIGHT_HAND_MIDDLE1,
-    controller::RIGHT_HAND_MIDDLE2,
-    controller::RIGHT_HAND_MIDDLE3,
-    controller::RIGHT_HAND_MIDDLE4,
-    controller::RIGHT_HAND_RING1,
-    controller::RIGHT_HAND_RING2,
-    controller::RIGHT_HAND_RING3,
-    controller::RIGHT_HAND_RING4,
-    controller::RIGHT_HAND_PINKY1,
-    controller::RIGHT_HAND_PINKY2,
-    controller::RIGHT_HAND_PINKY3,
-    controller::RIGHT_HAND_PINKY4
+    controller::LEFT_HAND,          controller::LEFT_HAND_THUMB1,   controller::LEFT_HAND_THUMB2,
+    controller::LEFT_HAND_THUMB3,   controller::LEFT_HAND_THUMB4,   controller::LEFT_HAND_INDEX1,
+    controller::LEFT_HAND_INDEX2,   controller::LEFT_HAND_INDEX3,   controller::LEFT_HAND_INDEX4,
+    controller::LEFT_HAND_MIDDLE1,  controller::LEFT_HAND_MIDDLE2,  controller::LEFT_HAND_MIDDLE3,
+    controller::LEFT_HAND_MIDDLE4,  controller::LEFT_HAND_RING1,    controller::LEFT_HAND_RING2,
+    controller::LEFT_HAND_RING3,    controller::LEFT_HAND_RING4,    controller::LEFT_HAND_PINKY1,
+    controller::LEFT_HAND_PINKY2,   controller::LEFT_HAND_PINKY3,   controller::LEFT_HAND_PINKY4,
+    controller::RIGHT_HAND,         controller::RIGHT_HAND_THUMB1,  controller::RIGHT_HAND_THUMB2,
+    controller::RIGHT_HAND_THUMB3,  controller::RIGHT_HAND_THUMB4,  controller::RIGHT_HAND_INDEX1,
+    controller::RIGHT_HAND_INDEX2,  controller::RIGHT_HAND_INDEX3,  controller::RIGHT_HAND_INDEX4,
+    controller::RIGHT_HAND_MIDDLE1, controller::RIGHT_HAND_MIDDLE2, controller::RIGHT_HAND_MIDDLE3,
+    controller::RIGHT_HAND_MIDDLE4, controller::RIGHT_HAND_RING1,   controller::RIGHT_HAND_RING2,
+    controller::RIGHT_HAND_RING3,   controller::RIGHT_HAND_RING4,   controller::RIGHT_HAND_PINKY1,
+    controller::RIGHT_HAND_PINKY2,  controller::RIGHT_HAND_PINKY3,  controller::RIGHT_HAND_PINKY4
 };
 
-#define UNKNOWN_JOINT (controller::StandardPoseChannel)0 
+#define UNKNOWN_JOINT (controller::StandardPoseChannel)0
 
 static controller::StandardPoseChannel LeapMotionJointIndexToPoseIndex(LeapMotionJointIndex i) {
     assert(i >= 0 && i < LeapMotionJointIndex::Size);
@@ -132,69 +104,67 @@ static controller::StandardPoseChannel LeapMotionJointIndexToPoseIndex(LeapMotio
     }
 }
 
-QStringList controllerJointNames = {
-    "Hips",
-    "RightUpLeg",
-    "RightLeg",
-    "RightFoot",
-    "LeftUpLeg",
-    "LeftLeg",
-    "LeftFoot",
-    "Spine",
-    "Spine1",
-    "Spine2",
-    "Spine3",
-    "Neck",
-    "Head",
-    "RightShoulder",
-    "RightArm",
-    "RightForeArm",
-    "RightHand",
-    "RightHandThumb1",
-    "RightHandThumb2",
-    "RightHandThumb3",
-    "RightHandThumb4",
-    "RightHandIndex1",
-    "RightHandIndex2",
-    "RightHandIndex3",
-    "RightHandIndex4",
-    "RightHandMiddle1",
-    "RightHandMiddle2",
-    "RightHandMiddle3",
-    "RightHandMiddle4",
-    "RightHandRing1",
-    "RightHandRing2",
-    "RightHandRing3",
-    "RightHandRing4",
-    "RightHandPinky1",
-    "RightHandPinky2",
-    "RightHandPinky3",
-    "RightHandPinky4",
-    "LeftShoulder",
-    "LeftArm",
-    "LeftForeArm",
-    "LeftHand",
-    "LeftHandThumb1",
-    "LeftHandThumb2",
-    "LeftHandThumb3",
-    "LeftHandThumb4",
-    "LeftHandIndex1",
-    "LeftHandIndex2",
-    "LeftHandIndex3",
-    "LeftHandIndex4",
-    "LeftHandMiddle1",
-    "LeftHandMiddle2",
-    "LeftHandMiddle3",
-    "LeftHandMiddle4",
-    "LeftHandRing1",
-    "LeftHandRing2",
-    "LeftHandRing3",
-    "LeftHandRing4",
-    "LeftHandPinky1",
-    "LeftHandPinky2",
-    "LeftHandPinky3",
-    "LeftHandPinky4"
-};
+QStringList controllerJointNames = { "Hips",
+                                     "RightUpLeg",
+                                     "RightLeg",
+                                     "RightFoot",
+                                     "LeftUpLeg",
+                                     "LeftLeg",
+                                     "LeftFoot",
+                                     "Spine",
+                                     "Spine1",
+                                     "Spine2",
+                                     "Spine3",
+                                     "Neck",
+                                     "Head",
+                                     "RightShoulder",
+                                     "RightArm",
+                                     "RightForeArm",
+                                     "RightHand",
+                                     "RightHandThumb1",
+                                     "RightHandThumb2",
+                                     "RightHandThumb3",
+                                     "RightHandThumb4",
+                                     "RightHandIndex1",
+                                     "RightHandIndex2",
+                                     "RightHandIndex3",
+                                     "RightHandIndex4",
+                                     "RightHandMiddle1",
+                                     "RightHandMiddle2",
+                                     "RightHandMiddle3",
+                                     "RightHandMiddle4",
+                                     "RightHandRing1",
+                                     "RightHandRing2",
+                                     "RightHandRing3",
+                                     "RightHandRing4",
+                                     "RightHandPinky1",
+                                     "RightHandPinky2",
+                                     "RightHandPinky3",
+                                     "RightHandPinky4",
+                                     "LeftShoulder",
+                                     "LeftArm",
+                                     "LeftForeArm",
+                                     "LeftHand",
+                                     "LeftHandThumb1",
+                                     "LeftHandThumb2",
+                                     "LeftHandThumb3",
+                                     "LeftHandThumb4",
+                                     "LeftHandIndex1",
+                                     "LeftHandIndex2",
+                                     "LeftHandIndex3",
+                                     "LeftHandIndex4",
+                                     "LeftHandMiddle1",
+                                     "LeftHandMiddle2",
+                                     "LeftHandMiddle3",
+                                     "LeftHandMiddle4",
+                                     "LeftHandRing1",
+                                     "LeftHandRing2",
+                                     "LeftHandRing3",
+                                     "LeftHandRing4",
+                                     "LeftHandPinky1",
+                                     "LeftHandPinky2",
+                                     "LeftHandPinky3",
+                                     "LeftHandPinky4" };
 
 static const char* getControllerJointName(controller::StandardPoseChannel i) {
     if (i >= 0 && i < controller::NUM_STANDARD_POSES) {
@@ -220,14 +190,12 @@ void LeapMotionPlugin::pluginUpdate(float deltaTime, const controller::InputCali
         _hasLeapMotionBeenConnected = true;
     }
 
-    processFrame(frame);  // Updates _joints.
+    processFrame(frame); // Updates _joints.
 
     auto joints = _joints;
 
     auto userInputMapper = DependencyManager::get<controller::UserInputMapper>();
-    userInputMapper->withLock([&, this]() {
-        _inputDevice->update(deltaTime, inputCalibrationData, joints, _prevJoints);
-    });
+    userInputMapper->withLock([&, this]() { _inputDevice->update(deltaTime, inputCalibrationData, joints, _prevJoints); });
 
     _prevJoints = joints;
 
@@ -251,23 +219,23 @@ QString LeapMotionPlugin::InputDevice::getDefaultMappingConfig() const {
 }
 
 void LeapMotionPlugin::InputDevice::update(float deltaTime, const controller::InputCalibrationData& inputCalibrationData,
-        const std::vector<LeapMotionPlugin::LeapMotionJoint>& joints,
-        const std::vector<LeapMotionPlugin::LeapMotionJoint>& prevJoints) {
-
+                                           const std::vector<LeapMotionPlugin::LeapMotionJoint>& joints,
+                                           const std::vector<LeapMotionPlugin::LeapMotionJoint>& prevJoints) {
     glm::mat4 controllerToAvatar = glm::inverse(inputCalibrationData.avatarMat) * inputCalibrationData.sensorToWorldMat;
     glm::quat controllerToAvatarRotation = glmExtractRotation(controllerToAvatar);
 
-    glm::vec3 hmdSensorPosition;    // HMD
+    glm::vec3 hmdSensorPosition; // HMD
     glm::quat hmdSensorOrientation; // HMD
-    glm::vec3 leapMotionOffset;     // Desktop
+    glm::vec3 leapMotionOffset; // Desktop
     if (_isLeapOnHMD) {
         hmdSensorPosition = extractTranslation(inputCalibrationData.hmdSensorMat);
         hmdSensorOrientation = extractRotation(inputCalibrationData.hmdSensorMat);
     } else {
-        // Desktop "zero" position is some distance above the Leap Motion sensor and half the avatar's shoulder-to-hand length 
+        // Desktop "zero" position is some distance above the Leap Motion sensor and half the avatar's shoulder-to-hand length
         // in front of avatar.
-        float halfShouldToHandLength = fabsf(extractTranslation(inputCalibrationData.defaultLeftHand).x
-            - extractTranslation(inputCalibrationData.defaultLeftArm).x) / 2.0f;
+        float halfShouldToHandLength = fabsf(extractTranslation(inputCalibrationData.defaultLeftHand).x -
+                                             extractTranslation(inputCalibrationData.defaultLeftArm).x) /
+                                       2.0f;
         leapMotionOffset = glm::vec3(0.0f, _desktopHeightOffset, halfShouldToHandLength);
     }
 
@@ -283,7 +251,7 @@ void LeapMotionPlugin::InputDevice::update(float deltaTime, const controller::In
         glm::quat rot;
         if (_isLeapOnHMD) {
             auto jointPosition = joints[i].position;
-            const glm::vec3 HMD_EYE_TO_LEAP_OFFSET = glm::vec3(0.0f, 0.0f, -0.09f);  // Eyes to surface of Leap Motion.
+            const glm::vec3 HMD_EYE_TO_LEAP_OFFSET = glm::vec3(0.0f, 0.0f, -0.09f); // Eyes to surface of Leap Motion.
             jointPosition = glm::vec3(-jointPosition.x, -jointPosition.z, -jointPosition.y) + HMD_EYE_TO_LEAP_OFFSET;
             jointPosition = hmdSensorPosition + hmdSensorOrientation * jointPosition;
             pos = transformPoint(controllerToAvatar, jointPosition);
@@ -299,7 +267,7 @@ void LeapMotionPlugin::InputDevice::update(float deltaTime, const controller::In
 
         glm::vec3 linearVelocity, angularVelocity;
         if (i < prevJoints.size()) {
-            linearVelocity = (pos - (prevJoints[i].position * METERS_PER_CENTIMETER)) / deltaTime;  // m/s
+            linearVelocity = (pos - (prevJoints[i].position * METERS_PER_CENTIMETER)) / deltaTime; // m/s
             // quat log imaginary part points along the axis of rotation, with length of one half the angle of rotation.
             glm::quat d = glm::log(rot * glm::inverse(prevJoints[i].orientation));
             angularVelocity = glm::vec3(d.x, d.y, d.z) / (0.5f * deltaTime); // radians/s
@@ -314,23 +282,21 @@ void LeapMotionPlugin::init() {
     auto preferences = DependencyManager::get<Preferences>();
     static const QString LEAPMOTION_PLUGIN { "Leap Motion" };
     {
-        auto getter = [this]()->bool { return _enabled; };
+        auto getter = [this]() -> bool { return _enabled; };
         auto setter = [this](bool value) {
             _enabled = value;
             emit deviceStatusChanged(getName(), isRunning());
             saveSettings();
             if (!_enabled) {
                 auto userInputMapper = DependencyManager::get<controller::UserInputMapper>();
-                userInputMapper->withLock([&, this]() {
-                    _inputDevice->clearState();
-                });
+                userInputMapper->withLock([&, this]() { _inputDevice->clearState(); });
             }
         };
         auto preference = new CheckPreference(LEAPMOTION_PLUGIN, "Enabled", getter, setter);
         preferences->addPreference(preference);
     }
     {
-        auto getter = [this]()->QString { return _sensorLocation; };
+        auto getter = [this]() -> QString { return _sensorLocation; };
         auto setter = [this](QString value) {
             _sensorLocation = value;
             saveSettings();
@@ -342,7 +308,7 @@ void LeapMotionPlugin::init() {
         preferences->addPreference(preference);
     }
     {
-        auto getter = [this]()->float { return _desktopHeightOffset; };
+        auto getter = [this]() -> float { return _desktopHeightOffset; };
         auto setter = [this](float value) {
             _desktopHeightOffset = value;
             saveSettings();
@@ -407,8 +373,8 @@ void LeapMotionPlugin::loadSettings() {
         _enabled = settings.value(SETTINGS_ENABLED_KEY, QVariant(DEFAULT_ENABLED)).toBool();
         emit deviceStatusChanged(getName(), isRunning());
         _sensorLocation = settings.value(SETTINGS_SENSOR_LOCATION_KEY, QVariant(DEFAULT_SENSOR_LOCATION)).toString();
-        _desktopHeightOffset = 
-            settings.value(SETTINGS_DESKTOP_HEIGHT_OFFSET_KEY, QVariant(DEFAULT_DESKTOP_HEIGHT_OFFSET)).toFloat();
+        _desktopHeightOffset = settings.value(SETTINGS_DESKTOP_HEIGHT_OFFSET_KEY, QVariant(DEFAULT_DESKTOP_HEIGHT_OFFSET))
+                                   .toFloat();
         applySensorLocation();
         applyDesktopHeightOffset();
     }
@@ -490,4 +456,3 @@ void LeapMotionPlugin::processFrame(const Leap::Frame& frame) {
         }
     }
 }
-

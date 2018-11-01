@@ -15,7 +15,7 @@
 
 class Cube3DOverlay : public Volume3DOverlay {
     Q_OBJECT
-    
+
 public:
     static QString const TYPE;
     virtual QString getType() const override { return TYPE; }
@@ -33,6 +33,7 @@ public:
     QVariant getProperty(const QString& property) override;
 
     virtual scriptable::ScriptableModelBase getScriptableModel() override;
+
 protected:
     Transform evalRenderTransform() override;
 
@@ -41,5 +42,4 @@ private:
     std::array<int, 12> _geometryIds;
 };
 
- 
 #endif // hifi_Cube3DOverlay_h

@@ -10,19 +10,18 @@
 #include <mutex>
 
 #include <QtCore/QCoreApplication>
-#include <QtCore/QDir>
 #include <QtCore/QDebug>
+#include <QtCore/QDir>
 #include <QtCore/QPluginLoader>
 
 #include <DependencyManager.h>
 #include <UserActivityLogger.h>
 
-#include "RuntimePlugin.h"
 #include "CodecPlugin.h"
 #include "DisplayPlugin.h"
 #include "InputPlugin.h"
 #include "PluginLogging.h"
-
+#include "RuntimePlugin.h"
 
 void PluginManager::setDisplayPluginProvider(const DisplayPluginProvider& provider) {
     _displayPluginProvider = provider;
@@ -194,7 +193,6 @@ const DisplayPluginList& PluginManager::getDisplayPlugins() {
         // Grab the built in plugins
         _displayPlugins = _displayPluginProvider();
 
-
         // Now grab the dynamic plugins
         for (auto loader : getLoadedPlugins()) {
             DisplayProvider* displayProvider = qobject_cast<DisplayProvider*>(loader->instance());
@@ -210,18 +208,15 @@ const DisplayPluginList& PluginManager::getDisplayPlugins() {
             plugin->setContainer(_container);
             plugin->init();
         }
-
     });
     return _displayPlugins;
 }
 
 void PluginManager::disableDisplayPlugin(const QString& name) {
-    auto it = std::remove_if(_displayPlugins.begin(), _displayPlugins.end(), [&](const DisplayPluginPointer& plugin){
-        return plugin->getName() == name;
-    });
+    auto it = std::remove_if(_displayPlugins.begin(), _displayPlugins.end(),
+                             [&](const DisplayPluginPointer& plugin) { return plugin->getName() == name; });
     _displayPlugins.erase(it, _displayPlugins.end());
 }
-
 
 const InputPluginList& PluginManager::getInputPlugins() {
     static std::once_flag once;
@@ -255,9 +250,11 @@ const InputPluginList& PluginManager::getInputPlugins() {
         for (auto plugin : _inputPlugins) {
             connect(plugin.get(), &Plugin::deviceConnected, this, deviceAddedCallback, Qt::QueuedConnection);
             connect(plugin.get(), &Plugin::subdeviceConnected, this, subdeviceAddedCallback, Qt::QueuedConnection);
-            connect(plugin.get(), &Plugin::deviceStatusChanged, this, [&](const QString& deviceName, bool isRunning) {
-                emit inputDeviceRunningChanged(deviceName, isRunning, getRunningInputDeviceNames());
-            }, Qt::QueuedConnection);
+            connect(plugin.get(), &Plugin::deviceStatusChanged, this,
+                    [&](const QString& deviceName, bool isRunning) {
+                        emit inputDeviceRunningChanged(deviceName, isRunning, getRunningInputDeviceNames());
+                    },
+                    Qt::QueuedConnection);
             plugin->setContainer(_container);
             plugin->init();
         }
@@ -267,7 +264,7 @@ const InputPluginList& PluginManager::getInputPlugins() {
 
 QStringList PluginManager::getRunningInputDeviceNames() const {
     QStringList runningDevices;
-    for (auto plugin: _inputPlugins) {
+    for (auto plugin : _inputPlugins) {
         if (plugin->isRunning()) {
             runningDevices << plugin->getName();
         }
@@ -288,9 +285,8 @@ DisplayPluginList PluginManager::getPreferredDisplayPlugins() {
         auto plugins = getDisplayPlugins();
 
         for (auto pluginName : preferredDisplayPlugins) {
-            auto it = std::find_if(plugins.begin(), plugins.end(), [&](DisplayPluginPointer plugin) {
-                return plugin->getName() == pluginName;
-            });
+            auto it = std::find_if(plugins.begin(), plugins.end(),
+                                   [&](DisplayPluginPointer plugin) { return plugin->getName() == pluginName; });
             if (it != plugins.end()) {
                 displayPlugins.push_back(*it);
             }
@@ -299,7 +295,6 @@ DisplayPluginList PluginManager::getPreferredDisplayPlugins() {
 
     return displayPlugins;
 }
-
 
 void PluginManager::disableDisplays(const QStringList& displays) {
     disabledDisplays << displays;

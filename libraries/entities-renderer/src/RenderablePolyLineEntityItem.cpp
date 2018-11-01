@@ -13,15 +13,15 @@
 #include <ParticleEffectEntityItem.h>
 
 #include <GeometryCache.h>
-#include <StencilMaskPass.h>
-#include <TextureCache.h>
 #include <PathUtils.h>
 #include <PerfStat.h>
+#include <StencilMaskPass.h>
+#include <TextureCache.h>
 #include <shaders/Shaders.h>
 
 //#define POLYLINE_ENTITY_USE_FADE_EFFECT
 #ifdef POLYLINE_ENTITY_USE_FADE_EFFECT
-#   include <FadeEffect.h>
+#include <FadeEffect.h>
 #endif
 
 using namespace render;
@@ -35,7 +35,8 @@ static gpu::PipelinePointer polylinePipeline;
 static gpu::PipelinePointer polylineFadePipeline;
 #endif
 
-static render::ShapePipelinePointer shapePipelineFactory(const render::ShapePlumber& plumber, const render::ShapeKey& key, gpu::Batch& batch) {
+static render::ShapePipelinePointer shapePipelineFactory(const render::ShapePlumber& plumber, const render::ShapeKey& key,
+                                                         gpu::Batch& batch) {
     if (!polylinePipeline) {
         gpu::ShaderPointer program = gpu::Shader::createProgram(shader::entities_renderer::program::paintStroke);
 #ifdef POLYLINE_ENTITY_USE_FADE_EFFECT
@@ -46,9 +47,8 @@ static render::ShapePipelinePointer shapePipelineFactory(const render::ShapePlum
         gpu::StatePointer state = gpu::StatePointer(new gpu::State());
         state->setDepthTest(true, true, gpu::LESS_EQUAL);
         PrepareStencil::testMask(*state);
-        state->setBlendFunction(true,
-            gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
-            gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
+        state->setBlendFunction(true, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
+                                gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
         polylinePipeline = gpu::Pipeline::create(program, state);
 #ifdef POLYLINE_ENTITY_USE_FADE_EFFECT
         _fadePipeline = gpu::Pipeline::create(fadeProgram, state);
@@ -58,7 +58,8 @@ static render::ShapePipelinePointer shapePipelineFactory(const render::ShapePlum
 #ifdef POLYLINE_ENTITY_USE_FADE_EFFECT
     if (key.isFaded()) {
         auto fadeEffect = DependencyManager::get<FadeEffect>();
-        return std::make_shared<render::ShapePipeline>(_fadePipeline, nullptr, fadeEffect->getBatchSetter(), fadeEffect->getItemUniformSetter());
+        return std::make_shared<render::ShapePipeline>(_fadePipeline, nullptr, fadeEffect->getBatchSetter(),
+                                                       fadeEffect->getItemUniformSetter());
     } else {
 #endif
         return std::make_shared<render::ShapePipeline>(polylinePipeline, nullptr, nullptr, nullptr);
@@ -72,10 +73,14 @@ PolyLineEntityRenderer::PolyLineEntityRenderer(const EntityItemPointer& entity) 
     std::call_once(once, [&] {
         CUSTOM_PIPELINE_NUMBER = render::ShapePipeline::registerCustomShapePipelineFactory(shapePipelineFactory);
         polylineFormat.reset(new gpu::Stream::Format());
-        polylineFormat->setAttribute(gpu::Stream::POSITION, 0, gpu::Element(gpu::VEC3, gpu::FLOAT, gpu::XYZ), offsetof(Vertex, position));
-        polylineFormat->setAttribute(gpu::Stream::NORMAL, 0, gpu::Element(gpu::VEC3, gpu::FLOAT, gpu::XYZ), offsetof(Vertex, normal));
-        polylineFormat->setAttribute(gpu::Stream::TEXCOORD, 0, gpu::Element(gpu::VEC2, gpu::FLOAT, gpu::UV), offsetof(Vertex, uv));
-        polylineFormat->setAttribute(gpu::Stream::COLOR, 0, gpu::Element(gpu::VEC3, gpu::FLOAT, gpu::RGB), offsetof(Vertex, color));
+        polylineFormat->setAttribute(gpu::Stream::POSITION, 0, gpu::Element(gpu::VEC3, gpu::FLOAT, gpu::XYZ),
+                                     offsetof(Vertex, position));
+        polylineFormat->setAttribute(gpu::Stream::NORMAL, 0, gpu::Element(gpu::VEC3, gpu::FLOAT, gpu::XYZ),
+                                     offsetof(Vertex, normal));
+        polylineFormat->setAttribute(gpu::Stream::TEXCOORD, 0, gpu::Element(gpu::VEC2, gpu::FLOAT, gpu::UV),
+                                     offsetof(Vertex, uv));
+        polylineFormat->setAttribute(gpu::Stream::COLOR, 0, gpu::Element(gpu::VEC3, gpu::FLOAT, gpu::RGB),
+                                     offsetof(Vertex, color));
     });
 
     _verticesBuffer = std::make_shared<gpu::Buffer>();
@@ -90,16 +95,12 @@ ShapeKey PolyLineEntityRenderer::getShapeKey() {
 }
 
 bool PolyLineEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const {
-    return (
-        entity->pointsChanged() ||
-        entity->strokeWidthsChanged() ||
-        entity->normalsChanged() ||
-        entity->texturesChanged() ||
-        entity->strokeColorsChanged()
-    );
+    return (entity->pointsChanged() || entity->strokeWidthsChanged() || entity->normalsChanged() || entity->texturesChanged() ||
+            entity->strokeColorsChanged());
 }
 
-void PolyLineEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) {
+void PolyLineEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                            const TypedEntityPointer& entity) {
     static const QUrl DEFAULT_POLYLINE_TEXTURE = QUrl(PathUtils::resourcesPath() + "images/paintStroke.png");
     QUrl entityTextures = DEFAULT_POLYLINE_TEXTURE;
     if (entity->texturesChanged()) {
@@ -110,8 +111,7 @@ void PolyLineEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& 
         }
         _texture = DependencyManager::get<TextureCache>()->getTexture(entityTextures);
     }
-    
-    
+
     if (!_texture) {
         _texture = DependencyManager::get<TextureCache>()->getTexture(entityTextures);
     }
@@ -122,7 +122,6 @@ void PolyLineEntityRenderer::doRenderUpdateAsynchronousTyped(const TypedEntityPo
     auto strokeWidthsChanged = entity->strokeWidthsChanged();
     auto normalsChanged = entity->normalsChanged();
     auto strokeColorsChanged = entity->strokeColorsChanged();
-    
 
     bool isUVModeStretch = entity->getIsUVModeStretch();
     entity->resetPolyLineChanged();
@@ -142,12 +141,14 @@ void PolyLineEntityRenderer::doRenderUpdateAsynchronousTyped(const TypedEntityPo
     }
     if (strokeColorsChanged) {
         _lastStrokeColors = entity->getStrokeColors();
-        _lastStrokeColors = _lastNormals.size() == _lastStrokeColors.size() ? _lastStrokeColors : QVector<glm::vec3>({ toGlm(entity->getColor()) });
+        _lastStrokeColors = _lastNormals.size() == _lastStrokeColors.size() ? _lastStrokeColors
+                                                                            : QVector<glm::vec3>({ toGlm(entity->getColor()) });
     }
     if (pointsChanged || strokeWidthsChanged || normalsChanged || strokeColorsChanged) {
         _empty = std::min(_lastPoints.size(), std::min(_lastNormals.size(), _lastStrokeWidths.size())) < 2;
         if (!_empty) {
-            updateGeometry(updateVertices(_lastPoints, _lastNormals, _lastStrokeWidths, _lastStrokeColors, isUVModeStretch, _textureAspectRatio));
+            updateGeometry(updateVertices(_lastPoints, _lastNormals, _lastStrokeWidths, _lastStrokeColors, isUVModeStretch,
+                                          _textureAspectRatio));
         }
     }
 }
@@ -161,12 +162,9 @@ void PolyLineEntityRenderer::updateGeometry(const std::vector<Vertex>& vertices)
     _verticesBuffer->setSubData(0, vertices);
 }
 
-std::vector<PolyLineEntityRenderer::Vertex> PolyLineEntityRenderer::updateVertices(const QVector<glm::vec3>& points,
-                                                                                   const QVector<glm::vec3>& normals,
-                                                                                   const QVector<float>& strokeWidths, 
-                                                                                   const QVector<glm::vec3>& strokeColors,
-                                                                                   const bool isUVModeStretch,
-                                                                                   const float textureAspectRatio) {
+std::vector<PolyLineEntityRenderer::Vertex> PolyLineEntityRenderer::updateVertices(
+    const QVector<glm::vec3>& points, const QVector<glm::vec3>& normals, const QVector<float>& strokeWidths,
+    const QVector<glm::vec3>& strokeColors, const bool isUVModeStretch, const float textureAspectRatio) {
     // Calculate the minimum vector size out of normals, points, and stroke widths
     int size = std::min(points.size(), std::min(normals.size(), strokeWidths.size()));
 
@@ -187,7 +185,6 @@ std::vector<PolyLineEntityRenderer::Vertex> PolyLineEntityRenderer::updateVertic
     float strokeWidth = 0.0f;
     bool doesStrokeWidthVary = false;
 
-
     for (int i = 1; i < strokeWidths.size(); i++) {
         if (strokeWidths[i] != strokeWidths[i - 1]) {
             doesStrokeWidthVary = true;
@@ -201,7 +198,6 @@ std::vector<PolyLineEntityRenderer::Vertex> PolyLineEntityRenderer::updateVertic
         const auto& normal = normals.at(i);
         const auto& color = strokeColors.size() == normals.size() ? strokeColors.at(i) : strokeColors.at(0);
         int vertexIndex = i * 2;
-        
 
         if (!isUVModeStretch && i >= 1) {
             distanceToLastPoint = glm::distance(points.at(i), points.at(i - 1));
@@ -209,19 +205,20 @@ std::vector<PolyLineEntityRenderer::Vertex> PolyLineEntityRenderer::updateVertic
             strokeWidth = 2 * strokeWidths[i];
 
             if (doesStrokeWidthVary) {
-                //If the stroke varies along the line the texture will stretch more or less depending on the speed
-                //because it looks better than using the same method as below
+                // If the stroke varies along the line the texture will stretch more or less depending on the speed
+                // because it looks better than using the same method as below
                 accumulatedStrokeWidth += strokeWidth;
                 float increaseValue = 1;
                 if (accumulatedStrokeWidth != 0) {
-                    float newUcoord = glm::ceil(((1.0f / textureAspectRatio) * accumulatedDistance) / (accumulatedStrokeWidth / i));
+                    float newUcoord = glm::ceil(((1.0f / textureAspectRatio) * accumulatedDistance) /
+                                                (accumulatedStrokeWidth / i));
                     increaseValue = newUcoord - uCoord;
                 }
 
                 increaseValue = increaseValue > 0 ? increaseValue : 1;
                 uCoord += increaseValue;
             } else {
-                //If the stroke width is constant then the textures should keep the aspect ratio along the line
+                // If the stroke width is constant then the textures should keep the aspect ratio along the line
                 uCoord = ((1.0f / textureAspectRatio) * accumulatedDistance) / strokeWidth;
             }
         } else if (vertexIndex >= 2) {

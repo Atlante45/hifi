@@ -11,7 +11,6 @@
 #ifndef hifi_LightPayload_h
 #define hifi_LightPayload_h
 
-
 #include <graphics/Light.h>
 #include <render/Item.h>
 #include "LightStage.h"
@@ -26,8 +25,14 @@ public:
     ~LightPayload();
     void render(RenderArgs* args);
 
-    graphics::LightPointer editLight() { _needUpdate = true; return _light; }
-    render::Item::Bound& editBound() { _needUpdate = true; return _bound; }
+    graphics::LightPointer editLight() {
+        _needUpdate = true;
+        return _light;
+    }
+    render::Item::Bound& editBound() {
+        _needUpdate = true;
+        return _bound;
+    }
 
     void setVisible(bool visible) { _isVisible = visible; }
     bool isVisible() const { return _isVisible; }
@@ -38,14 +43,17 @@ protected:
     LightStagePointer _stage;
     LightStage::Index _index { LightStage::INVALID_INDEX };
     bool _needUpdate { true };
-    bool _isVisible{ true };
+    bool _isVisible { true };
 };
 
 namespace render {
-    template <> const ItemKey payloadGetKey(const LightPayload::Pointer& payload);
-    template <> const Item::Bound payloadGetBound(const LightPayload::Pointer& payload);
-    template <> void payloadRender(const LightPayload::Pointer& payload, RenderArgs* args);
-}
+template<>
+const ItemKey payloadGetKey(const LightPayload::Pointer& payload);
+template<>
+const Item::Bound payloadGetBound(const LightPayload::Pointer& payload);
+template<>
+void payloadRender(const LightPayload::Pointer& payload, RenderArgs* args);
+} // namespace render
 
 class KeyLightPayload {
 public:
@@ -56,12 +64,17 @@ public:
     ~KeyLightPayload();
     void render(RenderArgs* args);
 
-    graphics::LightPointer editLight() { _needUpdate = true; return _light; }
-    render::Item::Bound& editBound() { _needUpdate = true; return _bound; }
+    graphics::LightPointer editLight() {
+        _needUpdate = true;
+        return _light;
+    }
+    render::Item::Bound& editBound() {
+        _needUpdate = true;
+        return _bound;
+    }
 
     void setVisible(bool visible) { _isVisible = visible; }
     bool isVisible() const { return _isVisible; }
-
 
     // More attributes used for rendering:
     NetworkTexturePointer _ambientTexture;
@@ -78,9 +91,12 @@ protected:
 };
 
 namespace render {
-    template <> const ItemKey payloadGetKey(const KeyLightPayload::Pointer& payload);
-    template <> const Item::Bound payloadGetBound(const KeyLightPayload::Pointer& payload);
-    template <> void payloadRender(const KeyLightPayload::Pointer& payload, RenderArgs* args);
-}
+template<>
+const ItemKey payloadGetKey(const KeyLightPayload::Pointer& payload);
+template<>
+const Item::Bound payloadGetBound(const KeyLightPayload::Pointer& payload);
+template<>
+void payloadRender(const KeyLightPayload::Pointer& payload, RenderArgs* args);
+} // namespace render
 
 #endif

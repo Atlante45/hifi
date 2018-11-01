@@ -16,7 +16,7 @@
 #include "SharedLogging.h"
 
 QScriptValue variantToScriptValue(QVariant& qValue, QScriptEngine& scriptEngine) {
-    switch(qValue.type()) {
+    switch (qValue.type()) {
         case QVariant::Bool:
             return qValue.toBool();
             break;
@@ -48,7 +48,6 @@ QScriptValue variantToScriptValue(QVariant& qValue, QScriptEngine& scriptEngine)
     return QScriptValue();
 }
 
-
 QScriptValue variantMapToScriptValue(QVariantMap& variantMap, QScriptEngine& scriptEngine) {
     QScriptValue scriptValue = scriptEngine.newObject();
 
@@ -61,9 +60,7 @@ QScriptValue variantMapToScriptValue(QVariantMap& variantMap, QScriptEngine& scr
     return scriptValue;
 }
 
-
 QScriptValue variantListToScriptValue(QVariantList& variantList, QScriptEngine& scriptEngine) {
-
     QScriptValue scriptValue = scriptEngine.newArray();
 
     for (int i = 0; i < variantList.size(); i++) {

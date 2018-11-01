@@ -12,8 +12,8 @@
 #include "SoundCacheScriptingInterface.h"
 
 SoundCacheScriptingInterface::SoundCacheScriptingInterface() :
-    ScriptableResourceCache::ScriptableResourceCache(DependencyManager::get<SoundCache>())
-{ }
+    ScriptableResourceCache::ScriptableResourceCache(DependencyManager::get<SoundCache>()) {
+}
 
 SharedSoundPointer SoundCacheScriptingInterface::getSound(const QUrl& url) {
     return DependencyManager::get<SoundCache>()->getSound(url);

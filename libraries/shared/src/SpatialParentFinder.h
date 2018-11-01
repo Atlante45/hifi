@@ -24,16 +24,12 @@ public:
     virtual SpatiallyNestablePointer findByID(const QUuid& id) const { return nullptr; }
 };
 class SpatialParentFinder : public Dependency {
-
-
-
-// This interface is used to turn a QUuid into a pointer to a "parent" -- something that children can
-// be spatially relative to.  At this point, this means either an EntityItem or an Avatar.
-
+    // This interface is used to turn a QUuid into a pointer to a "parent" -- something that children can
+    // be spatially relative to.  At this point, this means either an EntityItem or an Avatar.
 
 public:
-    SpatialParentFinder() { }
-    virtual ~SpatialParentFinder() { }
+    SpatialParentFinder() {}
+    virtual ~SpatialParentFinder() {}
 
     virtual SpatiallyNestableWeakPointer find(QUuid parentID, bool& success, SpatialParentTree* entityTree = nullptr) const = 0;
 };

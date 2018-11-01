@@ -9,13 +9,12 @@
 //
 #include "GameWorkloadRenderer.h"
 
-#include <cstring>
 #include <gpu/Context.h>
+#include <cstring>
 
-#include <StencilMaskPass.h>
 #include <GeometryCache.h>
+#include <StencilMaskPass.h>
 #include <shaders/Shaders.h>
-
 
 void GameSpaceToRender::configure(const Config& config) {
     _freezeViews = config.freezeViews;
@@ -43,9 +42,8 @@ void GameSpaceToRender::run(const workload::WorkloadContextPointer& runContext, 
     // Nothing really needed, early exit
     if (!visible) {
         if (render::Item::isValidID(_spaceRenderItemID)) {
-            transaction.updateItem<GameWorkloadRenderItem>(_spaceRenderItemID, [](GameWorkloadRenderItem& item) {
-                item.setVisible(false);
-            });
+            transaction.updateItem<GameWorkloadRenderItem>(_spaceRenderItemID,
+                                                           [](GameWorkloadRenderItem& item) { item.setVisible(false); });
             scene->enqueueTransaction(transaction);
         }
         return;
@@ -65,40 +63,46 @@ void GameSpaceToRender::run(const workload::WorkloadContextPointer& runContext, 
         renderItem->setAllProxies(proxies);
         transaction.resetItem(_spaceRenderItemID, std::make_shared<GameWorkloadRenderItem::Payload>(renderItem));
     }
-    
-    transaction.updateItem<GameWorkloadRenderItem>(_spaceRenderItemID, [visible, showProxies, proxies, showViews, views](GameWorkloadRenderItem& item) {
+
+    transaction.updateItem<GameWorkloadRenderItem>(_spaceRenderItemID, [visible, showProxies, proxies, showViews,
+                                                                        views](GameWorkloadRenderItem& item) {
         item.setVisible(visible);
         item.showProxies(showProxies);
         item.setAllProxies(proxies);
         item.showViews(showViews);
         item.setAllViews(views);
     });
-    
+
     scene->enqueueTransaction(transaction);
 }
 
 namespace render {
-    template <> const ItemKey payloadGetKey(const GameWorkloadRenderItem::Pointer& payload) {
-        return payload->getKey();
+template<>
+const ItemKey payloadGetKey(const GameWorkloadRenderItem::Pointer& payload) {
+    return payload->getKey();
+}
+template<>
+const Item::Bound payloadGetBound(const GameWorkloadRenderItem::Pointer& payload) {
+    if (payload) {
+        return payload->getBound();
     }
-    template <> const Item::Bound payloadGetBound(const GameWorkloadRenderItem::Pointer& payload) {
-        if (payload) {
-            return payload->getBound();
-        }
-        return Item::Bound();
-    }
-    template <> void payloadRender(const GameWorkloadRenderItem::Pointer& payload, RenderArgs* args) {
-        if (payload) {
-            payload->render(args);
-        }
-    }
-    template <> const ShapeKey shapeGetShapeKey(const GameWorkloadRenderItem::Pointer& payload) {
-        return ShapeKey::Builder::ownPipeline();
+    return Item::Bound();
+}
+template<>
+void payloadRender(const GameWorkloadRenderItem::Pointer& payload, RenderArgs* args) {
+    if (payload) {
+        payload->render(args);
     }
 }
+template<>
+const ShapeKey shapeGetShapeKey(const GameWorkloadRenderItem::Pointer& payload) {
+    return ShapeKey::Builder::ownPipeline();
+}
+} // namespace render
 
-
-GameWorkloadRenderItem::GameWorkloadRenderItem() : _key(render::ItemKey::Builder::opaqueShape().withShadowCaster().withTagBits(render::ItemKey::TAG_BITS_0 | render::ItemKey::TAG_BITS_1)) {
+GameWorkloadRenderItem::GameWorkloadRenderItem() :
+    _key(render::ItemKey::Builder::opaqueShape().withShadowCaster().withTagBits(render::ItemKey::TAG_BITS_0 |
+                                                                                render::ItemKey::TAG_BITS_1)) {
 }
 
 render::ItemKey GameWorkloadRenderItem::getKey() const {
@@ -121,7 +125,6 @@ void GameWorkloadRenderItem::showViews(bool show) {
     _showViews = show;
 }
 
-
 void GameWorkloadRenderItem::setAllProxies(const workload::Proxy::Vector& proxies) {
     _myOwnProxies = proxies;
     static const uint32_t sizeOfProxy = sizeof(workload::Proxy);
@@ -129,8 +132,8 @@ void GameWorkloadRenderItem::setAllProxies(const workload::Proxy::Vector& proxie
         _allProxiesBuffer = std::make_shared<gpu::Buffer>(sizeOfProxy);
     }
 
-    _allProxiesBuffer->setData(proxies.size() * sizeOfProxy, (const gpu::Byte*) proxies.data());
-    _numAllProxies = (uint32_t) proxies.size();
+    _allProxiesBuffer->setData(proxies.size() * sizeOfProxy, (const gpu::Byte*)proxies.data());
+    _numAllProxies = (uint32_t)proxies.size();
 }
 
 void GameWorkloadRenderItem::setAllViews(const workload::Views& views) {
@@ -140,7 +143,7 @@ void GameWorkloadRenderItem::setAllViews(const workload::Views& views) {
         _allViewsBuffer = std::make_shared<gpu::Buffer>(sizeOfView);
     }
 
-    _allViewsBuffer->setData(views.size() * sizeOfView, (const gpu::Byte*) views.data());
+    _allViewsBuffer->setData(views.size() * sizeOfView, (const gpu::Byte*)views.data());
     _numAllViews = (uint32_t)views.size();
 }
 
@@ -149,9 +152,9 @@ const gpu::PipelinePointer GameWorkloadRenderItem::getProxiesPipeline() {
         gpu::ShaderPointer program = gpu::Shader::createProgram(shader::render_utils::program::drawWorkloadProxy);
         auto state = std::make_shared<gpu::State>();
         state->setDepthTest(true, true, gpu::LESS_EQUAL);
-      /*  state->setBlendFunction(true,
-            gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
-            gpu::State::DEST_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ZERO);*/
+        /*  state->setBlendFunction(true,
+              gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
+              gpu::State::DEST_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ZERO);*/
 
         PrepareStencil::testMaskDrawShape(*state);
         state->setCullMode(gpu::State::CULL_NONE);
@@ -159,7 +162,6 @@ const gpu::PipelinePointer GameWorkloadRenderItem::getProxiesPipeline() {
     }
     return _drawAllProxiesPipeline;
 }
-
 
 const gpu::PipelinePointer GameWorkloadRenderItem::getViewsPipeline() {
     if (!_drawAllViewsPipeline) {
@@ -197,7 +199,7 @@ const gpu::BufferPointer GameWorkloadRenderItem::getDrawViewBuffer() {
         verts[numSegments] = verts[0];
         verts[numSegments].p.w = 0.0f;
 
-        _drawViewBuffer = std::make_shared<gpu::Buffer>(verts.size() * sizeof(Vert), (const gpu::Byte*) verts.data());
+        _drawViewBuffer = std::make_shared<gpu::Buffer>(verts.size() * sizeof(Vert), (const gpu::Byte*)verts.data());
         _numDrawViewVerts = numSegments + 1;
     }
     return _drawViewBuffer;
@@ -227,13 +229,8 @@ void GameWorkloadRenderItem::render(RenderArgs* args) {
         static const int NUM_VERTICES_PER_DRAWVIEWVERT = 2;
         static const int NUM_REGIONS = 3;
         batch.draw(gpu::TRIANGLE_STRIP, NUM_REGIONS * NUM_VERTICES_PER_DRAWVIEWVERT * _numDrawViewVerts * _numAllViews, 0);
-
     }
 
     batch.setResourceBuffer(0, nullptr);
     batch.setResourceBuffer(1, nullptr);
-
 }
-
-
-

@@ -11,31 +11,31 @@
 
 #include "ShaderTests.h"
 
-#include <fstream>
-#include <sstream>
-#include <regex>
 #include <algorithm>
+#include <fstream>
+#include <regex>
+#include <sstream>
 
 #include <QtCore/QJsonDocument>
 
 #include <GLMHelpers.h>
 
+#include <shared/FileUtils.h>
 #include <test-utils/GLMTestUtils.h>
 #include <test-utils/QTestExtensions.h>
-#include <shared/FileUtils.h>
 
-#include <shaders/Shaders.h>
 #include <gl/Config.h>
 #include <gl/GLHelpers.h>
+#include <gl/QOpenGLContextWrapper.h>
 #include <gpu/gl/GLBackend.h>
 #include <gpu/gl/GLShader.h>
-#include <gl/QOpenGLContextWrapper.h>
+#include <shaders/Shaders.h>
 
 #define RUNTIME_SHADER_COMPILE_TEST 0
 
 #if RUNTIME_SHADER_COMPILE_TEST
-#include <glslang/Public/ShaderLang.h>
 #include <SPIRV/GlslangToSpv.h>
+#include <glslang/Public/ShaderLang.h>
 #include <spirv-tools/libspirv.hpp>
 #include <spirv-tools/optimizer.hpp>
 #endif
@@ -66,7 +66,7 @@ void ShaderTests::cleanupTestCase() {
 
 #if RUNTIME_SHADER_COMPILE_TEST
 
-template <typename C>
+template<typename C>
 QStringList toQStringList(const C& c) {
     QStringList result;
     for (const auto& v : c) {
@@ -75,7 +75,7 @@ QStringList toQStringList(const C& c) {
     return result;
 }
 
-template <typename C, typename F>
+template<typename C, typename F>
 std::unordered_set<std::string> toStringSet(const C& c, F f) {
     std::unordered_set<std::string> result;
     for (const auto& v : c) {
@@ -84,7 +84,7 @@ std::unordered_set<std::string> toStringSet(const C& c, F f) {
     return result;
 }
 
-template <typename C>
+template<typename C>
 bool isSubset(const C& parent, const C& child) {
     for (const auto& v : child) {
         if (0 == parent.count(v)) {
@@ -126,7 +126,7 @@ gpu::Shader::ReflectionMap mergeReflection(const std::initializer_list<const gpu
 }
 #endif
 
-template <typename K, typename V>
+template<typename K, typename V>
 std::unordered_map<V, K> invertMap(const std::unordered_map<K, V>& map) {
     std::unordered_map<V, K> result;
     for (const auto& entry : map) {
@@ -138,10 +138,8 @@ std::unordered_map<V, K> invertMap(const std::unordered_map<K, V>& map) {
     return result;
 }
 
-static void verifyInterface(const gpu::Shader::Source& vertexSource,
-                            const gpu::Shader::Source& fragmentSource,
-                            shader::Dialect dialect,
-                            shader::Variant variant) {
+static void verifyInterface(const gpu::Shader::Source& vertexSource, const gpu::Shader::Source& fragmentSource,
+                            shader::Dialect dialect, shader::Variant variant) {
     const auto& fragmentReflection = fragmentSource.getReflection(dialect, variant);
     if (fragmentReflection.inputs.empty()) {
         return;
@@ -177,7 +175,7 @@ static void verifyInterface(const gpu::Shader::Source& vertexSource, const gpu::
 }
 
 #if RUNTIME_SHADER_COMPILE_TEST
-template <typename C>
+template<typename C>
 bool compareBindings(const C& actual, const gpu::Shader::LocationMap& expected) {
     if (actual.size() != expected.size()) {
         auto actualNames = toStringSet(actual, [](const auto& v) { return v.name; });
@@ -306,9 +304,9 @@ bool endsWith(const std::string& s, const std::string& f) {
 }
 
 EShLanguage getShaderStage(const std::string& shaderName) {
-    static const std::string VERT_EXT{ ".vert" };
-    static const std::string FRAG_EXT{ ".frag" };
-    static const std::string GEOM_EXT{ ".geom" };
+    static const std::string VERT_EXT { ".vert" };
+    static const std::string FRAG_EXT { ".frag" };
+    static const std::string GEOM_EXT { ".geom" };
     static const size_t EXT_SIZE = VERT_EXT.size();
     if (shaderName.size() < EXT_SIZE) {
         throw std::runtime_error("Invalid shader name");
@@ -552,10 +550,10 @@ void ShaderTests::testShaderLoad() {
                 // Textures
                 {
                     auto textures = gl::Uniform::loadTextures(program);
-                    auto expiredBegin =
-                        std::remove_if(textures.begin(), textures.end(), [&](const gl::Uniform& uniform) -> bool {
-                            return uniform.name == "transformObjectBuffer";
-                        });
+                    auto expiredBegin = std::remove_if(textures.begin(), textures.end(),
+                                                       [&](const gl::Uniform& uniform) -> bool {
+                                                           return uniform.name == "transformObjectBuffer";
+                                                       });
                     textures.erase(expiredBegin, textures.end());
 
                     const auto expectedTextures = expectedBindings[gpu::Shader::BindingType::TEXTURE];

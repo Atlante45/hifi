@@ -20,28 +20,28 @@
 #include "Pose.h"
 
 namespace controller {
-    /*
-    using Modifiers = std::vector<Input>;
-    typedef QPair<Input, QString> InputPair;
-    class Endpoint;
-    using EndpointPtr = std::shared_ptr<Endpoint>;
-    
-    template<typename T>
-    using InputGetter = std::function<T(const Input& input, int timestamp)>;
-    using ButtonGetter = InputGetter<bool>;
-    using AxisGetter = InputGetter<float>;
-    using PoseGetter = InputGetter<Pose>;
-    using ResetBindings = std::function<bool()>;
-    using AvailableInputGetter = std::function<Input::NamedVector()>;
-    using EndpointCreator = std::function<EndpointPtr(const Input&)>;
+/*
+using Modifiers = std::vector<Input>;
+typedef QPair<Input, QString> InputPair;
+class Endpoint;
+using EndpointPtr = std::shared_ptr<Endpoint>;
 
-    class DeviceProxy {
-    public:
-        using Pointer = std::shared_ptr<DeviceProxy>;
+template<typename T>
+using InputGetter = std::function<T(const Input& input, int timestamp)>;
+using ButtonGetter = InputGetter<bool>;
+using AxisGetter = InputGetter<float>;
+using PoseGetter = InputGetter<Pose>;
+using ResetBindings = std::function<bool()>;
+using AvailableInputGetter = std::function<Input::NamedVector()>;
+using EndpointCreator = std::function<EndpointPtr(const Input&)>;
 
-        QString _name;
-    };
-    */
+class DeviceProxy {
+public:
+    using Pointer = std::shared_ptr<DeviceProxy>;
+
+    QString _name;
+};
+*/
 }
 
 #endif

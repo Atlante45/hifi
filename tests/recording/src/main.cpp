@@ -14,10 +14,10 @@
 #pragma clang diagnostic ignored "-Wunused-private-field"
 #endif
 
+#include <QtCore/QString>
+#include <QtCore/QTemporaryFile>
 #include <QtGlobal>
 #include <QtTest/QtTest>
-#include <QtCore/QTemporaryFile>
-#include <QtCore/QString>
 
 #if defined(__clang__)
 #pragma clang diagnostic pop
@@ -78,13 +78,12 @@ void testFilePersist() {
 
     size_t count = 0;
     for (auto readFrame = readClip->nextFrame(), writeFrame = writeClip->nextFrame(); readFrame && writeFrame;
-        readFrame = readClip->nextFrame(), writeFrame = writeClip->nextFrame(), ++count) {
+         readFrame = readClip->nextFrame(), writeFrame = writeClip->nextFrame(), ++count) {
         QVERIFY(readFrame->type == writeFrame->type);
         QVERIFY(readFrame->timeOffset == writeFrame->timeOffset);
         QVERIFY(readFrame->data == writeFrame->data);
     }
     QVERIFY(readClip->frameCount() == count);
-
 
     writeClip = Clip::newClip();
     writeClip->addFrame(std::make_shared<Frame>(TEST_FRAME_TYPE, 5.0f, QByteArray()));

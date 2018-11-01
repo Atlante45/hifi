@@ -12,44 +12,44 @@
 #ifndef hifi_SettingInterface_h
 #define hifi_SettingInterface_h
 
-#include <memory>
-#include <QtCore/QWeakPointer>
 #include <QtCore/QString>
 #include <QtCore/QVariant>
+#include <QtCore/QWeakPointer>
+#include <memory>
 
 namespace Setting {
-    class Manager;
+class Manager;
+
+void init();
+
+class Interface {
+public:
+    const QString& getKey() const { return _key; }
+    bool isSet() const { return _isSet; }
+
+    virtual void setVariant(const QVariant& variant) = 0;
+    virtual QVariant getVariant() = 0;
+
+protected:
+    Interface(const QString& key) : _key(key) {}
+    virtual ~Interface() = default;
 
     void init();
+    void maybeInit() const;
+    void deinit();
 
-    class Interface {
-    public:
-        const QString& getKey() const { return _key; }
-        bool isSet() const { return _isSet; } 
+    void save();
+    void load();
 
-        virtual void setVariant(const QVariant& variant) = 0;
-        virtual QVariant getVariant() = 0;
-        
-    protected:
-        Interface(const QString& key) : _key(key) {}
-        virtual ~Interface() = default;
+    bool _isSet = false;
+    const QString _key;
 
-        void init();
-        void maybeInit() const;
-        void deinit();
-        
-        void save();
-        void load();
+private:
+    mutable bool _isInitialized = false;
 
-        bool _isSet = false;
-        const QString _key;
-
-    private:
-        mutable bool _isInitialized = false;
-        
-        friend class Manager;
-        mutable QWeakPointer<Manager> _manager;
-    };
-}
+    friend class Manager;
+    mutable QWeakPointer<Manager> _manager;
+};
+} // namespace Setting
 
 #endif // hifi_SettingInterface_h

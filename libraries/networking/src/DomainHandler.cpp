@@ -19,27 +19,26 @@
 
 #include <QThread>
 
-#include <QtCore/QJsonDocument>
 #include <QtCore/QDataStream>
+#include <QtCore/QJsonDocument>
 
 #include "AddressManager.h"
 #include "Assignment.h"
 #include "HifiSockAddr.h"
-#include "NodeList.h"
-#include "udt/Packet.h"
-#include "udt/PacketHeaders.h"
 #include "NLPacket.h"
+#include "NetworkLogging.h"
+#include "NodeList.h"
 #include "SharedUtil.h"
 #include "UserActivityLogger.h"
-#include "NetworkLogging.h"
+#include "udt/Packet.h"
+#include "udt/PacketHeaders.h"
 
 DomainHandler::DomainHandler(QObject* parent) :
     QObject(parent),
     _sockAddr(HifiSockAddr(QHostAddress::Null, DEFAULT_DOMAIN_SERVER_PORT)),
     _icePeer(this),
     _settingsTimer(this),
-    _apiRefreshTimer(this)
-{
+    _apiRefreshTimer(this) {
     _sockAddr.setObjectName("DomainServer");
 
     // if we get a socket that make sure our NetworkPeer ping timer stops
@@ -142,20 +141,15 @@ void DomainHandler::hardReset() {
 bool DomainHandler::isHardRefusal(int reasonCode) {
     return (reasonCode == (int)ConnectionRefusedReason::ProtocolMismatch ||
             reasonCode == (int)ConnectionRefusedReason::TooManyUsers ||
-            reasonCode == (int)ConnectionRefusedReason::NotAuthorized ||
-            reasonCode == (int)ConnectionRefusedReason::TimedOut);
+            reasonCode == (int)ConnectionRefusedReason::NotAuthorized || reasonCode == (int)ConnectionRefusedReason::TimedOut);
 }
 
 bool DomainHandler::getInterstitialModeEnabled() const {
-    return _interstitialModeSettingLock.resultWithReadLock<bool>([&] {
-        return _enableInterstitialMode.get();
-    });
+    return _interstitialModeSettingLock.resultWithReadLock<bool>([&] { return _enableInterstitialMode.get(); });
 }
 
 void DomainHandler::setInterstitialModeEnabled(bool enableInterstitialMode) {
-    _interstitialModeSettingLock.withWriteLock([&] {
-        _enableInterstitialMode.set(enableInterstitialMode);
-    });
+    _interstitialModeSettingLock.withWriteLock([&] { _enableInterstitialMode.set(enableInterstitialMode); });
 }
 
 void DomainHandler::setErrorDomainURL(const QUrl& url) {
@@ -241,7 +235,6 @@ void DomainHandler::setURLAndID(QUrl domainURL, QUuid domainID) {
 }
 
 void DomainHandler::setIceServerHostnameAndID(const QString& iceServerHostname, const QUuid& id) {
-
     // if it's in the error state, reset and try again.
     if ((_iceServerSockAddr.getAddress().toString() != iceServerHostname || id != _pendingDomainID) || _isInErrorState) {
         // re-set the domain info to connect to new domain
@@ -263,7 +256,8 @@ void DomainHandler::setIceServerHostnameAndID(const QString& iceServerHostname, 
 
         if (_iceServerSockAddr.getAddress().isNull()) {
             // connect to lookup completed for ice-server socket so we can request a heartbeat once hostname is looked up
-            connect(&_iceServerSockAddr, &HifiSockAddr::lookupCompleted, this, &DomainHandler::completedIceServerHostnameLookup);
+            connect(&_iceServerSockAddr, &HifiSockAddr::lookupCompleted, this,
+                    &DomainHandler::completedIceServerHostnameLookup);
         } else {
             completedIceServerHostnameLookup();
         }
@@ -309,7 +303,7 @@ void DomainHandler::completedHostnameLookup(const QHostInfo& hostInfo) {
             DependencyManager::get<NodeList>()->flagTimeForConnectionStep(LimitedNodeList::ConnectionStep::SetDomainSocket);
 
             qCDebug(networking, "DS at %s is at %s", _domainURL.host().toLocal8Bit().constData(),
-                   _sockAddr.getAddress().toString().toLocal8Bit().constData());
+                    _sockAddr.getAddress().toString().toLocal8Bit().constData());
 
             emit completedSocketDiscovery();
 
@@ -395,11 +389,11 @@ void DomainHandler::requestDomainSettings() {
 void DomainHandler::processSettingsPacketList(QSharedPointer<ReceivedMessage> packetList) {
     // stop our settings timer since we successfully requested the settings we need
     _settingsTimer.stop();
-    
+
     auto data = packetList->getMessage();
 
     _settingsObject = QJsonDocument::fromJson(data).object();
-    
+
     if (!_settingsObject.isEmpty()) {
         qCDebug(networking) << "Received domain settings: \n" << _settingsObject;
     }
@@ -437,7 +431,7 @@ void DomainHandler::processDTLSRequirementPacket(QSharedPointer<ReceivedMessage>
 
     _sockAddr.setPort(dtlsPort);
 
-//    initializeDTLSSession();
+    //    initializeDTLSSession();
 }
 
 void DomainHandler::processICEResponsePacket(QSharedPointer<ReceivedMessage> message) {
@@ -457,7 +451,8 @@ void DomainHandler::processICEResponsePacket(QSharedPointer<ReceivedMessage> mes
     DependencyManager::get<NodeList>()->flagTimeForConnectionStep(LimitedNodeList::ConnectionStep::ReceiveDSPeerInformation);
 
     if (_icePeer.getUUID() != _pendingDomainID) {
-        qCDebug(networking) << "Received a network peer with ID that does not match current domain. Will not attempt connection.";
+        qCDebug(networking)
+            << "Received a network peer with ID that does not match current domain. Will not attempt connection.";
         _icePeer.reset();
     } else {
         qCDebug(networking) << "Received network peer object for domain -" << _icePeer;
@@ -504,7 +499,7 @@ void DomainHandler::processDomainServerConnectionDeniedPacket(QSharedPointer<Rec
 
     quint16 extraInfoSize;
     message->readPrimitive(&extraInfoSize);
-    auto extraInfoUtf8= message->readWithoutCopy(extraInfoSize);
+    auto extraInfoUtf8 = message->readWithoutCopy(extraInfoSize);
     QString extraInfo = QString::fromUtf8(extraInfoUtf8);
 
     // output to the log so the user knows they got a denied connection request

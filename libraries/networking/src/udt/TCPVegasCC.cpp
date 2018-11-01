@@ -63,8 +63,8 @@ bool TCPVegasCC::calculateRTT(p_high_resolution_clock::time_point sendTime, p_hi
         static const int RTT_ESTIMATION_VARIANCE_ALPHA = 4;
 
         _ewmaRTT = (_ewmaRTT * (RTT_ESTIMATION_ALPHA - 1) + lastRTT) / RTT_ESTIMATION_ALPHA;
-        _rttVariance = (_rttVariance * (RTT_ESTIMATION_VARIANCE_ALPHA- 1)
-                        + abs(lastRTT - _ewmaRTT)) / RTT_ESTIMATION_VARIANCE_ALPHA;
+        _rttVariance = (_rttVariance * (RTT_ESTIMATION_VARIANCE_ALPHA - 1) + abs(lastRTT - _ewmaRTT)) /
+                       RTT_ESTIMATION_VARIANCE_ALPHA;
     }
 
     // keep track of the lowest RTT during connection
@@ -80,15 +80,13 @@ bool TCPVegasCC::calculateRTT(p_high_resolution_clock::time_point sendTime, p_hi
 }
 
 bool TCPVegasCC::onACK(SequenceNumber ack, p_high_resolution_clock::time_point receiveTime) {
-
     auto previousAck = _lastACK;
     _lastACK = ack;
 
     bool wasDuplicateACK = (ack == previousAck);
 
-    auto it = std::find_if(_sentPacketDatas.begin(), _sentPacketDatas.end(), [ack](SentPacketData& packetTime){
-        return packetTime.sequenceNumber == ack;
-    });
+    auto it = std::find_if(_sentPacketDatas.begin(), _sentPacketDatas.end(),
+                           [ack](SentPacketData& packetTime) { return packetTime.sequenceNumber == ack; });
 
     if (!wasDuplicateACK && it != _sentPacketDatas.end()) {
         // check if we can unambigiously calculate an RTT from this ACK
@@ -97,12 +95,10 @@ bool TCPVegasCC::onACK(SequenceNumber ack, p_high_resolution_clock::time_point r
         // any of the packets this ACK covers (from the current ACK back to our previous ACK)
         // must not have been re-sent
         bool canBeUsedForRTT = std::none_of(_sentPacketDatas.begin(), _sentPacketDatas.end(),
-                               [ack, previousAck](SentPacketData& sentPacketData)
-        {
-            return sentPacketData.sequenceNumber > previousAck
-                && sentPacketData.sequenceNumber <= ack
-                && sentPacketData.wasResent;
-        });
+                                            [ack, previousAck](SentPacketData& sentPacketData) {
+                                                return sentPacketData.sequenceNumber > previousAck &&
+                                                       sentPacketData.sequenceNumber <= ack && sentPacketData.wasResent;
+                                            });
 
         auto sendTime = it->timePoint;
 
@@ -138,9 +134,8 @@ bool TCPVegasCC::onACK(SequenceNumber ack, p_high_resolution_clock::time_point r
 bool TCPVegasCC::needsFastRetransmit(SequenceNumber ack, bool wasDuplicateACK) {
     // we may need to re-send ackNum + 1 if it has been more than our estimated timeout since it was sent
 
-    auto nextIt = std::find_if(_sentPacketDatas.begin(), _sentPacketDatas.end(), [ack](SentPacketData& packetTime){
-        return packetTime.sequenceNumber == ack + 1;
-    });
+    auto nextIt = std::find_if(_sentPacketDatas.begin(), _sentPacketDatas.end(),
+                               [ack](SentPacketData& packetTime) { return packetTime.sequenceNumber == ack + 1; });
 
     if (nextIt != _sentPacketDatas.end()) {
         auto now = p_high_resolution_clock::now();
@@ -188,12 +183,12 @@ void TCPVegasCC::performCongestionAvoidance(udt::SequenceNumber ack) {
     // increase or decrease the congestion window size, and by how much
 
     // Grab the minimum RTT seen during the last RTT (since the last performed congestion avoidance)
-    
+
     // Taking the min avoids the effects of delayed ACKs
     // (though congestion may be noticed a bit later)
     int rtt = _currentMinRTT;
 
-    int64_t windowSizeDiff = (int64_t) _congestionWindowSize * (rtt - _baseRTT) / _baseRTT;
+    int64_t windowSizeDiff = (int64_t)_congestionWindowSize * (rtt - _baseRTT) / _baseRTT;
 
     if (_numRTTs <= 2) {
         performRenoCongestionAvoidance(ack);
@@ -248,7 +243,6 @@ void TCPVegasCC::performCongestionAvoidance(udt::SequenceNumber ack) {
     // reset our count of collected RTT samples
     _numRTTs = 0;
 }
-
 
 int TCPVegasCC::estimatedTimeout() const {
     return _ewmaRTT == -1 ? DEFAULT_SYN_INTERVAL : _ewmaRTT + _rttVariance * 4;
@@ -319,9 +313,8 @@ void TCPVegasCC::onPacketSent(int wireSize, SequenceNumber seqNum, p_high_resolu
 
 void TCPVegasCC::onPacketReSent(int wireSize, SequenceNumber seqNum, p_high_resolution_clock::time_point timePoint) {
     // look for our information for this sent packet
-    auto it = std::find_if(_sentPacketDatas.begin(), _sentPacketDatas.end(), [seqNum](SentPacketData& sentPacketInfo){
-        return sentPacketInfo.sequenceNumber == seqNum;
-    });
+    auto it = std::find_if(_sentPacketDatas.begin(), _sentPacketDatas.end(),
+                           [seqNum](SentPacketData& sentPacketInfo) { return sentPacketInfo.sequenceNumber == seqNum; });
 
     // if we found information for this packet (it hasn't been erased because it hasn't yet been ACKed)
     // then mark it as re-sent so we know it cannot be used for RTT calculations
@@ -329,4 +322,3 @@ void TCPVegasCC::onPacketReSent(int wireSize, SequenceNumber seqNum, p_high_reso
         it->wasResent = true;
     }
 }
-

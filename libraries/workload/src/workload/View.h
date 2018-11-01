@@ -12,10 +12,10 @@
 #ifndef hifi_workload_View_h
 #define hifi_workload_View_h
 
-#include <memory>
-#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
+#include <memory>
+#include <vector>
 
 #include "Region.h"
 
@@ -33,19 +33,20 @@ public:
     // View attributes:
 
     // direction
-    glm::vec3 direction{ 0.0f, 0.0f, -1.0f };
+    glm::vec3 direction { 0.0f, 0.0f, -1.0f };
 
     // Max radius
-    float maxRadius{ FLT_MAX };
+    float maxRadius { FLT_MAX };
 
     // Fov stores the half field of view angle, and tan/cos/sin ready to go, default is fov of 90deg
-    glm::vec4 fov_halfAngle_tan_cos_sin { glm::quarter_pi<float>(), 1.0f, glm::root_two<float>() * 0.5f, glm::root_two<float>() * 0.5f};
+    glm::vec4 fov_halfAngle_tan_cos_sin { glm::quarter_pi<float>(), 1.0f, glm::root_two<float>() * 0.5f,
+                                          glm::root_two<float>() * 0.5f };
 
     // Origin position
-    glm::vec3 origin{ 0.0f };
+    glm::vec3 origin { 0.0f };
 
     // Origin radius
-    float originRadius{ 0.5f };
+    float originRadius { 0.5f };
 
     // N regions distances
     glm::vec2 regionBackFronts[Region::NUM_VIEW_REGIONS + 1];

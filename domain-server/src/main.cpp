@@ -15,9 +15,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+#include <BuildInfo.h>
 #include <LogHandler.h>
 #include <SharedUtil.h>
-#include <BuildInfo.h>
 
 #include "DomainServer.h"
 
@@ -39,4 +39,3 @@ int main(int argc, char* argv[]) {
     qInfo() << "Quitting.";
     return currentExitCode;
 }
-

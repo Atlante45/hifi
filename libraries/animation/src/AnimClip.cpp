@@ -10,28 +10,27 @@
 
 #include "AnimClip.h"
 
-#include "GLMHelpers.h"
-#include "AnimationLogging.h"
 #include "AnimUtil.h"
+#include "AnimationLogging.h"
+#include "GLMHelpers.h"
 
-AnimClip::AnimClip(const QString& id, const QString& url, float startFrame, float endFrame, float timeScale, bool loopFlag, bool mirrorFlag) :
+AnimClip::AnimClip(const QString& id, const QString& url, float startFrame, float endFrame, float timeScale, bool loopFlag,
+                   bool mirrorFlag) :
     AnimNode(AnimNode::Type::Clip, id),
     _startFrame(startFrame),
     _endFrame(endFrame),
     _timeScale(timeScale),
     _loopFlag(loopFlag),
     _mirrorFlag(mirrorFlag),
-    _frame(startFrame)
-{
+    _frame(startFrame) {
     loadURL(url);
 }
 
 AnimClip::~AnimClip() {
-
 }
 
-const AnimPoseVec& AnimClip::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) {
-
+const AnimPoseVec& AnimClip::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                      AnimVariantMap& triggersOut) {
     // lookup parameters from animVars, using current instance variables as defaults.
     _startFrame = animVars.lookup(_startFrameVar, _startFrame);
     _endFrame = animVars.lookup(_endFrameVar, _endFrame);
@@ -50,7 +49,6 @@ const AnimPoseVec& AnimClip::evaluate(const AnimVariantMap& animVars, const Anim
     }
 
     if (_anim.size()) {
-
         // lazy creation of mirrored animation frames.
         if (_mirrorFlag && _anim.size() != _mirrorAnim.size()) {
             buildMirrorAnim();
@@ -110,7 +108,8 @@ void AnimClip::copyFromNetworkAnim() {
     for (int i = 0; i < animJointCount; i++) {
         int skeletonJoint = _skeleton->nameToJointIndex(animSkeleton.getJointName(i));
         if (skeletonJoint == -1) {
-            qCWarning(animation) << "animation contains joint =" << animSkeleton.getJointName(i) << " which is not in the skeleton, url =" << _url;
+            qCWarning(animation) << "animation contains joint =" << animSkeleton.getJointName(i)
+                                 << " which is not in the skeleton, url =" << _url;
         }
         jointMap.push_back(skeletonJoint);
     }
@@ -119,7 +118,6 @@ void AnimClip::copyFromNetworkAnim() {
     _anim.resize(frameCount);
 
     for (int frame = 0; frame < frameCount; frame++) {
-
         const FBXAnimationFrame& fbxAnimFrame = geom.animationFrames[frame];
 
         // init all joints in animation to default pose
@@ -137,7 +135,6 @@ void AnimClip::copyFromNetworkAnim() {
 
             // skip joints that are in the animation but not in the skeleton.
             if (skeletonJoint >= 0 && skeletonJoint < skeletonJointCount) {
-
                 AnimPose preRot, postRot;
                 preRot = animSkeleton.getPreRotationPose(animJoint);
                 postRot = animSkeleton.getPostRotationPose(animJoint);
@@ -158,7 +155,8 @@ void AnimClip::copyFromNetworkAnim() {
                     boneLengthScale = glm::length(relDefaultPose.trans()) / glm::length(fbxZeroTrans);
                 }
 
-                AnimPose trans = AnimPose(glm::vec3(1.0f), glm::quat(), relDefaultPose.trans() + boneLengthScale * (fbxAnimTrans - fbxZeroTrans));
+                AnimPose trans = AnimPose(glm::vec3(1.0f), glm::quat(),
+                                          relDefaultPose.trans() + boneLengthScale * (fbxAnimTrans - fbxZeroTrans));
 
                 _anim[frame][skeletonJoint] = trans * preRot * rot * postRot;
             }

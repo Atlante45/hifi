@@ -14,22 +14,22 @@
 
 #include <algorithm>
 #include <cfloat>
+#include <queue>
 #include <unordered_map>
 #include <vector>
-#include <queue>
 
 #include <QtCore/QJsonObject>
 #include <QtCore/QUrl>
 
-#include <AvatarData.h>
 #include <AssociatedTraitValues.h>
+#include <AvatarData.h>
 #include <NodeData.h>
 #include <NumericalConstants.h>
-#include <udt/PacketHeaders.h>
 #include <PortableHighResolutionClock.h>
 #include <SimpleMovingAverage.h>
 #include <UUIDHasher.h>
 #include <shared/ConicalViewFrustum.h>
+#include <udt/PacketHeaders.h>
 
 const QString OUTBOUND_AVATAR_DATA_STATS_KEY = "outbound_av_data_kbps";
 const QString INBOUND_AVATAR_DATA_STATS_KEY = "inbound_av_data_kbps";
@@ -50,14 +50,19 @@ public:
     AvatarSharedPointer getAvatarSharedPointer() const { return _avatar; }
 
     uint16_t getLastBroadcastSequenceNumber(NLPacket::LocalID nodeID) const;
-    void setLastBroadcastSequenceNumber(NLPacket::LocalID nodeID, uint16_t sequenceNumber)
-        { _lastBroadcastSequenceNumbers[nodeID] = sequenceNumber; }
-    Q_INVOKABLE void removeLastBroadcastSequenceNumber(NLPacket::LocalID nodeID) { _lastBroadcastSequenceNumbers.erase(nodeID); }
+    void setLastBroadcastSequenceNumber(NLPacket::LocalID nodeID, uint16_t sequenceNumber) {
+        _lastBroadcastSequenceNumbers[nodeID] = sequenceNumber;
+    }
+    Q_INVOKABLE void removeLastBroadcastSequenceNumber(NLPacket::LocalID nodeID) {
+        _lastBroadcastSequenceNumbers.erase(nodeID);
+    }
     bool isIgnoreRadiusEnabled() const { return _isIgnoreRadiusEnabled; }
     void setIsIgnoreRadiusEnabled(bool enabled) { _isIgnoreRadiusEnabled = enabled; }
 
     uint64_t getLastBroadcastTime(NLPacket::LocalID nodeUUID) const;
-    void setLastBroadcastTime(NLPacket::LocalID nodeUUID, uint64_t broadcastTime) { _lastBroadcastTimes[nodeUUID] = broadcastTime; }
+    void setLastBroadcastTime(NLPacket::LocalID nodeUUID, uint64_t broadcastTime) {
+        _lastBroadcastTimes[nodeUUID] = broadcastTime;
+    }
     Q_INVOKABLE void removeLastBroadcastTime(NLPacket::LocalID nodeUUID) { _lastBroadcastTimes.erase(nodeUUID); }
 
     Q_INVOKABLE void cleanupKilledNode(const QUuid& nodeUUID, Node::LocalID nodeLocalID);
@@ -73,10 +78,10 @@ public:
     void incrementNumAvatarsSentLastFrame() { ++_numAvatarsSentLastFrame; }
     int getNumAvatarsSentLastFrame() const { return _numAvatarsSentLastFrame; }
 
-    void recordNumOtherAvatarStarves(int numAvatarsHeldBack) { _otherAvatarStarves.updateAverage((float) numAvatarsHeldBack); }
+    void recordNumOtherAvatarStarves(int numAvatarsHeldBack) { _otherAvatarStarves.updateAverage((float)numAvatarsHeldBack); }
     float getAvgNumOtherAvatarStarvesPerSecond() const { return _otherAvatarStarves.getAverageSampleValuePerSecond(); }
 
-    void recordNumOtherAvatarSkips(int numOtherAvatarSkips) { _otherAvatarSkips.updateAverage((float) numOtherAvatarSkips); }
+    void recordNumOtherAvatarSkips(int numOtherAvatarSkips) { _otherAvatarSkips.updateAverage((float)numOtherAvatarSkips); }
     float getAvgNumOtherAvatarSkipsPerSecond() const { return _otherAvatarSkips.getAverageSampleValuePerSecond(); }
 
     void incrementNumOutOfOrderSends() { ++_numOutOfOrderSends; }
@@ -85,10 +90,11 @@ public:
     void incrementNumFramesSinceFRDAdjustment() { ++_numFramesSinceAdjustment; }
     void resetNumFramesSinceFRDAdjustment() { _numFramesSinceAdjustment = 0; }
 
-    void recordSentAvatarData(int numBytes) { _avgOtherAvatarDataRate.updateAverage((float) numBytes); }
+    void recordSentAvatarData(int numBytes) { _avgOtherAvatarDataRate.updateAverage((float)numBytes); }
 
-    float getOutboundAvatarDataKbps() const
-        { return _avgOtherAvatarDataRate.getAverageSampleValuePerSecond() / (float) BYTES_PER_KILOBIT; }
+    float getOutboundAvatarDataKbps() const {
+        return _avgOtherAvatarDataRate.getAverageSampleValuePerSecond() / (float)BYTES_PER_KILOBIT;
+    }
 
     void loadJSONStats(QJsonObject& jsonObject) const;
 
@@ -116,7 +122,9 @@ public:
     uint64_t getLastOtherAvatarEncodeTime(NLPacket::LocalID otherAvatar) const;
     void setLastOtherAvatarEncodeTime(NLPacket::LocalID otherAvatar, uint64_t time);
 
-    QVector<JointData>& getLastOtherAvatarSentJoints(NLPacket::LocalID otherAvatar) { return _lastOtherAvatarSentJoints[otherAvatar]; }
+    QVector<JointData>& getLastOtherAvatarSentJoints(NLPacket::LocalID otherAvatar) {
+        return _lastOtherAvatarSentJoints[otherAvatar];
+    }
 
     void queuePacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer node);
     int processPackets(const SlaveSharedData& slaveSharedData); // returns number of packets processed
@@ -133,8 +141,9 @@ public:
     const AvatarTraits::TraitVersions& getLastReceivedTraitVersions() const { return _lastReceivedTraitVersions; }
 
     TraitsCheckTimestamp getLastOtherAvatarTraitsSendPoint(Node::LocalID otherAvatar) const;
-    void setLastOtherAvatarTraitsSendPoint(Node::LocalID otherAvatar, TraitsCheckTimestamp sendPoint)
-        { _lastSentTraitsTimestamps[otherAvatar] = sendPoint; }
+    void setLastOtherAvatarTraitsSendPoint(Node::LocalID otherAvatar, TraitsCheckTimestamp sendPoint) {
+        _lastSentTraitsTimestamps[otherAvatar] = sendPoint;
+    }
 
     AvatarTraits::TraitVersions& getLastSentTraitVersions(Node::LocalID otherAvatar) { return _sentTraitVersions[otherAvatar]; }
 
@@ -158,8 +167,8 @@ private:
     std::unordered_map<NLPacket::LocalID, QVector<JointData>> _lastOtherAvatarSentJoints;
 
     uint64_t _identityChangeTimestamp;
-    bool _avatarSessionDisplayNameMustChange{ true };
-    bool _avatarSkeletonModelUrlMustChange{ false };
+    bool _avatarSessionDisplayNameMustChange { true };
+    bool _avatarSkeletonModelUrlMustChange { false };
 
     int _numAvatarsSentLastFrame = 0;
     int _numFramesSinceAdjustment = 0;
@@ -174,7 +183,8 @@ private:
 
     int _recentOtherAvatarsInView { 0 };
     int _recentOtherAvatarsOutOfView { 0 };
-    QString _baseDisplayName{}; // The santized key used in determinging unique sessionDisplayName, so that we can remove from dictionary.
+    QString _baseDisplayName {}; // The santized key used in determinging unique sessionDisplayName, so that we can remove from
+                                 // dictionary.
     bool _requestsDomainListData { false };
 
     AvatarTraits::TraitVersions _lastReceivedTraitVersions;

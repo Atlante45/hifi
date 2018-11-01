@@ -19,22 +19,22 @@
 
 #include <LogHandler.h>
 #include <NetworkAccessManager.h>
-#include <NodeList.h>
 #include <Node.h>
+#include <NodeList.h>
 #include <OctreeConstants.h>
-#include <plugins/PluginManager.h>
-#include <plugins/CodecPlugin.h>
-#include <udt/PacketHeaders.h>
 #include <SharedUtil.h>
 #include <StDev.h>
 #include <UUID.h>
+#include <plugins/CodecPlugin.h>
+#include <plugins/PluginManager.h>
+#include <udt/PacketHeaders.h>
 
-#include "AudioRingBuffer.h"
+#include "AudioHelpers.h"
 #include "AudioMixer.h"
 #include "AudioMixerClientData.h"
+#include "AudioRingBuffer.h"
 #include "AvatarAudioStream.h"
 #include "InjectedAudioStream.h"
-#include "AudioHelpers.h"
 
 using namespace std;
 using AudioStreamVector = AudioMixerClientData::AudioStreamVector;
@@ -51,9 +51,10 @@ void sendEnvironmentPacket(const SharedNodePointer& node, AudioMixerClientData& 
 // mix helpers
 inline float approximateGain(const AvatarAudioStream& listeningNodeStream, const PositionalAudioStream& streamToAdd);
 inline float computeGain(float masterListenerGain, const AvatarAudioStream& listeningNodeStream,
-        const PositionalAudioStream& streamToAdd, const glm::vec3& relativePosition, float distance, bool isEcho);
+                         const PositionalAudioStream& streamToAdd, const glm::vec3& relativePosition, float distance,
+                         bool isEcho);
 inline float computeAzimuth(const AvatarAudioStream& listeningNodeStream, const PositionalAudioStream& streamToAdd,
-        const glm::vec3& relativePosition);
+                            const glm::vec3& relativePosition);
 
 void AudioMixerSlave::processPackets(const SharedNodePointer& node) {
     AudioMixerClientData* data = (AudioMixerClientData*)node->getLinkedData();
@@ -128,23 +129,20 @@ void AudioMixerSlave::mix(const SharedNodePointer& node) {
     }
 }
 
-
-template <class Container, class Predicate>
+template<class Container, class Predicate>
 void erase_if(Container& cont, Predicate&& pred) {
     auto it = remove_if(begin(cont), end(cont), std::forward<Predicate>(pred));
     cont.erase(it, end(cont));
 }
 
-template <class Container>
+template<class Container>
 bool contains(const Container& cont, typename Container::value_type value) {
-    return std::any_of(begin(cont), end(cont), [&value](const auto& element) {
-        return value == element;
-    });
+    return std::any_of(begin(cont), end(cont), [&value](const auto& element) { return value == element; });
 }
 
 // This class lets you do an erase if in several segments
 // that use different predicates
-template <class Container>
+template<class Container>
 class SegmentedEraseIf {
 public:
     using iterator = typename Container::iterator;
@@ -158,7 +156,7 @@ public:
         _cont.erase(_first, _it);
     }
 
-    template <class Predicate>
+    template<class Predicate>
     void iterateTo(iterator last, Predicate pred) {
         while (_it != last) {
             if (!pred(*_it)) {
@@ -177,7 +175,6 @@ private:
     Container& _cont;
 };
 
-
 void AudioMixerSlave::addStreams(Node& listener, AudioMixerClientData& listenerData) {
     auto& ignoredNodeIDs = listener.getIgnoredNodeIDs();
     auto& ignoringNodeIDs = listenerData.getIgnoringNodeIDs();
@@ -195,15 +192,15 @@ void AudioMixerSlave::addStreams(Node& listener, AudioMixerClientData& listenerD
                     bool ignoringListener = contains(ignoringNodeIDs, node->getUUID());
 
                     if (ignoredByListener || ignoringListener) {
-                        streams.skipped.emplace_back(node->getUUID(), node->getLocalID(),
-                                                    stream->getStreamIdentifier(), stream.get());
+                        streams.skipped.emplace_back(node->getUUID(), node->getLocalID(), stream->getStreamIdentifier(),
+                                                     stream.get());
 
                         // pre-populate ignored and ignoring flags for this stream
                         streams.skipped.back().ignoredByListener = ignoredByListener;
                         streams.skipped.back().ignoringListener = ignoringListener;
                     } else {
-                        streams.active.emplace_back(node->getUUID(), node->getLocalID(),
-                                                     stream->getStreamIdentifier(), stream.get());
+                        streams.active.emplace_back(node->getUUID(), node->getLocalID(), stream->getStreamIdentifier(),
+                                                    stream.get());
                     }
                 }
             }
@@ -235,14 +232,11 @@ bool shouldBeRemoved(const MixableStream& stream, const AudioMixerSlave::SharedD
 };
 
 bool shouldBeInactive(MixableStream& stream) {
-    return (!stream.positionalStream->lastPopSucceeded() ||
-            stream.positionalStream->getLastPopOutputLoudness() == 0.0f);
+    return (!stream.positionalStream->lastPopSucceeded() || stream.positionalStream->getLastPopOutputLoudness() == 0.0f);
 };
 
-bool shouldBeSkipped(MixableStream& stream, const Node& listener,
-                     const AvatarAudioStream& listenerAudioStream,
+bool shouldBeSkipped(MixableStream& stream, const Node& listener, const AvatarAudioStream& listenerAudioStream,
                      const AudioMixerClientData& listenerData) {
-
     if (stream.nodeStreamID.nodeLocalID == listener.getLocalID()) {
         return !stream.positionalStream->shouldLoopbackForNode();
     }
@@ -272,10 +266,8 @@ bool shouldBeSkipped(MixableStream& stream, const Node& listener,
         return true;
     }
 
-    bool shouldCheckIgnoreBox = (listenerAudioStream.isIgnoreBoxEnabled() ||
-                                 stream.positionalStream->isIgnoreBoxEnabled());
-    if (shouldCheckIgnoreBox &&
-        listenerAudioStream.getIgnoreBox().touches(stream.positionalStream->getIgnoreBox())) {
+    bool shouldCheckIgnoreBox = (listenerAudioStream.isIgnoreBoxEnabled() || stream.positionalStream->isIgnoreBoxEnabled());
+    if (shouldCheckIgnoreBox && listenerAudioStream.getIgnoreBox().touches(stream.positionalStream->getIgnoreBox())) {
         return true;
     }
 
@@ -303,7 +295,8 @@ float approximateVolume(const MixableStream& stream, const AvatarAudioStream* li
 };
 
 bool AudioMixerSlave::prepareMix(const SharedNodePointer& listener) {
-    AvatarAudioStream* listenerAudioStream = static_cast<AudioMixerClientData*>(listener->getLinkedData())->getAvatarAudioStream();
+    AvatarAudioStream* listenerAudioStream = static_cast<AudioMixerClientData*>(listener->getLinkedData())
+                                                 ->getAvatarAudioStream();
     AudioMixerClientData* listenerData = static_cast<AudioMixerClientData*>(listener->getLinkedData());
 
     // zero out the mix for this listener
@@ -333,8 +326,7 @@ bool AudioMixerSlave::prepareMix(const SharedNodePointer& listener) {
         }
 
         if (!isThrottling) {
-            updateHRTFParameters(stream, *listenerAudioStream,
-                                 listenerData->getMasterAvatarGain());
+            updateHRTFParameters(stream, *listenerAudioStream, listenerData->getMasterAvatarGain());
         }
         return false;
     });
@@ -358,8 +350,7 @@ bool AudioMixerSlave::prepareMix(const SharedNodePointer& listener) {
         }
 
         if (!isThrottling) {
-            updateHRTFParameters(stream, *listenerAudioStream,
-                                 listenerData->getMasterAvatarGain());
+            updateHRTFParameters(stream, *listenerAudioStream, listenerData->getMasterAvatarGain());
         }
         return false;
     });
@@ -403,10 +394,7 @@ bool AudioMixerSlave::prepareMix(const SharedNodePointer& listener) {
         auto throttlePoint = begin(streams.active) + numToRetain;
 
         std::nth_element(streams.active.begin(), throttlePoint, streams.active.end(),
-                         [](const auto& a, const auto& b)
-                         {
-                             return a.approximateVolume > b.approximateVolume;
-                         });
+                         [](const auto& a, const auto& b) { return a.approximateVolume > b.approximateVolume; });
 
         SegmentedEraseIf<MixableStreamsVector> erase(streams.active);
         erase.iterateTo(throttlePoint, [&](MixableStream& stream) {
@@ -482,8 +470,7 @@ bool AudioMixerSlave::prepareMix(const SharedNodePointer& listener) {
     return hasAudio;
 }
 
-void AudioMixerSlave::addStream(AudioMixerClientData::MixableStream& mixableStream,
-                                AvatarAudioStream& listeningNodeStream,
+void AudioMixerSlave::addStream(AudioMixerClientData::MixableStream& mixableStream, AvatarAudioStream& listeningNodeStream,
                                 float masterListenerGain) {
     ++stats.totalMixes;
 
@@ -539,27 +526,26 @@ void AudioMixerSlave::addStream(AudioMixerClientData::MixableStream& mixableStre
 
     // stereo sources are not passed through HRTF
     if (streamToAdd->isStereo()) {
-
         // apply the avatar gain adjustment
         gain *= mixableStream.hrtf->getGainAdjustment();
 
         const float scale = 1 / 32768.0f; // int16_t to float
 
         for (int i = 0; i < AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL; i++) {
-            _mixSamples[2*i+0] += (float)streamPopOutput[2*i+0] * gain * scale;
-            _mixSamples[2*i+1] += (float)streamPopOutput[2*i+1] * gain * scale;
+            _mixSamples[2 * i + 0] += (float)streamPopOutput[2 * i + 0] * gain * scale;
+            _mixSamples[2 * i + 1] += (float)streamPopOutput[2 * i + 1] * gain * scale;
         }
 
         ++stats.manualStereoMixes;
     } else if (isEcho) {
         // echo sources are not passed through HRTF
 
-        const float scale = 1/32768.0f; // int16_t to float
+        const float scale = 1 / 32768.0f; // int16_t to float
 
         for (int i = 0; i < AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL; i++) {
             float sample = (float)streamPopOutput[i] * gain * scale;
-            _mixSamples[2*i+0] += sample;
-            _mixSamples[2*i+1] += sample;
+            _mixSamples[2 * i + 0] += sample;
+            _mixSamples[2 * i + 1] += sample;
         }
 
         ++stats.manualEchoMixes;
@@ -574,8 +560,7 @@ void AudioMixerSlave::addStream(AudioMixerClientData::MixableStream& mixableStre
 }
 
 void AudioMixerSlave::updateHRTFParameters(AudioMixerClientData::MixableStream& mixableStream,
-                                      AvatarAudioStream& listeningNodeStream,
-                                      float masterListenerGain) {
+                                           AvatarAudioStream& listeningNodeStream, float masterListenerGain) {
     auto streamToAdd = mixableStream.positionalStream;
 
     // check if this is a server echo of a source back to itself
@@ -593,7 +578,7 @@ void AudioMixerSlave::updateHRTFParameters(AudioMixerClientData::MixableStream& 
 }
 
 void AudioMixerSlave::resetHRTFState(AudioMixerClientData::MixableStream& mixableStream) {
-     mixableStream.hrtf->reset();
+    mixableStream.hrtf->reset();
     ++stats.hrtfResets;
 }
 
@@ -605,8 +590,8 @@ std::unique_ptr<NLPacket> createAudioPacket(PacketType type, int size, quint16 s
 }
 
 void sendMixPacket(const SharedNodePointer& node, AudioMixerClientData& data, QByteArray& buffer) {
-    const int MIX_PACKET_SIZE =
-        sizeof(quint16) + AudioConstants::MAX_CODEC_NAME_LENGTH_ON_WIRE + AudioConstants::NETWORK_FRAME_BYTES_STEREO;
+    const int MIX_PACKET_SIZE = sizeof(quint16) + AudioConstants::MAX_CODEC_NAME_LENGTH_ON_WIRE +
+                                AudioConstants::NETWORK_FRAME_BYTES_STEREO;
     quint16 sequence = data.getOutgoingSequenceNumber();
     QString codec = data.getCodecName();
     auto mixPacket = createAudioPacket(PacketType::MixedAudio, MIX_PACKET_SIZE, sequence, codec);
@@ -620,8 +605,7 @@ void sendMixPacket(const SharedNodePointer& node, AudioMixerClientData& data, QB
 }
 
 void sendSilentPacket(const SharedNodePointer& node, AudioMixerClientData& data) {
-    const int SILENT_PACKET_SIZE =
-        sizeof(quint16) + AudioConstants::MAX_CODEC_NAME_LENGTH_ON_WIRE + sizeof(quint16);
+    const int SILENT_PACKET_SIZE = sizeof(quint16) + AudioConstants::MAX_CODEC_NAME_LENGTH_ON_WIRE + sizeof(quint16);
     quint16 sequence = data.getOutgoingSequenceNumber();
     QString codec = data.getCodecName();
     auto mixPacket = createAudioPacket(PacketType::SilentAudioFrame, SILENT_PACKET_SIZE, sequence, codec);
@@ -665,7 +649,7 @@ void sendEnvironmentPacket(const SharedNodePointer& node, AudioMixerClientData& 
 
     // check if data changed
     bool dataChanged = (stream->hasReverb() != hasReverb) ||
-        (stream->hasReverb() && (stream->getRevebTime() != reverbTime || stream->getWetLevel() != wetLevel));
+                       (stream->hasReverb() && (stream->getRevebTime() != reverbTime || stream->getWetLevel() != wetLevel));
     if (dataChanged) {
         // update stream
         if (hasReverb) {
@@ -722,20 +706,20 @@ float approximateGain(const AvatarAudioStream& listeningNodeStream, const Positi
 }
 
 float computeGain(float masterListenerGain, const AvatarAudioStream& listeningNodeStream,
-        const PositionalAudioStream& streamToAdd, const glm::vec3& relativePosition, float distance, bool isEcho) {
+                  const PositionalAudioStream& streamToAdd, const glm::vec3& relativePosition, float distance, bool isEcho) {
     float gain = 1.0f;
 
     // injector: apply attenuation
     if (streamToAdd.getType() == PositionalAudioStream::Injector) {
         gain *= reinterpret_cast<const InjectedAudioStream*>(&streamToAdd)->getAttenuationRatio();
 
-    // avatar: apply fixed off-axis attenuation to make them quieter as they turn away
+        // avatar: apply fixed off-axis attenuation to make them quieter as they turn away
     } else if (!isEcho && (streamToAdd.getType() == PositionalAudioStream::Microphone)) {
         glm::vec3 rotatedListenerPosition = glm::inverse(streamToAdd.getOrientation()) * relativePosition;
 
         // source directivity is based on angle of emission, in local coordinates
         glm::vec3 direction = glm::normalize(rotatedListenerPosition);
-        float angleOfDelivery = fastAcosf(glm::clamp(-direction.z, -1.0f, 1.0f));   // UNIT_NEG_Z is "forward"
+        float angleOfDelivery = fastAcosf(glm::clamp(-direction.z, -1.0f, 1.0f)); // UNIT_NEG_Z is "forward"
 
         const float MAX_OFF_AXIS_ATTENUATION = 0.2f;
         const float OFF_AXIS_ATTENUATION_STEP = (1 - MAX_OFF_AXIS_ATTENUATION) / 2.0f;
@@ -771,7 +755,7 @@ float computeGain(float masterListenerGain, const AvatarAudioStream& listeningNo
 }
 
 float computeAzimuth(const AvatarAudioStream& listeningNodeStream, const PositionalAudioStream& streamToAdd,
-        const glm::vec3& relativePosition) {
+                     const glm::vec3& relativePosition) {
     glm::quat inverseOrientation = glm::inverse(listeningNodeStream.getOrientation());
 
     glm::vec3 rotatedSourcePosition = inverseOrientation * relativePosition;
@@ -783,14 +767,13 @@ float computeAzimuth(const AvatarAudioStream& listeningNodeStream, const Positio
 
     float rotatedSourcePositionLength2 = glm::length2(rotatedSourcePosition);
     if (rotatedSourcePositionLength2 > SOURCE_DISTANCE_THRESHOLD) {
-        
         // produce an oriented angle about the y-axis
         glm::vec3 direction = rotatedSourcePosition * (1.0f / fastSqrtf(rotatedSourcePositionLength2));
         float angle = fastAcosf(glm::clamp(-direction.z, -1.0f, 1.0f)); // UNIT_NEG_Z is "forward"
         return (direction.x < 0.0f) ? -angle : angle;
 
-    } else {   
+    } else {
         // no azimuth if they are in same spot
-        return 0.0f; 
+        return 0.0f;
     }
 }

@@ -21,7 +21,7 @@ public:
     using JobModel = workload::Job::ModelI<PhysicsBoundary, Inputs, Config>;
 
     PhysicsBoundary() {}
-    void configure(const Config& config) { }
+    void configure(const Config& config) {}
     void run(const workload::WorkloadContextPointer& context, const Inputs& inputs);
 };
 

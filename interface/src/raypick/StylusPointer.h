@@ -9,8 +9,8 @@
 #define hifi_StylusPointer_h
 
 #include <Pointer.h>
-#include <shared/Bilateral.h>
 #include <RegisteredMetaTypes.h>
+#include <shared/Bilateral.h>
 
 #include "ui/overlays/Overlay.h"
 
@@ -31,7 +31,8 @@ public:
     // "events off" -> render, don't hover/trigger
     // "disabled" -> don't render, don't hover/trigger
     void setRenderState(const std::string& state) override;
-    void editRenderState(const std::string& state, const QVariant& startProps, const QVariant& pathProps, const QVariant& endProps) override {}
+    void editRenderState(const std::string& state, const QVariant& startProps, const QVariant& pathProps,
+                         const QVariant& endProps) override {}
 
     QVariantMap toVariantMap() const override;
 
@@ -44,7 +45,8 @@ protected:
     bool shouldTrigger(const PickResultPointer& pickResult) override;
     virtual PickResultPointer getPickResultCopy(const PickResultPointer& pickResult) const override;
 
-    PointerEvent buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult, const std::string& button = "", bool hover = true) override;
+    PointerEvent buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult,
+                                   const std::string& button = "", bool hover = true) override;
 
 private:
     void show(const StylusTip& tip);
@@ -65,11 +67,7 @@ private:
 
     TriggerState _state;
 
-    enum RenderState {
-        EVENTS_ON = 0,
-        EVENTS_OFF,
-        DISABLED
-    };
+    enum RenderState { EVENTS_ON = 0, EVENTS_OFF, DISABLED };
 
     RenderState _renderState { EVENTS_ON };
 
@@ -80,11 +78,6 @@ private:
     static glm::vec2 findPos2D(const PickedObject& pickedObject, const glm::vec3& origin);
 
     bool _showing { true };
-
 };
 
 #endif // hifi_StylusPointer_h
-
-
-
-

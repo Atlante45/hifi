@@ -26,7 +26,7 @@ public:
     explicit OtherAvatar(QThread* thread);
     virtual ~OtherAvatar();
 
-    virtual void instantiableAvatar() override { };
+    virtual void instantiableAvatar() override {};
     virtual void createOrb() override;
     virtual void indicateLoadingStatus(LoadingStatus loadingStatus) override;
     void updateOrbPosition();
@@ -57,4 +57,4 @@ protected:
 
 using OtherAvatarPointer = std::shared_ptr<OtherAvatar>;
 
-#endif  // hifi_OtherAvatar_h
+#endif // hifi_OtherAvatar_h

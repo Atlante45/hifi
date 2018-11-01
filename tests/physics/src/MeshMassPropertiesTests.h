@@ -15,14 +15,13 @@
 #include <QtTest/QtTest>
 
 // Relative error macro (see errorTest in BulletTestUtils.h)
-#define QCOMPARE_WITH_RELATIVE_ERROR(actual, expected, relativeError) \
+#define QCOMPARE_WITH_RELATIVE_ERROR(actual, expected, relativeError)                                                          \
     QCOMPARE_WITH_LAMBDA(actual, expected, errorTest(actual, expected, relativeError))
-
 
 // Testcase class
 class MeshMassPropertiesTests : public QObject {
     Q_OBJECT
-    
+
 private slots:
     void testParallelAxisTheorem();
     void testTetrahedron();

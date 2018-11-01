@@ -15,7 +15,8 @@
 class OffscreenQmlSurface;
 class PointerEvent;
 
-namespace render { namespace entities {
+namespace render {
+namespace entities {
 
 class WebEntityRenderer : public TypedEntityRenderer<WebEntityItem> {
     Q_OBJECT
@@ -33,7 +34,8 @@ protected:
     virtual void onRemoveFromSceneTyped(const TypedEntityPointer& entity) override;
     virtual bool needsRenderUpdate() const override;
     virtual bool needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const override;
-    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) override;
+    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                const TypedEntityPointer& entity) override;
     virtual void doRender(RenderArgs* args) override;
     virtual bool isTransparent() const override;
 
@@ -49,17 +51,12 @@ private:
     bool hasWebSurface();
     glm::vec2 getWindowSize(const TypedEntityPointer& entity) const;
 
-
-    int _geometryId{ 0 };
-    enum class ContentType {
-        NoContent,
-        HtmlContent,
-        QmlContent
-    };
+    int _geometryId { 0 };
+    enum class ContentType { NoContent, HtmlContent, QmlContent };
 
     static ContentType getContentType(const QString& urlString);
 
-    ContentType _contentType{ ContentType::NoContent };
+    ContentType _contentType { ContentType::NoContent };
     QSharedPointer<OffscreenQmlSurface> _webSurface;
     glm::vec3 _contextPosition;
     gpu::TexturePointer _texture;
@@ -70,7 +67,8 @@ private:
     uint64_t _lastRenderTime { 0 };
 };
 
-} } // namespace 
+} // namespace entities
+} // namespace render
 
 #if 0
     virtual void emitScriptEvent(const QVariant& message) override;

@@ -19,16 +19,16 @@ class MovingPercentileTests : public QObject {
 
 private slots:
     // Tests
-    void testRunningMin ();
-    void testRunningMax ();
-    void testRunningMedian ();
+    void testRunningMin();
+    void testRunningMax();
+    void testRunningMedian();
 
 private:
     // Utilities and helper functions
     int64_t random();
-    void testRunningMinForN (int n);
-    void testRunningMaxForN (int n);
-    void testRunningMedianForN (int n);
+    void testRunningMinForN(int n);
+    void testRunningMaxForN(int n);
+    void testRunningMedianForN(int n);
 };
 
 #endif // hifi_MovingPercentileTests_h

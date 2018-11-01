@@ -18,23 +18,22 @@
 #include "SharedLogging.h"
 
 float PIDController::update(float measuredValue, float dt, bool resetAccumulator) {
-    const float error = getMeasuredValueSetpoint() - measuredValue;   // Sign is the direction we want measuredValue to go. Positive means go higher.
+    const float error = getMeasuredValueSetpoint() -
+                        measuredValue; // Sign is the direction we want measuredValue to go. Positive means go higher.
 
     const float p = getKP() * error; // term is Proportional to error
 
-    const float accumulatedError = glm::clamp(error * dt + (resetAccumulator ? 0 : _lastAccumulation),  // integrate error
-        getAccumulatedValueLowLimit(),   // but clamp by anti-windup limits
-        getAccumulatedValueHighLimit());
+    const float accumulatedError = glm::clamp(error * dt + (resetAccumulator ? 0 : _lastAccumulation), // integrate error
+                                              getAccumulatedValueLowLimit(), // but clamp by anti-windup limits
+                                              getAccumulatedValueHighLimit());
     const float i = getKI() * accumulatedError; // term is Integral of error
 
-    const float changeInError = (error - _lastError) / dt;  // positive value denotes increasing deficit
+    const float changeInError = (error - _lastError) / dt; // positive value denotes increasing deficit
     const float d = getKD() * changeInError; // term is Derivative of Error
 
-    const float computedValue = glm::clamp(p + i + d,
-        getControlledValueLowLimit(),
-        getControlledValueHighLimit());
+    const float computedValue = glm::clamp(p + i + d, getControlledValueLowLimit(), getControlledValueHighLimit());
 
-    if (getIsLogging()) {  // if logging/reporting
+    if (getIsLogging()) { // if logging/reporting
         updateHistory(measuredValue, dt, error, accumulatedError, changeInError, p, i, d, computedValue);
     }
     Q_ASSERT(!glm::isnan(computedValue));
@@ -46,7 +45,8 @@ float PIDController::update(float measuredValue, float dt, bool resetAccumulator
 }
 
 // Just for logging/reporting. Used when picking/verifying the operational parameters.
-void PIDController::updateHistory(float measuredValue, float dt, float error, float accumulatedError, float changeInError, float p, float i, float d, float computedValue) {
+void PIDController::updateHistory(float measuredValue, float dt, float error, float accumulatedError, float changeInError,
+                                  float p, float i, float d, float computedValue) {
     // Don't report each update(), as the I/O messes with the results a lot.
     // Instead, add to history, and then dump out at once when full.
     // Typically, the first few values reported in each batch should be ignored.
@@ -71,11 +71,10 @@ void PIDController::reportHistory() {
     qCDebug(shared) << _label << "measured dt || error accumulated changed || p i d controlled";
     for (int i = 0; i < _history.size(); i++) {
         Row& row = _history[i];
-        qCDebug(shared) << row.measured << row.dt <<
-            "||" << row.error << row.accumulated << row.changed <<
-            "||" << row.p << row.i << row.d << row.computed << 1.0f/row.computed;
+        qCDebug(shared) << row.measured << row.dt << "||" << row.error << row.accumulated << row.changed << "||" << row.p
+                        << row.i << row.d << row.computed << 1.0f / row.computed;
     }
-    qCDebug(shared) << "Limits: setpoint" << getMeasuredValueSetpoint() << "accumulate" << getAccumulatedValueLowLimit() << getAccumulatedValueHighLimit() <<
-        "controlled" << getControlledValueLowLimit() << getControlledValueHighLimit() <<
-        "kp/ki/kd" << getKP() << getKI() << getKD();
+    qCDebug(shared) << "Limits: setpoint" << getMeasuredValueSetpoint() << "accumulate" << getAccumulatedValueLowLimit()
+                    << getAccumulatedValueHighLimit() << "controlled" << getControlledValueLowLimit()
+                    << getControlledValueHighLimit() << "kp/ki/kd" << getKP() << getKI() << getKD();
 }

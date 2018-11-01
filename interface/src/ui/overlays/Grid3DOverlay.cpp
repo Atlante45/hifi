@@ -11,12 +11,11 @@
 
 #include "Grid3DOverlay.h"
 
-#include <OctreeConstants.h>
 #include <DependencyManager.h>
 #include <GeometryCache.h>
+#include <OctreeConstants.h>
 #include <PathUtils.h>
 #include <ViewFrustum.h>
-
 
 QString const Grid3DOverlay::TYPE = "grid";
 const float DEFAULT_SCALE = 100.0f;
@@ -30,8 +29,7 @@ Grid3DOverlay::Grid3DOverlay() {
 Grid3DOverlay::Grid3DOverlay(const Grid3DOverlay* grid3DOverlay) :
     Planar3DOverlay(grid3DOverlay),
     _majorGridEvery(grid3DOverlay->_majorGridEvery),
-    _minorGridEvery(grid3DOverlay->_minorGridEvery)
-{
+    _minorGridEvery(grid3DOverlay->_minorGridEvery) {
     updateGrid();
     _geometryId = DependencyManager::get<GeometryCache>()->allocateID();
 }
@@ -71,8 +69,8 @@ void Grid3DOverlay::render(RenderArgs* args) {
         if (_followCamera) {
             // Get the camera position rounded to the nearest major grid line
             // This grid is for UI and should lie on worldlines
-            auto cameraPosition =
-                (float)_majorGridEvery * glm::round(args->getViewFrustum().getPosition() / (float)_majorGridEvery);
+            auto cameraPosition = (float)_majorGridEvery *
+                                  glm::round(args->getViewFrustum().getPosition() / (float)_majorGridEvery);
 
             position += glm::vec3(cameraPosition.x, 0.0f, cameraPosition.z);
         }
@@ -82,10 +80,10 @@ void Grid3DOverlay::render(RenderArgs* args) {
         batch->setModelTransform(transform);
         const float MINOR_GRID_EDGE = 0.0025f;
         const float MAJOR_GRID_EDGE = 0.005f;
-        DependencyManager::get<GeometryCache>()->renderGrid(*batch, minCorner, maxCorner,
-            _minorGridRowDivisions, _minorGridColDivisions, MINOR_GRID_EDGE,
-            _majorGridRowDivisions, _majorGridColDivisions, MAJOR_GRID_EDGE,
-            gridColor, _drawInFront, _geometryId);
+        DependencyManager::get<GeometryCache>()->renderGrid(*batch, minCorner, maxCorner, _minorGridRowDivisions,
+                                                            _minorGridColDivisions, MINOR_GRID_EDGE, _majorGridRowDivisions,
+                                                            _majorGridColDivisions, MAJOR_GRID_EDGE, gridColor, _drawInFront,
+                                                            _geometryId);
     }
 }
 
@@ -143,7 +141,8 @@ void Grid3DOverlay::setProperties(const QVariantMap& properties) {
  *     Antonyms: <code>isWire</code> and <code>wire</code>.
  * @property {boolean} isDashedLine=false - If <code>true</code>, a dashed line is drawn on the overlay's edges. Synonym:
  *     <code>dashed</code>.
- * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.  <code>ignoreRayIntersection</code> is a synonym.
+ * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.
+ * <code>ignoreRayIntersection</code> is a synonym.
  * @property {boolean} drawInFront=false - If <code>true</code>, the overlay is rendered in front of other overlays that don't
  *     have <code>drawInFront</code> set to <code>true</code>, and in front of entities.
  * @property {boolean} grabbable=false - Signal to grabbing scripts whether or not this overlay can be grabbed.
@@ -155,9 +154,9 @@ void Grid3DOverlay::setProperties(const QVariantMap& properties) {
  *
  * @property {boolean} followCamera=true - If <code>true</code>, the grid is always visible even as the camera moves to another
  *     position.
- * @property {number} majorGridEvery=5 - Integer number of <code>minorGridEvery</code> intervals at which to draw a thick grid 
+ * @property {number} majorGridEvery=5 - Integer number of <code>minorGridEvery</code> intervals at which to draw a thick grid
  *     line. Minimum value = <code>1</code>.
- * @property {number} minorGridEvery=1 - Real number of meters at which to draw thin grid lines. Minimum value = 
+ * @property {number} minorGridEvery=1 - Real number of meters at which to draw thin grid lines. Minimum value =
  *     <code>0.001</code>.
  */
 QVariant Grid3DOverlay::getProperty(const QString& property) {

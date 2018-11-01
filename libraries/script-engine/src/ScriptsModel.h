@@ -14,20 +14,14 @@
 
 #include <QAbstractItemModel>
 #include <QDir>
-#include <QNetworkReply>
 #include <QFileSystemWatcher>
+#include <QNetworkReply>
 
 class TreeNodeFolder;
 
-enum ScriptOrigin {
-    SCRIPT_ORIGIN_LOCAL,
-    SCRIPT_ORIGIN_DEFAULT
-};
+enum ScriptOrigin { SCRIPT_ORIGIN_LOCAL, SCRIPT_ORIGIN_DEFAULT };
 
-enum TreeNodeType {
-    TREE_NODE_TYPE_SCRIPT,
-    TREE_NODE_TYPE_FOLDER
-};
+enum TreeNodeType { TREE_NODE_TYPE_SCRIPT, TREE_NODE_TYPE_FOLDER };
 
 class TreeNodeBase {
 public:

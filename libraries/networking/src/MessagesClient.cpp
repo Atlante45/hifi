@@ -23,17 +23,15 @@
 #include "PacketReceiver.h"
 
 MessagesClient::MessagesClient() {
-    setCustomDeleter([](Dependency* dependency){
-        static_cast<MessagesClient*>(dependency)->deleteLater();
-    });
+    setCustomDeleter([](Dependency* dependency) { static_cast<MessagesClient*>(dependency)->deleteLater(); });
     auto nodeList = DependencyManager::get<NodeList>();
     auto& packetReceiver = nodeList->getPacketReceiver();
     packetReceiver.registerListener(PacketType::MessagesData, this, "handleMessagesPacket");
     connect(nodeList.data(), &LimitedNodeList::nodeActivated, this, &MessagesClient::handleNodeActivated);
 }
 
-void MessagesClient::decodeMessagesPacket(QSharedPointer<ReceivedMessage> receivedMessage, QString& channel, 
-                                                bool& isText, QString& message, QByteArray& data, QUuid& senderID) {
+void MessagesClient::decodeMessagesPacket(QSharedPointer<ReceivedMessage> receivedMessage, QString& channel, bool& isText,
+                                          QString& message, QByteArray& data, QUuid& senderID) {
     quint16 channelLength;
     receivedMessage->readPrimitive(&channelLength);
     auto channelData = receivedMessage->read(channelLength);
@@ -99,7 +97,6 @@ std::unique_ptr<NLPacketList> MessagesClient::encodeMessagesDataPacket(QString c
 
     return packetList;
 }
-
 
 void MessagesClient::handleMessagesPacket(QSharedPointer<ReceivedMessage> receivedMessage, SharedNodePointer senderNode) {
     QString channel, message;

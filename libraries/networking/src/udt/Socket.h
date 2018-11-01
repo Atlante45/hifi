@@ -15,17 +15,17 @@
 #define hifi_Socket_h
 
 #include <functional>
-#include <unordered_map>
-#include <mutex>
 #include <list>
+#include <mutex>
+#include <unordered_map>
 
 #include <QtCore/QObject>
 #include <QtCore/QTimer>
 #include <QtNetwork/QUdpSocket>
 
 #include "../HifiSockAddr.h"
-#include "TCPVegasCC.h"
 #include "Connection.h"
+#include "TCPVegasCC.h"
 
 //#define UDT_CONNECTION_DEBUG
 
@@ -54,11 +54,11 @@ class Socket : public QObject {
 
 public:
     using StatsVector = std::vector<std::pair<HifiSockAddr, ConnectionStats::Stats>>;
-    
+
     Socket(QObject* object = 0, bool shouldChangeSocketOptions = true);
-    
+
     quint16 localPort() const { return _udpSocket.localPort(); }
-    
+
     // Simple functions writing to the socket with no processing
     qint64 writeBasePacket(const BasePacket& packet, const HifiSockAddr& sockAddr);
     qint64 writePacket(const Packet& packet, const HifiSockAddr& sockAddr);
@@ -66,7 +66,7 @@ public:
     qint64 writePacketList(std::unique_ptr<PacketList> packetList, const HifiSockAddr& sockAddr);
     qint64 writeDatagram(const char* data, qint64 size, const HifiSockAddr& sockAddr);
     qint64 writeDatagram(const QByteArray& datagram, const HifiSockAddr& sockAddr);
-    
+
     void bind(const QHostAddress& address, quint16 port = 0);
     void rebind(quint16 port);
     void rebind();
@@ -75,18 +75,20 @@ public:
     void setPacketHandler(PacketHandler handler) { _packetHandler = handler; }
     void setMessageHandler(MessageHandler handler) { _messageHandler = handler; }
     void setMessageFailureHandler(MessageFailureHandler handler) { _messageFailureHandler = handler; }
-    void setConnectionCreationFilterOperator(ConnectionCreationFilterOperator filterOperator)
-        { _connectionCreationFilterOperator = filterOperator; }
-    
-    void addUnfilteredHandler(const HifiSockAddr& senderSockAddr, BasePacketHandler handler)
-        { _unfilteredHandlers[senderSockAddr] = handler; }
-    
+    void setConnectionCreationFilterOperator(ConnectionCreationFilterOperator filterOperator) {
+        _connectionCreationFilterOperator = filterOperator;
+    }
+
+    void addUnfilteredHandler(const HifiSockAddr& senderSockAddr, BasePacketHandler handler) {
+        _unfilteredHandlers[senderSockAddr] = handler;
+    }
+
     void setCongestionControlFactory(std::unique_ptr<CongestionControlVirtualFactory> ccFactory);
     void setConnectionMaxBandwidth(int maxBandwidth);
 
     void messageReceived(std::unique_ptr<Packet> packet);
     void messageFailed(Connection* connection, Packet::MessageNumber messageNumber);
-    
+
     StatsVector sampleStatsForAllConnections();
 
 #if (PR_BUILD || DEV_BUILD)
@@ -99,7 +101,7 @@ signals:
 public slots:
     void cleanupConnection(HifiSockAddr sockAddr);
     void clearConnections();
-    
+
 private slots:
     void readPendingDatagrams();
     void checkForReadyReadBackup();
@@ -111,16 +113,16 @@ private:
     void setSystemBufferSizes();
     Connection* findOrCreateConnection(const HifiSockAddr& sockAddr, bool filterCreation = false);
     bool socketMatchesNodeOrDomain(const HifiSockAddr& sockAddr);
-   
+
     // privatized methods used by UDTTest - they are private since they must be called on the Socket thread
     ConnectionStats::Stats sampleStatsForConnection(const HifiSockAddr& destination);
-    
+
     std::vector<HifiSockAddr> getConnectionSockAddrs();
     void connectToSendSignal(const HifiSockAddr& destinationAddr, QObject* receiver, const char* slot);
-    
+
     Q_INVOKABLE void writeReliablePacket(Packet* packet, const HifiSockAddr& sockAddr);
     Q_INVOKABLE void writeReliablePacketList(PacketList* packetList, const HifiSockAddr& sockAddr);
-    
+
     QUdpSocket _udpSocket { this };
     PacketFilterOperator _packetFilterOperator;
     PacketHandler _packetHandler;
@@ -145,10 +147,10 @@ private:
     int _lastPacketSizeRead { 0 };
     SequenceNumber _lastReceivedSequenceNumber;
     HifiSockAddr _lastPacketSockAddr;
-    
+
     friend UDTTest;
 };
-    
+
 } // namespace udt
 
 #endif // hifi_Socket_h

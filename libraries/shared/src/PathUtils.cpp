@@ -29,9 +29,8 @@
 #include <mach-o/dyld.h>
 #endif
 
-#include "shared/GlobalAppProperties.h"
 #include "SharedUtil.h"
-
+#include "shared/GlobalAppProperties.h"
 
 // Format: AppName-PID-Timestamp
 // Example: ...
@@ -53,7 +52,7 @@ const QString& PathUtils::getRccPath() {
     static QString rccLocation;
     static std::once_flag once;
     std::call_once(once, [&] {
-        static const QString rccName{ "/resources.rcc" };
+        static const QString rccName { "/resources.rcc" };
 #if defined(Q_OS_OSX)
         char buffer[8192];
         uint32_t bufferSize = sizeof(buffer);
@@ -81,9 +80,9 @@ const QString& PathUtils::projectRootPath() {
 #endif
 
 const QString& PathUtils::resourcesPath() {
-    static QString staticResourcePath{ ":/" };
+    static QString staticResourcePath { ":/" };
     static std::once_flag once;
-    std::call_once(once, [&]{
+    std::call_once(once, [&] {
 #if !defined(Q_OS_ANDROID) && defined(DEV_BUILD)
         if (USE_SOURCE_TREE_RESOURCES()) {
             // For dev builds, optionally load content from the Git source tree
@@ -95,9 +94,9 @@ const QString& PathUtils::resourcesPath() {
 }
 
 const QString& PathUtils::resourcesUrl() {
-    static QString staticResourcePath{ "qrc:///" };
+    static QString staticResourcePath { "qrc:///" };
     static std::once_flag once;
-    std::call_once(once, [&]{
+    std::call_once(once, [&] {
 #if !defined(Q_OS_ANDROID) && defined(DEV_BUILD)
         if (USE_SOURCE_TREE_RESOURCES()) {
             // For dev builds, optionally load content from the Git source tree
@@ -121,9 +120,9 @@ QUrl PathUtils::expandToLocalDataAbsolutePath(const QUrl& fileUrl) {
 
 #ifdef Q_OS_MAC
         static const QString staticResourcePath = QCoreApplication::applicationDirPath() + "/../Resources/";
-#elif defined (ANDROID)
-        static const QString staticResourcePath =
-            QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/resources/";
+#elif defined(ANDROID)
+        static const QString staticResourcePath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) +
+                                                  "/resources/";
 #else
         static const QString staticResourcePath = QCoreApplication::applicationDirPath() + "/resources/";
 #endif
@@ -279,11 +278,11 @@ Qt::CaseSensitivity PathUtils::getFSCaseSensitivity() {
     static Qt::CaseSensitivity sensitivity { Qt::CaseSensitive };
     static std::once_flag once;
     std::call_once(once, [&] {
-            QString path = defaultScriptsLocation().toLocalFile();
-            QFileInfo upperFI(path.toUpper());
-            QFileInfo lowerFI(path.toLower());
-            sensitivity = (upperFI == lowerFI) ? Qt::CaseInsensitive : Qt::CaseSensitive;
-        });
+        QString path = defaultScriptsLocation().toLocalFile();
+        QFileInfo upperFI(path.toUpper());
+        QFileInfo lowerFI(path.toLower());
+        sensitivity = (upperFI == lowerFI) ? Qt::CaseInsensitive : Qt::CaseSensitive;
+    });
     return sensitivity;
 }
 

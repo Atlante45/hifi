@@ -11,8 +11,7 @@
 
 #include "ScriptsModelFilter.h"
 
-ScriptsModelFilter::ScriptsModelFilter(QObject *parent) : 
-    QSortFilterProxyModel(parent) {
+ScriptsModelFilter::ScriptsModelFilter(QObject* parent) : QSortFilterProxyModel(parent) {
 }
 
 bool ScriptsModelFilter::lessThan(const QModelIndex& left, const QModelIndex& right) const {
@@ -28,8 +27,10 @@ bool ScriptsModelFilter::lessThan(const QModelIndex& left, const QModelIndex& ri
 bool ScriptsModelFilter::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const {
     if (!filterRegExp().isEmpty()) {
         ScriptsModel* scriptsModel = static_cast<ScriptsModel*>(sourceModel());
-        TreeNodeBase* node = scriptsModel->getFolderNodes(
-            static_cast<TreeNodeFolder*>(scriptsModel->getTreeNodeFromIndex(sourceParent))).at(sourceRow);
+        TreeNodeBase* node = scriptsModel
+                                 ->getFolderNodes(
+                                     static_cast<TreeNodeFolder*>(scriptsModel->getTreeNodeFromIndex(sourceParent)))
+                                 .at(sourceRow);
         QModelIndex sourceIndex = sourceModel()->index(sourceRow, this->filterKeyColumn(), sourceParent);
         if (node->getType() == TREE_NODE_TYPE_FOLDER) {
             int rows = scriptsModel->rowCount(sourceIndex);

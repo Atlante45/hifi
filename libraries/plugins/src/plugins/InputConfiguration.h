@@ -11,11 +11,11 @@
 
 #include <mutex>
 
+#include <DependencyManager.h>
+#include <QJsonObject>
 #include <QObject>
 #include <QString>
 #include <QStringList>
-#include <QJsonObject>
-#include <DependencyManager.h>
 
 class InputConfiguration : public QObject, public Dependency {
     Q_OBJECT

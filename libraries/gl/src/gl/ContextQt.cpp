@@ -40,7 +40,7 @@ QOpenGLContext* Context::qglContext() {
     }
     return _wrappedContext;
 #else
-    
+
     return _context;
 #endif
 }
@@ -62,16 +62,15 @@ void Context::debugMessageHandler(const QOpenGLDebugMessage& debugMessage) {
     return;
 }
 
-void Context::setupDebugLogging(QOpenGLContext *context) {
-    QOpenGLDebugLogger *logger = new QOpenGLDebugLogger(context);
-    QObject::connect(logger, &QOpenGLDebugLogger::messageLogged, nullptr, [](const QOpenGLDebugMessage& message){
-        Context::debugMessageHandler(message);
-    });
+void Context::setupDebugLogging(QOpenGLContext* context) {
+    QOpenGLDebugLogger* logger = new QOpenGLDebugLogger(context);
+    QObject::connect(logger, &QOpenGLDebugLogger::messageLogged, nullptr,
+                     [](const QOpenGLDebugMessage& message) { Context::debugMessageHandler(message); });
     if (logger->initialize()) {
         logger->enableMessages();
         logger->startLogging(QOpenGLDebugLogger::SynchronousLogging);
     } else {
-        qCWarning(glLogging) <<  "OpenGL context does not support debugging";
+        qCWarning(glLogging) << "OpenGL context does not support debugging";
     }
 }
 
@@ -93,7 +92,7 @@ void Context::doneCurrent() {
     }
 }
 
-Q_GUI_EXPORT QOpenGLContext *qt_gl_global_share_context();
+Q_GUI_EXPORT QOpenGLContext* qt_gl_global_share_context();
 const QSurfaceFormat& getDefaultOpenGLSurfaceFormat();
 
 void Context::create(QOpenGLContext* shareContext) {
@@ -115,7 +114,6 @@ void Context::create(QOpenGLContext* shareContext) {
         setupDebugLogging(_context);
     }
     doneCurrent();
-    
 }
 
 #endif

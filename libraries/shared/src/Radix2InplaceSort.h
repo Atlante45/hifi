@@ -14,29 +14,23 @@
 
 #include <algorithm>
 
-
 /**
  * Sorts the range between two iterators in linear time.
  *
  * A Radix2Scanner must be provided to decompose the sorting
  * criterion into a fixed number of bits.
  */
-template< class Radix2Scanner, typename BidiIterator >
-void radix2InplaceSort( BidiIterator from, BidiIterator to,
-        Radix2Scanner const& scanner = Radix2Scanner() );
+template<class Radix2Scanner, typename BidiIterator>
+void radix2InplaceSort(BidiIterator from, BidiIterator to, Radix2Scanner const& scanner = Radix2Scanner());
 
-
-
-template< class Scanner, typename Iterator > 
+template<class Scanner, typename Iterator>
 struct radix2InplaceSort_impl : Scanner {
-
-    radix2InplaceSort_impl(Scanner const& s) : Scanner(s) { }
+    radix2InplaceSort_impl(Scanner const& s) : Scanner(s) {}
 
     using Scanner::advance;
     using Scanner::bit;
 
     void go(Iterator& from, Iterator& to, typename Scanner::state_type s) {
-
         Iterator l(from), r(to);
         unsigned cl, cr;
 
@@ -44,11 +38,11 @@ struct radix2InplaceSort_impl : Scanner {
 
         while (true) {
             // scan from left for set bit
-            for (cl = cr = 0u; l != r ; ++l, ++cl)
+            for (cl = cr = 0u; l != r; ++l, ++cl)
                 if (bit(*l, s)) {
                     // scan from the right for unset bit
-                    for (++cr; --r != l ;++cr)
-                        if (! bit(*r, s)) {
+                    for (++cr; --r != l; ++cr)
+                        if (!bit(*r, s)) {
                             // swap, continue scanning from left
                             swap(*l, *r);
                             break;
@@ -58,15 +52,15 @@ struct radix2InplaceSort_impl : Scanner {
                 }
 
             // on to the next digit, if any
-            if (! advance(s)) {
-                return; 
+            if (!advance(s)) {
+                return;
             }
 
             // recurse into smaller branch and prepare iterative
             // processing of the other
             if (cl < cr) {
-
-                if (cl > 1u) go(from, l, s);
+                if (cl > 1u)
+                    go(from, l, s);
                 else if (cr <= 1u)
                     return;
 
@@ -74,8 +68,8 @@ struct radix2InplaceSort_impl : Scanner {
                 r = to;
 
             } else {
-
-                if (cr > 1u) go(r, to, s);
+                if (cr > 1u)
+                    go(r, to, s);
                 else if (cl <= 1u)
                     return;
 
@@ -86,12 +80,9 @@ struct radix2InplaceSort_impl : Scanner {
     }
 };
 
-template< class Radix2Scanner, typename BidiIterator >
-void radix2InplaceSort( BidiIterator from, BidiIterator to,
-        Radix2Scanner const& scanner) {
-
-    radix2InplaceSort_impl<Radix2Scanner, BidiIterator>(scanner)
-        .go(from, to, scanner.initial_state());
+template<class Radix2Scanner, typename BidiIterator>
+void radix2InplaceSort(BidiIterator from, BidiIterator to, Radix2Scanner const& scanner) {
+    radix2InplaceSort_impl<Radix2Scanner, BidiIterator>(scanner).go(from, to, scanner.initial_state());
 }
 
 #endif // hifi_Radix2InplaceSort_h

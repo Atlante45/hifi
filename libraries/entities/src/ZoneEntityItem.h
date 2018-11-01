@@ -12,14 +12,14 @@
 #ifndef hifi_ZoneEntityItem_h
 #define hifi_ZoneEntityItem_h
 
-#include "KeyLightPropertyGroup.h"
+#include <ComponentMode.h>
 #include "AmbientLightPropertyGroup.h"
+#include "BloomPropertyGroup.h"
 #include "EntityItem.h"
 #include "EntityTree.h"
-#include "SkyboxPropertyGroup.h"
 #include "HazePropertyGroup.h"
-#include "BloomPropertyGroup.h"
-#include <ComponentMode.h>
+#include "KeyLightPropertyGroup.h"
+#include "SkyboxPropertyGroup.h"
 
 class ZoneEntityItem : public EntityItem {
 public:
@@ -29,8 +29,9 @@ public:
 
     ALLOW_INSTANTIATION // This class can be instantiated
 
-    // methods for getting/setting all properties of an entity
-    virtual EntityItemProperties getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const override;
+        // methods for getting/setting all properties of an entity
+        virtual EntityItemProperties
+        getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const override;
     virtual bool setProperties(const EntityItemProperties& properties) override;
     virtual bool setSubClassProperties(const EntityItemProperties& properties) override;
 
@@ -38,18 +39,13 @@ public:
 
     virtual void appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                     EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
+                                    EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                    EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                                     OctreeElement::AppendState& appendState) const override;
 
     virtual int readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) override;
-
-
+                                                 ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                 bool overwriteLocalData, bool& somethingChanged) override;
 
     static bool getZonesArePickable() { return _zonesArePickable; }
     static void setZonesArePickable(bool value) { _zonesArePickable = value; }
@@ -58,15 +54,21 @@ public:
     static void setDrawZoneBoundaries(bool value) { _drawZoneBoundaries = value; }
 
     virtual bool isReadyToComputeShape() const override { return false; }
-    void setShapeType(ShapeType type) override { withWriteLock([&] { _shapeType = type; }); }
+    void setShapeType(ShapeType type) override {
+        withWriteLock([&] { _shapeType = type; });
+    }
     virtual ShapeType getShapeType() const override;
 
     virtual bool hasCompoundShapeURL() const;
     QString getCompoundShapeURL() const;
     virtual void setCompoundShapeURL(const QString& url);
 
-    KeyLightPropertyGroup getKeyLightProperties() const { return resultWithReadLock<KeyLightPropertyGroup>([&] { return _keyLightProperties; }); }
-    AmbientLightPropertyGroup getAmbientLightProperties() const { return resultWithReadLock<AmbientLightPropertyGroup>([&] { return _ambientLightProperties; }); }
+    KeyLightPropertyGroup getKeyLightProperties() const {
+        return resultWithReadLock<KeyLightPropertyGroup>([&] { return _keyLightProperties; });
+    }
+    AmbientLightPropertyGroup getAmbientLightProperties() const {
+        return resultWithReadLock<AmbientLightPropertyGroup>([&] { return _ambientLightProperties; });
+    }
 
     void setHazeMode(const uint32_t value);
     uint32_t getHazeMode() const;
@@ -83,8 +85,10 @@ public:
     void setBloomMode(const uint32_t value);
     uint32_t getBloomMode() const;
 
-    SkyboxPropertyGroup getSkyboxProperties() const { return resultWithReadLock<SkyboxPropertyGroup>([&] { return _skyboxProperties; }); }
-    
+    SkyboxPropertyGroup getSkyboxProperties() const {
+        return resultWithReadLock<SkyboxPropertyGroup>([&] { return _skyboxProperties; });
+    }
+
     const HazePropertyGroup& getHazeProperties() const { return _hazeProperties; }
     const BloomPropertyGroup& getBloomProperties() const { return _bloomProperties; }
 
@@ -93,7 +97,7 @@ public:
     bool getGhostingAllowed() const { return _ghostingAllowed; }
     void setGhostingAllowed(bool value) { _ghostingAllowed = value; }
     QString getFilterURL() const;
-    void setFilterURL(const QString url); 
+    void setFilterURL(const QString url);
 
     bool keyLightPropertiesChanged() const { return _keyLightPropertiesChanged; }
     bool ambientLightPropertiesChanged() const { return _ambientLightPropertiesChanged; }
@@ -106,14 +110,13 @@ public:
     void resetRenderingPropertiesChanged();
 
     virtual bool supportsDetailedIntersection() const override { return true; }
-    virtual bool findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                         OctreeElementPointer& element, float& distance,
-                         BoxFace& face, glm::vec3& surfaceNormal,
-                         QVariantMap& extraInfo, bool precisionPicking) const override;
+    virtual bool findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction, OctreeElementPointer& element,
+                                             float& distance, BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                             bool precisionPicking) const override;
     virtual bool findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
-                         const glm::vec3& acceleration, OctreeElementPointer& element, float& parabolicDistance,
-                         BoxFace& face, glm::vec3& surfaceNormal,
-                         QVariantMap& extraInfo, bool precisionPicking) const override;
+                                                  const glm::vec3& acceleration, OctreeElementPointer& element,
+                                                  float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+                                                  QVariantMap& extraInfo, bool precisionPicking) const override;
 
     virtual void debugDump() const override;
 
@@ -150,7 +153,7 @@ protected:
     bool _keyLightPropertiesChanged { false };
     bool _ambientLightPropertiesChanged { false };
     bool _skyboxPropertiesChanged { false };
-    bool _hazePropertiesChanged{ false };
+    bool _hazePropertiesChanged { false };
     bool _bloomPropertiesChanged { false };
     bool _stagePropertiesChanged { false };
 

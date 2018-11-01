@@ -8,12 +8,11 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef hifi_DualQuaternion
 #define hifi_DualQuaternion
 
-#include <QtGlobal>
 #include <QDebug>
+#include <QtGlobal>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -53,9 +52,9 @@ protected:
     glm::quat _dual;
 };
 
-
 inline QDebug operator<<(QDebug debug, const DualQuaternion& dq) {
-    debug << "DualQuaternion, real = (" << dq._real.x << dq._real.y << dq._real.z << dq._real.w << "), dual = (" << dq._dual.x << dq._dual.y << dq._dual.z << dq._dual.w << ")";
+    debug << "DualQuaternion, real = (" << dq._real.x << dq._real.y << dq._real.z << dq._real.w << "), dual = (" << dq._dual.x
+          << dq._dual.y << dq._dual.z << dq._dual.w << ")";
     return debug;
 }
 

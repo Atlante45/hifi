@@ -12,12 +12,10 @@
 using namespace gpu;
 using namespace gpu::gl;
 
-
 GLInputFormat::GLInputFormat() {
 }
 
-GLInputFormat:: ~GLInputFormat() {
-
+GLInputFormat::~GLInputFormat() {
 }
 
 GLInputFormat* GLInputFormat::sync(const Stream::Format& inputFormat) {

@@ -28,7 +28,6 @@
 
 using AtomicUIntStat = std::atomic<uintmax_t>;
 
-
 class EncodeBitstreamParams;
 class Octree;
 class OctreeElement;
@@ -42,16 +41,15 @@ using OctreeElementWeakPointer = std::weak_ptr<OctreeElement>;
 using ConstOctreeElementPointer = std::shared_ptr<const OctreeElement>;
 using OctreePointer = std::shared_ptr<Octree>;
 
-class OctreeElement: public std::enable_shared_from_this<OctreeElement> {
-
+class OctreeElement : public std::enable_shared_from_this<OctreeElement> {
 protected:
     // can only be constructed by derived implementation
     OctreeElement();
 
-    virtual OctreeElementPointer createNewElement(unsigned char * octalCode = NULL) = 0;
+    virtual OctreeElementPointer createNewElement(unsigned char* octalCode = NULL) = 0;
 
 public:
-    virtual void init(unsigned char * octalCode); /// Your subclass must call init on construction.
+    virtual void init(unsigned char* octalCode); /// Your subclass must call init on construction.
     virtual ~OctreeElement();
 
     // methods you can and should override to implement your tree functionality
@@ -60,7 +58,7 @@ public:
     virtual OctreeElementPointer addChildAtIndex(int childIndex);
 
     /// Override this to implement LOD averaging on changes to the tree.
-    virtual void calculateAverageFromChildren() { }
+    virtual void calculateAverageFromChildren() {}
 
     /// Override this to implement LOD collapsing and identical child pruning on changes to the tree.
     virtual bool collapseChildren() { return false; }
@@ -76,7 +74,7 @@ public:
     /// Override this to break up large octree elements when an edit operation is performed on a smaller octree element.
     /// For example, if the octrees represent solid cubes and a delete of a smaller octree element is done then the
     /// meaningful split would be to break the larger cube into smaller cubes of the same color/texture.
-    virtual void splitChildren() { }
+    virtual void splitChildren() {}
 
     /// Override to indicate that this element requires a split before editing lower elements in the octree
     virtual bool requiresSplit() const { return false; }
@@ -84,12 +82,13 @@ public:
     /// The state of the call to appendElementData
     typedef enum { COMPLETED, PARTIAL, NONE } AppendState;
 
-    virtual void debugExtraEncodeData(EncodeBitstreamParams& params) const { }
+    virtual void debugExtraEncodeData(EncodeBitstreamParams& params) const {}
 
     /// Override to deserialize the state of this element. This is used for loading from a persisted file or from reading
     /// from the network.
-    virtual int readElementDataFromBuffer(const unsigned char* data, int bytesLeftToRead, ReadBitstreamToTreeParams& args)
-                    { return 0; }
+    virtual int readElementDataFromBuffer(const unsigned char* data, int bytesLeftToRead, ReadBitstreamToTreeParams& args) {
+        return 0;
+    }
 
     /// Override to indicate that the item is currently rendered in the rendering engine. By default we assume that if
     /// the element should be rendered, then your rendering engine is rendering. But some rendering engines my have cases
@@ -98,14 +97,14 @@ public:
     virtual bool isRendered() const { return getShouldRender(); }
 
     virtual bool deleteApproved() const { return true; }
-    
+
     virtual bool canPickIntersect() const { return isLeaf(); }
     /// \param center center of sphere in meters
     /// \param radius radius of sphere in meters
     /// \param[out] penetration pointing into cube from sphere
     /// \param penetratedObject unused
-    virtual bool findSpherePenetration(const glm::vec3& center, float radius,
-                        glm::vec3& penetration, void** penetratedObject) const;
+    virtual bool findSpherePenetration(const glm::vec3& center, float radius, glm::vec3& penetration,
+                                       void** penetratedObject) const;
 
     // Base class methods you don't need to implement
     const unsigned char* getOctalCode() const { return (_octcodePointer) ? _octalCode.pointer : &_octalCode.buffer[0]; }
@@ -116,7 +115,6 @@ public:
 
     /// handles deletion of all descendants, returns false if delete not approved
     bool safeDeepDeleteChildAtIndex(int childIndex, int recursionCount = 0);
-
 
     const AACube& getAACube() const { return _cube; }
     const glm::vec3& getCorner() const { return _cube.getCorner(); }
@@ -147,7 +145,6 @@ public:
     // Used by VoxelSystem for rendering in/out of view and LOD
     void setShouldRender(bool shouldRender);
     bool getShouldRender() const { return _shouldRender; }
-
 
     void setSourceUUID(const QUuid& sourceID);
     QUuid getSourceUUID() const;
@@ -187,17 +184,16 @@ public:
 
     struct HalfSpace {
         enum {
-            None    = 0x00,
-            Bottom  = 0x01,
-            Top     = 0x02,
-            Right   = 0x04,
-            Left    = 0x08,
-            Near    = 0x10,
-            Far     = 0x20,
-            All     = 0x3f,
+            None = 0x00,
+            Bottom = 0x01,
+            Top = 0x02,
+            Right = 0x04,
+            Left = 0x08,
+            Near = 0x10,
+            Far = 0x20,
+            All = 0x3f,
         };
     };
-
 
     OctreeElementPointer getOrCreateChildElementAt(float x, float y, float z, float s);
     OctreeElementPointer getOrCreateChildElementContaining(const AACube& box);
@@ -210,7 +206,6 @@ public:
     uint64_t getLastChangedContent() const { return _lastChangedContent; }
 
 protected:
-
     void deleteAllChildren();
     void setChildAtIndex(int childIndex, const OctreeElementPointer& child);
 
@@ -220,8 +215,8 @@ protected:
 
     /// Client and server, buffer containing the octal code or a pointer to octal code for this node, 8 bytes
     union octalCode_t {
-      unsigned char buffer[8];
-      unsigned char* pointer;
+        unsigned char buffer[8];
+        unsigned char* pointer;
     } _octalCode;
 
     quint64 _lastChanged; /// Client and server, timestamp this node was last changed, 8 bytes
@@ -248,14 +243,14 @@ protected:
     static std::map<QString, uint16_t> _mapSourceUUIDsToKeys;
     static std::map<uint16_t, QString> _mapKeysToSourceUUIDs;
 
-    unsigned char _childBitmask;     // 1 byte
+    unsigned char _childBitmask; // 1 byte
 
     bool _falseColored : 1, /// Client only, is this voxel false colored, 1 bit
-         _isDirty : 1, /// Client only, has this voxel changed since being rendered, 1 bit
-         _shouldRender : 1, /// Client only, should this voxel render at this time, 1 bit
-         _octcodePointer : 1, /// Client and Server only, is this voxel's octal code a pointer or buffer, 1 bit
-         _unknownBufferIndex : 1,
-         _childrenExternal : 1; /// Client only, is this voxel's VBO buffer the unknown buffer index, 1 bit
+        _isDirty : 1, /// Client only, has this voxel changed since being rendered, 1 bit
+        _shouldRender : 1, /// Client only, should this voxel render at this time, 1 bit
+        _octcodePointer : 1, /// Client and Server only, is this voxel's octal code a pointer or buffer, 1 bit
+        _unknownBufferIndex : 1,
+        _childrenExternal : 1; /// Client only, is this voxel's VBO buffer the unknown buffer index, 1 bit
 
     static AtomicUIntStat _voxelNodeCount;
     static AtomicUIntStat _voxelNodeLeafCount;

@@ -10,13 +10,14 @@
 
 #include "Circle3DOverlay.h"
 
-#include <GeometryUtil.h>
 #include <GeometryCache.h>
+#include <GeometryUtil.h>
 #include <RegisteredMetaTypes.h>
 
 QString const Circle3DOverlay::TYPE = "circle3d";
 
-Circle3DOverlay::Circle3DOverlay() {}
+Circle3DOverlay::Circle3DOverlay() {
+}
 
 Circle3DOverlay::Circle3DOverlay(const Circle3DOverlay* circle3DOverlay) :
     Planar3DOverlay(circle3DOverlay),
@@ -38,8 +39,7 @@ Circle3DOverlay::Circle3DOverlay(const Circle3DOverlay* circle3DOverlay) :
     _majorTickMarksLength(circle3DOverlay->_majorTickMarksLength),
     _minorTickMarksLength(circle3DOverlay->_minorTickMarksLength),
     _majorTickMarksColor(circle3DOverlay->_majorTickMarksColor),
-    _minorTickMarksColor(circle3DOverlay->_minorTickMarksColor)
-{
+    _minorTickMarksColor(circle3DOverlay->_minorTickMarksColor) {
 }
 
 Circle3DOverlay::~Circle3DOverlay() {
@@ -73,7 +73,7 @@ void Circle3DOverlay::render(RenderArgs* args) {
     _dirty = false;
 
     const float FULL_CIRCLE = 360.0f;
-    const float SLICES = 180.0f;  // The amount of segment to create the circle
+    const float SLICES = 180.0f; // The amount of segment to create the circle
     const float SLICE_ANGLE_RADIANS = glm::radians(FULL_CIRCLE / SLICES);
 
     auto geometryCache = DependencyManager::get<GeometryCache>();
@@ -145,50 +145,50 @@ void Circle3DOverlay::render(RenderArgs* args) {
             }
             geometryCache->updateVertices(_quadVerticesID, points, colors);
         }
-        
+
         geometryCache->renderVertices(batch, _solidPrimitive, _quadVerticesID);
-        
+
     } else {
         if (!_lineVerticesID) {
             _lineVerticesID = geometryCache->allocateID();
         }
-        
+
         if (geometryChanged) {
             QVector<glm::vec2> points;
-            
+
             const auto startAtRadians = glm::radians(_startAt);
             const auto endAtRadians = glm::radians(_endAt);
 
             float angleRadians = startAtRadians;
             glm::vec2 firstPoint(cosf(angleRadians) * _outerRadius, sinf(angleRadians) * _outerRadius);
             points << firstPoint;
-            
+
             while (angleRadians < endAtRadians) {
                 angleRadians += SLICE_ANGLE_RADIANS;
                 glm::vec2 thisPoint(cosf(angleRadians) * _outerRadius, sinf(angleRadians) * _outerRadius);
                 points << thisPoint;
-                
+
                 if (getIsDashedLine()) {
                     angleRadians += SLICE_ANGLE_RADIANS / 2.0f; // short gap
                     glm::vec2 dashStartPoint(cosf(angleRadians) * _outerRadius, sinf(angleRadians) * _outerRadius);
                     points << dashStartPoint;
                 }
             }
-            
+
             // get the last slice portion....
             angleRadians = endAtRadians;
             glm::vec2 lastPoint(cosf(angleRadians) * _outerRadius, sinf(angleRadians) * _outerRadius);
             points << lastPoint;
             geometryCache->updateVertices(_lineVerticesID, points, vec4(toGlm(getColor()), getAlpha()));
         }
-        
+
         if (getIsDashedLine()) {
             geometryCache->renderVertices(batch, gpu::LINES, _lineVerticesID);
         } else {
             geometryCache->renderVertices(batch, gpu::LINE_STRIP, _lineVerticesID);
         }
     }
-    
+
     // draw our tick marks
     // for our overlay, is solid means we draw a ring between the inner and outer radius of the circle, otherwise
     // we just draw a line...
@@ -199,49 +199,47 @@ void Circle3DOverlay::render(RenderArgs* args) {
         if (!_minorTicksVerticesID) {
             _minorTicksVerticesID = geometryCache->allocateID();
         }
-        
+
         if (geometryChanged) {
             QVector<glm::vec2> majorPoints;
             QVector<glm::vec2> minorPoints;
-            
+
             // draw our major tick marks
             if (getMajorTickMarksAngle() > 0.0f && getMajorTickMarksLength() != 0.0f) {
-                
                 float tickMarkAngle = getMajorTickMarksAngle();
                 float angle = _startAt - fmodf(_startAt, tickMarkAngle) + tickMarkAngle;
                 float tickMarkLength = getMajorTickMarksLength();
                 float startRadius = (tickMarkLength > 0.0f) ? _innerRadius : _outerRadius;
                 float endRadius = startRadius + tickMarkLength;
-                
+
                 while (angle <= _endAt) {
                     float angleInRadians = glm::radians(angle);
-                    
+
                     glm::vec2 thisPointA(cosf(angleInRadians) * startRadius, sinf(angleInRadians) * startRadius);
                     glm::vec2 thisPointB(cosf(angleInRadians) * endRadius, sinf(angleInRadians) * endRadius);
-                    
+
                     majorPoints << thisPointA << thisPointB;
-                    
+
                     angle += tickMarkAngle;
                 }
             }
-            
+
             // draw our minor tick marks
             if (getMinorTickMarksAngle() > 0.0f && getMinorTickMarksLength() != 0.0f) {
-                
                 float tickMarkAngle = getMinorTickMarksAngle();
                 float angle = _startAt - fmodf(_startAt, tickMarkAngle) + tickMarkAngle;
                 float tickMarkLength = getMinorTickMarksLength();
                 float startRadius = (tickMarkLength > 0.0f) ? _innerRadius : _outerRadius;
                 float endRadius = startRadius + tickMarkLength;
-                
+
                 while (angle <= _endAt) {
                     float angleInRadians = glm::radians(angle);
-                    
+
                     glm::vec2 thisPointA(cosf(angleInRadians) * startRadius, sinf(angleInRadians) * startRadius);
                     glm::vec2 thisPointB(cosf(angleInRadians) * endRadius, sinf(angleInRadians) * endRadius);
-                    
+
                     minorPoints << thisPointA << thisPointB;
-                    
+
                     angle += tickMarkAngle;
                 }
             }
@@ -269,12 +267,14 @@ const render::ShapeKey Circle3DOverlay::getShapeKey() {
     return builder.build();
 }
 
-template<typename T> T fromVariant(const QVariant& v, bool& valid) {
+template<typename T>
+T fromVariant(const QVariant& v, bool& valid) {
     valid = v.isValid();
     return qvariant_cast<T>(v);
 }
 
-template<> glm::u8vec3 fromVariant(const QVariant& v, bool& valid) {
+template<>
+glm::u8vec3 fromVariant(const QVariant& v, bool& valid) {
     return u8vec3FromVariant(v, valid);
 }
 
@@ -324,7 +324,6 @@ bool updateIfValid(const QVariantMap& properties, const std::initializer_list<co
     return false;
 }
 
-
 void Circle3DOverlay::setProperties(const QVariantMap& properties) {
     Planar3DOverlay::setProperties(properties);
     _dirty |= updateIfValid<float>(properties, "alpha", { _innerStartAlpha, _innerEndAlpha, _outerStartAlpha, _outerEndAlpha });
@@ -338,11 +337,12 @@ void Circle3DOverlay::setProperties(const QVariantMap& properties) {
     _dirty |= updateIfValid(properties, "outerStartAlpha", _outerStartAlpha);
     _dirty |= updateIfValid(properties, "outerEndAlpha", _outerEndAlpha);
 
-    _dirty |= updateIfValid<glm::u8vec3>(properties, "color", { _innerStartColor, _innerEndColor, _outerStartColor, _outerEndColor });
-    _dirty |= updateIfValid<glm::u8vec3>(properties, "startColor", { _innerStartColor, _outerStartColor } );
-    _dirty |= updateIfValid<glm::u8vec3>(properties, "endColor", { _innerEndColor, _outerEndColor } );
-    _dirty |= updateIfValid<glm::u8vec3>(properties, "innerColor", { _innerStartColor, _innerEndColor } );
-    _dirty |= updateIfValid<glm::u8vec3>(properties, "outerColor", { _outerStartColor, _outerEndColor } );
+    _dirty |= updateIfValid<glm::u8vec3>(properties, "color",
+                                         { _innerStartColor, _innerEndColor, _outerStartColor, _outerEndColor });
+    _dirty |= updateIfValid<glm::u8vec3>(properties, "startColor", { _innerStartColor, _outerStartColor });
+    _dirty |= updateIfValid<glm::u8vec3>(properties, "endColor", { _innerEndColor, _outerEndColor });
+    _dirty |= updateIfValid<glm::u8vec3>(properties, "innerColor", { _innerStartColor, _innerEndColor });
+    _dirty |= updateIfValid<glm::u8vec3>(properties, "outerColor", { _outerStartColor, _outerEndColor });
     _dirty |= updateIfValid(properties, "innerStartColor", _innerStartColor);
     _dirty |= updateIfValid(properties, "innerEndColor", _innerEndColor);
     _dirty |= updateIfValid(properties, "outerStartColor", _outerStartColor);
@@ -400,7 +400,8 @@ void Circle3DOverlay::setProperties(const QVariantMap& properties) {
  *     Antonyms: <code>isWire</code> and <code>wire</code>.
  * @property {boolean} isDashedLine=false - If <code>true</code>, a dashed line is drawn on the overlay's edges. Synonym:
  *     <code>dashed</code>.
- * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.  <code>ignoreRayIntersection</code> is a synonym.
+ * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.
+ <code>ignoreRayIntersection</code> is a synonym.
  * @property {boolean} drawInFront=false - If <code>true</code>, the overlay is rendered in front of other overlays that don't
  *     have <code>drawInFront</code> set to <code>true</code>, and in front of entities.
  * @property {boolean} grabbable=false - Signal to grabbing scripts whether or not this overlay can be grabbed.
@@ -430,7 +431,7 @@ void Circle3DOverlay::setProperties(const QVariantMap& properties) {
  * @property {Color} outerStartColor - The color at the outer start point of the overlay.
  * @property {Color} outerEndColor - The color at the outer end point of the overlay.
  * @property {number} alpha=0.5 - The opacity of the overlay, <code>0.0</code> - <code>1.0</code>. Setting this value also sets
- *     the values of <code>innerStartAlpha</code>, <code>innerEndAlpha</code>, <code>outerStartAlpha</code>, and 
+ *     the values of <code>innerStartAlpha</code>, <code>innerEndAlpha</code>, <code>outerStartAlpha</code>, and
  *     <code>outerEndAlpha</code>. Synonym: <code>Alpha</code>; <em>write-only</em>.
  * @property {number} startAlpha - Sets the values of <code>innerStartAlpha</code> and <code>outerStartAlpha</code>.
  *     <em>Write-only.</em>
@@ -520,8 +521,8 @@ QVariant Circle3DOverlay::getProperty(const QString& property) {
     return Planar3DOverlay::getProperty(property);
 }
 
-bool Circle3DOverlay::findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, float& distance, 
-                                          BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking) {
+bool Circle3DOverlay::findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, float& distance, BoxFace& face,
+                                          glm::vec3& surfaceNormal, bool precisionPicking) {
     // Scale the dimensions by the diameter
     glm::vec2 dimensions = getOuterRadius() * 2.0f * getDimensions();
     glm::quat rotation = getWorldOrientation();
@@ -549,8 +550,9 @@ bool Circle3DOverlay::findRayIntersection(const glm::vec3& origin, const glm::ve
     return false;
 }
 
-bool Circle3DOverlay::findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                               float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking) {
+bool Circle3DOverlay::findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
+                                               const glm::vec3& acceleration, float& parabolicDistance, BoxFace& face,
+                                               glm::vec3& surfaceNormal, bool precisionPicking) {
     // Scale the dimensions by the diameter
     glm::vec2 xyDimensions = getOuterRadius() * 2.0f * getDimensions();
     glm::quat rotation = getWorldOrientation();
@@ -562,7 +564,8 @@ bool Circle3DOverlay::findParabolaIntersection(const glm::vec3& origin, const gl
     glm::vec3 localAcceleration = inverseRot * acceleration;
 
     if (findParabolaRectangleIntersection(localOrigin, localVelocity, localAcceleration, xyDimensions, parabolicDistance)) {
-        glm::vec3 localHitPosition = localOrigin + localVelocity * parabolicDistance + 0.5f * localAcceleration * parabolicDistance * parabolicDistance;
+        glm::vec3 localHitPosition = localOrigin + localVelocity * parabolicDistance +
+                                     0.5f * localAcceleration * parabolicDistance * parabolicDistance;
         localHitPosition.x /= getDimensions().x;
         localHitPosition.y /= getDimensions().y;
         float distanceToHit = glm::length(localHitPosition);

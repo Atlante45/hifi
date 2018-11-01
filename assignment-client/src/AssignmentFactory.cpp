@@ -22,11 +22,10 @@
 #include "scripts/EntityScriptServer.h"
 
 ThreadedAssignment* AssignmentFactory::unpackAssignment(ReceivedMessage& message) {
-
     quint8 packedType;
     message.peekPrimitive(&packedType);
 
-    Assignment::Type unpackedType = (Assignment::Type) packedType;
+    Assignment::Type unpackedType = (Assignment::Type)packedType;
 
     switch (unpackedType) {
         case Assignment::AudioMixerType:

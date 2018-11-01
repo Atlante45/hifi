@@ -16,7 +16,7 @@ namespace crash {
 class B;
 class A {
 public:
-    A(B* b) : _b(b) { }
+    A(B* b) : _b(b) {}
     ~A();
     virtual void virtualFunction() = 0;
 
@@ -26,8 +26,8 @@ private:
 
 class B : public A {
 public:
-    B() : A(this) { }
-    virtual void virtualFunction() override { }
+    B() : A(this) {}
+    virtual void virtualFunction() override {}
 };
 
 A::~A() {
@@ -71,7 +71,6 @@ void newFault() {
         const size_t GIGABYTE = 1024 * 1024 * 1024;
         new char[GIGABYTE];
     }
+}
 
-}
-    
-}
+} // namespace crash

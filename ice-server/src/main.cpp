@@ -17,7 +17,7 @@
 
 int main(int argc, char* argv[]) {
     setupHifiApplication("Ice Server");
-    
+
     IceServer iceServer(argc, argv);
     return iceServer.exec();
 }

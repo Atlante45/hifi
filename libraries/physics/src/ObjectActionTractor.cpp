@@ -20,7 +20,6 @@ const float MAX_TRACTOR_TIMESCALE = 600.0f; // 10 min is a long time
 
 const uint16_t ObjectActionTractor::tractorVersion = 1;
 
-
 ObjectActionTractor::ObjectActionTractor(const QUuid& id, EntityItemPointer ownerEntity) :
     ObjectAction(DYNAMIC_TYPE_TRACTOR, id, ownerEntity),
     _positionalTarget(0.0f),
@@ -31,25 +30,23 @@ ObjectActionTractor::ObjectActionTractor(const QUuid& id, EntityItemPointer owne
     _desiredRotationalTarget(),
     _angularTimeScale(FLT_MAX),
     _rotationalTargetSet(true),
-    _linearVelocityTarget(0.0f)
-{
-    #if WANT_DEBUG
+    _linearVelocityTarget(0.0f) {
+#if WANT_DEBUG
     qCDebug(physics) << "ObjectActionTractor::ObjectActionTractor";
-    #endif
+#endif
 }
 
 ObjectActionTractor::~ObjectActionTractor() {
-    #if WANT_DEBUG
+#if WANT_DEBUG
     qCDebug(physics) << "ObjectActionTractor::~ObjectActionTractor";
-    #endif
+#endif
 }
 
-bool ObjectActionTractor::getTarget(float deltaTimeStep, glm::quat& rotation, glm::vec3& position,
-                                   glm::vec3& linearVelocity, glm::vec3& angularVelocity,
-                                   float& linearTimeScale, float& angularTimeScale) {
+bool ObjectActionTractor::getTarget(float deltaTimeStep, glm::quat& rotation, glm::vec3& position, glm::vec3& linearVelocity,
+                                    glm::vec3& angularVelocity, float& linearTimeScale, float& angularTimeScale) {
     bool success { true };
     EntityItemPointer other = std::dynamic_pointer_cast<EntityItem>(getOther());
-    withReadLock([&]{
+    withReadLock([&] {
         linearTimeScale = _linearTimeScale;
         angularTimeScale = _angularTimeScale;
 
@@ -107,10 +104,8 @@ bool ObjectActionTractor::prepareForTractorUpdate(btScalar deltaTimeStep) {
         glm::vec3 angularVelocityForAction;
         float linearTimeScale;
         float angularTimeScale;
-        bool success = tractorAction->getTarget(deltaTimeStep,
-                                               rotationForAction, positionForAction,
-                                               linearVelocityForAction, angularVelocityForAction,
-                                               linearTimeScale, angularTimeScale);
+        bool success = tractorAction->getTarget(deltaTimeStep, rotationForAction, positionForAction, linearVelocityForAction,
+                                                angularVelocityForAction, linearTimeScale, angularTimeScale);
         if (success) {
             if (angularTimeScale < MAX_TRACTOR_TIMESCALE) {
                 angularTractorCount++;
@@ -131,7 +126,7 @@ bool ObjectActionTractor::prepareForTractorUpdate(btScalar deltaTimeStep) {
     }
 
     if (angularTractorCount > 0 || linearTractorCount > 0) {
-        withWriteLock([&]{
+        withWriteLock([&] {
             if (doLinearTraction && linearTractorCount > 0) {
                 position /= linearTractorCount;
                 _lastPositionTarget = _positionalTarget;
@@ -160,13 +155,12 @@ bool ObjectActionTractor::prepareForTractorUpdate(btScalar deltaTimeStep) {
     return true;
 }
 
-
 void ObjectActionTractor::updateActionWorker(btScalar deltaTimeStep) {
     if (!prepareForTractorUpdate(deltaTimeStep)) {
         return;
     }
 
-    withReadLock([&]{
+    withReadLock([&] {
         auto ownerEntity = _ownerEntity.lock();
         if (!ownerEntity) {
             return;
@@ -232,7 +226,6 @@ void ObjectActionTractor::updateActionWorker(btScalar deltaTimeStep) {
 
 const float MIN_TIMESCALE = 0.1f;
 
-
 bool ObjectActionTractor::updateArguments(QVariantMap arguments) {
     glm::vec3 positionalTarget;
     float linearTimeScale;
@@ -240,26 +233,28 @@ bool ObjectActionTractor::updateArguments(QVariantMap arguments) {
     float angularTimeScale;
     QUuid otherID;
 
-
     bool needUpdate = false;
     bool somethingChanged = ObjectDynamic::updateArguments(arguments);
-    withReadLock([&]{
+    withReadLock([&] {
         // targets are required, tractor-constants are optional
         bool ok = true;
-        positionalTarget = EntityDynamicInterface::extractVec3Argument("tractor action", arguments, "targetPosition", ok, false);
+        positionalTarget = EntityDynamicInterface::extractVec3Argument("tractor action", arguments, "targetPosition", ok,
+                                                                       false);
         if (ok) {
             _positionalTargetSet = true;
         } else {
             positionalTarget = _desiredPositionalTarget;
         }
         ok = true;
-        linearTimeScale = EntityDynamicInterface::extractFloatArgument("tractor action", arguments, "linearTimeScale", ok, false);
+        linearTimeScale = EntityDynamicInterface::extractFloatArgument("tractor action", arguments, "linearTimeScale", ok,
+                                                                       false);
         if (!ok || linearTimeScale <= 0.0f) {
             linearTimeScale = _linearTimeScale;
         }
 
         ok = true;
-        rotationalTarget = EntityDynamicInterface::extractQuatArgument("tractor action", arguments, "targetRotation", ok, false);
+        rotationalTarget = EntityDynamicInterface::extractQuatArgument("tractor action", arguments, "targetRotation", ok,
+                                                                       false);
         if (ok) {
             _rotationalTargetSet = true;
         } else {
@@ -267,25 +262,20 @@ bool ObjectActionTractor::updateArguments(QVariantMap arguments) {
         }
 
         ok = true;
-        angularTimeScale =
-            EntityDynamicInterface::extractFloatArgument("tractor action", arguments, "angularTimeScale", ok, false);
+        angularTimeScale = EntityDynamicInterface::extractFloatArgument("tractor action", arguments, "angularTimeScale", ok,
+                                                                        false);
         if (!ok) {
             angularTimeScale = _angularTimeScale;
         }
 
         ok = true;
-        otherID = QUuid(EntityDynamicInterface::extractStringArgument("tractor action",
-                                                                            arguments, "otherID", ok, false));
+        otherID = QUuid(EntityDynamicInterface::extractStringArgument("tractor action", arguments, "otherID", ok, false));
         if (!ok) {
             otherID = _otherID;
         }
 
-        if (somethingChanged ||
-            positionalTarget != _desiredPositionalTarget ||
-            linearTimeScale != _linearTimeScale ||
-            rotationalTarget != _desiredRotationalTarget ||
-            angularTimeScale != _angularTimeScale ||
-            otherID != _otherID) {
+        if (somethingChanged || positionalTarget != _desiredPositionalTarget || linearTimeScale != _linearTimeScale ||
+            rotationalTarget != _desiredRotationalTarget || angularTimeScale != _angularTimeScale || otherID != _otherID) {
             // something changed
             needUpdate = true;
         }
@@ -313,20 +303,20 @@ bool ObjectActionTractor::updateArguments(QVariantMap arguments) {
 }
 
 /**jsdoc
- * The <code>"tractor"</code> {@link Entities.ActionType|ActionType} moves and rotates an entity to a target position and 
+ * The <code>"tractor"</code> {@link Entities.ActionType|ActionType} moves and rotates an entity to a target position and
  * orientation, optionally relative to another entity.
  * It has arguments in addition to the common {@link Entities.ActionArguments|ActionArguments}.
  *
  * @typedef {object} Entities.ActionArguments-Tractor
  * @property {Vec3} targetPosition=0,0,0 - The target position.
  * @property {Quat} targetRotation=0,0,0,1 - The target rotation.
- * @property {Uuid} otherID=null - If an entity ID, the <code>targetPosition</code> and <code>targetRotation</code> are 
+ * @property {Uuid} otherID=null - If an entity ID, the <code>targetPosition</code> and <code>targetRotation</code> are
  *     relative to this entity's position and rotation.
  * @property {number} linearTimeScale=3.4e+38 - Controls how long it takes for the entity's position to catch up with the
- *     target position. The value is the time for the action to catch up to 1/e = 0.368 of the target value, where the action 
+ *     target position. The value is the time for the action to catch up to 1/e = 0.368 of the target value, where the action
  *     is applied using an exponential decay.
  * @property {number} angularTimeScale=3.4e+38 - Controls how long it takes for the entity's orientation to catch up with the
- *     target orientation. The value is the time for the action to catch up to 1/e = 0.368 of the target value, where the 
+ *     target orientation. The value is the time for the action to catch up to 1/e = 0.368 of the target value, where the
  *     action is applied using an exponential decay.
  */
 QVariantMap ObjectActionTractor::getArguments() {

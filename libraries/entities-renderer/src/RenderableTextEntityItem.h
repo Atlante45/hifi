@@ -17,20 +17,24 @@
 class TextEntityItem;
 class TextRenderer3D;
 
-namespace render { namespace entities {
+namespace render {
+namespace entities {
 
 class TextEntityRenderer : public TypedEntityRenderer<TextEntityItem> {
     using Parent = TypedEntityRenderer<TextEntityItem>;
     using Pointer = std::shared_ptr<TextEntityRenderer>;
+
 public:
     TextEntityRenderer(const EntityItemPointer& entity);
     ~TextEntityRenderer();
+
 private:
     virtual bool needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const override;
-    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) override;
+    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                const TypedEntityPointer& entity) override;
     virtual void doRenderUpdateAsynchronousTyped(const TypedEntityPointer& entity) override;
     virtual void doRender(RenderArgs* args) override;
-    int _geometryID{ 0 };
+    int _geometryID { 0 };
     std::shared_ptr<TextRenderer3D> _textRenderer;
     bool _faceCamera;
     glm::vec3 _dimensions;
@@ -40,6 +44,7 @@ private:
     float _lineHeight;
 };
 
-} }
+} // namespace entities
+} // namespace render
 
 #endif // hifi_RenderableTextEntityItem_h

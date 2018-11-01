@@ -20,7 +20,6 @@
 #include "Constants.h"
 
 namespace udt {
-    
 
 class TCPVegasCC : public CongestionControl {
 public:
@@ -33,10 +32,11 @@ public:
     virtual void onPacketReSent(int wireSize, SequenceNumber seqNum, p_high_resolution_clock::time_point timePoint) override;
 
     virtual int estimatedTimeout() const override;
-    
+
 protected:
     virtual void performCongestionAvoidance(SequenceNumber ack);
     virtual void setInitialSendSequenceNumber(SequenceNumber seqNum) override { _lastACK = seqNum - 1; }
+
 private:
     bool calculateRTT(p_high_resolution_clock::time_point sendTime, p_high_resolution_clock::time_point receiveTime);
     bool needsFastRetransmit(SequenceNumber ack, bool wasDuplicateACK);
@@ -45,9 +45,10 @@ private:
     void performRenoCongestionAvoidance(SequenceNumber ack);
 
     struct SentPacketData {
-        SentPacketData(SequenceNumber seqNum, p_high_resolution_clock::time_point tPoint)
-            : sequenceNumber(seqNum), timePoint(tPoint) {};
-        
+        SentPacketData(SequenceNumber seqNum, p_high_resolution_clock::time_point tPoint) :
+            sequenceNumber(seqNum),
+            timePoint(tPoint) {};
+
         SequenceNumber sequenceNumber;
         p_high_resolution_clock::time_point timePoint;
         bool wasResent { false };
@@ -62,7 +63,9 @@ private:
 
     SequenceNumber _lastACK; // Sequence number of last packet that was ACKed
 
-    int _numACKSinceFastRetransmit { 3 }; // Number of ACKs received since fast re-transmit, default avoids immediate re-transmit
+    int _numACKSinceFastRetransmit {
+        3
+    }; // Number of ACKs received since fast re-transmit, default avoids immediate re-transmit
 
     int _currentMinRTT; // Current min RTT during last RTT (since last congestion avoidance check), in microseconds
     int _baseRTT; // Lowest RTT during connection, in microseconds
@@ -77,10 +80,6 @@ private:
     int _slowStartOddAdjust { 0 }; // Marker for every window adjustment every other RTT in slow-start
 };
 
-}
-
-
-
-
+} // namespace udt
 
 #endif // hifi_TCPVegasCC_h

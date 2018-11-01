@@ -17,11 +17,7 @@
 
 const int ASCII_CHARACTERS_UPPER_LIMIT = 126;
 
-JSBaker::JSBaker(const QUrl& jsURL, const QString& bakedOutputDir) :
-    _jsURL(jsURL),
-    _bakedOutputDir(bakedOutputDir)
-{
-
+JSBaker::JSBaker(const QUrl& jsURL, const QString& bakedOutputDir) : _jsURL(jsURL), _bakedOutputDir(bakedOutputDir) {
 }
 
 void JSBaker::bake() {
@@ -38,7 +34,7 @@ void JSBaker::bake() {
     QByteArray inputJS = jsFile.readAll();
     QByteArray outputJS;
 
-    // Call baking on inputJS and store result in outputJS 
+    // Call baking on inputJS and store result in outputJS
     bool success = bakeJS(inputJS, outputJS);
     if (!success) {
         qCDebug(js_baking) << "Bake Failed";
@@ -71,7 +67,7 @@ void JSBaker::bake() {
 }
 
 bool JSBaker::bakeJS(const QByteArray& inputFile, QByteArray& outputFile) {
-    // Read from inputFile and write to outputFile per character 
+    // Read from inputFile and write to outputFile per character
     QTextStream in(inputFile, QIODevice::ReadOnly);
     QTextStream out(&outputFile, QIODevice::WriteOnly);
 
@@ -93,7 +89,7 @@ bool JSBaker::bakeJS(const QByteArray& inputFile, QByteArray& outputFile) {
             if (nextCharacter == '/') {
                 handleSingleLineComments(in);
 
-                //Start fresh after handling comments
+                // Start fresh after handling comments
                 previousCharacter = '\n';
                 in >> currentCharacter;
                 continue;
@@ -104,7 +100,7 @@ bool JSBaker::bakeJS(const QByteArray& inputFile, QByteArray& outputFile) {
                     // Errors present return false
                     return false;
                 }
-                //Start fresh after handling comments
+                // Start fresh after handling comments
                 previousCharacter = '\n';
                 in >> currentCharacter;
                 continue;
@@ -130,8 +126,8 @@ bool JSBaker::bakeJS(const QByteArray& inputFile, QByteArray& outputFile) {
         } else if (currentCharacter == '\n') {
             // Check if new line
 
-            //Skip multiple new lines
-            //Skip new line followed by space or tab
+            // Skip multiple new lines
+            // Skip new line followed by space or tab
             while (nextCharacter == '\n' || isSpaceOrTab(nextCharacter)) {
                 in >> nextCharacter;
             }
@@ -154,7 +150,7 @@ bool JSBaker::bakeJS(const QByteArray& inputFile, QByteArray& outputFile) {
                 out << nextCharacter;
             }
 
-            //Start fresh after handling quoted strings
+            // Start fresh after handling quoted strings
             previousCharacter = nextCharacter;
             in >> currentCharacter;
             continue;
@@ -167,7 +163,7 @@ bool JSBaker::bakeJS(const QByteArray& inputFile, QByteArray& outputFile) {
         currentCharacter = nextCharacter;
     }
 
-    //write currentCharacter to output file when nextCharacter reaches EOF
+    // write currentCharacter to output file when nextCharacter reaches EOF
     if (currentCharacter != '\n') {
         out << currentCharacter;
     }
@@ -200,21 +196,20 @@ bool JSBaker::handleMultiLineComments(QTextStream& in) {
 }
 
 bool JSBaker::canOmitSpace(QChar previousCharacter, QChar nextCharacter) {
-    return(!((isAlphanum(previousCharacter) || isNonAscii(previousCharacter) || isSpecialCharacter(previousCharacter)) &&
-        (isAlphanum(nextCharacter) || isNonAscii(nextCharacter) || isSpecialCharacter(nextCharacter)))
-           );
+    return (!((isAlphanum(previousCharacter) || isNonAscii(previousCharacter) || isSpecialCharacter(previousCharacter)) &&
+              (isAlphanum(nextCharacter) || isNonAscii(nextCharacter) || isSpecialCharacter(nextCharacter))));
 }
 
 bool JSBaker::canOmitNewLine(QChar previousCharacter, QChar nextCharacter) {
-    return (!((isAlphanum(previousCharacter) || isNonAscii(previousCharacter) || isSpecialCharacterPrevious(previousCharacter)) &&
-        (isAlphanum(nextCharacter) || isNonAscii(nextCharacter) || isSpecialCharacterNext(nextCharacter)))
-            );
+    return (
+        !((isAlphanum(previousCharacter) || isNonAscii(previousCharacter) || isSpecialCharacterPrevious(previousCharacter)) &&
+          (isAlphanum(nextCharacter) || isNonAscii(nextCharacter) || isSpecialCharacterNext(nextCharacter))));
 }
 
-//Check if character is alphabet, number or one of the following: '_', '$', '\\' or a non-ASCII character
+// Check if character is alphabet, number or one of the following: '_', '$', '\\' or a non-ASCII character
 bool JSBaker::isAlphanum(QChar c) {
-    return ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z')
-            || c == '_' || c == '$' || c == '\\' || c > ASCII_CHARACTERS_UPPER_LIMIT);
+    return ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == '_' || c == '$' || c == '\\' ||
+            c > ASCII_CHARACTERS_UPPER_LIMIT);
 }
 
 bool JSBaker::isNonAscii(QChar c) {
@@ -223,13 +218,13 @@ bool JSBaker::isNonAscii(QChar c) {
 
 // If previous and next characters are special characters, don't omit space
 bool JSBaker::isSpecialCharacter(QChar c) {
-    return (c == '\'' || c == '$' || c == '_' || c == '/' || c== '+' || c == '-');
+    return (c == '\'' || c == '$' || c == '_' || c == '/' || c == '+' || c == '-');
 }
 
 // If previous character is a special character, maybe don't omit new line (depends on next character as well)
 bool JSBaker::isSpecialCharacterPrevious(QChar c) {
-    return (c == '\'' || c == '$' || c == '_' || c == '}' || c == ']' || c == ')' || c == '+' || c == '-'
-            || c == '"' || c == '\'');
+    return (c == '\'' || c == '$' || c == '_' || c == '}' || c == ']' || c == ')' || c == '+' || c == '-' || c == '"' ||
+            c == '\'');
 }
 
 // If next character is a special character, maybe don't omit new line (depends on previous character as well)

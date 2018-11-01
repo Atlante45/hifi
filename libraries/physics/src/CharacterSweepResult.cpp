@@ -15,10 +15,9 @@
 
 #include "CharacterGhostObject.h"
 
-CharacterSweepResult::CharacterSweepResult(const CharacterGhostObject* character)
-    :   btCollisionWorld::ClosestConvexResultCallback(btVector3(0.0f, 0.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)),
-        _character(character)
-{
+CharacterSweepResult::CharacterSweepResult(const CharacterGhostObject* character) :
+    btCollisionWorld::ClosestConvexResultCallback(btVector3(0.0f, 0.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)),
+    _character(character) {
     // set collision group and mask to match _character
     assert(_character);
     _character->getCollisionGroupAndMask(m_collisionFilterGroup, m_collisionFilterMask);

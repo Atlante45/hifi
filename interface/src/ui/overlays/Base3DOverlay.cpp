@@ -8,13 +8,11 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #include "Base3DOverlay.h"
 
 #include <RegisteredMetaTypes.h>
 #include <SharedUtil.h>
 #include "Application.h"
-
 
 const bool DEFAULT_IS_SOLID = false;
 const bool DEFAULT_IS_DASHED_LINE = false;
@@ -25,8 +23,7 @@ Base3DOverlay::Base3DOverlay() :
     _isDashedLine(DEFAULT_IS_DASHED_LINE),
     _ignorePickIntersection(false),
     _drawInFront(false),
-    _drawHUDLayer(false)
-{
+    _drawHUDLayer(false) {
 }
 
 Base3DOverlay::Base3DOverlay(const Base3DOverlay* base3DOverlay) :
@@ -38,8 +35,7 @@ Base3DOverlay::Base3DOverlay(const Base3DOverlay* base3DOverlay) :
     _drawInFront(base3DOverlay->_drawInFront),
     _drawHUDLayer(base3DOverlay->_drawHUDLayer),
     _isGrabbable(base3DOverlay->_isGrabbable),
-    _isVisibleInSecondaryCamera(base3DOverlay->_isVisibleInSecondaryCamera)
-{
+    _isVisibleInSecondaryCamera(base3DOverlay->_isVisibleInSecondaryCamera) {
     setTransform(base3DOverlay->getTransform());
 }
 
@@ -56,8 +52,8 @@ QVariantMap convertOverlayLocationFromScriptSemantics(const QVariantMap& propert
     if (result["localPosition"].isValid()) {
         result["position"] = result["localPosition"];
     } else if (result["position"].isValid()) {
-        glm::vec3 localPosition = SpatiallyNestable::worldToLocal(vec3FromVariant(result["position"]),
-                                                                  parentID, parentJointIndex, scalesWithParent, success);
+        glm::vec3 localPosition = SpatiallyNestable::worldToLocal(vec3FromVariant(result["position"]), parentID,
+                                                                  parentJointIndex, scalesWithParent, success);
         if (success) {
             result["position"] = vec3toVariant(localPosition);
         }
@@ -66,8 +62,8 @@ QVariantMap convertOverlayLocationFromScriptSemantics(const QVariantMap& propert
     if (result["localOrientation"].isValid()) {
         result["orientation"] = result["localOrientation"];
     } else if (result["orientation"].isValid()) {
-        glm::quat localOrientation = SpatiallyNestable::worldToLocal(quatFromVariant(result["orientation"]),
-                                                                     parentID, parentJointIndex, scalesWithParent, success);
+        glm::quat localOrientation = SpatiallyNestable::worldToLocal(quatFromVariant(result["orientation"]), parentID,
+                                                                     parentJointIndex, scalesWithParent, success);
         if (success) {
             result["orientation"] = quatToVariant(localOrientation);
         }
@@ -102,9 +98,9 @@ void Base3DOverlay::setProperties(const QVariantMap& originalProperties) {
 
     // All of parentID, parentJointIndex, position, orientation are needed to make sense of any of them.
     // If any of these changed, pull any missing properties from the overlay.
-    if (properties["parentID"].isValid() || properties["parentJointIndex"].isValid() ||
-        properties["position"].isValid() || properties["localPosition"].isValid() ||
-        properties["orientation"].isValid() || properties["localOrientation"].isValid()) {
+    if (properties["parentID"].isValid() || properties["parentJointIndex"].isValid() || properties["position"].isValid() ||
+        properties["localPosition"].isValid() || properties["orientation"].isValid() ||
+        properties["localOrientation"].isValid()) {
         if (!properties["parentID"].isValid()) {
             properties["parentID"] = getParentID();
         }
@@ -213,7 +209,7 @@ void Base3DOverlay::setProperties(const QVariantMap& originalProperties) {
 // JSDoc for copying to @typedefs of overlay types that inherit Base3DOverlay.
 /**jsdoc
  * @property {string} name="" - A friendly name for the overlay.
- * @property {Vec3} position - The position of the overlay center. Synonyms: <code>p1</code>, <code>point</code>, and 
+ * @property {Vec3} position - The position of the overlay center. Synonyms: <code>p1</code>, <code>point</code>, and
  *     <code>start</code>.
  * @property {Vec3} localPosition - The local position of the overlay relative to its parent if the overlay has a
  *     <code>parentID</code> set, otherwise the same value as <code>position</code>.
@@ -224,7 +220,8 @@ void Base3DOverlay::setProperties(const QVariantMap& originalProperties) {
  *     Antonyms: <code>isWire</code> and <code>wire</code>.
  * @property {boolean} isDashedLine=false - If <code>true</code>, a dashed line is drawn on the overlay's edges. Synonym:
  *     <code>dashed</code>.
- * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.  <code>ignoreRayIntersection</code> is a synonym.
+ * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.
+ * <code>ignoreRayIntersection</code> is a synonym.
  * @property {boolean} drawInFront=false - If <code>true</code>, the overlay is rendered in front of other overlays that don't
  *     have <code>drawInFront</code> set to <code>true</code>, and in front of entities.
  * @property {boolean} grabbable=false - Signal to grabbing scripts whether or not this overlay can be grabbed.
@@ -236,9 +233,7 @@ void Base3DOverlay::setProperties(const QVariantMap& originalProperties) {
  */
 QVariant Base3DOverlay::getProperty(const QString& property) {
     if (property == "name") {
-        return _nameLock.resultWithReadLock<QString>([&] {
-            return _name;
-        });
+        return _nameLock.resultWithReadLock<QString>([&] { return _name; });
     }
     if (property == "position" || property == "start" || property == "p1" || property == "point") {
         return vec3toVariant(getWorldPosition());
@@ -347,18 +342,12 @@ void Base3DOverlay::setVisible(bool visible) {
 }
 
 QString Base3DOverlay::getName() const {
-    return _nameLock.resultWithReadLock<QString>([&] {
-        return QString("Overlay:") + _name;
-    });
+    return _nameLock.resultWithReadLock<QString>([&] { return QString("Overlay:") + _name; });
 }
 
 void Base3DOverlay::setName(QString name) {
-    _nameLock.withWriteLock([&] {
-        _name = name;
-    });
+    _nameLock.withWriteLock([&] { _name = name; });
 }
-
-
 
 render::ItemKey Base3DOverlay::getKey() {
     auto builder = render::ItemKey::Builder(Overlay::getKey());

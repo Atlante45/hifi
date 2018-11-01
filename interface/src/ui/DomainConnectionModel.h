@@ -12,8 +12,8 @@
 #ifndef hifi_DomainConnectionModel_h
 #define hifi_DomainConnectionModel_h
 
-#include <QAbstractItemModel>
 #include <DependencyManager.h>
+#include <QAbstractItemModel>
 
 class DomainConnectionModel : public QAbstractItemModel, public Dependency {
     Q_OBJECT
@@ -29,18 +29,12 @@ public:
     QModelIndex parent(const QModelIndex& child) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    enum Roles {
-        DisplayNameRole = Qt::UserRole,
-        TimestampRole,
-        DeltaRole,
-        TimeElapsedRole
-    };
+    enum Roles { DisplayNameRole = Qt::UserRole, TimestampRole, DeltaRole, TimeElapsedRole };
 
 public slots:
     void refresh();
 
 protected:
-
 private:
 };
 

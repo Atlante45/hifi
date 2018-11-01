@@ -74,4 +74,3 @@ bool AnyEndpoint::readable() const {
     }
     return true;
 }
-

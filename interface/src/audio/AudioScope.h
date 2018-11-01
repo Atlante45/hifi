@@ -20,11 +20,10 @@
 #include <DependencyManager.h>
 #include <gpu/Batch.h>
 
-
 class AudioScope : public QObject, public Dependency {
     Q_OBJECT
     SINGLETON_DEPENDENCY
-    
+
     /**jsdoc
      * The AudioScope API helps control the Audio Scope features in Interface
      * @namespace AudioScope
@@ -53,14 +52,14 @@ public:
     void allocateScope();
     void freeScope();
     void reallocateScope(int frames);
-    
+
 public slots:
 
     /**jsdoc
      * @function AudioScope.toggle
      */
     void toggle() { setVisible(!_isEnabled); }
-     
+
     /**jsdoc
      * @function AudioScope.setVisible
      * @param {boolean} visible
@@ -69,7 +68,7 @@ public slots:
 
     /**jsdoc
      * @function AudioScope.getVisible
-     * @returns {boolean} 
+     * @returns {boolean}
      */
     bool getVisible() const { return _isEnabled; }
 
@@ -82,7 +81,10 @@ public slots:
      * @function AudioScope.setPause
      * @param {boolean} paused
      */
-    void setPause(bool paused) { _isPaused = paused; emit pauseChanged(); }
+    void setPause(bool paused) {
+        _isPaused = paused;
+        emit pauseChanged();
+    }
 
     /**jsdoc
      * @function AudioScope.getPause
@@ -103,23 +105,29 @@ public slots:
 
     /**jsdoc
      * @function AudioScope.setAutoTrigger
-     * @param {boolean} autoTrigger 
+     * @param {boolean} autoTrigger
      */
-    void setAutoTrigger(bool autoTrigger) { _isTriggered = false; _autoTrigger = autoTrigger; }
+    void setAutoTrigger(bool autoTrigger) {
+        _isTriggered = false;
+        _autoTrigger = autoTrigger;
+    }
 
     /**jsdoc
      * @function AudioScope.setTriggerValues
      * @param {number} x
      * @param {number} y
      */
-    void setTriggerValues(int x, int y) { _triggerValues.x = x; _triggerValues.y = y; }
-    
+    void setTriggerValues(int x, int y) {
+        _triggerValues.x = x;
+        _triggerValues.y = y;
+    }
+
     /**jsdoc
      * @function AudioScope.setTriggered
      * @param {boolean} triggered
      */
     void setTriggered(bool triggered) { _isTriggered = triggered; }
-    
+
     /**jsdoc
      * @function AudioScope.getTriggered
      * @returns {boolean}
@@ -155,7 +163,7 @@ public slots:
 
     /**jsdoc
      * @function AudioScope.getScopeInput
-     * @returns {number[]} 
+     * @returns {number[]}
      */
     QVector<int> getScopeInput() { return _scopeInputData; };
 
@@ -182,7 +190,7 @@ public slots:
      * @returns {number[]}
      */
     QVector<int> getTriggerOutputLeft() { return _triggerOutputLeftData; };
-   
+
     /**jsdoc
      * @function AudioScope.getTriggerOutputRight
      * @returns {number[]}
@@ -217,20 +225,19 @@ signals:
 
 protected:
     AudioScope();
-    
+
 private slots:
     void addStereoSilenceToScope(int silentSamplesPerChannel);
     void addLastFrameRepeatedWithFadeToScope(int samplesPerChannel);
     void addStereoSamplesToScope(const QByteArray& samples);
     void addInputToScope(const QByteArray& inputSamples);
-    
+
 private:
-    
     // Audio scope methods for data acquisition
     int addBufferToScope(QByteArray* byteArray, int frameOffset, const int16_t* source, int sourceSamples,
                          unsigned int sourceChannel, unsigned int sourceNumberOfChannels, float fade = 1.0f);
     int addSilenceToScope(QByteArray* byteArray, int frameOffset, int silentSamples);
-    
+
     QVector<int> getScopeVector(const QByteArray* scope, int offset);
 
     bool shouldTrigger(const QVector<int>& scope);
@@ -252,7 +259,7 @@ private:
     QByteArray* _scopeOutputLeft;
     QByteArray* _scopeOutputRight;
     QByteArray _scopeLastFrame;
-    
+
     QVector<int> _scopeInputData;
     QVector<int> _scopeOutputLeftData;
     QVector<int> _scopeOutputRightData;
@@ -261,7 +268,6 @@ private:
     QVector<int> _triggerOutputLeftData;
     QVector<int> _triggerOutputRightData;
 
-    
     glm::ivec2 _triggerValues;
 
     int _audioScopeBackground;

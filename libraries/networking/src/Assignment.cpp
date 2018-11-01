@@ -14,12 +14,12 @@
 #include <QtCore/QDataStream>
 
 #include <BuildInfo.h>
-#include <QtCore/QStandardPaths>
 #include <QtCore/QDir>
+#include <QtCore/QStandardPaths>
 
-#include "udt/PacketHeaders.h"
 #include "SharedUtil.h"
 #include "UUID.h"
+#include "udt/PacketHeaders.h"
 
 Assignment::Type Assignment::typeForNodeType(NodeType_t nodeType) {
     switch (nodeType) {
@@ -49,12 +49,11 @@ Assignment::Assignment() :
     _pool(),
     _location(Assignment::LocalLocation),
     _payload(),
-    _isStatic(false)
-{
-    
+    _isStatic(false) {
 }
 
-Assignment::Assignment(Assignment::Command command, Assignment::Type type, const QString& pool, Assignment::Location location, QString dataDirectory) :
+Assignment::Assignment(Assignment::Command command, Assignment::Type type, const QString& pool, Assignment::Location location,
+                       QString dataDirectory) :
     _uuid(),
     _command(command),
     _type(type),
@@ -64,8 +63,7 @@ Assignment::Assignment(Assignment::Command command, Assignment::Type type, const
     _isStatic(false),
     _walletUUID(),
     _nodeVersion(),
-    _dataDirectory(dataDirectory)
-{
+    _dataDirectory(dataDirectory) {
     if (_command == Assignment::CreateCommand) {
         // this is a newly created assignment, generate a random UUID
         _uuid = QUuid::createUuid();
@@ -79,23 +77,21 @@ Assignment::Assignment(ReceivedMessage& message) :
     _location(GlobalLocation),
     _payload(),
     _walletUUID(),
-    _nodeVersion()
-{
+    _nodeVersion() {
     if (message.getType() == PacketType::RequestAssignment) {
         _command = Assignment::RequestCommand;
     } else if (message.getType() == PacketType::CreateAssignment) {
         _command = Assignment::CreateCommand;
     }
-    
+
     QDataStream packetStream(message.getMessage());
-    
+
     packetStream >> *this;
 }
 
 #ifdef WIN32
-#pragma warning(default:4351)
+#pragma warning(default : 4351)
 #endif
-
 
 Assignment::Assignment(const Assignment& otherAssignment) : QObject() {
     _uuid = otherAssignment._uuid;
@@ -116,7 +112,7 @@ Assignment& Assignment::operator=(const Assignment& rhsAssignment) {
 
 void Assignment::swap(Assignment& otherAssignment) {
     using std::swap;
-    
+
     swap(_uuid, otherAssignment._uuid);
     swap(_command, otherAssignment._command);
     swap(_type, otherAssignment._type);
@@ -152,10 +148,9 @@ const char* Assignment::typeToString(Assignment::Type type) {
     }
 }
 
-QDebug operator<<(QDebug debug, const Assignment &assignment) {
-    debug.nospace() << "UUID: " << qPrintable(assignment.getUUID().toString()) <<
-        ", Type: " << assignment.getType();
-    
+QDebug operator<<(QDebug debug, const Assignment& assignment) {
+    debug.nospace() << "UUID: " << qPrintable(assignment.getUUID().toString()) << ", Type: " << assignment.getType();
+
     if (!assignment.getPool().isEmpty()) {
         debug << ", Pool: " << assignment.getPool();
     }
@@ -163,31 +158,30 @@ QDebug operator<<(QDebug debug, const Assignment &assignment) {
     return debug.space();
 }
 
-QDataStream& operator<<(QDataStream &out, const Assignment& assignment) {
-    out << (quint8) assignment._type << assignment._uuid << assignment._pool << assignment._payload;
-    
+QDataStream& operator<<(QDataStream& out, const Assignment& assignment) {
+    out << (quint8)assignment._type << assignment._uuid << assignment._pool << assignment._payload;
+
     if (assignment._command == Assignment::RequestCommand) {
         out << assignment._nodeVersion << assignment._walletUUID;
     }
-    
+
     return out;
 }
 
-QDataStream& operator>>(QDataStream &in, Assignment& assignment) {
+QDataStream& operator>>(QDataStream& in, Assignment& assignment) {
     quint8 packedType;
     in >> packedType >> assignment._uuid >> assignment._pool >> assignment._payload;
-    assignment._type = (Assignment::Type) packedType;
-    
+    assignment._type = (Assignment::Type)packedType;
+
     if (assignment._command == Assignment::RequestCommand) {
         in >> assignment._nodeVersion >> assignment._walletUUID;
     }
-    
+
     return in;
 }
-
 
 uint qHash(const Assignment::Type& key, uint seed) {
     // seems odd that Qt couldn't figure out this cast itself, but this fixes a compile error after switch to
     // strongly typed enum for PacketType
-    return qHash((uint8_t) key, seed);
+    return qHash((uint8_t)key, seed);
 }

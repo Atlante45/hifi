@@ -13,21 +13,19 @@
 #include <atomic>
 
 #include <QtCore/qglobal.h>
+#include <QtCore/QJsonArray>
+#include <QtCore/QJsonObject>
 #include <QtCore/QString>
 #include <QtCore/QUrl>
-#include <QtCore/QJsonObject>
-#include <QtCore/QJsonArray>
 
-#include <gpu/Shader.h>
-#include <gpu/Pipeline.h>
 #include <gpu/Batch.h>
+#include <gpu/Pipeline.h>
+#include <gpu/Shader.h>
 #include <model-networking/ShaderCache.h>
 #include <model-networking/TextureCache.h>
 
 using UniformLambdas = std::list<std::function<void(gpu::Batch& batch)>>;
-const size_t MAX_PROCEDURAL_TEXTURE_CHANNELS{ 4 };
-
-
+const size_t MAX_PROCEDURAL_TEXTURE_CHANNELS { 4 };
 
 struct ProceduralData {
     static QJsonValue getProceduralData(const QString& proceduralJson);
@@ -42,9 +40,8 @@ struct ProceduralData {
     QJsonArray channels;
 };
 
-
-// WARNING with threaded rendering it is the RESPONSIBILITY OF THE CALLER to ensure that 
-// calls to `setProceduralData` happen on the main thread and that calls to `ready` and `prepare` 
+// WARNING with threaded rendering it is the RESPONSIBILITY OF THE CALLER to ensure that
+// calls to `setProceduralData` happen on the main thread and that calls to `ready` and `prepare`
 // are treated atomically, and that they cannot happen concurrently with calls to `setProceduralData`
 // FIXME better encapsulation
 // FIXME better mechanism for extending to things rendered using shaders other than simple.slv
@@ -55,7 +52,8 @@ public:
 
     bool isReady() const;
     bool isEnabled() const { return _enabled; }
-    void prepare(gpu::Batch& batch, const glm::vec3& position, const glm::vec3& size, const glm::quat& orientation, const glm::vec4& color = glm::vec4(1));
+    void prepare(gpu::Batch& batch, const glm::vec3& position, const glm::vec3& size, const glm::quat& orientation,
+                 const glm::vec4& color = glm::vec4(1));
     const gpu::ShaderPointer& getOpaqueShader() const { return _opaqueShader; }
 
     glm::vec4 getColor(const glm::vec4& entityColor);
@@ -71,14 +69,13 @@ public:
     gpu::StatePointer _opaqueState { std::make_shared<gpu::State>() };
     gpu::StatePointer _transparentState { std::make_shared<gpu::State>() };
 
-
 protected:
     // DO NOT TOUCH
     // We have to pack these in a particular way to match the ProceduralCommon.slh
-    // layout.  
+    // layout.
     struct StandardInputs {
         vec4 date;
-        vec4 position; 
+        vec4 position;
         vec4 scale;
         float time;
         int frameCount;

@@ -10,8 +10,8 @@
 
 #include <DependencyManager.h>
 
-#include "../../UserInputMapper.h"
 #include "../../InputRecorder.h"
+#include "../../UserInputMapper.h"
 
 using namespace controller;
 
@@ -25,7 +25,7 @@ void ActionEndpoint::apply(float newValue, const Pointer& source) {
             newValue = inputRecorder->getActionState(actionName);
         }
     }
-    
+
     _currentValue += newValue;
     if (_input != Input::INVALID_INPUT) {
         userInputMapper->deltaActionState(Action(_input.getChannel()), newValue);
@@ -41,7 +41,7 @@ void ActionEndpoint::apply(const Pose& value, const Pointer& source) {
         QString actionName = userInputMapper->getActionName(Action(_input.getChannel()));
         inputRecorder->setActionState(actionName, _currentPose);
     }
-    
+
     if (!_currentPose.isValid()) {
         return;
     }
@@ -54,4 +54,3 @@ void ActionEndpoint::reset() {
     _currentValue = 0.0f;
     _currentPose = Pose();
 }
-

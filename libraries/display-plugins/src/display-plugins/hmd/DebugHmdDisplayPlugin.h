@@ -21,14 +21,13 @@ public:
     bool beginFrameRender(uint32_t frameIndex) override;
     float getTargetFrameRate() const override { return 90; }
 
-
 protected:
     void updatePresentPose() override;
     void hmdPresent() override {}
     bool isHmdMounted() const override { return true; }
     bool internalActivate() override;
-private:
 
+private:
     static const QString NAME;
-    bool _isAutoRotateEnabled{ true };
+    bool _isAutoRotateEnabled { true };
 };

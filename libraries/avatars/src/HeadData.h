@@ -19,8 +19,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <SharedUtil.h>
 #include <FaceshiftConstants.h>
+#include <SharedUtil.h>
 
 // degrees
 const float MIN_HEAD_YAW = -180.0f;
@@ -36,7 +36,7 @@ class QJsonObject;
 class HeadData {
 public:
     explicit HeadData(AvatarData* owningAvatar);
-    virtual ~HeadData() { };
+    virtual ~HeadData() {};
 
     // degrees
     float getBaseYaw() const { return _baseYaw; }
@@ -61,7 +61,9 @@ public:
     const QVector<float>& getBlendshapeCoefficients() const { return _blendshapeCoefficients; }
     const QVector<float>& getSummedBlendshapeCoefficients();
     int getNumSummedBlendshapeCoefficients() const;
-    void setBlendshapeCoefficients(const QVector<float>& blendshapeCoefficients) { _blendshapeCoefficients = blendshapeCoefficients; }
+    void setBlendshapeCoefficients(const QVector<float>& blendshapeCoefficients) {
+        _blendshapeCoefficients = blendshapeCoefficients;
+    }
 
     const glm::vec3& getLookAtPosition() const { return _lookAtPosition; }
     void setLookAtPosition(const glm::vec3& lookAtPosition) {
@@ -123,7 +125,7 @@ protected:
 private:
     // privatize copy ctor and assignment operator so copies of this object cannot be made
     HeadData(const HeadData&);
-    HeadData& operator= (const HeadData&);
+    HeadData& operator=(const HeadData&);
 
     void setHeadOrientation(const glm::quat& orientation);
     void computeBlendshapesLookupMap();

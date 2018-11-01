@@ -14,18 +14,18 @@
 
 #include <memory>
 
-#include <QStringList>
 #include <QDateTime>
+#include <QStringList>
 #include <QtCore/QCoreApplication>
 
 #include <HTTPManager.h>
 
 #include <ThreadedAssignment.h>
 
+#include "OctreeInboundPacketProcessor.h"
 #include "OctreePersistThread.h"
 #include "OctreeSendThread.h"
 #include "OctreeServerConsts.h"
-#include "OctreeInboundPacketProcessor.h"
 
 #include <QLoggingCategory>
 
@@ -49,8 +49,10 @@ public:
 
     OctreePointer getOctree() { return _tree; }
 
-    int getPacketsPerClientPerInterval() const { return std::min(_packetsPerClientPerInterval,
-                                std::max(1, getPacketsTotalPerInterval() / std::max(1, getCurrentClientCount()))); }
+    int getPacketsPerClientPerInterval() const {
+        return std::min(_packetsPerClientPerInterval,
+                        std::max(1, getPacketsTotalPerInterval() / std::max(1, getCurrentClientCount())));
+    }
 
     int getPacketsPerClientPerSecond() const { return getPacketsPerClientPerInterval() * INTERVALS_PER_SECOND; }
     int getPacketsTotalPerInterval() const { return _packetsTotalPerInterval; }
@@ -64,8 +66,12 @@ public:
     bool isPersistEnabled() const { return (_persistManager) ? true : false; }
     quint64 getLoadElapsedTime() const { return (_persistManager) ? _persistManager->getLoadElapsedTime() : 0; }
     QString getPersistFilename() const { return (_persistManager) ? _persistManager->getPersistFilename() : ""; }
-    QString getPersistFileMimeType() const { return (_persistManager) ? _persistManager->getPersistFileMimeType() : "text/plain"; }
-    QByteArray getPersistFileContents() const { return (_persistManager) ? _persistManager->getPersistFileContents() : QByteArray(); }
+    QString getPersistFileMimeType() const {
+        return (_persistManager) ? _persistManager->getPersistFileMimeType() : "text/plain";
+    }
+    QByteArray getPersistFileContents() const {
+        return (_persistManager) ? _persistManager->getPersistFileContents() : QByteArray();
+    }
 
     // Subclasses must implement these methods
     virtual std::unique_ptr<OctreeQueryNode> createOctreeQueryNode() = 0;
@@ -78,12 +84,12 @@ public:
     virtual QString getMyDomainSettingsKey() const { return QString("octree_server_settings"); }
 
     // subclass may implement these method
-    virtual void beforeRun() { }
+    virtual void beforeRun() {}
     virtual bool hasSpecialPacketsToSend(const SharedNodePointer& node) { return false; }
     virtual int sendSpecialPackets(const SharedNodePointer& node, OctreeQueryNode* queryNode, int& packetsSent) { return 0; }
     virtual QString serverSubclassStats() { return QString(); }
-    virtual void trackSend(const QUuid& dataID, quint64 dataLastEdited, const QUuid& viewerNode) { }
-    virtual void trackViewerGone(const QUuid& viewerNode) { }
+    virtual void trackSend(const QUuid& dataID, quint64 dataLastEdited, const QUuid& viewerNode) {}
+    virtual void trackViewerGone(const QUuid& viewerNode) {}
 
     static float SKIP_TIME; // use this for trackXXXTime() calls for non-times
 
@@ -146,14 +152,14 @@ private slots:
 protected:
     using UniqueSendThread = std::unique_ptr<OctreeSendThread>;
     using SendThreads = std::unordered_map<QUuid, UniqueSendThread>;
-    
+
     virtual OctreePointer createTree() = 0;
     bool readOptionBool(const QString& optionName, const QJsonObject& settingsSectionObject, bool& result);
     bool readOptionInt(const QString& optionName, const QJsonObject& settingsSectionObject, int& result);
     bool readOptionInt64(const QString& optionName, const QJsonObject& settingsSectionObject, qint64& result);
     bool readOptionString(const QString& optionName, const QJsonObject& settingsSectionObject, QString& result);
     void readConfiguration();
-    virtual void readAdditionalConfiguration(const QJsonObject& settingsSectionObject) { };
+    virtual void readAdditionalConfiguration(const QJsonObject& settingsSectionObject) {};
     void parsePayload();
     void initHTTPManager(int port);
     void resetSendingStats();
@@ -163,7 +169,7 @@ protected:
     QString getStatusLink();
 
     void beginRunning();
-    
+
     UniqueSendThread createSendThread(const SharedNodePointer& node);
     virtual UniqueSendThread newSendThread(const SharedNodePointer& node) = 0;
 
@@ -200,7 +206,7 @@ protected:
     time_t _started;
     quint64 _startedUSecs;
     QString _safeServerName;
-    
+
     SendThreads _sendThreads;
 
     static int _clientCount;

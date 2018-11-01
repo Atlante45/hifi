@@ -14,10 +14,10 @@
 
 #include <chrono>
 
-#include <QtCore/qobject.h>
 #include <QtCore/qjsondocument.h>
 #include <QtCore/qjsonobject.h>
 #include <QtCore/qjsonvalue.h>
+#include <QtCore/qobject.h>
 #include <shared/JSONHelpers.h>
 
 #include "SettingHandle.h"
@@ -26,16 +26,15 @@ namespace task {
 
 class JobConcept;
 
-template <class C> class PersistentConfig : public C {
+template<class C>
+class PersistentConfig : public C {
 public:
     const QString DEFAULT = "Default";
     const QString NONE = "None";
 
     PersistentConfig() = delete;
-    PersistentConfig(const QStringList& path) :
-        _preset(path, DEFAULT) { }
-    PersistentConfig(const QStringList& path, bool enabled) : C(enabled),
-        _preset(path, enabled ? DEFAULT : NONE) { }
+    PersistentConfig(const QStringList& path) : _preset(path, DEFAULT) {}
+    PersistentConfig(const QStringList& path, bool enabled) : C(enabled), _preset(path, enabled ? DEFAULT : NONE) {}
 
     QStringList getPresetList() {
         if (_presets.empty()) {
@@ -54,7 +53,7 @@ public:
             _presets.insert(DEFAULT, _default);
         }
         if (!C::alwaysEnabled) {
-            _presets.insert(NONE, QVariantMap{{ "enabled", false }});
+            _presets.insert(NONE, QVariantMap { { "enabled", false } });
         }
 
         auto preset = _preset.get();
@@ -88,21 +87,25 @@ protected:
 // A default Config is always on; to create an enableable Config, use the ctor JobConfig(bool enabled)
 class JobConfig : public QObject {
     Q_OBJECT
-    Q_PROPERTY(double cpuRunTime READ getCPURunTime NOTIFY newStats()) //ms
+    Q_PROPERTY(double cpuRunTime READ getCPURunTime NOTIFY newStats()) // ms
     Q_PROPERTY(bool enabled READ isEnabled WRITE setEnabled NOTIFY dirtyEnabled())
 
-    double _msCPURunTime{ 0.0 };
+    double _msCPURunTime { 0.0 };
+
 public:
     using Persistent = PersistentConfig<JobConfig>;
 
     JobConfig() = default;
-    JobConfig(bool enabled) : alwaysEnabled{ false }, enabled{ enabled } {}
+    JobConfig(bool enabled) : alwaysEnabled { false }, enabled { enabled } {}
 
     bool isEnabled() { return alwaysEnabled || enabled; }
-    void setEnabled(bool enable) { enabled = alwaysEnabled || enable; emit dirtyEnabled(); }
+    void setEnabled(bool enable) {
+        enabled = alwaysEnabled || enable;
+        emit dirtyEnabled();
+    }
 
-    bool alwaysEnabled{ true };
-    bool enabled{ true };
+    bool alwaysEnabled { true };
+    bool enabled { true };
 
     virtual void setPresetList(const QJsonObject& object);
 
@@ -117,13 +120,19 @@ public:
      * @function Render.load
      * @param {object} map
      */
-    Q_INVOKABLE void load(const QVariantMap& map) { qObjectFromJsonValue(QJsonObject::fromVariantMap(map), *this); emit loaded(); }
+    Q_INVOKABLE void load(const QVariantMap& map) {
+        qObjectFromJsonValue(QJsonObject::fromVariantMap(map), *this);
+        emit loaded();
+    }
 
     Q_INVOKABLE QObject* getConfig(const QString& name) { return nullptr; }
 
     // Running Time measurement
     // The new stats signal is emitted once per run time of a job when stats  (cpu runtime) are updated
-    void setCPURunTime(const std::chrono::nanoseconds& runtime) { _msCPURunTime = std::chrono::duration<double, std::milli>(runtime).count(); emit newStats(); }
+    void setCPURunTime(const std::chrono::nanoseconds& runtime) {
+        _msCPURunTime = std::chrono::duration<double, std::milli>(runtime).count();
+        emit newStats();
+    }
     double getCPURunTime() const { return _msCPURunTime; }
 
     // Describe the node graph data connections of the associated Job/Task
@@ -158,7 +167,10 @@ public slots:
      * @function Render.load
      * @param {object} map
      */
-    void load(const QJsonObject& val) { qObjectFromJsonValue(val, *this); emit loaded(); }
+    void load(const QJsonObject& val) {
+        qObjectFromJsonValue(val, *this);
+        emit loaded();
+    }
 
 signals:
 
@@ -188,7 +200,6 @@ public:
     using Config = JobConfig;
 };
 
-
 /**jsdoc
  * @namespace Render
  *
@@ -206,7 +217,6 @@ public:
     TaskConfig() = default;
     TaskConfig(bool enabled) : JobConfig(enabled) {}
 
-
     /**jsdoc
      * @function Render.getConfig
      * @param {string} name
@@ -214,7 +224,8 @@ public:
      */
     // Get a sub job config through task.getConfig(path)
     // where path can be:
-    // - <job_name> search for the first job named job_name traversing the the sub graph of task and jobs (from this task as root)
+    // - <job_name> search for the first job named job_name traversing the the sub graph of task and jobs (from this task as
+    // root)
     // - <parent_name>.[<sub_parent_names>.]<job_name>
     //    Allowing to first look for the parent_name job (from this task as root) and then search from there for the
     //    optional sub_parent_names and finally from there looking for the job_name (assuming every job in the path were found)
@@ -222,15 +233,15 @@ public:
     // getter for qml integration, prefer the templated getter
     Q_INVOKABLE QObject* getConfig(const QString& name) { return getConfig<TConfigProxy>(name.toStdString()); }
     // getter for cpp (strictly typed), prefer this getter
-    template <class T> typename T::Config* getConfig(std::string job = "") const {
+    template<class T>
+    typename T::Config* getConfig(std::string job = "") const {
         const TaskConfig* root = this;
         QString path = (job.empty() ? QString() : QString(job.c_str())); // an empty string is not a null string
         auto tokens = path.split('.', QString::SkipEmptyParts);
 
         if (tokens.empty()) {
             tokens.push_back(QString());
-        }
-        else {
+        } else {
             while (tokens.size() > 1) {
                 auto name = tokens.front();
                 tokens.pop_front();
@@ -272,6 +283,6 @@ public slots:
     void refresh();
 };
 
-}
+} // namespace task
 
 #endif // hifi_task_Config_h

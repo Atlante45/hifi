@@ -15,7 +15,8 @@
 // For 3D overlays only
 class OverlayTransformNode : public BaseNestableTransformNode<Base3DOverlay> {
 public:
-    OverlayTransformNode(std::weak_ptr<Base3DOverlay> spatiallyNestable, int jointIndex) : BaseNestableTransformNode(spatiallyNestable, jointIndex) {};
+    OverlayTransformNode(std::weak_ptr<Base3DOverlay> spatiallyNestable, int jointIndex) :
+        BaseNestableTransformNode(spatiallyNestable, jointIndex) {};
 };
 
 #endif // hifi_OverlayTransformNode_h

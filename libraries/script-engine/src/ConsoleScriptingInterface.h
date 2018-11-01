@@ -19,11 +19,11 @@
 #ifndef hifi_ConsoleScriptingInterface_h
 #define hifi_ConsoleScriptingInterface_h
 
+#include <QtCore/QDateTime>
+#include <QtCore/QHash>
+#include <QtCore/QList>
 #include <QtCore/QObject>
 #include <QtCore/QString>
-#include <QtCore/QDateTime>
-#include <QtCore/QList>
-#include <QtCore/QHash>
 #include <QtScript/QScriptable>
 
 // Scriptable interface of "console" object. Used exclusively in the JavaScript API
@@ -47,7 +47,7 @@ public slots:
     void trace();
     void clear();
 
-private:    
+private:
     QHash<QString, QDateTime> _timerDetails;
     static QList<QString> _groupDetails;
     static void logGroupMessage(QString message, QScriptEngine* engine);

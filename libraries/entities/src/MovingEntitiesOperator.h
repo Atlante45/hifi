@@ -47,6 +47,7 @@ public:
     virtual OctreeElementPointer possiblyCreateChildAt(const OctreeElementPointer& element, int childIndex) override;
     bool hasMovingEntities() const { return _entitiesToMove.size() > 0; }
     void reset();
+
 private:
     bool shouldRecurseSubTree(const OctreeElementPointer& element);
 

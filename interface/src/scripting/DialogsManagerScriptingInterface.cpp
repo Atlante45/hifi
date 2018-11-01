@@ -16,10 +16,9 @@
 #include "ui/DialogsManager.h"
 
 DialogsManagerScriptingInterface::DialogsManagerScriptingInterface() {
-    connect(DependencyManager::get<DialogsManager>().data(), &DialogsManager::addressBarShown,
-            this, &DialogsManagerScriptingInterface::addressBarShown);
+    connect(DependencyManager::get<DialogsManager>().data(), &DialogsManager::addressBarShown, this,
+            &DialogsManagerScriptingInterface::addressBarShown);
 }
-
 
 DialogsManagerScriptingInterface* DialogsManagerScriptingInterface::getInstance() {
     static DialogsManagerScriptingInterface sharedInstance;
@@ -27,21 +26,17 @@ DialogsManagerScriptingInterface* DialogsManagerScriptingInterface::getInstance(
 }
 
 void DialogsManagerScriptingInterface::showAddressBar() {
-    QMetaObject::invokeMethod(DependencyManager::get<DialogsManager>().data(),
-        "showAddressBar", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(DependencyManager::get<DialogsManager>().data(), "showAddressBar", Qt::QueuedConnection);
 }
 
 void DialogsManagerScriptingInterface::hideAddressBar() {
-    QMetaObject::invokeMethod(DependencyManager::get<DialogsManager>().data(),
-                              "hideAddressBar", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(DependencyManager::get<DialogsManager>().data(), "hideAddressBar", Qt::QueuedConnection);
 }
 
 void DialogsManagerScriptingInterface::showLoginDialog() {
-    QMetaObject::invokeMethod(DependencyManager::get<DialogsManager>().data(),
-        "showLoginDialog", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(DependencyManager::get<DialogsManager>().data(), "showLoginDialog", Qt::QueuedConnection);
 }
 
 void DialogsManagerScriptingInterface::showFeed() {
-    QMetaObject::invokeMethod(DependencyManager::get<DialogsManager>().data(),
-        "showFeed", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(DependencyManager::get<DialogsManager>().data(), "showFeed", Qt::QueuedConnection);
 }

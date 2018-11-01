@@ -15,27 +15,27 @@
 #include <QtCore/QDebug>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QMetaEnum>
-#include <QtCore/QUrl>
 #include <QtCore/QThread>
+#include <QtCore/QUrl>
 #include <QtNetwork/QHostInfo>
 #include <QtNetwork/QNetworkInterface>
 
-#include <shared/QtHelpers.h>
-#include <ThreadHelpers.h>
 #include <LogHandler.h>
+#include <ThreadHelpers.h>
 #include <UUID.h>
+#include <shared/QtHelpers.h>
 
 #include "AccountManager.h"
 #include "AddressManager.h"
 #include "Assignment.h"
 #include "AudioHelpers.h"
-#include "HifiSockAddr.h"
 #include "FingerprintUtils.h"
+#include "HifiSockAddr.h"
 
-#include "NetworkLogging.h"
-#include "udt/PacketHeaders.h"
-#include "SharedUtil.h"
 #include <Trace.h>
+#include "NetworkLogging.h"
+#include "SharedUtil.h"
+#include "udt/PacketHeaders.h"
 
 const int KEEPALIVE_PING_INTERVAL_MS = 1000;
 
@@ -45,20 +45,16 @@ NodeList::NodeList(char newOwnerType, int socketListenPort, int dtlsListenPort) 
     _nodeTypesOfInterest(),
     _domainHandler(this),
     _assignmentServerSocket(),
-    _keepAlivePingTimer(this)
-{
-    setCustomDeleter([](Dependency* dependency){
-        static_cast<NodeList*>(dependency)->deleteLater();
-    });
+    _keepAlivePingTimer(this) {
+    setCustomDeleter([](Dependency* dependency) { static_cast<NodeList*>(dependency)->deleteLater(); });
 
     auto addressManager = DependencyManager::get<AddressManager>();
 
     // handle domain change signals from AddressManager
-    connect(addressManager.data(), &AddressManager::possibleDomainChangeRequired,
-            &_domainHandler, &DomainHandler::setURLAndID);
+    connect(addressManager.data(), &AddressManager::possibleDomainChangeRequired, &_domainHandler, &DomainHandler::setURLAndID);
 
-    connect(addressManager.data(), &AddressManager::possibleDomainChangeRequiredViaICEForID,
-            &_domainHandler, &DomainHandler::setIceServerHostnameAndID);
+    connect(addressManager.data(), &AddressManager::possibleDomainChangeRequiredViaICEForID, &_domainHandler,
+            &DomainHandler::setIceServerHostnameAndID);
 
     // handle a request for a path change from the AddressManager
     connect(addressManager.data(), &AddressManager::pathChangeRequired, this, &NodeList::handleDSPathQuery);
@@ -91,10 +87,10 @@ NodeList::NodeList(char newOwnerType, int socketListenPort, int dtlsListenPort) 
     connect(accountManager.data(), &AccountManager::newKeypair, this, &NodeList::sendDomainServerCheckIn);
 
     // clear out NodeList when login is finished and we know our new username
-    connect(accountManager.data(), SIGNAL(usernameChanged(QString)) , this, SLOT(reset()));
+    connect(accountManager.data(), SIGNAL(usernameChanged(QString)), this, SLOT(reset()));
 
     // clear our NodeList when logout is requested
-    connect(accountManager.data(), SIGNAL(logoutComplete()) , this, SLOT(reset()));
+    connect(accountManager.data(), SIGNAL(logoutComplete()), this, SLOT(reset()));
 
     // anytime we get a new node we will want to attempt to punch to it
     connect(this, &LimitedNodeList::nodeAdded, this, &NodeList::startNodeHolePunch);
@@ -123,7 +119,8 @@ NodeList::NodeList(char newOwnerType, int socketListenPort, int dtlsListenPort) 
     packetReceiver.registerListener(PacketType::ICEPing, this, "processICEPingPacket");
     packetReceiver.registerListener(PacketType::DomainServerAddedNode, this, "processDomainServerAddedNode");
     packetReceiver.registerListener(PacketType::DomainServerConnectionToken, this, "processDomainServerConnectionTokenPacket");
-    packetReceiver.registerListener(PacketType::DomainConnectionDenied, &_domainHandler, "processDomainServerConnectionDeniedPacket");
+    packetReceiver.registerListener(PacketType::DomainConnectionDenied, &_domainHandler,
+                                    "processDomainServerConnectionDeniedPacket");
     packetReceiver.registerListener(PacketType::DomainSettings, &_domainHandler, "processSettingsPacketList");
     packetReceiver.registerListener(PacketType::ICEServerPeerInformation, &_domainHandler, "processICEResponsePacket");
     packetReceiver.registerListener(PacketType::DomainServerRequireDTLS, &_domainHandler, "processDTLSRequirementPacket");
@@ -135,8 +132,7 @@ NodeList::NodeList(char newOwnerType, int socketListenPort, int dtlsListenPort) 
 
 qint64 NodeList::sendStats(QJsonObject statsObject, HifiSockAddr destination) {
     if (thread() != QThread::currentThread()) {
-        QMetaObject::invokeMethod(this, "sendStats", Qt::QueuedConnection,
-                                  Q_ARG(QJsonObject, statsObject),
+        QMetaObject::invokeMethod(this, "sendStats", Qt::QueuedConnection, Q_ARG(QJsonObject, statsObject),
                                   Q_ARG(HifiSockAddr, destination));
         return 0;
     }
@@ -152,8 +148,7 @@ qint64 NodeList::sendStats(QJsonObject statsObject, HifiSockAddr destination) {
 
 qint64 NodeList::sendStatsToDomainServer(QJsonObject statsObject) {
     if (thread() != QThread::currentThread()) {
-        QMetaObject::invokeMethod(this, "sendStatsToDomainServer", Qt::QueuedConnection,
-                                  Q_ARG(QJsonObject, statsObject));
+        QMetaObject::invokeMethod(this, "sendStatsToDomainServer", Qt::QueuedConnection, Q_ARG(QJsonObject, statsObject));
         return 0;
     }
 
@@ -187,20 +182,21 @@ void NodeList::timePingReply(ReceivedMessage& message, const SharedNodePointer& 
 
     if (wantDebug) {
         auto averageClockSkew = sendingNode->getClockSkewUsec();
-        qCDebug(networking) << "PING_REPLY from node " << *sendingNode << "\n" <<
-        "                     now: " << now << "\n" <<
-        "                 ourTime: " << ourOriginalTime << "\n" <<
-        "                pingTime: " << pingTime << "\n" <<
-        "        oneWayFlightTime: " << oneWayFlightTime << "\n" <<
-        "         othersReplyTime: " << othersReplyTime << "\n" <<
-        "    othersExprectedReply: " << othersExpectedReply << "\n" <<
-        "               clockSkew: " << clockSkew << "[" << formatUsecTime(clockSkew) << "]" << "\n" <<
-        "       average clockSkew: " << averageClockSkew << "[" << formatUsecTime(averageClockSkew) << "]";
+        qCDebug(networking) << "PING_REPLY from node " << *sendingNode << "\n"
+                            << "                     now: " << now << "\n"
+                            << "                 ourTime: " << ourOriginalTime << "\n"
+                            << "                pingTime: " << pingTime << "\n"
+                            << "        oneWayFlightTime: " << oneWayFlightTime << "\n"
+                            << "         othersReplyTime: " << othersReplyTime << "\n"
+                            << "    othersExprectedReply: " << othersExpectedReply << "\n"
+                            << "               clockSkew: " << clockSkew << "[" << formatUsecTime(clockSkew) << "]"
+                            << "\n"
+                            << "       average clockSkew: " << averageClockSkew << "[" << formatUsecTime(averageClockSkew)
+                            << "]";
     }
 }
 
 void NodeList::processPingPacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer sendingNode) {
-
     // send back a reply
     auto replyPacket = constructPingReplyPacket(*message);
     const HifiSockAddr& senderSockAddr = message->getSenderSockAddr();
@@ -227,7 +223,6 @@ void NodeList::processPingPacket(QSharedPointer<ReceivedMessage> message, Shared
             killNodeWithUUID(sendingNode->getUUID(), connectionID);
         }
     }
-
 }
 
 void NodeList::processPingReplyPacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer sendingNode) {
@@ -290,7 +285,6 @@ void NodeList::addSetOfNodeTypesToNodeInterestSet(const NodeSet& setOfNodeTypes)
 }
 
 void NodeList::sendDomainServerCheckIn() {
-
     if (!_sendDomainServerCheckInEnabled) {
         qCDebug(networking) << "Refusing to send a domain-server check in while it is disabled.";
         return;
@@ -314,9 +308,8 @@ void NodeList::sendDomainServerCheckIn() {
         handleICEConnectionToDomainServer();
         // let the domain handler know we are due to send a checkin packet
     } else if (!_domainHandler.getIP().isNull() && !_domainHandler.checkInPacketTimeout()) {
-
-        PacketType domainPacketType = !_domainHandler.isConnected()
-            ? PacketType::DomainConnectRequest : PacketType::DomainListRequest;
+        PacketType domainPacketType = !_domainHandler.isConnected() ? PacketType::DomainConnectRequest
+                                                                    : PacketType::DomainListRequest;
 
         if (!_domainHandler.isConnected()) {
             qCDebug(networking) << "Sending connect request to domain-server at" << _domainHandler.getHostname();
@@ -324,9 +317,8 @@ void NodeList::sendDomainServerCheckIn() {
             // is this our localhost domain-server?
             // if so we need to make sure we have an up-to-date local port in case it restarted
 
-            if (_domainHandler.getSockAddr().getAddress() == QHostAddress::LocalHost
-                || _domainHandler.getHostname() == "localhost") {
-
+            if (_domainHandler.getSockAddr().getAddress() == QHostAddress::LocalHost ||
+                _domainHandler.getHostname() == "localhost") {
                 quint16 domainPort = DEFAULT_DOMAIN_SERVER_PORT;
                 getLocalServerPortFromSharedMemory(DOMAIN_SERVER_LOCAL_PORT_SMEM_KEY, domainPort);
                 qCDebug(networking) << "Local domain-server port read from shared memory (or default) is" << domainPort;
@@ -342,7 +334,7 @@ void NodeList::sendDomainServerCheckIn() {
 
         if (requiresUsernameSignature && !accountManager->getAccountInfo().hasPrivateKey()) {
             qWarning() << "A keypair is required to present a username signature to the domain-server"
-                << "but no keypair is present. Waiting for keypair generation to complete.";
+                       << "but no keypair is present. Waiting for keypair generation to complete.";
             accountManager->generateNewUserKeypair();
 
             // don't send the check in packet - wait for the new public key to be available to the domain-server first
@@ -354,7 +346,6 @@ void NodeList::sendDomainServerCheckIn() {
         QDataStream packetStream(domainPacket.get());
 
         if (domainPacketType == PacketType::DomainConnectRequest) {
-
 #if (PR_BUILD || DEV_BUILD)
             if (_shouldSendNewerVersion) {
                 domainPacket->setVersion(versionForPacketType(domainPacketType) + 1);
@@ -436,7 +427,6 @@ void NodeList::sendDomainServerCheckIn() {
             sendPacket(std::move(packetCopy), _domainHandler.getSockAddr());
         }
         sendPacket(std::move(domainPacket), _domainHandler.getSockAddr());
-        
     }
 }
 
@@ -460,11 +450,9 @@ void NodeList::handleDSPathQuery(const QString& newPath) {
 }
 
 void NodeList::sendPendingDSPathQuery() {
-
     QString pendingPath = _domainHandler.getPendingPath();
 
     if (!pendingPath.isEmpty()) {
-
         if (_domainHandler.isServerless()) {
             auto viewpoint = _domainHandler.getViewPointFromNamedPath(pendingPath);
             if (!pendingPath.isEmpty()) {
@@ -493,7 +481,7 @@ void NodeList::sendDSPathQuery(const QString& newPath) {
         // get the size of the UTF8 representation of the desired path
         quint16 numPathBytes = pathQueryUTF8.size();
 
-        if (numPathBytes + ((qint16) sizeof(numPathBytes)) < pathQueryPacket->bytesAvailableForWrite()) {
+        if (numPathBytes + ((qint16)sizeof(numPathBytes)) < pathQueryPacket->bytesAvailableForWrite()) {
             // append the size of the path to the query packet
             pathQueryPacket->writePrimitive(numPathBytes);
 
@@ -501,13 +489,13 @@ void NodeList::sendDSPathQuery(const QString& newPath) {
             pathQueryPacket->write(pathQueryUTF8);
 
             qCDebug(networking) << "Sending a path query packet for path" << newPath << "to domain-server at"
-                << _domainHandler.getSockAddr();
+                                << _domainHandler.getSockAddr();
 
             // send off the path query
             sendPacket(std::move(pathQueryPacket), _domainHandler.getSockAddr());
         } else {
-            qCDebug(networking) << "Path" << newPath << "would make PacketType::DomainServerPathQuery packet > MAX_PACKET_SIZE." <<
-                "Will not send query.";
+            qCDebug(networking) << "Path" << newPath << "would make PacketType::DomainServerPathQuery packet > MAX_PACKET_SIZE."
+                                << "Will not send query.";
         }
     }
 }
@@ -545,8 +533,7 @@ void NodeList::processDomainServerPathResponse(QSharedPointer<ReceivedMessage> m
     if (!pathQuery.isEmpty() && DependencyManager::get<AddressManager>()->goToViewpointForPath(viewpoint, pathQuery)) {
         qCDebug(networking) << "Going to viewpoint" << viewpoint << "which was the lookup result for path" << pathQuery;
     } else {
-        qCDebug(networking) << "Could not go to viewpoint" << viewpoint
-            << "which was the lookup result for path" << pathQuery;
+        qCDebug(networking) << "Could not go to viewpoint" << viewpoint << "which was the lookup result for path" << pathQuery;
     }
 }
 
@@ -554,32 +541,30 @@ void NodeList::handleICEConnectionToDomainServer() {
     // if we're still waiting to get sockets we want to ping for the domain-server
     // then send another heartbeat now
     if (!_domainHandler.getICEPeer().hasSockets()) {
-
         _domainHandler.getICEPeer().resetConnectionAttempts();
 
         flagTimeForConnectionStep(LimitedNodeList::ConnectionStep::SendICEServerQuery);
 
-        LimitedNodeList::sendPeerQueryToIceServer(_domainHandler.getICEServerSockAddr(),
-                                                  _domainHandler.getICEClientID(),
+        LimitedNodeList::sendPeerQueryToIceServer(_domainHandler.getICEServerSockAddr(), _domainHandler.getICEClientID(),
                                                   _domainHandler.getPendingDomainID());
     }
-} 
+}
 
 void NodeList::pingPunchForDomainServer() {
     // make sure if we're here that we actually still need to ping the domain-server
     if (_domainHandler.getIP().isNull() && _domainHandler.getICEPeer().hasSockets()) {
-
         // check if we've hit the number of pings we'll send to the DS before we consider it a fail
         const int NUM_DOMAIN_SERVER_PINGS_BEFORE_RESET = 2000 / UDP_PUNCH_PING_INTERVAL_MS;
 
         if (_domainHandler.getICEPeer().getConnectionAttempts() == 0) {
             qCDebug(networking) << "Sending ping packets to establish connectivity with domain-server with ID"
-                << uuidStringWithoutCurlyBraces(_domainHandler.getPendingDomainID());
+                                << uuidStringWithoutCurlyBraces(_domainHandler.getPendingDomainID());
         } else {
             if (_domainHandler.getICEPeer().getConnectionAttempts() % NUM_DOMAIN_SERVER_PINGS_BEFORE_RESET == 0) {
                 // if we have then nullify the domain handler's network peer and send a fresh ICE heartbeat
                 qCDebug(networking) << "No ping replies received from domain-server with ID"
-                    << uuidStringWithoutCurlyBraces(_domainHandler.getICEClientID()) << "-" << "re-sending ICE query.";
+                                    << uuidStringWithoutCurlyBraces(_domainHandler.getICEClientID()) << "-"
+                                    << "re-sending ICE query.";
 
                 _domainHandler.getICEPeer().softReset();
                 handleICEConnectionToDomainServer();
@@ -653,17 +638,16 @@ void NodeList::processDomainServerList(QSharedPointer<ReceivedMessage> message) 
     // when connected, if the session ID or local ID were not null and changed, we should reset
     auto currentLocalID = getSessionLocalID();
     auto currentSessionID = getSessionUUID();
-    if (_domainHandler.isConnected() &&
-        ((currentLocalID != Node::NULL_LOCAL_ID && newLocalID != currentLocalID) ||
-        (!currentSessionID.isNull() && newUUID != currentSessionID))) {
-            qCDebug(networking) << "Local ID or Session ID changed while connected to domain - forcing NodeList reset";
+    if (_domainHandler.isConnected() && ((currentLocalID != Node::NULL_LOCAL_ID && newLocalID != currentLocalID) ||
+                                         (!currentSessionID.isNull() && newUUID != currentSessionID))) {
+        qCDebug(networking) << "Local ID or Session ID changed while connected to domain - forcing NodeList reset";
 
-            // reset the nodelist, but don't do a domain handler reset since we're about to process a good domain list
-            reset(true);
+        // reset the nodelist, but don't do a domain handler reset since we're about to process a good domain list
+        reset(true);
 
-            // tell the domain handler that we're no longer connected so that below
-            // it can re-perform actions as if we just connected
-            _domainHandler.setIsConnected(false);
+        // tell the domain handler that we're no longer connected so that below
+        // it can re-perform actions as if we just connected
+        _domainHandler.setIsConnected(false);
     }
 
     setSessionLocalID(newLocalID);
@@ -706,7 +690,8 @@ void NodeList::processDomainServerAddedNode(QSharedPointer<ReceivedMessage> mess
 void NodeList::processDomainServerRemovedNode(QSharedPointer<ReceivedMessage> message) {
     // read the UUID from the packet, remove it if it exists
     QUuid nodeUUID = QUuid::fromRfc4122(message->readWithoutCopy(NUM_BYTES_RFC4122_UUID));
-    qCDebug(networking) << "Received packet from domain-server to remove node with UUID" << uuidStringWithoutCurlyBraces(nodeUUID);
+    qCDebug(networking) << "Received packet from domain-server to remove node with UUID"
+                        << uuidStringWithoutCurlyBraces(nodeUUID);
     killNodeWithUUID(nodeUUID);
 }
 
@@ -719,8 +704,8 @@ void NodeList::parseNodeFromPacketStream(QDataStream& packetStream) {
     bool isReplicated;
     Node::LocalID sessionLocalID;
 
-    packetStream >> nodeType >> nodeUUID >> nodePublicSocket >> nodeLocalSocket >> permissions
-        >> isReplicated >> sessionLocalID;
+    packetStream >> nodeType >> nodeUUID >> nodePublicSocket >> nodeLocalSocket >> permissions >> isReplicated >>
+        sessionLocalID;
 
     // if the public socket address is 0 then it's reachable at the same IP
     // as the domain server
@@ -730,8 +715,8 @@ void NodeList::parseNodeFromPacketStream(QDataStream& packetStream) {
 
     packetStream >> connectionSecretUUID;
 
-    SharedNodePointer node = addOrUpdateNode(nodeUUID, nodeType, nodePublicSocket, nodeLocalSocket,
-                                             sessionLocalID, isReplicated, false, connectionSecretUUID, permissions);
+    SharedNodePointer node = addOrUpdateNode(nodeUUID, nodeType, nodePublicSocket, nodeLocalSocket, sessionLocalID,
+                                             isReplicated, false, connectionSecretUUID, permissions);
 
     // nodes that are downstream or upstream of our own type are kept alive when we hear about them from the domain server
     // and always have their public socket as their active socket
@@ -742,10 +727,8 @@ void NodeList::parseNodeFromPacketStream(QDataStream& packetStream) {
 }
 
 void NodeList::sendAssignment(Assignment& assignment) {
-
-    PacketType assignmentPacketType = assignment.getCommand() == Assignment::CreateCommand
-        ? PacketType::CreateAssignment
-        : PacketType::RequestAssignment;
+    PacketType assignmentPacketType = assignment.getCommand() == Assignment::CreateCommand ? PacketType::CreateAssignment
+                                                                                           : PacketType::RequestAssignment;
 
     auto assignmentPacket = NLPacket::create(assignmentPacketType);
 
@@ -766,7 +749,7 @@ void NodeList::pingPunchForInactiveNode(const SharedNodePointer& node) {
     if (node->getConnectionAttempts() > 0 && node->getConnectionAttempts() % NUM_DEBUG_CONNECTION_ATTEMPTS == 0) {
         qCDebug(networking) << "No response to UDP hole punch pings for node" << node->getUUID() << "in last second.";
     }
-    
+
     auto nodeID = node->getUUID();
 
     // send the ping packet to the local and public sockets for this node
@@ -785,7 +768,6 @@ void NodeList::pingPunchForInactiveNode(const SharedNodePointer& node) {
 }
 
 void NodeList::startNodeHolePunch(const SharedNodePointer& node) {
-
     // we don't hole punch to downstream servers, since it is assumed that we have a direct line to them
     // we also don't hole punch to relayed upstream nodes, since we do not communicate directly with them
 
@@ -830,7 +812,7 @@ void NodeList::activateSocketFromNodeCommunication(ReceivedMessage& message, con
     }
 
     if (sendingNode->getType() == NodeType::AudioMixer) {
-       flagTimeForConnectionStep(LimitedNodeList::ConnectionStep::SetAudioMixerSocket);
+        flagTimeForConnectionStep(LimitedNodeList::ConnectionStep::SetAudioMixerSocket);
     }
 }
 
@@ -843,12 +825,12 @@ void NodeList::stopKeepalivePingTimer() {
 void NodeList::sendKeepAlivePings() {
     // send keep-alive ping packets to nodes of types we care about that are not relayed to us from an upstream node
 
-    eachMatchingNode([this](const SharedNodePointer& node)->bool {
-        auto type = node->getType();
-        return !node->isUpstream() && _nodeTypesOfInterest.contains(type) && !NodeType::isDownstream(type);
-    }, [&](const SharedNodePointer& node) {
-        sendPacket(constructPingPacket(node->getUUID()), *node);
-    });
+    eachMatchingNode(
+        [this](const SharedNodePointer& node) -> bool {
+            auto type = node->getType();
+            return !node->isUpstream() && _nodeTypesOfInterest.contains(type) && !NodeType::isDownstream(type);
+        },
+        [&](const SharedNodePointer& node) { sendPacket(constructPingPacket(node->getUUID()), *node); });
 }
 
 bool NodeList::sockAddrBelongsToDomainOrNode(const HifiSockAddr& sockAddr) {
@@ -859,11 +841,11 @@ void NodeList::ignoreNodesInRadius(bool enabled) {
     bool isEnabledChange = _ignoreRadiusEnabled.get() != enabled;
     _ignoreRadiusEnabled.set(enabled);
 
-    eachMatchingNode([](const SharedNodePointer& node)->bool {
-        return (node->getType() == NodeType::AudioMixer || node->getType() == NodeType::AvatarMixer);
-    }, [this](const SharedNodePointer& destinationNode) {
-        sendIgnoreRadiusStateToNode(destinationNode);
-    });
+    eachMatchingNode(
+        [](const SharedNodePointer& node) -> bool {
+            return (node->getType() == NodeType::AudioMixer || node->getType() == NodeType::AvatarMixer);
+        },
+        [this](const SharedNodePointer& destinationNode) { sendIgnoreRadiusStateToNode(destinationNode); });
     if (isEnabledChange) {
         emit ignoreRadiusEnabledChanged(enabled);
     }
@@ -878,53 +860,59 @@ void NodeList::sendIgnoreRadiusStateToNode(const SharedNodePointer& destinationN
 void NodeList::ignoreNodeBySessionID(const QUuid& nodeID, bool ignoreEnabled) {
     // enumerate the nodes to send a reliable ignore packet to each that can leverage it
     if (!nodeID.isNull() && getSessionUUID() != nodeID) {
-        eachMatchingNode([](const SharedNodePointer& node)->bool {
-            if (node->getType() == NodeType::AudioMixer || node->getType() == NodeType::AvatarMixer) {
-                return true;
-            } else {
-                return false;
-            }
-        }, [&nodeID, ignoreEnabled, this](const SharedNodePointer& destinationNode) {
-            // create a reliable NLPacket with space for the ignore UUID
-            auto ignorePacket = NLPacket::create(PacketType::NodeIgnoreRequest, NUM_BYTES_RFC4122_UUID + sizeof(bool), true);
+        eachMatchingNode(
+            [](const SharedNodePointer& node) -> bool {
+                if (node->getType() == NodeType::AudioMixer || node->getType() == NodeType::AvatarMixer) {
+                    return true;
+                } else {
+                    return false;
+                }
+            },
+            [&nodeID, ignoreEnabled, this](const SharedNodePointer& destinationNode) {
+                // create a reliable NLPacket with space for the ignore UUID
+                auto ignorePacket = NLPacket::create(PacketType::NodeIgnoreRequest, NUM_BYTES_RFC4122_UUID + sizeof(bool),
+                                                     true);
 
-            ignorePacket->writePrimitive(ignoreEnabled);
-            // write the node ID to the packet
-            ignorePacket->write(nodeID.toRfc4122());
+                ignorePacket->writePrimitive(ignoreEnabled);
+                // write the node ID to the packet
+                ignorePacket->write(nodeID.toRfc4122());
 
-            qCDebug(networking) << "Sending packet to" << (destinationNode->getType() == NodeType::AudioMixer ? "AudioMixer" : "AvatarMixer") << "to"
-                << (ignoreEnabled ? "ignore" : "unignore") << "node" << uuidStringWithoutCurlyBraces(nodeID);
+                qCDebug(networking) << "Sending packet to"
+                                    << (destinationNode->getType() == NodeType::AudioMixer ? "AudioMixer" : "AvatarMixer")
+                                    << "to" << (ignoreEnabled ? "ignore" : "unignore") << "node"
+                                    << uuidStringWithoutCurlyBraces(nodeID);
 
-            // send off this ignore packet reliably to the matching node
-            sendPacket(std::move(ignorePacket), *destinationNode);
-        });
+                // send off this ignore packet reliably to the matching node
+                sendPacket(std::move(ignorePacket), *destinationNode);
+            });
 
         if (ignoreEnabled) {
             {
-                QReadLocker ignoredSetLocker{ &_ignoredSetLock }; // read lock for insert
+                QReadLocker ignoredSetLocker { &_ignoredSetLock }; // read lock for insert
                 // add this nodeID to our set of ignored IDs
                 _ignoredNodeIDs.insert(nodeID);
             }
             {
-                QReadLocker personalMutedSetLocker{ &_personalMutedSetLock }; // read lock for insert
+                QReadLocker personalMutedSetLocker { &_personalMutedSetLock }; // read lock for insert
                 // add this nodeID to our set of personal muted IDs
                 _personalMutedNodeIDs.insert(nodeID);
             }
             emit ignoredNode(nodeID, true);
         } else {
             {
-                QWriteLocker ignoredSetLocker{ &_ignoredSetLock }; // write lock for unsafe_erase
+                QWriteLocker ignoredSetLocker { &_ignoredSetLock }; // write lock for unsafe_erase
                 _ignoredNodeIDs.unsafe_erase(nodeID);
             }
             {
-                QWriteLocker personalMutedSetLocker{ &_personalMutedSetLock }; // write lock for unsafe_erase
+                QWriteLocker personalMutedSetLocker { &_personalMutedSetLock }; // write lock for unsafe_erase
                 _personalMutedNodeIDs.unsafe_erase(nodeID);
             }
             emit ignoredNode(nodeID, false);
         }
 
     } else {
-        qWarning() << "NodeList::ignoreNodeBySessionID called with an invalid ID or an ID which matches the current session ID.";
+        qWarning()
+            << "NodeList::ignoreNodeBySessionID called with an invalid ID or an ID which matches the current session ID.";
     }
 }
 
@@ -932,18 +920,18 @@ void NodeList::removeFromIgnoreMuteSets(const QUuid& nodeID) {
     // don't remove yourself, or nobody
     if (!nodeID.isNull() && getSessionUUID() != nodeID) {
         {
-            QWriteLocker ignoredSetLocker{ &_ignoredSetLock };
+            QWriteLocker ignoredSetLocker { &_ignoredSetLock };
             _ignoredNodeIDs.unsafe_erase(nodeID);
         }
         {
-            QWriteLocker personalMutedSetLocker{ &_personalMutedSetLock };
+            QWriteLocker personalMutedSetLocker { &_personalMutedSetLock };
             _personalMutedNodeIDs.unsafe_erase(nodeID);
         }
     }
 }
 
 bool NodeList::isIgnoringNode(const QUuid& nodeID) const {
-    QReadLocker ignoredSetLocker{ &_ignoredSetLock };
+    QReadLocker ignoredSetLocker { &_ignoredSetLock };
     return _ignoredNodeIDs.find(nodeID) != _ignoredNodeIDs.cend();
 }
 
@@ -954,26 +942,26 @@ void NodeList::personalMuteNodeBySessionID(const QUuid& nodeID, bool muteEnabled
         if (audioMixer) {
             if (isIgnoringNode(nodeID)) {
                 qCDebug(networking) << "You can't personally mute or unmute a node you're already ignoring.";
-            }
-            else {
+            } else {
                 // setup the packet
-                auto personalMutePacket = NLPacket::create(PacketType::NodeIgnoreRequest, NUM_BYTES_RFC4122_UUID + sizeof(bool), true);
+                auto personalMutePacket = NLPacket::create(PacketType::NodeIgnoreRequest, NUM_BYTES_RFC4122_UUID + sizeof(bool),
+                                                           true);
 
                 personalMutePacket->writePrimitive(muteEnabled);
                 // write the node ID to the packet
                 personalMutePacket->write(nodeID.toRfc4122());
 
-                qCDebug(networking) << "Sending Personal Mute Packet to" << (muteEnabled ? "mute" : "unmute") << "node" << uuidStringWithoutCurlyBraces(nodeID);
+                qCDebug(networking) << "Sending Personal Mute Packet to" << (muteEnabled ? "mute" : "unmute") << "node"
+                                    << uuidStringWithoutCurlyBraces(nodeID);
 
                 sendPacket(std::move(personalMutePacket), *audioMixer);
 
-
                 if (muteEnabled) {
-                    QReadLocker personalMutedSetLocker{ &_personalMutedSetLock }; // read lock for insert
+                    QReadLocker personalMutedSetLocker { &_personalMutedSetLock }; // read lock for insert
                     // add this nodeID to our set of personal muted IDs
                     _personalMutedNodeIDs.insert(nodeID);
                 } else {
-                    QWriteLocker personalMutedSetLocker{ &_personalMutedSetLock }; // write lock for unsafe_erase
+                    QWriteLocker personalMutedSetLocker { &_personalMutedSetLock }; // write lock for unsafe_erase
                     _personalMutedNodeIDs.unsafe_erase(nodeID);
                 }
             }
@@ -981,12 +969,13 @@ void NodeList::personalMuteNodeBySessionID(const QUuid& nodeID, bool muteEnabled
             qWarning() << "Couldn't find audio mixer to send node personal mute request";
         }
     } else {
-        qWarning() << "NodeList::personalMuteNodeBySessionID called with an invalid ID or an ID which matches the current session ID.";
+        qWarning()
+            << "NodeList::personalMuteNodeBySessionID called with an invalid ID or an ID which matches the current session ID.";
     }
 }
 
 bool NodeList::isPersonalMutingNode(const QUuid& nodeID) const {
-    QReadLocker personalMutedSetLocker{ &_personalMutedSetLock };
+    QReadLocker personalMutedSetLocker { &_personalMutedSetLock };
     return _personalMutedNodeIDs.find(nodeID) != _personalMutedNodeIDs.cend();
 }
 
@@ -995,7 +984,7 @@ void NodeList::maybeSendIgnoreSetToNode(SharedNodePointer newNode) {
         // this is a mixer that we just added - it's unlikely it knows who we were previously ignoring in this session,
         // so send that list along now (assuming it isn't empty)
 
-        QReadLocker personalMutedSetLocker{ &_personalMutedSetLock };
+        QReadLocker personalMutedSetLocker { &_personalMutedSetLock };
 
         if (_personalMutedNodeIDs.size() > 0) {
             // setup a packet list so we can send the stream of ignore IDs
@@ -1022,7 +1011,7 @@ void NodeList::maybeSendIgnoreSetToNode(SharedNodePointer newNode) {
         // this is a mixer that we just added - it's unlikely it knows who we were previously ignoring in this session,
         // so send that list along now (assuming it isn't empty)
 
-        QReadLocker ignoredSetLocker{ &_ignoredSetLock };
+        QReadLocker ignoredSetLocker { &_ignoredSetLock };
 
         if (_ignoredNodeIDs.size() > 0) {
             // setup a packet list so we can send the stream of ignore IDs
@@ -1053,7 +1042,8 @@ void NodeList::setAvatarGain(const QUuid& nodeID, float gain) {
         auto audioMixer = soloNodeOfType(NodeType::AudioMixer);
         if (audioMixer) {
             // setup the packet
-            auto setAvatarGainPacket = NLPacket::create(PacketType::PerAvatarGainSet, NUM_BYTES_RFC4122_UUID + sizeof(float), true);
+            auto setAvatarGainPacket = NLPacket::create(PacketType::PerAvatarGainSet, NUM_BYTES_RFC4122_UUID + sizeof(float),
+                                                        true);
 
             // write the node ID to the packet
             setAvatarGainPacket->write(nodeID.toRfc4122());
@@ -1064,11 +1054,12 @@ void NodeList::setAvatarGain(const QUuid& nodeID, float gain) {
             if (nodeID.isNull()) {
                 qCDebug(networking) << "Sending Set MASTER Avatar Gain packet with Gain:" << gain;
             } else {
-                qCDebug(networking) << "Sending Set Avatar Gain packet with UUID: " << uuidStringWithoutCurlyBraces(nodeID) << "Gain:" << gain;
+                qCDebug(networking) << "Sending Set Avatar Gain packet with UUID: " << uuidStringWithoutCurlyBraces(nodeID)
+                                    << "Gain:" << gain;
             }
 
             sendPacket(std::move(setAvatarGainPacket), *audioMixer);
-            QWriteLocker lock{ &_avatarGainMapLock };
+            QWriteLocker lock { &_avatarGainMapLock };
             _avatarGainMap[nodeID] = gain;
 
         } else {
@@ -1080,7 +1071,7 @@ void NodeList::setAvatarGain(const QUuid& nodeID, float gain) {
 }
 
 float NodeList::getAvatarGain(const QUuid& nodeID) {
-    QReadLocker lock{ &_avatarGainMapLock };
+    QReadLocker lock { &_avatarGainMapLock };
     auto it = _avatarGainMap.find(nodeID);
     if (it != _avatarGainMap.cend()) {
         return it->second;
@@ -1092,7 +1083,7 @@ void NodeList::kickNodeBySessionID(const QUuid& nodeID) {
     // send a request to domain-server to kick the node with the given session ID
     // the domain-server will handle the persistence of the kick (via username or IP)
 
-    if (!nodeID.isNull() && getSessionUUID() != nodeID ) {
+    if (!nodeID.isNull() && getSessionUUID() != nodeID) {
         if (getThisNodeCanKick()) {
             // setup the packet
             auto kickPacket = NLPacket::create(PacketType::NodeKickRequest, NUM_BYTES_RFC4122_UUID, true);
@@ -1105,17 +1096,16 @@ void NodeList::kickNodeBySessionID(const QUuid& nodeID) {
             sendPacket(std::move(kickPacket), _domainHandler.getSockAddr());
         } else {
             qWarning() << "You do not have permissions to kick in this domain."
-                << "Request to kick node" << uuidStringWithoutCurlyBraces(nodeID) << "will not be sent";
+                       << "Request to kick node" << uuidStringWithoutCurlyBraces(nodeID) << "will not be sent";
         }
     } else {
         qWarning() << "NodeList::kickNodeBySessionID called with an invalid ID or an ID which matches the current session ID.";
-
     }
 }
 
 void NodeList::muteNodeBySessionID(const QUuid& nodeID) {
     // cannot mute yourself, or nobody
-    if (!nodeID.isNull() && getSessionUUID() != nodeID ) {
+    if (!nodeID.isNull() && getSessionUUID() != nodeID) {
         if (getThisNodeCanKick()) {
             auto audioMixer = soloNodeOfType(NodeType::AudioMixer);
             if (audioMixer) {
@@ -1133,11 +1123,10 @@ void NodeList::muteNodeBySessionID(const QUuid& nodeID) {
             }
         } else {
             qWarning() << "You do not have permissions to mute in this domain."
-                << "Request to mute node" << uuidStringWithoutCurlyBraces(nodeID) << "will not be sent";
+                       << "Request to mute node" << uuidStringWithoutCurlyBraces(nodeID) << "will not be sent";
         }
     } else {
         qWarning() << "NodeList::muteNodeBySessionID called with an invalid ID or an ID which matches the current session ID.";
-
     }
 }
 
@@ -1153,7 +1142,8 @@ void NodeList::requestUsernameFromSessionID(const QUuid& nodeID) {
         usernameFromIDRequestPacket->write(nodeID.toRfc4122());
     }
 
-    qCDebug(networking) << "Sending packet to get username/fingerprint/admin status of node" << uuidStringWithoutCurlyBraces(nodeID);
+    qCDebug(networking) << "Sending packet to get username/fingerprint/admin status of node"
+                        << uuidStringWithoutCurlyBraces(nodeID);
 
     sendPacket(std::move(usernameFromIDRequestPacket), _domainHandler.getSockAddr());
 }
@@ -1168,8 +1158,8 @@ void NodeList::processUsernameFromIDReply(QSharedPointer<ReceivedMessage> messag
     bool isAdmin;
     message->readPrimitive(&isAdmin);
 
-    qCDebug(networking) << "Got username" << username << "and machine fingerprint"
-        << machineFingerprintString << "for node" << nodeUUIDString << ". isAdmin:" << isAdmin;
+    qCDebug(networking) << "Got username" << username << "and machine fingerprint" << machineFingerprintString << "for node"
+                        << nodeUUIDString << ". isAdmin:" << isAdmin;
 
     emit usernameFromIDReply(nodeUUIDString, username, machineFingerprintString, isAdmin);
 }
@@ -1179,16 +1169,17 @@ void NodeList::setRequestsDomainListData(bool isRequesting) {
     if (_requestsDomainListData == isRequesting) {
         return;
     }
-    eachMatchingNode([](const SharedNodePointer& node)->bool {
-        return (node->getType() == NodeType::AudioMixer || node->getType() == NodeType::AvatarMixer);
-    }, [this, isRequesting](const SharedNodePointer& destinationNode) {
-        auto packet = NLPacket::create(PacketType::RequestsDomainListData, sizeof(bool), true); // reliable
-        packet->writePrimitive(isRequesting);
-        sendPacket(std::move(packet), *destinationNode);
-    });
+    eachMatchingNode(
+        [](const SharedNodePointer& node) -> bool {
+            return (node->getType() == NodeType::AudioMixer || node->getType() == NodeType::AvatarMixer);
+        },
+        [this, isRequesting](const SharedNodePointer& destinationNode) {
+            auto packet = NLPacket::create(PacketType::RequestsDomainListData, sizeof(bool), true); // reliable
+            packet->writePrimitive(isRequesting);
+            sendPacket(std::move(packet), *destinationNode);
+        });
     _requestsDomainListData = isRequesting;
 }
-
 
 void NodeList::startThread() {
     moveToNewNamedThread(this, "NodeList Thread", QThread::TimeCriticalPriority);

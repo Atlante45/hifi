@@ -18,15 +18,13 @@
 #include "EntityTree.h"
 #include "PhysicsLogging.h"
 
-
 const uint16_t ObjectConstraintSlider::constraintVersion = 1;
 const glm::vec3 DEFAULT_SLIDER_AXIS(1.0f, 0.0f, 0.0f);
 
 ObjectConstraintSlider::ObjectConstraintSlider(const QUuid& id, EntityItemPointer ownerEntity) :
     ObjectConstraint(DYNAMIC_TYPE_SLIDER, id, ownerEntity),
     _axisInA(DEFAULT_SLIDER_AXIS),
-    _axisInB(DEFAULT_SLIDER_AXIS)
-{
+    _axisInB(DEFAULT_SLIDER_AXIS) {
 }
 
 ObjectConstraintSlider::~ObjectConstraintSlider() {
@@ -36,9 +34,7 @@ QList<btRigidBody*> ObjectConstraintSlider::getRigidBodies() {
     QList<btRigidBody*> result;
     result += getRigidBody();
     QUuid otherEntityID;
-    withReadLock([&]{
-        otherEntityID = _otherID;
-    });
+    withReadLock([&] { otherEntityID = _otherID; });
     if (!otherEntityID.isNull()) {
         result += getOtherRigidBody(otherEntityID);
     }
@@ -51,9 +47,7 @@ void ObjectConstraintSlider::prepareForPhysicsSimulation() {
 void ObjectConstraintSlider::updateSlider() {
     btSliderConstraint* constraint { nullptr };
 
-    withReadLock([&]{
-        constraint = static_cast<btSliderConstraint*>(_constraint);
-    });
+    withReadLock([&] { constraint = static_cast<btSliderConstraint*>(_constraint); });
 
     if (!constraint) {
         return;
@@ -64,9 +58,7 @@ void ObjectConstraintSlider::updateSlider() {
     constraint->setUpperLinLimit(_linearHigh);
     constraint->setLowerAngLimit(_angularLow);
     constraint->setUpperAngLimit(_angularHigh);
-
 }
-
 
 btTypedConstraint* ObjectConstraintSlider::getConstraint() {
     btSliderConstraint* constraint { nullptr };
@@ -76,7 +68,7 @@ btTypedConstraint* ObjectConstraintSlider::getConstraint() {
     glm::vec3 pointInB;
     glm::vec3 axisInB;
 
-    withReadLock([&]{
+    withReadLock([&] {
         constraint = static_cast<btSliderConstraint*>(_constraint);
         pointInA = _pointInA;
         axisInA = _axisInA;
@@ -136,9 +128,7 @@ btTypedConstraint* ObjectConstraintSlider::getConstraint() {
         constraint = new btSliderConstraint(*rigidBodyA, frameInA, true);
     }
 
-    withWriteLock([&]{
-        _constraint = constraint;
-    });
+    withWriteLock([&] { _constraint = constraint; });
 
     // if we don't wake up rigidBodyA, we may not send the dynamicData property over the network
     forceBodyNonStatic();
@@ -148,7 +138,6 @@ btTypedConstraint* ObjectConstraintSlider::getConstraint() {
 
     return constraint;
 }
-
 
 bool ObjectConstraintSlider::updateArguments(QVariantMap arguments) {
     glm::vec3 pointInA;
@@ -163,7 +152,7 @@ bool ObjectConstraintSlider::updateArguments(QVariantMap arguments) {
 
     bool needUpdate = false;
     bool somethingChanged = ObjectDynamic::updateArguments(arguments);
-    withReadLock([&]{
+    withReadLock([&] {
         bool ok = true;
         pointInA = EntityDynamicInterface::extractVec3Argument("slider constraint", arguments, "point", ok, false);
         if (!ok) {
@@ -177,8 +166,8 @@ bool ObjectConstraintSlider::updateArguments(QVariantMap arguments) {
         }
 
         ok = true;
-        otherEntityID = QUuid(EntityDynamicInterface::extractStringArgument("slider constraint",
-                                                                            arguments, "otherEntityID", ok, false));
+        otherEntityID = QUuid(
+            EntityDynamicInterface::extractStringArgument("slider constraint", arguments, "otherEntityID", ok, false));
         if (!ok) {
             otherEntityID = _otherID;
         }
@@ -219,16 +208,9 @@ bool ObjectConstraintSlider::updateArguments(QVariantMap arguments) {
             angularHigh = _angularHigh;
         }
 
-        if (somethingChanged ||
-            pointInA != _pointInA ||
-            axisInA != _axisInA ||
-            otherEntityID != _otherID ||
-            pointInB != _pointInB ||
-            axisInB != _axisInB ||
-            linearLow != _linearLow ||
-            linearHigh != _linearHigh ||
-            angularLow != _angularLow ||
-            angularHigh != _angularHigh) {
+        if (somethingChanged || pointInA != _pointInA || axisInA != _axisInA || otherEntityID != _otherID ||
+            pointInB != _pointInB || axisInB != _axisInB || linearLow != _linearLow || linearHigh != _linearHigh ||
+            angularLow != _angularLow || angularHigh != _angularHigh) {
             // something changed
             needUpdate = true;
         }
@@ -262,28 +244,28 @@ bool ObjectConstraintSlider::updateArguments(QVariantMap arguments) {
 }
 
 /**jsdoc
- * The <code>"slider"</code> {@link Entities.ActionType|ActionType} lets an entity slide and rotate along an axis, or connects 
+ * The <code>"slider"</code> {@link Entities.ActionType|ActionType} lets an entity slide and rotate along an axis, or connects
  * two entities that slide and rotate along a shared axis.
  * It has arguments in addition to the common {@link Entities.ActionArguments|ActionArguments}.
  *
  * @typedef {object} Entities.ActionArguments-Slider
  * @property {Vec3} point=0,0,0 - The local position of a point in the entity that slides along the axis.
  * @property {Vec3} axis=1,0,0 - The axis of the entity that slides along the joint. Must be a non-zero vector.
- * @property {Uuid} otherEntityID=null - The ID of the other entity that is connected to the joint, if any. If non is 
+ * @property {Uuid} otherEntityID=null - The ID of the other entity that is connected to the joint, if any. If non is
  *     specified then the first entity simply slides and rotates about its specified <code>axis</code>.
  * @property {Vec3} otherPoint=0,0,0 - The local position of a point in the other entity that slides along the axis.
  * @property {Vec3} axis=1,0,0 - The axis of the other entity that slides along the joint. Must be a non-zero vector.
- * @property {number} linearLow=1.17e-38 - The most negative linear offset from the entity's initial point that the entity can 
+ * @property {number} linearLow=1.17e-38 - The most negative linear offset from the entity's initial point that the entity can
  *     have along the slider.
- * @property {number} linearHigh=3.40e+38 - The most positive linear offset from the entity's initial point that the entity can 
- *     have along the slider. 
- * @property {number} angularLow=-6.283 - The most negative angle that the entity can rotate about the axis if the action 
+ * @property {number} linearHigh=3.40e+38 - The most positive linear offset from the entity's initial point that the entity can
+ *     have along the slider.
+ * @property {number} angularLow=-6.283 - The most negative angle that the entity can rotate about the axis if the action
  *     involves only one entity, otherwise the most negative angle the rotation can be between the two entities. In radians.
- * @property {number} angularHigh=6.283 - The most positive angle that the entity can rotate about the axis if the action 
+ * @property {number} angularHigh=6.283 - The most positive angle that the entity can rotate about the axis if the action
  *     involves only one entity, otherwise the most positive angle the rotation can be between the two entities. In radians.
- * @property {number} linearPosition=0 - The current linear offset the entity is from its initial point if the action involves 
+ * @property {number} linearPosition=0 - The current linear offset the entity is from its initial point if the action involves
  *     only one entity, otherwise the linear offset between the two entities' action points. <em>Read-only.</em>
- * @property {number} angularPosition=0 - The current angular offset of the entity from its initial rotation if the action 
+ * @property {number} angularPosition=0 - The current angular offset of the entity from its initial rotation if the action
  *     involves only one entity, otherwise the angular offset between the two entities. <em>Read-only.</em>
  */
 QVariantMap ObjectConstraintSlider::getArguments() {

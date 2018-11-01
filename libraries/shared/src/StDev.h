@@ -22,6 +22,7 @@ public:
     float getAverage() const;
     float getStDev() const;
     int getSamples() const { return _sampleCount; }
+
 private:
     float _data[NUM_SAMPLES];
     int _sampleCount;

@@ -19,12 +19,12 @@
 
 class MetaModelPayload {
 public:
-    void setBlendedVertices(int blendNumber, const QVector<BlendshapeOffset>& blendshapeOffsets, const QVector<int>& blendedMeshSizes, const render::ItemIDs& subRenderItems);
+    void setBlendedVertices(int blendNumber, const QVector<BlendshapeOffset>& blendshapeOffsets,
+                            const QVector<int>& blendedMeshSizes, const render::ItemIDs& subRenderItems);
 
 private:
     std::unordered_map<int, gpu::BufferPointer> _blendshapeBuffers;
     int _appliedBlendNumber { 0 };
-
 };
 
 #endif

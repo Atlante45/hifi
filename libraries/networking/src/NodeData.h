@@ -16,8 +16,8 @@
 #include <QtCore/QObject>
 #include <QtCore/QSharedPointer>
 
-#include "NetworkPeer.h"
 #include "NLPacket.h"
+#include "NetworkPeer.h"
 #include "ReceivedMessage.h"
 
 class Node;
@@ -31,7 +31,7 @@ public:
 
     const QUuid& getNodeID() const { return _nodeID; }
     NetworkPeer::LocalID getNodeLocalID() const { return _nodeLocalID; }
-    
+
     QMutex& getMutex() { return _mutex; }
 
 private:

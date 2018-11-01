@@ -12,14 +12,14 @@
 #define hifi_render_utils_BloomStage_h
 
 #include <graphics/Stage.h>
-#include <set>
-#include <unordered_map>
 #include <render/IndexedContainer.h>
 #include <render/Stage.h>
+#include <set>
+#include <unordered_map>
 
-#include <render/Forward.h>
-#include <render/DrawTask.h>
 #include <graphics/Bloom.h>
+#include <render/DrawTask.h>
+#include <render/Forward.h>
 
 // Bloom stage to set up bloom-related rendering tasks
 class BloomStage : public render::Stage {
@@ -30,7 +30,7 @@ public:
     using Index = render::indexed_container::Index;
     static const Index INVALID_INDEX;
     static bool isIndexInvalid(Index index) { return index == INVALID_INDEX; }
-    
+
     using BloomPointer = graphics::BloomPointer;
     using Blooms = render::indexed_container::IndexedPointerVector<graphics::Bloom>;
     using BloomMap = std::unordered_map<BloomPointer, Index>;
@@ -41,16 +41,14 @@ public:
     Index addBloom(const BloomPointer& bloom);
 
     BloomPointer removeBloom(Index index);
-    
+
     bool checkBloomId(Index index) const { return _blooms.checkIndex(index); }
 
     Index getNumBlooms() const { return _blooms.getNumElements(); }
     Index getNumFreeBlooms() const { return _blooms.getNumFreeIndices(); }
     Index getNumAllocatedBlooms() const { return _blooms.getNumAllocatedIndices(); }
 
-    BloomPointer getBloom(Index bloomId) const {
-        return _blooms.get(bloomId);
-    }
+    BloomPointer getBloom(Index bloomId) const { return _blooms.get(bloomId); }
 
     Blooms _blooms;
     BloomMap _bloomMap;
@@ -58,7 +56,7 @@ public:
     class Frame {
     public:
         Frame() {}
-        
+
         void clear() { _blooms.clear(); }
 
         void pushBloom(BloomStage::Index index) { _blooms.emplace_back(index); }
@@ -66,7 +64,7 @@ public:
         BloomStage::BloomIndices _blooms;
     };
     using FramePointer = std::shared_ptr<Frame>;
-    
+
     Frame _currentFrame;
 };
 using BloomStagePointer = std::shared_ptr<BloomStage>;
@@ -95,9 +93,18 @@ public:
     float bloomSize { graphics::Bloom::INITIAL_BLOOM_SIZE };
 
 public slots:
-    void setBloomIntensity(const float value) { bloomIntensity = value; emit dirty(); }
-    void setBloomThreshold(const float value) { bloomThreshold = value; emit dirty(); }
-    void setBloomSize(const float value) { bloomSize = value; emit dirty(); }
+    void setBloomIntensity(const float value) {
+        bloomIntensity = value;
+        emit dirty();
+    }
+    void setBloomThreshold(const float value) {
+        bloomThreshold = value;
+        emit dirty();
+    }
+    void setBloomSize(const float value) {
+        bloomSize = value;
+        emit dirty();
+    }
 
 signals:
     void dirty();

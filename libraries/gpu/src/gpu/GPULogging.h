@@ -17,4 +17,3 @@
 Q_DECLARE_LOGGING_CATEGORY(gpulogging)
 
 #endif // hifi_GPULogging_h
-

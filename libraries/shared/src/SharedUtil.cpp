@@ -11,16 +11,16 @@
 
 #include "SharedUtil.h"
 
-#include <cassert>
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <cctype>
 #include <time.h>
+#include <cassert>
+#include <cctype>
+#include <chrono>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <mutex>
 #include <thread>
 #include <unordered_map>
-#include <chrono>
 
 #include <glm/glm.hpp>
 
@@ -35,19 +35,17 @@
 
 #if _MSC_VER >= 1900
 #pragma comment(lib, "legacy_stdio_definitions.lib")
-FILE _iob[] = {*stdin, *stdout, *stderr};
-extern "C" FILE * __cdecl __iob_func(void) {
+FILE _iob[] = { *stdin, *stdout, *stderr };
+extern "C" FILE* __cdecl __iob_func(void) {
     return _iob;
 }
 #endif
 
 #endif
 
-
 #ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
 #endif
-
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 #include <signal.h>
@@ -144,15 +142,15 @@ float secTimestampNow() {
 }
 
 float randFloat() {
-    return (rand() % 10000)/10000.0f;
+    return (rand() % 10000) / 10000.0f;
 }
 
-int randIntInRange (int min, int max) {
+int randIntInRange(int min, int max) {
     return min + (rand() % ((max + 1) - min));
 }
 
-float randFloatInRange (float min,float max) {
-    return min + ((rand() % 10000)/10000.0f * (max-min));
+float randFloatInRange(float min, float max) {
+    return min + ((rand() % 10000) / 10000.0f * (max - min));
 }
 
 float randomSign() {
@@ -193,7 +191,7 @@ void outputBits(unsigned char byte, QDebug* continuedDebug) {
         resultString.sprintf("[ %d (0x%x): ", byte, byte);
     }
     debug << qPrintable(resultString);
-    
+
     for (int i = 0; i < 8; i++) {
         resultString.sprintf("%d", byte >> (7 - i) & 1);
         debug << qPrintable(resultString);
@@ -202,22 +200,17 @@ void outputBits(unsigned char byte, QDebug* continuedDebug) {
 }
 
 int numberOfOnes(unsigned char byte) {
+    static const int nbits[256] = { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3,
+                                    4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4,
+                                    4, 5, 4, 5, 5, 6, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4,
+                                    5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5,
+                                    4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2,
+                                    3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5,
+                                    5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4,
+                                    5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 3, 4, 4, 5, 4, 5, 5, 6,
+                                    4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8 };
 
-    static const int nbits[256] = {
-        0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,1,2,2,3,2,3,3,4,2,3,3,
-        4,3,4,4,5,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,
-        4,5,3,4,4,5,4,5,5,6,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,
-        3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,2,3,3,4,3,4,4,5,3,4,4,5,
-        4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,1,2,2,3,2,3,3,
-        4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,2,3,
-        3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,
-        6,6,7,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,
-        4,5,5,6,5,6,6,7,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,4,5,5,
-        6,5,6,6,7,5,6,6,7,6,7,7,8
-    };
-
-    return nbits[(unsigned char) byte];
-
+    return nbits[(unsigned char)byte];
 }
 
 bool oneAtBit(unsigned char byte, int bitIndex) {
@@ -236,14 +229,13 @@ void setAtBit16(unsigned short& word, int bitIndex) {
     word |= (1 << (15 - bitIndex));
 }
 
-
 void clearAtBit(unsigned char& byte, int bitIndex) {
     if (oneAtBit(byte, bitIndex)) {
         byte -= (1 << (7 - bitIndex));
     }
 }
 
-int  getSemiNibbleAt(unsigned short word, int bitIndex) {
+int getSemiNibbleAt(unsigned short word, int bitIndex) {
     return (word >> (14 - bitIndex) & 3); // semi-nibbles store 00, 01, 10, or 11
 }
 
@@ -267,7 +259,7 @@ int getNthBit(unsigned char byte, int ordinal) {
 }
 
 void setSemiNibbleAt(unsigned short& word, int bitIndex, int value) {
-    //assert(value <= 3 && value >= 0);
+    // assert(value <= 3 && value >= 0);
     word |= ((value & 3) << (14 - bitIndex)); // semi-nibbles store 00, 01, 10, or 11
 }
 
@@ -285,13 +277,13 @@ bool isInEnvironment(const char* environment) {
 //              then you're using the "-i" flag to set the input file name.
 // Usage:       char * inputFilename = getCmdOption(argc, argv, "-i");
 // Complaints:  Brad :)
-const char* getCmdOption(int argc, const char * argv[],const char* option) {
+const char* getCmdOption(int argc, const char* argv[], const char* option) {
     // check each arg
-    for (int i=0; i < argc; i++) {
+    for (int i = 0; i < argc; i++) {
         // if the arg matches the desired option
-        if (strcmp(option,argv[i])==0 && i+1 < argc) {
+        if (strcmp(option, argv[i]) == 0 && i + 1 < argc) {
             // then return the next option
-            return argv[i+1];
+            return argv[i + 1];
         }
     }
     return NULL;
@@ -304,11 +296,11 @@ const char* getCmdOption(int argc, const char * argv[],const char* option) {
 // Usage:       bool wantDump   = cmdOptionExists(argc, argv, "-d");
 // Complaints:  Brad :)
 
-bool cmdOptionExists(int argc, const char * argv[],const char* option) {
+bool cmdOptionExists(int argc, const char* argv[], const char* option) {
     // check each arg
-    for (int i=0; i < argc; i++) {
+    for (int i = 0; i < argc; i++) {
         // if the arg matches the desired option
-        if (strcmp(option,argv[i])==0) {
+        if (strcmp(option, argv[i]) == 0) {
             // then return the next option
             return true;
         }
@@ -316,7 +308,7 @@ bool cmdOptionExists(int argc, const char * argv[],const char* option) {
     return false;
 }
 
-void sharedMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString &message) {
+void sharedMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& message) {
     fprintf(stdout, "%s", message.toLocal8Bit().constData());
 }
 
@@ -330,8 +322,7 @@ unsigned char* pointToOctalCode(float x, float y, float z, float s) {
 /// The input values x,y,z range 0.0 <= v < 1.0
 /// IMPORTANT: The voxel is returned to you a buffer which you MUST delete when you are
 /// done with it.
-unsigned char* pointToVoxel(float x, float y, float z, float s, unsigned char r, unsigned char g, unsigned char b ) {
-
+unsigned char* pointToVoxel(float x, float y, float z, float s, unsigned char r, unsigned char g, unsigned char b) {
     // special case for size 1, the root node
     if (s >= 1.0f) {
         unsigned char* voxelOut = new unsigned char;
@@ -357,7 +348,7 @@ unsigned char* pointToVoxel(float x, float y, float z, float s, unsigned char r,
     unsigned char* voxelOut = new unsigned char[voxelBufferSize];
 
     // first byte of buffer is always our size in octets
-    voxelOut[0]=voxelSizeInOctets;
+    voxelOut[0] = voxelSizeInOctets;
 
     sTest = 0.5f; // reset sTest so we can do this again.
 
@@ -371,58 +362,58 @@ unsigned char* pointToVoxel(float x, float y, float z, float s, unsigned char r,
         if (x >= xTest) {
             //<write 1 bit>
             byte = (byte << 1) | true;
-            xTest += sTest/2.0f;
+            xTest += sTest / 2.0f;
         } else {
             //<write 0 bit;>
             byte = (byte << 1) | false;
-            xTest -= sTest/2.0f;
+            xTest -= sTest / 2.0f;
         }
         bitInByteNDX++;
         // If we've reached the last bit of the byte, then we want to copy this byte
         // into our buffer. And get ready to start on a new byte
         if (bitInByteNDX == 8) {
-            voxelOut[byteNDX]=byte;
+            voxelOut[byteNDX] = byte;
             byteNDX++;
-            bitInByteNDX=0;
-            byte=0;
+            bitInByteNDX = 0;
+            byte = 0;
         }
 
         if (y >= yTest) {
             //<write 1 bit>
             byte = (byte << 1) | true;
-            yTest += sTest/2.0f;
+            yTest += sTest / 2.0f;
         } else {
             //<write 0 bit;>
             byte = (byte << 1) | false;
-            yTest -= sTest/2.0f;
+            yTest -= sTest / 2.0f;
         }
         bitInByteNDX++;
         // If we've reached the last bit of the byte, then we want to copy this byte
         // into our buffer. And get ready to start on a new byte
         if (bitInByteNDX == 8) {
-            voxelOut[byteNDX]=byte;
+            voxelOut[byteNDX] = byte;
             byteNDX++;
-            bitInByteNDX=0;
-            byte=0;
+            bitInByteNDX = 0;
+            byte = 0;
         }
 
         if (z >= zTest) {
             //<write 1 bit>
             byte = (byte << 1) | true;
-            zTest += sTest/2.0f;
+            zTest += sTest / 2.0f;
         } else {
             //<write 0 bit;>
             byte = (byte << 1) | false;
-            zTest -= sTest/2.0f;
+            zTest -= sTest / 2.0f;
         }
         bitInByteNDX++;
         // If we've reached the last bit of the byte, then we want to copy this byte
         // into our buffer. And get ready to start on a new byte
         if (bitInByteNDX == 8) {
-            voxelOut[byteNDX]=byte;
+            voxelOut[byteNDX] = byte;
             byteNDX++;
-            bitInByteNDX=0;
-            byte=0;
+            bitInByteNDX = 0;
+            byte = 0;
         }
 
         octetsDone++;
@@ -439,31 +430,31 @@ unsigned char* pointToVoxel(float x, float y, float z, float s, unsigned char r,
         }
 
         // Copy it into our output buffer
-        voxelOut[byteNDX]=byte;
+        voxelOut[byteNDX] = byte;
         byteNDX++;
     }
     // copy color data
-    voxelOut[byteNDX]=r;
-    voxelOut[byteNDX+1]=g;
-    voxelOut[byteNDX+2]=b;
+    voxelOut[byteNDX] = r;
+    voxelOut[byteNDX + 1] = g;
+    voxelOut[byteNDX + 2] = b;
 
     return voxelOut;
 }
 
 void printVoxelCode(unsigned char* voxelCode) {
     unsigned char octets = voxelCode[0];
-    unsigned int voxelSizeInBits = octets*3;
-    unsigned int voxelSizeInBytes = (voxelSizeInBits/8)+1;
-    unsigned int voxelSizeInOctets = (voxelSizeInBits/3);
-    unsigned int voxelBufferSize = voxelSizeInBytes+1+3; // 1 for size, 3 for color
+    unsigned int voxelSizeInBits = octets * 3;
+    unsigned int voxelSizeInBytes = (voxelSizeInBits / 8) + 1;
+    unsigned int voxelSizeInOctets = (voxelSizeInBits / 3);
+    unsigned int voxelBufferSize = voxelSizeInBytes + 1 + 3; // 1 for size, 3 for color
 
-    qCDebug(shared, "octets=%d",octets);
-    qCDebug(shared, "voxelSizeInBits=%d",voxelSizeInBits);
-    qCDebug(shared, "voxelSizeInBytes=%d",voxelSizeInBytes);
-    qCDebug(shared, "voxelSizeInOctets=%d",voxelSizeInOctets);
-    qCDebug(shared, "voxelBufferSize=%d",voxelBufferSize);
+    qCDebug(shared, "octets=%d", octets);
+    qCDebug(shared, "voxelSizeInBits=%d", voxelSizeInBits);
+    qCDebug(shared, "voxelSizeInBytes=%d", voxelSizeInBytes);
+    qCDebug(shared, "voxelSizeInOctets=%d", voxelSizeInOctets);
+    qCDebug(shared, "voxelBufferSize=%d", voxelBufferSize);
 
-    for(unsigned int i=0; i < voxelBufferSize; i++) {
+    for (unsigned int i = 0; i < voxelBufferSize; i++) {
         QDebug voxelBufferDebug = qDebug();
         voxelBufferDebug << "i =" << i;
         outputBits(voxelCode[i], &voxelBufferDebug);
@@ -502,7 +493,7 @@ void usleep(int waitTime) {
         int64_t sleepFor = ((sleepTicks - now.QuadPart) * USECS_PER_SECOND) / ticksPerSec - MIN_SLEEP_USECS_BERTH;
         if (sleepFor > MIN_SLEEP_USECS) {
             Sleep((DWORD)(sleepFor / USECS_PER_MSEC));
-        // Yield otherwise
+            // Yield otherwise
         } else {
             // Use Qt to delegate, as SwitchToThread is only supported starting with XP
             QThread::yieldCurrentThread();
@@ -516,10 +507,8 @@ void usleep(int waitTime) {
 // non-sorted array
 // returns -1 if size exceeded
 // originalIndexArray is optional
-int insertIntoSortedArrays(void* value, float key, int originalIndex,
-                           void** valueArray, float* keyArray, int* originalIndexArray,
-                           int currentCount, int maxCount) {
-
+int insertIntoSortedArrays(void* value, float key, int originalIndex, void** valueArray, float* keyArray,
+                           int* originalIndexArray, int currentCount, int maxCount) {
     if (currentCount < maxCount) {
         int i = 0;
         if (currentCount > 0) {
@@ -528,7 +517,7 @@ int insertIntoSortedArrays(void* value, float key, int originalIndex,
             }
             // i is our desired location
             // shift array elements to the right
-            if (i < currentCount && i+1 < maxCount) {
+            if (i < currentCount && i + 1 < maxCount) {
                 memmove(&valueArray[i + 1], &valueArray[i], sizeof(void*) * (currentCount - i));
                 memmove(&keyArray[i + 1], &keyArray[i], sizeof(float) * (currentCount - i));
                 if (originalIndexArray) {
@@ -547,9 +536,8 @@ int insertIntoSortedArrays(void* value, float key, int originalIndex,
     return -1; // error case
 }
 
-int removeFromSortedArrays(void* value, void** valueArray, float* keyArray, int* originalIndexArray,
-                           int currentCount, int maxCount) {
-
+int removeFromSortedArrays(void* value, void** valueArray, float* keyArray, int* originalIndexArray, int currentCount,
+                           int maxCount) {
     int i = 0;
     if (currentCount > 0) {
         while (i < currentCount && value != valueArray[i]) {
@@ -559,12 +547,12 @@ int removeFromSortedArrays(void* value, void** valueArray, float* keyArray, int*
         if (value == valueArray[i] && i < currentCount) {
             // i is the location of the item we were looking for
             // shift array elements to the left
-            memmove(&valueArray[i], &valueArray[i + 1], sizeof(void*) * ((currentCount-1) - i));
-            memmove(&keyArray[i], &keyArray[i + 1], sizeof(float) * ((currentCount-1) - i));
+            memmove(&valueArray[i], &valueArray[i + 1], sizeof(void*) * ((currentCount - 1) - i));
+            memmove(&keyArray[i], &keyArray[i + 1], sizeof(float) * ((currentCount - 1) - i));
             if (originalIndexArray) {
-                memmove(&originalIndexArray[i], &originalIndexArray[i + 1], sizeof(int) * ((currentCount-1) - i));
+                memmove(&originalIndexArray[i], &originalIndexArray[i + 1], sizeof(int) * ((currentCount - 1) - i));
             }
-            return currentCount-1;
+            return currentCount - 1;
         }
     }
     return -1; // error case
@@ -582,7 +570,7 @@ int packFloatRatioToTwoByte(unsigned char* buffer, float ratio) {
         ratioHolder = floorf(ratio * SMALL_RATIO_CONVERSION_RATIO);
     } else {
         const float LARGE_RATIO_CONVERSION_RATIO = std::numeric_limits<int16_t>::min() / LARGE_LIMIT;
-        ratioHolder = floorf((std::min(ratio,LARGE_LIMIT) - SMALL_LIMIT) * LARGE_RATIO_CONVERSION_RATIO);
+        ratioHolder = floorf((std::min(ratio, LARGE_LIMIT) - SMALL_LIMIT) * LARGE_RATIO_CONVERSION_RATIO);
     }
     memcpy(buffer, &ratioHolder, sizeof(ratioHolder));
     return sizeof(ratioHolder);
@@ -594,10 +582,10 @@ int unpackFloatRatioFromTwoByte(const unsigned char* buffer, float& ratio) {
 
     // If it's positive, than the original ratio was less than SMALL_LIMIT
     if (ratioHolder > 0) {
-        ratio = (ratioHolder / (float) std::numeric_limits<int16_t>::max()) * SMALL_LIMIT;
+        ratio = (ratioHolder / (float)std::numeric_limits<int16_t>::max()) * SMALL_LIMIT;
     } else {
         // If it's negative, than the original ratio was between SMALL_LIMIT and LARGE_LIMIT
-        ratio = ((ratioHolder / (float) std::numeric_limits<int16_t>::min()) * LARGE_LIMIT) + SMALL_LIMIT;
+        ratio = ((ratioHolder / (float)std::numeric_limits<int16_t>::min()) * LARGE_LIMIT) + SMALL_LIMIT;
     }
     return sizeof(ratioHolder);
 }
@@ -625,7 +613,7 @@ int unpackClipValueFromTwoByte(const unsigned char* buffer, float& clipValue) {
 
     // If it's positive, than the original clipValue was less than SMALL_LIMIT
     if (holder > 0) {
-        clipValue = (holder / (float) std::numeric_limits<int16_t>::max()) * SMALL_LIMIT;
+        clipValue = (holder / (float)std::numeric_limits<int16_t>::max()) * SMALL_LIMIT;
     } else {
         // If it's negative, than the original holder can be found as the opposite sign of holder
         clipValue = -1.0f * holder;
@@ -644,7 +632,7 @@ int packFloatToByte(unsigned char* buffer, float value, float scaleBy) {
 int unpackFloatFromByte(const unsigned char* buffer, float& value, float scaleBy) {
     quint8 holder;
     memcpy(&holder, buffer, sizeof(holder));
-    value = ((float)holder / (float) 255) * scaleBy;
+    value = ((float)holder / (float)255) * scaleBy;
     return sizeof(holder);
 }
 
@@ -665,9 +653,8 @@ void debug::checkDeadBeef(void* memoryVoid, int size) {
     assert(memcmp((unsigned char*)memoryVoid, DEADBEEF, std::min(size, DEADBEEF_SIZE)) != 0);
 }
 
-
 // glm::abs() works for signed or unsigned types
-template <typename T>
+template<typename T>
 QString formatUsecTime(T usecs) {
     static const int PRECISION = 3;
     static const int FRACTION_MASK = pow(10, PRECISION);
@@ -716,7 +703,6 @@ QString formatUsecTime(T usecs) {
     return result;
 }
 
-
 QString formatUsecTime(quint64 usecs) {
     return formatUsecTime<quint64>(usecs);
 }
@@ -737,11 +723,10 @@ QString formatSecTime(qint64 secs) {
     return formatUsecTime(secs * 1000000);
 }
 
-
 QString formatSecondsElapsed(float seconds) {
     QString result;
 
-    const float SECONDS_IN_DAY = 60.0f * 60.0f * 24.0f;        
+    const float SECONDS_IN_DAY = 60.0f * 60.0f * 24.0f;
     if (seconds > SECONDS_IN_DAY) {
         float days = floor(seconds / SECONDS_IN_DAY);
         float rest = seconds - (days * SECONDS_IN_DAY);
@@ -762,13 +747,13 @@ bool similarStrings(const QString& stringA, const QString& stringB) {
     QStringList aWords = stringA.split(" ");
     QStringList bWords = stringB.split(" ");
     float aWordsInB = 0.0f;
-    foreach(QString aWord, aWords) {
+    foreach (QString aWord, aWords) {
         if (bWords.contains(aWord)) {
             aWordsInB += 1.0f;
         }
     }
     float bWordsInA = 0.0f;
-    foreach(QString bWord, bWords) {
+    foreach (QString bWord, bWords) {
         if (aWords.contains(bWord)) {
             bWordsInA += 1.0f;
         }
@@ -816,14 +801,13 @@ void printSystemInformation() {
     qCDebug(shared).noquote() << "\tProcessor Architecture: " << si.wProcessorArchitecture;
     qCDebug(shared).noquote() << "\tProcessor Type: " << si.dwProcessorType;
     qCDebug(shared).noquote() << "\tProcessor Level: " << si.wProcessorLevel;
-    qCDebug(shared).noquote() << "\tProcessor Revision: "
-                       << QString("0x%1").arg(si.wProcessorRevision, 4, 16, QChar('0'));
+    qCDebug(shared).noquote() << "\tProcessor Revision: " << QString("0x%1").arg(si.wProcessorRevision, 4, 16, QChar('0'));
     qCDebug(shared).noquote() << "\tNumber of Processors: " << si.dwNumberOfProcessors;
     qCDebug(shared).noquote() << "\tPage size: " << si.dwPageSize << " Bytes";
     qCDebug(shared).noquote() << "\tMin Application Address: "
-                       << QString("0x%1").arg(qulonglong(si.lpMinimumApplicationAddress), 16, 16, QChar('0'));
+                              << QString("0x%1").arg(qulonglong(si.lpMinimumApplicationAddress), 16, 16, QChar('0'));
     qCDebug(shared).noquote() << "\tMax Application Address: "
-                       << QString("0x%1").arg(qulonglong(si.lpMaximumApplicationAddress), 16, 16, QChar('0'));
+                              << QString("0x%1").arg(qulonglong(si.lpMaximumApplicationAddress), 16, 16, QChar('0'));
 
     const double BYTES_TO_MEGABYTE = 1.0 / (1024 * 1024);
 
@@ -831,8 +815,7 @@ void printSystemInformation() {
     MEMORYSTATUSEX ms;
     ms.dwLength = sizeof(ms);
     if (GlobalMemoryStatusEx(&ms)) {
-        qCDebug(shared).noquote()
-            << QString("\tCurrent System Memory Usage: %1%").arg(ms.dwMemoryLoad);
+        qCDebug(shared).noquote() << QString("\tCurrent System Memory Usage: %1%").arg(ms.dwMemoryLoad);
         qCDebug(shared).noquote()
             << QString("\tAvail Physical Memory: %1 MB").arg(ms.ullAvailPhys * BYTES_TO_MEGABYTE, 20, 'f', 2);
         qCDebug(shared).noquote()
@@ -861,14 +844,11 @@ void printSystemInformation() {
 
     qCDebug(shared) << "Environment Variables";
     // List of env variables to include in the log. For privacy reasons we don't send all env variables.
-    const QStringList envWhitelist = {
-        "QTWEBENGINE_REMOTE_DEBUGGING"
-    };
+    const QStringList envWhitelist = { "QTWEBENGINE_REMOTE_DEBUGGING" };
     auto envVariables = QProcessEnvironment::systemEnvironment();
-    for (auto& env : envWhitelist)
-    {
-        qCDebug(shared).noquote().nospace() << "\t" <<
-            (envVariables.contains(env) ? " = " + envVariables.value(env) : " NOT FOUND");
+    for (auto& env : envWhitelist) {
+        qCDebug(shared).noquote().nospace()
+            << "\t" << (envVariables.contains(env) ? " = " + envVariables.value(env) : " NOT FOUND");
     }
 }
 
@@ -883,7 +863,6 @@ bool getMemoryInfo(MemoryInfo& info) {
     info.totalMemoryBytes = ms.ullTotalPhys;
     info.availMemoryBytes = ms.ullAvailPhys;
     info.usedMemoryBytes = ms.ullTotalPhys - ms.ullAvailPhys;
-
 
     PROCESS_MEMORY_COUNTERS_EX pmc;
     if (!GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pmc), sizeof(pmc))) {
@@ -901,12 +880,9 @@ bool getMemoryInfo(MemoryInfo& info) {
 // Largely taken from: https://msdn.microsoft.com/en-us/library/windows/desktop/ms683194(v=vs.85).aspx
 
 #ifdef Q_OS_WIN
-using LPFN_GLPI = BOOL(WINAPI*)(
-    PSYSTEM_LOGICAL_PROCESSOR_INFORMATION,
-    PDWORD);
+using LPFN_GLPI = BOOL(WINAPI*)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION, PDWORD);
 
-DWORD CountSetBits(ULONG_PTR bitMask)
-{
+DWORD CountSetBits(ULONG_PTR bitMask) {
     DWORD LSHIFT = sizeof(ULONG_PTR) * 8 - 1;
     DWORD bitSetCount = 0;
     ULONG_PTR bitTest = (ULONG_PTR)1 << LSHIFT;
@@ -922,7 +898,6 @@ DWORD CountSetBits(ULONG_PTR bitMask)
 #endif
 
 bool getProcessorInfo(ProcessorInfo& info) {
-
 #ifdef Q_OS_WIN
     LPFN_GLPI glpi;
     bool done = false;
@@ -939,9 +914,7 @@ bool getProcessorInfo(ProcessorInfo& info) {
     DWORD byteOffset = 0;
     PCACHE_DESCRIPTOR Cache;
 
-    glpi = (LPFN_GLPI)GetProcAddress(
-        GetModuleHandle(TEXT("kernel32")),
-        "GetLogicalProcessorInformation");
+    glpi = (LPFN_GLPI)GetProcAddress(GetModuleHandle(TEXT("kernel32")), "GetLogicalProcessorInformation");
     if (nullptr == glpi) {
         qCDebug(shared) << "GetLogicalProcessorInformation is not supported.";
         return false;
@@ -956,8 +929,7 @@ bool getProcessorInfo(ProcessorInfo& info) {
                     free(buffer);
                 }
 
-                buffer = (PSYSTEM_LOGICAL_PROCESSOR_INFORMATION)malloc(
-                    returnLength);
+                buffer = (PSYSTEM_LOGICAL_PROCESSOR_INFORMATION)malloc(returnLength);
 
                 if (NULL == buffer) {
                     qCDebug(shared) << "Error: Allocation failure";
@@ -976,38 +948,38 @@ bool getProcessorInfo(ProcessorInfo& info) {
 
     while (byteOffset + sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION) <= returnLength) {
         switch (ptr->Relationship) {
-        case RelationNumaNode:
-            // Non-NUMA systems report a single record of this type.
-            numaNodeCount++;
-            break;
+            case RelationNumaNode:
+                // Non-NUMA systems report a single record of this type.
+                numaNodeCount++;
+                break;
 
-        case RelationProcessorCore:
-            processorCoreCount++;
+            case RelationProcessorCore:
+                processorCoreCount++;
 
-            // A hyperthreaded core supplies more than one logical processor.
-            logicalProcessorCount += CountSetBits(ptr->ProcessorMask);
-            break;
+                // A hyperthreaded core supplies more than one logical processor.
+                logicalProcessorCount += CountSetBits(ptr->ProcessorMask);
+                break;
 
-        case RelationCache:
-            // Cache data is in ptr->Cache, one CACHE_DESCRIPTOR structure for each cache. 
-            Cache = &ptr->Cache;
-            if (Cache->Level == 1) {
-                processorL1CacheCount++;
-            } else if (Cache->Level == 2) {
-                processorL2CacheCount++;
-            } else if (Cache->Level == 3) {
-                processorL3CacheCount++;
-            }
-            break;
+            case RelationCache:
+                // Cache data is in ptr->Cache, one CACHE_DESCRIPTOR structure for each cache.
+                Cache = &ptr->Cache;
+                if (Cache->Level == 1) {
+                    processorL1CacheCount++;
+                } else if (Cache->Level == 2) {
+                    processorL2CacheCount++;
+                } else if (Cache->Level == 3) {
+                    processorL3CacheCount++;
+                }
+                break;
 
-        case RelationProcessorPackage:
-            // Logical processors share a physical package.
-            processorPackageCount++;
-            break;
+            case RelationProcessorPackage:
+                // Logical processors share a physical package.
+                processorPackageCount++;
+                break;
 
-        default:
-            qCDebug(shared) << "\nError: Unsupported LOGICAL_PROCESSOR_RELATIONSHIP value.\n";
-            break;
+            default:
+                qCDebug(shared) << "\nError: Unsupported LOGICAL_PROCESSOR_RELATIONSHIP value.\n";
+                break;
         }
         byteOffset += sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION);
         ptr++;
@@ -1018,10 +990,8 @@ bool getProcessorInfo(ProcessorInfo& info) {
     qCDebug(shared) << "Number of physical processor packages:" << processorPackageCount;
     qCDebug(shared) << "Number of processor cores:" << processorCoreCount;
     qCDebug(shared) << "Number of logical processors:" << logicalProcessorCount;
-    qCDebug(shared) << "Number of processor L1/L2/L3 caches:"
-        << processorL1CacheCount
-        << "/" << processorL2CacheCount
-        << "/" << processorL3CacheCount;
+    qCDebug(shared) << "Number of processor L1/L2/L3 caches:" << processorL1CacheCount << "/" << processorL2CacheCount << "/"
+                    << processorL3CacheCount;
 
     info.numPhysicalProcessorPackages = processorPackageCount;
     info.numProcessorCores = processorCoreCount;
@@ -1037,7 +1007,6 @@ bool getProcessorInfo(ProcessorInfo& info) {
 
     return false;
 }
-
 
 const QString& getInterfaceSharedMemoryName() {
     static const QString applicationName = "High Fidelity Interface - " + qgetenv("USERNAME");
@@ -1161,7 +1130,7 @@ void setupHifiApplication(QString applicationName) {
     // Windows tends to hold onto log lines until it has a sizeable buffer
     // This makes the log feel unresponsive and trap useful log data in the log buffer
     // when a crash occurs.
-    //Force windows to flush the buffer on each new line character to avoid this.
+    // Force windows to flush the buffer on each new line character to avoid this.
     setvbuf(stdout, NULL, _IOLBF, 0);
 #endif
 
@@ -1178,11 +1147,12 @@ QString getLastErrorAsString() {
 
     LPSTR messageBuffer = nullptr;
     size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-        nullptr, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, nullptr);
+                                 nullptr, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0,
+                                 nullptr);
 
     auto message = QString::fromLocal8Bit(messageBuffer, (int)size);
 
-    //Free the buffer.
+    // Free the buffer.
     LocalFree(messageBuffer);
 
     return message;

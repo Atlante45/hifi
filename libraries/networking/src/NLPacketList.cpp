@@ -13,18 +13,15 @@
 
 #include "udt/Packet.h"
 
-
-std::unique_ptr<NLPacketList> NLPacketList::create(PacketType packetType, QByteArray extendedHeader,
-                                                   bool isReliable, bool isOrdered) {
-    auto nlPacketList = std::unique_ptr<NLPacketList>(new NLPacketList(packetType, extendedHeader,
-                                                                       isReliable, isOrdered));
+std::unique_ptr<NLPacketList> NLPacketList::create(PacketType packetType, QByteArray extendedHeader, bool isReliable,
+                                                   bool isOrdered) {
+    auto nlPacketList = std::unique_ptr<NLPacketList>(new NLPacketList(packetType, extendedHeader, isReliable, isOrdered));
     nlPacketList->open(WriteOnly);
     return nlPacketList;
 }
 
 NLPacketList::NLPacketList(PacketType packetType, QByteArray extendedHeader, bool isReliable, bool isOrdered) :
-    PacketList(packetType, extendedHeader, isReliable, isOrdered)
-{
+    PacketList(packetType, extendedHeader, isReliable, isOrdered) {
 }
 
 NLPacketList::NLPacketList(PacketList&& other) : PacketList(std::move(other)) {

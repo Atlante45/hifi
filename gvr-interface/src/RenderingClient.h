@@ -9,7 +9,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef hifi_RenderingClient_h
 #define hifi_RenderingClient_h
 
@@ -26,27 +25,26 @@ class RenderingClient : public Client {
     Q_OBJECT
 public:
     RenderingClient(QObject* parent = 0, const QString& launchURLString = QString());
-    
+
     const glm::vec3& getPosition() const { return _position; }
     const glm::quat& getOrientation() const { return _orientation; }
     void setOrientation(const glm::quat& orientation) { _orientation = orientation; }
-    
+
     static glm::vec3 getPositionForAudio() { return _instance->getPosition(); }
     static glm::quat getOrientationForAudio() { return _instance->getOrientation(); }
-    
+
     virtual void cleanupBeforeQuit();
-    
+
 private slots:
-    void goToLocation(const glm::vec3& newPosition,
-                      bool hasOrientationChange, const glm::quat& newOrientation,
+    void goToLocation(const glm::vec3& newPosition, bool hasOrientationChange, const glm::quat& newOrientation,
                       bool shouldFaceLocation);
     void sendAvatarPacket();
-    
+
 private:
     virtual void processVerifiedPacket(const HifiSockAddr& senderSockAddr, const QByteArray& incomingPacket);
-    
+
     static RenderingClient* _instance;
-    
+
     glm::vec3 _position;
     glm::quat _orientation;
 

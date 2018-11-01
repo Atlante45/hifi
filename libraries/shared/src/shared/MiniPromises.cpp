@@ -13,13 +13,13 @@
 int MiniPromise::metaTypeID = qRegisterMetaType<MiniPromise::Promise>("MiniPromise::Promise");
 
 namespace {
-    void promiseFromScriptValue(const QScriptValue& object, MiniPromise::Promise& promise) {
-        Q_ASSERT(false);
-    }
-    QScriptValue promiseToScriptValue(QScriptEngine *engine, const MiniPromise::Promise& promise) {
-        return engine->newQObject(promise.get());
-    }
+void promiseFromScriptValue(const QScriptValue& object, MiniPromise::Promise& promise) {
+    Q_ASSERT(false);
 }
+QScriptValue promiseToScriptValue(QScriptEngine* engine, const MiniPromise::Promise& promise) {
+    return engine->newQObject(promise.get());
+}
+} // namespace
 void MiniPromise::registerMetaTypes(QObject* engine) {
     auto scriptEngine = qobject_cast<QScriptEngine*>(engine);
     qScriptRegisterMetaType(scriptEngine, promiseToScriptValue, promiseFromScriptValue);

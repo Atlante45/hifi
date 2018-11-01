@@ -8,8 +8,8 @@
 
 #include "TraceTests.h"
 
-#include <QtTest/QtTest>
 #include <QtGui/QDesktopServices>
+#include <QtTest/QtTest>
 
 #include <Profile.h>
 
@@ -44,4 +44,3 @@ void TraceTests::testTraceSerialization() {
     }
     qDebug() << "Done";
 }
-

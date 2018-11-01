@@ -14,9 +14,9 @@
 #include <chrono>
 #include <thread>
 
+#include <time.h>
 #include <cstdio>
 #include <fstream>
-#include <time.h>
 
 #include <QDateTime>
 #include <QDebug>
@@ -24,17 +24,17 @@
 #include <QDirIterator>
 #include <QFile>
 #include <QJsonArray>
-#include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QRegExp>
 
 #include <NumericalConstants.h>
-#include <PerfStat.h>
 #include <PathUtils.h>
+#include <PerfStat.h>
 
+#include "OctreeDataUtils.h"
 #include "OctreeLogging.h"
 #include "OctreeUtils.h"
-#include "OctreeDataUtils.h"
 
 constexpr std::chrono::seconds OctreePersistThread::DEFAULT_PERSIST_INTERVAL { 30 };
 constexpr std::chrono::milliseconds TIME_BETWEEN_PROCESSING { 10 };
@@ -52,8 +52,7 @@ OctreePersistThread::OctreePersistThread(OctreePointer tree, const QString& file
     _loadTimeUSecs(0),
     _debugTimestampNow(debugTimestampNow),
     _lastTimeDebug(0),
-    _persistAsFileType(persistAsFileType)
-{
+    _persistAsFileType(persistAsFileType) {
     // in case the persist filename has an extension that doesn't match the file type
     QString sansExt = fileNameWithoutExtension(_filename, PERSIST_EXTENSIONS);
     _filename = sansExt + "." + _persistAsFileType;
@@ -105,7 +104,7 @@ void OctreePersistThread::handleOctreeDataFileReply(QSharedPointer<ReceivedMessa
         qDebug() << "Got OctreeDataFileReply, new data sent";
     } else {
         qDebug() << "Got OctreeDataFileReply, current entity data is sufficient";
-        
+
         OctreeUtils::RawEntityData data;
         qCDebug(octree) << "Reading octree data from" << _filename;
         if (data.readOctreeDataInfoFromFile(_filename)) {
@@ -156,15 +155,13 @@ void OctreePersistThread::handleOctreeDataFileReply(QSharedPointer<ReceivedMessa
 
     bool wantDebug = false;
     if (wantDebug) {
-        double usecPerGet = (double)OctreeElement::getGetChildAtIndexTime() 
-                                / (double)OctreeElement::getGetChildAtIndexCalls();
+        double usecPerGet = (double)OctreeElement::getGetChildAtIndexTime() / (double)OctreeElement::getGetChildAtIndexCalls();
         qCDebug(octree) << "getChildAtIndexCalls=" << OctreeElement::getGetChildAtIndexCalls()
-                << " getChildAtIndexTime=" << OctreeElement::getGetChildAtIndexTime() << " perGet=" << usecPerGet;
+                        << " getChildAtIndexTime=" << OctreeElement::getGetChildAtIndexTime() << " perGet=" << usecPerGet;
 
-        double usecPerSet = (double)OctreeElement::getSetChildAtIndexTime() 
-                                / (double)OctreeElement::getSetChildAtIndexCalls();
+        double usecPerSet = (double)OctreeElement::getSetChildAtIndexTime() / (double)OctreeElement::getSetChildAtIndexCalls();
         qCDebug(octree) << "setChildAtIndexCalls=" << OctreeElement::getSetChildAtIndexCalls()
-                << " setChildAtIndexTime=" << OctreeElement::getSetChildAtIndexTime() << " perSet=" << usecPerSet;
+                        << " setChildAtIndexTime=" << OctreeElement::getSetChildAtIndexTime() << " perSet=" << usecPerSet;
     }
 
     _initialLoadComplete = true;
@@ -181,11 +178,11 @@ void OctreePersistThread::handleOctreeDataFileReply(QSharedPointer<ReceivedMessa
     emit loadCompleted();
 }
 
-
 QString OctreePersistThread::getPersistFileMimeType() const {
     if (_persistAsFileType == "json") {
         return "application/json";
-    } if (_persistAsFileType == "json.gz") {
+    }
+    if (_persistAsFileType == "json.gz") {
         return "application/zip";
     }
     return "";
@@ -265,7 +262,8 @@ void OctreePersistThread::cleanupOldReplacementBackups() {
         auto absPath = fileInfo.absoluteFilePath();
         qDebug() << "  Found:" << absPath;
         if (filenameRegex.exactMatch(absPath)) {
-            if (count >= MAX_OCTREE_REPLACEMENT_BACKUP_FILES_COUNT || totalSize > MAX_OCTREE_REPLACEMENT_BACKUP_FILES_SIZE_BYTES) {
+            if (count >= MAX_OCTREE_REPLACEMENT_BACKUP_FILES_COUNT ||
+                totalSize > MAX_OCTREE_REPLACEMENT_BACKUP_FILES_SIZE_BYTES) {
                 qDebug() << "  Removing:" << absPath;
                 QFile backup(absPath);
                 if (backup.remove()) {
@@ -283,7 +281,6 @@ void OctreePersistThread::cleanupOldReplacementBackups() {
 
 void OctreePersistThread::persist() {
     if (_tree->isDirty() && _initialLoadComplete) {
-
         _tree->withWriteLock([&] {
             qCDebug(octree) << "pruning Octree before saving...";
             _tree->pruneTree();

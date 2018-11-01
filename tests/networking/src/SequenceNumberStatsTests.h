@@ -14,8 +14,8 @@
 
 #include <QtTest/QtTest>
 
-#include "SequenceNumberStatsTests.h"
 #include "SequenceNumberStats.h"
+#include "SequenceNumberStatsTests.h"
 
 class SequenceNumberStatsTests : public QObject {
     Q_OBJECT

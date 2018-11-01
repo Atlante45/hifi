@@ -76,9 +76,7 @@ void AudioMixerSlavePool::processPackets(ConstIter begin, ConstIter end) {
 
 void AudioMixerSlavePool::mix(ConstIter begin, ConstIter end, unsigned int frame, int numToRetain) {
     _function = &AudioMixerSlave::mix;
-    _configure = [=](AudioMixerSlave& slave) {
-        slave.configureMix(_begin, _end, frame, numToRetain);
-    };
+    _configure = [=](AudioMixerSlave& slave) { slave.configureMix(_begin, _end, frame, numToRetain); };
 
     run(begin, end);
 }
@@ -89,9 +87,7 @@ void AudioMixerSlavePool::run(ConstIter begin, ConstIter end) {
 
 #ifdef AUDIO_SINGLE_THREADED
     _configure(slave);
-    std::for_each(begin, end, [&](const SharedNodePointer& node) {
-        _function(slave, node);
-    });
+    std::for_each(begin, end, [&](const SharedNodePointer& node) { _function(slave, node); });
 #else
     // fill the queue
     std::for_each(_begin, _end, [&](const SharedNodePointer& node) {

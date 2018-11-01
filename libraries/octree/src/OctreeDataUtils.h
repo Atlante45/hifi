@@ -13,16 +13,16 @@
 
 #include <udt/PacketHeaders.h>
 
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QUuid>
-#include <QJsonArray>
 
 namespace OctreeUtils {
 
 using Version = int64_t;
 constexpr Version INITIAL_VERSION = 0;
 
-//using PacketType = uint8_t;
+// using PacketType = uint8_t;
 
 // RawOctreeData is an intermediate format between JSON and a fully deserialized Octree.
 class RawOctreeData {
@@ -33,8 +33,8 @@ public:
 
     virtual PacketType dataPacketType() const;
 
-    virtual void readSubclassData(const QJsonObject& root) { }
-    virtual void writeSubclassData(QJsonObject& root) const { }
+    virtual void readSubclassData(const QJsonObject& root) {}
+    virtual void writeSubclassData(QJsonObject& root) const {}
 
     void resetIdAndVersion();
     QByteArray toByteArray();
@@ -53,6 +53,6 @@ class RawEntityData : public RawOctreeData {
     QJsonArray entityData;
 };
 
-}
+} // namespace OctreeUtils
 
 #endif // hifi_OctreeDataUtils_h

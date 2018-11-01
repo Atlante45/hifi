@@ -11,9 +11,9 @@
 #ifndef hifi_AnimSkeleton
 #define hifi_AnimSkeleton
 
-#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <vector>
 
 #include <FBXReader.h>
 #include "AnimPose.h"

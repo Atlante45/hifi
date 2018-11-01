@@ -31,8 +31,7 @@ Overlay::Overlay() :
     _alphaPulse(0.0f),
     _colorPulse(0.0f),
     _color(DEFAULT_OVERLAY_COLOR),
-    _visible(true)
-{
+    _visible(true) {
 }
 
 Overlay::Overlay(const Overlay* overlay) :
@@ -48,8 +47,7 @@ Overlay::Overlay(const Overlay* overlay) :
     _alphaPulse(overlay->_alphaPulse),
     _colorPulse(overlay->_colorPulse),
     _color(overlay->_color),
-    _visible(overlay->_visible)
-{
+    _visible(overlay->_visible) {
 }
 
 Overlay::~Overlay() {
@@ -94,23 +92,23 @@ void Overlay::setProperties(const QVariantMap& properties) {
 
 // JSDoc for copying to @typedefs of overlay types that inherit Overlay.
 /**jsdoc
-  * @property {string} type=TODO - Has the value <code>"TODO"</code>. <em>Read-only.</em>
-  * @property {Color} color=255,255,255 - The color of the overlay.
-  * @property {number} alpha=0.7 - The opacity of the overlay, <code>0.0</code> - <code>1.0</code>.
-  * @property {number} pulseMax=0 - The maximum value of the pulse multiplier.
-  * @property {number} pulseMin=0 - The minimum value of the pulse multiplier.
-  * @property {number} pulsePeriod=1 - The duration of the color and alpha pulse, in seconds. A pulse multiplier value goes from 
-  *     <code>pulseMin</code> to <code>pulseMax</code>, then <code>pulseMax</code> to <code>pulseMin</code> in one period.
-  * @property {number} alphaPulse=0 - If non-zero, the alpha of the overlay is pulsed: the alpha value is multiplied by the 
-  *     current pulse multiplier value each frame. If > 0 the pulse multiplier is applied in phase with the pulse period; if < 0 
-  *     the pulse multiplier is applied out of phase with the pulse period. (The magnitude of the property isn't otherwise
-  *     used.)
-  * @property {number} colorPulse=0 - If non-zero, the color of the overlay is pulsed: the color value is multiplied by the 
-  *     current pulse multiplier value each frame. If > 0 the pulse multiplier is applied in phase with the pulse period; if < 0 
-  *     the pulse multiplier is applied out of phase with the pulse period. (The magnitude of the property isn't otherwise
-  *     used.)
-  * @property {boolean} visible=true - If <code>true</code>, the overlay is rendered, otherwise it is not rendered.
-  */
+ * @property {string} type=TODO - Has the value <code>"TODO"</code>. <em>Read-only.</em>
+ * @property {Color} color=255,255,255 - The color of the overlay.
+ * @property {number} alpha=0.7 - The opacity of the overlay, <code>0.0</code> - <code>1.0</code>.
+ * @property {number} pulseMax=0 - The maximum value of the pulse multiplier.
+ * @property {number} pulseMin=0 - The minimum value of the pulse multiplier.
+ * @property {number} pulsePeriod=1 - The duration of the color and alpha pulse, in seconds. A pulse multiplier value goes from
+ *     <code>pulseMin</code> to <code>pulseMax</code>, then <code>pulseMax</code> to <code>pulseMin</code> in one period.
+ * @property {number} alphaPulse=0 - If non-zero, the alpha of the overlay is pulsed: the alpha value is multiplied by the
+ *     current pulse multiplier value each frame. If > 0 the pulse multiplier is applied in phase with the pulse period; if < 0
+ *     the pulse multiplier is applied out of phase with the pulse period. (The magnitude of the property isn't otherwise
+ *     used.)
+ * @property {number} colorPulse=0 - If non-zero, the color of the overlay is pulsed: the color value is multiplied by the
+ *     current pulse multiplier value each frame. If > 0 the pulse multiplier is applied in phase with the pulse period; if < 0
+ *     the pulse multiplier is applied out of phase with the pulse period. (The magnitude of the property isn't otherwise
+ *     used.)
+ * @property {boolean} visible=true - If <code>true</code>, the overlay is rendered, otherwise it is not rendered.
+ */
 QVariant Overlay::getProperty(const QString& property) {
     if (property == "type") {
         return QVariant(getType());
@@ -145,7 +143,7 @@ QVariant Overlay::getProperty(const QString& property) {
 
 glm::u8vec3 Overlay::getColor() {
     if (_colorPulse == 0.0f) {
-        return _color; 
+        return _color;
     }
 
     float pulseLevel = updatePulse();
@@ -164,7 +162,7 @@ glm::u8vec3 Overlay::getColor() {
 
 float Overlay::getAlpha() {
     if (_alphaPulse == 0.0f) {
-        return _alpha; 
+        return _alpha;
     }
     float pulseLevel = updatePulse();
     return (_alphaPulse >= 0.0f) ? _alpha * pulseLevel : _alpha * (1.0f - pulseLevel);
@@ -177,7 +175,7 @@ float Overlay::updatePulse() {
     }
     quint64 now = usecTimestampNow();
     quint64 elapsedUSecs = (now - _lastPulseUpdate);
-    float elapsedSeconds =  (float)elapsedUSecs / (float)USECS_PER_SECOND;
+    float elapsedSeconds = (float)elapsedUSecs / (float)USECS_PER_SECOND;
     float elapsedPeriods = elapsedSeconds / _pulsePeriod;
 
     // we can safely remove any "full" periods, since those just rotate us back
@@ -185,7 +183,7 @@ float Overlay::updatePulse() {
     elapsedPeriods = fmod(elapsedPeriods, 1.0f);
     _lastPulseUpdate = now;
 
-    float pulseDistance =  (_pulseMax - _pulseMin);
+    float pulseDistance = (_pulseMax - _pulseMin);
     float pulseDistancePerPeriod = pulseDistance * 2.0f;
 
     float pulseDelta = _pulseDirection * pulseDistancePerPeriod * elapsedPeriods;
@@ -219,7 +217,7 @@ QScriptValue OverlayIDtoScriptValue(QScriptEngine* engine, const OverlayID& id) 
     return quuidToScriptValue(engine, id);
 }
 
-void OverlayIDfromScriptValue(const QScriptValue &object, OverlayID& id) {
+void OverlayIDfromScriptValue(const QScriptValue& object, OverlayID& id) {
     quuidFromScriptValue(object, id);
 }
 

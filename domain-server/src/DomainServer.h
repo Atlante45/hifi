@@ -12,6 +12,7 @@
 #ifndef hifi_DomainServer_h
 #define hifi_DomainServer_h
 
+#include <QAbstractNativeEventFilter>
 #include <QtCore/QCoreApplication>
 #include <QtCore/QHash>
 #include <QtCore/QJsonObject>
@@ -20,19 +21,18 @@
 #include <QtCore/QStringList>
 #include <QtCore/QThread>
 #include <QtCore/QUrl>
-#include <QAbstractNativeEventFilter>
 
 #include <Assignment.h>
 #include <HTTPSConnection.h>
 #include <LimitedNodeList.h>
 
 #include "AssetsBackupHandler.h"
+#include "DomainContentBackupManager.h"
 #include "DomainGatekeeper.h"
 #include "DomainMetadata.h"
 #include "DomainServerSettingsManager.h"
 #include "DomainServerWebSessionData.h"
 #include "WalletTransaction.h"
-#include "DomainContentBackupManager.h"
 
 #include "PendingAssignedNodeData.h"
 
@@ -48,10 +48,7 @@ using SubnetList = std::vector<Subnet>;
 
 const int INVALID_ICE_LOOKUP_ID = -1;
 
-enum ReplicationServerDirection {
-    Upstream,
-    Downstream
-};
+enum ReplicationServerDirection { Upstream, Downstream };
 
 class DomainServer : public QCoreApplication, public HTTPSRequestHandler {
     Q_OBJECT
@@ -61,11 +58,7 @@ public:
 
     static void parseCommandLine(int argc, char* argv[]);
 
-    enum DomainType {
-        NonMetaverse,
-        MetaverseDomain,
-        MetaverseTemporaryDomain
-    };
+    enum DomainType { NonMetaverse, MetaverseDomain, MetaverseTemporaryDomain };
 
     static int const EXIT_CODE_REBOOT;
 
@@ -109,7 +102,7 @@ private slots:
     void sendHeartbeatToMetaverse() { sendHeartbeatToMetaverse(QString()); }
     void sendHeartbeatToIceServer();
 
-    void handleConnectedNode(SharedNodePointer newNode); 
+    void handleConnectedNode(SharedNodePointer newNode);
     void handleTempDomainSuccess(QNetworkReply* requestReply);
     void handleTempDomainError(QNetworkReply* requestReply);
 
@@ -209,12 +202,9 @@ private:
 
     HTTPSConnection* connectionFromReplyWithState(QNetworkReply* reply);
 
-    bool forwardMetaverseAPIRequest(HTTPConnection* connection,
-                                    const QString& metaversePath,
-                                    const QString& requestSubobject,
-                                    std::initializer_list<QString> requiredData = { },
-                                    std::initializer_list<QString> optionalData = { },
-                                    bool requireAccessToken = true);
+    bool forwardMetaverseAPIRequest(HTTPConnection* connection, const QString& metaversePath, const QString& requestSubobject,
+                                    std::initializer_list<QString> requiredData = {},
+                                    std::initializer_list<QString> optionalData = {}, bool requireAccessToken = true);
 
     SubnetList _acSubnetWhitelist;
 
@@ -283,6 +273,5 @@ private:
 
     QThread _assetClientThread;
 };
-
 
 #endif // hifi_DomainServer_h

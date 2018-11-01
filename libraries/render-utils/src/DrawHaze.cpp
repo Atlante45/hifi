@@ -17,19 +17,19 @@
 #include <graphics/ShaderConstants.h>
 #include "render-utils/ShaderConstants.h"
 
-#include "StencilMaskPass.h"
 #include "FramebufferCache.h"
 #include "LightStage.h"
+#include "StencilMaskPass.h"
 
 namespace ru {
-    using render_utils::slot::texture::Texture;
-    using render_utils::slot::buffer::Buffer;
-}
+using render_utils::slot::buffer::Buffer;
+using render_utils::slot::texture::Texture;
+} // namespace ru
 
 namespace gr {
-    using graphics::slot::texture::Texture;
-    using graphics::slot::buffer::Buffer;
-}
+using graphics::slot::buffer::Buffer;
+using graphics::slot::texture::Texture;
+} // namespace gr
 
 void DrawHaze::run(const render::RenderContextPointer& renderContext, const Inputs& inputs) {
     const auto hazeFrame = inputs.get0();
@@ -57,8 +57,7 @@ void DrawHaze::run(const render::RenderContextPointer& renderContext, const Inpu
         gpu::ShaderPointer program = gpu::Shader::createProgram(shader::render_utils::program::haze);
         gpu::StatePointer state = gpu::StatePointer(new gpu::State());
 
-        state->setBlendFunction(true,
-                                gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
+        state->setBlendFunction(true, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
                                 gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
 
         // Mask out haze on the tablet

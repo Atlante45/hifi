@@ -56,7 +56,8 @@
 
 // <!
 
-namespace gpu { namespace slot {
+namespace gpu {
+namespace slot {
 
 namespace buffer {
 enum Buffer {
@@ -77,7 +78,7 @@ enum Texture {
 namespace storage {
 enum Storage {
     ObjectTransforms = GPU_STORAGE_TRANSFORM_OBJECT,
-}; 
+};
 } // namespace storage
 
 namespace attr {
@@ -98,7 +99,8 @@ enum Attribute {
 };
 } // namespace attr
 
-} } // namespace gpu::slot
+} // namespace slot
+} // namespace gpu
 
 // !>
 

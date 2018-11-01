@@ -16,12 +16,12 @@
 
 class AABoxCubeTests : public QObject {
     Q_OBJECT
-    
+
 private slots:
-    void raycastOutHitsXMinFace ();
-    void raycastOutHitsXMaxFace ();
-    void raycastInHitsXMinFace ();
-    
+    void raycastOutHitsXMinFace();
+    void raycastOutHitsXMaxFace();
+    void raycastInHitsXMinFace();
+
     // TODO: Add more unit tests!
     // (do we need this? Currently no tests for no-intersection or non-orthogonal rays)
 };

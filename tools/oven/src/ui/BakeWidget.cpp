@@ -15,10 +15,7 @@
 
 #include "../OvenGUIApplication.h"
 
-BakeWidget::BakeWidget(QWidget* parent, Qt::WindowFlags flags) :
-    QWidget(parent, flags)
-{
-
+BakeWidget::BakeWidget(QWidget* parent, Qt::WindowFlags flags) : QWidget(parent, flags) {
 }
 
 BakeWidget::~BakeWidget() {

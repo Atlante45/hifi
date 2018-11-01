@@ -12,8 +12,8 @@
 #define hifi_AnimClip_h
 
 #include <string>
-#include "AnimationCache.h"
 #include "AnimNode.h"
+#include "AnimationCache.h"
 
 // Playback a single animation timeline.
 // url determines the location of the fbx file to use within this clip.
@@ -25,10 +25,12 @@ class AnimClip : public AnimNode {
 public:
     friend class AnimTests;
 
-    AnimClip(const QString& id, const QString& url, float startFrame, float endFrame, float timeScale, bool loopFlag, bool mirrorFlag);
+    AnimClip(const QString& id, const QString& url, float startFrame, float endFrame, float timeScale, bool loopFlag,
+             bool mirrorFlag);
     virtual ~AnimClip() override;
 
-    virtual const AnimPoseVec& evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) override;
+    virtual const AnimPoseVec& evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                        AnimVariantMap& triggersOut) override;
 
     void setStartFrameVar(const QString& startFrameVar) { _startFrameVar = startFrameVar; }
     void setEndFrameVar(const QString& endFrameVar) { _endFrameVar = endFrameVar; }
@@ -54,8 +56,8 @@ public:
     float getFrame() const { return _frame; }
 
     void loadURL(const QString& url);
-protected:
 
+protected:
     virtual void setCurrentFrameInternal(float frame) override;
 
     void copyFromNetworkAnim();

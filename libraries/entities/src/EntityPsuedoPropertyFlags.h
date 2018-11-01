@@ -18,23 +18,23 @@
 #include <type_traits>
 
 namespace EntityPsuedoPropertyFlag {
-    enum {
-        None = 0,
-        FlagsActive,
-        ID,
-        Type,
-        Created,
-        Age,
-        AgeAsText,
-        LastEdited,
-        BoundingBox,
-        OriginalTextures,
-        RenderInfo,
-        ClientOnly,
-        OwningAvatarID,
+enum {
+    None = 0,
+    FlagsActive,
+    ID,
+    Type,
+    Created,
+    Age,
+    AgeAsText,
+    LastEdited,
+    BoundingBox,
+    OriginalTextures,
+    RenderInfo,
+    ClientOnly,
+    OwningAvatarID,
 
-        NumFlags
-    };
+    NumFlags
+};
 }
 typedef std::bitset<EntityPsuedoPropertyFlag::NumFlags> EntityPsuedoPropertyFlags;
 

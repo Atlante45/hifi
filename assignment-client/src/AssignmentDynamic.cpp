@@ -24,7 +24,7 @@ AssignmentDynamic::~AssignmentDynamic() {
 }
 
 void AssignmentDynamic::removeFromSimulation(EntitySimulationPointer simulation) const {
-    withReadLock([&]{
+    withReadLock([&] {
         simulation->removeDynamic(_id);
         simulation->applyDynamicChanges();
     });
@@ -32,16 +32,12 @@ void AssignmentDynamic::removeFromSimulation(EntitySimulationPointer simulation)
 
 QByteArray AssignmentDynamic::serialize() const {
     QByteArray result;
-    withReadLock([&]{
-        result = _data;
-    });
+    withReadLock([&] { result = _data; });
     return result;
 }
 
 void AssignmentDynamic::deserialize(QByteArray serializedArguments) {
-    withWriteLock([&]{
-        _data = serializedArguments;
-    });
+    withWriteLock([&] { _data = serializedArguments; });
 }
 
 bool AssignmentDynamic::updateArguments(QVariantMap arguments) {

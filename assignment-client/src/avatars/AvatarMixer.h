@@ -15,8 +15,8 @@
 #ifndef hifi_AvatarMixer_h
 #define hifi_AvatarMixer_h
 
-#include <shared/RateCounter.h>
 #include <PortableHighResolutionClock.h>
+#include <shared/RateCounter.h>
 
 #include <ThreadedAssignment.h>
 #include "AvatarMixerClientData.h"
@@ -30,8 +30,7 @@ public:
     AvatarMixer(ReceivedMessage& message);
 
     static bool shouldReplicateTo(const Node& from, const Node& to) {
-        return to.getType() == NodeType::DownstreamAvatarMixer &&
-               to.getPublicSocket() != from.getPublicSocket() &&
+        return to.getType() == NodeType::DownstreamAvatarMixer && to.getPublicSocket() != from.getPublicSocket() &&
                to.getLocalSocket() != from.getLocalSocket();
     }
 
@@ -91,7 +90,9 @@ private:
     p_high_resolution_clock::time_point _lastDebugMessage;
     QHash<QString, QPair<int, int>> _sessionDisplayNames;
 
-    quint64 _displayNameManagementElapsedTime { 0 }; // total time spent in broadcastAvatarData/display name management... since last stats window
+    quint64 _displayNameManagementElapsedTime {
+        0
+    }; // total time spent in broadcastAvatarData/display name management... since last stats window
     quint64 _ignoreCalculationElapsedTime { 0 };
     quint64 _avatarDataPackingElapsedTime { 0 };
     quint64 _packetSendingElapsedTime { 0 };

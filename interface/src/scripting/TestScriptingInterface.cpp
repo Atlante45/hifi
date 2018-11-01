@@ -11,13 +11,13 @@
 #include <QtCore/QLoggingCategory>
 #include <QtCore/QThread>
 
-#include <shared/FileUtils.h>
-#include <shared/QtHelpers.h>
 #include <DependencyManager.h>
 #include <MainWindow.h>
 #include <OffscreenUi.h>
 #include <StatTracker.h>
 #include <Trace.h>
+#include <shared/FileUtils.h>
+#include <shared/QtHelpers.h>
 
 #include "Application.h"
 
@@ -33,20 +33,18 @@ void TestScriptingInterface::quit() {
 }
 
 void TestScriptingInterface::waitForTextureIdle() {
-    waitForCondition(0, []()->bool {
-        return (0 == gpu::Context::getTexturePendingGPUTransferCount());
-    });
+    waitForCondition(0, []() -> bool { return (0 == gpu::Context::getTexturePendingGPUTransferCount()); });
 }
 
 void TestScriptingInterface::waitForDownloadIdle() {
-    waitForCondition(0, []()->bool {
+    waitForCondition(0, []() -> bool {
         return (0 == ResourceCache::getLoadingRequestCount()) && (0 == ResourceCache::getPendingRequestCount());
     });
 }
 
 void TestScriptingInterface::waitForProcessingIdle() {
     auto statTracker = DependencyManager::get<StatTracker>();
-    waitForCondition(0, [statTracker]()->bool {
+    waitForCondition(0, [statTracker]() -> bool {
         return (0 == statTracker->getStat("Processing").toInt() && 0 == statTracker->getStat("PendingProcessing").toInt());
     });
 }
@@ -70,7 +68,7 @@ bool TestScriptingInterface::loadTestScene(QString scene) {
     static const QString TEST_BINARY_ROOT = "https://hifi-public.s3.amazonaws.com/test_scene_data/";
     static const QString TEST_SCRIPTS_ROOT = TEST_ROOT + "scripts/";
     static const QString TEST_SCENES_ROOT = TEST_ROOT + "scenes/";
-    
+
     DependencyManager::get<ResourceManager>()->setUrlPrefixOverride("atp:/", TEST_BINARY_ROOT + scene + ".atp/");
     auto tree = qApp->getEntities()->getTree();
     auto treeIsClient = tree->getIsClient();
@@ -106,17 +104,14 @@ bool TestScriptingInterface::stopTracing(QString filename) {
 }
 
 void TestScriptingInterface::clear() {
-    qApp->postLambdaEvent([] {
-        qApp->getEntities()->clear();
-    });
+    qApp->postLambdaEvent([] { qApp->getEntities()->clear(); });
 }
 
 bool TestScriptingInterface::waitForConnection(qint64 maxWaitMs) {
     // Wait for any previous connection to die
     QThread::sleep(1);
-    return waitForCondition(maxWaitMs, []()->bool {
-        return DependencyManager::get<NodeList>()->getDomainHandler().isConnected();
-    });
+    return waitForCondition(maxWaitMs,
+                            []() -> bool { return DependencyManager::get<NodeList>()->getDomainHandler().isConnected(); });
 }
 
 void TestScriptingInterface::wait(int milliseconds) {
@@ -158,7 +153,7 @@ void TestScriptingInterface::profileRange(const QString& name, QScriptValue fn) 
 }
 
 void TestScriptingInterface::clearCaches() {
-	qApp->reloadResourceCaches();
+    qApp->reloadResourceCaches();
 }
 
 // Writes a JSON object from javascript to a file

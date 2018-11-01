@@ -20,22 +20,23 @@ class WalletTransaction : public QObject {
 public:
     WalletTransaction();
     WalletTransaction(const QUuid& destinationUUID, qint64 amount);
-    
+
     const QUuid& getUUID() const { return _uuid; }
-    
+
     void setDestinationUUID(const QUuid& destinationUUID) { _destinationUUID = destinationUUID; }
     const QUuid& getDestinationUUID() const { return _destinationUUID; }
-    
+
     qint64 getAmount() const { return _amount; }
     void setAmount(qint64 amount) { _amount = amount; }
     void incrementAmount(qint64 increment) { _amount += increment; }
-    
+
     bool isFinalized() const { return _isFinalized; }
     void setIsFinalized(bool isFinalized) { _isFinalized = isFinalized; }
-    
+
     QJsonDocument postJson();
     QJsonObject toJson();
     void loadFromJson(const QJsonObject& jsonObject);
+
 protected:
     QUuid _uuid;
     QUuid _destinationUUID;

@@ -15,20 +15,20 @@
 
 #include <glm/glm.hpp>
 
+#include <qendian.h>
+#include <QDataStream>
 #include <QRunnable>
 #include <QThreadPool>
-#include <QDataStream>
 #include <QtCore/QDebug>
-#include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
-#include <qendian.h>
+#include <QtNetwork/QNetworkRequest>
 
 #include <LimitedNodeList.h>
 #include <NetworkAccessManager.h>
 #include <SharedUtil.h>
 
-#include "AudioRingBuffer.h"
 #include "AudioLogging.h"
+#include "AudioRingBuffer.h"
 #include "AudioSRC.h"
 
 #include "flump3dec.h"
@@ -54,8 +54,7 @@ Sound::Sound(const QUrl& url, bool isStereo, bool isAmbisonic) :
     Resource(url),
     _isStereo(isStereo),
     _isAmbisonic(isAmbisonic),
-    _isReady(false)
-{
+    _isReady(false) {
 }
 
 void Sound::downloadFinished(const QByteArray& data) {
@@ -67,7 +66,6 @@ void Sound::downloadFinished(const QByteArray& data) {
 }
 
 void Sound::soundProcessSuccess(QByteArray data, bool stereo, bool ambisonic, float duration) {
-
     qCDebug(audio) << "Setting ready state for sound file" << _url.toDisplayString();
 
     _byteArray = data;
@@ -87,7 +85,6 @@ void Sound::soundProcessError(int error, QString str) {
 }
 
 void SoundProcessor::run() {
-
     qCDebug(audio) << "Processing sound file" << _url.toDisplayString();
 
     // replace our byte array with the downloaded data
@@ -99,7 +96,6 @@ void SoundProcessor::run() {
     static const QString RAW_EXTENSION = ".raw";
 
     if (fileName.endsWith(WAV_EXTENSION)) {
-
         QByteArray outputAudioByteArray;
 
         int sampleRate = interpretAsWav(rawAudioByteArray, outputAudioByteArray);
@@ -112,7 +108,6 @@ void SoundProcessor::run() {
         downSample(outputAudioByteArray, sampleRate);
 
     } else if (fileName.endsWith(MP3_EXTENSION)) {
-
         QByteArray outputAudioByteArray;
 
         int sampleRate = interpretAsMP3(rawAudioByteArray, outputAudioByteArray);
@@ -129,7 +124,8 @@ void SoundProcessor::run() {
         // since it's raw the only way for us to know that is if the file was called .stereo.raw
         if (fileName.toLower().endsWith("stereo.raw")) {
             _isStereo = true;
-            qCDebug(audio) << "Processing sound of" << rawAudioByteArray.size() << "bytes from" << _url << "as stereo audio file.";
+            qCDebug(audio) << "Processing sound of" << rawAudioByteArray.size() << "bytes from" << _url
+                           << "as stereo audio file.";
         }
 
         // Process as 48khz RAW file
@@ -145,7 +141,6 @@ void SoundProcessor::run() {
 }
 
 void SoundProcessor::downSample(const QByteArray& rawAudioByteArray, int sampleRate) {
-
     // we want to convert it to the format that the audio-mixer wants
     // which is signed, 16-bit, 24Khz
 
@@ -153,8 +148,8 @@ void SoundProcessor::downSample(const QByteArray& rawAudioByteArray, int sampleR
         // no resampling needed
         _data = rawAudioByteArray;
     } else {
-
-        int numChannels = _isAmbisonic ? AudioConstants::AMBISONIC : (_isStereo ? AudioConstants::STEREO : AudioConstants::MONO);
+        int numChannels = _isAmbisonic ? AudioConstants::AMBISONIC
+                                       : (_isStereo ? AudioConstants::STEREO : AudioConstants::MONO);
         AudioSRC resampler(sampleRate, AudioConstants::SAMPLE_RATE, numChannels);
 
         // resize to max possible output
@@ -163,8 +158,7 @@ void SoundProcessor::downSample(const QByteArray& rawAudioByteArray, int sampleR
         int maxDestinationBytes = maxDestinationFrames * numChannels * sizeof(AudioConstants::AudioSample);
         _data.resize(maxDestinationBytes);
 
-        int numDestinationFrames = resampler.render((int16_t*)rawAudioByteArray.data(), 
-                                                    (int16_t*)_data.data(),
+        int numDestinationFrames = resampler.render((int16_t*)rawAudioByteArray.data(), (int16_t*)_data.data(),
                                                     numSourceFrames);
 
         // truncate to actual output
@@ -196,32 +190,31 @@ void SoundProcessor::downSample(const QByteArray& rawAudioByteArray, int sampleR
 //
 
 struct chunk {
-    char        id[4];
-    quint32     size;
+    char id[4];
+    quint32 size;
 };
 
 struct RIFFHeader {
-    chunk       descriptor;     // "RIFF"
-    char        type[4];        // "WAVE"
+    chunk descriptor; // "RIFF"
+    char type[4]; // "WAVE"
 };
 
 static const int WAVEFORMAT_PCM = 1;
 static const int WAVEFORMAT_EXTENSIBLE = 0xfffe;
 
 struct WAVEFormat {
-    quint16     audioFormat;    // Format type: 1=PCM, 257=Mu-Law, 258=A-Law, 259=ADPCM
-    quint16     numChannels;    // Number of channels: 1=mono, 2=stereo
-    quint32     sampleRate;
-    quint32     byteRate;       // Sample rate * Number of Channels * Bits per sample / 8
-    quint16     blockAlign;     // (Number of Channels * Bits per sample) / 8.1
-    quint16     bitsPerSample;
+    quint16 audioFormat; // Format type: 1=PCM, 257=Mu-Law, 258=A-Law, 259=ADPCM
+    quint16 numChannels; // Number of channels: 1=mono, 2=stereo
+    quint32 sampleRate;
+    quint32 byteRate; // Sample rate * Number of Channels * Bits per sample / 8
+    quint16 blockAlign; // (Number of Channels * Bits per sample) / 8.1
+    quint16 bitsPerSample;
 };
 
 // returns wavfile sample rate, used for resampling
 int SoundProcessor::interpretAsWav(const QByteArray& inputAudioByteArray, QByteArray& outputAudioByteArray) {
-
     // Create a data stream to analyze the data
-    QDataStream waveStream(const_cast<QByteArray *>(&inputAudioByteArray), QIODevice::ReadOnly);
+    QDataStream waveStream(const_cast<QByteArray*>(&inputAudioByteArray), QIODevice::ReadOnly);
 
     // Read the "RIFF" chunk
     RIFFHeader riff;
@@ -252,7 +245,7 @@ int SoundProcessor::interpretAsWav(const QByteArray& inputAudioByteArray, QByteA
         if (strncmp(fmt.id, "fmt ", 4) == 0) {
             break;
         }
-        waveStream.skipRawData(qFromLittleEndian<quint32>(fmt.size));   // next chunk
+        waveStream.skipRawData(qFromLittleEndian<quint32>(fmt.size)); // next chunk
     }
 
     // Read the "fmt " chunk
@@ -294,7 +287,7 @@ int SoundProcessor::interpretAsWav(const QByteArray& inputAudioByteArray, QByteA
         if (strncmp(data.id, "data", 4) == 0) {
             break;
         }
-        waveStream.skipRawData(qFromLittleEndian<quint32>(data.size));  // next chunk
+        waveStream.skipRawData(qFromLittleEndian<quint32>(data.size)); // next chunk
     }
 
     // Read the "data" chunk
@@ -319,13 +312,13 @@ int SoundProcessor::interpretAsMP3(const QByteArray& inputAudioByteArray, QByteA
     uint8_t mp3Buffer[MP3_BUFFER_SIZE];
 
     // create bitstream
-    Bit_stream_struc *bitstream = bs_new();
+    Bit_stream_struc* bitstream = bs_new();
     if (bitstream == nullptr) {
         return 0;
     }
 
     // create decoder
-    mp3tl *decoder = mp3tl_new(bitstream, MP3TL_MODE_16BIT);
+    mp3tl* decoder = mp3tl_new(bitstream, MP3TL_MODE_16BIT);
     if (decoder == nullptr) {
         bs_free(bitstream);
         return 0;
@@ -341,19 +334,15 @@ int SoundProcessor::interpretAsMP3(const QByteArray& inputAudioByteArray, QByteA
     Mp3TlRetcode result = mp3tl_skip_id3(decoder);
 
     while (!(result == MP3TL_ERR_NO_SYNC || result == MP3TL_ERR_NEED_DATA)) {
-
         mp3tl_sync(decoder);
 
         // find MP3 header
-        const fr_header *header = nullptr;
+        const fr_header* header = nullptr;
         result = mp3tl_decode_header(decoder, &header);
 
         if (result == MP3TL_ERR_OK) {
-
             if (frameCount++ == 0) {
-
-                qCDebug(audio) << "Decoding MP3 with bitrate =" << header->bitrate
-                               << "sample rate =" << header->sample_rate
+                qCDebug(audio) << "Decoding MP3 with bitrate =" << header->bitrate << "sample rate =" << header->sample_rate
                                << "channels =" << header->channels;
 
                 // save header info
@@ -366,7 +355,6 @@ int SoundProcessor::interpretAsMP3(const QByteArray& inputAudioByteArray, QByteA
 
             // decode MP3 frame
             if (result == MP3TL_ERR_OK) {
-
                 result = mp3tl_decode_frame(decoder, mp3Buffer, MP3_BUFFER_SIZE);
 
                 // fill bad frames with silence

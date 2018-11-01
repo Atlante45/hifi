@@ -12,27 +12,27 @@
 #ifndef hifi_render_Stage_h
 #define hifi_render_Stage_h
 
-#include <memory>
 #include <map>
+#include <memory>
 #include <string>
 
 namespace render {
 
-    class Stage {
-    public:
-        using Name = std::string;
+class Stage {
+public:
+    using Name = std::string;
 
-        Stage();
-        virtual ~Stage();
+    Stage();
+    virtual ~Stage();
 
-    protected:
-        Name _name;
-    };
+protected:
+    Name _name;
+};
 
-    using StagePointer = std::shared_ptr<Stage>;
+using StagePointer = std::shared_ptr<Stage>;
 
-    using StageMap = std::map<const Stage::Name, StagePointer>;
+using StageMap = std::map<const Stage::Name, StagePointer>;
 
-}
+} // namespace render
 
 #endif // hifi_render_Stage_h

@@ -65,7 +65,7 @@ glm::vec3 DualQuaternion::xformVector(const glm::vec3& rhs) const {
 
 DualQuaternion DualQuaternion::inverse() const {
     glm::quat invReal = glm::inverse(_real);
-    return DualQuaternion(invReal, - invReal * _dual * invReal);
+    return DualQuaternion(invReal, -invReal * _dual * invReal);
 }
 
 DualQuaternion DualQuaternion::conjugate() const {

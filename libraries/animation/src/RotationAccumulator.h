@@ -14,7 +14,7 @@
 
 class RotationAccumulator {
 public:
-    RotationAccumulator() : _rotationSum(0.0f, 0.0f, 0.0f, 0.0f), _numRotations(0), _isDirty(false) { }
+    RotationAccumulator() : _rotationSum(0.0f, 0.0f, 0.0f, 0.0f), _numRotations(0), _isDirty(false) {}
 
     int size() const { return _numRotations; }
 

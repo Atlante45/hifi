@@ -14,13 +14,13 @@
 #ifndef hifi_EntitiesScriptEngineProvider_h
 #define hifi_EntitiesScriptEngineProvider_h
 
-#include <QtCore/QString>
 #include <QFuture>
+#include <QtCore/QString>
 #include "EntityItemID.h"
 
 class EntitiesScriptEngineProvider {
 public:
-    virtual void callEntityScriptMethod(const EntityItemID& entityID, const QString& methodName, 
+    virtual void callEntityScriptMethod(const EntityItemID& entityID, const QString& methodName,
                                         const QStringList& params = QStringList(), const QUuid& remoteCallerID = QUuid()) = 0;
     virtual QFuture<QVariant> getLocalEntityScriptDetails(const EntityItemID& entityID) = 0;
 };

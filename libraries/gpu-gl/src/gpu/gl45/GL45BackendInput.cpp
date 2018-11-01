@@ -8,8 +8,8 @@
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
-#include "GL45Backend.h"
 #include <gpu/gl/GLShared.h>
+#include "GL45Backend.h"
 
 using namespace gpu;
 using namespace gpu::gl45;
@@ -41,7 +41,7 @@ void GL45Backend::updateInput() {
         // Assign the vertex format required
         auto format = acquire(_input._format);
         if (format) {
-            bool hasColorAttribute{ false };
+            bool hasColorAttribute { false };
 
             _input._attribBindingBuffers.reset();
 
@@ -61,7 +61,8 @@ void GL45Backend::updateInput() {
                     uint8_t locationCount = attrib._element.getLocationCount();
                     GLenum type = gl::ELEMENT_TYPE_TO_GL[attrib._element.getType()];
 
-                    GLuint offset = (GLuint)attrib._offset;;
+                    GLuint offset = (GLuint)attrib._offset;
+                    ;
                     GLboolean isNormalized = attrib._element.isNormalized();
 
                     GLenum perLocationSize = attrib._element.getLocationSize();
@@ -89,7 +90,6 @@ void GL45Backend::updateInput() {
                         assert(frequency == attrib._frequency);
                     }
 
-
                     (void)CHECK_GL_ERROR();
                 }
 #ifdef GPU_STEREO_DRAWCALL_INSTANCED
@@ -110,7 +110,8 @@ void GL45Backend::updateInput() {
         }
 
         // Manage Activation what was and what is expected now
-        // This should only disable VertexAttribs since the one needed by the vertex format (if it exists) have been enabled above
+        // This should only disable VertexAttribs since the one needed by the vertex format (if it exists) have been enabled
+        // above
         for (GLuint i = 0; i < (GLuint)newActivation.size(); i++) {
             bool newState = newActivation[i];
             if (newState != _input._attributeActivation[i]) {
@@ -134,7 +135,7 @@ void GL45Backend::updateInput() {
         auto stride = _input._bufferStrides.data();
 
         // Profile the count of buffers to update and use it to short cut the for loop
-        int numInvalids = (int) _input._invalidBuffers.count();
+        int numInvalids = (int)_input._invalidBuffers.count();
         _stats._ISNumInputBufferChanges += numInvalids;
 
         auto numBuffers = _input._buffers.size();

@@ -12,10 +12,9 @@
 #include "TextureCacheScriptingInterface.h"
 
 TextureCacheScriptingInterface::TextureCacheScriptingInterface() :
-    ScriptableResourceCache::ScriptableResourceCache(DependencyManager::get<TextureCache>())
-{
-    connect(DependencyManager::get<TextureCache>().data(), &TextureCache::spectatorCameraFramebufferReset,
-        this, &TextureCacheScriptingInterface::spectatorCameraFramebufferReset);
+    ScriptableResourceCache::ScriptableResourceCache(DependencyManager::get<TextureCache>()) {
+    connect(DependencyManager::get<TextureCache>().data(), &TextureCache::spectatorCameraFramebufferReset, this,
+            &TextureCacheScriptingInterface::spectatorCameraFramebufferReset);
 }
 
 ScriptableResource* TextureCacheScriptingInterface::prefetch(const QUrl& url, int type, int maxNumPixels) {

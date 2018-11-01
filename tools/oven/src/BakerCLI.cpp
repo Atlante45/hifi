@@ -11,27 +11,26 @@
 
 #include "BakerCLI.h"
 
-#include <QObject>
-#include <QImageReader>
-#include <QtCore/QDebug>
 #include <QFile>
+#include <QImageReader>
+#include <QObject>
+#include <QtCore/QDebug>
 
 #include <unordered_map>
 
-#include "OvenCLIApplication.h"
-#include "ModelBakingLoggingCategory.h"
 #include "FBXBaker.h"
 #include "JSBaker.h"
+#include "ModelBakingLoggingCategory.h"
+#include "OvenCLIApplication.h"
 #include "TextureBaker.h"
 
 BakerCLI::BakerCLI(OvenCLIApplication* parent) : QObject(parent) {
-    
 }
 
 void BakerCLI::bakeFile(QUrl inputUrl, const QString& outputPath, const QString& type) {
-
     // if the URL doesn't have a scheme, assume it is a local file
-    if (inputUrl.scheme() != "http" && inputUrl.scheme() != "https" && inputUrl.scheme() != "ftp" && inputUrl.scheme() != "file") {
+    if (inputUrl.scheme() != "http" && inputUrl.scheme() != "https" && inputUrl.scheme() != "ftp" &&
+        inputUrl.scheme() != "file") {
         inputUrl = QUrl::fromLocalFile(inputUrl.toString());
     }
 
@@ -56,9 +55,7 @@ void BakerCLI::bakeFile(QUrl inputUrl, const QString& outputPath, const QString&
     // create our appropiate baker
     if (isFBX) {
         _baker = std::unique_ptr<Baker> {
-            new FBXBaker(inputUrl,
-                         []() -> QThread* { return Oven::instance().getNextWorkerThread(); },
-                         outputPath)
+            new FBXBaker(inputUrl, []() -> QThread* { return Oven::instance().getNextWorkerThread(); }, outputPath)
         };
         _baker->moveToThread(Oven::instance().getNextWorkerThread());
     } else if (isScript) {

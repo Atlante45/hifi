@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <functional>
 #include <QSharedPointer>
+#include <functional>
 #include "../DependencyManager.h"
 
 class QScriptEngine;

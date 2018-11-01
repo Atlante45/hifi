@@ -11,21 +11,19 @@
 
 #include "ACClientApp.h"
 
-#include <QDataStream>
-#include <QThread>
-#include <QLoggingCategory>
 #include <QCommandLineParser>
+#include <QDataStream>
+#include <QLoggingCategory>
+#include <QThread>
 
-#include <NetworkLogging.h>
-#include <NetworkingConstants.h>
-#include <SharedLogging.h>
 #include <AddressManager.h>
 #include <DependencyManager.h>
+#include <NetworkLogging.h>
+#include <NetworkingConstants.h>
 #include <SettingHandle.h>
+#include <SharedLogging.h>
 
-ACClientApp::ACClientApp(int argc, char* argv[]) :
-    QCoreApplication(argc, argv)
-{
+ACClientApp::ACClientApp(int argc, char* argv[]) : QCoreApplication(argc, argv) {
     // parse command-line
     QCommandLineParser parser;
     parser.setApplicationDescription("High Fidelity AC client");
@@ -70,7 +68,6 @@ ACClientApp::ACClientApp(int argc, char* argv[]) :
         const_cast<QLoggingCategory*>(&shared())->setEnabled(QtInfoMsg, false);
         const_cast<QLoggingCategory*>(&shared())->setEnabled(QtWarningMsg, false);
     }
-    
 
     QString domainServerAddress = "127.0.0.1:40103";
     if (parser.isSet(domainAddressOption)) {
@@ -100,7 +97,7 @@ ACClientApp::ACClientApp(int argc, char* argv[]) :
 
     DependencyManager::registerInheritance<LimitedNodeList, NodeList>();
 
-    DependencyManager::set<AccountManager>([&]{ return QString("Mozilla/5.0 (HighFidelityACClient)"); });
+    DependencyManager::set<AccountManager>([&] { return QString("Mozilla/5.0 (HighFidelityACClient)"); });
     DependencyManager::set<AddressManager>();
     DependencyManager::set<NodeList>(NodeType::Agent, listenPort);
 
@@ -127,8 +124,9 @@ ACClientApp::ACClientApp(int argc, char* argv[]) :
     connect(nodeList.data(), &NodeList::nodeKilled, this, &ACClientApp::nodeKilled);
     connect(nodeList.data(), &NodeList::nodeActivated, this, &ACClientApp::nodeActivated);
     connect(nodeList.data(), &NodeList::packetVersionMismatch, this, &ACClientApp::notifyPacketVersionMismatch);
-    nodeList->addSetOfNodeTypesToNodeInterestSet(NodeSet() << NodeType::AudioMixer << NodeType::AvatarMixer
-                                                 << NodeType::EntityServer << NodeType::AssetServer << NodeType::MessagesMixer);
+    nodeList->addSetOfNodeTypesToNodeInterestSet(NodeSet()
+                                                 << NodeType::AudioMixer << NodeType::AvatarMixer << NodeType::EntityServer
+                                                 << NodeType::AssetServer << NodeType::MessagesMixer);
 
     if (_verbose) {
         QString username = accountManager->getAccountInfo().getUsername();
@@ -136,21 +134,18 @@ ACClientApp::ACClientApp(int argc, char* argv[]) :
     }
 
     if (!_username.isEmpty()) {
-
-        connect(accountManager.data(), &AccountManager::newKeypair, this, [&](){
+        connect(accountManager.data(), &AccountManager::newKeypair, this, [&]() {
             if (_verbose) {
                 qDebug() << "new keypair has been created.";
             }
         });
 
-        connect(accountManager.data(), &AccountManager::loginComplete, this, [&](){
+        connect(accountManager.data(), &AccountManager::loginComplete, this, [&]() {
             if (_verbose) {
                 qDebug() << "login successful";
             }
         });
-        connect(accountManager.data(), &AccountManager::loginFailed, this, [&](){
-            qDebug() << "login failed.";
-        });
+        connect(accountManager.data(), &AccountManager::loginFailed, this, [&]() { qDebug() << "login failed."; });
         accountManager->requestAccessToken(_username, _password);
     }
 
@@ -164,7 +159,6 @@ ACClientApp::ACClientApp(int argc, char* argv[]) :
 
 ACClientApp::~ACClientApp() {
 }
-
 
 void ACClientApp::domainConnectionRefused(const QString& reasonMessage, int reasonCodeInt, const QString& extraInfo) {
     qDebug() << "domainConnectionRefused";
@@ -188,26 +182,22 @@ void ACClientApp::nodeActivated(SharedNodePointer node) {
             qDebug() << "saw EntityServer";
         }
         _sawEntityServer = true;
-    }
-    else if (node->getType() == NodeType::AudioMixer) {
+    } else if (node->getType() == NodeType::AudioMixer) {
         if (_verbose) {
             qDebug() << "saw AudioMixer";
         }
         _sawAudioMixer = true;
-    }
-    else if (node->getType() == NodeType::AvatarMixer) {
+    } else if (node->getType() == NodeType::AvatarMixer) {
         if (_verbose) {
             qDebug() << "saw AvatarMixer";
         }
         _sawAvatarMixer = true;
-    }
-    else if (node->getType() == NodeType::AssetServer) {
+    } else if (node->getType() == NodeType::AssetServer) {
         if (_verbose) {
             qDebug() << "saw AssetServer";
         }
         _sawAssetServer = true;
-    }
-    else if (node->getType() == NodeType::MessagesMixer) {
+    } else if (node->getType() == NodeType::MessagesMixer) {
         if (_verbose) {
             qDebug() << "saw MessagesMixer";
         }
@@ -228,8 +218,8 @@ void ACClientApp::nodeKilled(SharedNodePointer node) {
 
 void ACClientApp::timedOut() {
     if (_verbose) {
-        qDebug() << "timed out: " << _sawEntityServer << _sawAudioMixer <<
-            _sawAvatarMixer << _sawAssetServer << _sawMessagesMixer;
+        qDebug() << "timed out: " << _sawEntityServer << _sawAudioMixer << _sawAvatarMixer << _sawAssetServer
+                 << _sawMessagesMixer;
     }
     finish(1);
 }

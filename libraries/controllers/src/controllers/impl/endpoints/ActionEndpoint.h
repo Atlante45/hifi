@@ -12,8 +12,8 @@
 
 #include "../Endpoint.h"
 
-#include "../../Actions.h"
 #include <DependencyManager.h>
+#include "../../Actions.h"
 
 #include "../../UserInputMapper.h"
 
@@ -21,7 +21,7 @@ namespace controller {
 
 class ActionEndpoint : public Endpoint {
 public:
-    ActionEndpoint(const Input& id = Input::INVALID_INPUT) : Endpoint(id) { }
+    ActionEndpoint(const Input& id = Input::INVALID_INPUT) : Endpoint(id) {}
 
     virtual float peek() const override { return _currentValue; }
     virtual void apply(float newValue, const Pointer& source) override;
@@ -32,10 +32,10 @@ public:
     virtual void reset() override;
 
 private:
-    float _currentValue{ 0.0f };
-    Pose _currentPose{};
+    float _currentValue { 0.0f };
+    Pose _currentPose {};
 };
 
-}
+} // namespace controller
 
 #endif

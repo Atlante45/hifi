@@ -16,27 +16,26 @@
 #include <PathUtils.h>
 #include <SharedUtil.h>
 #include <gpu/Context.h>
-#include <shaders/Shaders.h>
 #include <graphics/ShaderConstants.h>
+#include <shaders/Shaders.h>
 
-#include "render-utils/ShaderConstants.h"
+#include "DependencyManager.h"
+#include "FramebufferCache.h"
+#include "GeometryCache.h"
 #include "StencilMaskPass.h"
 #include "TextureCache.h"
-#include "DependencyManager.h"
 #include "ViewFrustum.h"
-#include "GeometryCache.h"
-#include "FramebufferCache.h"
-
+#include "render-utils/ShaderConstants.h"
 
 namespace ru {
-    using render_utils::slot::texture::Texture;
-    using render_utils::slot::buffer::Buffer;
-}
+using render_utils::slot::buffer::Buffer;
+using render_utils::slot::texture::Texture;
+} // namespace ru
 
 namespace gr {
-    using graphics::slot::texture::Texture;
-    using graphics::slot::buffer::Buffer;
-}
+using graphics::slot::buffer::Buffer;
+using graphics::slot::texture::Texture;
+} // namespace gr
 
 #if !ANTIALIASING_USE_TAA
 
@@ -94,7 +93,7 @@ void Antialiasing::run(const render::RenderContextPointer& renderContext, const 
         }
 
         {
-            int width = args->_viewport.z; 
+            int width = args->_viewport.z;
             int height = args->_viewport.w;
             if (_antialiasingBuffer && _antialiasingBuffer->getSize() != uvec2(width, height)) {
                 _antialiasingBuffer.reset();
@@ -105,14 +104,14 @@ void Antialiasing::run(const render::RenderContextPointer& renderContext, const 
                 _antialiasingBuffer = gpu::FramebufferPointer(gpu::Framebuffer::create("antialiasing"));
                 auto format = gpu::Element::COLOR_SRGBA_32;
                 auto defaultSampler = gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_POINT);
-                _antialiasingTexture = gpu::Texture::createRenderBuffer(format, width, height, gpu::Texture::SINGLE_MIP, defaultSampler);
+                _antialiasingTexture = gpu::Texture::createRenderBuffer(format, width, height, gpu::Texture::SINGLE_MIP,
+                                                                        defaultSampler);
                 _antialiasingBuffer->setRenderBuffer(0, _antialiasingTexture);
                 glm::vec2 fbExtent { args->_viewport.z, args->_viewport.w };
                 glm::vec2 inverseFbExtent = 1.0f / fbExtent;
                 _paramsBuffer->setSubData(0, glm::vec4(inverseFbExtent, 0.0, 0.0));
             }
         }
-
 
         glm::mat4 projMat;
         Transform viewMat;
@@ -139,8 +138,7 @@ void Antialiasing::run(const render::RenderContextPointer& renderContext, const 
 }
 #else
 
-Antialiasing::Antialiasing(bool isSharpenEnabled) : 
-    _isSharpenEnabled{ isSharpenEnabled } {
+Antialiasing::Antialiasing(bool isSharpenEnabled) : _isSharpenEnabled { isSharpenEnabled } {
 }
 
 Antialiasing::~Antialiasing() {
@@ -150,17 +148,16 @@ Antialiasing::~Antialiasing() {
 }
 
 const gpu::PipelinePointer& Antialiasing::getAntialiasingPipeline(const render::RenderContextPointer& renderContext) {
-   
     if (!_antialiasingPipeline) {
         gpu::ShaderPointer program = gpu::Shader::createProgram(shader::render_utils::program::taa);
         gpu::StatePointer state = gpu::StatePointer(new gpu::State());
-        
+
         PrepareStencil::testNoAA(*state);
 
         // Good to go add the brand new pipeline
         _antialiasingPipeline = gpu::Pipeline::create(program, state);
     }
-    
+
     return _antialiasingPipeline;
 }
 
@@ -180,7 +177,6 @@ const gpu::PipelinePointer& Antialiasing::getDebugBlendPipeline() {
         gpu::ShaderPointer program = gpu::Shader::createProgram(shader::render_utils::program::taa_blend);
         gpu::StatePointer state = gpu::StatePointer(new gpu::State());
         PrepareStencil::testNoAA(*state);
-
 
         // Good to go add the brand new pipeline
         _debugBlendPipeline = gpu::Pipeline::create(program, state);
@@ -212,27 +208,26 @@ void Antialiasing::configure(const Config& config) {
     _params.edit().setShowClosestFragment(config.showClosestFragment);
 }
 
-
 void Antialiasing::run(const render::RenderContextPointer& renderContext, const Inputs& inputs) {
     assert(renderContext->args);
     assert(renderContext->args->hasViewFrustum());
-    
+
     RenderArgs* args = renderContext->args;
 
     auto& deferredFrameTransform = inputs.get0();
     auto& sourceBuffer = inputs.get1();
     auto& linearDepthBuffer = inputs.get2();
     auto& velocityBuffer = inputs.get3();
-    
+
     int width = sourceBuffer->getWidth();
     int height = sourceBuffer->getHeight();
 
-    if (_antialiasingBuffers && _antialiasingBuffers->get(0) && _antialiasingBuffers->get(0)->getSize() != uvec2(width, height)) {
+    if (_antialiasingBuffers && _antialiasingBuffers->get(0) &&
+        _antialiasingBuffers->get(0)->getSize() != uvec2(width, height)) {
         _antialiasingBuffers.reset();
         _antialiasingTextures[0].reset();
         _antialiasingTextures[1].reset();
     }
-
 
     if (!_antialiasingBuffers) {
         std::vector<gpu::FramebufferPointer> antiAliasingBuffers;
@@ -242,12 +237,13 @@ void Antialiasing::run(const render::RenderContextPointer& renderContext, const 
         for (int i = 0; i < 2; i++) {
             antiAliasingBuffers.emplace_back(gpu::Framebuffer::create("antialiasing"));
             const auto& antiAliasingBuffer = antiAliasingBuffers.back();
-            _antialiasingTextures[i] = gpu::Texture::createRenderBuffer(format, width, height, gpu::Texture::SINGLE_MIP, defaultSampler);
+            _antialiasingTextures[i] = gpu::Texture::createRenderBuffer(format, width, height, gpu::Texture::SINGLE_MIP,
+                                                                        defaultSampler);
             antiAliasingBuffer->setRenderBuffer(0, _antialiasingTextures[i]);
         }
         _antialiasingBuffers = std::make_shared<gpu::FramebufferSwapChain>(antiAliasingBuffers);
     }
-    
+
     gpu::doInBatch("Antialiasing::run", args->_context, [&](gpu::Batch& batch) {
         batch.enableStereo(false);
         batch.setViewportTransform(args->_viewport);
@@ -262,7 +258,7 @@ void Antialiasing::run(const render::RenderContextPointer& renderContext, const 
 
         batch.setUniformBuffer(ru::Buffer::TaaParams, _params);
         batch.setUniformBuffer(ru::Buffer::DeferredFrameTransform, deferredFrameTransform->getFrameTransformBuffer());
-        
+
         batch.setFramebufferSwapChain(_antialiasingBuffers, 1);
         batch.setPipeline(getAntialiasingPipeline(renderContext));
         batch.draw(gpu::TRIANGLE_STRIP, 4);
@@ -274,7 +270,7 @@ void Antialiasing::run(const render::RenderContextPointer& renderContext, const 
         if (_params->isDebug()) {
             batch.setPipeline(getDebugBlendPipeline());
             batch.setResourceFramebufferSwapChainTexture(ru::Texture::TaaNext, _antialiasingBuffers, 1);
-        }  else {
+        } else {
             batch.setPipeline(getBlendPipeline());
             // Must match the bindg point in the fxaa_blend.slf shader
             batch.setResourceFramebufferSwapChainTexture(0, _antialiasingBuffers, 1);
@@ -287,7 +283,7 @@ void Antialiasing::run(const render::RenderContextPointer& renderContext, const 
         }
         batch.draw(gpu::TRIANGLE_STRIP, 4);
         batch.advance(_antialiasingBuffers);
-        
+
         batch.setUniformBuffer(ru::Buffer::TaaParams, nullptr);
         batch.setUniformBuffer(ru::Buffer::DeferredFrameTransform, nullptr);
 
@@ -298,9 +294,8 @@ void Antialiasing::run(const render::RenderContextPointer& renderContext, const 
     });
 }
 
-
 void JitterSampleConfig::setIndex(int current) {
-    _index = (current) % JitterSample::SEQUENCE_LENGTH;    
+    _index = (current) % JitterSample::SEQUENCE_LENGTH;
     emit dirty();
 }
 
@@ -350,7 +345,6 @@ int JitterSampleConfig::pause() {
     return _state;
 }
 
-
 int JitterSampleConfig::play() {
     _state = 2;
     stop = false;
@@ -359,10 +353,9 @@ int JitterSampleConfig::play() {
     return _state;
 }
 
-template <int B> 
+template<int B>
 class Halton {
 public:
-
     float eval(int index) const {
         float f = 1.0f;
         float r = 0.0f;
@@ -373,16 +366,13 @@ public:
             f = f * invB;
             r = r + f * (float)(index % B);
             index = index / B;
-
         }
 
         return r;
     }
-
 };
 
-
-JitterSample::SampleSequence::SampleSequence(){
+JitterSample::SampleSequence::SampleSequence() {
     // Halton sequence (2,3)
     Halton<2> genX;
     Halton<3> genY;

@@ -12,8 +12,8 @@
 #ifndef hifi_ShapeManager_h
 #define hifi_ShapeManager_h
 
-#include <btBulletDynamicsCommon.h>
 #include <LinearMath/btHashMap.h>
+#include <btBulletDynamicsCommon.h>
 
 #include <ShapeInfo.h>
 
@@ -43,7 +43,6 @@
 
 class ShapeManager {
 public:
-
     ShapeManager();
     ~ShapeManager();
 

@@ -98,7 +98,7 @@ public:
 protected:
     float updatePulse();
 
-    render::ItemID _renderItemID{ render::Item::INVALID_ITEM_ID };
+    render::ItemID _renderItemID { render::Item::INVALID_ITEM_ID };
 
     bool _isLoaded;
     float _alpha;
@@ -129,12 +129,17 @@ private:
 };
 
 namespace render {
-   template <> const ItemKey payloadGetKey(const Overlay::Pointer& overlay);
-   template <> const Item::Bound payloadGetBound(const Overlay::Pointer& overlay);
-   template <> void payloadRender(const Overlay::Pointer& overlay, RenderArgs* args);
-   template <> const ShapeKey shapeGetShapeKey(const Overlay::Pointer& overlay);
-   template <> uint32_t metaFetchMetaSubItems(const Overlay::Pointer& overlay, ItemIDs& subItems);
-}
+template<>
+const ItemKey payloadGetKey(const Overlay::Pointer& overlay);
+template<>
+const Item::Bound payloadGetBound(const Overlay::Pointer& overlay);
+template<>
+void payloadRender(const Overlay::Pointer& overlay, RenderArgs* args);
+template<>
+const ShapeKey shapeGetShapeKey(const Overlay::Pointer& overlay);
+template<>
+uint32_t metaFetchMetaSubItems(const Overlay::Pointer& overlay, ItemIDs& subItems);
+} // namespace render
 
 Q_DECLARE_METATYPE(OverlayID);
 Q_DECLARE_METATYPE(QVector<OverlayID>);

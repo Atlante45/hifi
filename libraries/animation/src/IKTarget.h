@@ -16,14 +16,7 @@ const float HACK_HMD_TARGET_WEIGHT = 8.0f;
 
 class IKTarget {
 public:
-    enum class Type {
-        RotationAndPosition,
-        RotationOnly,
-        HmdHead,
-        HipsRelativeRotationAndPosition,
-        Spline,
-        Unknown
-    };
+    enum class Type { RotationAndPosition, RotationOnly, HmdHead, HipsRelativeRotationAndPosition, Spline, Unknown };
 
     IKTarget() {}
 

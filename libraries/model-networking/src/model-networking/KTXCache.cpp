@@ -23,8 +23,8 @@ const int KTXCache::CURRENT_VERSION = 0x01;
 const int KTXCache::INVALID_VERSION = 0x00;
 const char* KTXCache::SETTING_VERSION_NAME = "hifi.ktx.cache_version";
 
-KTXCache::KTXCache(const std::string& dir, const std::string& ext) :
-    FileCache(dir, ext) { }
+KTXCache::KTXCache(const std::string& dir, const std::string& ext) : FileCache(dir, ext) {
+}
 
 void KTXCache::initialize() {
     FileCache::initialize();
@@ -36,9 +36,7 @@ void KTXCache::initialize() {
     }
 }
 
-
 std::unique_ptr<File> KTXCache::createFile(Metadata&& metadata, const std::string& filepath) {
     qCInfo(file_cache) << "Wrote KTX" << metadata.key.c_str();
     return FileCache::createFile(std::move(metadata), filepath);
 }
-

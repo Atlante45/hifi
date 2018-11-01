@@ -9,6 +9,6 @@
 //
 #include "BusyWindow.h"
 
-BusyWindow::BusyWindow(QWidget *parent) {
+BusyWindow::BusyWindow(QWidget* parent) {
     setupUi(this);
 }

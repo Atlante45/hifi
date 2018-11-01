@@ -11,16 +11,16 @@
 
 #include "DesktopScriptingInterface.h"
 
-#include <QWindow>
 #include <QScreen>
+#include <QWindow>
 
 #include <shared/QtHelpers.h>
 
-#include "Application.h"
-#include "MainWindow.h"
-#include <display-plugins/CompositorHelper.h>
 #include <DependencyManager.h>
 #include <OffscreenUi.h>
+#include <display-plugins/CompositorHelper.h>
+#include "Application.h"
+#include "MainWindow.h"
 
 int DesktopScriptingInterface::getWidth() {
     QSize size = qApp->getWindow()->windowHandle()->screen()->virtualSize();
@@ -32,10 +32,7 @@ int DesktopScriptingInterface::getHeight() {
 }
 
 QVariantMap DesktopScriptingInterface::getPresentationMode() {
-    static QVariantMap presentationModes {
-        { "VIRTUAL", Virtual },
-        { "NATIVE", Native }
-    };
+    static QVariantMap presentationModes { { "VIRTUAL", Virtual }, { "NATIVE", Native } };
     return presentationModes;
 }
 
@@ -43,7 +40,7 @@ void DesktopScriptingInterface::setHUDAlpha(float alpha) {
     qApp->getApplicationCompositor().setAlpha(alpha);
 }
 
-void DesktopScriptingInterface::show(const QString& path, const QString&  title) {
+void DesktopScriptingInterface::show(const QString& path, const QString& title) {
     if (QThread::currentThread() != thread()) {
         QMetaObject::invokeMethod(this, "show", Qt::QueuedConnection, Q_ARG(QString, path), Q_ARG(QString, title));
         return;
@@ -54,11 +51,10 @@ void DesktopScriptingInterface::show(const QString& path, const QString&  title)
 InteractiveWindowPointer DesktopScriptingInterface::createWindow(const QString& sourceUrl, const QVariantMap& properties) {
     if (QThread::currentThread() != thread()) {
         InteractiveWindowPointer interactiveWindow = nullptr;
-        BLOCKING_INVOKE_METHOD(this, "createWindow",
-            Q_RETURN_ARG(InteractiveWindowPointer, interactiveWindow),
-            Q_ARG(QString, sourceUrl),
-            Q_ARG(QVariantMap, properties));
+        BLOCKING_INVOKE_METHOD(this, "createWindow", Q_RETURN_ARG(InteractiveWindowPointer, interactiveWindow),
+                               Q_ARG(QString, sourceUrl), Q_ARG(QVariantMap, properties));
         return interactiveWindow;
     }
-    return new InteractiveWindow(sourceUrl, properties);;
+    return new InteractiveWindow(sourceUrl, properties);
+    ;
 }

@@ -24,7 +24,7 @@
 
 /**jsdoc
  * The Window API provides various facilities not covered elsewhere: window dimensions, window focus, normal or entity camera
- * view, clipboard, announcements, user connections, common dialog boxes, snapshots, file import, domain changes, domain 
+ * view, clipboard, announcements, user connections, common dialog boxes, snapshots, file import, domain changes, domain
  * physics.
  *
  * @namespace Window
@@ -37,9 +37,9 @@
  * @property {number} innerHeight - The height of the drawable area of the Interface window (i.e., without borders or other
  *     chrome), in pixels. <em>Read-only.</em>
  * @property {object} location - Provides facilities for working with your current metaverse location. See {@link location}.
- * @property {number} x - The x display coordinate of the top left corner of the drawable area of the Interface window. 
+ * @property {number} x - The x display coordinate of the top left corner of the drawable area of the Interface window.
  *     <em>Read-only.</em>
- * @property {number} y - The y display coordinate of the top left corner of the drawable area of the Interface window. 
+ * @property {number} y - The y display coordinate of the top left corner of the drawable area of the Interface window.
  *     <em>Read-only.</em>
  */
 
@@ -69,7 +69,7 @@ public slots:
     QScriptValue hasFocus();
 
     /**jsdoc
-     * Make the Interface window have focus. On Windows, if Interface doesn't already have focus, the task bar icon flashes to 
+     * Make the Interface window have focus. On Windows, if Interface doesn't already have focus, the task bar icon flashes to
      * indicate that Interface wants attention but focus isn't taken away from the application that the user is using.
      * @function Window.setFocus
      */
@@ -105,7 +105,7 @@ public slots:
     QScriptValue confirm(const QString& message = "");
 
     /**jsdoc
-     * Prompt the user to enter some text. Displays a modal dialog with a message and a text box, plus "OK" and "Cancel" 
+     * Prompt the user to enter some text. Displays a modal dialog with a message and a text box, plus "OK" and "Cancel"
      * buttons.
      * @function Window.prompt
      * @param {string} message - The question to display.
@@ -122,8 +122,8 @@ public slots:
     QScriptValue prompt(const QString& message, const QString& defaultText);
 
     /**jsdoc
-     * Prompt the user to enter some text. Displays a non-modal dialog with a message and a text box, plus "OK" and "Cancel" 
-     * buttons. A {@link Window.promptTextChanged|promptTextChanged} signal is emitted when the user OKs the dialog; no signal 
+     * Prompt the user to enter some text. Displays a non-modal dialog with a message and a text box, plus "OK" and "Cancel"
+     * buttons. A {@link Window.promptTextChanged|promptTextChanged} signal is emitted when the user OKs the dialog; no signal
      * is emitted if the user cancels the dialog.
      * @function Window.promptAsync
      * @param {string} [message=""] - The question to display.
@@ -150,7 +150,7 @@ public slots:
      * print("Directory: " + directory);
      */
     QScriptValue browseDir(const QString& title = "", const QString& directory = "");
-    
+
     /**jsdoc
      * Prompt the user to choose a directory. Displays a non-modal dialog that navigates the directory tree. A
      * {@link Window.browseDirChanged|browseDirChanged} signal is emitted when a directory is chosen; no signal is emitted if
@@ -174,14 +174,14 @@ public slots:
      * @function Window.browse
      * @param {string} [title=""] - The title to display at the top of the dialog.
      * @param {string} [directory=""] - The initial directory to start browsing at.
-     * @param {string} [nameFilter=""] - The types of files to display. Examples: <code>"*.json"</code> and 
+     * @param {string} [nameFilter=""] - The types of files to display. Examples: <code>"*.json"</code> and
      *     <code>"Images (*.png *.jpg *.svg)"</code>. All files are displayed if a filter isn't specified.
      * @returns {string} The path and name of the file if one is chosen, otherwise <code>null</code>.
      * @example <caption>Ask the user to choose an image file.</caption>
      * var filename = Window.browse("Select Image File", Paths.resources, "Images (*.png *.jpg *.svg)");
      * print("File: " + filename);
      */
-    QScriptValue browse(const QString& title = "", const QString& directory = "",  const QString& nameFilter = "");
+    QScriptValue browse(const QString& title = "", const QString& directory = "", const QString& nameFilter = "");
 
     /**jsdoc
      * Prompt the user to choose a file. Displays a non-modal dialog that navigates the directory tree. A
@@ -201,7 +201,7 @@ public slots:
      * Window.browseAsync("Select Image File", Paths.resources, "Images (*.png *.jpg *.svg)");
      * print("Script continues without waiting");
      */
-    void browseAsync(const QString& title = "", const QString& directory = "",  const QString& nameFilter = "");
+    void browseAsync(const QString& title = "", const QString& directory = "", const QString& nameFilter = "");
 
     /**jsdoc
      * Prompt the user to specify the path and name of a file to save to. Displays a model dialog that navigates the directory
@@ -217,7 +217,7 @@ public slots:
      * var filename = Window.save("Save to JSON file", Paths.resources, "*.json");
      * print("File: " + filename);
      */
-    QScriptValue save(const QString& title = "", const QString& directory = "",  const QString& nameFilter = "");
+    QScriptValue save(const QString& title = "", const QString& directory = "", const QString& nameFilter = "");
 
     /**jsdoc
      * Prompt the user to specify the path and name of a file to save to. Displays a non-model dialog that navigates the
@@ -237,7 +237,7 @@ public slots:
      * Window.saveAsync("Save to JSON file", Paths.resources, "*.json");
      * print("Script continues without waiting");
      */
-    void saveAsync(const QString& title = "", const QString& directory = "",  const QString& nameFilter = "");
+    void saveAsync(const QString& title = "", const QString& directory = "", const QString& nameFilter = "");
 
     /**jsdoc
      * Prompt the user to choose an Asset Server item. Displays a modal dialog that navigates the tree of assets on the Asset
@@ -245,7 +245,7 @@ public slots:
      * @function Window.browseAssets
      * @param {string} [title=""] - The title to display at the top of the dialog.
      * @param {string} [directory=""] - The initial directory to start browsing at.
-     * @param {string} [nameFilter=""] - The types of files to display. Examples: <code>"*.json"</code> and 
+     * @param {string} [nameFilter=""] - The types of files to display. Examples: <code>"*.json"</code> and
      *     <code>"Images (*.png *.jpg *.svg)"</code>. All files are displayed if a filter isn't specified.
      * @returns {string} The path and name of the asset if one is chosen, otherwise <code>null</code>.
      * @example <caption>Ask the user to select an FBX asset.</caption>
@@ -255,7 +255,7 @@ public slots:
     QScriptValue browseAssets(const QString& title = "", const QString& directory = "", const QString& nameFilter = "");
 
     /**jsdoc
-     * Prompt the user to choose an Asset Server item. Displays a non-modal dialog that navigates the tree of assets on the 
+     * Prompt the user to choose an Asset Server item. Displays a non-modal dialog that navigates the tree of assets on the
      * Asset Server. A {@link Window.assetsDirChanged|assetsDirChanged} signal is emitted when an asset is chosen; no signal is
      * emitted if the user cancels the dialog.
      * @function Window.browseAssetsAsync
@@ -308,8 +308,8 @@ public slots:
     void copyToClipboard(const QString& text);
 
     /**jsdoc
-     * Takes a snapshot of the current Interface view from the primary camera. When a still image only is captured, 
-     * {@link Window.stillSnapshotTaken|stillSnapshotTaken} is emitted; when a still image plus moving images are captured, 
+     * Takes a snapshot of the current Interface view from the primary camera. When a still image only is captured,
+     * {@link Window.stillSnapshotTaken|stillSnapshotTaken} is emitted; when a still image plus moving images are captured,
      * {@link Window.processingGifStarted|processingGifStarted} and {@link Window.processingGifCompleted|processingGifCompleted}
      * are emitted. The path to store the snapshots and the length of the animated GIF to capture are specified in Settings >
      * General > Snapshots.
@@ -325,14 +325,14 @@ public slots:
      * @function Window.takeSnapshot
      * @param {boolean} [notify=true] - This value is passed on through the {@link Window.stillSnapshotTaken|stillSnapshotTaken}
      *     signal.
-     * @param {boolean} [includeAnimated=false] - If <code>true</code>, a moving image is captured as an animated GIF in addition 
-     *     to a still image.
+     * @param {boolean} [includeAnimated=false] - If <code>true</code>, a moving image is captured as an animated GIF in
+     * addition to a still image.
      * @param {number} [aspectRatio=0] - The width/height ratio of the snapshot required. If the value is <code>0</code> the
      *     full resolution is used (window dimensions in desktop mode; HMD display dimensions in HMD mode), otherwise one of the
      *     dimensions is adjusted in order to match the aspect ratio.
-     * @param {string} [filename=""] - If this parameter is not given, the image will be saved as "hifi-snap-by-&lt;user name&gt-YYYY-MM-DD_HH-MM-SS".
-     *     If this parameter is <code>""</code> then the image will be saved as ".jpg".
-     *     Otherwise, the image will be saved to this filename, with an appended ".jpg".
+     * @param {string} [filename=""] - If this parameter is not given, the image will be saved as "hifi-snap-by-&lt;user
+     * name&gt-YYYY-MM-DD_HH-MM-SS". If this parameter is <code>""</code> then the image will be saved as ".jpg". Otherwise, the
+     * image will be saved to this filename, with an appended ".jpg".
      *
      * @example <caption>Using the snapshot function and signals.</caption>
      * function onStillSnapshotTaken(path, notify) {
@@ -358,33 +358,35 @@ public slots:
      * var filename = "";
      * Window.takeSnapshot(notify, animated, aspect, filename);
      */
-    void takeSnapshot(bool notify = true, bool includeAnimated = false, float aspectRatio = 0.0f, const QString& filename = QString());
+    void takeSnapshot(bool notify = true, bool includeAnimated = false, float aspectRatio = 0.0f,
+                      const QString& filename = QString());
 
     /**jsdoc
      * Takes a still snapshot of the current view from the secondary camera that can be set up through the {@link Render} API.
      * @function Window.takeSecondaryCameraSnapshot
      * @param {boolean} [notify=true] - This value is passed on through the {@link Window.stillSnapshotTaken|stillSnapshotTaken}
      *     signal.
-     * @param {string} [filename=""] - If this parameter is not given, the image will be saved as "hifi-snap-by-&lt;user name&gt;-YYYY-MM-DD_HH-MM-SS".
-     *     If this parameter is <code>""</code> then the image will be saved as ".jpg".
-     *     Otherwise, the image will be saved to this filename, with an appended ".jpg".
+     * @param {string} [filename=""] - If this parameter is not given, the image will be saved as "hifi-snap-by-&lt;user
+     * name&gt;-YYYY-MM-DD_HH-MM-SS". If this parameter is <code>""</code> then the image will be saved as ".jpg". Otherwise,
+     * the image will be saved to this filename, with an appended ".jpg".
      */
     void takeSecondaryCameraSnapshot(const bool& notify = true, const QString& filename = QString());
 
     /**jsdoc
-     * Takes a 360&deg; snapshot at a given position for the secondary camera. The secondary camera does not need to have been 
+     * Takes a 360&deg; snapshot at a given position for the secondary camera. The secondary camera does not need to have been
      *     set up.
      * @function Window.takeSecondaryCamera360Snapshot
      * @param {Vec3} cameraPosition - The position of the camera for the snapshot.
-     * @param {boolean} [cubemapOutputFormat=false] - If <code>true</code> then the snapshot is saved as a cube map image, 
+     * @param {boolean} [cubemapOutputFormat=false] - If <code>true</code> then the snapshot is saved as a cube map image,
      *     otherwise is saved as an equirectangular image.
      * @param {boolean} [notify=true] - This value is passed on through the {@link Window.stillSnapshotTaken|stillSnapshotTaken}
      *     signal.
-     * @param {string} [filename=""] - If this parameter is not supplied, the image will be saved as "hifi-snap-by-&lt;user name&gt;-YYYY-MM-DD_HH-MM-SS".
-     *     If this parameter is <code>""</code> then the image will be saved as ".jpg".
-     *     Otherwise, the image will be saved to this filename, with an appended ".jpg".
+     * @param {string} [filename=""] - If this parameter is not supplied, the image will be saved as "hifi-snap-by-&lt;user
+     * name&gt;-YYYY-MM-DD_HH-MM-SS". If this parameter is <code>""</code> then the image will be saved as ".jpg". Otherwise,
+     * the image will be saved to this filename, with an appended ".jpg".
      */
-    void takeSecondaryCamera360Snapshot(const glm::vec3& cameraPosition, const bool& cubemapOutputFormat = false, const bool& notify = true, const QString& filename = QString());
+    void takeSecondaryCamera360Snapshot(const glm::vec3& cameraPosition, const bool& cubemapOutputFormat = false,
+                                        const bool& notify = true, const QString& filename = QString());
 
     /**jsdoc
      * Emit a {@link Window.connectionAdded|connectionAdded} or a {@link Window.connectionError|connectionError} signal that
@@ -500,7 +502,7 @@ public slots:
     int getLastDomainConnectionError() const;
 
     /**jsdoc
-     * Open a non-modal message box that can have a variety of button combinations. See also, 
+     * Open a non-modal message box that can have a variety of button combinations. See also,
      * {@link Window.updateMessageBox|updateMessageBox} and {@link Window.closeMessageBox|closeMessageBox}.
      * @function Window.openMessageBox
      * @param {string} title - The title to display for the message box.
@@ -525,15 +527,15 @@ public slots:
      * }
      * Window.messageBoxClosed.connect(onMessageBoxClosed);
      *
-     * messageBox = Window.openMessageBox("Reset Something", 
+     * messageBox = Window.openMessageBox("Reset Something",
      *     "Do you want to reset something?",
      *     resetButton + cancelButton, cancelButton);
      */
     int openMessageBox(QString title, QString text, int buttons, int defaultButton);
 
     /**jsdoc
-     * Open a URL in the Interface window or other application, depending on the URL's scheme. If the URL starts with 
-     * <code>hifi://</code> then that URL is navigated to in Interface, otherwise the URL is opened in the application the OS 
+     * Open a URL in the Interface window or other application, depending on the URL's scheme. If the URL starts with
+     * <code>hifi://</code> then that URL is navigated to in Interface, otherwise the URL is opened in the application the OS
      * associates with the URL's scheme (e.g., a Web browser for <code>http://</code>).
      * @function Window.openUrl
      * @param {string} url - The URL to open.
@@ -543,9 +545,9 @@ public slots:
     /**jsdoc
      * Open an Android activity and optionally return back to the scene when the activity is completed. <em>Android only.</em>
      * @function Window.openAndroidActivity
-     * @param {string} activityName - The name of the activity to open: one of <code>"Home"</code>, <code>"Login"</code>, or 
+     * @param {string} activityName - The name of the activity to open: one of <code>"Home"</code>, <code>"Login"</code>, or
      *     <code>"Privacy Policy"</code>.
-     * @param {boolean} backToScene - If <code>true</code>, the user is automatically returned back to the scene when the 
+     * @param {boolean} backToScene - If <code>true</code>, the user is automatically returned back to the scene when the
      *     activity is completed.
      */
     void openAndroidActivity(const QString& activityName, const bool backToScene);
@@ -579,7 +581,7 @@ private slots:
 signals:
 
     /**jsdoc
-     * Triggered when you change the domain you're visiting. <strong>Warning:</strong> Is not emitted if you go to a domain 
+     * Triggered when you change the domain you're visiting. <strong>Warning:</strong> Is not emitted if you go to a domain
      * that isn't running.
      * @function Window.domainChanged
      * @param {string} domainURL - The domain's URL.
@@ -628,7 +630,7 @@ signals:
     void interstitialModeChanged(bool interstitialMode);
 
     /**jsdoc
-     * Triggered when a still snapshot has been taken by calling {@link Window.takeSnapshot|takeSnapshot} with 
+     * Triggered when a still snapshot has been taken by calling {@link Window.takeSnapshot|takeSnapshot} with
      *     <code>includeAnimated = false</code> or {@link Window.takeSecondaryCameraSnapshot|takeSecondaryCameraSnapshot}.
      * @function Window.stillSnapshotTaken
      * @param {string} pathStillSnapshot - The path and name of the snapshot image file.
@@ -639,14 +641,14 @@ signals:
     void stillSnapshotTaken(const QString& pathStillSnapshot, bool notify);
 
     /**jsdoc
-    * Triggered when a still 360&deg; snapshot has been taken by calling 
-    *     {@link Window.takeSecondaryCamera360Snapshot|takeSecondaryCamera360Snapshot}.
-    * @function Window.snapshot360Taken
-    * @param {string} pathStillSnapshot - The path and name of the snapshot image file.
-    * @param {boolean} notify - The value of the <code>notify</code> parameter that {@link Window.takeSecondaryCamera360Snapshot|takeSecondaryCamera360Snapshot}
-    *     was called with.
-    * @returns {Signal}
-    */
+     * Triggered when a still 360&deg; snapshot has been taken by calling
+     *     {@link Window.takeSecondaryCamera360Snapshot|takeSecondaryCamera360Snapshot}.
+     * @function Window.snapshot360Taken
+     * @param {string} pathStillSnapshot - The path and name of the snapshot image file.
+     * @param {boolean} notify - The value of the <code>notify</code> parameter that {@link
+     * Window.takeSecondaryCamera360Snapshot|takeSecondaryCamera360Snapshot} was called with.
+     * @returns {Signal}
+     */
     void snapshot360Taken(const QString& path360Snapshot, bool notify);
 
     /**jsdoc
@@ -677,7 +679,6 @@ signals:
      */
     void processingGifCompleted(const QString& pathAnimatedSnapshot);
 
-
     /**jsdoc
      * Triggered when you've successfully made a user connection.
      * @function Window.connectionAdded
@@ -701,7 +702,6 @@ signals:
      * @returns {Signal}
      */
     void announcement(const QString& message);
-
 
     /**jsdoc
      * Triggered when the user closes a message box that was opened with {@link Window.openMessageBox|openMessageBox}.
@@ -753,7 +753,6 @@ signals:
      */
     void promptTextChanged(QString text);
 
-
     /**jsdoc
      * Triggered when the position or size of the Interface window changes.
      * @function Window.geometryChanged
@@ -782,7 +781,7 @@ private:
 
     int createMessageBox(QString title, QString text, int buttons, int defaultButton);
     QHash<int, QQuickItem*> _messageBoxes;
-    int _lastMessageBoxID{ -1 };
+    int _lastMessageBoxID { -1 };
 };
 
 #endif // hifi_WindowScriptingInterface_h

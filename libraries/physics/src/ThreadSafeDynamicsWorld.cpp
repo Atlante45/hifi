@@ -8,7 +8,8 @@
  * including commercial applications, and to alter it and redistribute it freely,
  * subject to the following restrictions:
  *
- * 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+ * 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you
+ * use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
  * 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
@@ -21,51 +22,46 @@
 
 #include "Profile.h"
 
-ThreadSafeDynamicsWorld::ThreadSafeDynamicsWorld(
-        btDispatcher* dispatcher,
-        btBroadphaseInterface* pairCache,
-        btConstraintSolver* constraintSolver,
-        btCollisionConfiguration* collisionConfiguration)
-    :   btDiscreteDynamicsWorld(dispatcher, pairCache, constraintSolver, collisionConfiguration) {
+ThreadSafeDynamicsWorld::ThreadSafeDynamicsWorld(btDispatcher* dispatcher, btBroadphaseInterface* pairCache,
+                                                 btConstraintSolver* constraintSolver,
+                                                 btCollisionConfiguration* collisionConfiguration) :
+    btDiscreteDynamicsWorld(dispatcher, pairCache, constraintSolver, collisionConfiguration) {
 }
 
-int ThreadSafeDynamicsWorld::stepSimulationWithSubstepCallback(btScalar timeStep, int maxSubSteps,
-                                                               btScalar fixedTimeStep, SubStepCallback onSubStep) {
+int ThreadSafeDynamicsWorld::stepSimulationWithSubstepCallback(btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep,
+                                                               SubStepCallback onSubStep) {
     DETAILED_PROFILE_RANGE(simulation_physics, "stepWithCB");
     BT_PROFILE("stepSimulationWithSubstepCallback");
     int subSteps = 0;
     if (maxSubSteps) {
-        //fixed timestep with interpolation
+        // fixed timestep with interpolation
         m_fixedTimeStep = fixedTimeStep;
         m_localTime += timeStep;
-        if (m_localTime >= fixedTimeStep)
-        {
-            subSteps = int( m_localTime / fixedTimeStep);
+        if (m_localTime >= fixedTimeStep) {
+            subSteps = int(m_localTime / fixedTimeStep);
             m_localTime -= subSteps * fixedTimeStep;
         }
     } else {
-        //variable timestep
+        // variable timestep
         fixedTimeStep = timeStep;
         m_localTime = m_latencyMotionStateInterpolation ? 0 : timeStep;
         m_fixedTimeStep = 0;
-        if (btFuzzyZero(timeStep))
-        {
+        if (btFuzzyZero(timeStep)) {
             subSteps = 0;
             maxSubSteps = 0;
-        } else
-        {
+        } else {
             subSteps = 1;
             maxSubSteps = 1;
         }
     }
 
     if (subSteps) {
-        //clamp the number of substeps, to prevent simulation grinding spiralling down to a halt
-        int clampedSimulationSteps = (subSteps > maxSubSteps)? maxSubSteps : subSteps;
+        // clamp the number of substeps, to prevent simulation grinding spiralling down to a halt
+        int clampedSimulationSteps = (subSteps > maxSubSteps) ? maxSubSteps : subSteps;
         _numSubsteps += clampedSimulationSteps;
         ObjectMotionState::setWorldSimulationStep(_numSubsteps);
 
-        saveKinematicState(fixedTimeStep*clampedSimulationSteps);
+        saveKinematicState(fixedTimeStep * clampedSimulationSteps);
 
         {
             DETAILED_PROFILE_RANGE(simulation_physics, "applyGravity");
@@ -73,7 +69,7 @@ int ThreadSafeDynamicsWorld::stepSimulationWithSubstepCallback(btScalar timeStep
             applyGravity();
         }
 
-        for (int i=0;i<clampedSimulationSteps;i++) {
+        for (int i = 0; i < clampedSimulationSteps; i++) {
             DETAILED_PROFILE_RANGE(simulation_physics, "substep");
             internalSingleStepSimulation(fixedTimeStep);
             onSubStep();
@@ -108,10 +104,12 @@ void ThreadSafeDynamicsWorld::synchronizeMotionState(btRigidBody* body) {
         return;
     }
     btTransform interpolatedTransform;
-    btTransformUtil::integrateTransform(body->getInterpolationWorldTransform(),
-        body->getInterpolationLinearVelocity(),body->getInterpolationAngularVelocity(),
-        (m_latencyMotionStateInterpolation && m_fixedTimeStep) ? m_localTime - m_fixedTimeStep : m_localTime*body->getHitFraction(),
-        interpolatedTransform);
+    btTransformUtil::integrateTransform(body->getInterpolationWorldTransform(), body->getInterpolationLinearVelocity(),
+                                        body->getInterpolationAngularVelocity(),
+                                        (m_latencyMotionStateInterpolation && m_fixedTimeStep)
+                                            ? m_localTime - m_fixedTimeStep
+                                            : m_localTime * body->getHitFraction(),
+                                        interpolatedTransform);
     body->getMotionState()->setWorldTransform(interpolatedTransform);
 }
 
@@ -123,8 +121,8 @@ void ThreadSafeDynamicsWorld::synchronizeMotionStates() {
     // NOTE: m_synchronizeAllMotionStates is 'false' by default for optimization.
     // See PhysicsEngine::init() where we call _dynamicsWorld->setForceUpdateAllAabbs(false)
     if (m_synchronizeAllMotionStates) {
-        //iterate  over all collision objects
-        for (int i=0;i<m_collisionObjects.size();i++) {
+        // iterate  over all collision objects
+        for (int i = 0; i < m_collisionObjects.size(); i++) {
             btCollisionObject* colObj = m_collisionObjects[i];
             btRigidBody* body = btRigidBody::upcast(colObj);
             if (body && body->getMotionState()) {
@@ -132,13 +130,13 @@ void ThreadSafeDynamicsWorld::synchronizeMotionStates() {
                 _changedMotionStates.push_back(static_cast<ObjectMotionState*>(body->getMotionState()));
             }
         }
-    } else  {
-        //iterate over all active rigid bodies
+    } else {
+        // iterate over all active rigid bodies
         // TODO? if this becomes a performance bottleneck we could derive our own SimulationIslandManager
         // that remembers a list of objects deactivated last step
         _activeStates.clear();
         _deactivatedStates.clear();
-        for (int i=0;i<m_nonStaticRigidBodies.size();i++) {
+        for (int i = 0; i < m_nonStaticRigidBodies.size(); i++) {
             btRigidBody* body = m_nonStaticRigidBodies[i];
             ObjectMotionState* motionState = static_cast<ObjectMotionState*>(body->getMotionState());
             if (motionState) {
@@ -159,7 +157,7 @@ void ThreadSafeDynamicsWorld::synchronizeMotionStates() {
 void ThreadSafeDynamicsWorld::saveKinematicState(btScalar timeStep) {
     DETAILED_PROFILE_RANGE(simulation_physics, "saveKinematicState");
     BT_PROFILE("saveKinematicState");
-    for (int i=0;i<m_nonStaticRigidBodies.size();i++) {
+    for (int i = 0; i < m_nonStaticRigidBodies.size(); i++) {
         btRigidBody* body = m_nonStaticRigidBodies[i];
         if (body && body->isKinematicObject() && body->getActivationState() != ISLAND_SLEEPING) {
             if (body->getMotionState()) {

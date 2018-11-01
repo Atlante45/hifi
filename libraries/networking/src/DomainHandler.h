@@ -15,20 +15,20 @@
 #include <QtCore/QJsonObject>
 #include <QtCore/QObject>
 #include <QtCore/QTimer>
-#include <QtCore/QUuid>
 #include <QtCore/QUrl>
+#include <QtCore/QUuid>
 #include <QtNetwork/QHostInfo>
 
-#include <shared/ReadWriteLockable.h>
 #include <SettingHandle.h>
+#include <shared/ReadWriteLockable.h>
 
 #include "HifiSockAddr.h"
-#include "NetworkPeer.h"
 #include "NLPacket.h"
 #include "NLPacketList.h"
+#include "NetworkPeer.h"
+#include "NetworkingConstants.h"
 #include "Node.h"
 #include "ReceivedMessage.h"
-#include "NetworkingConstants.h"
 
 const unsigned short DEFAULT_DOMAIN_SERVER_PORT = 40102;
 const unsigned short DEFAULT_DOMAIN_SERVER_DTLS_PORT = 40103;
@@ -53,7 +53,7 @@ public:
 
     QString getHostname() const { return _domainURL.host(); }
 
-    QUrl getErrorDomainURL(){ return _errorDomainURL; }
+    QUrl getErrorDomainURL() { return _errorDomainURL; }
     void setErrorDomainURL(const QUrl& url);
 
     int getLastDomainConnectionError() { return _lastDomainConnectionError; }
@@ -231,7 +231,7 @@ private:
     QString _pendingPath;
     QTimer _settingsTimer;
     mutable ReadWriteLockable _interstitialModeSettingLock;
-    Setting::Handle<bool> _enableInterstitialMode{ "enableInterstitialMode", true };
+    Setting::Handle<bool> _enableInterstitialMode { "enableInterstitialMode", true };
 
     QSet<QString> _domainConnectionRefusals;
     bool _hasCheckedForAccessToken { false };
@@ -243,7 +243,7 @@ private:
     std::map<QString, QString> _namedPaths;
 
     // domain connection error upon connection refusal.
-    int _lastDomainConnectionError{ -1 };
+    int _lastDomainConnectionError { -1 };
 };
 
 const QString DOMAIN_SPAWNING_POINT { "/0, -10, 0" };

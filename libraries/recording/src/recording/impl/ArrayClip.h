@@ -16,7 +16,7 @@
 
 namespace recording {
 
-template <typename T>
+template<typename T>
 class ArrayClip : public Clip {
 public:
     virtual float duration() const override {
@@ -44,10 +44,7 @@ public:
     virtual void seekFrameTime(Frame::Time offset) override {
         Locker lock(_mutex);
         auto itr = std::lower_bound(_frames.begin(), _frames.end(), offset,
-                [](const T& a, Frame::Time b)->bool {
-                return a.timeOffset < b;
-            }
-        );
+                                    [](const T& a, Frame::Time b) -> bool { return a.timeOffset < b; });
         _frameIndex = itr - _frames.begin();
     }
 
@@ -86,15 +83,13 @@ public:
     }
 
 protected:
-    virtual void reset() override {
-        _frameIndex = 0;
-    }
+    virtual void reset() override { _frameIndex = 0; }
 
     virtual FrameConstPointer readFrame(size_t index) const = 0;
     std::vector<T> _frames;
     mutable size_t _frameIndex { 0 };
 };
 
-}
+} // namespace recording
 
 #endif

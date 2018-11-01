@@ -9,7 +9,9 @@
 
 #include <QtQuick/QQuickRenderControl>
 
-namespace hifi { namespace qml { namespace impl {
+namespace hifi {
+namespace qml {
+namespace impl {
 
 class RenderControl : public QQuickRenderControl {
 public:
@@ -20,7 +22,9 @@ protected:
     QWindow* renderWindow(QPoint* offset) override;
 
 private:
-    QWindow* _renderWindow{ nullptr };
+    QWindow* _renderWindow { nullptr };
 };
 
-}}}  // namespace hifi::qml::impl
+} // namespace impl
+} // namespace qml
+} // namespace hifi

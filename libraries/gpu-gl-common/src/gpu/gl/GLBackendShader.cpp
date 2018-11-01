@@ -5,9 +5,9 @@
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
+#include <gl/GLShaders.h>
 #include "GLBackend.h"
 #include "GLShader.h"
-#include <gl/GLShaders.h>
 
 using namespace gpu;
 using namespace gpu::gl;
@@ -19,7 +19,7 @@ static_assert(Shader::Type::NUM_DOMAINS == NUM_SHADER_DOMAINS, "GL shader domain
 
 // GL Shader type enums
 // Must match the order of type specified in gpu::Shader::Type
-static const std::array<GLenum, NUM_SHADER_DOMAINS> SHADER_DOMAINS{ {
+static const std::array<GLenum, NUM_SHADER_DOMAINS> SHADER_DOMAINS { {
     GL_VERTEX_SHADER,
     GL_FRAGMENT_SHADER,
     GL_GEOMETRY_SHADER,
@@ -52,11 +52,12 @@ GLShader* GLBackend::compileBackendShader(const Shader& shader, const Shader::Co
         if (handler) {
             bool retest = true;
             std::string currentSrc = shaderSource;
-            // When a Handler is specified, we can try multiple times to build the shader and let the handler change the source if the compilation fails.
-            // The retest bool is set to false as soon as the compilation succeed to exit the while loop.
-            // The handler tells us if we should retry or not while returning a modified version of the source.
+            // When a Handler is specified, we can try multiple times to build the shader and let the handler change the source
+            // if the compilation fails. The retest bool is set to false as soon as the compilation succeed to exit the while
+            // loop. The handler tells us if we should retry or not while returning a modified version of the source.
             while (retest) {
-                bool result = ::gl::compileShader(shaderDomain, currentSrc, shaderObject.glshader, compilationLogs[index].message);
+                bool result = ::gl::compileShader(shaderDomain, currentSrc, shaderObject.glshader,
+                                                  compilationLogs[index].message);
                 compilationLogs[index].compiled = result;
                 if (!result) {
                     std::string newSrc;
@@ -67,11 +68,13 @@ GLShader* GLBackend::compileBackendShader(const Shader& shader, const Shader::Co
                 }
             }
         } else {
-            compilationLogs[index].compiled = ::gl::compileShader(shaderDomain, shaderSource, shaderObject.glshader, compilationLogs[index].message);
+            compilationLogs[index].compiled = ::gl::compileShader(shaderDomain, shaderSource, shaderObject.glshader,
+                                                                  compilationLogs[index].message);
         }
 
         if (!compilationLogs[index].compiled) {
-            qCWarning(gpugllogging) << "GLBackend::compileBackendProgram - Shader didn't compile:\n" << compilationLogs[index].message.c_str();
+            qCWarning(gpugllogging) << "GLBackend::compileBackendProgram - Shader didn't compile:\n"
+                                    << compilationLogs[index].message.c_str();
             shader.setCompilationLogs(compilationLogs);
             return nullptr;
         }
@@ -106,7 +109,7 @@ GLShader* GLBackend::compileBackendProgram(const Shader& program, const Shader::
 
         CachedShader cachedBinary;
         {
-            Lock shaderCacheLock{ _shaderBinaryCache._mutex };
+            Lock shaderCacheLock { _shaderBinaryCache._mutex };
             if (_shaderBinaryCache._binaries.count(hash) != 0) {
                 cachedBinary = _shaderBinaryCache._binaries[hash];
             }
@@ -120,12 +123,12 @@ GLShader* GLBackend::compileBackendProgram(const Shader& program, const Shader::
                 ++gpuBinaryShadersLoaded;
             } else {
                 cachedBinary = CachedShader();
-                std::unique_lock<std::mutex> shaderCacheLock{ _shaderBinaryCache._mutex };
+                std::unique_lock<std::mutex> shaderCacheLock { _shaderBinaryCache._mutex };
                 _shaderBinaryCache._binaries.erase(hash);
             }
         }
 
-        // If we have no program, then either no cached binary, or the binary failed to load 
+        // If we have no program, then either no cached binary, or the binary failed to load
         // (perhaps a GPU driver update invalidated the cache)
         if (0 == glprogram) {
             // Let's go through every shaders and make sure they are ready to go
@@ -136,9 +139,11 @@ GLShader* GLBackend::compileBackendProgram(const Shader& program, const Shader::
                 if (object) {
                     shaderGLObjects.push_back(object->_shaderObjects[index].glshader);
                 } else {
-                    qCWarning(gpugllogging) << "GLBackend::compileBackendProgram - One of the shaders of the program is not compiled?";
+                    qCWarning(gpugllogging)
+                        << "GLBackend::compileBackendProgram - One of the shaders of the program is not compiled?";
                     compilationLogs[index].compiled = false;
-                    compilationLogs[index].message = std::string("Failed to compile, one of the shaders of the program is not compiled ?");
+                    compilationLogs[index].message = std::string(
+                        "Failed to compile, one of the shaders of the program is not compiled ?");
                     program.setCompilationLogs(compilationLogs);
                     return nullptr;
                 }
@@ -147,8 +152,9 @@ GLShader* GLBackend::compileBackendProgram(const Shader& program, const Shader::
             glprogram = ::gl::buildProgram(shaderGLObjects);
 
             if (!::gl::linkProgram(glprogram, compilationLogs[index].message)) {
-                qCWarning(gpugllogging) << "GLBackend::compileBackendProgram - Program didn't link:\n" << compilationLogs[index].message.c_str();
-                compilationLogs[index].compiled = false;                
+                qCWarning(gpugllogging) << "GLBackend::compileBackendProgram - Program didn't link:\n"
+                                        << compilationLogs[index].message.c_str();
+                compilationLogs[index].compiled = false;
                 glDeleteProgram(glprogram);
                 glprogram = 0;
                 return nullptr;
@@ -157,13 +163,14 @@ GLShader* GLBackend::compileBackendProgram(const Shader& program, const Shader::
             if (!cachedBinary) {
                 ::gl::getProgramBinary(glprogram, cachedBinary);
                 cachedBinary.source = programSource;
-                std::unique_lock<std::mutex> shaderCacheLock{ _shaderBinaryCache._mutex };
+                std::unique_lock<std::mutex> shaderCacheLock { _shaderBinaryCache._mutex };
                 _shaderBinaryCache._binaries[hash] = cachedBinary;
             }
         }
 
         if (glprogram == 0) {
-            qCWarning(gpugllogging) << "GLBackend::compileBackendProgram - Program didn't link:\n" << compilationLogs[index].message.c_str(); 
+            qCWarning(gpugllogging) << "GLBackend::compileBackendProgram - Program didn't link:\n"
+                                    << compilationLogs[index].message.c_str();
             program.setCompilationLogs(compilationLogs);
             return nullptr;
         }
@@ -190,9 +197,9 @@ GLint GLBackend::getRealUniformLocation(GLint location) const {
     auto& shader = _pipeline._programShader->_shaderObjects[index];
     auto itr = shader.uniformRemap.find(location);
     if (itr == shader.uniformRemap.end()) {
-        // This shouldn't happen, because we use reflection to determine all the possible 
+        // This shouldn't happen, because we use reflection to determine all the possible
         // uniforms.  If someone is requesting a uniform that isn't in the remapping structure
-        // that's a bug from the calling code, because it means that location wasn't in the 
+        // that's a bug from the calling code, because it means that location wasn't in the
         // reflection
         qWarning() << "Unexpected location requested for shader: #" << location;
         return INVALID_UNIFORM_INDEX;
@@ -210,7 +217,6 @@ void GLBackend::postLinkProgram(ShaderObject& shaderObject, const Shader& progra
         uniformRemap[entry.second] = INVALID_UNIFORM_INDEX;
     }
 
-
     // Get the actual uniform locations from the shader
     const auto names = Shader::Reflection::getNames(expectedUniforms);
     const auto uniforms = ::gl::Uniform::load(glprogram, names);
@@ -226,111 +232,111 @@ void GLBackend::postLinkProgram(ShaderObject& shaderObject, const Shader& progra
 
 GLBackend::ElementResource GLBackend::getFormatFromGLUniform(GLenum gltype) {
     switch (gltype) {
-    case GL_FLOAT:
-        return ElementResource(Element(SCALAR, gpu::FLOAT, UNIFORM), Resource::BUFFER);
-    case GL_FLOAT_VEC2:
-        return ElementResource(Element(VEC2, gpu::FLOAT, UNIFORM), Resource::BUFFER);
-    case GL_FLOAT_VEC3:
-        return ElementResource(Element(VEC3, gpu::FLOAT, UNIFORM), Resource::BUFFER);
-    case GL_FLOAT_VEC4:
-        return ElementResource(Element(VEC4, gpu::FLOAT, UNIFORM), Resource::BUFFER);
+        case GL_FLOAT:
+            return ElementResource(Element(SCALAR, gpu::FLOAT, UNIFORM), Resource::BUFFER);
+        case GL_FLOAT_VEC2:
+            return ElementResource(Element(VEC2, gpu::FLOAT, UNIFORM), Resource::BUFFER);
+        case GL_FLOAT_VEC3:
+            return ElementResource(Element(VEC3, gpu::FLOAT, UNIFORM), Resource::BUFFER);
+        case GL_FLOAT_VEC4:
+            return ElementResource(Element(VEC4, gpu::FLOAT, UNIFORM), Resource::BUFFER);
 
-    case GL_INT:
-        return ElementResource(Element(SCALAR, gpu::INT32, UNIFORM), Resource::BUFFER);
-    case GL_INT_VEC2:
-        return ElementResource(Element(VEC2, gpu::INT32, UNIFORM), Resource::BUFFER);
-    case GL_INT_VEC3:
-        return ElementResource(Element(VEC3, gpu::INT32, UNIFORM), Resource::BUFFER);
-    case GL_INT_VEC4:
-        return ElementResource(Element(VEC4, gpu::INT32, UNIFORM), Resource::BUFFER);
+        case GL_INT:
+            return ElementResource(Element(SCALAR, gpu::INT32, UNIFORM), Resource::BUFFER);
+        case GL_INT_VEC2:
+            return ElementResource(Element(VEC2, gpu::INT32, UNIFORM), Resource::BUFFER);
+        case GL_INT_VEC3:
+            return ElementResource(Element(VEC3, gpu::INT32, UNIFORM), Resource::BUFFER);
+        case GL_INT_VEC4:
+            return ElementResource(Element(VEC4, gpu::INT32, UNIFORM), Resource::BUFFER);
 
-    case GL_UNSIGNED_INT:
-        return ElementResource(Element(SCALAR, gpu::UINT32, UNIFORM), Resource::BUFFER);
-    case GL_UNSIGNED_INT_VEC2:
-        return ElementResource(Element(VEC2, gpu::UINT32, UNIFORM), Resource::BUFFER);
-    case GL_UNSIGNED_INT_VEC3:
-        return ElementResource(Element(VEC3, gpu::UINT32, UNIFORM), Resource::BUFFER);
-    case GL_UNSIGNED_INT_VEC4:
-        return ElementResource(Element(VEC4, gpu::UINT32, UNIFORM), Resource::BUFFER);
+        case GL_UNSIGNED_INT:
+            return ElementResource(Element(SCALAR, gpu::UINT32, UNIFORM), Resource::BUFFER);
+        case GL_UNSIGNED_INT_VEC2:
+            return ElementResource(Element(VEC2, gpu::UINT32, UNIFORM), Resource::BUFFER);
+        case GL_UNSIGNED_INT_VEC3:
+            return ElementResource(Element(VEC3, gpu::UINT32, UNIFORM), Resource::BUFFER);
+        case GL_UNSIGNED_INT_VEC4:
+            return ElementResource(Element(VEC4, gpu::UINT32, UNIFORM), Resource::BUFFER);
 
-    case GL_BOOL:
-        return ElementResource(Element(SCALAR, gpu::BOOL, UNIFORM), Resource::BUFFER);
-    case GL_BOOL_VEC2:
-        return ElementResource(Element(VEC2, gpu::BOOL, UNIFORM), Resource::BUFFER);
-    case GL_BOOL_VEC3:
-        return ElementResource(Element(VEC3, gpu::BOOL, UNIFORM), Resource::BUFFER);
-    case GL_BOOL_VEC4:
-        return ElementResource(Element(VEC4, gpu::BOOL, UNIFORM), Resource::BUFFER);
+        case GL_BOOL:
+            return ElementResource(Element(SCALAR, gpu::BOOL, UNIFORM), Resource::BUFFER);
+        case GL_BOOL_VEC2:
+            return ElementResource(Element(VEC2, gpu::BOOL, UNIFORM), Resource::BUFFER);
+        case GL_BOOL_VEC3:
+            return ElementResource(Element(VEC3, gpu::BOOL, UNIFORM), Resource::BUFFER);
+        case GL_BOOL_VEC4:
+            return ElementResource(Element(VEC4, gpu::BOOL, UNIFORM), Resource::BUFFER);
 
-    case GL_FLOAT_MAT2:
-        return ElementResource(Element(gpu::MAT2, gpu::FLOAT, UNIFORM), Resource::BUFFER);
-    case GL_FLOAT_MAT3:
-        return ElementResource(Element(MAT3, gpu::FLOAT, UNIFORM), Resource::BUFFER);
-    case GL_FLOAT_MAT4:
-        return ElementResource(Element(MAT4, gpu::FLOAT, UNIFORM), Resource::BUFFER);
+        case GL_FLOAT_MAT2:
+            return ElementResource(Element(gpu::MAT2, gpu::FLOAT, UNIFORM), Resource::BUFFER);
+        case GL_FLOAT_MAT3:
+            return ElementResource(Element(MAT3, gpu::FLOAT, UNIFORM), Resource::BUFFER);
+        case GL_FLOAT_MAT4:
+            return ElementResource(Element(MAT4, gpu::FLOAT, UNIFORM), Resource::BUFFER);
 
-    case GL_SAMPLER_2D:
-        return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER), Resource::TEXTURE_2D);
-    case GL_SAMPLER_3D:
-        return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER), Resource::TEXTURE_3D);
-    case GL_SAMPLER_CUBE:
-        return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER), Resource::TEXTURE_CUBE);
-    case GL_SAMPLER_2D_MULTISAMPLE:
-        return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER_MULTISAMPLE), Resource::TEXTURE_2D);
-    case GL_SAMPLER_2D_ARRAY:
-        return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER), Resource::TEXTURE_2D_ARRAY);
-    case GL_SAMPLER_2D_MULTISAMPLE_ARRAY:
-        return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER_MULTISAMPLE), Resource::TEXTURE_2D_ARRAY);
-    case GL_SAMPLER_2D_SHADOW:
-        return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER_SHADOW), Resource::TEXTURE_2D);
-    case GL_SAMPLER_CUBE_SHADOW:
-        return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER_SHADOW), Resource::TEXTURE_CUBE);
-    case GL_SAMPLER_2D_ARRAY_SHADOW:
-        return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER_SHADOW), Resource::TEXTURE_2D_ARRAY);
-    case GL_SAMPLER_BUFFER:
-        return ElementResource(Element(SCALAR, gpu::FLOAT, RESOURCE_BUFFER), Resource::BUFFER);
-    case GL_INT_SAMPLER_2D:
-        return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER), Resource::TEXTURE_2D);
-    case GL_INT_SAMPLER_2D_MULTISAMPLE:
-        return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER_MULTISAMPLE), Resource::TEXTURE_2D);
-    case GL_INT_SAMPLER_3D:
-        return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER), Resource::TEXTURE_3D);
-    case GL_INT_SAMPLER_CUBE:
-        return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER), Resource::TEXTURE_CUBE);
-    case GL_INT_SAMPLER_2D_ARRAY:
-        return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER), Resource::TEXTURE_2D_ARRAY);
-    case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
-        return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER_MULTISAMPLE), Resource::TEXTURE_2D_ARRAY);
-    case GL_UNSIGNED_INT_SAMPLER_2D:
-        return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER), Resource::TEXTURE_2D);
-    case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE:
-        return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER_MULTISAMPLE), Resource::TEXTURE_2D);
-    case GL_UNSIGNED_INT_SAMPLER_3D:
-        return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER), Resource::TEXTURE_3D);
-    case GL_UNSIGNED_INT_SAMPLER_CUBE:
-        return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER), Resource::TEXTURE_CUBE);
-    case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
-        return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER), Resource::TEXTURE_2D_ARRAY);
-    case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
-        return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER_MULTISAMPLE), Resource::TEXTURE_2D_ARRAY);
+        case GL_SAMPLER_2D:
+            return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER), Resource::TEXTURE_2D);
+        case GL_SAMPLER_3D:
+            return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER), Resource::TEXTURE_3D);
+        case GL_SAMPLER_CUBE:
+            return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER), Resource::TEXTURE_CUBE);
+        case GL_SAMPLER_2D_MULTISAMPLE:
+            return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER_MULTISAMPLE), Resource::TEXTURE_2D);
+        case GL_SAMPLER_2D_ARRAY:
+            return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER), Resource::TEXTURE_2D_ARRAY);
+        case GL_SAMPLER_2D_MULTISAMPLE_ARRAY:
+            return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER_MULTISAMPLE), Resource::TEXTURE_2D_ARRAY);
+        case GL_SAMPLER_2D_SHADOW:
+            return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER_SHADOW), Resource::TEXTURE_2D);
+        case GL_SAMPLER_CUBE_SHADOW:
+            return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER_SHADOW), Resource::TEXTURE_CUBE);
+        case GL_SAMPLER_2D_ARRAY_SHADOW:
+            return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER_SHADOW), Resource::TEXTURE_2D_ARRAY);
+        case GL_SAMPLER_BUFFER:
+            return ElementResource(Element(SCALAR, gpu::FLOAT, RESOURCE_BUFFER), Resource::BUFFER);
+        case GL_INT_SAMPLER_2D:
+            return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER), Resource::TEXTURE_2D);
+        case GL_INT_SAMPLER_2D_MULTISAMPLE:
+            return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER_MULTISAMPLE), Resource::TEXTURE_2D);
+        case GL_INT_SAMPLER_3D:
+            return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER), Resource::TEXTURE_3D);
+        case GL_INT_SAMPLER_CUBE:
+            return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER), Resource::TEXTURE_CUBE);
+        case GL_INT_SAMPLER_2D_ARRAY:
+            return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER), Resource::TEXTURE_2D_ARRAY);
+        case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+            return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER_MULTISAMPLE), Resource::TEXTURE_2D_ARRAY);
+        case GL_UNSIGNED_INT_SAMPLER_2D:
+            return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER), Resource::TEXTURE_2D);
+        case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE:
+            return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER_MULTISAMPLE), Resource::TEXTURE_2D);
+        case GL_UNSIGNED_INT_SAMPLER_3D:
+            return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER), Resource::TEXTURE_3D);
+        case GL_UNSIGNED_INT_SAMPLER_CUBE:
+            return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER), Resource::TEXTURE_CUBE);
+        case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
+            return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER), Resource::TEXTURE_2D_ARRAY);
+        case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+            return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER_MULTISAMPLE), Resource::TEXTURE_2D_ARRAY);
 
 #if !defined(USE_GLES)
-    case GL_SAMPLER_1D:
-        return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER), Resource::TEXTURE_1D);
-    case GL_SAMPLER_1D_ARRAY:
-        return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER), Resource::TEXTURE_1D_ARRAY);
-    case GL_INT_SAMPLER_1D:
-        return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER), Resource::TEXTURE_1D);
-    case GL_INT_SAMPLER_1D_ARRAY:
-        return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER), Resource::TEXTURE_1D_ARRAY);
-    case GL_UNSIGNED_INT_SAMPLER_1D:
-        return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER), Resource::TEXTURE_1D);
-    case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
-        return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER), Resource::TEXTURE_1D_ARRAY);
+        case GL_SAMPLER_1D:
+            return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER), Resource::TEXTURE_1D);
+        case GL_SAMPLER_1D_ARRAY:
+            return ElementResource(Element(SCALAR, gpu::FLOAT, SAMPLER), Resource::TEXTURE_1D_ARRAY);
+        case GL_INT_SAMPLER_1D:
+            return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER), Resource::TEXTURE_1D);
+        case GL_INT_SAMPLER_1D_ARRAY:
+            return ElementResource(Element(SCALAR, gpu::INT32, SAMPLER), Resource::TEXTURE_1D_ARRAY);
+        case GL_UNSIGNED_INT_SAMPLER_1D:
+            return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER), Resource::TEXTURE_1D);
+        case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
+            return ElementResource(Element(SCALAR, gpu::UINT32, SAMPLER), Resource::TEXTURE_1D_ARRAY);
 #endif
 
-    default:
-        return ElementResource(Element(), Resource::BUFFER);
+        default:
+            return ElementResource(Element(), Resource::BUFFER);
     }
 
     // Non-covered types
@@ -403,4 +409,3 @@ void GLBackend::initShaderBinaryCache() {
 void GLBackend::killShaderBinaryCache() {
     ::gl::saveShaderCache(_shaderBinaryCache._binaries);
 }
-

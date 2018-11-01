@@ -69,5 +69,4 @@ private:
 };
 using ConicalViewFrustums = std::vector<ConicalViewFrustum>;
 
-
 #endif /* hifi_ConicalViewFrustum_h */

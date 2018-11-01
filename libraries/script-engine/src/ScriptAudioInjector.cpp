@@ -30,9 +30,7 @@ void injectorFromScriptValue(const QScriptValue& object, ScriptAudioInjector*& o
     out = qobject_cast<ScriptAudioInjector*>(object.toQObject());
 }
 
-ScriptAudioInjector::ScriptAudioInjector(const AudioInjectorPointer& injector) :
-    _injector(injector)
-{
+ScriptAudioInjector::ScriptAudioInjector(const AudioInjectorPointer& injector) : _injector(injector) {
     QObject::connect(injector.data(), &AudioInjector::finished, this, &ScriptAudioInjector::finished);
 }
 

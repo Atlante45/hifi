@@ -12,14 +12,14 @@
 #ifndef hifi_AccountManager_h
 #define hifi_AccountManager_h
 
+#include <QUrlQuery>
 #include <QtCore/QByteArray>
 #include <QtCore/QObject>
 #include <QtCore/QUrl>
 #include <QtNetwork/QNetworkReply>
-#include <QUrlQuery>
 
-#include "NetworkingConstants.h"
 #include "NetworkAccessManager.h"
+#include "NetworkingConstants.h"
 
 #include "DataServerAccountInfo.h"
 #include "SharedUtil.h"
@@ -39,11 +39,7 @@ public:
 };
 
 namespace AccountManagerAuth {
-    enum Type {
-        None,
-        Required,
-        Optional
-    };
+enum Type { None, Required, Optional };
 }
 
 Q_DECLARE_METATYPE(AccountManagerAuth::Type);
@@ -60,14 +56,11 @@ class AccountManager : public QObject, public Dependency {
 public:
     AccountManager(UserAgentGetter userAgentGetter = DEFAULT_USER_AGENT_GETTER);
 
-    Q_INVOKABLE void sendRequest(const QString& path,
-                                 AccountManagerAuth::Type authType,
+    Q_INVOKABLE void sendRequest(const QString& path, AccountManagerAuth::Type authType,
                                  QNetworkAccessManager::Operation operation = QNetworkAccessManager::GetOperation,
                                  const JSONCallbackParameters& callbackParams = JSONCallbackParameters(),
-                                 const QByteArray& dataByteArray = QByteArray(),
-                                 QHttpMultiPart* dataMultiPart = NULL,
-                                 const QVariantMap& propertyMap = QVariantMap(),
-                                 QUrlQuery query = QUrlQuery());
+                                 const QByteArray& dataByteArray = QByteArray(), QHttpMultiPart* dataMultiPart = NULL,
+                                 const QVariantMap& propertyMap = QVariantMap(), QUrlQuery query = QUrlQuery());
 
     void setIsAgent(bool isAgent) { _isAgent = isAgent; }
 
@@ -84,7 +77,7 @@ public:
     void requestProfile();
 
     DataServerAccountInfo& getAccountInfo() { return _accountInfo; }
-    void setAccountInfo(const DataServerAccountInfo &newAccountInfo);
+    void setAccountInfo(const DataServerAccountInfo& newAccountInfo);
 
     static QJsonObject dataObjectFromResponse(QNetworkReply* requestReply);
 

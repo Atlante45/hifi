@@ -9,11 +9,11 @@
 //
 #include "NullDisplayPlugin.h"
 
-#include <QtGui/QImage>
-#include <ui-plugins/PluginContainer.h>
 #include <FramebufferCache.h>
-#include <gpu/Frame.h>
 #include <gpu/Context.h>
+#include <gpu/Frame.h>
+#include <ui-plugins/PluginContainer.h>
+#include <QtGui/QImage>
 
 const QString NullDisplayPlugin::NAME("NullDisplayPlugin");
 

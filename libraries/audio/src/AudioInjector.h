@@ -24,17 +24,16 @@
 
 #include <NLPacket.h>
 
+#include "AudioFOA.h"
+#include "AudioHRTF.h"
 #include "AudioInjectorLocalBuffer.h"
 #include "AudioInjectorOptions.h"
-#include "AudioHRTF.h"
-#include "AudioFOA.h"
 #include "Sound.h"
 
 class AbstractAudioInterface;
 class AudioInjectorManager;
 class AudioInjector;
 using AudioInjectorPointer = QSharedPointer<AudioInjector>;
-
 
 enum class AudioInjectorState : uint8_t {
     NotFinished = 0,
@@ -44,8 +43,8 @@ enum class AudioInjectorState : uint8_t {
     NetworkInjectionFinished = 8
 };
 
-AudioInjectorState operator& (AudioInjectorState lhs, AudioInjectorState rhs);
-AudioInjectorState& operator|= (AudioInjectorState& lhs, AudioInjectorState rhs);
+AudioInjectorState operator&(AudioInjectorState lhs, AudioInjectorState rhs);
+AudioInjectorState& operator|=(AudioInjectorState& lhs, AudioInjectorState rhs);
 
 // In order to make scripting cleaner for the AudioInjector, the script now holds on to the AudioInjector object
 // until it dies.
@@ -72,12 +71,12 @@ public:
     bool isStereo() const { return _options.stereo; }
     bool isAmbisonic() const { return _options.ambisonic; }
 
-    bool stateHas(AudioInjectorState state) const ;
+    bool stateHas(AudioInjectorState state) const;
     static void setLocalAudioInterface(AbstractAudioInterface* audioInterface) { _localAudioInterface = audioInterface; }
     static AudioInjectorPointer playSoundAndDelete(const QByteArray& buffer, const AudioInjectorOptions options);
     static AudioInjectorPointer playSound(const QByteArray& buffer, const AudioInjectorOptions options);
-    static AudioInjectorPointer playSound(SharedSoundPointer sound, const float volume,
-                                          const float stretchFactor, const glm::vec3 position);
+    static AudioInjectorPointer playSound(SharedSoundPointer sound, const float volume, const float stretchFactor,
+                                          const glm::vec3 position);
 
 public slots:
     void restart();
@@ -100,7 +99,7 @@ signals:
 
 private:
     int64_t injectNextFrame();
-    bool inject(bool(AudioInjectorManager::*injection)(const AudioInjectorPointer&));
+    bool inject(bool (AudioInjectorManager::*injection)(const AudioInjectorPointer&));
     bool injectLocally();
     void deleteLocalBuffer();
 

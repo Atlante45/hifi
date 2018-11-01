@@ -9,14 +9,13 @@
 
 #include "SwingTwistConstraint.h"
 
-#include <algorithm>
 #include <math.h>
+#include <algorithm>
 
-#include <GeometryUtil.h>
 #include <GLMHelpers.h>
+#include <GeometryUtil.h>
 #include <NumericalConstants.h>
 #include "AnimUtil.h"
-
 
 const float MIN_MINDOT = -0.999f;
 const float MAX_MINDOT = 1.0f;
@@ -52,7 +51,7 @@ void SwingTwistConstraint::SwingLimitFunction::setMinDots(const std::vector<floa
         // we have enough data points
         int trueNumDots = numDots;
         int numFiller = 0;
-        while(trueNumDots < MIN_NUM_DOTS) {
+        while (trueNumDots < MIN_NUM_DOTS) {
             numFiller++;
             trueNumDots += numDots;
         }
@@ -190,12 +189,11 @@ float SwingTwistConstraint::SwingLimitFunction::getMinDot(float theta) const {
 }
 
 SwingTwistConstraint::SwingTwistConstraint() :
-        RotationConstraint(),
-        _swingLimitFunction(),
-        _minTwist(-PI),
-        _maxTwist(PI),
-        _lastTwistBoundary(LAST_CLAMP_NO_BOUNDARY)
-{
+    RotationConstraint(),
+    _swingLimitFunction(),
+    _minTwist(-PI),
+    _maxTwist(PI),
+    _lastTwistBoundary(LAST_CLAMP_NO_BOUNDARY) {
 }
 
 void SwingTwistConstraint::setSwingLimits(std::vector<float> minDots) {

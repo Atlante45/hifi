@@ -11,8 +11,8 @@
 
 #include "FilterTask.h"
 
-#include <algorithm>
 #include <assert.h>
+#include <algorithm>
 
 #include <OctreeUtils.h>
 #include <PerfStat.h>
@@ -45,19 +45,18 @@ void SliceItems::run(const RenderContextPointer& renderContext, const ItemBounds
     outItems.clear();
     std::static_pointer_cast<Config>(renderContext->jobConfig)->setNumItems((int)inItems.size());
 
-    if (_rangeOffset < 0) return;
+    if (_rangeOffset < 0)
+        return;
 
     int maxItemNum = std::min(_rangeOffset + _rangeLength, (int)inItems.size());
-
 
     for (int i = _rangeOffset; i < maxItemNum; i++) {
         outItems.emplace_back(inItems[i]);
     }
-
 }
 
 void SelectItems::run(const RenderContextPointer& renderContext, const Inputs& inputs, ItemBounds& outItems) {
-    auto selectionName{ _name };
+    auto selectionName { _name };
     if (!inputs.get2().empty()) {
         selectionName = inputs.get2();
     }
@@ -74,7 +73,7 @@ void SelectItems::run(const RenderContextPointer& renderContext, const Inputs& i
     }
 
     if (!selectedItems.empty()) {
-        outItems.reserve(outItems.size()+selectedItems.size());
+        outItems.reserve(outItems.size() + selectedItems.size());
 
         for (auto src : inItems) {
             if (selection.contains(src.id)) {
@@ -90,26 +89,28 @@ void SelectSortItems::run(const RenderContextPointer& renderContext, const ItemB
     outItems.clear();
 
     if (!selectedItems.empty()) {
-        struct Pair { int src; int dst; };
+        struct Pair {
+            int src;
+            int dst;
+        };
         std::vector<Pair> indices;
         indices.reserve(selectedItems.size());
 
         // Collect
-        for (int srcIndex = 0; ((std::size_t) srcIndex < inItems.size()) && (indices.size() < selectedItems.size()) ; srcIndex++ ) {
+        for (int srcIndex = 0; ((std::size_t)srcIndex < inItems.size()) && (indices.size() < selectedItems.size());
+             srcIndex++) {
             int index = selection.find(inItems[srcIndex].id);
             if (index != Selection::NOT_FOUND) {
-                indices.emplace_back( Pair{ srcIndex, index } );
+                indices.emplace_back(Pair { srcIndex, index });
             }
         }
 
         // Then sort
         if (!indices.empty()) {
-            std::sort(indices.begin(), indices.end(), [] (Pair a, Pair b) { 
-                return (a.dst < b.dst);
-            });
+            std::sort(indices.begin(), indices.end(), [](Pair a, Pair b) { return (a.dst < b.dst); });
 
-            for (auto& pair: indices) {
-               outItems.emplace_back(inItems[pair.src]);
+            for (auto& pair : indices) {
+                outItems.emplace_back(inItems[pair.src]);
             }
         }
     }
@@ -139,12 +140,12 @@ void IDsToBounds::run(const RenderContextPointer& renderContext, const ItemIDs& 
         for (auto id : inItems) {
             auto& item = scene->getItem(id);
             if (item.exist()) {
-                outItems.emplace_back(ItemBound{ id, item.getBound() });
+                outItems.emplace_back(ItemBound { id, item.getBound() });
             }
         }
     } else {
         for (auto id : inItems) {
-            outItems.emplace_back(ItemBound{ id });
+            outItems.emplace_back(ItemBound { id });
         }
     }
 }

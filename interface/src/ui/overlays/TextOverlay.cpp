@@ -13,8 +13,8 @@
 #include <QQuickItem>
 
 #include <DependencyManager.h>
-#include <GeometryCache.h>
 #include <GLMHelpers.h>
+#include <GeometryCache.h>
 #include <OffscreenUi.h>
 #include <RegisteredMetaTypes.h>
 #include <SharedUtil.h>
@@ -40,12 +40,12 @@ QUrl const TextOverlay::URL(QString("hifi/overlays/TextOverlay.qml"));
  *
  * @property {number} margin=0 - Sets the <code>leftMargin</code> and <code>topMargin</code> values, in pixels.
  *     <em>Write-only.</em>
- * @property {number} leftMargin=0 - The left margin's size, in pixels. This value is also used for the right margin. 
+ * @property {number} leftMargin=0 - The left margin's size, in pixels. This value is also used for the right margin.
  *     <em>Write-only.</em>
- * @property {number} topMargin=0 - The top margin's size, in pixels. This value is also used for the bottom margin. 
+ * @property {number} topMargin=0 - The top margin's size, in pixels. This value is also used for the bottom margin.
  *     <em>Write-only.</em>
- * @property {string} text="" - The text to display. Text does not automatically wrap; use <code>\n</code> for a line break. Text
- *     is clipped to the <code>bounds</code>. <em>Write-only.</em>
+ * @property {string} text="" - The text to display. Text does not automatically wrap; use <code>\n</code> for a line break.
+ * Text is clipped to the <code>bounds</code>. <em>Write-only.</em>
  * @property {number} font.size=18 - The size of the text, in pixels. <em>Write-only.</em>
  * @property {number} lineHeight=18 - The height of a line of text, in pixels. <em>Write-only.</em>
  * @property {Color} color=255,255,255 - The color of the text. Synonym: <code>textColor</code>. <em>Write-only.</em>
@@ -56,13 +56,14 @@ QUrl const TextOverlay::URL(QString("hifi/overlays/TextOverlay.qml"));
  *     <em>Write-only.</em>
  */
 
-TextOverlay::TextOverlay() : QmlOverlay(URL) { }
-
-TextOverlay::TextOverlay(const TextOverlay* textOverlay) 
-    : QmlOverlay(URL, textOverlay) {
+TextOverlay::TextOverlay() : QmlOverlay(URL) {
 }
 
-TextOverlay::~TextOverlay() { }
+TextOverlay::TextOverlay(const TextOverlay* textOverlay) : QmlOverlay(URL, textOverlay) {
+}
+
+TextOverlay::~TextOverlay() {
+}
 
 TextOverlay* TextOverlay::createClone() const {
     return new TextOverlay(this);
@@ -70,7 +71,7 @@ TextOverlay* TextOverlay::createClone() const {
 
 QSizeF TextOverlay::textSize(const QString& text) const {
     int lines = 1;
-    foreach(QChar c, text) {
+    foreach (QChar c, text) {
         if (c == QChar('\n')) {
             ++lines;
         }
@@ -79,11 +80,14 @@ QSizeF TextOverlay::textSize(const QString& text) const {
     font.setPixelSize(18);
     QFontMetrics fm(font);
     QSizeF result = QSizeF(fm.width(text), 18 * lines);
-    return result; 
+    return result;
 }
 
-
-void TextOverlay::setTopMargin(float margin) {}
-void TextOverlay::setLeftMargin(float margin) {}
-void TextOverlay::setFontSize(float size) {}
-void TextOverlay::setText(const QString& text) {}
+void TextOverlay::setTopMargin(float margin) {
+}
+void TextOverlay::setLeftMargin(float margin) {
+}
+void TextOverlay::setFontSize(float size) {
+}
+void TextOverlay::setText(const QString& text) {
+}

@@ -9,7 +9,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef hifi_AboutUtil_h
 #define hifi_AboutUtil_h
 
@@ -20,7 +19,7 @@
  *
  * @hifi-interface
  * @hifi-client-entity
- * 
+ *
  * @property {string} buildDate
  * @property {string} buildVersion
  * @property {string} qtVersion
@@ -46,7 +45,8 @@ public slots:
      * @function HifiAbout.openUrl
      * @param {string} url
      */
-    void openUrl(const QString &url) const;
+    void openUrl(const QString& url) const;
+
 private:
     AboutUtil(QObject* parent = nullptr);
     QString _dateConverted;

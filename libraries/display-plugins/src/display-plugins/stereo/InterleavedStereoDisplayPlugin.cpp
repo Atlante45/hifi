@@ -8,9 +8,9 @@
 
 #include "InterleavedStereoDisplayPlugin.h"
 
-#include <gpu/Pipeline.h>
 #include <gpu/Batch.h>
 #include <gpu/Context.h>
+#include <gpu/Pipeline.h>
 #include <shaders/Shaders.h>
 
 const QString InterleavedStereoDisplayPlugin::NAME("3D TV - Interleaved");

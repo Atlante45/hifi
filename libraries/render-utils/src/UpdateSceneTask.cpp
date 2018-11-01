@@ -10,14 +10,14 @@
 //
 #include "UpdateSceneTask.h"
 
-#include <render/SceneTask.h>
-#include "LightStage.h"
-#include "BackgroundStage.h"
-#include "HazeStage.h"
-#include "BloomStage.h"
-#include <render/TransitionStage.h>
 #include <render/HighlightStage.h>
+#include <render/SceneTask.h>
+#include <render/TransitionStage.h>
+#include "BackgroundStage.h"
+#include "BloomStage.h"
 #include "DeferredLightingEffect.h"
+#include "HazeStage.h"
+#include "LightStage.h"
 
 void UpdateSceneTask::build(JobModel& task, const render::Varying& input, render::Varying& output) {
     task.addJob<LightStageSetup>("LightStageSetup");
@@ -31,4 +31,3 @@ void UpdateSceneTask::build(JobModel& task, const render::Varying& input, render
 
     task.addJob<render::PerformSceneTransaction>("PerformSceneTransaction");
 }
-

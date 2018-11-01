@@ -17,158 +17,158 @@
 
 namespace render {
 
-    using CullFunctor = std::function<bool(const RenderArgs*, const AABox&)>;
+using CullFunctor = std::function<bool(const RenderArgs*, const AABox&)>;
 
-    void cullItems(const RenderContextPointer& renderContext, const CullFunctor& cullFunctor, RenderDetails::Item& details,
-        const ItemBounds& inItems, ItemBounds& outItems);
+void cullItems(const RenderContextPointer& renderContext, const CullFunctor& cullFunctor, RenderDetails::Item& details,
+               const ItemBounds& inItems, ItemBounds& outItems);
 
-    // Culling Frustum / solidAngle test helper class
-    struct CullTest {
-        CullFunctor _functor;
-        RenderArgs* _args;
-        RenderDetails::Item& _renderDetails;
-        ViewFrustumPointer _antiFrustum;
-        glm::vec3 _eyePos;
-        float _squareTanAlpha;
+// Culling Frustum / solidAngle test helper class
+struct CullTest {
+    CullFunctor _functor;
+    RenderArgs* _args;
+    RenderDetails::Item& _renderDetails;
+    ViewFrustumPointer _antiFrustum;
+    glm::vec3 _eyePos;
+    float _squareTanAlpha;
 
-        CullTest(CullFunctor& functor, RenderArgs* pargs, RenderDetails::Item& renderDetails, ViewFrustumPointer antiFrustum = nullptr);
+    CullTest(CullFunctor& functor, RenderArgs* pargs, RenderDetails::Item& renderDetails,
+             ViewFrustumPointer antiFrustum = nullptr);
 
-        bool frustumTest(const AABox& bound);
-        bool antiFrustumTest(const AABox& bound);
-        bool solidAngleTest(const AABox& bound);
-    };
+    bool frustumTest(const AABox& bound);
+    bool antiFrustumTest(const AABox& bound);
+    bool solidAngleTest(const AABox& bound);
+};
 
-    class FetchNonspatialItems {
-    public:
-        using JobModel = Job::ModelIO<FetchNonspatialItems, ItemFilter, ItemBounds>;
-        void run(const RenderContextPointer& renderContext, const ItemFilter& filter, ItemBounds& outItems);
-    };
+class FetchNonspatialItems {
+public:
+    using JobModel = Job::ModelIO<FetchNonspatialItems, ItemFilter, ItemBounds>;
+    void run(const RenderContextPointer& renderContext, const ItemFilter& filter, ItemBounds& outItems);
+};
 
-    class FetchSpatialTreeConfig : public Job::Config {
-        Q_OBJECT
-        Q_PROPERTY(int numItems READ getNumItems)
-        Q_PROPERTY(bool freezeFrustum MEMBER freezeFrustum WRITE setFreezeFrustum)
-        Q_PROPERTY(float LODAngle MEMBER lodAngle NOTIFY dirty)
-    
-    public:
-        int numItems{ 0 };
-        int getNumItems() { return numItems; }
+class FetchSpatialTreeConfig : public Job::Config {
+    Q_OBJECT
+    Q_PROPERTY(int numItems READ getNumItems)
+    Q_PROPERTY(bool freezeFrustum MEMBER freezeFrustum WRITE setFreezeFrustum)
+    Q_PROPERTY(float LODAngle MEMBER lodAngle NOTIFY dirty)
 
-        bool freezeFrustum{ false };
-    
-        float lodAngle{ 2.0 };
-    public slots:
-        void setFreezeFrustum(bool enabled) { freezeFrustum = enabled; emit dirty(); }
+public:
+    int numItems { 0 };
+    int getNumItems() { return numItems; }
 
-    signals:
-        void dirty();
-    };
+    bool freezeFrustum { false };
 
-    class FetchSpatialTree {
-        bool _freezeFrustum{ false }; // initialized by Config
-        bool _justFrozeFrustum{ false };
-        ViewFrustum _frozenFrustum;
-        float _lodAngle;
+    float lodAngle { 2.0 };
+public slots:
+    void setFreezeFrustum(bool enabled) {
+        freezeFrustum = enabled;
+        emit dirty();
+    }
 
-    public:
-        using Config = FetchSpatialTreeConfig;
-        using Inputs = render::VaryingSet2<ItemFilter, glm::ivec2>;
-        using JobModel = Job::ModelIO<FetchSpatialTree, Inputs, ItemSpatialTree::ItemSelection, Config>;
+signals:
+    void dirty();
+};
 
-        FetchSpatialTree() {}
+class FetchSpatialTree {
+    bool _freezeFrustum { false }; // initialized by Config
+    bool _justFrozeFrustum { false };
+    ViewFrustum _frozenFrustum;
+    float _lodAngle;
 
-        void configure(const Config& config);
-        void run(const RenderContextPointer& renderContext, const Inputs& inputs, ItemSpatialTree::ItemSelection& outSelection);
-    };
+public:
+    using Config = FetchSpatialTreeConfig;
+    using Inputs = render::VaryingSet2<ItemFilter, glm::ivec2>;
+    using JobModel = Job::ModelIO<FetchSpatialTree, Inputs, ItemSpatialTree::ItemSelection, Config>;
 
-    class CullSpatialSelectionConfig : public Job::Config {
-        Q_OBJECT
-        Q_PROPERTY(int numItems READ getNumItems)
-        Q_PROPERTY(bool freezeFrustum MEMBER freezeFrustum WRITE setFreezeFrustum)
-        Q_PROPERTY(bool skipCulling MEMBER skipCulling WRITE setSkipCulling)
-    public:
-        int numItems{ 0 };
-        int getNumItems() { return numItems; }
+    FetchSpatialTree() {}
 
-        bool freezeFrustum{ false };
-        bool skipCulling{ false };
-    public slots:
-        void setFreezeFrustum(bool enabled) { freezeFrustum = enabled; emit dirty(); }
-        void setSkipCulling(bool enabled) { skipCulling = enabled; emit dirty(); }
-    signals:
-        void dirty();
-    };
+    void configure(const Config& config);
+    void run(const RenderContextPointer& renderContext, const Inputs& inputs, ItemSpatialTree::ItemSelection& outSelection);
+};
 
-    class CullSpatialSelection {
-        bool _freezeFrustum{ false }; // initialized by Config
-        bool _justFrozeFrustum{ false };
-        bool _skipCulling{ false };
-        ViewFrustum _frozenFrustum;
-    public:
-        using Config = CullSpatialSelectionConfig;
-        using Inputs = render::VaryingSet2<ItemSpatialTree::ItemSelection, ItemFilter>;
-        using JobModel = Job::ModelIO<CullSpatialSelection, Inputs, ItemBounds, Config>;
+class CullSpatialSelectionConfig : public Job::Config {
+    Q_OBJECT
+    Q_PROPERTY(int numItems READ getNumItems)
+    Q_PROPERTY(bool freezeFrustum MEMBER freezeFrustum WRITE setFreezeFrustum)
+    Q_PROPERTY(bool skipCulling MEMBER skipCulling WRITE setSkipCulling)
+public:
+    int numItems { 0 };
+    int getNumItems() { return numItems; }
 
-        CullSpatialSelection(CullFunctor cullFunctor, RenderDetails::Type type) :
-            _cullFunctor{ cullFunctor },
-            _detailType(type) {}
+    bool freezeFrustum { false };
+    bool skipCulling { false };
+public slots:
+    void setFreezeFrustum(bool enabled) {
+        freezeFrustum = enabled;
+        emit dirty();
+    }
+    void setSkipCulling(bool enabled) {
+        skipCulling = enabled;
+        emit dirty();
+    }
+signals:
+    void dirty();
+};
 
-        CullSpatialSelection(CullFunctor cullFunctor) :
-            _cullFunctor{ cullFunctor } {
-        }
+class CullSpatialSelection {
+    bool _freezeFrustum { false }; // initialized by Config
+    bool _justFrozeFrustum { false };
+    bool _skipCulling { false };
+    ViewFrustum _frozenFrustum;
 
-        CullFunctor _cullFunctor;
-        RenderDetails::Type _detailType{ RenderDetails::OTHER };
+public:
+    using Config = CullSpatialSelectionConfig;
+    using Inputs = render::VaryingSet2<ItemSpatialTree::ItemSelection, ItemFilter>;
+    using JobModel = Job::ModelIO<CullSpatialSelection, Inputs, ItemBounds, Config>;
 
-        void configure(const Config& config);
-        void run(const RenderContextPointer& renderContext, const Inputs& inputs, ItemBounds& outItems);
-    };
+    CullSpatialSelection(CullFunctor cullFunctor, RenderDetails::Type type) : _cullFunctor { cullFunctor }, _detailType(type) {}
 
-    class CullShapeBounds {
-    public:
-        using Inputs = render::VaryingSet4<ShapeBounds, ItemFilter, ItemFilter, ViewFrustumPointer>;
-        using Outputs = render::VaryingSet2<ShapeBounds, AABox>;
-        using JobModel = Job::ModelIO<CullShapeBounds, Inputs, Outputs>;
+    CullSpatialSelection(CullFunctor cullFunctor) : _cullFunctor { cullFunctor } {}
 
-        CullShapeBounds(CullFunctor cullFunctor, RenderDetails::Type type) :
-            _cullFunctor{ cullFunctor },
-            _detailType(type) {}
+    CullFunctor _cullFunctor;
+    RenderDetails::Type _detailType { RenderDetails::OTHER };
 
-        CullShapeBounds(CullFunctor cullFunctor) :
-            _cullFunctor{ cullFunctor } {
-        }
+    void configure(const Config& config);
+    void run(const RenderContextPointer& renderContext, const Inputs& inputs, ItemBounds& outItems);
+};
 
-        void run(const RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs);
+class CullShapeBounds {
+public:
+    using Inputs = render::VaryingSet4<ShapeBounds, ItemFilter, ItemFilter, ViewFrustumPointer>;
+    using Outputs = render::VaryingSet2<ShapeBounds, AABox>;
+    using JobModel = Job::ModelIO<CullShapeBounds, Inputs, Outputs>;
 
-    private:
+    CullShapeBounds(CullFunctor cullFunctor, RenderDetails::Type type) : _cullFunctor { cullFunctor }, _detailType(type) {}
 
-        CullFunctor _cullFunctor;
-        RenderDetails::Type _detailType{ RenderDetails::OTHER };
+    CullShapeBounds(CullFunctor cullFunctor) : _cullFunctor { cullFunctor } {}
 
-    };
+    void run(const RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs);
 
-    class FilterSpatialSelection {
-    public:
-        using Inputs = render::VaryingSet2<ItemSpatialTree::ItemSelection, ItemFilter>;
-        using JobModel = Job::ModelIO<FilterSpatialSelection, Inputs, ItemBounds>;
+private:
+    CullFunctor _cullFunctor;
+    RenderDetails::Type _detailType { RenderDetails::OTHER };
+};
 
-        FilterSpatialSelection() {}
-        void run(const RenderContextPointer& renderContext, const Inputs& inputs, ItemBounds& outItems);
-    };
+class FilterSpatialSelection {
+public:
+    using Inputs = render::VaryingSet2<ItemSpatialTree::ItemSelection, ItemFilter>;
+    using JobModel = Job::ModelIO<FilterSpatialSelection, Inputs, ItemBounds>;
 
-    class ApplyCullFunctorOnItemBounds {
-    public:
-        using Inputs = render::VaryingSet2<ItemBounds, ViewFrustumPointer>;
-        using Outputs = ItemBounds;
-        using JobModel = Job::ModelIO<ApplyCullFunctorOnItemBounds, Inputs, Outputs>;
+    FilterSpatialSelection() {}
+    void run(const RenderContextPointer& renderContext, const Inputs& inputs, ItemBounds& outItems);
+};
 
-        ApplyCullFunctorOnItemBounds(render::CullFunctor cullFunctor) : _cullFunctor(cullFunctor) {}
-        void run(const RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs);
+class ApplyCullFunctorOnItemBounds {
+public:
+    using Inputs = render::VaryingSet2<ItemBounds, ViewFrustumPointer>;
+    using Outputs = ItemBounds;
+    using JobModel = Job::ModelIO<ApplyCullFunctorOnItemBounds, Inputs, Outputs>;
 
-    private:
+    ApplyCullFunctorOnItemBounds(render::CullFunctor cullFunctor) : _cullFunctor(cullFunctor) {}
+    void run(const RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs);
 
-        render::CullFunctor _cullFunctor;
-    };
-}
+private:
+    render::CullFunctor _cullFunctor;
+};
+} // namespace render
 
 #endif // hifi_render_CullTask_h;

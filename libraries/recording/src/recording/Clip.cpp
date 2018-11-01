@@ -11,13 +11,13 @@
 #include "Frame.h"
 #include "Logging.h"
 
-#include "impl/FileClip.h"
 #include "impl/BufferClip.h"
+#include "impl/FileClip.h"
 
-#include <QtCore/QJsonDocument>
-#include <QtCore/QJsonObject>
 #include <QtCore/QBuffer>
 #include <QtCore/QDebug>
+#include <QtCore/QJsonDocument>
+#include <QtCore/QJsonObject>
 
 using namespace recording;
 
@@ -65,7 +65,7 @@ bool writeFrame(QIODevice& output, const Frame& frame, bool compressed = true) {
     if (written != sizeof(FrameType)) {
         return false;
     }
-    //qDebug(recordingLog) << "Writing frame with time offset " << frame.timeOffset;
+    // qDebug(recordingLog) << "Writing frame with time offset " << frame.timeOffset;
     written = output.write((char*)&(frame.timeOffset), sizeof(Frame::Time));
     if (written != sizeof(Frame::Time)) {
         return false;

@@ -12,8 +12,8 @@
 #include "SortTask.h"
 #include "ShapePipeline.h"
 
-#include <assert.h>
 #include <ViewFrustum.h>
+#include <assert.h>
 
 using namespace render;
 
@@ -25,34 +25,33 @@ struct ItemBoundSort {
     AABox _bounds;
 
     ItemBoundSort() {}
-    ItemBoundSort(float centerDepth, float nearDepth, float farDepth, ItemID id, const AABox& bounds) : _centerDepth(centerDepth), _nearDepth(nearDepth), _farDepth(farDepth), _id(id), _bounds(bounds) {}
+    ItemBoundSort(float centerDepth, float nearDepth, float farDepth, ItemID id, const AABox& bounds) :
+        _centerDepth(centerDepth),
+        _nearDepth(nearDepth),
+        _farDepth(farDepth),
+        _id(id),
+        _bounds(bounds) {}
 };
 
 struct FrontToBackSort {
-    bool operator() (const ItemBoundSort& left, const ItemBoundSort& right) {
-        return (left._centerDepth < right._centerDepth);
-    }
+    bool operator()(const ItemBoundSort& left, const ItemBoundSort& right) { return (left._centerDepth < right._centerDepth); }
 };
 
 struct BackToFrontSort {
-    bool operator() (const ItemBoundSort& left, const ItemBoundSort& right) {
-        return (left._centerDepth > right._centerDepth);
-    }
+    bool operator()(const ItemBoundSort& left, const ItemBoundSort& right) { return (left._centerDepth > right._centerDepth); }
 };
 
-void render::depthSortItems(const RenderContextPointer& renderContext, bool frontToBack, 
-                            const ItemBounds& inItems, ItemBounds& outItems, AABox* bounds) {
+void render::depthSortItems(const RenderContextPointer& renderContext, bool frontToBack, const ItemBounds& inItems,
+                            ItemBounds& outItems, AABox* bounds) {
     assert(renderContext->args);
     assert(renderContext->args->hasViewFrustum());
 
     auto& scene = renderContext->_scene;
     RenderArgs* args = renderContext->args;
 
-
     // Allocate and simply copy
     outItems.clear();
     outItems.reserve(inItems.size());
-
 
     // Make a local dataset of the center distance and closest point distance
     std::vector<ItemBoundSort> itemBoundSorts;
@@ -71,7 +70,7 @@ void render::depthSortItems(const RenderContextPointer& renderContext, bool fron
         FrontToBackSort frontToBackSort;
         std::sort(itemBoundSorts.begin(), itemBoundSorts.end(), frontToBackSort);
     } else {
-        BackToFrontSort  backToFrontSort;
+        BackToFrontSort backToFrontSort;
         std::sort(itemBoundSorts.begin(), itemBoundSorts.end(), backToFrontSort);
     }
 
@@ -106,7 +105,7 @@ void PipelineSortShapes::run(const RenderContextPointer& renderContext, const It
         auto key = scene->getItem(item.id).getShapeKey();
         auto outItems = outShapes.find(key);
         if (outItems == outShapes.end()) {
-            outItems = outShapes.insert(std::make_pair(key, ItemBounds{})).first;
+            outItems = outShapes.insert(std::make_pair(key, ItemBounds {})).first;
             outItems->second.reserve(inItems.size());
         }
 
@@ -126,14 +125,15 @@ void DepthSortShapes::run(const RenderContextPointer& renderContext, const Shape
         auto& inItems = pipeline.second;
         auto outItems = outShapes.find(pipeline.first);
         if (outItems == outShapes.end()) {
-            outItems = outShapes.insert(std::make_pair(pipeline.first, ItemBounds{})).first;
+            outItems = outShapes.insert(std::make_pair(pipeline.first, ItemBounds {})).first;
         }
 
         depthSortItems(renderContext, _frontToBack, inItems, outItems->second);
     }
 }
 
-void DepthSortShapesAndComputeBounds::run(const RenderContextPointer& renderContext, const ShapeBounds& inShapes, Outputs& outputs) {
+void DepthSortShapesAndComputeBounds::run(const RenderContextPointer& renderContext, const ShapeBounds& inShapes,
+                                          Outputs& outputs) {
     auto& outShapes = outputs.edit0();
     auto& outBounds = outputs.edit1();
 
@@ -145,7 +145,7 @@ void DepthSortShapesAndComputeBounds::run(const RenderContextPointer& renderCont
         auto& inItems = pipeline.second;
         auto outItems = outShapes.find(pipeline.first);
         if (outItems == outShapes.end()) {
-            outItems = outShapes.insert(std::make_pair(pipeline.first, ItemBounds{})).first;
+            outItems = outShapes.insert(std::make_pair(pipeline.first, ItemBounds {})).first;
         }
         AABox bounds;
 

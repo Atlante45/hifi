@@ -10,13 +10,12 @@
 //
 
 #include "SkeletonDumpApp.h"
+#include <AnimSkeleton.h>
+#include <FBXReader.h>
 #include <QCommandLineParser>
 #include <QFile>
-#include <FBXReader.h>
-#include <AnimSkeleton.h>
 
 SkeletonDumpApp::SkeletonDumpApp(int argc, char* argv[]) : QCoreApplication(argc, argv) {
-
     // parse command-line
     QCommandLineParser parser;
     parser.setApplicationDescription("High Fidelity FBX Skeleton Analyzer");

@@ -25,7 +25,6 @@ class RotationConstraint;
 
 class AnimInverseKinematics : public AnimNode {
 public:
-
     struct JointInfo {
         glm::quat rot;
         glm::vec3 trans;
@@ -48,12 +47,15 @@ public:
     void loadPoses(const AnimPoseVec& poses);
     void computeAbsolutePoses(AnimPoseVec& absolutePoses) const;
 
-    void setTargetVars(const QString& jointName, const QString& positionVar, const QString& rotationVar,
-                       const QString& typeVar, const QString& weightVar, float weight, const std::vector<float>& flexCoefficients,
-                       const QString& poleVectorEnabledVar, const QString& poleReferenceVectorVar, const QString& poleVectorVar);
+    void setTargetVars(const QString& jointName, const QString& positionVar, const QString& rotationVar, const QString& typeVar,
+                       const QString& weightVar, float weight, const std::vector<float>& flexCoefficients,
+                       const QString& poleVectorEnabledVar, const QString& poleReferenceVectorVar,
+                       const QString& poleVectorVar);
 
-    virtual const AnimPoseVec& evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) override;
-    virtual const AnimPoseVec& overlay(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut, const AnimPoseVec& underPoses) override;
+    virtual const AnimPoseVec& evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                        AnimVariantMap& triggersOut) override;
+    virtual const AnimPoseVec& overlay(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                       AnimVariantMap& triggersOut, const AnimPoseVec& underPoses) override;
 
     void clearIKJointLimitHistory();
 
@@ -76,11 +78,12 @@ public:
 
 protected:
     void computeTargets(const AnimVariantMap& animVars, std::vector<IKTarget>& targets, const AnimPoseVec& underPoses);
-    void solve(const AnimContext& context, const std::vector<IKTarget>& targets, float dt, JointChainInfoVec& jointChainInfoVec);
-    void solveTargetWithCCD(const AnimContext& context, const IKTarget& target, const AnimPoseVec& absolutePoses,
-                            bool debug, JointChainInfo& jointChainInfoOut) const;
-    void solveTargetWithSpline(const AnimContext& context, const IKTarget& target, const AnimPoseVec& absolutePoses,
-                               bool debug, JointChainInfo& jointChainInfoOut) const;
+    void solve(const AnimContext& context, const std::vector<IKTarget>& targets, float dt,
+               JointChainInfoVec& jointChainInfoVec);
+    void solveTargetWithCCD(const AnimContext& context, const IKTarget& target, const AnimPoseVec& absolutePoses, bool debug,
+                            JointChainInfo& jointChainInfoOut) const;
+    void solveTargetWithSpline(const AnimContext& context, const IKTarget& target, const AnimPoseVec& absolutePoses, bool debug,
+                               JointChainInfo& jointChainInfoOut) const;
     virtual void setSkeletonInternal(AnimSkeleton::ConstPointer skeleton) override;
     void debugDrawIKChain(const JointChainInfo& jointChainInfo, const AnimContext& context) const;
     void debugDrawRelativePoses(const AnimContext& context) const;
@@ -93,9 +96,9 @@ protected:
 
     // used to pre-compute information about each joint influeced by a spline IK target.
     struct SplineJointInfo {
-        int jointIndex;       // joint in the skeleton that this information pertains to.
-        float ratio;          // percentage (0..1) along the spline for this joint.
-        AnimPose offsetPose;  // local offset from the spline to the joint.
+        int jointIndex; // joint in the skeleton that this information pertains to.
+        float ratio; // percentage (0..1) along the spline for this joint.
+        AnimPose offsetPose; // local offset from the spline to the joint.
     };
 
     void computeAndCacheSplineJointInfosForIKTarget(const AnimContext& context, const IKTarget& target) const;
@@ -116,8 +119,9 @@ protected:
     enum FlexCoefficients { MAX_FLEX_COEFFICIENTS = 10 };
     struct IKTargetVar {
         IKTargetVar(const QString& jointNameIn, const QString& positionVarIn, const QString& rotationVarIn,
-                    const QString& typeVarIn, const QString& weightVarIn, float weightIn, const std::vector<float>& flexCoefficientsIn,
-                    const QString& poleVectorEnabledVar, const QString& poleReferenceVectorVar, const QString& poleVectorVar);
+                    const QString& typeVarIn, const QString& weightVarIn, float weightIn,
+                    const std::vector<float>& flexCoefficientsIn, const QString& poleVectorEnabledVar,
+                    const QString& poleReferenceVectorVar, const QString& poleVectorVar);
         IKTargetVar(const IKTargetVar& orig);
 
         QString jointName;
@@ -140,7 +144,7 @@ protected:
     std::vector<IKTargetVar> _targetVarVec;
     AnimPoseVec _defaultRelativePoses; // poses of the relaxed state
     AnimPoseVec _relativePoses; // current relative poses
-    AnimPoseVec _limitCenterPoses;  // relative
+    AnimPoseVec _limitCenterPoses; // relative
 
     std::map<int, AnimPose> _secondaryTargetsInRigFrame;
 

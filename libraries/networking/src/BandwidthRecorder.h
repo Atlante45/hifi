@@ -10,15 +10,13 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef hifi_BandwidthRecorder_h
 #define hifi_BandwidthRecorder_h
 
-#include <QObject>
 #include <QElapsedTimer>
+#include <QObject>
 #include "DependencyManager.h"
 #include "SimpleMovingAverage.h"
-
 
 class BandwidthRecorder : public QObject, public Dependency {
     Q_OBJECT
@@ -60,12 +58,10 @@ public:
     float getCachedTotalAverageInputKilobitsPerSecond() const;
     float getCachedTotalAverageOutputKilobitsPerSecond() const;
 
-
 private:
     // one for each possible Node type
     static const unsigned int CHANNEL_COUNT = 256;
     Channel* _channels[CHANNEL_COUNT];
-
 
 public slots:
     void updateInboundData(const quint8 channelType, const int bytes);

@@ -8,71 +8,68 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-#include <unordered_map>
-#include <memory>
 #include <cstdio>
+#include <memory>
+#include <unordered_map>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <QtCore/QTime>
-#include <QtCore/QTimer>
 #include <QtCore/QDir>
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QFile>
 #include <QtCore/QLoggingCategory>
+#include <QtCore/QTime>
+#include <QtCore/QTimer>
 
-#include <QtGui/QResizeEvent>
-#include <QtGui/QWindow>
 #include <QtGui/QGuiApplication>
 #include <QtGui/QImage>
+#include <QtGui/QResizeEvent>
+#include <QtGui/QWindow>
 
-#include <gpu/Context.h>
 #include <gpu/Batch.h>
+#include <gpu/Context.h>
 #include <gpu/Stream.h>
 #include <gpu/gl/GLBackend.h>
 
-#include <gl/QOpenGLContextWrapper.h>
 #include <gl/GLHelpers.h>
+#include <gl/QOpenGLContextWrapper.h>
 
 #include <GLMHelpers.h>
-#include <PathUtils.h>
 #include <NumericalConstants.h>
+#include <PathUtils.h>
 
-#include <GeometryCache.h>
 #include <DeferredLightingEffect.h>
 #include <FramebufferCache.h>
-#include <TextureCache.h>
-#include <PerfStat.h>
+#include <GeometryCache.h>
 #include <PathUtils.h>
+#include <PerfStat.h>
 #include <SharedUtil.h>
+#include <TextureCache.h>
 #include <ViewFrustum.h>
 
-#include <gpu/Pipeline.h>
 #include <gpu/Context.h>
+#include <gpu/Pipeline.h>
 
+#include <render/CullTask.h>
+#include <render/DrawSceneOctree.h>
+#include <render/DrawStatus.h>
+#include <render/DrawTask.h>
 #include <render/Engine.h>
 #include <render/Scene.h>
-#include <render/CullTask.h>
 #include <render/SortTask.h>
-#include <render/DrawTask.h>
-#include <render/DrawStatus.h>
-#include <render/DrawSceneOctree.h>
-#include <render/CullTask.h>
 
-#include "TestWindow.h"
 #include "TestFbx.h"
 #include "TestFloorGrid.h"
 #include "TestFloorTexture.h"
 #include "TestInstancedShapes.h"
 #include "TestShapes.h"
+#include "TestWindow.h"
 
 using namespace render;
 
-
 using TestBuilder = std::function<GpuTestBase*()>;
 using TestBuilders = std::list<TestBuilder>;
-
 
 #define INTERACTIVE
 
@@ -154,12 +151,12 @@ class MyTestWindow : public TestWindow {
 
 #ifdef INTERACTIVE
 
-#else 
+#else
         // TODO Capture the current rendered framebuffer and save
         // Increment the test ID
         ++_currentTestId;
 #endif
-        }
+    }
 };
 
 extern uvec2 rectifySize(const uvec2& size);
@@ -167,7 +164,7 @@ extern uvec2 rectifySize(const uvec2& size);
 void testSparseRectify() {
     std::vector<std::pair<uvec2, uvec2>> SPARSE_SIZE_TESTS {
         // Already sparse
-        { {1024, 1024 }, { 1024, 1024 } },
+        { { 1024, 1024 }, { 1024, 1024 } },
         { { 128, 128 }, { 128, 128 } },
         // Too small in one dimension
         { { 127, 127 }, { 128, 128 } },
@@ -204,4 +201,3 @@ int main(int argc, char** argv) {
 #endif
     return 0;
 }
-

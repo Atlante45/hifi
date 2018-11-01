@@ -14,13 +14,13 @@
 
 class Encoder {
 public:
-    virtual ~Encoder() { }
+    virtual ~Encoder() {}
     virtual void encode(const QByteArray& decodedBuffer, QByteArray& encodedBuffer) = 0;
 };
 
 class Decoder {
 public:
-    virtual ~Decoder() { }
+    virtual ~Decoder() {}
     virtual void decode(const QByteArray& encodedBuffer, QByteArray& decodedBuffer) = 0;
 
     virtual void lostFrame(QByteArray& decodedBuffer) = 0;

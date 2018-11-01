@@ -16,7 +16,7 @@
 
 class Circle3DOverlay : public Planar3DOverlay {
     Q_OBJECT
-    
+
 public:
     static QString const TYPE;
     virtual QString getType() const override { return TYPE; }
@@ -24,7 +24,7 @@ public:
     Circle3DOverlay();
     Circle3DOverlay(const Circle3DOverlay* circle3DOverlay);
     ~Circle3DOverlay();
-    
+
     virtual void render(RenderArgs* args) override;
     virtual const render::ShapeKey getShapeKey() override;
     void setProperties(const QVariantMap& properties) override;
@@ -41,7 +41,7 @@ public:
     float getMinorTickMarksLength() const { return _minorTickMarksLength; }
     glm::u8vec3 getMajorTickMarksColor() const { return _majorTickMarksColor; }
     glm::u8vec3 getMinorTickMarksColor() const { return _minorTickMarksColor; }
-    
+
     void setStartAt(float value) { _startAt = value; }
     void setEndAt(float value) { _endAt = value; }
     void setOuterRadius(float value) { _outerRadius = value; }
@@ -54,13 +54,14 @@ public:
     void setMajorTickMarksColor(const glm::u8vec3& value) { _majorTickMarksColor = value; }
     void setMinorTickMarksColor(const glm::u8vec3& value) { _minorTickMarksColor = value; }
 
-    virtual bool findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, float& distance,
-                                     BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking = false) override;
+    virtual bool findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, float& distance, BoxFace& face,
+                                     glm::vec3& surfaceNormal, bool precisionPicking = false) override;
     virtual bool findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                          float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking = false) override;
+                                          float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+                                          bool precisionPicking = false) override;
 
     virtual Circle3DOverlay* createClone() const override;
-    
+
 protected:
     float _startAt { 0 };
     float _endAt { 360 };
@@ -92,5 +93,4 @@ protected:
     bool _dirty { true };
 };
 
- 
 #endif // hifi_Circle3DOverlay_h

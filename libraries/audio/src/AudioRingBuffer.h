@@ -16,12 +16,12 @@
 
 #include <QtCore/QIODevice>
 
-#include <SharedUtil.h>
 #include <NodeData.h>
+#include <SharedUtil.h>
 
 const int DEFAULT_RING_BUFFER_FRAME_CAPACITY = 10;
 
-template <class T>
+template<class T>
 class AudioRingBufferTemplate {
     using Sample = T;
     static const int SampleSize = sizeof(Sample);
@@ -86,7 +86,7 @@ public:
 
     /// Returns a reference to the index-th sample offset from the current read sample
     Sample& operator[](const int index) { return *shiftedPositionAccomodatingWrap(_nextOutput, index); }
-    const Sample& operator[] (const int index) const { return *shiftedPositionAccomodatingWrap(_nextOutput, index); }
+    const Sample& operator[](const int index) const { return *shiftedPositionAccomodatingWrap(_nextOutput, index); }
 
     /// Essentially discards the next numSamples from the ring buffer
     /// NOTE: This is not checked - it is possible to shift past written data
@@ -97,7 +97,6 @@ public:
     int framesAvailable() const { return (_numFrameSamples == 0) ? 0 : samplesAvailable() / _numFrameSamples; }
     float getNextOutputFrameLoudness() const { return getFrameLoudness(_nextOutput); }
 
-
     int getNumFrameSamples() const { return _numFrameSamples; }
     int getFrameCapacity() const { return _frameCapacity; }
     int getSampleCapacity() const { return _sampleCapacity; }
@@ -106,11 +105,7 @@ public:
 
     class ConstIterator {
     public:
-        ConstIterator() :
-            _bufferLength(0),
-            _bufferFirst(NULL),
-            _bufferLast(NULL),
-            _at(NULL) {}
+        ConstIterator() : _bufferLength(0), _bufferFirst(NULL), _bufferLast(NULL), _at(NULL) {}
         ConstIterator(Sample* bufferFirst, int capacity, Sample* at) :
             _bufferLength(capacity),
             _bufferFirst(bufferFirst),
@@ -149,15 +144,9 @@ public:
             --(*this);
             return tmp;
         }
-        const Sample& operator[] (int i) {
-            return *atShiftedBy(i);
-        }
-        ConstIterator operator+(int i) {
-            return ConstIterator(_bufferFirst, _bufferLength, atShiftedBy(i));
-        }
-        ConstIterator operator-(int i) {
-            return ConstIterator(_bufferFirst, _bufferLength, atShiftedBy(-i));
-        }
+        const Sample& operator[](int i) { return *atShiftedBy(i); }
+        ConstIterator operator+(int i) { return ConstIterator(_bufferFirst, _bufferLength, atShiftedBy(i)); }
+        ConstIterator operator-(int i) { return ConstIterator(_bufferFirst, _bufferLength, atShiftedBy(-i)); }
 
         void readSamples(Sample* dest, int numSamples) {
             auto samplesToEnd = _bufferLast - _at + 1;
@@ -182,7 +171,6 @@ public:
             }
         }
 
-
     private:
         Sample* atShiftedBy(int i) {
             i = (_at - _bufferFirst + i) % _bufferLength;
@@ -198,12 +186,8 @@ public:
         Sample* _at;
     };
 
-    ConstIterator nextOutput() const {
-        return ConstIterator(_buffer, _bufferLength, _nextOutput);
-    }
-    ConstIterator lastFrameWritten() const {
-        return ConstIterator(_buffer, _bufferLength, _endOfLastWrite) - _numFrameSamples;
-    }
+    ConstIterator nextOutput() const { return ConstIterator(_buffer, _bufferLength, _nextOutput); }
+    ConstIterator lastFrameWritten() const { return ConstIterator(_buffer, _bufferLength, _endOfLastWrite) - _numFrameSamples; }
 
     int writeSamples(ConstIterator source, int maxSamples);
     int writeSamplesWithFade(ConstIterator source, int maxSamples, float fade);
@@ -218,11 +202,11 @@ protected:
     int _frameCapacity;
     int _sampleCapacity;
     int _bufferLength; // actual _buffer length (_sampleCapacity + 1)
-    int _overflowCount{ 0 }; // times the ring buffer has overwritten data
+    int _overflowCount { 0 }; // times the ring buffer has overwritten data
 
-    Sample* _nextOutput{ nullptr };
-    Sample* _endOfLastWrite{ nullptr };
-    Sample* _buffer{ nullptr };
+    Sample* _nextOutput { nullptr };
+    Sample* _endOfLastWrite { nullptr };
+    Sample* _buffer { nullptr };
 };
 
 // expose explicit instantiations for scratch/mix buffers

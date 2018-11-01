@@ -11,13 +11,12 @@
 
 #include "ConicalViewFrustum.h"
 
-
 #include "../NumericalConstants.h"
 #include "../ViewFrustum.h"
 
 void ConicalViewFrustum::set(const ViewFrustum& viewFrustum) {
-    // The ConicalViewFrustum has two parts: a central sphere (same as ViewFrustum) and a circular cone that bounds the frustum part.
-    // Why?  Because approximate intersection tests are much faster to compute for a cone than for a frustum.
+    // The ConicalViewFrustum has two parts: a central sphere (same as ViewFrustum) and a circular cone that bounds the frustum
+    // part. Why?  Because approximate intersection tests are much faster to compute for a cone than for a frustum.
     _position = viewFrustum.getPosition();
     _radius = viewFrustum.getCenterRadius();
     _farClip = viewFrustum.getFarClip();
@@ -29,10 +28,8 @@ void ConicalViewFrustum::set(const ViewFrustum& viewFrustum) {
     auto centerAxis = 0.25f * (topLeft + topRight + bottomLeft + bottomRight); // Take the average
 
     _direction = glm::normalize(centerAxis);
-    _angle = std::max(std::max(angleBetween(_direction, topLeft),
-                               angleBetween(_direction, topRight)),
-                      std::max(angleBetween(_direction, bottomLeft),
-                               angleBetween(_direction, bottomRight)));
+    _angle = std::max(std::max(angleBetween(_direction, topLeft), angleBetween(_direction, topRight)),
+                      std::max(angleBetween(_direction, bottomLeft), angleBetween(_direction, bottomRight)));
 }
 
 void ConicalViewFrustum::calculate() {
@@ -47,10 +44,9 @@ bool ConicalViewFrustum::isVerySimilar(const ConicalViewFrustum& other) const {
     const float MIN_RELATIVE_ERROR = 0.01f; // 1%
 
     return glm::distance2(_position, other._position) < MIN_POSITION_SLOP_SQUARED &&
-            angleBetween(_direction, other._direction) < MIN_ANGLE_BETWEEN &&
-            closeEnough(_angle, other._angle, MIN_RELATIVE_ERROR) &&
-            closeEnough(_farClip, other._farClip, MIN_RELATIVE_ERROR) &&
-            closeEnough(_radius, other._radius, MIN_RELATIVE_ERROR);
+           angleBetween(_direction, other._direction) < MIN_ANGLE_BETWEEN &&
+           closeEnough(_angle, other._angle, MIN_RELATIVE_ERROR) && closeEnough(_farClip, other._farClip, MIN_RELATIVE_ERROR) &&
+           closeEnough(_radius, other._radius, MIN_RELATIVE_ERROR);
 }
 
 bool ConicalViewFrustum::intersects(const AACube& cube) const {
@@ -84,7 +80,6 @@ float ConicalViewFrustum::getAngularSize(const AABox& box) const {
 
     return getAngularSize(distance, radius);
 }
-
 
 bool ConicalViewFrustum::intersects(const glm::vec3& relativePosition, float distance, float radius) const {
     if (distance < _radius + radius) {

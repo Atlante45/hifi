@@ -15,12 +15,8 @@
 #include <QBuffer>
 class OwningBuffer : public QBuffer {
 public:
-    OwningBuffer(const QByteArray& content) : _content(content) {
-        setData(_content);
-    }
-    OwningBuffer(QByteArray&& content) : _content(std::move(content)) {
-        setData(_content);
-    }
+    OwningBuffer(const QByteArray& content) : _content(content) { setData(_content); }
+    OwningBuffer(QByteArray&& content) : _content(std::move(content)) { setData(_content); }
 
 private:
     QByteArray _content;

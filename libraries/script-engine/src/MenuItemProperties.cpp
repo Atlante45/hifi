@@ -11,12 +11,11 @@
 
 #include "MenuItemProperties.h"
 
-#include <QDebug>
 #include <RegisteredMetaTypes.h>
+#include <QDebug>
 
-
-MenuItemProperties::MenuItemProperties(const QString& menuName, const QString& menuItemName,
-                        const QString& shortcutKey, bool checkable, bool checked, bool separator) :
+MenuItemProperties::MenuItemProperties(const QString& menuName, const QString& menuItemName, const QString& shortcutKey,
+                                       bool checkable, bool checked, bool separator) :
     menuName(menuName),
     menuItemName(menuItemName),
     shortcutKey(shortcutKey),
@@ -24,20 +23,18 @@ MenuItemProperties::MenuItemProperties(const QString& menuName, const QString& m
     shortcutKeySequence(shortcutKey),
     isCheckable(checkable),
     isChecked(checked),
-    isSeparator(separator)
-{
+    isSeparator(separator) {
 }
 
-MenuItemProperties::MenuItemProperties(const QString& menuName, const QString& menuItemName,
-                        const KeyEvent& shortcutKeyEvent, bool checkable, bool checked, bool separator) :
+MenuItemProperties::MenuItemProperties(const QString& menuName, const QString& menuItemName, const KeyEvent& shortcutKeyEvent,
+                                       bool checkable, bool checked, bool separator) :
     menuName(menuName),
     menuItemName(menuItemName),
     shortcutKeyEvent(shortcutKeyEvent),
     shortcutKeySequence(shortcutKeyEvent),
     isCheckable(checkable),
     isChecked(checked),
-    isSeparator(separator)
-{
+    isSeparator(separator) {
 }
 
 void registerMenuItemProperties(QScriptEngine* engine) {
@@ -53,7 +50,7 @@ QScriptValue menuItemPropertiesToScriptValue(QScriptEngine* engine, const MenuIt
 /**jsdoc
  * A set of properties that can be passed to {@link Menu.addMenuItem} to create a new menu item.
  *
- * If none of <code>position</code>, <code>beforeItem</code>, <code>afterItem</code>, or <code>grouping</code> are specified, 
+ * If none of <code>position</code>, <code>beforeItem</code>, <code>afterItem</code>, or <code>grouping</code> are specified,
  * the menu item will be placed at the end of the menu.
  *
  * @typedef {object} Menu.MenuItemProperties
@@ -97,5 +94,3 @@ void menuItemPropertiesFromScriptValue(const QScriptValue& object, MenuItemPrope
     properties.afterItem = object.property("afterItem").toVariant().toString();
     properties.grouping = object.property("grouping").toVariant().toString();
 }
-
-

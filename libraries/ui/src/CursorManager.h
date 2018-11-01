@@ -7,68 +7,67 @@
 //
 
 #pragma once
-#include <stdint.h>
 #include <DependencyManager.h>
+#include <stdint.h>
 
 #include <GLMHelpers.h>
 
 namespace Cursor {
-    enum class Source {
-        MOUSE,
-        UNKNOWN,
-    };
+enum class Source {
+    MOUSE,
+    UNKNOWN,
+};
 
-    enum Icon {
-        SYSTEM,
-        DEFAULT,
-        LINK,
-        GRAB,
-        ARROW,
-        RETICLE,
+enum Icon {
+    SYSTEM,
+    DEFAULT,
+    LINK,
+    GRAB,
+    ARROW,
+    RETICLE,
 
-        // Add new system cursors here
+    // Add new system cursors here
 
-        // User cursors will have ids over this value
-        USER_BASE = 0xFF,
-    };
-    class Instance {
-    public:
-        virtual Source getType() const = 0;
-        virtual void setIcon(uint16_t icon);
-        virtual uint16_t getIcon() const;
-    private:
-        uint16_t _icon;
-    };
+    // User cursors will have ids over this value
+    USER_BASE = 0xFF,
+};
+class Instance {
+public:
+    virtual Source getType() const = 0;
+    virtual void setIcon(uint16_t icon);
+    virtual uint16_t getIcon() const;
 
-    class MouseInstance : public Instance {
-        Source getType() const override {
-            return Source::MOUSE;
-        }
-    };
+private:
+    uint16_t _icon;
+};
 
-    class Manager : public QObject, public Dependency {
-        SINGLETON_DEPENDENCY
+class MouseInstance : public Instance {
+    Source getType() const override { return Source::MOUSE; }
+};
 
-        Manager();
-        Manager(const Manager& other) = delete;
-    public:
-        static Manager& instance();
-        uint8_t getCount();
-        float getScale();
-        void setScale(float scale);
-        Instance* getCursor(uint8_t index = 0);
-        uint16_t registerIcon(const QString& path);
-        QList<uint16_t> registeredIcons() const;
-        const QString& getIconImage(uint16_t icon);
+class Manager : public QObject, public Dependency {
+    SINGLETON_DEPENDENCY
 
-        static QMap<uint16_t, QString> ICON_NAMES;
-        static Icon lookupIcon(const QString& name);
-        static const QString& getIconName(const Icon& icon);
-    private:
-        MouseInstance mouseInstance;
-        float _scale{ 1.0f };
-        QMap<uint16_t, QString> ICONS;
-    };
-}
+    Manager();
+    Manager(const Manager& other) = delete;
 
+public:
+    static Manager& instance();
+    uint8_t getCount();
+    float getScale();
+    void setScale(float scale);
+    Instance* getCursor(uint8_t index = 0);
+    uint16_t registerIcon(const QString& path);
+    QList<uint16_t> registeredIcons() const;
+    const QString& getIconImage(uint16_t icon);
 
+    static QMap<uint16_t, QString> ICON_NAMES;
+    static Icon lookupIcon(const QString& name);
+    static const QString& getIconName(const Icon& icon);
+
+private:
+    MouseInstance mouseInstance;
+    float _scale { 1.0f };
+    QMap<uint16_t, QString> ICONS;
+};
+} // namespace Cursor

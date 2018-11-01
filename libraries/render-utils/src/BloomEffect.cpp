@@ -18,14 +18,15 @@
 #include <render/ResampleTask.h>
 #include "render-utils/ShaderConstants.h"
 
-#define BLOOM_BLUR_LEVEL_COUNT  3
+#define BLOOM_BLUR_LEVEL_COUNT 3
 
 BloomThreshold::BloomThreshold(unsigned int downsamplingFactor) {
     assert(downsamplingFactor > 0);
     _parameters.edit()._sampleCount = downsamplingFactor;
 }
 
-void BloomThreshold::configure(const Config& config) {}
+void BloomThreshold::configure(const Config& config) {
+}
 
 void BloomThreshold::run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs) {
     assert(renderContext->args);
@@ -57,8 +58,9 @@ void BloomThreshold::run(const render::RenderContextPointer& renderContext, cons
     bufferSize.y /= downSamplingFactor;
 
     if (!_outputBuffer || _outputBuffer->getSize() != bufferSize) {
-        auto colorTexture = gpu::TexturePointer(gpu::Texture::createRenderBuffer(inputBuffer->getTexelFormat(), bufferSize.x, bufferSize.y,
-                                                gpu::Texture::SINGLE_MIP, gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_LINEAR_MIP_POINT, gpu::Sampler::WRAP_CLAMP)));
+        auto colorTexture = gpu::TexturePointer(gpu::Texture::createRenderBuffer(
+            inputBuffer->getTexelFormat(), bufferSize.x, bufferSize.y, gpu::Texture::SINGLE_MIP,
+            gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_LINEAR_MIP_POINT, gpu::Sampler::WRAP_CLAMP)));
 
         _outputBuffer = gpu::FramebufferPointer(gpu::Framebuffer::create("BloomThreshold"));
         _outputBuffer->setRenderBuffer(0, colorTexture);
@@ -72,7 +74,7 @@ void BloomThreshold::run(const render::RenderContextPointer& renderContext, cons
         _pipeline = gpu::Pipeline::create(program, state);
     }
 
-    glm::ivec4 viewport{ 0, 0, bufferSize.x, bufferSize.y };
+    glm::ivec4 viewport { 0, 0, bufferSize.x, bufferSize.y };
 
     _parameters.edit()._threshold = bloom->getBloomThreshold();
 
@@ -97,10 +99,10 @@ void BloomThreshold::run(const render::RenderContextPointer& renderContext, cons
 }
 
 BloomApply::BloomApply() {
-
 }
 
-void BloomApply::configure(const Config& config) {}
+void BloomApply::configure(const Config& config) {
+}
 
 void BloomApply::run(const render::RenderContextPointer& renderContext, const Inputs& inputs) {
     assert(renderContext->args);
@@ -124,7 +126,7 @@ void BloomApply::run(const render::RenderContextPointer& renderContext, const In
     const auto blur1FB = inputs.get2();
     const auto blur2FB = inputs.get3();
     const auto bloom = inputs.get4();
-    const glm::ivec4 viewport{ 0, 0, framebufferSize.x, framebufferSize.y };
+    const glm::ivec4 viewport { 0, 0, framebufferSize.x, framebufferSize.y };
 
     const auto newIntensity = bloom->getBloomIntensity() / 3.0f;
     auto& parameters = _parameters.edit();
@@ -166,8 +168,8 @@ void BloomDraw::run(const render::RenderContextPointer& renderContext, const Inp
             gpu::ShaderPointer program = gpu::Shader::createProgram(shader::gpu::program::drawTransformUnitQuadTextureOpaque);
             gpu::StatePointer state = gpu::StatePointer(new gpu::State());
             state->setDepthTest(gpu::State::DepthTest(false, false));
-            state->setBlendFunction(true, gpu::State::ONE, gpu::State::BLEND_OP_ADD, gpu::State::ONE,
-                                    gpu::State::ZERO, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
+            state->setBlendFunction(true, gpu::State::ONE, gpu::State::BLEND_OP_ADD, gpu::State::ONE, gpu::State::ZERO,
+                                    gpu::State::BLEND_OP_ADD, gpu::State::ONE);
             _pipeline = gpu::Pipeline::create(program, state);
         }
 
@@ -208,11 +210,9 @@ void DebugBloom::run(const render::RenderContextPointer& renderContext, const In
     const auto level0FB = inputs.get1();
     const auto level1FB = inputs.get2();
     const auto level2FB = inputs.get3();
-    const gpu::TexturePointer levelTextures[BLOOM_BLUR_LEVEL_COUNT] = {
-        level0FB->getRenderBuffer(0),
-        level1FB->getRenderBuffer(0),
-        level2FB->getRenderBuffer(0)
-    };
+    const gpu::TexturePointer levelTextures[BLOOM_BLUR_LEVEL_COUNT] = { level0FB->getRenderBuffer(0),
+                                                                        level1FB->getRenderBuffer(0),
+                                                                        level2FB->getRenderBuffer(0) };
 
     if (!_pipeline) {
         gpu::ShaderPointer program = gpu::Shader::createProgram(shader::gpu::program::drawTextureOpaqueTexcoordRect);
@@ -274,7 +274,8 @@ void DebugBloom::run(const render::RenderContextPointer& renderContext, const In
     });
 }
 
-BloomEffect::BloomEffect() {}
+BloomEffect::BloomEffect() {
+}
 
 void BloomEffect::configure(const Config& config) {
     std::string blurName { "BloomBlurN" };

@@ -1,4 +1,4 @@
- //
+//
 //  Bookmarks.h
 //  interface/src
 //
@@ -21,7 +21,7 @@ class QMenu;
 class Menu;
 class MenuWrapper;
 
-class Bookmarks: public QObject {
+class Bookmarks : public QObject {
     Q_OBJECT
 
 public:
@@ -37,14 +37,14 @@ protected:
     virtual void addBookmarkToMenu(Menu* menubar, const QString& name, const QVariant& bookmark) = 0;
     void enableMenuItems(bool enabled);
     virtual void readFromFile();
-    void insert(const QString& name, const QVariant& address);  // Overwrites any existing entry with same name.
+    void insert(const QString& name, const QVariant& address); // Overwrites any existing entry with same name.
     void sortActions(Menu* menubar, MenuWrapper* menu);
     int getMenuItemLocation(QList<QAction*> actions, const QString& name) const;
     void removeBookmarkFromMenu(Menu* menubar, const QString& name);
     bool contains(const QString& name) const;
     void remove(const QString& name);
 
-    QVariantMap _bookmarks;  // { name: url, ... }
+    QVariantMap _bookmarks; // { name: url, ... }
     QPointer<MenuWrapper> _bookmarksMenu;
     QPointer<QAction> _deleteBookmarksAction;
     QString _bookmarksFilename;

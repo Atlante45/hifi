@@ -20,8 +20,8 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QPushButton>
 
-#include <QtCore/QDir>
 #include <QtCore/QDebug>
+#include <QtCore/QDir>
 
 #include "../OvenGUIApplication.h"
 
@@ -35,8 +35,7 @@ DomainBakeWidget::DomainBakeWidget(QWidget* parent, Qt::WindowFlags flags) :
     _domainNameSetting(DOMAIN_NAME_SETTING_KEY),
     _exportDirectory(EXPORT_DIR_SETTING_KEY),
     _browseStartDirectory(BROWSE_START_DIR_SETTING_KEY),
-    _destinationPathSetting(DESTINATION_PATH_SETTING_KEY)
-{
+    _destinationPathSetting(DESTINATION_PATH_SETTING_KEY) {
     setupUI();
 }
 
@@ -153,8 +152,7 @@ void DomainBakeWidget::chooseFileButtonClicked() {
         startDir = QDir::homePath();
     }
 
-    auto selectedFile = QFileDialog::getOpenFileName(this, "Choose Entities File", startDir,
-                                                     "Entities File (*.json *.gz)");
+    auto selectedFile = QFileDialog::getOpenFileName(this, "Choose Entities File", startDir, "Entities File (*.json *.gz)");
 
     if (!selectedFile.isEmpty()) {
         // set the contents of the entities file text box to be the path to the selected file
@@ -191,7 +189,6 @@ void DomainBakeWidget::outputDirectoryChanged(const QString& newDirectory) {
 }
 
 void DomainBakeWidget::bakeButtonClicked() {
-
     // save whatever the current domain name is in settings, we'll re-use it next time the widget is shown
     _domainNameSetting.set(_domainNameLineEdit->text());
 
@@ -210,9 +207,8 @@ void DomainBakeWidget::bakeButtonClicked() {
         // everything seems to be in place, kick off a bake for this entities file now
         auto fileToBakeURL = QUrl::fromLocalFile(_entitiesFileLineEdit->text());
         auto domainBaker = std::unique_ptr<DomainBaker> {
-                new DomainBaker(fileToBakeURL, _domainNameLineEdit->text(),
-                                outputDirectory.absolutePath(), _destinationPathLineEdit->text(),
-                                _rebakeOriginalsCheckBox->isChecked())
+            new DomainBaker(fileToBakeURL, _domainNameLineEdit->text(), outputDirectory.absolutePath(),
+                            _destinationPathLineEdit->text(), _rebakeOriginalsCheckBox->isChecked())
         };
 
         // make sure we hear from the baker when it is done
@@ -241,13 +237,12 @@ void DomainBakeWidget::bakeButtonClicked() {
 void DomainBakeWidget::handleBakerProgress(int baked, int total) {
     if (auto baker = qobject_cast<DomainBaker*>(sender())) {
         // add the results of this bake to the results window
-        auto it = std::find_if(_bakers.begin(), _bakers.end(), [baker](const BakerRowPair& value) {
-            return value.first.get() == baker;
-        });
+        auto it = std::find_if(_bakers.begin(), _bakers.end(),
+                               [baker](const BakerRowPair& value) { return value.first.get() == baker; });
 
         if (it != _bakers.end()) {
             auto resultRow = it->second;
-            
+
             // grab the results window, don't force it to be brought to the top
             auto resultsWindow = OvenGUIApplication::instance()->getMainWindow()->showResultsWindow(false);
 
@@ -262,9 +257,8 @@ void DomainBakeWidget::handleBakerProgress(int baked, int total) {
 void DomainBakeWidget::handleFinishedBaker() {
     if (auto baker = qobject_cast<DomainBaker*>(sender())) {
         // add the results of this bake to the results window
-        auto it = std::find_if(_bakers.begin(), _bakers.end(), [baker](const BakerRowPair& value) {
-            return value.first.get() == baker;
-        });
+        auto it = std::find_if(_bakers.begin(), _bakers.end(),
+                               [baker](const BakerRowPair& value) { return value.first.get() == baker; });
 
         if (it != _bakers.end()) {
             auto resultRow = it->second;

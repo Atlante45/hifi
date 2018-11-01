@@ -14,20 +14,19 @@
 #include <glm/gtx/transform.hpp>
 
 #include <BaseScriptEngine.h>
-#include <graphics/BufferViewHelpers.h>
-#include <graphics/GpuHelpers.h>
-#include <graphics/Geometry.h>
 #include <RegisteredMetaTypes.h>
+#include <graphics/BufferViewHelpers.h>
+#include <graphics/Geometry.h>
+#include <graphics/GpuHelpers.h>
 
 #include "Forward.h"
-#include "ScriptableMeshPart.h"
 #include "GraphicsScriptingUtil.h"
 #include "OBJWriter.h"
+#include "ScriptableMeshPart.h"
 
 // #define SCRIPTABLE_MESH_DEBUG 1
 
-scriptable::ScriptableMesh::ScriptableMesh(const ScriptableMeshBase& other)
-    : ScriptableMeshBase(other), QScriptable() {
+scriptable::ScriptableMesh::ScriptableMesh(const ScriptableMeshBase& other) : ScriptableMeshBase(other), QScriptable() {
     auto mesh = getMeshPointer();
     QString name = mesh ? QString::fromStdString(mesh->modelName) : "";
     if (name.isEmpty()) {
@@ -64,13 +63,14 @@ QVector<glm::uint32> scriptable::ScriptableMesh::findNearbyVertexIndices(const g
     if (!isValid()) {
         return result;
     }
-    const auto epsilon2 = epsilon*epsilon;
-    buffer_helpers::forEach<glm::vec3>(buffer_helpers::mesh::getBufferView(getMeshPointer(), gpu::Stream::POSITION), [&](glm::uint32 index, const glm::vec3& position) {
-        if (glm::length2(position - origin) <= epsilon2) {
-            result << index;
-        }
-        return true;
-    });
+    const auto epsilon2 = epsilon * epsilon;
+    buffer_helpers::forEach<glm::vec3>(buffer_helpers::mesh::getBufferView(getMeshPointer(), gpu::Stream::POSITION),
+                                       [&](glm::uint32 index, const glm::vec3& position) {
+                                           if (glm::length2(position - origin) <= epsilon2) {
+                                               result << index;
+                                           }
+                                           return true;
+                                       });
     return result;
 }
 
@@ -83,7 +83,6 @@ QVector<glm::uint32> scriptable::ScriptableMesh::getIndices() const {
     }
     return QVector<glm::uint32>();
 }
-
 
 glm::uint32 scriptable::ScriptableMesh::getNumAttributes() const {
     if (auto mesh = getMeshPointer()) {
@@ -131,11 +130,11 @@ QVariantMap scriptable::ScriptableMesh::getBufferFormats() const {
     QVariantMap result;
     for (const auto& a : buffer_helpers::ATTRIBUTES.toStdMap()) {
         auto bufferView = buffer_helpers::mesh::getBufferView(getMeshPointer(), a.second);
-        result[a.first] = QVariantMap{
+        result[a.first] = QVariantMap {
             { "slot", a.second },
             { "length", (glm::uint32)bufferView.getNumElements() },
             { "byteLength", (glm::uint32)bufferView._size },
-            { "offset", (glm::uint32) bufferView._offset },
+            { "offset", (glm::uint32)bufferView._offset },
             { "stride", (glm::uint32)bufferView._stride },
             { "element", scriptable::toVariant(bufferView._element) },
         };
@@ -238,7 +237,8 @@ QVariant scriptable::ScriptableMesh::getVertexProperty(glm::uint32 vertexIndex, 
     return buffer_helpers::getValue<QVariant>(bufferView, vertexIndex, qUtf8Printable(attributeName));
 }
 
-bool scriptable::ScriptableMesh::setVertexProperty(glm::uint32 vertexIndex, const QString& attributeName, const QVariant& value) {
+bool scriptable::ScriptableMesh::setVertexProperty(glm::uint32 vertexIndex, const QString& attributeName,
+                                                   const QVariant& value) {
     if (!isValidIndex(vertexIndex, attributeName)) {
         return false;
     }
@@ -274,7 +274,6 @@ glm::uint32 scriptable::ScriptableMesh::forEachVertex(QScriptValue _callback) {
     });
     return numProcessed;
 }
-
 
 glm::uint32 scriptable::ScriptableMesh::updateVertexAttributes(QScriptValue _callback) {
     auto mesh = getMeshPointer();
@@ -328,7 +327,10 @@ bool scriptable::ScriptableMesh::isValidIndex(glm::uint32 vertexIndex, const QSt
     const auto last = getNumVertices() - 1;
     if (vertexIndex > last) {
         if (context()) {
-            context()->throwError(QString("vertexIndex=%1 out of range (firstVertexIndex=%2, lastVertexIndex=%3)").arg(vertexIndex).arg(0).arg(last));
+            context()->throwError(QString("vertexIndex=%1 out of range (firstVertexIndex=%2, lastVertexIndex=%3)")
+                                      .arg(vertexIndex)
+                                      .arg(0)
+                                      .arg(last));
         }
         return false;
     }
@@ -343,14 +345,16 @@ bool scriptable::ScriptableMesh::isValidIndex(glm::uint32 vertexIndex, const QSt
         auto view = buffer_helpers::mesh::getBufferView(getMeshPointer(), static_cast<gpu::Stream::Slot>(slotNum));
         if (vertexIndex >= (glm::uint32)view.getNumElements()) {
             if (context()) {
-                context()->throwError(QString("vertexIndex=%1 out of range (attribute=%2, numElements=%3)").arg(vertexIndex).arg(attributeName).arg(view.getNumElements()));
+                context()->throwError(QString("vertexIndex=%1 out of range (attribute=%2, numElements=%3)")
+                                          .arg(vertexIndex)
+                                          .arg(attributeName)
+                                          .arg(view.getNumElements()));
             }
             return false;
         }
     }
     return true;
 }
-
 
 scriptable::ScriptableMeshPointer scriptable::ScriptableMesh::cloneMesh() {
     auto mesh = getMeshPointer();
@@ -365,12 +369,17 @@ scriptable::ScriptableMeshPointer scriptable::ScriptableMesh::cloneMesh() {
 }
 
 // note: we don't always want the JS side to prevent mesh data from being freed (hence weak pointers unless parented QObject)
-scriptable::ScriptableMeshBase::ScriptableMeshBase(
-    scriptable::WeakModelProviderPointer provider, scriptable::ScriptableModelBasePointer model, scriptable::WeakMeshPointer weakMesh, QObject* parent
-    ) : QObject(parent), provider(provider), model(model), weakMesh(weakMesh) {
+scriptable::ScriptableMeshBase::ScriptableMeshBase(scriptable::WeakModelProviderPointer provider,
+                                                   scriptable::ScriptableModelBasePointer model,
+                                                   scriptable::WeakMeshPointer weakMesh, QObject* parent) :
+    QObject(parent),
+    provider(provider),
+    model(model),
+    weakMesh(weakMesh) {
     if (parent) {
 #ifdef SCRIPTABLE_MESH_DEBUG
-        qCDebug(graphics_scripting) << "ScriptableMeshBase -- have parent QObject, creating strong neshref" << weakMesh.lock().get() << parent;
+        qCDebug(graphics_scripting) << "ScriptableMeshBase -- have parent QObject, creating strong neshref"
+                                    << weakMesh.lock().get() << parent;
 #endif
         strongMesh = weakMesh.lock();
     }
@@ -390,14 +399,16 @@ scriptable::ScriptableMeshBase& scriptable::ScriptableMeshBase::operator=(const 
 
 scriptable::ScriptableMeshBase::~ScriptableMeshBase() {
 #ifdef SCRIPTABLE_MESH_DEBUG
-    qCInfo(graphics_scripting) << "//~ScriptableMeshBase" << this << "strongMesh:"  << strongMesh.use_count() << "weakMesh:" << weakMesh.use_count();
+    qCInfo(graphics_scripting) << "//~ScriptableMeshBase" << this << "strongMesh:" << strongMesh.use_count()
+                               << "weakMesh:" << weakMesh.use_count();
 #endif
     strongMesh.reset();
 }
 
 scriptable::ScriptableMesh::~ScriptableMesh() {
 #ifdef SCRIPTABLE_MESH_DEBUG
-    qCInfo(graphics_scripting) << "//~ScriptableMesh" << this << "strongMesh:"  << strongMesh.use_count() << "weakMesh:" << weakMesh.use_count();
+    qCInfo(graphics_scripting) << "//~ScriptableMesh" << this << "strongMesh:" << strongMesh.use_count()
+                               << "weakMesh:" << weakMesh.use_count();
 #endif
     strongMesh.reset();
 }

@@ -33,16 +33,29 @@ public:
     int getBroadcastData(unsigned char* destinationBuffer);
     int parseData(ReceivedMessage& message) override;
 
-    bool hasConicalViews() const { QMutexLocker lock(&_conicalViewsLock); return !_conicalViews.empty(); }
-    void setConicalViews(ConicalViewFrustums views)
-        { QMutexLocker lock(&_conicalViewsLock); _conicalViews = views; }
-    void clearConicalViews() { QMutexLocker lock(&_conicalViewsLock); _conicalViews.clear(); }
+    bool hasConicalViews() const {
+        QMutexLocker lock(&_conicalViewsLock);
+        return !_conicalViews.empty();
+    }
+    void setConicalViews(ConicalViewFrustums views) {
+        QMutexLocker lock(&_conicalViewsLock);
+        _conicalViews = views;
+    }
+    void clearConicalViews() {
+        QMutexLocker lock(&_conicalViewsLock);
+        _conicalViews.clear();
+    }
 
     // getters/setters for JSON filter
-    QJsonObject getJSONParameters() { QReadLocker locker { &_jsonParametersLock }; return _jsonParameters; }
-    void setJSONParameters(const QJsonObject& jsonParameters)
-        { QWriteLocker locker { &_jsonParametersLock }; _jsonParameters = jsonParameters; }
-    
+    QJsonObject getJSONParameters() {
+        QReadLocker locker { &_jsonParametersLock };
+        return _jsonParameters;
+    }
+    void setJSONParameters(const QJsonObject& jsonParameters) {
+        QWriteLocker locker { &_jsonParametersLock };
+        _jsonParameters = jsonParameters;
+    }
+
     // related to Octree Sending strategies
     int getMaxQueryPacketsPerSecond() const { return _maxQueryPPS; }
     float getOctreeSizeScale() const { return _octreeElementSizeScale; }
@@ -50,7 +63,7 @@ public:
 
     void incrementConnectionID() { ++_connectionID; }
 
-    bool hasReceivedFirstQuery() const  { return _hasReceivedFirstQuery; }
+    bool hasReceivedFirstQuery() const { return _hasReceivedFirstQuery; }
 
     // Want a report when the initial query is complete.
     bool wantReportInitialCompletion() const { return _reportInitialCompletion; }
@@ -74,10 +87,10 @@ protected:
     int _boundaryLevelAdjust = 0; /// used for LOD calculations
 
     uint16_t _connectionID; // query connection ID, randomized to start, increments with each new connection to server
-    
+
     QJsonObject _jsonParameters;
     QReadWriteLock _jsonParametersLock;
-    
+
     enum OctreeQueryFlags : uint16_t { NoFlags = 0x0, WantInitialCompletion = 0x1 };
     friend OctreeQuery::OctreeQueryFlags operator|=(OctreeQuery::OctreeQueryFlags& lhs, const int rhs);
 

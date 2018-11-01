@@ -15,12 +15,11 @@
 #include <QtTest/QtTest>
 
 class MovingMinMaxAvgTests : public QObject {
-    
 private slots:
     void testQuint64();
     void testInt();
     void testFloat();
-    
+
 private:
     quint64 randQuint64();
 };

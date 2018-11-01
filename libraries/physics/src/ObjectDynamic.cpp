@@ -15,7 +15,6 @@
 
 #include "PhysicsLogging.h"
 
-
 ObjectDynamic::ObjectDynamic(EntityDynamicType type, const QUuid& id, EntityItemPointer ownerEntity) :
     EntityDynamicInterface(type, id),
     _ownerEntity(ownerEntity) {
@@ -25,7 +24,7 @@ ObjectDynamic::~ObjectDynamic() {
 }
 
 void ObjectDynamic::remapIDs(QHash<EntityItemID, EntityItemID>& map) {
-    withWriteLock([&]{
+    withWriteLock([&] {
         if (!_id.isNull()) {
             // just force our ID to something new -- action IDs don't go into the map
             _id = QUuid::createUuid();
@@ -64,7 +63,7 @@ qint64 ObjectDynamic::getEntityServerClockSkew() const {
 bool ObjectDynamic::updateArguments(QVariantMap arguments) {
     bool somethingChanged = false;
 
-    withWriteLock([&]{
+    withWriteLock([&] {
         quint64 previousExpires = _expires;
         QString previousTag = _tag;
 
@@ -94,40 +93,40 @@ bool ObjectDynamic::updateArguments(QVariantMap arguments) {
 }
 
 /**jsdoc
-* Different entity action types have different arguments: some common to all actions (listed below) and some specific to each 
-* {@link Entities.ActionType|ActionType} (linked to below). The arguments are accessed as an object of property names and 
-* values.
-*
-* @typedef {object} Entities.ActionArguments
-* @property {Entities.ActionType} type - The type of action.
-* @property {string} tag="" - A string that a script can use for its own purposes.
-* @property {number} ttl=0 - How long the action should exist, in seconds, before it is automatically deleted. A value of 
-*     <code>0</code> means that the action should not be deleted.
-* @property {boolean} isMine=true - Is <code>true</code> if you created the action during your current Interface session, 
-*     <code>false</code> otherwise. <em>Read-only.</em>
-* @property {boolean} ::no-motion-state - Is present when the entity hasn't been registered with the physics engine yet (e.g., 
-*     if the action hasn't been properly configured), otherwise <code>undefined</code>. <em>Read-only.</em>
-* @property {boolean} ::active - Is <code>true</code> when the action is modifying the entity's motion, <code>false</code> 
-*     otherwise. Is present once the entity has been registered with the physics engine, otherwise <code>undefined</code>. 
-*     <em>Read-only.</em>
-* @property {Entities.PhysicsMotionType} ::motion-type - How the entity moves with the action. Is present once the entity has 
-*     been registered with the physics engine, otherwise <code>undefined</code>. <em>Read-only.</em>
-*
-* @see The different action types have additional arguments as follows:
-* @see {@link Entities.ActionArguments-FarGrab|ActionArguments-FarGrab}
-* @see {@link Entities.ActionArguments-Hold|ActionArguments-Hold}
-* @see {@link Entities.ActionArguments-Offset|ActionArguments-Offset}
-* @see {@link Entities.ActionArguments-Tractor|ActionArguments-Tractor}
-* @see {@link Entities.ActionArguments-TravelOriented|ActionArguments-TravelOriented}
-* @see {@link Entities.ActionArguments-Hinge|ActionArguments-Hinge}
-* @see {@link Entities.ActionArguments-Slider|ActionArguments-Slider}
-* @see {@link Entities.ActionArguments-ConeTwist|ActionArguments-ConeTwist}
-* @see {@link Entities.ActionArguments-BallSocket|ActionArguments-BallSocket}
-*/
+ * Different entity action types have different arguments: some common to all actions (listed below) and some specific to each
+ * {@link Entities.ActionType|ActionType} (linked to below). The arguments are accessed as an object of property names and
+ * values.
+ *
+ * @typedef {object} Entities.ActionArguments
+ * @property {Entities.ActionType} type - The type of action.
+ * @property {string} tag="" - A string that a script can use for its own purposes.
+ * @property {number} ttl=0 - How long the action should exist, in seconds, before it is automatically deleted. A value of
+ *     <code>0</code> means that the action should not be deleted.
+ * @property {boolean} isMine=true - Is <code>true</code> if you created the action during your current Interface session,
+ *     <code>false</code> otherwise. <em>Read-only.</em>
+ * @property {boolean} ::no-motion-state - Is present when the entity hasn't been registered with the physics engine yet (e.g.,
+ *     if the action hasn't been properly configured), otherwise <code>undefined</code>. <em>Read-only.</em>
+ * @property {boolean} ::active - Is <code>true</code> when the action is modifying the entity's motion, <code>false</code>
+ *     otherwise. Is present once the entity has been registered with the physics engine, otherwise <code>undefined</code>.
+ *     <em>Read-only.</em>
+ * @property {Entities.PhysicsMotionType} ::motion-type - How the entity moves with the action. Is present once the entity has
+ *     been registered with the physics engine, otherwise <code>undefined</code>. <em>Read-only.</em>
+ *
+ * @see The different action types have additional arguments as follows:
+ * @see {@link Entities.ActionArguments-FarGrab|ActionArguments-FarGrab}
+ * @see {@link Entities.ActionArguments-Hold|ActionArguments-Hold}
+ * @see {@link Entities.ActionArguments-Offset|ActionArguments-Offset}
+ * @see {@link Entities.ActionArguments-Tractor|ActionArguments-Tractor}
+ * @see {@link Entities.ActionArguments-TravelOriented|ActionArguments-TravelOriented}
+ * @see {@link Entities.ActionArguments-Hinge|ActionArguments-Hinge}
+ * @see {@link Entities.ActionArguments-Slider|ActionArguments-Slider}
+ * @see {@link Entities.ActionArguments-ConeTwist|ActionArguments-ConeTwist}
+ * @see {@link Entities.ActionArguments-BallSocket|ActionArguments-BallSocket}
+ */
 // Note: The "type" property is set in EntityItem::getActionArguments().
 QVariantMap ObjectDynamic::getArguments() {
     QVariantMap arguments;
-    withReadLock([&]{
+    withReadLock([&] {
         if (_expires == 0) {
             arguments["ttl"] = 0.0f;
         } else {
@@ -153,9 +152,7 @@ QVariantMap ObjectDynamic::getArguments() {
 
 void ObjectDynamic::removeFromSimulation(EntitySimulationPointer simulation) const {
     QUuid myID;
-    withReadLock([&]{
-        myID = _id;
-    });
+    withReadLock([&] { myID = _id; });
     simulation->removeDynamic(myID);
 }
 
@@ -168,9 +165,7 @@ void ObjectDynamic::setOwnerEntity(const EntityItemPointer ownerEntity) {
 
 EntityItemPointer ObjectDynamic::getEntityByID(EntityItemID entityID) const {
     EntityItemPointer ownerEntity;
-    withReadLock([&]{
-        ownerEntity = _ownerEntity.lock();
-    });
+    withReadLock([&] { ownerEntity = _ownerEntity.lock(); });
     EntityTreeElementPointer element = ownerEntity ? ownerEntity->getElement() : nullptr;
     EntityTreePointer tree = element ? element->getTree() : nullptr;
     if (!tree) {
@@ -179,10 +174,9 @@ EntityItemPointer ObjectDynamic::getEntityByID(EntityItemID entityID) const {
     return tree->findEntityByID(entityID);
 }
 
-
 btRigidBody* ObjectDynamic::getRigidBody() {
     ObjectMotionState* motionState = nullptr;
-    withReadLock([&]{
+    withReadLock([&] {
         auto ownerEntity = _ownerEntity.lock();
         if (!ownerEntity) {
             return;
@@ -287,7 +281,7 @@ QList<btRigidBody*> ObjectDynamic::getRigidBodies() {
 
 SpatiallyNestablePointer ObjectDynamic::getOther() {
     SpatiallyNestablePointer other;
-    withWriteLock([&]{
+    withWriteLock([&] {
         if (_otherID == QUuid()) {
             // no other
             return;

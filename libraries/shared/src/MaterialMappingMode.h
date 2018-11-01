@@ -11,10 +11,7 @@
 
 #include "QString"
 
-enum MaterialMappingMode {
-    UV = 0,
-    PROJECTED
-};
+enum MaterialMappingMode { UV = 0, PROJECTED };
 
 class MaterialMappingModeHelpers {
 public:
@@ -22,4 +19,3 @@ public:
 };
 
 #endif // hifi_MaterialMappingMode_h
-

@@ -31,7 +31,6 @@ const char* HTTPConnection::StatusCode404 = "404 Not Found";
 const char* HTTPConnection::StatusCode500 = "500 Internal server error";
 const char* HTTPConnection::DefaultContentType = "text/plain; charset=ISO-8859-1";
 
-
 class MemoryStorage : public HTTPConnection::Storage {
 public:
     static std::unique_ptr<MemoryStorage> make(qint64 size);
@@ -57,7 +56,6 @@ void MemoryStorage::write(const QByteArray& data) {
     memcpy(_array.data() + _bytesWritten, data.data(), data.size());
     _bytesWritten += data.size();
 }
-
 
 class FileStorage : public HTTPConnection::Storage {
 public:
@@ -96,8 +94,7 @@ FileStorage::FileStorage(std::unique_ptr<QTemporaryFile> file, uchar* mapped, qi
     _wrapperArray(QByteArray::fromRawData(reinterpret_cast<char*>(mapped), size)),
     _file(std::move(file)),
     _mappedMemoryAddress(mapped),
-    _mappedMemorySize(size)
-{
+    _mappedMemorySize(size) {
 }
 
 FileStorage::~FileStorage() {
@@ -112,13 +109,11 @@ void FileStorage::write(const QByteArray& data) {
     _bytesWritten += data.size();
 }
 
-
 HTTPConnection::HTTPConnection(QTcpSocket* socket, HTTPManager* parentManager) :
     QObject(parentManager),
     _parentManager(parentManager),
     _socket(socket),
-    _address(socket->peerAddress())
-{
+    _address(socket->peerAddress()) {
     // take over ownership of the socket
     _socket->setParent(this);
 
@@ -130,8 +125,7 @@ HTTPConnection::HTTPConnection(QTcpSocket* socket, HTTPManager* parentManager) :
 
 HTTPConnection::~HTTPConnection() {
     // log the destruction
-    if (_socket->error() != QAbstractSocket::UnknownSocketError
-        && _socket->error() != QAbstractSocket::RemoteHostClosedError) {
+    if (_socket->error() != QAbstractSocket::UnknownSocketError && _socket->error() != QAbstractSocket::RemoteHostClosedError) {
         qCDebug(embeddedwebserver) << _socket->errorString() << "-" << _socket->error();
     }
 }
@@ -175,7 +169,7 @@ QList<FormData> HTTPConnection::parseFormData() const {
             break;
         }
     }
-    
+
     QByteArray start = "--" + boundary;
     QByteArray end = "\r\n--" + boundary + "--\r\n";
 
@@ -227,7 +221,8 @@ void HTTPConnection::respond(const char* code, const QByteArray& content, const 
     disconnect(_socket, &QTcpSocket::readyRead, this, nullptr);
 }
 
-void HTTPConnection::respond(const char* code, std::unique_ptr<QIODevice> device, const char* contentType, const Headers& headers) {
+void HTTPConnection::respond(const char* code, std::unique_ptr<QIODevice> device, const char* contentType,
+                             const Headers& headers) {
     _responseDevice = std::move(device);
 
     if (_responseDevice->isSequential()) {
@@ -254,21 +249,20 @@ void HTTPConnection::respond(const char* code, std::unique_ptr<QIODevice> device
                 }
             }
         });
-
     }
 
     // make sure we receive no further read notifications
     disconnect(_socket, &QTcpSocket::readyRead, this, nullptr);
 }
 
-void HTTPConnection::respondWithStatusAndHeaders(const char* code, const char* contentType, const Headers& headers, qint64 contentLength) {
+void HTTPConnection::respondWithStatusAndHeaders(const char* code, const char* contentType, const Headers& headers,
+                                                 qint64 contentLength) {
     _socket->write("HTTP/1.1 ");
 
     _socket->write(code);
     _socket->write("\r\n");
 
-    for (Headers::const_iterator it = headers.constBegin(), end = headers.constEnd();
-            it != end; it++) {
+    for (Headers::const_iterator it = headers.constBegin(), end = headers.constEnd(); it != end; it++) {
         _socket->write(it.key());
         _socket->write(": ");
         _socket->write(it.value());

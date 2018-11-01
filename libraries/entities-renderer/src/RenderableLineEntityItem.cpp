@@ -11,8 +11,8 @@
 
 #include "RenderableLineEntityItem.h"
 
-#include <gpu/Batch.h>
 #include <PerfStat.h>
+#include <gpu/Batch.h>
 
 using namespace render;
 using namespace render::entities;

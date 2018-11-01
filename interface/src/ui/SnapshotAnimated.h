@@ -12,12 +12,12 @@
 #ifndef hifi_SnapshotAnimated_h
 #define hifi_SnapshotAnimated_h
 
-#include <QtCore/QVector>
 #include <Application.h>
 #include <DependencyManager.h>
 #include <GifCreator.h>
-#include <qtimer.h>
 #include <SettingHandle.h>
+#include <qtimer.h>
+#include <QtCore/QVector>
 #include "scripting/WindowScriptingInterface.h"
 
 // If the snapshot width or the framerate are too high for the
@@ -26,9 +26,9 @@
 // This value should divide evenly into 100. Snapshot framerate is NOT guaranteed.
 #define SNAPSNOT_ANIMATED_TARGET_FRAMERATE (25)
 #define SNAPSNOT_ANIMATED_DURATION_SECS (3)
-#define SNAPSNOT_ANIMATED_DURATION_MSEC (SNAPSNOT_ANIMATED_DURATION_SECS*1000)
+#define SNAPSNOT_ANIMATED_DURATION_MSEC (SNAPSNOT_ANIMATED_DURATION_SECS * 1000)
 
-#define SNAPSNOT_ANIMATED_FRAME_DELAY_MSEC (1000/SNAPSNOT_ANIMATED_TARGET_FRAMERATE)
+#define SNAPSNOT_ANIMATED_FRAME_DELAY_MSEC (1000 / SNAPSNOT_ANIMATED_TARGET_FRAMERATE)
 
 class SnapshotAnimated {
 private:
@@ -50,8 +50,10 @@ private:
     static void captureFrames();
     static void processFrames();
     static void clearTempVariables();
+
 public:
-    static void saveSnapshotAnimated(QString pathStill, float aspectRatio, Application* app, QSharedPointer<WindowScriptingInterface> dm);
+    static void saveSnapshotAnimated(QString pathStill, float aspectRatio, Application* app,
+                                     QSharedPointer<WindowScriptingInterface> dm);
     static bool isAlreadyTakingSnapshotAnimated() { return snapshotAnimatedFirstFrameTimestamp != 0; };
     static Setting::Handle<bool> alsoTakeAnimatedSnapshot;
     static Setting::Handle<float> snapshotAnimatedDuration;

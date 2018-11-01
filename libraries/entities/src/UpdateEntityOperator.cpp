@@ -11,10 +11,8 @@
 
 #include "UpdateEntityOperator.h"
 
-UpdateEntityOperator::UpdateEntityOperator(EntityTreePointer tree,
-                        EntityTreeElementPointer containingElement,
-                        EntityItemPointer existingEntity,
-                        const AACube newQueryAACube) :
+UpdateEntityOperator::UpdateEntityOperator(EntityTreePointer tree, EntityTreeElementPointer containingElement,
+                                           EntityItemPointer existingEntity, const AACube newQueryAACube) :
     _tree(tree),
     _existingEntity(existingEntity),
     _containingElement(containingElement),
@@ -26,8 +24,7 @@ UpdateEntityOperator::UpdateEntityOperator(EntityTreePointer tree,
     _changeTime(usecTimestampNow()),
     _oldEntityCube(),
     _newEntityCube(),
-    _wantDebug(false)
-{
+    _wantDebug(false) {
     // caller must have verified existence of containingElement and oldEntity
     assert(_containingElement && _existingEntity);
 
@@ -68,17 +65,13 @@ UpdateEntityOperator::UpdateEntityOperator(EntityTreePointer tree,
         qCDebug(entities) << "    _newEntityBox:" << _newEntityBox;
         qCDebug(entities) << "--------------------------------------------------------------------------";
     }
-
 }
-
 
 UpdateEntityOperator::~UpdateEntityOperator() {
 }
 
-
 // does this entity tree element contain the old entity
 bool UpdateEntityOperator::subTreeContainsOldEntity(const OctreeElementPointer& element) {
-
     // We've found cases where the old entity might be placed in an element that is not actually the best fit
     // so when we're searching the tree for the old element, we use the known cube for the known containing element
     bool elementContainsOldBox = element->getAACube().contains(_containingElementCube);
@@ -111,7 +104,6 @@ bool UpdateEntityOperator::subTreeContainsNewEntity(const OctreeElementPointer& 
     return elementContainsNewBox;
 }
 
-
 bool UpdateEntityOperator::preRecursion(const OctreeElementPointer& element) {
     EntityTreeElementPointer entityTreeElement = std::static_pointer_cast<EntityTreeElement>(element);
 
@@ -141,7 +133,6 @@ bool UpdateEntityOperator::preRecursion(const OctreeElementPointer& element) {
     // If we haven't yet found the old element, and this subTreeContains our old element,
     // then we need to keep searching.
     if (!_foundOld && subtreeContainsOld) {
-
         if (_wantDebug) {
             qCDebug(entities) << "    OLD TREE CASE....";
             qCDebug(entities) << "    entityTreeElement=" << entityTreeElement.get();
@@ -151,7 +142,6 @@ bool UpdateEntityOperator::preRecursion(const OctreeElementPointer& element) {
         // If this is the element we're looking for, then ask it to remove the old entity
         // and we can stop searching.
         if (entityTreeElement == _containingElement) {
-
             if (_wantDebug) {
                 qCDebug(entities) << "    *** it's the OLD ELEMENT! ***";
             }
@@ -160,7 +150,6 @@ bool UpdateEntityOperator::preRecursion(const OctreeElementPointer& element) {
             // then we need to remove it, and the updateEntity below will store it in the
             // correct element.
             if (_removeOld) {
-
                 if (_wantDebug) {
                     qCDebug(entities) << "    *** REMOVING from ELEMENT ***";
                 }
@@ -191,7 +180,6 @@ bool UpdateEntityOperator::preRecursion(const OctreeElementPointer& element) {
     // If we haven't yet found the new element, and this subTreeContains our new element,
     // then we need to keep searching.
     if (!_foundNew && subtreeContainsNew) {
-
         if (_wantDebug) {
             qCDebug(entities) << "    NEW TREE CASE....";
             qCDebug(entities) << "    entityTreeElement=" << entityTreeElement.get();
@@ -202,7 +190,6 @@ bool UpdateEntityOperator::preRecursion(const OctreeElementPointer& element) {
 
         // If this element is the best fit for the new entity properties, then add/or update it
         if (entityTreeElement->bestFitBounds(_newEntityBox)) {
-
             if (_wantDebug) {
                 qCDebug(entities) << "    *** THIS ELEMENT IS BEST FIT ***";
             }
@@ -250,8 +237,7 @@ bool UpdateEntityOperator::postRecursion(const OctreeElementPointer& element) {
 
     // As we unwind, if we're in either of these two paths, we mark our element
     // as dirty.
-    if ((_foundOld && subtreeContainsOld) ||
-            (_foundNew && subtreeContainsNew)) {
+    if ((_foundOld && subtreeContainsOld) || (_foundNew && subtreeContainsNew)) {
         element->markWithChangedTime();
     }
 

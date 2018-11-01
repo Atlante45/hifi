@@ -9,7 +9,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef I3D_MOUSE_PARAMS_H
 #define I3D_MOUSE_PARAMS_H
 
@@ -17,15 +16,11 @@
 
 class I3dMouseSensor {
 public:
-    enum Speed {
-       SPEED_LOW = 0,
-       SPEED_MID,
-       SPEED_HIGH
-    };
+    enum Speed { SPEED_LOW = 0, SPEED_MID, SPEED_HIGH };
 
     virtual bool IsPanZoom() const = 0;
-    virtual bool IsRotate() const  = 0;
-    virtual Speed GetSpeed() const  = 0;
+    virtual bool IsRotate() const = 0;
+    virtual Speed GetSpeed() const = 0;
 
     virtual void SetPanZoom(bool isPanZoom) = 0;
     virtual void SetRotate(bool isRotate) = 0;
@@ -37,28 +32,20 @@ protected:
 
 class I3dMouseNavigation {
 public:
-   enum Pivot {
-      PIVOT_MANUAL = 0,
-      PIVOT_AUTO,
-      PIVOT_AUTO_OVERRIDE
-   };
+    enum Pivot { PIVOT_MANUAL = 0, PIVOT_AUTO, PIVOT_AUTO_OVERRIDE };
 
-   enum Navigation {
-      NAVIGATION_OBJECT_MODE = 0,
-      NAVIGATION_CAMERA_MODE,
-      NAVIGATION_FLY_MODE,
-      NAVIGATION_WALK_MODE,
-      NAVIGATION_HELICOPTER_MODE
-   };
+    enum Navigation {
+        NAVIGATION_OBJECT_MODE = 0,
+        NAVIGATION_CAMERA_MODE,
+        NAVIGATION_FLY_MODE,
+        NAVIGATION_WALK_MODE,
+        NAVIGATION_HELICOPTER_MODE
+    };
 
-   enum PivotVisibility {
-      PIVOT_HIDE = 0,
-      PIVOT_SHOW,
-      PIVOT_SHOW_MOVING
-   };
+    enum PivotVisibility { PIVOT_HIDE = 0, PIVOT_SHOW, PIVOT_SHOW_MOVING };
 
-    virtual Navigation GetNavigationMode() const  = 0;
-    virtual Pivot GetPivotMode() const  = 0;
+    virtual Navigation GetNavigationMode() const = 0;
+    virtual Pivot GetPivotMode() const = 0;
     virtual PivotVisibility GetPivotVisibility() const = 0;
     virtual bool IsLockHorizon() const = 0;
 
@@ -68,7 +55,7 @@ public:
     virtual void SetPivotVisibility(PivotVisibility visibility) = 0;
 
 protected:
-    virtual ~I3dMouseNavigation(){}
+    virtual ~I3dMouseNavigation() {}
 };
 
 class I3dMouseParam : public I3dMouseSensor, public I3dMouseNavigation {

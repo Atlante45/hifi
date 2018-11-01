@@ -8,18 +8,18 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-#include <QCoreApplication>
-#include <QFile>
-#include <QTimer>
-#include <QElapsedTimer>
-#include <QLoggingCategory>
-#include <QDir>
 #include <ByteCountCoding.h>
+#include <QCoreApplication>
+#include <QDir>
+#include <QElapsedTimer>
+#include <QFile>
+#include <QLoggingCategory>
+#include <QTimer>
 
-#include <ShapeEntityItem.h>
 #include <EntityItemProperties.h>
 #include <Octree.h>
 #include <PathUtils.h>
+#include <ShapeEntityItem.h>
 #include <SharedUtil.h>
 
 const QString& getTestResourceDir() {
@@ -48,50 +48,41 @@ public:
         _count++;
     }
 
-    quint64 getLast() {
-        return _last;
-    }
+    quint64 getLast() { return _last; }
 
-    quint64 getTotal() {
-        return _total;
-    }
+    quint64 getTotal() { return _total; }
 
-    float getAverage() {
-        return (float)_total / (float)_count;
-    }
+    float getAverage() { return (float)_total / (float)_count; }
 
-    void reset() {
-        _last = _start = _total = _count = 0;
-    }
+    void reset() { _last = _start = _total = _count = 0; }
 
 private:
-    size_t _count{ 0 };
-    quint64 _total{ 0 };
-    quint64 _start{ 0 };
-    quint64 _last{ 0 };
+    size_t _count { 0 };
+    quint64 _total { 0 };
+    quint64 _start { 0 };
+    quint64 _last { 0 };
 };
 
-template <typename T>
+template<typename T>
 void testByteCountCodedStable(const T& value) {
     ByteCountCoded<T> coder((T)value);
     auto encoded = coder.encode();
-    #ifndef QT_NO_DEBUG
+#ifndef QT_NO_DEBUG
     auto originalEncodedSize = encoded.size();
-    #endif
+#endif
     for (int i = 0; i < 10; ++i) {
         encoded.append(qrand());
     }
     ByteCountCoded<T> decoder;
     decoder.decode(encoded);
     Q_ASSERT(decoder.data == coder.data);
-    #ifndef QT_NO_DEBUG
+#ifndef QT_NO_DEBUG
     auto consumed = decoder.decode(encoded.data(), encoded.size());
     Q_ASSERT(consumed == (unsigned int)originalEncodedSize);
-    #endif
-
+#endif
 }
 
-template <typename T>
+template<typename T>
 void testByteCountCoded() {
     testByteCountCodedStable<T>(0);
     testByteCountCodedStable<T>(1);
@@ -107,9 +98,9 @@ void testPropertyFlags(uint32_t value) {
         original.setHasProperty((EntityPropertyList)i);
     }
     QByteArray encoded = original.encode();
-    #ifndef QT_NO_DEBUG
+#ifndef QT_NO_DEBUG
     int originalSize = encoded.size();
-    #endif
+#endif
     for (size_t i = 0; i < enumSize; ++i) {
         encoded.append(qrand());
     }
@@ -121,11 +112,11 @@ void testPropertyFlags(uint32_t value) {
     }
 
     {
-        #ifndef QT_NO_DEBUG
+#ifndef QT_NO_DEBUG
         int decodeSize = (int)decodeNew.decode((const uint8_t*)encoded.data(), (int)encoded.size());
         Q_ASSERT(originalSize == decodeSize);
         Q_ASSERT(decodeNew == original);
-        #endif
+#endif
     }
 }
 
@@ -151,12 +142,12 @@ int main(int argc, char** argv) {
         }
         auto duration = usecTimestampNow() - start;
         qDebug() << duration;
-
     }
     DependencyManager::set<NodeList>(NodeType::Unassigned);
 
     QFile file(getTestResourceDir() + "packet.bin");
-    if (!file.open(QIODevice::ReadOnly)) return -1;
+    if (!file.open(QIODevice::ReadOnly))
+        return -1;
     QByteArray packet = file.readAll();
     EntityItemPointer item = ShapeEntityItem::boxFactory(EntityItemID(), EntityItemProperties());
     ReadBitstreamToTreeParams params;

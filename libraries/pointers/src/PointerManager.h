@@ -28,7 +28,8 @@ public:
     void enablePointer(unsigned int uid) const;
     void disablePointer(unsigned int uid) const;
     void setRenderState(unsigned int uid, const std::string& renderState) const;
-    void editRenderState(unsigned int uid, const std::string& state, const QVariant& startProps, const QVariant& pathProps, const QVariant& endProps) const;
+    void editRenderState(unsigned int uid, const std::string& state, const QVariant& startProps, const QVariant& pathProps,
+                         const QVariant& endProps) const;
     PickResultPointer getPrevPickResult(unsigned int uid) const;
     QVariantMap getPointerProperties(unsigned int uid) const;
 
@@ -37,7 +38,8 @@ public:
     void setIncludeItems(unsigned int uid, const QVector<QUuid>& includeEntities) const;
 
     void setLength(unsigned int uid, float length) const;
-    void setLockEndUUID(unsigned int uid, const QUuid& objectID, bool isOverlay, const glm::mat4& offsetMat = glm::mat4()) const;
+    void setLockEndUUID(unsigned int uid, const QUuid& objectID, bool isOverlay,
+                        const glm::mat4& offsetMat = glm::mat4()) const;
 
     void update();
 

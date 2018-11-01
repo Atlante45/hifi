@@ -11,14 +11,13 @@
 
 #pragma once
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include "AABox.h"
 #include "GeometryUtil.h"
 
 class TriangleSet {
-
     class TriangleTreeCell {
     public:
         TriangleTreeCell(std::vector<Triangle>& allTriangles) : _allTriangles(allTriangles) {}
@@ -29,11 +28,11 @@ class TriangleSet {
         void clear();
 
         bool findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& invDirection,
-            float& distance, BoxFace& face, Triangle& triangle, bool precision, int& trianglesTouched,
-            bool allowBackface = false);
+                                 float& distance, BoxFace& face, Triangle& triangle, bool precision, int& trianglesTouched,
+                                 bool allowBackface = false);
         bool findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-            float& parabolicDistance, BoxFace& face, Triangle& triangle, bool precision, int& trianglesTouched,
-            bool allowBackface = false);
+                                      float& parabolicDistance, BoxFace& face, Triangle& triangle, bool precision,
+                                      int& trianglesTouched, bool allowBackface = false);
 
         const AABox& getBounds() const { return _bounds; }
 
@@ -41,12 +40,11 @@ class TriangleSet {
 
     protected:
         // checks our internal list of triangles
-        bool findRayIntersectionInternal(const glm::vec3& origin, const glm::vec3& direction,
-            float& distance, BoxFace& face, Triangle& triangle, bool precision, int& trianglesTouched,
-            bool allowBackface = false);
+        bool findRayIntersectionInternal(const glm::vec3& origin, const glm::vec3& direction, float& distance, BoxFace& face,
+                                         Triangle& triangle, bool precision, int& trianglesTouched, bool allowBackface = false);
         bool findParabolaIntersectionInternal(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-            float& parabolicDistance, BoxFace& face, Triangle& triangle, bool precision, int& trianglesTouched,
-            bool allowBackface = false);
+                                              float& parabolicDistance, BoxFace& face, Triangle& triangle, bool precision,
+                                              int& trianglesTouched, bool allowBackface = false);
 
         std::pair<AABox, AABox> getTriangleTreeCellChildBounds();
 
@@ -70,9 +68,10 @@ public:
     void insert(const Triangle& t);
 
     bool findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& invDirection,
-        float& distance, BoxFace& face, Triangle& triangle, bool precision, bool allowBackface = false);
+                             float& distance, BoxFace& face, Triangle& triangle, bool precision, bool allowBackface = false);
     bool findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-        float& parabolicDistance, BoxFace& face, Triangle& triangle, bool precision, bool allowBackface = false);
+                                  float& parabolicDistance, BoxFace& face, Triangle& triangle, bool precision,
+                                  bool allowBackface = false);
 
     void balanceTree();
 
@@ -81,7 +80,7 @@ public:
     void clear();
 
     // Determine if a point is "inside" all the triangles of a convex hull. It is the responsibility of the caller to
-    // determine that the triangle set is indeed a convex hull. If the triangles added to this set are not in fact a 
+    // determine that the triangle set is indeed a convex hull. If the triangles added to this set are not in fact a
     // convex hull, the result of this method is meaningless and undetermined.
     bool convexHullContains(const glm::vec3& point) const;
     const AABox& getBounds() const { return _bounds; }

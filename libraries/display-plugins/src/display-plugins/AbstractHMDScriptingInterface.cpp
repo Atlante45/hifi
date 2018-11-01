@@ -10,8 +10,8 @@
 
 #include <SettingHandle.h>
 
-#include "DisplayPlugin.h"
 #include <ui-plugins/PluginContainer.h>
+#include "DisplayPlugin.h"
 
 static Setting::Handle<float> IPD_SCALE_HANDLE("hmd.ipdScale", 1.0f);
 

@@ -44,8 +44,10 @@ protected:
     glm::vec3 _axisInB;
 
     float _swingSpan1 { TWO_PI };
-    float _swingSpan2 { TWO_PI };;
-    float _twistSpan { TWO_PI };;
+    float _swingSpan2 { TWO_PI };
+    ;
+    float _twistSpan { TWO_PI };
+    ;
 };
 
 #endif // hifi_ObjectConstraintConeTwist_h

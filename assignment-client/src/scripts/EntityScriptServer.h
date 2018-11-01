@@ -19,9 +19,9 @@
 #include <QtCore/QUuid>
 
 #include <EntityEditPacketSender.h>
-#include <plugins/CodecPlugin.h>
 #include <ScriptEngine.h>
 #include <ThreadedAssignment.h>
+#include <plugins/CodecPlugin.h>
 #include "../entities/EntityTreeHeadlessViewer.h"
 
 class EntityScriptServer : public ThreadedAssignment {
@@ -54,7 +54,6 @@ private slots:
     void pushLogs();
 
     void handleEntityScriptCallMethodPacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer senderNode);
-
 
 private:
     void negotiateAudioFormat();

@@ -17,15 +17,12 @@
 
 QString const Line3DOverlay::TYPE = "line3d";
 
-Line3DOverlay::Line3DOverlay() :
-    _geometryCacheID(DependencyManager::get<GeometryCache>()->allocateID())
-{
+Line3DOverlay::Line3DOverlay() : _geometryCacheID(DependencyManager::get<GeometryCache>()->allocateID()) {
 }
 
 Line3DOverlay::Line3DOverlay(const Line3DOverlay* line3DOverlay) :
     Base3DOverlay(line3DOverlay),
-    _geometryCacheID(DependencyManager::get<GeometryCache>()->allocateID())
-{
+    _geometryCacheID(DependencyManager::get<GeometryCache>()->allocateID()) {
     setParentID(line3DOverlay->getParentID());
     setParentJointIndex(line3DOverlay->getParentJointIndex());
     setLocalTransform(line3DOverlay->getLocalTransform());
@@ -116,7 +113,7 @@ void Line3DOverlay::setLocalEnd(const glm::vec3& localEnd) {
 }
 
 AABox Line3DOverlay::getBounds() const {
-    auto extents = Extents{};
+    auto extents = Extents {};
     extents.addPoint(getStart());
     extents.addPoint(getEnd());
     return AABox(extents);
@@ -257,7 +254,7 @@ void Line3DOverlay::setProperties(const QVariantMap& originalProperties) {
 /**jsdoc
  * These are the properties of a <code>line3d</code> {@link Overlays.OverlayType|OverlayType}.
  * @typedef {object} Overlays.Line3DProperties
- * 
+ *
  * @property {string} type=line3d - Has the value <code>"line3d"</code>. <em>Read-only.</em>
  * @property {Color} color=255,255,255 - The color of the overlay.
  * @property {number} alpha=0.7 - The opacity of the overlay, <code>0.0</code> - <code>1.0</code>.
@@ -287,7 +284,8 @@ void Line3DOverlay::setProperties(const QVariantMap& originalProperties) {
  *     Antonyms: <code>isWire</code> and <code>wire</code>.
  * @property {boolean} isDashedLine=false - If <code>true</code>, a dashed line is drawn on the overlay's edges. Synonym:
  *     <code>dashed</code>.
- * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.  <code>ignoreRayIntersection</code> is a synonym.
+ * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.
+ * <code>ignoreRayIntersection</code> is a synonym.
  * @property {boolean} drawInFront=false - If <code>true</code>, the overlay is rendered in front of other overlays that don't
  *     have <code>drawInFront</code> set to <code>true</code>, and in front of entities.
  * @property {boolean} grabbable=false - Signal to grabbing scripts whether or not this overlay can be grabbed.
@@ -351,7 +349,7 @@ Transform Line3DOverlay::evalRenderTransform() {
     // start is the origin
     // end is at the tip of the front axis aka -Z
     Transform transform;
-    transform.setTranslation( getStart());
+    transform.setTranslation(getStart());
     auto endPos = getEnd();
 
     auto vec = endPos - transform.getTranslation();

@@ -15,10 +15,7 @@
 #include <NumericalConstants.h>
 #include "AnimUtil.h"
 
-ElbowConstraint::ElbowConstraint() :
-        _minAngle(-PI),
-        _maxAngle(PI)
-{
+ElbowConstraint::ElbowConstraint() : _minAngle(-PI), _maxAngle(PI) {
 }
 
 void ElbowConstraint::setHingeAxis(const glm::vec3& axis) {
@@ -31,14 +28,14 @@ void ElbowConstraint::setHingeAxis(const glm::vec3& axis) {
         float component = _axis[i];
         const float MIN_LARGEST_NORMALIZED_VECTOR_COMPONENT = 0.57735f; // just under 1/sqrt(3)
         if (fabsf(component) > MIN_LARGEST_NORMALIZED_VECTOR_COMPONENT) {
-           int j = (i + 1) % 3;
-           int k = (j + 1) % 3;
-           _perpAxis[i] = - _axis[j];
-           _perpAxis[j] = component;
-           _perpAxis[k] = 0.0f;
-           _perpAxis = glm::normalize(_perpAxis);
-           break;
-       }
+            int j = (i + 1) % 3;
+            int k = (j + 1) % 3;
+            _perpAxis[i] = -_axis[j];
+            _perpAxis[j] = component;
+            _perpAxis[k] = 0.0f;
+            _perpAxis = glm::normalize(_perpAxis);
+            break;
+        }
     }
 }
 

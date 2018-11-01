@@ -60,7 +60,6 @@ static const int32_t FBX_PROPERTY_COMPRESSED_FLAG = 1;
 class FBXNode;
 using FBXNodeList = QList<FBXNode>;
 
-
 /// A node within an FBX document.
 class FBXNode {
 public:
@@ -68,7 +67,6 @@ public:
     QVariantList properties;
     FBXNodeList children;
 };
-
 
 /// A single blendshape extracted from an FBX document.
 class FBXBlendshape {
@@ -90,7 +88,6 @@ struct FBXJointShapeInfo {
 /// A single joint (transformation node) extracted from an FBX document.
 class FBXJoint {
 public:
-
     FBXJointShapeInfo shapeInfo;
     QVector<int> freeLineage;
     bool isFree;
@@ -99,18 +96,18 @@ public:
 
     // http://download.autodesk.com/us/fbx/20112/FBX_SDK_HELP/SDKRef/a00209.html
 
-    glm::vec3 translation;   // T
-    glm::mat4 preTransform;  // Roff * Rp
-    glm::quat preRotation;   // Rpre
-    glm::quat rotation;      // R
-    glm::quat postRotation;  // Rpost
+    glm::vec3 translation; // T
+    glm::mat4 preTransform; // Roff * Rp
+    glm::quat preRotation; // Rpre
+    glm::quat rotation; // R
+    glm::quat postRotation; // Rpost
     glm::mat4 postTransform; // Rp-1 * Soff * Sp * S * Sp-1
 
     // World = ParentWorld * T * (Roff * Rp) * Rpre * R * Rpost * (Rp-1 * Soff * Sp * S * Sp-1)
 
     glm::mat4 transform;
-    glm::vec3 rotationMin;  // radians
-    glm::vec3 rotationMax;  // radians
+    glm::vec3 rotationMin; // radians
+    glm::vec3 rotationMax; // radians
     glm::quat inverseDefaultRotation;
     glm::quat inverseBindRotation;
     glm::mat4 bindTransform;
@@ -125,11 +122,9 @@ public:
     glm::vec3 geometricScaling;
 };
 
-
 /// A single binding to a joint in an FBX document.
 class FBXCluster {
 public:
-
     int jointIndex;
     glm::mat4 inverseBindMatrix;
     Transform inverseBindTransform;
@@ -150,7 +145,7 @@ public:
     int texcoordSet;
     QString texcoordSetName;
 
-    bool isBumpmap{ false };
+    bool isBumpmap { false };
 
     bool isNull() const { return name.isEmpty() && filename.isEmpty() && content.isEmpty(); }
 };
@@ -158,7 +153,6 @@ public:
 /// A single part of a mesh (with the same material).
 class FBXMeshPart {
 public:
-
     QVector<int> quadIndices; // original indices from the FBX mesh
     QVector<int> quadTrianglesIndices; // original indices from the FBX mesh of the quad converted as triangles
     QVector<int> triangleIndices; // original indices from the FBX mesh
@@ -169,32 +163,32 @@ public:
 class FBXMaterial {
 public:
     FBXMaterial() {};
-    FBXMaterial(const glm::vec3& diffuseColor, const glm::vec3& specularColor, const glm::vec3& emissiveColor,
-         float shininess, float opacity) :
+    FBXMaterial(const glm::vec3& diffuseColor, const glm::vec3& specularColor, const glm::vec3& emissiveColor, float shininess,
+                float opacity) :
         diffuseColor(diffuseColor),
         specularColor(specularColor),
         emissiveColor(emissiveColor),
         shininess(shininess),
-        opacity(opacity)  {}
+        opacity(opacity) {}
 
     void getTextureNames(QSet<QString>& textureList) const;
     void setMaxNumPixelsPerTexture(int maxNumPixels);
 
-    glm::vec3 diffuseColor{ 1.0f };
-    float diffuseFactor{ 1.0f };
-    glm::vec3 specularColor{ 0.02f };
-    float specularFactor{ 1.0f };
+    glm::vec3 diffuseColor { 1.0f };
+    float diffuseFactor { 1.0f };
+    glm::vec3 specularColor { 0.02f };
+    float specularFactor { 1.0f };
 
-    glm::vec3 emissiveColor{ 0.0f };
-    float emissiveFactor{ 0.0f };
+    glm::vec3 emissiveColor { 0.0f };
+    float emissiveFactor { 0.0f };
 
-    float shininess{ 23.0f };
-    float opacity{ 1.0f };
+    float shininess { 23.0f };
+    float opacity { 1.0f };
 
-    float metallic{ 0.0f };
-    float roughness{ 1.0f };
-    float emissiveIntensity{ 1.0f };
-    float ambientFactor{ 1.0f };
+    float metallic { 0.0f };
+    float roughness { 1.0f };
+    float emissiveIntensity { 1.0f };
+    float ambientFactor { 1.0f };
 
     float bumpMultiplier { 1.0f }; // TODO: to be implemented
 
@@ -214,19 +208,18 @@ public:
     FBXTexture occlusionTexture;
     FBXTexture scatteringTexture;
     FBXTexture lightmapTexture;
-    glm::vec2 lightmapParams{ 0.0f, 1.0f };
+    glm::vec2 lightmapParams { 0.0f, 1.0f };
 
-
-    bool isPBSMaterial{ false };
+    bool isPBSMaterial { false };
     // THe use XXXMap are not really used to drive which map are going or not, debug only
-    bool useNormalMap{ false };
-    bool useAlbedoMap{ false };
-    bool useOpacityMap{ false };
-    bool useRoughnessMap{ false };
-    bool useSpecularMap{ false };
-    bool useMetallicMap{ false };
-    bool useEmissiveMap{ false };
-    bool useOcclusionMap{ false };
+    bool useNormalMap { false };
+    bool useAlbedoMap { false };
+    bool useOpacityMap { false };
+    bool useRoughnessMap { false };
+    bool useSpecularMap { false };
+    bool useMetallicMap { false };
+    bool useEmissiveMap { false };
+    bool useOcclusionMap { false };
 
     bool needTangentSpace() const;
 };
@@ -234,7 +227,6 @@ public:
 /// A single mesh (with optional blendshapes) extracted from an FBX document.
 class FBXMesh {
 public:
-
     QVector<FBXMeshPart> parts;
 
     QVector<glm::vec3> vertices;
@@ -267,8 +259,8 @@ class ExtractedMesh {
 public:
     FBXMesh mesh;
     QMultiHash<int, int> newIndices;
-    QVector<QHash<int, int> > blendshapeIndexMaps;
-    QVector<QPair<int, int> > partMaterialTextures;
+    QVector<QHash<int, int>> blendshapeIndexMaps;
+    QVector<QPair<int, int>> partMaterialTextures;
     QHash<QString, size_t> texcoordSetMap;
 };
 
@@ -293,13 +285,7 @@ public:
     float fogValue;
     glm::vec3 color;
 
-    FBXLight() :
-        name(),
-        transform(),
-        intensity(1.0f),
-        fogValue(0.0f),
-        color(1.0f)
-    {}
+    FBXLight() : name(), transform(), intensity(1.0f), fogValue(0.0f), color(1.0f) {}
 };
 
 Q_DECLARE_METATYPE(FBXAnimationFrame)
@@ -336,7 +322,7 @@ public:
     int leftToeJointIndex = -1;
     int rightToeJointIndex = -1;
 
-    float leftEyeSize = 0.0f;  // Maximum mesh extents dimension
+    float leftEyeSize = 0.0f; // Maximum mesh extents dimension
     float rightEyeSize = 0.0f;
 
     QVector<int> humanIKJointIndices;

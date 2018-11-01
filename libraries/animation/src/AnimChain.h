@@ -20,7 +20,7 @@
 
 #include "AnimSkeleton.h"
 
-template <int N>
+template<int N>
 class AnimChainT {
 public:
     AnimChainT() {}
@@ -115,9 +115,7 @@ public:
         }
     }
 
-    int size() const {
-        return _top;
-    }
+    int size() const { return _top; }
 
     void outputRelativePoses(AnimPoseVec& relativePoses) {
         for (int i = 0; i < _top; i++) {
@@ -144,7 +142,6 @@ public:
     }
 
 protected:
-
     struct AnimChainElem {
         AnimPose relativePose;
         AnimPose absolutePose;

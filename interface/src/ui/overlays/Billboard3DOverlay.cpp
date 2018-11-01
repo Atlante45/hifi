@@ -14,8 +14,7 @@
 Billboard3DOverlay::Billboard3DOverlay(const Billboard3DOverlay* billboard3DOverlay) :
     Planar3DOverlay(billboard3DOverlay),
     PanelAttachable(*billboard3DOverlay),
-    Billboardable(*billboard3DOverlay)
-{
+    Billboardable(*billboard3DOverlay) {
 }
 
 void Billboard3DOverlay::setProperties(const QVariantMap& properties) {
@@ -24,7 +23,7 @@ void Billboard3DOverlay::setProperties(const QVariantMap& properties) {
     Billboardable::setProperties(properties);
 }
 
-QVariant Billboard3DOverlay::getProperty(const QString &property) {
+QVariant Billboard3DOverlay::getProperty(const QString& property) {
     QVariant value;
     value = Billboardable::getProperty(property);
     if (value.isValid()) {

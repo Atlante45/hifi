@@ -19,7 +19,6 @@
 class QThread;
 
 class Oven {
-
 public:
     Oven();
     ~Oven();
@@ -39,6 +38,5 @@ private:
 
     static Oven* _staticInstance;
 };
-
 
 #endif // hifi_Oven_h

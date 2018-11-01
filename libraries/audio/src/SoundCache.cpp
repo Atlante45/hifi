@@ -21,9 +21,7 @@ static const int SOUNDS_LOADING_PRIORITY { -7 }; // Make sure sounds load after 
 
 int soundPointerMetaTypeId = qRegisterMetaType<SharedSoundPointer>();
 
-SoundCache::SoundCache(QObject* parent) :
-    ResourceCache(parent)
-{
+SoundCache::SoundCache(QObject* parent) : ResourceCache(parent) {
     const qint64 SOUND_DEFAULT_UNUSED_MAX_SIZE = 50 * BYTES_PER_MEGABYTES;
     setUnusedResourceCacheSize(SOUND_DEFAULT_UNUSED_MAX_SIZE);
     setObjectName("SoundCache");
@@ -34,7 +32,7 @@ SharedSoundPointer SoundCache::getSound(const QUrl& url) {
 }
 
 QSharedPointer<Resource> SoundCache::createResource(const QUrl& url, const QSharedPointer<Resource>& fallback,
-    const void* extra) {
+                                                    const void* extra) {
     qCDebug(audio) << "Requesting sound at" << url.toString();
     auto resource = QSharedPointer<Resource>(new Sound(url), &Resource::deleter);
     resource->setLoadPriority(this, SOUNDS_LOADING_PRIORITY);

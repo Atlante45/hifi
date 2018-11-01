@@ -55,21 +55,18 @@ void LightEntityItem::setUnscaledDimensions(const glm::vec3& value) {
 
 void LightEntityItem::locationChanged(bool tellPhysics) {
     EntityItem::locationChanged(tellPhysics);
-    withWriteLock([&] {
-        _lightPropertiesChanged = true;
-    });
+    withWriteLock([&] { _lightPropertiesChanged = true; });
 }
 
 void LightEntityItem::dimensionsChanged() {
     EntityItem::dimensionsChanged();
-    withWriteLock([&] {
-        _lightPropertiesChanged = true;
-    });
+    withWriteLock([&] { _lightPropertiesChanged = true; });
 }
 
-
-EntityItemProperties LightEntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
-    EntityItemProperties properties = EntityItem::getProperties(desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
+EntityItemProperties LightEntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                                    bool allowEmptyDesiredProperties) const {
+    EntityItemProperties properties = EntityItem::getProperties(
+        desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
 
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(isSpotlight, getIsSpotlight);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(color, getColor);
@@ -120,9 +117,7 @@ void LightEntityItem::setCutoff(float value) {
         return;
     }
 
-    withWriteLock([&] {
-        _cutoff = value;
-    });
+    withWriteLock([&] { _cutoff = value; });
 
     if (getIsSpotlight()) {
         // If we are a spotlight, adjusting the cutoff will affect the area we encapsulate,
@@ -131,10 +126,8 @@ void LightEntityItem::setCutoff(float value) {
         const float width = length * glm::sin(glm::radians(_cutoff));
         setScaledDimensions(glm::vec3(width, width, length));
     }
-    
-    withWriteLock([&] {
-        _lightPropertiesChanged = true;
-    });
+
+    withWriteLock([&] { _lightPropertiesChanged = true; });
 }
 
 bool LightEntityItem::setProperties(const EntityItemProperties& properties) {
@@ -144,8 +137,8 @@ bool LightEntityItem::setProperties(const EntityItemProperties& properties) {
         if (wantDebug) {
             uint64_t now = usecTimestampNow();
             int elapsed = now - getLastEdited();
-            qCDebug(entities) << "LightEntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                "now=" << now << " getLastEdited()=" << getLastEdited();
+            qCDebug(entities) << "LightEntityItem::setProperties() AFTER update... edited AGO=" << elapsed << "now=" << now
+                              << " getLastEdited()=" << getLastEdited();
         }
         setLastEdited(properties.getLastEdited());
     }
@@ -165,12 +158,9 @@ bool LightEntityItem::setSubClassProperties(const EntityItemProperties& properti
     return somethingChanged;
 }
 
-
-int LightEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead, 
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) {
-
+int LightEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
+                                                      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                      bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 
@@ -184,7 +174,6 @@ int LightEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data,
     return bytesRead;
 }
 
-
 EntityPropertyFlags LightEntityItem::getEntityProperties(EncodeBitstreamParams& params) const {
     EntityPropertyFlags requestedProperties = EntityItem::getEntityProperties(params);
     requestedProperties += PROP_IS_SPOTLIGHT;
@@ -196,14 +185,11 @@ EntityPropertyFlags LightEntityItem::getEntityProperties(EncodeBitstreamParams& 
     return requestedProperties;
 }
 
-void LightEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params, 
-                                    EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount, 
-                                    OctreeElement::AppendState& appendState) const { 
-
+void LightEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
+                                         EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
+                                         EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                         EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                         OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
     APPEND_ENTITY_PROPERTY(PROP_IS_SPOTLIGHT, getIsSpotlight());
     APPEND_ENTITY_PROPERTY(PROP_COLOR, getColor());
@@ -214,9 +200,7 @@ void LightEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBit
 }
 
 glm::u8vec3 LightEntityItem::getColor() const {
-    return resultWithReadLock<glm::u8vec3>([&] {
-        return _color;
-    });
+    return resultWithReadLock<glm::u8vec3>([&] { return _color; });
 }
 
 void LightEntityItem::setColor(const glm::u8vec3& value) {
@@ -228,17 +212,13 @@ void LightEntityItem::setColor(const glm::u8vec3& value) {
 
 bool LightEntityItem::getIsSpotlight() const {
     bool result;
-    withReadLock([&] {
-        result = _isSpotlight;
-    });
+    withReadLock([&] { result = _isSpotlight; });
     return result;
 }
 
-float LightEntityItem::getIntensity() const { 
+float LightEntityItem::getIntensity() const {
     float result;
-    withReadLock([&] {
-        result = _intensity;
-    });
+    withReadLock([&] { result = _intensity; });
     return result;
 }
 
@@ -249,19 +229,15 @@ void LightEntityItem::setIntensity(float value) {
     });
 }
 
-float LightEntityItem::getFalloffRadius() const { 
+float LightEntityItem::getFalloffRadius() const {
     float result;
-    withReadLock([&] {
-        result = _falloffRadius;
-    });
+    withReadLock([&] { result = _falloffRadius; });
     return result;
 }
 
-float LightEntityItem::getExponent() const { 
+float LightEntityItem::getExponent() const {
     float result;
-    withReadLock([&] {
-        result = _exponent;
-    });
+    withReadLock([&] { result = _exponent; });
     return result;
 }
 
@@ -272,11 +248,9 @@ void LightEntityItem::setExponent(float value) {
     });
 }
 
-float LightEntityItem::getCutoff() const { 
+float LightEntityItem::getCutoff() const {
     float result;
-    withReadLock([&] {
-        result = _cutoff;
-    });
+    withReadLock([&] { result = _cutoff; });
     return result;
 }
 
@@ -285,10 +259,9 @@ void LightEntityItem::resetLightPropertiesChanged() {
 }
 
 bool LightEntityItem::findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                        OctreeElementPointer& element, float& distance,
-                        BoxFace& face, glm::vec3& surfaceNormal,
-                        QVariantMap& extraInfo, bool precisionPicking) const {
-
+                                                  OctreeElementPointer& element, float& distance, BoxFace& face,
+                                                  glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                                  bool precisionPicking) const {
     // TODO: consider if this is really what we want to do. We've made it so that "lights are pickable" is a global state
     // this is probably reasonable since there's typically only one tree you'd be picking on at a time. Technically we could
     // be on the clipboard and someone might be trying to use the ray intersection API there. Anyway... if you ever try to
@@ -298,9 +271,9 @@ bool LightEntityItem::findDetailedRayIntersection(const glm::vec3& origin, const
 }
 
 bool LightEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
-                        const glm::vec3& acceleration, OctreeElementPointer& element, float& parabolicDistance,
-                        BoxFace& face, glm::vec3& surfaceNormal,
-                        QVariantMap& extraInfo, bool precisionPicking) const {
+                                                       const glm::vec3& acceleration, OctreeElementPointer& element,
+                                                       float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+                                                       QVariantMap& extraInfo, bool precisionPicking) const {
     // TODO: consider if this is really what we want to do. We've made it so that "lights are pickable" is a global state
     // this is probably reasonable since there's typically only one tree you'd be picking on at a time. Technically we could
     // be on the clipboard and someone might be trying to use the parabola intersection API there. Anyway... if you ever try to

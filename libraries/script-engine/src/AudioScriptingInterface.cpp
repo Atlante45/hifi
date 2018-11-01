@@ -23,18 +23,17 @@ void registerAudioMetaTypes(QScriptEngine* engine) {
     qScriptRegisterMetaType(engine, soundSharedPointerToScriptValue, soundSharedPointerFromScriptValue);
 }
 
-
 void AudioScriptingInterface::setLocalAudioInterface(AbstractAudioInterface* audioInterface) {
     if (_localAudioInterface) {
-        disconnect(_localAudioInterface, &AbstractAudioInterface::isStereoInputChanged,
-                   this, &AudioScriptingInterface::isStereoInputChanged);
+        disconnect(_localAudioInterface, &AbstractAudioInterface::isStereoInputChanged, this,
+                   &AudioScriptingInterface::isStereoInputChanged);
     }
-    
+
     _localAudioInterface = audioInterface;
 
     if (_localAudioInterface) {
-        connect(_localAudioInterface, &AbstractAudioInterface::isStereoInputChanged,
-                this, &AudioScriptingInterface::isStereoInputChanged);
+        connect(_localAudioInterface, &AbstractAudioInterface::isStereoInputChanged, this,
+                &AudioScriptingInterface::isStereoInputChanged);
     }
 }
 
@@ -49,10 +48,8 @@ ScriptAudioInjector* AudioScriptingInterface::playSound(SharedSoundPointer sound
     if (QThread::currentThread() != thread()) {
         ScriptAudioInjector* injector = NULL;
 
-        BLOCKING_INVOKE_METHOD(this, "playSound",
-                                  Q_RETURN_ARG(ScriptAudioInjector*, injector),
-                                  Q_ARG(SharedSoundPointer, sound),
-                                  Q_ARG(const AudioInjectorOptions&, injectorOptions));
+        BLOCKING_INVOKE_METHOD(this, "playSound", Q_RETURN_ARG(ScriptAudioInjector*, injector),
+                               Q_ARG(SharedSoundPointer, sound), Q_ARG(const AudioInjectorOptions&, injectorOptions));
         return injector;
     }
 
@@ -61,7 +58,7 @@ ScriptAudioInjector* AudioScriptingInterface::playSound(SharedSoundPointer sound
         AudioInjectorOptions optionsCopy = injectorOptions;
         optionsCopy.stereo = sound->isStereo();
         optionsCopy.ambisonic = sound->isAmbisonic();
-        optionsCopy.localOnly = optionsCopy.localOnly || sound->isAmbisonic();  // force localOnly when Ambisonic
+        optionsCopy.localOnly = optionsCopy.localOnly || sound->isAmbisonic(); // force localOnly when Ambisonic
 
         auto injector = AudioInjector::playSound(sound->getByteArray(), optionsCopy);
         if (!injector) {

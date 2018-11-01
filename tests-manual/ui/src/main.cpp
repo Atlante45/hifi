@@ -1,10 +1,9 @@
 #include <QApplication>
+#include <QFileSystemModel>
 #include <QQmlApplicationEngine>
 #include <QtWebEngine>
-#include <QFileSystemModel>
 
 #include "../../../libraries/ui/src/FileDialogHelper.h"
-
 
 class Preference : public QObject {
     Q_OBJECT
@@ -22,8 +21,10 @@ public:
 
     Preference(QObject* parent = nullptr) : QObject(parent) {}
 
-    Preference(const QString& category, const QString& name, QObject* parent = nullptr)
-        : QObject(parent), _category(category), _name(name) { }
+    Preference(const QString& category, const QString& name, QObject* parent = nullptr) :
+        QObject(parent),
+        _category(category),
+        _name(name) {}
     const QString& getCategory() const { return _category; }
     const QString& getName() const { return _name; }
     virtual Type getType() { return Editable; }
@@ -37,9 +38,7 @@ class Reticle : public QObject {
     Q_OBJECT
     Q_PROPERTY(QPoint position READ getPosition CONSTANT)
 public:
-
-    Reticle(QObject* parent) : QObject(parent) {
-    }
+    Reticle(QObject* parent) : QObject(parent) {}
 
     QPoint getPosition() {
         if (!_window) {
@@ -48,16 +47,15 @@ public:
         return _window->mapFromGlobal(QCursor::pos());
     }
 
-    void setWindow(QWindow* window) {
-        _window = window;
-    }
+    void setWindow(QWindow* window) { _window = window; }
 
 private:
-    QWindow* _window{nullptr};
+    QWindow* _window { nullptr };
 };
 
 QString getRelativeDir(const QString& relativePath = ".") {
-    QDir path(__FILE__); path.cdUp();
+    QDir path(__FILE__);
+    path.cdUp();
     auto result = path.absoluteFilePath(relativePath);
     result = path.cleanPath(result) + "/";
     return result;
@@ -71,16 +69,15 @@ QString getInterfaceQmlDir() {
     return getRelativeDir("/");
 }
 
-
 void setChild(QQmlApplicationEngine& engine, const char* name) {
-  for (auto obj : engine.rootObjects()) {
-    auto child = obj->findChild<QObject*>(QString(name));
-    if (child) {
-      engine.rootContext()->setContextProperty(name, child);
-      return;
+    for (auto obj : engine.rootObjects()) {
+        auto child = obj->findChild<QObject*>(QString(name));
+        if (child) {
+            engine.rootContext()->setContextProperty(name, child);
+            return;
+        }
     }
-  }
-  qWarning() << "Could not find object named " << name;
+    qWarning() << "Could not find object named " << name;
 }
 
 void addImportPath(QQmlApplicationEngine& engine, const QString& relativePath, bool insert = false) {
@@ -88,7 +85,7 @@ void addImportPath(QQmlApplicationEngine& engine, const QString& relativePath, b
     engine.addImportPath(resolvedPath);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
     app.setOrganizationName("Some Company");
     app.setOrganizationDomain("somecompany.com");
@@ -118,7 +115,7 @@ int main(int argc, char *argv[]) {
     engine.rootContext()->setContextProperty("DebugQML", true);
     engine.rootContext()->setContextProperty("fileDialogHelper", new FileDialogHelper());
 
-    //engine.load(QUrl(QStringLiteral("qrc:/qml/gallery/main.qml")));
+    // engine.load(QUrl(QStringLiteral("qrc:/qml/gallery/main.qml")));
     engine.load(QUrl(QStringLiteral("qml/main.qml")));
     for (QObject* rootObject : engine.rootObjects()) {
         if (rootObject->objectName() == "MainWindow") {
@@ -133,4 +130,3 @@ int main(int argc, char *argv[]) {
 }
 
 #include "main.moc"
-

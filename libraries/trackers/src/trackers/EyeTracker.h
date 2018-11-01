@@ -9,8 +9,8 @@
 #ifndef hifi_EyeTracker_h
 #define hifi_EyeTracker_h
 
-#include <QObject>
 #include <QFutureWatcher>
+#include <QObject>
 
 #include <glm/glm.hpp>
 
@@ -18,7 +18,6 @@
 #ifdef HAVE_IVIEWHMD
 #include <iViewHMDAPI.h>
 #endif
-
 
 class EyeTracker : public QObject, public Dependency {
     Q_OBJECT
@@ -36,8 +35,8 @@ public:
     bool isTracking() const;
     bool isSimulating() const { return _isSimulating; }
 
-    glm::vec3 getLookAtPosition() const { return _lookAtPosition; }  // From mid eye point in head frame.
-    
+    glm::vec3 getLookAtPosition() const { return _lookAtPosition; } // From mid eye point in head frame.
+
 #ifdef HAVE_IVIEWHMD
     void processData(smi_CallbackDataStruct* data);
 
@@ -51,7 +50,7 @@ private slots:
 
 private:
     QString smiReturnValueToString(int value);
-    
+
     bool _isInitialized = false;
     bool _isEnabled = false;
     bool _isSimulating = false;

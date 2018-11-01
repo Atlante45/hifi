@@ -12,15 +12,15 @@
 #ifndef hifi_WalletScriptingInterface_h
 #define hifi_WalletScriptingInterface_h
 
-#include <QtCore/QObject>
 #include <DependencyManager.h>
+#include <QtCore/QObject>
 
-#include "scripting/HMDScriptingInterface.h"
-#include <ui/TabletScriptingInterface.h>
-#include <ui/QmlWrapper.h>
 #include <OffscreenUi.h>
+#include <ui/QmlWrapper.h>
+#include <ui/TabletScriptingInterface.h>
 #include "Application.h"
 #include "commerce/Wallet.h"
+#include "scripting/HMDScriptingInterface.h"
 #include "ui/overlays/ContextOverlayInterface.h"
 
 class CheckoutProxy : public QmlWrapper {
@@ -28,7 +28,6 @@ class CheckoutProxy : public QmlWrapper {
 public:
     CheckoutProxy(QObject* qmlObject, QObject* parent = nullptr);
 };
-
 
 /**jsdoc
  * @namespace Wallet

@@ -30,26 +30,27 @@ public:
 public slots:
     void showAddressBar();
     void showLoginDialog();
-    
+
     void showLoginFailure();
-    
+
 #if defined(ANDROID) && defined(HAVE_LIBOVR)
     OVR::KeyState& getBackKeyState() { return _backKeyState; }
 #endif
-    
+
 protected:
     void keyPressEvent(QKeyEvent* event);
     void keyReleaseEvent(QKeyEvent* event);
 private slots:
     void refreshLoginAction();
+
 private:
     void setupMenuBar();
-    
+
 #if defined(ANDROID) && defined(HAVE_LIBOVR)
     OVR::KeyState _backKeyState;
     bool _wasBackKeyDown;
 #endif
-    
+
     QVBoxLayout* _mainLayout;
     QMenuBar* _menuBar;
     QAction* _loginAction;

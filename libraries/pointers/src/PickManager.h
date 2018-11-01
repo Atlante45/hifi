@@ -34,7 +34,7 @@ public:
 
     PickResultPointer getPrevPickResult(unsigned int uid) const;
 
-    template <typename T>
+    template<typename T>
     std::shared_ptr<T> getPrevPickResultTyped(unsigned int uid) const {
         return std::static_pointer_cast<T>(getPrevPickResult(uid));
     }
@@ -50,8 +50,12 @@ public:
     bool isRightHand(unsigned int uid);
     bool isMouse(unsigned int uid);
 
-    void setShouldPickHUDOperator(std::function<bool()> shouldPickHUDOperator) { _shouldPickHUDOperator = shouldPickHUDOperator; }
-    void setCalculatePos2DFromHUDOperator(std::function<glm::vec2(const glm::vec3&)> calculatePos2DFromHUDOperator) { _calculatePos2DFromHUDOperator = calculatePos2DFromHUDOperator; }
+    void setShouldPickHUDOperator(std::function<bool()> shouldPickHUDOperator) {
+        _shouldPickHUDOperator = shouldPickHUDOperator;
+    }
+    void setCalculatePos2DFromHUDOperator(std::function<glm::vec2(const glm::vec3&)> calculatePos2DFromHUDOperator) {
+        _calculatePos2DFromHUDOperator = calculatePos2DFromHUDOperator;
+    }
     glm::vec2 calculatePos2DFromHUD(const glm::vec3& intersection) { return _calculatePos2DFromHUDOperator(intersection); }
 
     static const unsigned int INVALID_PICK_ID { 0 };

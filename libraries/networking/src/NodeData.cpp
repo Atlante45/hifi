@@ -14,7 +14,5 @@
 NodeData::NodeData(const QUuid& nodeID, NetworkPeer::LocalID nodeLocalID) :
     _mutex(),
     _nodeID(nodeID),
-    _nodeLocalID(nodeLocalID)
-{
-    
+    _nodeLocalID(nodeLocalID) {
 }

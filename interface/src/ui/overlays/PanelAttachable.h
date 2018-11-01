@@ -32,11 +32,11 @@
 
 #include <memory>
 
-#include <glm/glm.hpp>
 #include <Transform.h>
-#include <QScriptValue>
 #include <QScriptEngine>
+#include <QScriptValue>
 #include <QUuid>
+#include <glm/glm.hpp>
 
 class OverlayPanel;
 class PanelAttachable {

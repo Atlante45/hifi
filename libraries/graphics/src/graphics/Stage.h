@@ -25,38 +25,65 @@ typedef glm::mat4 Mat4;
 
 class EarthSunModel {
 public:
-
     void setScale(float scale);
     float getScale() const { return _scale; }
 
     void setLatitude(float lat);
-    float getLatitude() const  { return _latitude; }
+    float getLatitude() const { return _latitude; }
     void setLongitude(float lon);
     float getLongitude() const { return _longitude; }
     void setAltitude(float altitude);
-    float getAltitude() const  { return _altitude; }
-
+    float getAltitude() const { return _altitude; }
 
     void setSurfaceOrientation(const Quat& orientation);
-    const Quat& getSurfaceOrientation() const { valid(); return _surfaceOrientation; }
- 
-    const Vec3d& getSurfacePos() const { valid(); return _surfacePos; }
+    const Quat& getSurfaceOrientation() const {
+        valid();
+        return _surfaceOrientation;
+    }
 
-    const Mat4d& getSurfaceToWorldMat() const { valid(); return _surfaceToWorldMat; }
-    const Mat4d& getWoldToSurfaceMat() const { valid(); return _worldToSurfaceMat; }
+    const Vec3d& getSurfacePos() const {
+        valid();
+        return _surfacePos;
+    }
 
-    const Mat4d& getEyeToSurfaceMat() const { valid(); return _eyeToSurfaceMat; }
-    const Mat4d& getSurfaceToEyeMat() const { valid(); return _surfaceToEyeMat; }
+    const Mat4d& getSurfaceToWorldMat() const {
+        valid();
+        return _surfaceToWorldMat;
+    }
+    const Mat4d& getWoldToSurfaceMat() const {
+        valid();
+        return _worldToSurfaceMat;
+    }
 
-    const Mat4d& getEyeToWorldMat() const { valid(); return _eyeToWorldMat; }
-    const Mat4d& getWorldToEyeMat() const { valid(); return _worldToEyeMat; }
+    const Mat4d& getEyeToSurfaceMat() const {
+        valid();
+        return _eyeToSurfaceMat;
+    }
+    const Mat4d& getSurfaceToEyeMat() const {
+        valid();
+        return _surfaceToEyeMat;
+    }
 
+    const Mat4d& getEyeToWorldMat() const {
+        valid();
+        return _eyeToWorldMat;
+    }
+    const Mat4d& getWorldToEyeMat() const {
+        valid();
+        return _worldToEyeMat;
+    }
 
-    //or set the surfaceToEye mat directly
-    void setEyeToSurfaceMat( const Mat4d& e2s);
+    // or set the surfaceToEye mat directly
+    void setEyeToSurfaceMat(const Mat4d& e2s);
 
-    const Vec3d& getEyePos() const { valid(); return _eyePos; }
-    const Vec3d& getEyeDir() const { valid(); return _eyeDir; }
+    const Vec3d& getEyePos() const {
+        valid();
+        return _eyePos;
+    }
+    const Vec3d& getEyeDir() const {
+        valid();
+        return _eyeDir;
+    }
 
     void setSunLongitude(float lon);
     float getSunLongitude() const { return _sunLongitude; }
@@ -64,32 +91,37 @@ public:
     void setSunLatitude(float lat);
     float getSunLatitude() const { return _sunLatitude; }
 
-    const Vec3d& getWorldSunDir() const { valid(); return _sunDir; }
-    const Vec3d& getSurfaceSunDir() const { valid(); return _surfaceSunDir; }
-
+    const Vec3d& getWorldSunDir() const {
+        valid();
+        return _sunDir;
+    }
+    const Vec3d& getSurfaceSunDir() const {
+        valid();
+        return _surfaceSunDir;
+    }
 
     EarthSunModel() { valid(); }
 
 protected:
-    float  _scale = 1000.0f; //Km
-    float  _earthRadius = 6360.0;
+    float _scale = 1000.0f; // Km
+    float _earthRadius = 6360.0;
 
-    Quat    _surfaceOrientation;
+    Quat _surfaceOrientation;
 
-    float  _longitude = 0.0f;
-    float  _latitude = 0.0f;
-    float  _altitude = 0.01f;
+    float _longitude = 0.0f;
+    float _latitude = 0.0f;
+    float _altitude = 0.01f;
     mutable Vec3d _surfacePos;
     mutable Mat4d _worldToSurfaceMat;
     mutable Mat4d _surfaceToWorldMat;
     void updateWorldToSurface() const;
- 
+
     mutable Mat4d _surfaceToEyeMat;
     mutable Mat4d _eyeToSurfaceMat;
     mutable Vec3d _eyeDir;
     mutable Vec3d _eyePos;
     void updateSurfaceToEye() const;
-            
+
     mutable Mat4d _worldToEyeMat;
     mutable Mat4d _eyeToWorldMat;
 
@@ -101,7 +133,12 @@ protected:
 
     mutable bool _invalid = true;
     void invalidate() const { _invalid = true; }
-    void valid() const { if (_invalid) { updateAll(); _invalid = false; } }
+    void valid() const {
+        if (_invalid) {
+            updateAll();
+            _invalid = false;
+        }
+    }
     void updateAll() const;
 
     static Mat4d evalWorldToGeoLocationMat(double longitude, double latitude, double altitude, double scale);
@@ -111,7 +148,6 @@ protected:
 // at the specified location and time around earth
 class SunSkyStage {
 public:
-
     SunSkyStage();
     ~SunSkyStage();
 
@@ -156,8 +192,11 @@ public:
     void setSunDirection(const Vec3& direction);
     const Vec3& getSunDirection() const { return getSunLight()->getDirection(); }
 
-    LightPointer getSunLight() const { valid(); return _sunLight;  }
- 
+    LightPointer getSunLight() const {
+        valid();
+        return _sunLight;
+    }
+
     enum BackgroundMode {
         NO_BACKGROUND = 0,
         SKY_DEFAULT,
@@ -172,7 +211,10 @@ public:
 
     // Skybox
     void setSkybox(const SkyboxPointer& skybox);
-    const SkyboxPointer& getSkybox() const { valid(); return _skybox; }
+    const SkyboxPointer& getSkybox() const {
+        valid();
+        return _skybox;
+    }
 
 protected:
     BackgroundMode _backgroundMode = SKY_DEFAULT;
@@ -184,15 +226,20 @@ protected:
     int _yearTime = 0;
     mutable EarthSunModel _earthSunModel;
     bool _sunModelEnable = true;
- 
+
     mutable bool _invalid = true;
     void invalidate() const { _invalid = true; }
-    void valid() const { if (_invalid) { updateGraphicsObject(); _invalid = false; } }
+    void valid() const {
+        if (_invalid) {
+            updateGraphicsObject();
+            _invalid = false;
+        }
+    }
     void updateGraphicsObject() const;
 };
 
-typedef std::shared_ptr< SunSkyStage > SunSkyStagePointer;
+typedef std::shared_ptr<SunSkyStage> SunSkyStagePointer;
 
-};
+}; // namespace graphics
 
 #endif

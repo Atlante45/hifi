@@ -17,4 +17,3 @@
 Q_DECLARE_LOGGING_CATEGORY(entitiesrenderer)
 
 #endif // hifi_EntitiesRendererLogging_h
-

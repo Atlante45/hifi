@@ -41,61 +41,61 @@ public:
 
     using LocalID = NetworkLocalID;
     static const LocalID NULL_LOCAL_ID = 0;
-    
+
     static const int NUM_BYTES_LOCALID = sizeof(LocalID);
     // this is used by the Octree classes - must be known at compile time
-    static const int MAX_PACKET_HEADER_SIZE =
-        sizeof(udt::Packet::SequenceNumberAndBitField) + sizeof(udt::Packet::MessageNumberAndBitField) +
-        sizeof(PacketType) + sizeof(PacketVersion) + NUM_BYTES_LOCALID + NUM_BYTES_MD5_HASH;
-    
-    static std::unique_ptr<NLPacket> create(PacketType type, qint64 size = -1,
-                    bool isReliable = false, bool isPartOfMessage = false, PacketVersion version = 0);
-    
+    static const int MAX_PACKET_HEADER_SIZE = sizeof(udt::Packet::SequenceNumberAndBitField) +
+                                              sizeof(udt::Packet::MessageNumberAndBitField) + sizeof(PacketType) +
+                                              sizeof(PacketVersion) + NUM_BYTES_LOCALID + NUM_BYTES_MD5_HASH;
+
+    static std::unique_ptr<NLPacket> create(PacketType type, qint64 size = -1, bool isReliable = false,
+                                            bool isPartOfMessage = false, PacketVersion version = 0);
+
     static std::unique_ptr<NLPacket> fromReceivedPacket(std::unique_ptr<char[]> data, qint64 size,
                                                         const HifiSockAddr& senderSockAddr);
 
     static std::unique_ptr<NLPacket> fromBase(std::unique_ptr<Packet> packet);
-    
+
     // Provided for convenience, try to limit use
     static std::unique_ptr<NLPacket> createCopy(const NLPacket& other);
-    
+
     // Current level's header size
     static int localHeaderSize(PacketType type);
     // Cumulated size of all the headers
     static int totalHeaderSize(PacketType type, bool isPartOfMessage = false);
     // The maximum payload size this packet can use to fit in MTU
     static int maxPayloadSize(PacketType type, bool isPartOfMessage = false);
-    
+
     static PacketType typeInHeader(const udt::Packet& packet);
     static PacketVersion versionInHeader(const udt::Packet& packet);
-    
+
     static LocalID sourceIDInHeader(const udt::Packet& packet);
     static QByteArray verificationHashInHeader(const udt::Packet& packet);
     static QByteArray hashForPacketAndHMAC(const udt::Packet& packet, HMACAuth& hash);
-    
+
     PacketType getType() const { return _type; }
     void setType(PacketType type);
-    
+
     PacketVersion getVersion() const { return _version; }
     void setVersion(PacketVersion version);
 
     LocalID getSourceID() const { return _sourceID; }
-    
+
     void writeSourceID(LocalID sourceID) const;
     void writeVerificationHash(HMACAuth& hmacAuth) const;
 
 protected:
-    
-    NLPacket(PacketType type, qint64 size = -1, bool forceReliable = false, bool isPartOfMessage = false, PacketVersion version = 0);
+    NLPacket(PacketType type, qint64 size = -1, bool forceReliable = false, bool isPartOfMessage = false,
+             PacketVersion version = 0);
     NLPacket(std::unique_ptr<char[]> data, qint64 size, const HifiSockAddr& senderSockAddr);
-    
+
     NLPacket(const NLPacket& other);
     NLPacket(NLPacket&& other);
     NLPacket(Packet&& other);
-    
+
     NLPacket& operator=(const NLPacket& other);
     NLPacket& operator=(NLPacket&& other);
-    
+
     // Header writers
     void writeTypeAndVersion();
 
@@ -103,7 +103,7 @@ protected:
     void readType();
     void readVersion();
     void readSourceID();
-    
+
     PacketType _type;
     PacketVersion _version;
     mutable LocalID _sourceID;

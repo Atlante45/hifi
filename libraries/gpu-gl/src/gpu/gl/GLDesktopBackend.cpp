@@ -14,10 +14,10 @@
 
 #include <QtCore/QProcessEnvironment>
 
-#include <shared/GlobalAppProperties.h>
-#include <gl/QOpenGLContextWrapper.h>
 #include <gl/GLHelpers.h>
+#include <gl/QOpenGLContextWrapper.h>
 #include <gpu/gl/GLShader.h>
+#include <shared/GlobalAppProperties.h>
 
 #include "../gl41/GL41Backend.h"
 #include "../gl45/GL45Backend.h"
@@ -25,7 +25,7 @@
 using namespace gpu;
 using namespace gpu::gl;
 
-static GLBackend* INSTANCE{ nullptr };
+static GLBackend* INSTANCE { nullptr };
 
 BackendPointer GLBackend::createBackend() {
     // FIXME provide a mechanism to override the backend for testing

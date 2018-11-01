@@ -12,25 +12,24 @@
 
 #include <QtCore/QProcessEnvironment>
 
-
-#include <shared/GlobalAppProperties.h>
 #include <GPUIdent.h>
 #include <gl/QOpenGLContextWrapper.h>
 #include <gpu/gl/GLShader.h>
+#include <shared/GlobalAppProperties.h>
 
 #include "../gles/GLESBackend.h"
 
 using namespace gpu;
 using namespace gpu::gl;
 
-static GLBackend* INSTANCE{ nullptr };
+static GLBackend* INSTANCE { nullptr };
 
 BackendPointer GLBackend::createBackend() {
     // FIXME provide a mechanism to override the backend for testing
     // Where the gpuContext is initialized and where the TRUE Backend is created and assigned
-    //auto version = QOpenGLContextWrapper::currentContextVersion();
+    // auto version = QOpenGLContextWrapper::currentContextVersion();
     std::shared_ptr<GLBackend> result;
-    
+
     qDebug() << "Using OpenGL ES backend";
     result = std::make_shared<gpu::gles::GLESBackend>();
 

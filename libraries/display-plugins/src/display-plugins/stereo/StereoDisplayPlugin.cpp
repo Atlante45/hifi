@@ -13,11 +13,11 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDesktopWidget>
 
-#include <ViewFrustum.h>
-#include <MatrixStack.h>
-#include <ui-plugins/PluginContainer.h>
-#include <gl/GLWidget.h>
 #include <CursorManager.h>
+#include <MatrixStack.h>
+#include <ViewFrustum.h>
+#include <gl/GLWidget.h>
+#include <ui-plugins/PluginContainer.h>
 #include "../CompositorHelper.h"
 
 bool StereoDisplayPlugin::isSupported() const {
@@ -38,7 +38,7 @@ const float DEFAULT_SEPARATION = DEFAULT_IPD / DEFAULT_SCREEN_WIDTH;
 const float DEFAULT_CONVERGENCE = 0.5f;
 
 glm::mat4 StereoDisplayPlugin::getEyeProjection(Eye eye, const glm::mat4& baseProjection) const {
-    // Refer to http://www.nvidia.com/content/gtc-2010/pdfs/2010_gtc2010.pdf on creating 
+    // Refer to http://www.nvidia.com/content/gtc-2010/pdfs/2010_gtc2010.pdf on creating
     // stereo projection matrices.  Do NOT use "toe-in", use translation.
     // Updated version: http://developer.download.nvidia.com/assets/gamedev/docs/Siggraph2011-Stereoscopy_From_XY_to_Z-SG.pdf
 
@@ -46,7 +46,6 @@ glm::mat4 StereoDisplayPlugin::getEyeProjection(Eye eye, const glm::mat4& basePr
     if (eye == Right) {
         frustumshift = -frustumshift;
     }
-
 
     auto eyeProjection = baseProjection;
     eyeProjection[2][0] += frustumshift;
@@ -66,8 +65,8 @@ bool StereoDisplayPlugin::internalActivate() {
             checked = true;
         }
         const uint32_t screenIndex = i;
-        _container->addMenuItem(PluginType::DISPLAY_PLUGIN, MENU_PATH(), name,
-            [=](bool clicked) { updateScreen(screenIndex); }, true, checked, "Screens");
+        _container->addMenuItem(PluginType::DISPLAY_PLUGIN, MENU_PATH(), name, [=](bool clicked) { updateScreen(screenIndex); },
+                                true, checked, "Screens");
     }
 
     _container->removeMenu(FRAMERATE);
@@ -93,4 +92,3 @@ void StereoDisplayPlugin::internalDeactivate() {
 float StereoDisplayPlugin::getRecommendedAspectRatio() const {
     return aspect(Parent::getRecommendedRenderSize());
 }
-

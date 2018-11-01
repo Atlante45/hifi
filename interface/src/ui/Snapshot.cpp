@@ -11,37 +11,37 @@
 
 #include "Snapshot.h"
 
+#include <QPainter>
+#include <QtConcurrent/QtConcurrentRun>
 #include <QtCore/QDateTime>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
+#include <QtCore/QJsonArray>
+#include <QtCore/QJsonDocument>
 #include <QtCore/QTemporaryFile>
 #include <QtCore/QUrl>
 #include <QtCore/QUrlQuery>
-#include <QtCore/QJsonDocument>
-#include <QtCore/QJsonArray>
 #include <QtNetwork/QHttpMultiPart>
-#include <QPainter>
-#include <QtConcurrent/QtConcurrentRun>
 
 #include <AccountManager.h>
 #include <AddressManager.h>
-#include <avatar/AvatarManager.h>
-#include <avatar/MyAvatar.h>
-#include <shared/FileUtils.h>
 #include <NodeList.h>
 #include <OffscreenUi.h>
-#include <SharedUtil.h>
 #include <SecondaryCamera.h>
+#include <SharedUtil.h>
+#include <avatar/AvatarManager.h>
+#include <avatar/MyAvatar.h>
 #include <plugins/DisplayPlugin.h>
+#include <shared/FileUtils.h>
 
 #include "Application.h"
-#include "display-plugins/CompositorHelper.h"
-#include "scripting/WindowScriptingInterface.h"
 #include "MainWindow.h"
 #include "Snapshot.h"
 #include "SnapshotUploader.h"
 #include "ToneMappingEffect.h"
+#include "display-plugins/CompositorHelper.h"
+#include "scripting/WindowScriptingInterface.h"
 
 // filename format: hifi-snap-by-%username%-on-%date%_%time%_@-%location%.jpg
 // %1 <= username, %2 <= date and time, %3 <= current location
@@ -121,15 +121,13 @@ static const glm::quat CAMERA_ORIENTATION_LEFT(glm::quat(glm::radians(glm::vec3(
 static const glm::quat CAMERA_ORIENTATION_BACK(glm::quat(glm::radians(glm::vec3(0.0f, 180.0f, 0.0f))));
 static const glm::quat CAMERA_ORIENTATION_RIGHT(glm::quat(glm::radians(glm::vec3(0.0f, 270.0f, 0.0f))));
 static const glm::quat CAMERA_ORIENTATION_UP(glm::quat(glm::radians(glm::vec3(90.0f, 0.0f, 0.0f))));
-void Snapshot::save360Snapshot(const glm::vec3& cameraPosition,
-                               const bool& cubemapOutputFormat,
-                               const bool& notify,
+void Snapshot::save360Snapshot(const glm::vec3& cameraPosition, const bool& cubemapOutputFormat, const bool& notify,
                                const QString& filename) {
     _snapshotFilename = filename;
     _notify360 = notify;
     _cubemapOutputFormat = cubemapOutputFormat;
-    SecondaryCameraJobConfig* secondaryCameraRenderConfig =
-        static_cast<SecondaryCameraJobConfig*>(qApp->getRenderEngine()->getConfiguration()->getConfig("SecondaryCamera"));
+    SecondaryCameraJobConfig* secondaryCameraRenderConfig = static_cast<SecondaryCameraJobConfig*>(
+        qApp->getRenderEngine()->getConfiguration()->getConfig("SecondaryCamera"));
 
     // Save initial values of secondary camera render config
     _oldEnabled = secondaryCameraRenderConfig->isEnabled();
@@ -164,8 +162,8 @@ void Snapshot::save360Snapshot(const glm::vec3& cameraPosition,
 }
 
 void Snapshot::takeNextSnapshot() {
-    SecondaryCameraJobConfig* config =
-        static_cast<SecondaryCameraJobConfig*>(qApp->getRenderEngine()->getConfiguration()->getConfig("SecondaryCamera"));
+    SecondaryCameraJobConfig* config = static_cast<SecondaryCameraJobConfig*>(
+        qApp->getRenderEngine()->getConfiguration()->getConfig("SecondaryCamera"));
 
     // Order is:
     // 0. Down
@@ -346,9 +344,7 @@ QTemporaryFile* Snapshot::saveTempSnapshot(QImage image) {
     return static_cast<QTemporaryFile*>(savedFileForSnapshot(image, true));
 }
 
-QFile* Snapshot::savedFileForSnapshot(QImage& shot,
-                                      bool isTemporary,
-                                      const QString& userSelectedFilename,
+QFile* Snapshot::savedFileForSnapshot(QImage& shot, bool isTemporary, const QString& userSelectedFilename,
                                       const QString& userSelectedPathname) {
     // adding URL to snapshot
     QUrl currentURL = DependencyManager::get<AddressManager>()->currentPublicAddress();
@@ -399,13 +395,13 @@ QFile* Snapshot::savedFileForSnapshot(QImage& shot,
         }
 
         if (snapshotFullPath.isEmpty()) {
-            snapshotFullPath =
-                OffscreenUi::getExistingDirectory(nullptr, "Choose Snapshots Directory",
-                                                  QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
+            snapshotFullPath = OffscreenUi::getExistingDirectory(nullptr, "Choose Snapshots Directory",
+                                                                 QStandardPaths::writableLocation(
+                                                                     QStandardPaths::DesktopLocation));
             _snapshotsLocation.set(snapshotFullPath);
         }
 
-        if (!snapshotFullPath.isEmpty()) {  // not cancelled
+        if (!snapshotFullPath.isEmpty()) { // not cancelled
 
             if (!snapshotFullPath.endsWith(QDir::separator())) {
                 snapshotFullPath.append(QDir::separator());
@@ -422,9 +418,9 @@ QFile* Snapshot::savedFileForSnapshot(QImage& shot,
                 qApp->getApplicationCompositor().getReticleInterface()->setVisible(true);
                 qApp->getApplicationCompositor().getReticleInterface()->setAllowMouseCapture(true);
 
-                snapshotFullPath =
-                    OffscreenUi::getExistingDirectory(nullptr, "Write Error - Choose New Snapshots Directory",
-                                                      QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
+                snapshotFullPath = OffscreenUi::getExistingDirectory(nullptr, "Write Error - Choose New Snapshots Directory",
+                                                                     QStandardPaths::writableLocation(
+                                                                         QStandardPaths::DesktopLocation));
                 if (snapshotFullPath.isEmpty()) {
                     return NULL;
                 }
@@ -489,7 +485,7 @@ void Snapshot::uploadSnapshot(const QString& filename, const QUrl& href) {
     imagePart.setBodyDevice(file);
 
     QHttpMultiPart* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
-    file->setParent(multiPart);  // we cannot delete the file now, so delete it with the multiPart
+    file->setParent(multiPart); // we cannot delete the file now, so delete it with the multiPart
     multiPart->append(imagePart);
 
     auto accountManager = DependencyManager::get<AccountManager>();

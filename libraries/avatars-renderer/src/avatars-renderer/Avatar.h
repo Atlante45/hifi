@@ -18,24 +18,28 @@
 #include <QtCore/QUuid>
 
 #include <AvatarData.h>
-#include <ShapeInfo.h>
-#include <render/Scene.h>
-#include <graphics-scripting/Forward.h>
 #include <GLMHelpers.h>
+#include <ShapeInfo.h>
+#include <graphics-scripting/Forward.h>
+#include <render/Scene.h>
 
-#include "Head.h"
-#include "SkeletonModel.h"
-#include "Rig.h"
 #include <ThreadSafeValueCache.h>
+#include "Head.h"
+#include "Rig.h"
+#include "SkeletonModel.h"
 
 #include "MetaModelPayload.h"
 
 namespace render {
-    template <> const ItemKey payloadGetKey(const AvatarSharedPointer& avatar);
-    template <> const Item::Bound payloadGetBound(const AvatarSharedPointer& avatar);
-    template <> void payloadRender(const AvatarSharedPointer& avatar, RenderArgs* args);
-    template <> uint32_t metaFetchMetaSubItems(const AvatarSharedPointer& avatar, ItemIDs& subItems);
-}
+template<>
+const ItemKey payloadGetKey(const AvatarSharedPointer& avatar);
+template<>
+const Item::Bound payloadGetBound(const AvatarSharedPointer& avatar);
+template<>
+void payloadRender(const AvatarSharedPointer& avatar, RenderArgs* args);
+template<>
+uint32_t metaFetchMetaSubItems(const AvatarSharedPointer& avatar, ItemIDs& subItems);
+} // namespace render
 
 static const float SCALING_RATIO = .05f;
 
@@ -54,24 +58,9 @@ class Texture;
 
 class AvatarTransit {
 public:
-    enum Status {
-        IDLE = 0,
-        STARTED,
-        PRE_TRANSIT,
-        START_TRANSIT,
-        TRANSITING,
-        END_TRANSIT,
-        POST_TRANSIT,
-        ENDED,
-        ABORT_TRANSIT
-    };
+    enum Status { IDLE = 0, STARTED, PRE_TRANSIT, START_TRANSIT, TRANSITING, END_TRANSIT, POST_TRANSIT, ENDED, ABORT_TRANSIT };
 
-    enum EaseType {
-        NONE = 0,
-        EASE_IN,
-        EASE_OUT,
-        EASE_IN_OUT
-    };
+    enum EaseType { NONE = 0, EASE_IN, EASE_OUT, EASE_IN_OUT };
 
     struct TransitConfig {
         TransitConfig() {};
@@ -80,7 +69,7 @@ public:
         bool _isDistanceBased { false };
         float _minTriggerDistance { 0.0f };
         float _maxTriggerDistance { 0.0f };
-        float _abortDistance{ 0.0f };
+        float _abortDistance { 0.0f };
         EaseType _easeType { EaseType::EASE_OUT };
     };
 
@@ -146,20 +135,18 @@ public:
 
     virtual void render(RenderArgs* renderArgs);
 
-    void addToScene(AvatarSharedPointer self, const render::ScenePointer& scene,
-                            render::Transaction& transaction);
+    void addToScene(AvatarSharedPointer self, const render::ScenePointer& scene, render::Transaction& transaction);
 
-    void removeFromScene(AvatarSharedPointer self, const render::ScenePointer& scene,
-                                render::Transaction& transaction);
+    void removeFromScene(AvatarSharedPointer self, const render::ScenePointer& scene, render::Transaction& transaction);
 
     void updateRenderItem(render::Transaction& transaction);
 
     virtual void postUpdate(float deltaTime, const render::ScenePointer& scene);
 
-    //setters
+    // setters
     void setIsLookAtTarget(const bool isLookAtTarget) { _isLookAtTarget = isLookAtTarget; }
     bool getIsLookAtTarget() const { return _isLookAtTarget; }
-    //getters
+    // getters
     bool isInitialized() const { return _initialized; }
     SkeletonModelPointer getSkeletonModel() { return _skeletonModel; }
     const SkeletonModelPointer getSkeletonModel() const { return _skeletonModel; }
@@ -173,14 +160,9 @@ public:
     float getLODDistance() const;
 
     virtual bool isMyAvatar() const override { return false; }
-    virtual void createOrb() { }
+    virtual void createOrb() {}
 
-    enum class LoadingStatus {
-        NoModel,
-        LoadModel,
-        LoadSuccess,
-        LoadFailure
-    };
+    enum class LoadingStatus { NoModel, LoadModel, LoadSuccess, LoadFailure };
     virtual void indicateLoadingStatus(LoadingStatus loadingStatus) { _loadingStatus = loadingStatus; }
 
     virtual QVector<glm::quat> getJointRotations() const override;
@@ -195,14 +177,14 @@ public:
     /**jsdoc
      * @function MyAvatar.getDefaultJointRotation
      * @param {number} index
-     * @returns {Quat} 
+     * @returns {Quat}
      */
     Q_INVOKABLE virtual glm::quat getDefaultJointRotation(int index) const;
 
     /**jsdoc
      * @function MyAvatar.getDefaultJointTranslation
      * @param {number} index
-     * @returns {Vec3} 
+     * @returns {Vec3}
      */
     Q_INVOKABLE virtual glm::vec3 getDefaultJointTranslation(int index) const;
 
@@ -236,17 +218,17 @@ public:
     virtual void setAttachmentData(const QVector<AttachmentData>& attachmentData) override;
 
     void updateDisplayNameAlpha(bool showDisplayName);
-    virtual void setSessionDisplayName(const QString& sessionDisplayName) override { }; // no-op
+    virtual void setSessionDisplayName(const QString& sessionDisplayName) override {}; // no-op
 
     virtual int parseDataFromBuffer(const QByteArray& buffer) override;
 
-    static void renderJointConnectingCone(gpu::Batch& batch, glm::vec3 position1, glm::vec3 position2,
-                                               float radius1, float radius2, const glm::vec4& color);
+    static void renderJointConnectingCone(gpu::Batch& batch, glm::vec3 position1, glm::vec3 position2, float radius1,
+                                          float radius2, const glm::vec4& color);
 
-    virtual void applyCollision(const glm::vec3& contactPoint, const glm::vec3& penetration) { }
+    virtual void applyCollision(const glm::vec3& contactPoint, const glm::vec3& penetration) {}
 
     /**jsdoc
-     * Set the offset applied to the current avatar. The offset adjusts the position that the avatar is rendered. For example, 
+     * Set the offset applied to the current avatar. The offset adjusts the position that the avatar is rendered. For example,
      * with an offset of <code>{ x: 0, y: 0.1, z: 0 }</code>, your avatar will appear to be raised off the ground slightly.
      * @function MyAvatar.setSkeletonOffset
      * @param {Vec3} offset - The skeleton offset to set.
@@ -262,7 +244,7 @@ public:
     Q_INVOKABLE void setSkeletonOffset(const glm::vec3& offset);
 
     /**jsdoc
-     * Get the offset applied to the current avatar. The offset adjusts the position that the avatar is rendered. For example, 
+     * Get the offset applied to the current avatar. The offset adjusts the position that the avatar is rendered. For example,
      * with an offset of <code>{ x: 0, y: 0.1, z: 0 }</code>, your avatar will appear to be raised off the ground slightly.
      * @function MyAvatar.getSkeletonOffset
      * @returns {Vec3} The current skeleton offset.
@@ -302,7 +284,7 @@ public:
 
     /**jsdoc
      * @function MyAvatar.getAcceleration
-     * @returns {Vec3} 
+     * @returns {Vec3}
      */
     Q_INVOKABLE glm::vec3 getAcceleration() const { return _acceleration; }
 
@@ -327,7 +309,7 @@ public:
      * Get the position of the current avatar's feet (or rather, bottom of its collision capsule) in world coordinates.
      * @function MyAvatar.getWorldFeetPosition
      * @returns {Vec3} The position of the avatar's feet in world coordinates.
-    */
+     */
     Q_INVOKABLE glm::vec3 getWorldFeetPosition();
 
     void setPositionViaScript(const glm::vec3& position) override;
@@ -335,7 +317,7 @@ public:
 
     /**jsdoc
      * @function MyAvatar.getParentID
-     * @returns {Uuid} 
+     * @returns {Uuid}
      */
     // This calls through to the SpatiallyNestable versions, but is here to expose these to JavaScript.
     Q_INVOKABLE virtual const QUuid getParentID() const override { return SpatiallyNestable::getParentID(); }
@@ -349,7 +331,7 @@ public:
 
     /**jsdoc
      * @function MyAvatar.getParentJointIndex
-     * @returns {number} 
+     * @returns {number}
      */
     // This calls through to the SpatiallyNestable versions, but is here to expose these to JavaScript.
     Q_INVOKABLE virtual quint16 getParentJointIndex() const override { return SpatiallyNestable::getParentJointIndex(); }
@@ -391,14 +373,15 @@ public:
     /**jsdoc
      * @function MyAvatar.getSimulationRate
      * @param {string} [rateName=""]
-     * @returns {number} 
+     * @returns {number}
      */
     Q_INVOKABLE float getSimulationRate(const QString& rateName = QString("")) const;
 
     bool hasNewJointData() const { return _hasNewJointData; }
 
     float getBoundingRadius() const;
-    AABox getRenderBounds() const; // THis call is accessible from rendering thread only to report the bounding box of the avatar during the frame.
+    AABox getRenderBounds()
+        const; // THis call is accessible from rendering thread only to report the bounding box of the avatar during the frame.
 
     void addToScene(AvatarSharedPointer self, const render::ScenePointer& scene);
     void ensureInScene(AvatarSharedPointer self, const render::ScenePointer& scene);
@@ -438,7 +421,8 @@ public:
     virtual scriptable::ScriptableModelBase getScriptableModel() override;
 
     std::shared_ptr<AvatarTransit> getTransit() { return std::make_shared<AvatarTransit>(_transit); };
-    AvatarTransit::Status updateTransit(float deltaTime, const glm::vec3& avatarPosition, float avatarScale, const AvatarTransit::TransitConfig& config);
+    AvatarTransit::Status updateTransit(float deltaTime, const glm::vec3& avatarPosition, float avatarScale,
+                                        const AvatarTransit::TransitConfig& config);
 
 signals:
     void targetScaleChanged(float targetScale);
@@ -488,14 +472,14 @@ public slots:
 
     /**jsdoc
      * @function MyAvatar.rigReady
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     // Hooked up to Model::rigReady signal
     void rigReady();
 
     /**jsdoc
      * @function MyAvatar.rigReset
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     // Jooked up to Model::rigReset signal
     void rigReset();
@@ -504,9 +488,13 @@ protected:
     float getUnscaledEyeHeightFromSkeleton() const;
     void buildUnscaledEyeHeightCache();
     void clearUnscaledEyeHeightCache();
-    virtual const QString& getSessionDisplayNameForTransport() const override { return _empty; } // Save a tiny bit of bandwidth. Mixer won't look at what we send.
-    QString _empty{};
-    virtual void maybeUpdateSessionDisplayNameFromTransport(const QString& sessionDisplayName) override { _sessionDisplayName = sessionDisplayName; } // don't use no-op setter!
+    virtual const QString& getSessionDisplayNameForTransport() const override {
+        return _empty;
+    } // Save a tiny bit of bandwidth. Mixer won't look at what we send.
+    QString _empty {};
+    virtual void maybeUpdateSessionDisplayNameFromTransport(const QString& sessionDisplayName) override {
+        _sessionDisplayName = sessionDisplayName;
+    } // don't use no-op setter!
 
     SkeletonModelPointer _skeletonModel;
 
@@ -522,7 +510,7 @@ protected:
     std::vector<std::shared_ptr<Model>> _attachmentsToRemove;
     std::vector<std::shared_ptr<Model>> _attachmentsToDelete;
 
-    float _bodyYawDelta { 0.0f };  // degrees/sec
+    float _bodyYawDelta { 0.0f }; // degrees/sec
 
     // These position histories and derivatives are in the world-frame.
     // The derivatives are the MEASURED results of all external and internal forces
@@ -562,7 +550,7 @@ protected:
 
     virtual void updatePalms();
 
-    render::ItemID _renderItemID{ render::Item::INVALID_ITEM_ID };
+    render::ItemID _renderItemID { render::Item::INVALID_ITEM_ID };
 
     ThreadSafeValueCache<glm::vec3> _leftPalmPositionCache { glm::vec3() };
     ThreadSafeValueCache<glm::quat> _leftPalmRotationCache { glm::quat() };
@@ -574,7 +562,6 @@ protected:
     RateCounter<> _simulationInViewRate;
     RateCounter<> _skeletonModelSimulationRate;
     RateCounter<> _jointDataSimulationRate;
-
 
 protected:
     class AvatarEntityDataHash {
@@ -617,8 +604,8 @@ protected:
     void processMaterials();
 
     AABox _renderBound;
-    bool _isMeshVisible{ true };
-    bool _needMeshVisibleSwitch{ true };
+    bool _isMeshVisible { true };
+    bool _needMeshVisibleSwitch { true };
 
     static const float MYAVATAR_LOADING_PRIORITY;
     static const float OTHERAVATAR_LOADING_PRIORITY;
@@ -626,8 +613,9 @@ protected:
 
     LoadingStatus _loadingStatus { LoadingStatus::NoModel };
 
-    static void metaBlendshapeOperator(render::ItemID renderItemID, int blendshapeNumber, const QVector<BlendshapeOffset>& blendshapeOffsets,
-                                       const QVector<int>& blendedMeshSizes, const render::ItemIDs& subItemIDs);
+    static void metaBlendshapeOperator(render::ItemID renderItemID, int blendshapeNumber,
+                                       const QVector<BlendshapeOffset>& blendshapeOffsets, const QVector<int>& blendedMeshSizes,
+                                       const render::ItemIDs& subItemIDs);
 };
 
 #endif // hifi_Avatar_h

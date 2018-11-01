@@ -22,23 +22,20 @@ public:
     AnimManipulator(const QString& id, float alpha);
     virtual ~AnimManipulator() override;
 
-    virtual const AnimPoseVec& evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) override;
-    virtual const AnimPoseVec& overlay(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut, const AnimPoseVec& underPoses) override;
+    virtual const AnimPoseVec& evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                        AnimVariantMap& triggersOut) override;
+    virtual const AnimPoseVec& overlay(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                       AnimVariantMap& triggersOut, const AnimPoseVec& underPoses) override;
 
     void setAlphaVar(const QString& alphaVar) { _alphaVar = alphaVar; }
 
     virtual void setSkeletonInternal(AnimSkeleton::ConstPointer skeleton) override;
 
     struct JointVar {
-        enum class Type {
-            Absolute,
-            Relative,
-            UnderPose,
-            Default,
-            NumTypes
-        };
+        enum class Type { Absolute, Relative, UnderPose, Default, NumTypes };
 
-        JointVar(const QString& jointNameIn, Type rotationType, Type translationType, const QString& rotationVarIn, const QString& translationVarIn);
+        JointVar(const QString& jointNameIn, Type rotationType, Type translationType, const QString& rotationVarIn,
+                 const QString& translationVarIn);
         QString jointName = "";
         Type rotationType = Type::Absolute;
         Type translationType = Type::Absolute;
@@ -69,7 +66,6 @@ protected:
     // no copies
     AnimManipulator(const AnimManipulator&) = delete;
     AnimManipulator& operator=(const AnimManipulator&) = delete;
-
 };
 
 #endif // hifi_AnimManipulator_h

@@ -14,17 +14,17 @@
 #ifndef hifi_BaseAssetScriptingInterface_h
 #define hifi_BaseAssetScriptingInterface_h
 
+#include <shared/MiniPromises.h>
 #include <QtCore/QObject>
 #include <QtCore/QThread>
-#include "AssetClient.h"
-#include <shared/MiniPromises.h>
-#include "NetworkAccessManager.h"
 #include <QtNetwork/QNetworkDiskCache>
+#include "AssetClient.h"
+#include "NetworkAccessManager.h"
 
 class BaseAssetScriptingInterface : public QObject {
     Q_OBJECT
 public:
-    const QStringList RESPONSE_TYPES{ "text", "arraybuffer", "json" };
+    const QStringList RESPONSE_TYPES { "text", "arraybuffer", "json" };
     using Promise = MiniPromise::Promise;
     QSharedPointer<AssetClient> assetClient();
 
@@ -35,54 +35,54 @@ public slots:
     /**jsdoc
      * @function Assets.isValidPath
      * @param {string} input
-     * @returns {boolean} 
+     * @returns {boolean}
      */
     bool isValidPath(QString input) { return AssetUtils::isValidPath(input); }
 
     /**jsdoc
      * @function Assets.isValidFilePath
      * @param {string} input
-     * @returns {boolean} 
+     * @returns {boolean}
      */
     bool isValidFilePath(QString input) { return AssetUtils::isValidFilePath(input); }
 
     /**jsdoc
      * @function Assets.getATPUrl
      * @param {string} input
-     * @returns {string} 
+     * @returns {string}
      */
     QUrl getATPUrl(QString input) { return AssetUtils::getATPUrl(input); }
 
     /**jsdoc
      * @function Assets.extractAssetHash
      * @param {string} input
-     * @returns {string} 
+     * @returns {string}
      */
     QString extractAssetHash(QString input) { return AssetUtils::extractAssetHash(input); }
 
     /**jsdoc
      * @function Assets.isValidHash
      * @param {string} input
-     * @returns {boolean} 
+     * @returns {boolean}
      */
     bool isValidHash(QString input) { return AssetUtils::isValidHash(input); }
 
     /**jsdoc
      * @function Assets.hashData
      * @param {} data
-     * @returns {object} 
+     * @returns {object}
      */
     QByteArray hashData(const QByteArray& data) { return AssetUtils::hashData(data); }
 
     /**jsdoc
      * @function Assets.hashDataHex
      * @param {} data
-     * @returns {string} 
+     * @returns {string}
      */
     QString hashDataHex(const QByteArray& data) { return hashData(data).toHex(); }
 
 protected:
-    bool _cacheReady{ false };
+    bool _cacheReady { false };
     bool initializeCache();
     Promise getCacheStatus();
     Promise queryCacheMeta(const QUrl& url);

@@ -20,7 +20,6 @@
 #include "../Logging.h"
 #include "BufferClip.h"
 
-
 using namespace recording;
 
 using FrameTranslationMap = QMap<FrameType, FrameType>;
@@ -44,7 +43,6 @@ FrameTranslationMap parseTranslationMap(const QJsonDocument& doc) {
     return results;
 }
 
-
 PointerFrameHeaderList parseFrameHeaders(uchar* const start, const size_t& size) {
     PointerFrameHeaderList results;
     auto current = start;
@@ -67,10 +65,10 @@ PointerFrameHeaderList parseFrameHeaders(uchar* const start, const size_t& size)
         results.push_back(header);
     }
     qDebug(recordingLog) << "Parsed source data into " << results.size() << " frames";
-//    int i = 0;
-//    for (const auto& frameHeader : results) {
-//        qDebug(recordingLog) << "Frame " << i++ << " time " << frameHeader.timeOffset << " Type " << frameHeader.type;
-//    }
+    //    int i = 0;
+    //    for (const auto& frameHeader : results) {
+    //        qDebug(recordingLog) << "Frame " << i++ << " time " << frameHeader.timeOffset << " Type " << frameHeader.type;
+    //    }
     return results;
 }
 
@@ -110,9 +108,7 @@ void PointerClip::init(uchar* data, size_t size) {
     }
 
     // Check for compression
-    {
-        _compressed = _header.object()[FRAME_COMREPSSION_FLAG].toBool();
-    }
+    { _compressed = _header.object()[FRAME_COMREPSSION_FLAG].toBool(); }
 
     // Find the type enum translation map and fix up the frame headers
     {
@@ -133,7 +129,6 @@ void PointerClip::init(uchar* data, size_t size) {
             _frames.push_back(frameHeader);
         }
     }
-
 }
 
 // Internal only function, needs no locking
@@ -145,7 +140,7 @@ FrameConstPointer PointerClip::readFrame(size_t frameIndex) const {
         result->type = header.type;
         result->timeOffset = header.timeOffset;
         if (header.size) {
-            result->data.insert(0, reinterpret_cast<char*>(_data)+header.fileOffset, header.size);
+            result->data.insert(0, reinterpret_cast<char*>(_data) + header.fileOffset, header.size);
             if (_compressed) {
                 result->data = qUncompress(result->data);
             }

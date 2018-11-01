@@ -11,13 +11,13 @@
 
 #include "Wallet.h"
 
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-#include <openssl/x509.h>
-#include <openssl/pem.h>
-#include <openssl/evp.h>
 #include <openssl/aes.h>
 #include <openssl/ecdsa.h>
+#include <openssl/err.h>
+#include <openssl/evp.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/x509.h>
 // I know, right?  But per https://www.openssl.org/docs/faq.html
 // this avoids OPENSSL_Uplink(00007FF847238000,08): no OPENSSL_Applink
 // at runtime.
@@ -25,21 +25,21 @@
 #include <openssl/applink.c>
 #endif
 
-#include <QFile>
-#include <QCryptographicHash>
-#include <QQmlContext>
 #include <QBuffer>
+#include <QCryptographicHash>
+#include <QFile>
+#include <QQmlContext>
 
-#include <PathUtils.h>
-#include <OffscreenUi.h>
 #include <AccountManager.h>
+#include <OffscreenUi.h>
+#include <PathUtils.h>
 #include <ui/TabletScriptingInterface.h>
 
 #include "Application.h"
 #include "CommerceLogging.h"
 #include "Ledger.h"
-#include "ui/SecurityImageProvider.h"
 #include "scripting/HMDScriptingInterface.h"
+#include "ui/SecurityImageProvider.h"
 
 static const char* KEY_FILE = "hifikey";
 static const char* INSTRUCTIONS_FILE = "backup_instructions.html";
@@ -65,7 +65,7 @@ bool Wallet::copyKeyFileFrom(const QString& pathname) {
     qCDebug(commerce) << "Old keyfile" << existing;
     if (!existing.isEmpty()) {
         QString backup = QString(existing).insert(existing.indexOf(KEY_FILE) - 1,
-            QDateTime::currentDateTime().toString(Qt::ISODate).replace(":", ""));
+                                                  QDateTime::currentDateTime().toString(Qt::ISODate).replace(":", ""));
         qCDebug(commerce) << "Renaming old keyfile to" << backup;
         if (!QFile::rename(existing, backup)) {
             qCCritical(commerce) << "Unable to backup" << existing << "to" << backup;
@@ -98,7 +98,7 @@ int passwordCallback(char* password, int maxPasswordSize, int rwFlag, void* u) {
 
 EC_KEY* readKeys(const char* filename) {
     FILE* fp;
-    EC_KEY *key = NULL;
+    EC_KEY* key = NULL;
     if ((fp = fopen(filename, "rt"))) {
         // file opened successfully
         qCDebug(commerce) << "opened key file" << filename;
@@ -131,8 +131,7 @@ bool Wallet::writeBackupInstructions() {
     QFile outputFile(outputFilename);
     bool retval = false;
 
-    if (getKeyFilePath().isEmpty())
-    {
+    if (getKeyFilePath().isEmpty()) {
         return false;
     }
 
@@ -152,7 +151,7 @@ bool Wallet::writeBackupInstructions() {
             outputFile.write(text.toUtf8());
 
             // Close the output file
-            outputFile.close();  
+            outputFile.close();
 
             retval = true;
             qCDebug(commerce) << "wrote html file successfully";
@@ -215,9 +214,8 @@ QByteArray Wallet::getWallet() {
 }
 
 QPair<QByteArray*, QByteArray*> generateECKeypair() {
-
     EC_KEY* keyPair = EC_KEY_new_by_curve_name(NID_secp256k1);
-    QPair<QByteArray*, QByteArray*> retval{};
+    QPair<QByteArray*, QByteArray*> retval {};
 
     EC_KEY_set_asn1_flag(keyPair, OPENSSL_EC_NAMED_CURVE);
     if (!EC_KEY_generate_key(keyPair)) {
@@ -235,7 +233,6 @@ QPair<QByteArray*, QByteArray*> generateECKeypair() {
     if (publicKeyLength <= 0 || privateKeyLength <= 0) {
         qCDebug(commerce) << "Error getting DER public or private key from EC struct -" << ERR_get_error();
 
-
         // cleanup the EC struct
         EC_KEY_free(keyPair);
 
@@ -250,7 +247,6 @@ QPair<QByteArray*, QByteArray*> generateECKeypair() {
 
         return retval;
     }
-
 
     if (!writeKeys(keyFilePath().toStdString().c_str(), keyPair)) {
         qCDebug(commerce) << "couldn't save keys!";
@@ -360,16 +356,16 @@ Wallet::Wallet() {
 
         if (wallet->getKeyFilePath().isEmpty() || !wallet->getSecurityImage()) {
             if (keyStatus == "preexisting") {
-                status = (uint) WalletStatus::WALLET_STATUS_PREEXISTING;
-            } else{
-                status = (uint) WalletStatus::WALLET_STATUS_NOT_SET_UP;
+                status = (uint)WalletStatus::WALLET_STATUS_PREEXISTING;
+            } else {
+                status = (uint)WalletStatus::WALLET_STATUS_NOT_SET_UP;
             }
         } else if (!wallet->walletIsAuthenticatedWithPassphrase()) {
-            status = (uint) WalletStatus::WALLET_STATUS_NOT_AUTHENTICATED;
+            status = (uint)WalletStatus::WALLET_STATUS_NOT_AUTHENTICATED;
         } else if (keyStatus == "conflicting") {
-            status = (uint) WalletStatus::WALLET_STATUS_CONFLICTING;
+            status = (uint)WalletStatus::WALLET_STATUS_CONFLICTING;
         } else {
-            status = (uint) WalletStatus::WALLET_STATUS_READY;
+            status = (uint)WalletStatus::WALLET_STATUS_READY;
         }
 
         walletScriptingInterface->setWalletStatus(status);
@@ -506,7 +502,7 @@ bool Wallet::readSecurityImage(const QString& inputFilePath, unsigned char** out
         }
     }
     inputFile.close();
-    if (! (foundHeader && foundFooter)) {
+    if (!(foundHeader && foundFooter)) {
         qCDebug(commerce) << "couldn't parse" << inputFilePath << foundHeader << foundFooter;
         return false;
     }
@@ -553,7 +549,8 @@ bool Wallet::walletIsAuthenticatedWithPassphrase() {
     // this should always be false if we don't have a passphrase
     // cached yet
     if (!_passphrase || _passphrase->isEmpty()) {
-        if (!getKeyFilePath().isEmpty()) { // If file exists, then it is an old school file that has not been lockered. Must get user's passphrase.
+        if (!getKeyFilePath().isEmpty()) { // If file exists, then it is an old school file that has not been lockered. Must get
+                                           // user's passphrase.
             qCDebug(commerce) << "walletIsAuthenticatedWithPassphrase: No passphrase, but there is an existing wallet.";
             return false;
         } else {
@@ -641,12 +638,8 @@ QString Wallet::signWithKey(const QByteArray& text, const QString& key) {
 
         QByteArray hashedPlaintext = QCryptographicHash::hash(text, QCryptographicHash::Sha256);
 
-
-        int retrn = ECDSA_sign(0,
-            reinterpret_cast<const unsigned char*>(hashedPlaintext.constData()),
-            hashedPlaintext.size(),
-            sig,
-            &signatureBytes, ecPrivateKey);
+        int retrn = ECDSA_sign(0, reinterpret_cast<const unsigned char*>(hashedPlaintext.constData()), hashedPlaintext.size(),
+                               sig, &signatureBytes, ecPrivateKey);
 
         EC_KEY_free(ecPrivateKey);
         QByteArray signature(reinterpret_cast<const char*>(sig), signatureBytes);
@@ -666,23 +659,25 @@ void Wallet::updateImageProvider() {
         return;
     }
     QQmlEngine* engine = offscreenUI->getSurfaceContext()->engine();
-    securityImageProvider = reinterpret_cast<SecurityImageProvider*>(engine->imageProvider(SecurityImageProvider::PROVIDER_NAME));
+    securityImageProvider = reinterpret_cast<SecurityImageProvider*>(
+        engine->imageProvider(SecurityImageProvider::PROVIDER_NAME));
     securityImageProvider->setSecurityImage(_securityImage);
 
     // inform tablet security image provider
-    TabletProxy* tablet = DependencyManager::get<TabletScriptingInterface>()->getTablet("com.highfidelity.interface.tablet.system");
+    TabletProxy* tablet = DependencyManager::get<TabletScriptingInterface>()->getTablet(
+        "com.highfidelity.interface.tablet.system");
     if (tablet) {
         OffscreenQmlSurface* tabletSurface = tablet->getTabletSurface();
         if (tabletSurface) {
             QQmlEngine* tabletEngine = tabletSurface->getSurfaceContext()->engine();
-            securityImageProvider = reinterpret_cast<SecurityImageProvider*>(tabletEngine->imageProvider(SecurityImageProvider::PROVIDER_NAME));
+            securityImageProvider = reinterpret_cast<SecurityImageProvider*>(
+                tabletEngine->imageProvider(SecurityImageProvider::PROVIDER_NAME));
             securityImageProvider->setSecurityImage(_securityImage);
         }
     }
 }
 
 void Wallet::chooseSecurityImage(const QString& filename) {
-
     if (_securityImage) {
         delete _securityImage;
     }
@@ -758,7 +753,7 @@ bool Wallet::writeWallet(const QString& newPassphrase) {
     auto ledger = DependencyManager::get<Ledger>();
     // Remove any existing locker, because it will be out of date.
     if (!_publicKeys.isEmpty() && !ledger->receiveAt(_publicKeys.first(), _publicKeys.first(), QByteArray())) {
-        return false;  // FIXME: receiveAt could fail asynchronously.
+        return false; // FIXME: receiveAt could fail asynchronously.
     }
     if (keys) {
         // we read successfully, so now write to a new temp file
@@ -821,7 +816,7 @@ void Wallet::handleChallengeOwnershipPacket(QSharedPointer<ReceivedMessage> pack
     int challengingNodeUUIDByteArraySize;
 
     packet->readPrimitive(&certIDByteArraySize);
-    packet->readPrimitive(&textByteArraySize);  // returns a cast char*, size
+    packet->readPrimitive(&textByteArraySize); // returns a cast char*, size
     if (challengeOriginatedFromClient) {
         packet->readPrimitive(&challengingNodeUUIDByteArraySize);
     }
@@ -837,9 +832,10 @@ void Wallet::handleChallengeOwnershipPacket(QSharedPointer<ReceivedMessage> pack
     EC_KEY* ec = readKeys(keyFilePath().toStdString().c_str());
     QString sig;
 
-   if (ec) {
+    if (ec) {
         ERR_clear_error();
-        sig = signWithKey(text, ""); // base64 signature, QByteArray cast (on return) to QString FIXME should pass ec as string so we can tell which key to sign with
+        sig = signWithKey(text, ""); // base64 signature, QByteArray cast (on return) to QString FIXME should pass ec as string
+                                     // so we can tell which key to sign with
         status = 1;
     } else {
         qCDebug(commerce) << "During entity ownership challenge, creating the EC-signed nonce failed.";
@@ -857,8 +853,8 @@ void Wallet::handleChallengeOwnershipPacket(QSharedPointer<ReceivedMessage> pack
     // setup the packet
     if (challengeOriginatedFromClient) {
         auto textPacket = NLPacket::create(PacketType::ChallengeOwnershipReply,
-            certIDSize + textByteArraySize + challengingNodeUUIDByteArraySize + 3 * sizeof(int),
-            true);
+                                           certIDSize + textByteArraySize + challengingNodeUUIDByteArraySize + 3 * sizeof(int),
+                                           true);
 
         textPacket->writePrimitive(certIDSize);
         textPacket->writePrimitive(textByteArraySize);
@@ -867,18 +863,21 @@ void Wallet::handleChallengeOwnershipPacket(QSharedPointer<ReceivedMessage> pack
         textPacket->write(textByteArray);
         textPacket->write(challengingNodeUUID);
 
-        qCDebug(commerce) << "Sending ChallengeOwnershipReply Packet containing signed text" << textByteArray << "for CertID" << certID;
+        qCDebug(commerce) << "Sending ChallengeOwnershipReply Packet containing signed text" << textByteArray << "for CertID"
+                          << certID;
 
         nodeList->sendPacket(std::move(textPacket), *sendingNode);
     } else {
-        auto textPacket = NLPacket::create(PacketType::ChallengeOwnership, certIDSize + textByteArraySize + 2 * sizeof(int), true);
+        auto textPacket = NLPacket::create(PacketType::ChallengeOwnership, certIDSize + textByteArraySize + 2 * sizeof(int),
+                                           true);
 
         textPacket->writePrimitive(certIDSize);
         textPacket->writePrimitive(textByteArraySize);
         textPacket->write(certID);
         textPacket->write(textByteArray);
 
-        qCDebug(commerce) << "Sending ChallengeOwnership Packet containing signed text" << textByteArray << "for CertID" << certID;
+        qCDebug(commerce) << "Sending ChallengeOwnership Packet containing signed text" << textByteArray << "for CertID"
+                          << certID;
 
         nodeList->sendPacket(std::move(textPacket), *sendingNode);
     }

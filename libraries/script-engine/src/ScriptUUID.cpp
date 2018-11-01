@@ -15,8 +15,8 @@
 
 #include <QDebug>
 
-#include "ScriptEngineLogging.h"
 #include "ScriptEngine.h"
+#include "ScriptEngineLogging.h"
 
 QUuid ScriptUUID::fromString(const QString& s) {
     return QUuid(s);
@@ -27,7 +27,7 @@ QString ScriptUUID::toString(const QUuid& id) {
 }
 
 QUuid ScriptUUID::generate() {
-    return QUuid::createUuid();    
+    return QUuid::createUuid();
 }
 
 bool ScriptUUID::isEqual(const QUuid& idA, const QUuid& idB) {

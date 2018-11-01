@@ -12,11 +12,12 @@
 #ifndef hifi_RenderablePolyLineEntityItem_h
 #define hifi_RenderablePolyLineEntityItem_h
 
-#include "RenderableEntityItem.h"
 #include <PolyLineEntityItem.h>
 #include <TextureCache.h>
+#include "RenderableEntityItem.h"
 
-namespace render { namespace entities {
+namespace render {
+namespace entities {
 
 class PolyLineEntityRenderer : public TypedEntityRenderer<PolyLineEntityItem> {
     using Parent = TypedEntityRenderer<PolyLineEntityItem>;
@@ -26,10 +27,10 @@ public:
     PolyLineEntityRenderer(const EntityItemPointer& entity);
 
     virtual scriptable::ScriptableModelBase getScriptableModel() override;
+
 protected:
     virtual bool needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const override;
-    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, 
-                                                Transaction& transaction, 
+    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
                                                 const TypedEntityPointer& entity) override;
     virtual void doRenderUpdateAsynchronousTyped(const TypedEntityPointer& entity) override;
 
@@ -41,10 +42,11 @@ protected:
 
     struct Vertex {
         Vertex() {}
-        Vertex(const vec3& position, const vec3& normal, const vec2& uv, const vec3& color) : position(position), 
-                                                                                              normal(normal), 
-                                                                                              uv(uv), 
-                                                                                              color(color) {}
+        Vertex(const vec3& position, const vec3& normal, const vec2& uv, const vec3& color) :
+            position(position),
+            normal(normal),
+            uv(uv),
+            color(color) {}
         vec3 position;
         vec3 normal;
         vec2 uv;
@@ -52,12 +54,9 @@ protected:
     };
 
     void updateGeometry(const std::vector<Vertex>& vertices);
-    static std::vector<Vertex> updateVertices(const QVector<glm::vec3>& points,
-                                              const QVector<glm::vec3>& normals,
-                                              const QVector<float>& strokeWidths, 
-                                              const QVector<glm::vec3>& strokeColors,
-                                              const bool isUVModeStretch,
-                                              const float textureAspectRatio);
+    static std::vector<Vertex> updateVertices(const QVector<glm::vec3>& points, const QVector<glm::vec3>& normals,
+                                              const QVector<float>& strokeWidths, const QVector<glm::vec3>& strokeColors,
+                                              const bool isUVModeStretch, const float textureAspectRatio);
 
     Transform _polylineTransform;
     QVector<glm::vec3> _lastPoints;
@@ -65,14 +64,14 @@ protected:
     QVector<glm::vec3> _lastStrokeColors;
     QVector<float> _lastStrokeWidths;
     gpu::BufferPointer _verticesBuffer;
-    
+
     uint32_t _numVertices { 0 };
-    bool _empty{ true };
+    bool _empty { true };
     NetworkTexturePointer _texture;
     float _textureAspectRatio { 1.0f };
-
 };
 
-} } // namespace 
+} // namespace entities
+} // namespace render
 
 #endif // hifi_RenderablePolyLineEntityItem_h

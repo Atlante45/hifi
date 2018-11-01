@@ -75,12 +75,9 @@ int branchIndexWithDescendant(const unsigned char* ancestorOctalCode, const unsi
 }
 
 unsigned char* childOctalCode(const unsigned char* parentOctalCode, int childNumber) {
-
     // find the length (in number of three bit code sequences)
     // in the parent
-    int parentCodeSections = parentOctalCode
-        ? numberOfThreeBitSectionsInCode(parentOctalCode)
-        : 0;
+    int parentCodeSections = parentOctalCode ? numberOfThreeBitSectionsInCode(parentOctalCode) : 0;
 
     // get the number of bytes used by the parent octal code
     size_t parentCodeBytes = bytesRequiredForCodeLength(parentCodeSections);
@@ -201,7 +198,6 @@ OctalCodeComparison compareOctalCodes(const unsigned char* codeA, const unsigned
     return result;
 }
 
-
 char getOctalCodeSectionValue(const unsigned char* octalCode, int section) {
     int startAtByte = 1 + (BITS_IN_OCTAL * section / BITS_IN_BYTE);
     char startIndexInByte = (BITS_IN_OCTAL * section) % BITS_IN_BYTE;
@@ -218,11 +214,11 @@ void setOctalCodeSectionValue(unsigned char* octalCode, int section, char sectio
     const unsigned char UNSHIFTED_MASK = 0x07;
     unsigned char shiftedMask;
     unsigned char shiftedValue;
-    if (shiftBy >=0) {
-        shiftedMask  = UNSHIFTED_MASK << shiftBy;
+    if (shiftBy >= 0) {
+        shiftedMask = UNSHIFTED_MASK << shiftBy;
         shiftedValue = sectionValue << shiftBy;
     } else {
-        shiftedMask  = UNSHIFTED_MASK >> -shiftBy;
+        shiftedMask = UNSHIFTED_MASK >> -shiftBy;
         shiftedValue = sectionValue >> -shiftBy;
     }
     unsigned char oldValue = *byteAt & ~shiftedMask;
@@ -236,11 +232,11 @@ void setOctalCodeSectionValue(unsigned char* octalCode, int section, char sectio
     // bit in this byte is 7 then 2 extra bits live in the next byte.
     const int FIRST_PARTIAL_BIT = 6;
     if (bitInByte >= FIRST_PARTIAL_BIT) {
-        int bitsInFirstByte  = BITS_IN_BYTE  - bitInByte;
+        int bitsInFirstByte = BITS_IN_BYTE - bitInByte;
         int bitsInSecondByte = BITS_IN_OCTAL - bitsInFirstByte;
         shiftBy = BITS_IN_BYTE - bitsInSecondByte;
 
-        shiftedMask  = UNSHIFTED_MASK << shiftBy;
+        shiftedMask = UNSHIFTED_MASK << shiftBy;
         shiftedValue = sectionValue << shiftBy;
 
         oldValue = byteAt[1] & ~shiftedMask;
@@ -335,4 +331,3 @@ QString octalCodeToHexString(const unsigned char* octalCode) {
     }
     return output;
 }
-

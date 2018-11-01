@@ -25,14 +25,12 @@
 #include <GLMHelpers.h>
 #include <OffscreenUi.h>
 
-
 ModelPropertiesDialog::ModelPropertiesDialog(FSTReader::ModelType modelType, const QVariantHash& originalMapping,
                                              const QString& basePath, const FBXGeometry& geometry) :
-_modelType(modelType),
-_originalMapping(originalMapping),
-_basePath(basePath),
-_geometry(geometry)
-{
+    _modelType(modelType),
+    _originalMapping(originalMapping),
+    _basePath(basePath),
+    _geometry(geometry) {
     setWindowTitle("Set Model Properties");
 
     QFormLayout* form = new QFormLayout();
@@ -81,8 +79,7 @@ _geometry(geometry)
         }
     }
 
-    QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Ok |
-                                                     QDialogButtonBox::Cancel | QDialogButtonBox::Reset);
+    QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::Reset);
     connect(buttons, SIGNAL(accepted()), SLOT(accept()));
     connect(buttons, SIGNAL(rejected()), SLOT(reject()));
     connect(buttons->button(QDialogButtonBox::Reset), SIGNAL(clicked(bool)), SLOT(reset()));
@@ -92,7 +89,6 @@ _geometry(geometry)
     // reset to initialize the fields
     reset();
 }
-
 
 QString ModelPropertiesDialog::getType() const {
     return FSTReader::getNameFromType(_modelType);
@@ -132,7 +128,6 @@ QVariantHash ModelPropertiesDialog::getMapping() const {
             insertJointMapping(joints, "jointEyeRight", _rightEyeJoint->currentText());
             insertJointMapping(joints, "jointNeck", _neckJoint->currentText());
         }
-
 
         if (_modelType == FSTReader::BODY_ONLY_MODEL || _modelType == FSTReader::HEAD_AND_BODY_MODEL) {
             insertJointMapping(joints, "jointRoot", _rootJoint->currentText());
@@ -224,7 +219,6 @@ void ModelPropertiesDialog::chooseScriptDirectory() {
     }
     _scriptDirectory->setText(directory.length() == _basePath.length() ? "." : directory.mid(_basePath.length() + 1));
 }
-
 
 void ModelPropertiesDialog::updatePivotJoint() {
     _pivotJoint->setEnabled(!_pivotAboutCenter->isChecked());

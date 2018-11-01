@@ -17,16 +17,15 @@
 
 #include "RingBufferHistory.h"
 
-template <typename T>
+template<typename T>
 class MinMaxAvg {
 public:
-    MinMaxAvg()
-        : _min(std::numeric_limits<T>::max()),
+    MinMaxAvg() :
+        _min(std::numeric_limits<T>::max()),
         _max(std::numeric_limits<T>::min()),
         _average(0.0),
         _samples(0),
-        _last(0)
-    {}
+        _last(0) {}
 
     void reset() {
         _min = std::numeric_limits<T>::max();
@@ -44,10 +43,9 @@ public:
             _max = sample;
         }
         double totalSamples = _samples + 1;
-        _average = _average * ((double)_samples / totalSamples)
-            + (double)sample / totalSamples;
+        _average = _average * ((double)_samples / totalSamples) + (double)sample / totalSamples;
         _samples++;
-        
+
         _last = sample;
     }
 
@@ -60,8 +58,7 @@ public:
         }
         double totalSamples = _samples + other._samples;
         if (totalSamples > 0) {
-            _average = _average * ((double)_samples / totalSamples)
-                + other._average * ((double)other._samples / totalSamples);
+            _average = _average * ((double)_samples / totalSamples) + other._average * ((double)other._samples / totalSamples);
         } else {
             _average = 0.0f;
         }
@@ -83,7 +80,7 @@ private:
     T _last;
 };
 
-template <typename T>
+template<typename T>
 class MovingMinMaxAvg {
 public:
     // This class collects 3 stats (min, max, avg) over a moving window of samples.
@@ -93,20 +90,18 @@ public:
     // For example, if you want a moving avg of the past 5000 samples updated every 100 samples, you would instantiate
     // this class with MovingMinMaxAvg(100, 50).  If you want a moving min of the past 100 samples updated on every
     // new sample, instantiate this class with MovingMinMaxAvg(1, 100).
-    
 
     /// use intervalLength = 0 to use in manual mode, where the currentIntervalComplete() function must
     /// be called to complete an interval
-    MovingMinMaxAvg(int intervalLength, int windowIntervals)
-        : _intervalLength(intervalLength),
+    MovingMinMaxAvg(int intervalLength, int windowIntervals) :
+        _intervalLength(intervalLength),
         _windowIntervals(windowIntervals),
         _overallStats(),
         _windowStats(),
         _currentIntervalStats(),
         _intervalStats(windowIntervals),
-        _newStatsAvailable(false)
-    {}
-    
+        _newStatsAvailable(false) {}
+
     void reset() {
         _overallStats.reset();
         _windowStats.reset();
@@ -146,8 +141,8 @@ public:
         _currentIntervalStats.reset();
 
         // update the window's stats by combining the intervals' stats
-        typename RingBufferHistory< MinMaxAvg<T> >::Iterator i = _intervalStats.begin();
-        typename RingBufferHistory< MinMaxAvg<T> >::Iterator end = _intervalStats.end();
+        typename RingBufferHistory<MinMaxAvg<T>>::Iterator i = _intervalStats.begin();
+        typename RingBufferHistory<MinMaxAvg<T>>::Iterator end = _intervalStats.end();
         _windowStats.reset();
         while (i != end) {
             _windowStats.update(*i);
@@ -179,11 +174,11 @@ public:
     int getCurrentIntervalSamples() const { return _currentIntervalStats.getSamples(); }
     double getCurrentIntervalSum() const { return _currentIntervalStats.getSum(); }
     T getCurrentIntervalLastSample() const { return _currentIntervalStats.getLast(); }
-    
-    const MinMaxAvg<T>& getOverallStats() const{ return _overallStats; }
-    const MinMaxAvg<T>& getWindowStats() const{ return _windowStats; }
+
+    const MinMaxAvg<T>& getOverallStats() const { return _overallStats; }
+    const MinMaxAvg<T>& getWindowStats() const { return _windowStats; }
     const MinMaxAvg<T>& getCurrentIntervalStats() const { return _currentIntervalStats; }
-    
+
     MinMaxAvg<T> getLastCompleteIntervalStats() const {
         const MinMaxAvg<T>* stats = _intervalStats.getNewestEntry();
         return stats == NULL ? MinMaxAvg<T>() : *stats;
@@ -205,7 +200,7 @@ private:
     MinMaxAvg<T> _currentIntervalStats;
 
     // these are stored stats for the past intervals in the window
-    RingBufferHistory< MinMaxAvg<T> > _intervalStats;
+    RingBufferHistory<MinMaxAvg<T>> _intervalStats;
 
     bool _newStatsAvailable;
 };

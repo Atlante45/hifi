@@ -9,7 +9,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef hifi_MyCharacterController_h
 #define hifi_MyCharacterController_h
 
@@ -22,7 +21,7 @@ class MyAvatar;
 class MyCharacterController : public CharacterController {
 public:
     explicit MyCharacterController(MyAvatar* avatar);
-    ~MyCharacterController ();
+    ~MyCharacterController();
 
     void setDynamicsWorld(btDynamicsWorld* world) override;
     void updateShapeIfNecessary() override;

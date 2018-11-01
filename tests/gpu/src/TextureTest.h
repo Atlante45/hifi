@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include <QtTest/QtTest>
 #include <QtCore/QTemporaryDir>
+#include <QtTest/QtTest>
 
-#include <gpu/Forward.h>
 #include <gl/OffscreenGLCanvas.h>
+#include <gpu/Forward.h>
 
 class TextureTest : public QObject {
     Q_OBJECT
@@ -23,12 +23,10 @@ private:
     void renderFrame(const std::function<void(gpu::Batch&)>& = [](gpu::Batch&) {});
     std::vector<gpu::TexturePointer> loadTestTextures() const;
 
-
 private slots:
     void initTestCase();
     void cleanupTestCase();
     void testTextureLoading();
-
 
 private:
     QString _resourcesPath;
@@ -37,7 +35,7 @@ private:
     gpu::PipelinePointer _pipeline;
     gpu::FramebufferPointer _framebuffer;
     gpu::TexturePointer _colorBuffer, _depthBuffer;
-    const glm::uvec2 _size{ 640, 480 };
+    const glm::uvec2 _size { 640, 480 };
     std::vector<std::string> _textureFiles;
     size_t _frameCount { 0 };
 };

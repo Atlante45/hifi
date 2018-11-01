@@ -14,8 +14,8 @@
 
 #include <gpu/Pipeline.h>
 #include <render/RenderFetchCullSortTask.h>
-#include "LightingModel.h"
 #include "LightStage.h"
+#include "LightingModel.h"
 
 class RenderForwardTask {
 public:
@@ -32,8 +32,7 @@ public:
     using Inputs = gpu::FramebufferPointer;
     using JobModel = render::Job::ModelO<PrepareFramebuffer, Inputs>;
 
-    void run(const render::RenderContextPointer& renderContext,
-            gpu::FramebufferPointer& framebuffer);
+    void run(const render::RenderContextPointer& renderContext, gpu::FramebufferPointer& framebuffer);
 
 private:
     gpu::FramebufferPointer _framebuffer;
@@ -44,20 +43,18 @@ public:
     using Inputs = LightStage::FramePointer;
     using JobModel = render::Job::ModelI<PrepareForward, Inputs>;
 
-    void run(const render::RenderContextPointer& renderContext,
-        const Inputs& inputs);
+    void run(const render::RenderContextPointer& renderContext, const Inputs& inputs);
 
 private:
 };
 
-class DrawForward{
+class DrawForward {
 public:
     using Inputs = render::VaryingSet2<render::ItemBounds, LightingModelPointer>;
     using JobModel = render::Job::ModelI<DrawForward, Inputs>;
 
     DrawForward(const render::ShapePlumberPointer& shapePlumber) : _shapePlumber(shapePlumber) {}
-    void run(const render::RenderContextPointer& renderContext,
-            const Inputs& inputs);
+    void run(const render::RenderContextPointer& renderContext, const Inputs& inputs);
 
 private:
     render::ShapePlumberPointer _shapePlumber;

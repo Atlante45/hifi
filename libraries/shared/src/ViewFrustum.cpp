@@ -21,8 +21,8 @@
 
 #include <QtCore/QDebug>
 
-#include "GeometryUtil.h"
 #include "GLMHelpers.h"
+#include "GeometryUtil.h"
 #include "NumericalConstants.h"
 #include "SharedLogging.h"
 
@@ -31,7 +31,7 @@ using namespace std;
 void ViewFrustum::setOrientation(const glm::quat& orientationAsQuaternion) {
     _orientation = orientationAsQuaternion;
     _right = glm::vec3(orientationAsQuaternion * glm::vec4(IDENTITY_RIGHT, 0.0f));
-    _up = glm::vec3(orientationAsQuaternion * glm::vec4(IDENTITY_UP,    0.0f));
+    _up = glm::vec3(orientationAsQuaternion * glm::vec4(IDENTITY_UP, 0.0f));
     _direction = glm::vec3(orientationAsQuaternion * glm::vec4(IDENTITY_FORWARD, 0.0f));
     _view = glm::translate(mat4(), _position) * glm::mat4_cast(_orientation);
 }
@@ -43,14 +43,9 @@ void ViewFrustum::setPosition(const glm::vec3& position) {
 
 // Order cooresponds to the order defined in the BoxVertex enum.
 static const glm::vec4 NDC_VALUES[NUM_FRUSTUM_CORNERS] = {
-    glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f),
-    glm::vec4(1.0f, -1.0f, -1.0f, 1.0f),
-    glm::vec4(1.0f, 1.0f, -1.0f, 1.0f),
-    glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f),
-    glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f),
-    glm::vec4(1.0f, -1.0f, 1.0f, 1.0f),
-    glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-    glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f),
+    glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f), glm::vec4(1.0f, -1.0f, -1.0f, 1.0f), glm::vec4(1.0f, 1.0f, -1.0f, 1.0f),
+    glm::vec4(-1.0f, 1.0f, -1.0f, 1.0f),  glm::vec4(-1.0f, -1.0f, 1.0f, 1.0f), glm::vec4(1.0f, -1.0f, 1.0f, 1.0f),
+    glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),    glm::vec4(-1.0f, 1.0f, 1.0f, 1.0f),
 };
 
 void ViewFrustum::setProjection(const glm::mat4& projection) {
@@ -67,7 +62,7 @@ void ViewFrustum::setProjection(const glm::mat4& projection) {
     _nearClip = -_corners[BOTTOM_LEFT_NEAR].z;
     _farClip = -_corners[BOTTOM_LEFT_FAR].z;
     _aspectRatio = (_corners[TOP_RIGHT_NEAR].x - _corners[BOTTOM_LEFT_NEAR].x) /
-        (_corners[TOP_RIGHT_NEAR].y - _corners[BOTTOM_LEFT_NEAR].y);
+                   (_corners[TOP_RIGHT_NEAR].y - _corners[BOTTOM_LEFT_NEAR].y);
     glm::vec4 top = inverseProjection * vec4(0.0f, 1.0f, -1.0f, 1.0f);
     top /= top.w;
     _fieldOfView = abs(glm::degrees(2.0f * abs(glm::angle(vec3(0.0f, 0.0f, -1.0f), glm::normalize(vec3(top))))));
@@ -87,7 +82,6 @@ void ViewFrustum::setProjection(float cameraFov, float cameraAspectRatio, float 
 //     http://www.lighthouse3d.com/tutorials/view-frustum-culling/view-frustums-shape/
 //
 void ViewFrustum::calculate() {
-
     // find the intersections of the rays through the corners with the clip planes in view space,
     // then transform them to world space
     glm::mat4 worldMatrix = glm::translate(_position) * glm::mat4(glm::mat3(_right, _up, -_direction));
@@ -110,11 +104,16 @@ void ViewFrustum::calculate() {
     // are inside the frustum, facing the plane. Start with any point, and go counter clockwise for
     // three consecutive points
     _planes[TOP_PLANE].set3Points(_cornersWorld[TOP_RIGHT_NEAR], _cornersWorld[TOP_LEFT_NEAR], _cornersWorld[TOP_LEFT_FAR]);
-    _planes[BOTTOM_PLANE].set3Points(_cornersWorld[BOTTOM_LEFT_NEAR], _cornersWorld[BOTTOM_RIGHT_NEAR], _cornersWorld[BOTTOM_RIGHT_FAR]);
-    _planes[LEFT_PLANE].set3Points(_cornersWorld[BOTTOM_LEFT_NEAR], _cornersWorld[BOTTOM_LEFT_FAR], _cornersWorld[TOP_LEFT_FAR]);
-    _planes[RIGHT_PLANE].set3Points(_cornersWorld[BOTTOM_RIGHT_FAR], _cornersWorld[BOTTOM_RIGHT_NEAR], _cornersWorld[TOP_RIGHT_FAR]);
-    _planes[NEAR_PLANE].set3Points(_cornersWorld[BOTTOM_RIGHT_NEAR], _cornersWorld[BOTTOM_LEFT_NEAR], _cornersWorld[TOP_LEFT_NEAR]);
-    _planes[FAR_PLANE].set3Points(_cornersWorld[BOTTOM_LEFT_FAR], _cornersWorld[BOTTOM_RIGHT_FAR], _cornersWorld[TOP_RIGHT_FAR]);
+    _planes[BOTTOM_PLANE].set3Points(_cornersWorld[BOTTOM_LEFT_NEAR], _cornersWorld[BOTTOM_RIGHT_NEAR],
+                                     _cornersWorld[BOTTOM_RIGHT_FAR]);
+    _planes[LEFT_PLANE].set3Points(_cornersWorld[BOTTOM_LEFT_NEAR], _cornersWorld[BOTTOM_LEFT_FAR],
+                                   _cornersWorld[TOP_LEFT_FAR]);
+    _planes[RIGHT_PLANE].set3Points(_cornersWorld[BOTTOM_RIGHT_FAR], _cornersWorld[BOTTOM_RIGHT_NEAR],
+                                    _cornersWorld[TOP_RIGHT_FAR]);
+    _planes[NEAR_PLANE].set3Points(_cornersWorld[BOTTOM_RIGHT_NEAR], _cornersWorld[BOTTOM_LEFT_NEAR],
+                                   _cornersWorld[TOP_LEFT_NEAR]);
+    _planes[FAR_PLANE].set3Points(_cornersWorld[BOTTOM_LEFT_FAR], _cornersWorld[BOTTOM_RIGHT_FAR],
+                                  _cornersWorld[TOP_RIGHT_FAR]);
 
     // Also calculate our projection matrix in case people want to project points...
     // Projection matrix : Field of View, ratio, display range : near to far
@@ -125,15 +124,21 @@ void ViewFrustum::calculate() {
     _ourModelViewProjectionMatrix = _projection * view; // Remember, matrix multiplication is the other way around
 }
 
-//enum { TOP_PLANE = 0, BOTTOM_PLANE, LEFT_PLANE, RIGHT_PLANE, NEAR_PLANE, FAR_PLANE };
-const char* ViewFrustum::debugPlaneName (int plane) const {
+// enum { TOP_PLANE = 0, BOTTOM_PLANE, LEFT_PLANE, RIGHT_PLANE, NEAR_PLANE, FAR_PLANE };
+const char* ViewFrustum::debugPlaneName(int plane) const {
     switch (plane) {
-        case TOP_PLANE:    return "Top Plane";
-        case BOTTOM_PLANE: return "Bottom Plane";
-        case LEFT_PLANE:   return "Left Plane";
-        case RIGHT_PLANE:  return "Right Plane";
-        case NEAR_PLANE:   return "Near Plane";
-        case FAR_PLANE:    return "Far Plane";
+        case TOP_PLANE:
+            return "Top Plane";
+        case BOTTOM_PLANE:
+            return "Bottom Plane";
+        case LEFT_PLANE:
+            return "Left Plane";
+        case RIGHT_PLANE:
+            return "Right Plane";
+        case NEAR_PLANE:
+            return "Near Plane";
+        case FAR_PLANE:
+            return "Far Plane";
     }
     return "Unknown";
 }
@@ -141,10 +146,10 @@ const char* ViewFrustum::debugPlaneName (int plane) const {
 ViewFrustum::intersection ViewFrustum::calculateCubeFrustumIntersection(const AACube& cube) const {
     // only check against frustum
     ViewFrustum::intersection result = INSIDE;
-    for(int i = 0; i < NUM_FRUSTUM_PLANES; i++) {
+    for (int i = 0; i < NUM_FRUSTUM_PLANES; i++) {
         const glm::vec3& normal = _planes[i].getNormal();
         // check distance to farthest cube point
-        if ( _planes[i].distance(cube.getFarthestVertex(normal)) < 0.0f) {
+        if (_planes[i].distance(cube.getFarthestVertex(normal)) < 0.0f) {
             return OUTSIDE;
         } else {
             // check distance to nearest cube point
@@ -186,7 +191,7 @@ ViewFrustum::intersection ViewFrustum::calculateCubeKeyholeIntersection(const AA
 
 bool ViewFrustum::pointIntersectsFrustum(const glm::vec3& point) const {
     // only check against frustum
-    for(int i = 0; i < NUM_FRUSTUM_PLANES; ++i) {
+    for (int i = 0; i < NUM_FRUSTUM_PLANES; ++i) {
         float distance = _planes[i].distance(point);
         if (distance < 0.0f) {
             return false;
@@ -197,7 +202,7 @@ bool ViewFrustum::pointIntersectsFrustum(const glm::vec3& point) const {
 
 bool ViewFrustum::sphereIntersectsFrustum(const glm::vec3& center, float radius) const {
     // only check against frustum
-    for(int i = 0; i < NUM_FRUSTUM_PLANES; i++) {
+    for (int i = 0; i < NUM_FRUSTUM_PLANES; i++) {
         float distance = _planes[i].distance(center);
         if (distance < -radius) {
             // This is outside the regular frustum, so just return the value from checking the keyhole
@@ -209,10 +214,10 @@ bool ViewFrustum::sphereIntersectsFrustum(const glm::vec3& center, float radius)
 
 bool ViewFrustum::boxIntersectsFrustum(const AABox& box) const {
     // only check against frustum
-    for(int i = 0; i < NUM_FRUSTUM_PLANES; i++) {
+    for (int i = 0; i < NUM_FRUSTUM_PLANES; i++) {
         const glm::vec3& normal = _planes[i].getNormal();
         // check distance to farthest box point
-        if ( _planes[i].distance(box.getFarthestVertex(normal)) < 0.0f) {
+        if (_planes[i].distance(box.getFarthestVertex(normal)) < 0.0f) {
             return false;
         }
     }
@@ -237,8 +242,8 @@ bool ViewFrustum::sphereIntersectsKeyhole(const glm::vec3& center, float radius)
         return true;
     }
     // check negative touches against frustum planes
-    for(int i = 0; i < NUM_FRUSTUM_PLANES; i++) {
-        if ( _planes[i].distance(center) < -radius) {
+    for (int i = 0; i < NUM_FRUSTUM_PLANES; i++) {
+        if (_planes[i].distance(center) < -radius) {
             return false;
         }
     }
@@ -251,9 +256,9 @@ bool ViewFrustum::cubeIntersectsKeyhole(const AACube& cube) const {
         return true;
     }
     // check negative touches against frustum planes
-    for(int i = 0; i < NUM_FRUSTUM_PLANES; i++) {
+    for (int i = 0; i < NUM_FRUSTUM_PLANES; i++) {
         const glm::vec3& normal = _planes[i].getNormal();
-        if ( _planes[i].distance(cube.getFarthestVertex(normal)) < 0.0f) {
+        if (_planes[i].distance(cube.getFarthestVertex(normal)) < 0.0f) {
             return false;
         }
     }
@@ -266,9 +271,9 @@ bool ViewFrustum::boxIntersectsKeyhole(const AABox& box) const {
         return true;
     }
     // check negative touches against frustum planes
-    for(int i = 0; i < NUM_FRUSTUM_PLANES; i++) {
+    for (int i = 0; i < NUM_FRUSTUM_PLANES; i++) {
         const glm::vec3& normal = _planes[i].getNormal();
-        if ( _planes[i].distance(box.getFarthestVertex(normal)) < 0.0f) {
+        if (_planes[i].distance(box.getFarthestVertex(normal)) < 0.0f) {
             return false;
         }
     }
@@ -282,13 +287,13 @@ bool ViewFrustum::isVerySimilar(const ViewFrustum& other) const {
     const float MIN_RELATIVE_ERROR = 0.01f; // 1%
 
     return glm::distance2(_position, other._position) < MIN_POSITION_SLOP_SQUARED &&
-        fabsf(glm::dot(_orientation, other._orientation)) > MIN_ORIENTATION_DOT &&
-        closeEnough(_fieldOfView, other._fieldOfView, MIN_RELATIVE_ERROR) &&
-        closeEnough(_aspectRatio, other._aspectRatio, MIN_RELATIVE_ERROR) &&
-        closeEnough(_nearClip, other._nearClip, MIN_RELATIVE_ERROR) &&
-        closeEnough(_farClip, other._farClip, MIN_RELATIVE_ERROR) &&
-        closeEnough(_focalLength, other._focalLength, MIN_RELATIVE_ERROR) &&
-        closeEnough(_centerSphereRadius, other._centerSphereRadius, MIN_RELATIVE_ERROR);
+           fabsf(glm::dot(_orientation, other._orientation)) > MIN_ORIENTATION_DOT &&
+           closeEnough(_fieldOfView, other._fieldOfView, MIN_RELATIVE_ERROR) &&
+           closeEnough(_aspectRatio, other._aspectRatio, MIN_RELATIVE_ERROR) &&
+           closeEnough(_nearClip, other._nearClip, MIN_RELATIVE_ERROR) &&
+           closeEnough(_farClip, other._farClip, MIN_RELATIVE_ERROR) &&
+           closeEnough(_focalLength, other._focalLength, MIN_RELATIVE_ERROR) &&
+           closeEnough(_centerSphereRadius, other._centerSphereRadius, MIN_RELATIVE_ERROR);
 }
 
 PickRay ViewFrustum::computePickRay(float x, float y) {
@@ -300,7 +305,7 @@ PickRay ViewFrustum::computePickRay(float x, float y) {
 
 void ViewFrustum::computePickRay(float x, float y, glm::vec3& origin, glm::vec3& direction) const {
     origin = _cornersWorld[TOP_LEFT_NEAR] + x * (_cornersWorld[TOP_RIGHT_NEAR] - _cornersWorld[TOP_LEFT_NEAR]) +
-        y * (_cornersWorld[BOTTOM_LEFT_NEAR] - _cornersWorld[TOP_LEFT_NEAR]);
+             y * (_cornersWorld[BOTTOM_LEFT_NEAR] - _cornersWorld[TOP_LEFT_NEAR]);
     direction = glm::normalize(origin - _position);
 }
 
@@ -343,10 +348,10 @@ void ViewFrustum::computeOffAxisFrustum(float& left, float& right, float& bottom
 
 void ViewFrustum::printDebugDetails() const {
     qCDebug(shared, "ViewFrustum::printDebugDetails()...");
-    qCDebug(shared, "_position=%f,%f,%f",  (double)_position.x, (double)_position.y, (double)_position.z );
-    qCDebug(shared, "_direction=%f,%f,%f", (double)_direction.x, (double)_direction.y, (double)_direction.z );
-    qCDebug(shared, "_up=%f,%f,%f", (double)_up.x, (double)_up.y, (double)_up.z );
-    qCDebug(shared, "_right=%f,%f,%f", (double)_right.x, (double)_right.y, (double)_right.z );
+    qCDebug(shared, "_position=%f,%f,%f", (double)_position.x, (double)_position.y, (double)_position.z);
+    qCDebug(shared, "_direction=%f,%f,%f", (double)_direction.x, (double)_direction.y, (double)_direction.z);
+    qCDebug(shared, "_up=%f,%f,%f", (double)_up.x, (double)_up.y, (double)_up.z);
+    qCDebug(shared, "_right=%f,%f,%f", (double)_right.x, (double)_right.y, (double)_right.z);
     qCDebug(shared, "_fieldOfView=%f", (double)_fieldOfView);
     qCDebug(shared, "_aspectRatio=%f", (double)_aspectRatio);
     qCDebug(shared, "_centerSphereRadius=%f", (double)_centerSphereRadius);
@@ -356,7 +361,6 @@ void ViewFrustum::printDebugDetails() const {
 }
 
 glm::vec2 ViewFrustum::projectPoint(glm::vec3 point, bool& pointInView) const {
-
     glm::vec4 pointVec4 = glm::vec4(point, 1.0f);
     glm::vec4 projectedPointVec4 = _ourModelViewProjectionMatrix * pointVec4;
     pointInView = (projectedPointVec4.w > 0.0f); // math! If the w result is negative then the point is behind the viewer
@@ -364,7 +368,7 @@ glm::vec2 ViewFrustum::projectPoint(glm::vec3 point, bool& pointInView) const {
     // what happens with w is 0???
     float x = projectedPointVec4.x / projectedPointVec4.w;
     float y = projectedPointVec4.y / projectedPointVec4.w;
-    glm::vec2 projectedPoint(x,y);
+    glm::vec2 projectedPoint(x, y);
 
     // if the point is out of view we also need to flip the signs of x and y
     if (!pointInView) {
@@ -375,95 +379,118 @@ glm::vec2 ViewFrustum::projectPoint(glm::vec3 point, bool& pointInView) const {
     return projectedPoint;
 }
 
-
 const int MAX_POSSIBLE_COMBINATIONS = 43;
 
-const int hullVertexLookup[MAX_POSSIBLE_COMBINATIONS][MAX_PROJECTED_POLYGON_VERTEX_COUNT+1] = {
+const int hullVertexLookup[MAX_POSSIBLE_COMBINATIONS][MAX_PROJECTED_POLYGON_VERTEX_COUNT + 1] = {
     // Number of vertices in shadow polygon for the visible faces, then a list of the index of each vertice from the AACube
 
-//0
-    {0}, // inside
-    {4, BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR, TOP_RIGHT_NEAR}, // right
-    {4, BOTTOM_LEFT_FAR, BOTTOM_LEFT_NEAR,  TOP_LEFT_NEAR, TOP_LEFT_FAR  },  // left
-    {0}, // n/a
+    // 0
+    { 0 }, // inside
+    { 4, BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR, TOP_RIGHT_NEAR }, // right
+    { 4, BOTTOM_LEFT_FAR, BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR, TOP_LEFT_FAR }, // left
+    { 0 }, // n/a
 
-//4
-    {4, BOTTOM_RIGHT_NEAR, BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR}, // bottom
-//5
-    {6, BOTTOM_RIGHT_NEAR, BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR, TOP_RIGHT_NEAR },//bottom, right
-    {6, BOTTOM_RIGHT_NEAR, BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR, TOP_LEFT_FAR, BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR, },//bottom, left
-    {0}, // n/a
-//8
-    {4, TOP_RIGHT_NEAR, TOP_RIGHT_FAR, TOP_LEFT_FAR, TOP_LEFT_NEAR},         // top
-    {6, TOP_RIGHT_NEAR, BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR, TOP_LEFT_FAR, TOP_LEFT_NEAR},   // top, right
-    {6, TOP_RIGHT_NEAR, TOP_RIGHT_FAR, TOP_LEFT_FAR, BOTTOM_LEFT_FAR, BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR},   // top, left
-    {0}, // n/a
-    {0}, // n/a
-    {0}, // n/a
-    {0}, // n/a
-    {0}, // n/a
-//16
-    {4, BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR, TOP_LEFT_NEAR }, // front or near
+    // 4
+    { 4, BOTTOM_RIGHT_NEAR, BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR }, // bottom
+    // 5
+    { 6, BOTTOM_RIGHT_NEAR, BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR,
+      TOP_RIGHT_NEAR }, // bottom, right
+    {
+        6,
+        BOTTOM_RIGHT_NEAR,
+        BOTTOM_LEFT_NEAR,
+        TOP_LEFT_NEAR,
+        TOP_LEFT_FAR,
+        BOTTOM_LEFT_FAR,
+        BOTTOM_RIGHT_FAR,
+    }, // bottom, left
+    { 0 }, // n/a
+    // 8
+    { 4, TOP_RIGHT_NEAR, TOP_RIGHT_FAR, TOP_LEFT_FAR, TOP_LEFT_NEAR }, // top
+    { 6, TOP_RIGHT_NEAR, BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR, TOP_LEFT_FAR, TOP_LEFT_NEAR }, // top, right
+    { 6, TOP_RIGHT_NEAR, TOP_RIGHT_FAR, TOP_LEFT_FAR, BOTTOM_LEFT_FAR, BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR }, // top, left
+    { 0 }, // n/a
+    { 0 }, // n/a
+    { 0 }, // n/a
+    { 0 }, // n/a
+    { 0 }, // n/a
+    // 16
+    { 4, BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR, TOP_LEFT_NEAR }, // front or near
 
-    {6, BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR, TOP_RIGHT_NEAR, TOP_LEFT_NEAR }, // front, right
-    {6, BOTTOM_LEFT_FAR, BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR, TOP_LEFT_NEAR, TOP_LEFT_FAR, }, // front, left
-    {0}, // n/a
-//20
-    {6, BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR, BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR, TOP_LEFT_NEAR }, // front,bottom
+    { 6, BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR, TOP_RIGHT_NEAR, TOP_LEFT_NEAR }, // front, right
+    {
+        6,
+        BOTTOM_LEFT_FAR,
+        BOTTOM_LEFT_NEAR,
+        BOTTOM_RIGHT_NEAR,
+        TOP_RIGHT_NEAR,
+        TOP_LEFT_NEAR,
+        TOP_LEFT_FAR,
+    }, // front, left
+    { 0 }, // n/a
+    // 20
+    { 6, BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR, BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR,
+      TOP_LEFT_NEAR }, // front,bottom
 
-//21
-    {6, BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR, TOP_RIGHT_NEAR, TOP_LEFT_NEAR }, //front,bottom,right
-//22
-    {6, BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR, BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR, TOP_LEFT_NEAR, TOP_LEFT_FAR  }, //front,bottom,left
-    {0}, // n/a
+    // 21
+    { 6, BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR, TOP_RIGHT_NEAR,
+      TOP_LEFT_NEAR }, // front,bottom,right
+    // 22
+    { 6, BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR, BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR, TOP_LEFT_NEAR,
+      TOP_LEFT_FAR }, // front,bottom,left
+    { 0 }, // n/a
 
-    {6, BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR, TOP_RIGHT_FAR, TOP_LEFT_FAR, TOP_LEFT_NEAR}, // front, top
+    { 6, BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR, TOP_RIGHT_FAR, TOP_LEFT_FAR, TOP_LEFT_NEAR }, // front, top
 
-    {6, BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR, TOP_LEFT_FAR, TOP_LEFT_NEAR }, // front, top, right
+    { 6, BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR, TOP_LEFT_FAR,
+      TOP_LEFT_NEAR }, // front, top, right
 
-    {6, BOTTOM_LEFT_FAR, BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR, TOP_RIGHT_FAR, TOP_LEFT_FAR }, // front, top, left
-    {0}, // n/a
-    {0}, // n/a
-    {0}, // n/a
-    {0}, // n/a
-    {0}, // n/a
-//32
-    {4, BOTTOM_RIGHT_FAR, BOTTOM_LEFT_FAR, TOP_LEFT_FAR, TOP_RIGHT_FAR }, // back
-    {6, BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR, BOTTOM_LEFT_FAR, TOP_LEFT_FAR, TOP_RIGHT_FAR, TOP_RIGHT_NEAR}, // back, right
-//34
-    {6, BOTTOM_RIGHT_FAR, BOTTOM_LEFT_FAR, BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR, TOP_LEFT_FAR, TOP_RIGHT_FAR }, // back, left
+    { 6, BOTTOM_LEFT_FAR, BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR, TOP_RIGHT_FAR,
+      TOP_LEFT_FAR }, // front, top, left
+    { 0 }, // n/a
+    { 0 }, // n/a
+    { 0 }, // n/a
+    { 0 }, // n/a
+    { 0 }, // n/a
+    // 32
+    { 4, BOTTOM_RIGHT_FAR, BOTTOM_LEFT_FAR, TOP_LEFT_FAR, TOP_RIGHT_FAR }, // back
+    { 6, BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR, BOTTOM_LEFT_FAR, TOP_LEFT_FAR, TOP_RIGHT_FAR, TOP_RIGHT_NEAR }, // back, right
+    // 34
+    { 6, BOTTOM_RIGHT_FAR, BOTTOM_LEFT_FAR, BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR, TOP_LEFT_FAR, TOP_RIGHT_FAR }, // back, left
 
+    { 0 }, // n/a
+    // 36
+    { 6, BOTTOM_RIGHT_NEAR, BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, TOP_LEFT_FAR, TOP_RIGHT_FAR, BOTTOM_RIGHT_FAR }, // back, bottom
+    { 6, BOTTOM_RIGHT_NEAR, BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, TOP_LEFT_FAR, TOP_RIGHT_FAR,
+      TOP_RIGHT_NEAR }, // back, bottom, right
 
-    {0}, // n/a
-//36
-    {6, BOTTOM_RIGHT_NEAR, BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, TOP_LEFT_FAR, TOP_RIGHT_FAR, BOTTOM_RIGHT_FAR}, // back, bottom
-    {6, BOTTOM_RIGHT_NEAR, BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, TOP_LEFT_FAR, TOP_RIGHT_FAR, TOP_RIGHT_NEAR},//back, bottom, right
+    // 38
+    { 6, BOTTOM_RIGHT_NEAR, BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR, TOP_LEFT_FAR, TOP_RIGHT_FAR,
+      BOTTOM_RIGHT_FAR }, // back, bottom, left
+    { 0 }, // n/a
 
-// 38
-    {6, BOTTOM_RIGHT_NEAR, BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR, TOP_LEFT_FAR, TOP_RIGHT_FAR, BOTTOM_RIGHT_FAR },//back, bottom, left
-    {0}, // n/a
+    // 40
+    { 6, BOTTOM_RIGHT_FAR, BOTTOM_LEFT_FAR, TOP_LEFT_FAR, TOP_LEFT_NEAR, TOP_RIGHT_NEAR, TOP_RIGHT_FAR }, // back, top
 
-// 40
-    {6, BOTTOM_RIGHT_FAR, BOTTOM_LEFT_FAR, TOP_LEFT_FAR, TOP_LEFT_NEAR, TOP_RIGHT_NEAR, TOP_RIGHT_FAR}, // back, top
-
-    {6, BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR, BOTTOM_LEFT_FAR, TOP_LEFT_FAR, TOP_LEFT_NEAR, TOP_RIGHT_NEAR}, // back, top, right
-//42
-    {6, TOP_RIGHT_NEAR, TOP_RIGHT_FAR, BOTTOM_RIGHT_FAR, BOTTOM_LEFT_FAR, BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR}, // back, top, left
+    { 6, BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR, BOTTOM_LEFT_FAR, TOP_LEFT_FAR, TOP_LEFT_NEAR,
+      TOP_RIGHT_NEAR }, // back, top, right
+    // 42
+    { 6, TOP_RIGHT_NEAR, TOP_RIGHT_FAR, BOTTOM_RIGHT_FAR, BOTTOM_LEFT_FAR, BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR }, // back, top, left
 };
 
-template <typename TBOX>
+template<typename TBOX>
 CubeProjectedPolygon ViewFrustum::computeProjectedPolygon(const TBOX& box) const {
     const glm::vec3& bottomNearRight = box.getCorner();
     glm::vec3 topFarLeft = box.calcTopFarLeft();
 
-    int lookUp = ((_position.x < bottomNearRight.x))    //  1 = right      |   compute 6-bit
-        + ((_position.x > topFarLeft.x) << 1)           //  2 = left       |         code to
-        + ((_position.y < bottomNearRight.y) << 2)      //  4 = bottom     | classify camera
-        + ((_position.y > topFarLeft.y) << 3)           //  8 = top        | with respect to
-        + ((_position.z < bottomNearRight.z) << 4)      // 16 = front/near |  the 6 defining
-        + ((_position.z > topFarLeft.z) << 5);          // 32 = back/far   |          planes
+    int lookUp = ((_position.x < bottomNearRight.x)) //  1 = right      |   compute 6-bit
+                 + ((_position.x > topFarLeft.x) << 1) //  2 = left       |         code to
+                 + ((_position.y < bottomNearRight.y) << 2) //  4 = bottom     | classify camera
+                 + ((_position.y > topFarLeft.y) << 3) //  8 = top        | with respect to
+                 + ((_position.z < bottomNearRight.z) << 4) // 16 = front/near |  the 6 defining
+                 + ((_position.z > topFarLeft.z) << 5); // 32 = back/far   |          planes
 
-    int vertexCount = hullVertexLookup[lookUp][0];  //look up number of vertices
+    int vertexCount = hullVertexLookup[lookUp][0]; // look up number of vertices
 
     CubeProjectedPolygon projectedPolygon(vertexCount);
 
@@ -530,25 +557,19 @@ bool ViewFrustum::getProjectedRect(const AABox& box, glm::vec2& bottomLeft, glm:
     const int VERTEX_COUNT = 8;
     const int EDGE_COUNT = 12;
     // In theory, after clipping a box with a plane, only 4 new vertices at max
-    // should be created but due to potential imprecisions (edge almost parallel to 
+    // should be created but due to potential imprecisions (edge almost parallel to
     // near plane for instance) there might be more
-    const int MAX_VERTEX_COUNT = VERTEX_COUNT + 4 + 2; 
+    const int MAX_VERTEX_COUNT = VERTEX_COUNT + 4 + 2;
 
     std::array<glm::vec3, MAX_VERTEX_COUNT> vertices;
-    std::array<Edge, EDGE_COUNT> boxEdges{ {
-        Edge{BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR},
-        Edge{TOP_LEFT_NEAR, TOP_RIGHT_NEAR},
-        Edge{BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR},
-        Edge{TOP_LEFT_FAR, TOP_RIGHT_FAR},
-        Edge{BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR},
-        Edge{BOTTOM_LEFT_FAR, TOP_LEFT_FAR},
-        Edge{BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR},
-        Edge{BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR},
-        Edge{BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR},
-        Edge{TOP_LEFT_NEAR, TOP_LEFT_FAR},
-        Edge{BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR},
-        Edge{TOP_RIGHT_NEAR, TOP_RIGHT_FAR}
-    } };
+    std::array<Edge, EDGE_COUNT> boxEdges {
+        { Edge { BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR }, Edge { TOP_LEFT_NEAR, TOP_RIGHT_NEAR },
+          Edge { BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR }, Edge { TOP_LEFT_FAR, TOP_RIGHT_FAR },
+          Edge { BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR }, Edge { BOTTOM_LEFT_FAR, TOP_LEFT_FAR },
+          Edge { BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR }, Edge { BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR },
+          Edge { BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR }, Edge { TOP_LEFT_NEAR, TOP_LEFT_FAR },
+          Edge { BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR }, Edge { TOP_RIGHT_NEAR, TOP_RIGHT_FAR } }
+    };
     std::array<float, VERTEX_COUNT> distancesToNearPlane;
     std::bitset<MAX_VERTEX_COUNT> areVerticesInside;
     int vertexCount = VERTEX_COUNT;
@@ -577,7 +598,8 @@ bool ViewFrustum::getProjectedRect(const AABox& box, glm::vec2& bottomLeft, glm:
         if (isStartPointInside != isEndPointInside) {
             // One of the two vertices is behind the near plane so add a new clipped vertex
             // add tag it as projectable.
-            vertices[vertexCount] = startVertex + (endVertex - startVertex) * (startVertexDistance / (startVertexDistance - endVertexDistance));
+            vertices[vertexCount] = startVertex + (endVertex - startVertex) *
+                                                      (startVertexDistance / (startVertexDistance - endVertexDistance));
             areVerticesInside.set(vertexCount);
             vertexCount++;
         }
@@ -640,18 +662,14 @@ void ViewFrustum::getFurthestPointFromCamera(const AACube& box, glm::vec3& furth
 const ViewFrustum::Corners ViewFrustum::getCorners(const float depth) const {
     glm::vec3 normal = glm::normalize(_direction);
 
-    auto getCorner = [&](enum::BoxVertex nearCorner, enum::BoxVertex farCorner) {
+    auto getCorner = [&](enum ::BoxVertex nearCorner, enum ::BoxVertex farCorner) {
         auto dir = glm::normalize(_cornersWorld[nearCorner] - _cornersWorld[farCorner]);
         auto factor = depth / glm::dot(dir, normal);
         return _position + factor * dir;
     };
 
-    return Corners{
-        getCorner(TOP_LEFT_NEAR, TOP_LEFT_FAR),
-        getCorner(TOP_RIGHT_NEAR, TOP_RIGHT_FAR),
-        getCorner(BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR),
-        getCorner(BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR)
-    };
+    return Corners { getCorner(TOP_LEFT_NEAR, TOP_LEFT_FAR), getCorner(TOP_RIGHT_NEAR, TOP_RIGHT_FAR),
+                     getCorner(BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR), getCorner(BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR) };
 }
 
 float ViewFrustum::distanceToCameraSquared(const glm::vec3& point) const {
@@ -665,24 +683,22 @@ void ViewFrustum::evalProjectionMatrix(glm::mat4& proj) const {
 }
 
 glm::mat4 ViewFrustum::evalProjectionMatrixRange(float rangeNear, float rangeFar) const {
-
     // make sure range near far make sense
     assert(rangeNear > 0.0f);
     assert(rangeFar > rangeNear);
 
     // recreate a projection matrix for only a range of depth of this frustum.
-   
+
     // take the current projection
     glm::mat4 rangeProj = _projection;
-    
+
     float A = -(rangeFar + rangeNear) / (rangeFar - rangeNear);
-    float B = -2.0f * rangeFar*rangeNear / ((rangeFar - rangeNear));
+    float B = -2.0f * rangeFar * rangeNear / ((rangeFar - rangeNear));
 
     rangeProj[2][2] = A;
     rangeProj[3][2] = B;
     return rangeProj;
 }
-
 
 void ViewFrustum::evalViewTransform(Transform& view) const {
     view.setTranslation(getPosition());
@@ -709,7 +725,7 @@ void ViewFrustum::getTransformedSidePlanes(const Transform& transform, ::Plane p
     transform.getInverseTransposeMatrix(normalTransform);
     getSidePlanes(planes);
     for (auto i = 0; i < 4; i++) {
-        // We assume the transform doesn't have a non uniform scale component to apply the 
+        // We assume the transform doesn't have a non uniform scale component to apply the
         // transform to the normal without using the correct transpose of inverse.
         auto transformedNormal = normalTransform * Transform::Vec4(planes[i].getNormal(), 0.0f);
         auto planePoint = transform.transform(planes[i].getPoint());
@@ -721,7 +737,7 @@ void ViewFrustum::getTransformedSidePlanes(const Transform& transform, ::Plane p
 void ViewFrustum::getUniformlyTransformedSidePlanes(const Transform& transform, ::Plane planes[4]) const {
     getSidePlanes(planes);
     for (auto i = 0; i < 4; i++) {
-        // We assume the transform doesn't have a non uniform scale component to apply the 
+        // We assume the transform doesn't have a non uniform scale component to apply the
         // transform to the normal without using the correct transpose of inverse.
         auto planeNormal = transform.transformDirection(planes[i].getNormal());
         auto planePoint = transform.transform(planes[i].getPoint());
@@ -776,10 +792,10 @@ void ViewFrustum::tesselateSides(const glm::vec3 points[8], Triangle triangles[8
     static_assert(TOP_RIGHT_FAR == (BOTTOM_RIGHT_FAR + 1), "Assuming a certain sequence in corners");
     static_assert(TOP_LEFT_FAR == (TOP_RIGHT_FAR + 1), "Assuming a certain sequence in corners");
     static const int triangleVertexIndices[8][3] = {
-        { BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR },{ BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR },
-        { BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR, TOP_RIGHT_FAR },{ BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR },
-        { TOP_RIGHT_NEAR, TOP_LEFT_NEAR, TOP_RIGHT_FAR },{ TOP_LEFT_NEAR, TOP_RIGHT_FAR, TOP_LEFT_FAR },
-        { BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR, TOP_LEFT_FAR },{ BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, TOP_LEFT_FAR }
+        { BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR }, { BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR },
+        { BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR, TOP_RIGHT_FAR },    { BOTTOM_RIGHT_NEAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR },
+        { TOP_RIGHT_NEAR, TOP_LEFT_NEAR, TOP_RIGHT_FAR },        { TOP_LEFT_NEAR, TOP_RIGHT_FAR, TOP_LEFT_FAR },
+        { BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR, TOP_LEFT_FAR },       { BOTTOM_LEFT_NEAR, BOTTOM_LEFT_FAR, TOP_LEFT_FAR }
     };
 
     for (auto i = 0; i < 8; i++) {

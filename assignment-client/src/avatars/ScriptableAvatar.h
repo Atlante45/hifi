@@ -12,17 +12,17 @@
 #ifndef hifi_ScriptableAvatar_h
 #define hifi_ScriptableAvatar_h
 
-#include <AnimationCache.h>
 #include <AnimSkeleton.h>
+#include <AnimationCache.h>
 #include <AvatarData.h>
 #include <ScriptEngine.h>
 
 /**jsdoc
- * The <code>Avatar</code> API is used to manipulate scriptable avatars on the domain. This API is a subset of the 
+ * The <code>Avatar</code> API is used to manipulate scriptable avatars on the domain. This API is a subset of the
  * {@link MyAvatar} API.
  *
  * <p><strong>Note:</strong> In the examples, use "<code>Avatar</code>" instead of "<code>MyAvatar</code>".</p>
- * 
+ *
  * @namespace Avatar
  *
  * @hifi-assignment-client
@@ -31,7 +31,7 @@
  * @property {number} scale
  * @property {number} density <em>Read-only.</em>
  * @property {Vec3} handPosition
- * @property {number} bodyYaw - The rotation left or right about an axis running from the head to the feet of the avatar. 
+ * @property {number} bodyYaw - The rotation left or right about an axis running from the head to the feet of the avatar.
  *     Yaw is sometimes called "heading".
  * @property {number} bodyPitch - The rotation about an axis running from shoulder to shoulder of the avatar. Pitch is
  *     sometimes called "elevation".
@@ -123,7 +123,6 @@
 class ScriptableAvatar : public AvatarData, public Dependency {
     Q_OBJECT
 public:
-
     ScriptableAvatar();
 
     /**jsdoc
@@ -139,7 +138,7 @@ public:
      */
     /// Allows scripts to run animations.
     Q_INVOKABLE void startAnimation(const QString& url, float fps = 30.0f, float priority = 1.0f, bool loop = false,
-                                    bool hold = false, float firstFrame = 0.0f, float lastFrame = FLT_MAX, 
+                                    bool hold = false, float firstFrame = 0.0f, float lastFrame = FLT_MAX,
                                     const QStringList& maskedJoints = QStringList());
 
     /**jsdoc

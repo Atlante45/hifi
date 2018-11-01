@@ -52,7 +52,6 @@ void DualQuaternionTests::ctor() {
 }
 
 void DualQuaternionTests::mult() {
-
     glm::quat rotation = angleAxis(PI / 3.0f, Vectors::UNIT_X);
     glm::vec3 translation(1.0, 2.0f, 3.0f);
     glm::mat4 m1 = createMatFromQuatAndPos(rotation, translation);
@@ -74,7 +73,6 @@ void DualQuaternionTests::mult() {
 }
 
 void DualQuaternionTests::xform() {
-
     glm::quat rotation = angleAxis(PI / 3.0f, Vectors::UNIT_X);
     glm::vec3 translation(1.0, 2.0f, 3.0f);
     glm::mat4 m1 = createMatFromQuatAndPos(rotation, translation);

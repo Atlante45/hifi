@@ -55,6 +55,3 @@ GLShader* GLShader::sync(GLBackend& backend, const Shader& shader, const Shader:
     glFinish();
     return object;
 }
-
-
-

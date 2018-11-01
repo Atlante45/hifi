@@ -9,13 +9,13 @@
 
 #include "TestHelpers.h"
 
-#define STATS_PROPERTY(type, name, initialValue) \
-    Q_PROPERTY(type name READ name NOTIFY name##Changed) \
-public: \
-    type name() { return _##name; }; \
-private: \
-    type _##name{ initialValue };
-
+#define STATS_PROPERTY(type, name, initialValue)                                                                               \
+    Q_PROPERTY(type name READ name NOTIFY name##Changed)                                                                       \
+public:                                                                                                                        \
+    type name() { return _##name; };                                                                                           \
+                                                                                                                               \
+private:                                                                                                                       \
+    type _##name { initialValue };
 
 class TextureTestStats : public QObject {
     Q_OBJECT;
@@ -46,7 +46,6 @@ signals:
     void prevTexture();
 };
 
-
 class TexturesTest : public GpuTestBase {
     Q_OBJECT
 
@@ -55,7 +54,7 @@ class TexturesTest : public GpuTestBase {
     std::vector<gpu::TexturePointer> oldTextures;
     gpu::PipelinePointer pipeline;
     TextureTestStats stats;
-    size_t index{ 0 };
+    size_t index { 0 };
 
 public:
     TexturesTest();
@@ -68,7 +67,4 @@ protected slots:
     void onMaxTextureMemory(int newValue);
     void onNextTexture();
     void onPrevTexture();
-
 };
-
-

@@ -5,12 +5,12 @@
 using namespace render;
 
 std::string TransitionStage::_name("Transition");
-const TransitionStage::Index TransitionStage::INVALID_INDEX{ indexed_container::INVALID_INDEX };
+const TransitionStage::Index TransitionStage::INVALID_INDEX { indexed_container::INVALID_INDEX };
 
 TransitionStage::Index TransitionStage::addTransition(ItemID itemId, Transition::Type type, ItemID boundId) {
     Transition transition;
     Index id;
-    
+
     transition.eventType = type;
     transition.itemId = itemId;
     transition.boundItemId = boundId;
@@ -21,7 +21,7 @@ TransitionStage::Index TransitionStage::addTransition(ItemID itemId, Transition:
 }
 
 void TransitionStage::removeTransition(Index index) {
-    TransitionIdList::iterator  idIterator = std::find(_activeTransitionIds.begin(), _activeTransitionIds.end(), index);
+    TransitionIdList::iterator idIterator = std::find(_activeTransitionIds.begin(), _activeTransitionIds.end(), index);
     if (idIterator != _activeTransitionIds.end()) {
         _activeTransitionIds.erase(idIterator);
     }
@@ -40,4 +40,3 @@ void TransitionStageSetup::run(const RenderContextPointer& renderContext) {
         renderContext->_scene->resetStage(TransitionStage::getName(), stage);
     }
 }
-

@@ -7,17 +7,17 @@
 //
 #include "PluginContainer.h"
 
-#include <QtCore/QTimer>
 #include <QtCore/QThread>
+#include <QtCore/QTimer>
 #include <QtGui/QScreen>
 #include <QtGui/QWindow>
 #include <QtWidgets/QApplication>
 
-#include <ui/Menu.h>
 #include <MainWindow.h>
 #include <plugins/DisplayPlugin.h>
+#include <ui/Menu.h>
 
-static PluginContainer* INSTANCE{ nullptr };
+static PluginContainer* INSTANCE { nullptr };
 
 PluginContainer& PluginContainer::getInstance() {
     Q_ASSERT(INSTANCE);
@@ -65,16 +65,17 @@ struct MenuCache {
         menu->removeMenu(menuName);
     }
 
-    void addMenuItem(ui::Menu* menu, const QString& path, const QString& name, std::function<void(bool)> onClicked, bool checkable, bool checked, const QString& groupName) {
+    void addMenuItem(ui::Menu* menu, const QString& path, const QString& name, std::function<void(bool)> onClicked,
+                     bool checkable, bool checked, const QString& groupName) {
         if (!menu) {
-            items[name] = Item{ path, onClicked, checkable, checked, groupName };
+            items[name] = Item { path, onClicked, checkable, checked, groupName };
             return;
         }
         flushCache(menu);
         MenuWrapper* parentItem = menu->getMenu(path);
         QAction* action = menu->addActionToQMenuAndActionHash(parentItem, name);
         if (!groupName.isEmpty()) {
-            QActionGroup* group{ nullptr };
+            QActionGroup* group { nullptr };
             if (!_exclusiveGroups.count(groupName)) {
                 group = _exclusiveGroups[groupName] = new QActionGroup(menu);
                 group->setExclusive(true);
@@ -83,9 +84,7 @@ struct MenuCache {
             }
             group->addAction(action);
         }
-        QObject::connect(action, &QAction::triggered, [=] {
-            onClicked(action->isChecked());
-        });
+        QObject::connect(action, &QAction::triggered, [=] { onClicked(action->isChecked()); });
         action->setCheckable(checkable);
         action->setChecked(checked);
     }
@@ -114,7 +113,6 @@ struct MenuCache {
             return;
         }
         flushCache(menu);
-
     }
 
     void flushCache(ui::Menu* menu) {
@@ -133,12 +131,12 @@ struct MenuCache {
 
         for (const auto& menuItemName : items.keys()) {
             const auto menuItem = items[menuItemName];
-            addMenuItem(menu, menuItem.path, menuItemName, menuItem.onClicked, menuItem.checkable, menuItem.checked, menuItem.groupName);
+            addMenuItem(menu, menuItem.path, menuItemName, menuItem.onClicked, menuItem.checkable, menuItem.checked,
+                        menuItem.groupName);
         }
         items.clear();
     }
 };
-
 
 static MenuCache& getMenuCache() {
     static MenuCache cache;
@@ -153,7 +151,8 @@ void PluginContainer::removeMenu(const QString& menuName) {
     getMenuCache().removeMenu(getPrimaryMenu(), menuName);
 }
 
-void PluginContainer::addMenuItem(PluginType type, const QString& path, const QString& name, std::function<void(bool)> onClicked, bool checkable, bool checked, const QString& groupName) {
+void PluginContainer::addMenuItem(PluginType type, const QString& path, const QString& name,
+                                  std::function<void(bool)> onClicked, bool checkable, bool checked, const QString& groupName) {
     getMenuCache().addMenuItem(getPrimaryMenu(), path, name, onClicked, checkable, checked, groupName);
     if (type == PluginType::DISPLAY_PLUGIN) {
         _currentDisplayPluginActions.push_back({ path, name });
@@ -173,8 +172,6 @@ bool PluginContainer::isOptionChecked(const QString& name) {
 void PluginContainer::setIsOptionChecked(const QString& path, bool checked) {
     getPrimaryMenu()->setIsOptionChecked(path, checked);
 }
-
-
 
 // FIXME there is a bug in the fullscreen setting, where leaving
 // fullscreen does not restore the window frame, making it difficult
@@ -214,7 +211,7 @@ void PluginContainer::unsetFullscreen(const QScreen* avoid) {
         if (avoidGeometry.contains(targetGeometry.topLeft())) {
             QScreen* newTarget = qApp->primaryScreen();
             if (newTarget == avoid) {
-                foreach(auto screen, qApp->screens()) {
+                foreach (auto screen, qApp->screens()) {
                     if (screen != avoid) {
                         newTarget = screen;
                         break;

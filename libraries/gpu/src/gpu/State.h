@@ -13,24 +13,24 @@
 
 #include "Format.h"
 
-#include <memory>
-#include <vector>
-#include <unordered_map>
 #include <bitset>
+#include <memory>
+#include <unordered_map>
+#include <vector>
 
 // Why a macro and not a fancy template you will ask me ?
 // Because some of the fields are bool packed tightly in the State::Cache class
 // and it s just not good anymore for template T& variable manipulation...
-#define SET_FIELD(field, defaultValue, value, dest) {\
-    dest = value;\
-    if (value == defaultValue) {\
-        _signature.reset(field);\
-    } else {\
-        _signature.set(field);\
-    }\
-    _stamp++;\
-}\
-
+#define SET_FIELD(field, defaultValue, value, dest)                                                                            \
+    {                                                                                                                          \
+        dest = value;                                                                                                          \
+        if (value == defaultValue) {                                                                                           \
+            _signature.reset(field);                                                                                           \
+        } else {                                                                                                               \
+            _signature.set(field);                                                                                             \
+        }                                                                                                                      \
+        _stamp++;                                                                                                              \
+    }
 
 namespace gpu {
 
@@ -104,14 +104,13 @@ public:
         NUM_BLEND_OPS,
     };
 
-    enum ColorMask
-    {
+    enum ColorMask {
         WRITE_NONE = 0,
         WRITE_RED = 1,
         WRITE_GREEN = 2,
         WRITE_BLUE = 4,
         WRITE_ALPHA = 8,
-        WRITE_ALL = (WRITE_RED | WRITE_GREEN | WRITE_BLUE | WRITE_ALPHA ),
+        WRITE_ALL = (WRITE_RED | WRITE_GREEN | WRITE_BLUE | WRITE_ALPHA),
     };
 
     class DepthTest {
@@ -124,8 +123,9 @@ public:
         uint8 _spare = 0; // Padding
     public:
         DepthTest(bool enabled = false, bool writeMask = true, ComparisonFunction func = LESS) :
-            _function(func), _writeMask(writeMask), _enabled(enabled) {
-            }
+            _function(func),
+            _writeMask(writeMask),
+            _enabled(enabled) {}
 
         bool isEnabled() const { return _enabled != 0; }
         ComparisonFunction getFunction() const { return ComparisonFunction(_function); }
@@ -133,11 +133,11 @@ public:
 
         int32 getRaw() const { return *(reinterpret_cast<const int32*>(this)); }
         DepthTest(int32 raw) { *(reinterpret_cast<int32*>(this)) = raw; }
-        bool operator== (const DepthTest& right) const { return getRaw() == right.getRaw(); }
-        bool operator!= (const DepthTest& right) const { return getRaw() != right.getRaw(); }
-   };
+        bool operator==(const DepthTest& right) const { return getRaw() == right.getRaw(); }
+        bool operator!=(const DepthTest& right) const { return getRaw() != right.getRaw(); }
+    };
 
-     class StencilTest {
+    class StencilTest {
         static const int FUNC_MASK = 0x000f;
         static const int FAIL_OP_MASK = 0x00f0;
         static const int DEPTH_FAIL_OP_MASK = 0x0f00;
@@ -149,16 +149,21 @@ public:
         uint16 _functionAndOperations;
         int8 _reference = 0;
         uint8 _readMask = 0xff;
-     public:
 
-        StencilTest(int8 reference = 0, uint8 readMask =0xFF, ComparisonFunction func = ALWAYS, StencilOp failOp = STENCIL_OP_KEEP, StencilOp depthFailOp = STENCIL_OP_KEEP, StencilOp passOp = STENCIL_OP_KEEP) :
-             _functionAndOperations(func | (failOp << FAIL_OP_OFFSET) | (depthFailOp << DEPTH_FAIL_OP_OFFSET) | (passOp << PASS_OP_OFFSET)),
-            _reference(reference), _readMask(readMask)
-            {}
+    public:
+        StencilTest(int8 reference = 0, uint8 readMask = 0xFF, ComparisonFunction func = ALWAYS,
+                    StencilOp failOp = STENCIL_OP_KEEP, StencilOp depthFailOp = STENCIL_OP_KEEP,
+                    StencilOp passOp = STENCIL_OP_KEEP) :
+            _functionAndOperations(func | (failOp << FAIL_OP_OFFSET) | (depthFailOp << DEPTH_FAIL_OP_OFFSET) |
+                                   (passOp << PASS_OP_OFFSET)),
+            _reference(reference),
+            _readMask(readMask) {}
 
         ComparisonFunction getFunction() const { return ComparisonFunction(_functionAndOperations & FUNC_MASK); }
         StencilOp getFailOp() const { return StencilOp((_functionAndOperations & FAIL_OP_MASK) >> FAIL_OP_OFFSET); }
-        StencilOp getDepthFailOp() const { return StencilOp((_functionAndOperations & DEPTH_FAIL_OP_MASK) >> DEPTH_FAIL_OP_OFFSET); }
+        StencilOp getDepthFailOp() const {
+            return StencilOp((_functionAndOperations & DEPTH_FAIL_OP_MASK) >> DEPTH_FAIL_OP_OFFSET);
+        }
         StencilOp getPassOp() const { return StencilOp((_functionAndOperations & PASS_OP_MASK) >> PASS_OP_OFFSET); }
 
         int8 getReference() const { return _reference; }
@@ -166,18 +171,20 @@ public:
 
         int32 getRaw() const { return *(reinterpret_cast<const int32*>(this)); }
         StencilTest(int32 raw) { *(reinterpret_cast<int32*>(this)) = raw; }
-        bool operator== (const StencilTest& right) const { return getRaw() == right.getRaw(); }
-        bool operator!= (const StencilTest& right) const { return getRaw() != right.getRaw(); }
-     };
+        bool operator==(const StencilTest& right) const { return getRaw() == right.getRaw(); }
+        bool operator!=(const StencilTest& right) const { return getRaw() != right.getRaw(); }
+    };
 
-     class StencilActivation {
+    class StencilActivation {
         uint8 _frontWriteMask = 0xFF;
         uint8 _backWriteMask = 0xFF;
         uint16 _enabled = 0;
-     public:
 
+    public:
         StencilActivation(bool enabled, uint8 frontWriteMask = 0xFF, uint8 backWriteMask = 0xFF) :
-            _frontWriteMask(frontWriteMask), _backWriteMask(backWriteMask), _enabled(enabled) {}
+            _frontWriteMask(frontWriteMask),
+            _backWriteMask(backWriteMask),
+            _enabled(enabled) {}
 
         bool isEnabled() const { return (_enabled != 0); }
         uint8 getWriteMaskFront() const { return _frontWriteMask; }
@@ -185,8 +192,8 @@ public:
 
         int32 getRaw() const { return *(reinterpret_cast<const int32*>(this)); }
         StencilActivation(int32 raw) { *(reinterpret_cast<int32*>(this)) = raw; }
-        bool operator== (const StencilActivation& right) const { return getRaw() == right.getRaw(); }
-        bool operator!= (const StencilActivation& right) const { return getRaw() != right.getRaw(); }
+        bool operator==(const StencilActivation& right) const { return getRaw() == right.getRaw(); }
+        bool operator!=(const StencilActivation& right) const { return getRaw() != right.getRaw(); }
     };
 
     class BlendFunction {
@@ -198,11 +205,10 @@ public:
         uint8 _source;
         uint8 _destination;
         uint8 _operation;
-    public:
 
-        BlendFunction(bool enabled,
-            BlendArg sourceColor, BlendOp operationColor, BlendArg destinationColor,
-            BlendArg sourceAlpha, BlendOp operationAlpha, BlendArg destinationAlpha) :
+    public:
+        BlendFunction(bool enabled, BlendArg sourceColor, BlendOp operationColor, BlendArg destinationColor,
+                      BlendArg sourceAlpha, BlendOp operationAlpha, BlendArg destinationAlpha) :
             _enabled(enabled),
             _source(sourceColor | (sourceAlpha << ALPHA_OFFSET)),
             _destination(destinationColor | (destinationAlpha << ALPHA_OFFSET)),
@@ -226,12 +232,13 @@ public:
 
         int32 getRaw() const { return *(reinterpret_cast<const int32*>(this)); }
         BlendFunction(int32 raw) { *(reinterpret_cast<int32*>(this)) = raw; }
-        bool operator== (const BlendFunction& right) const { return getRaw() == right.getRaw(); }
-        bool operator!= (const BlendFunction& right) const { return getRaw() != right.getRaw(); }
+        bool operator==(const BlendFunction& right) const { return getRaw() == right.getRaw(); }
+        bool operator!=(const BlendFunction& right) const { return getRaw() != right.getRaw(); }
     };
 
     // The Data class is the full explicit description of the State class fields value.
-    // Useful for having one const static called Default for reference or for the gpu::Backend to keep track of the current value
+    // Useful for having one const static called Default for reference or for the gpu::Backend to keep track of the current
+    // value
     class Data {
     public:
         float depthBias = 0.0f;
@@ -265,8 +272,7 @@ public:
             scissorEnable(false),
             multisampleEnable(false),
             antialisedLineEnable(true),
-            alphaToCoverageEnable(false)
-        {}
+            alphaToCoverageEnable(false) {}
     };
 
     // The unique default values for all the fields
@@ -274,34 +280,46 @@ public:
     void setFillMode(FillMode fill) { SET_FIELD(FILL_MODE, DEFAULT.fillMode, fill, _values.fillMode); }
     FillMode getFillMode() const { return FillMode(_values.fillMode); }
 
-    void setCullMode(CullMode cull)  { SET_FIELD(CULL_MODE, DEFAULT.cullMode, cull, _values.cullMode); }
+    void setCullMode(CullMode cull) { SET_FIELD(CULL_MODE, DEFAULT.cullMode, cull, _values.cullMode); }
     CullMode getCullMode() const { return CullMode(_values.cullMode); }
 
-    void setFrontFaceClockwise(bool isClockwise) { SET_FIELD(FRONT_FACE_CLOCKWISE, DEFAULT.frontFaceClockwise, isClockwise, _values.frontFaceClockwise); }
+    void setFrontFaceClockwise(bool isClockwise) {
+        SET_FIELD(FRONT_FACE_CLOCKWISE, DEFAULT.frontFaceClockwise, isClockwise, _values.frontFaceClockwise);
+    }
     bool isFrontFaceClockwise() const { return _values.frontFaceClockwise; }
 
-    void setDepthClampEnable(bool enable) { SET_FIELD(DEPTH_CLAMP_ENABLE, DEFAULT.depthClampEnable, enable, _values.depthClampEnable); }
+    void setDepthClampEnable(bool enable) {
+        SET_FIELD(DEPTH_CLAMP_ENABLE, DEFAULT.depthClampEnable, enable, _values.depthClampEnable);
+    }
     bool isDepthClampEnable() const { return _values.depthClampEnable; }
 
     void setScissorEnable(bool enable) { SET_FIELD(SCISSOR_ENABLE, DEFAULT.scissorEnable, enable, _values.scissorEnable); }
     bool isScissorEnable() const { return _values.scissorEnable; }
 
-    void setMultisampleEnable(bool enable) { SET_FIELD(MULTISAMPLE_ENABLE, DEFAULT.multisampleEnable, enable, _values.multisampleEnable); }
+    void setMultisampleEnable(bool enable) {
+        SET_FIELD(MULTISAMPLE_ENABLE, DEFAULT.multisampleEnable, enable, _values.multisampleEnable);
+    }
     bool isMultisampleEnable() const { return _values.multisampleEnable; }
 
-    void setAntialiasedLineEnable(bool enable) { SET_FIELD(ANTIALISED_LINE_ENABLE, DEFAULT.antialisedLineEnable, enable, _values.antialisedLineEnable); }
+    void setAntialiasedLineEnable(bool enable) {
+        SET_FIELD(ANTIALISED_LINE_ENABLE, DEFAULT.antialisedLineEnable, enable, _values.antialisedLineEnable);
+    }
     bool isAntialiasedLineEnable() const { return _values.antialisedLineEnable; }
 
     // Depth Bias
     void setDepthBias(float bias) { SET_FIELD(DEPTH_BIAS, DEFAULT.depthBias, bias, _values.depthBias); }
     float getDepthBias() const { return _values.depthBias; }
 
-    void setDepthBiasSlopeScale(float scale) { SET_FIELD(DEPTH_BIAS_SLOPE_SCALE, DEFAULT.depthBiasSlopeScale, scale, _values.depthBiasSlopeScale); }
+    void setDepthBiasSlopeScale(float scale) {
+        SET_FIELD(DEPTH_BIAS_SLOPE_SCALE, DEFAULT.depthBiasSlopeScale, scale, _values.depthBiasSlopeScale);
+    }
     float getDepthBiasSlopeScale() const { return _values.depthBiasSlopeScale; }
 
     // Depth Test
     void setDepthTest(DepthTest depthTest) { SET_FIELD(DEPTH_TEST, DEFAULT.depthTest, depthTest, _values.depthTest); }
-    void setDepthTest(bool enable, bool writeMask, ComparisonFunction func) { setDepthTest(DepthTest(enable, writeMask, func)); }
+    void setDepthTest(bool enable, bool writeMask, ComparisonFunction func) {
+        setDepthTest(DepthTest(enable, writeMask, func));
+    }
     DepthTest getDepthTest() const { return _values.depthTest; }
 
     bool isDepthTestEnabled() const { return getDepthTest().isEnabled(); }
@@ -310,11 +328,14 @@ public:
 
     // Stencil test
     void setStencilTest(bool enabled, uint8 frontWriteMask, StencilTest frontTest, uint8 backWriteMask, StencilTest backTest) {
-        SET_FIELD(STENCIL_ACTIVATION, DEFAULT.stencilActivation, StencilActivation(enabled, frontWriteMask, backWriteMask), _values.stencilActivation);
+        SET_FIELD(STENCIL_ACTIVATION, DEFAULT.stencilActivation, StencilActivation(enabled, frontWriteMask, backWriteMask),
+                  _values.stencilActivation);
         SET_FIELD(STENCIL_TEST_FRONT, DEFAULT.stencilTestFront, frontTest, _values.stencilTestFront);
-        SET_FIELD(STENCIL_TEST_BACK, DEFAULT.stencilTestBack, backTest, _values.stencilTestBack); }
+        SET_FIELD(STENCIL_TEST_BACK, DEFAULT.stencilTestBack, backTest, _values.stencilTestBack);
+    }
     void setStencilTest(bool enabled, uint8 frontWriteMask, StencilTest frontTest) {
-        setStencilTest(enabled, frontWriteMask, frontTest, frontWriteMask, frontTest); }
+        setStencilTest(enabled, frontWriteMask, frontTest, frontWriteMask, frontTest);
+    }
 
     StencilActivation getStencilActivation() const { return _values.stencilActivation; }
     StencilTest getStencilTestFront() const { return _values.stencilTestFront; }
@@ -325,7 +346,9 @@ public:
     uint8 getStencilWriteMaskBack() const { return getStencilActivation().getWriteMaskBack(); }
 
     // Alpha to coverage
-    void setAlphaToCoverageEnable(bool enable) { SET_FIELD(ALPHA_TO_COVERAGE_ENABLE, DEFAULT.alphaToCoverageEnable, enable, _values.alphaToCoverageEnable); }
+    void setAlphaToCoverageEnable(bool enable) {
+        SET_FIELD(ALPHA_TO_COVERAGE_ENABLE, DEFAULT.alphaToCoverageEnable, enable, _values.alphaToCoverageEnable);
+    }
     bool isAlphaToCoverageEnabled() const { return _values.alphaToCoverageEnable; }
 
     // Sample mask
@@ -333,19 +356,28 @@ public:
     uint32 getSampleMask() const { return _values.sampleMask; }
 
     // Blend Function
-    void setBlendFunction(BlendFunction function) { SET_FIELD(BLEND_FUNCTION, DEFAULT.blendFunction, function, _values.blendFunction); }
+    void setBlendFunction(BlendFunction function) {
+        SET_FIELD(BLEND_FUNCTION, DEFAULT.blendFunction, function, _values.blendFunction);
+    }
     BlendFunction getBlendFunction() const { return _values.blendFunction; }
 
-    void setBlendFunction(bool enabled, BlendArg sourceColor, BlendOp operationColor, BlendArg destinationColor, BlendArg sourceAlpha, BlendOp operationAlpha, BlendArg destinationAlpha) {
-        setBlendFunction(BlendFunction(enabled, sourceColor, operationColor, destinationColor, sourceAlpha, operationAlpha, destinationAlpha)); }
+    void setBlendFunction(bool enabled, BlendArg sourceColor, BlendOp operationColor, BlendArg destinationColor,
+                          BlendArg sourceAlpha, BlendOp operationAlpha, BlendArg destinationAlpha) {
+        setBlendFunction(BlendFunction(enabled, sourceColor, operationColor, destinationColor, sourceAlpha, operationAlpha,
+                                       destinationAlpha));
+    }
     void setBlendFunction(bool enabled, BlendArg source, BlendOp operation, BlendArg destination) {
-        setBlendFunction(BlendFunction(enabled, source, operation, destination)); }
+        setBlendFunction(BlendFunction(enabled, source, operation, destination));
+    }
 
     bool isBlendEnabled() const { return getBlendFunction().isEnabled(); }
 
     // Color write mask
     void setColorWriteMask(uint8 mask) { SET_FIELD(COLOR_WRITE_MASK, DEFAULT.colorWriteMask, mask, _values.colorWriteMask); }
-    void setColorWriteMask(bool red, bool green, bool blue, bool alpha) { uint32 value = ((WRITE_RED * red) | (WRITE_GREEN * green) | (WRITE_BLUE * blue) | (WRITE_ALPHA * alpha)); SET_FIELD(COLOR_WRITE_MASK, DEFAULT.colorWriteMask, value, _values.colorWriteMask); }
+    void setColorWriteMask(bool red, bool green, bool blue, bool alpha) {
+        uint32 value = ((WRITE_RED * red) | (WRITE_GREEN * green) | (WRITE_BLUE * blue) | (WRITE_ALPHA * alpha));
+        SET_FIELD(COLOR_WRITE_MASK, DEFAULT.colorWriteMask, value, _values.colorWriteMask);
+    }
     uint8 getColorWriteMask() const { return _values.colorWriteMask; }
 
     // All the possible fields
@@ -398,13 +430,13 @@ protected:
     State& operator=(const State& state);
 
     Data _values;
-    Signature _signature{0};
-    Stamp _stamp{0};
+    Signature _signature { 0 };
+    Stamp _stamp { 0 };
 };
 
-typedef std::shared_ptr< State > StatePointer;
-typedef std::vector< StatePointer > States;
+typedef std::shared_ptr<State> StatePointer;
+typedef std::vector<StatePointer> States;
 
-};
+}; // namespace gpu
 
 #endif

@@ -67,4 +67,3 @@ void TaskConfig::refresh() {
 
     _task->applyConfiguration();
 }
-

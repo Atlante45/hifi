@@ -14,22 +14,18 @@
 #include <GeometryUtil.h>
 #include <RegisteredMetaTypes.h>
 
-Planar3DOverlay::Planar3DOverlay() :
-    Base3DOverlay(),
-    _dimensions{1.0f, 1.0f}
-{
+Planar3DOverlay::Planar3DOverlay() : Base3DOverlay(), _dimensions { 1.0f, 1.0f } {
 }
 
 Planar3DOverlay::Planar3DOverlay(const Planar3DOverlay* planar3DOverlay) :
     Base3DOverlay(planar3DOverlay),
-    _dimensions(planar3DOverlay->_dimensions)
-{
+    _dimensions(planar3DOverlay->_dimensions) {
 }
 
 AABox Planar3DOverlay::getBounds() const {
-    auto halfDimensions = glm::vec3{_dimensions / 2.0f, 0.01f};
+    auto halfDimensions = glm::vec3 { _dimensions / 2.0f, 0.01f };
 
-    auto extents = Extents{-halfDimensions, halfDimensions};
+    auto extents = Extents { -halfDimensions, halfDimensions };
     extents.transform(getTransform());
 
     return AABox(extents);
@@ -70,8 +66,8 @@ QVariant Planar3DOverlay::getProperty(const QString& property) {
     return Base3DOverlay::getProperty(property);
 }
 
-bool Planar3DOverlay::findRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                                          float& distance, BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking) {
+bool Planar3DOverlay::findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, float& distance, BoxFace& face,
+                                          glm::vec3& surfaceNormal, bool precisionPicking) {
     glm::vec2 xyDimensions = getDimensions();
     glm::quat rotation = getWorldOrientation();
     glm::vec3 position = getWorldPosition();
@@ -90,8 +86,9 @@ bool Planar3DOverlay::findRayIntersection(const glm::vec3& origin, const glm::ve
     return false;
 }
 
-bool Planar3DOverlay::findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                               float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking) {
+bool Planar3DOverlay::findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
+                                               const glm::vec3& acceleration, float& parabolicDistance, BoxFace& face,
+                                               glm::vec3& surfaceNormal, bool precisionPicking) {
     glm::vec2 xyDimensions = getDimensions();
     glm::quat rotation = getWorldOrientation();
     glm::vec3 position = getWorldPosition();

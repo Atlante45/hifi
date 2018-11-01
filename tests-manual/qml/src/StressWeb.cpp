@@ -7,17 +7,17 @@
 using TextureAndFence = hifi::qml::OffscreenSurface::TextureAndFence;
 
 static const int DEFAULT_MAX_FPS = 10;
-static const QString CONTROL_URL{ "/qml/controls/WebEntityView.qml" };
-static const char* URL_PROPERTY{ "url" };
+static const QString CONTROL_URL { "/qml/controls/WebEntityView.qml" };
+static const char* URL_PROPERTY { "url" };
 
 QString StressWeb::getSourceUrl(bool video) {
-    static const std::vector<QString> SOURCE_URLS{
+    static const std::vector<QString> SOURCE_URLS {
         "https://www.reddit.com/wiki/random",
         "https://en.wikipedia.org/wiki/Wikipedia:Random",
         "https://slashdot.org/",
     };
 
-    static const std::vector<QString> VIDEO_SOURCE_URLS{
+    static const std::vector<QString> VIDEO_SOURCE_URLS {
         "https://www.youtube.com/watch?v=gDXwhHm4GhM",
         "https://www.youtube.com/watch?v=Ch_hoYPPeGc",
     };
@@ -26,8 +26,6 @@ QString StressWeb::getSourceUrl(bool video) {
     auto index = rand() % sourceUrls.size();
     return sourceUrls[index];
 }
-
-
 
 void StressWeb::buildSurface(QmlInfo& qmlInfo, bool video) {
     ++_surfaceCount;

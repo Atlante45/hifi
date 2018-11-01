@@ -12,8 +12,8 @@
 #ifndef hifi_GLMHelpersTests_h
 #define hifi_GLMHelpersTests_h
 
-#include <QtTest/QtTest>
 #include <GLMHelpers.h>
+#include <QtTest/QtTest>
 
 class GLMHelpersTests : public QObject {
     Q_OBJECT

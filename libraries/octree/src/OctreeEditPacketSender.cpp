@@ -21,11 +21,9 @@
 
 const int OctreeEditPacketSender::DEFAULT_MAX_PENDING_MESSAGES = PacketSender::DEFAULT_PACKETS_PER_SECOND;
 
-
 OctreeEditPacketSender::OctreeEditPacketSender() :
     _maxPendingMessages(DEFAULT_MAX_PENDING_MESSAGES),
-    _releaseQueuedMessagesPending(false)
-{
+    _releaseQueuedMessagesPending(false) {
 }
 
 OctreeEditPacketSender::~OctreeEditPacketSender() {
@@ -35,7 +33,6 @@ OctreeEditPacketSender::~OctreeEditPacketSender() {
     _pendingPacketsLock.unlock();
 }
 
-
 bool OctreeEditPacketSender::serversExist() const {
     auto node = DependencyManager::get<NodeList>()->soloNodeOfType(getMyNodeType());
     return node && node->getActiveSocket();
@@ -44,14 +41,11 @@ bool OctreeEditPacketSender::serversExist() const {
 // This method is called when the edit packet layer has determined that it has a fully formed packet destined for
 // a known nodeID.
 void OctreeEditPacketSender::queuePacketToNode(const QUuid& nodeUUID, std::unique_ptr<NLPacket> packet) {
-
     bool wantDebug = false;
-    DependencyManager::get<NodeList>()->eachNode([&](const SharedNodePointer& node){
+    DependencyManager::get<NodeList>()->eachNode([&](const SharedNodePointer& node) {
         // only send to the NodeTypes that are getMyNodeType()
-        if (node->getType() == getMyNodeType()
-            && ((node->getUUID() == nodeUUID) || (nodeUUID.isNull()))
-            && node->getActiveSocket()) {
-
+        if (node->getType() == getMyNodeType() && ((node->getUUID() == nodeUUID) || (nodeUUID.isNull())) &&
+            node->getActiveSocket()) {
             // jump to the beginning of the payload
             packet->seek(0);
 
@@ -74,8 +68,8 @@ void OctreeEditPacketSender::queuePacketToNode(const QUuid& nodeUUID, std::uniqu
                 quint64 transitTime = queuedAt - createdAt;
 
                 qCDebug(octree) << "OctreeEditPacketSender::queuePacketToNode() queued " << packet->getType()
-                    << " - command to node bytes=" << packet->getDataSize()
-                    << " sequence=" << sequence << " transitTimeSoFar=" << transitTime << " usecs";
+                                << " - command to node bytes=" << packet->getDataSize() << " sequence=" << sequence
+                                << " transitTimeSoFar=" << transitTime << " usecs";
             }
 
             // add packet to history
@@ -91,10 +85,8 @@ void OctreeEditPacketSender::queuePacketToNode(const QUuid& nodeUUID, std::uniqu
 void OctreeEditPacketSender::queuePacketListToNode(const QUuid& nodeUUID, std::unique_ptr<NLPacketList> packetList) {
     DependencyManager::get<NodeList>()->eachNode([&](const SharedNodePointer& node) {
         // only send to the NodeTypes that are getMyNodeType()
-        if (node->getType() == getMyNodeType()
-            && ((node->getUUID() == nodeUUID) || (nodeUUID.isNull()))
-            && node->getActiveSocket()) {
-
+        if (node->getType() == getMyNodeType() && ((node->getUUID() == nodeUUID) || (nodeUUID.isNull())) &&
+            node->getActiveSocket()) {
             // NOTE: unlike packets, the packet lists don't get rewritten sequence numbers.
             // or do history for resend
             queuePacketListForSending(node, std::move(packetList));
@@ -153,10 +145,8 @@ void OctreeEditPacketSender::queuePacketToNodes(std::unique_ptr<NLPacket> packet
     }
 }
 
-
 // NOTE: editMessage - is JUST the octcode/color and does not contain the packet header
 void OctreeEditPacketSender::queueOctreeEditMessage(PacketType type, QByteArray& editMessage) {
-
     // If we don't have servers, then we will simply queue up all of these packets and wait till we have
     // servers for processing
     if (!serversExist()) {
@@ -196,7 +186,6 @@ void OctreeEditPacketSender::queueOctreeEditMessage(PacketType type, QByteArray&
             quint64 now = usecTimestampNow() + nodeClockSkew;
             newPacket->writePrimitive(now);
 
-
             // We call this virtual function that allows our specific type of EditPacketSender to
             // fixup the buffer for any clock skew
             if (nodeClockSkew != 0) {
@@ -221,7 +210,6 @@ void OctreeEditPacketSender::queueOctreeEditMessage(PacketType type, QByteArray&
                 // If we're switching type, then we send the last one and start over
                 if ((type != bufferedPacket->getType() && bufferedPacket->getPayloadSize() > 0) ||
                     (editMessage.size() >= bufferedPacket->bytesAvailableForWrite())) {
-
                     // create the new packet and swap it with the packet in _pendingEditPackets
                     auto packetToRelease = initializePacket(type, node->getClockSkewUsec());
                     bufferedPacket.swap(packetToRelease);
@@ -244,7 +232,6 @@ void OctreeEditPacketSender::queueOctreeEditMessage(PacketType type, QByteArray&
     }
 
     _packetsQueueLock.unlock();
-
 }
 
 void OctreeEditPacketSender::releaseQueuedMessages() {
@@ -259,10 +246,10 @@ void OctreeEditPacketSender::releaseQueuedMessages() {
             if (i.second.first) {
                 // construct a null unique_ptr to an NL packet
                 std::unique_ptr<NLPacket> releasedPacket;
-                
+
                 // swap the null ptr with the packet we want to release
                 i.second.first.swap(releasedPacket);
-                
+
                 // move and release the queued packet
                 releaseQueuedPacket(i.first, std::move(releasedPacket));
             } else if (i.second.second) {
@@ -275,7 +262,6 @@ void OctreeEditPacketSender::releaseQueuedMessages() {
                 // move and release the queued NLPacketList
                 releaseQueuedPacketList(i.first, std::move(releasedPacketList));
             }
-            
         }
         _packetsQueueLock.unlock();
     }
@@ -313,7 +299,7 @@ std::unique_ptr<NLPacket> OctreeEditPacketSender::initializePacket(PacketType ty
 bool OctreeEditPacketSender::process() {
     // if we have servers, and we have pending pre-servers exist packets, then process those
     // before doing our normal process step. This processPreServerExistPackets()
-    if (serversExist() && (!_preServerEdits.empty() || !_preServerSingleMessagePackets.empty() )) {
+    if (serversExist() && (!_preServerEdits.empty() || !_preServerSingleMessagePackets.empty())) {
         processPreServerExistsPackets();
     }
 
@@ -328,14 +314,14 @@ void OctreeEditPacketSender::processNackPacket(ReceivedMessage& message, SharedN
     if (_sentPacketHistories.count(sendingNode->getUUID()) == 0) {
         return;
     }
-    
+
     const SentPacketHistory& sentPacketHistory = _sentPacketHistories[sendingNode->getUUID()];
 
     // read sequence numbers and queue packets for resend
     while (message.getBytesLeftToRead() > 0) {
         unsigned short int sequenceNumber;
         message.readPrimitive(&sequenceNumber);
-        
+
         // retrieve packet from history
         const NLPacket* packet = sentPacketHistory.getPacket(sequenceNumber);
         if (packet) {

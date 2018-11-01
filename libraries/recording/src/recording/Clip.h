@@ -53,7 +53,7 @@ public:
     static void toFile(const QString& filePath, const ConstPointer& clip);
     static QByteArray toBuffer(const ConstPointer& clip);
     static Pointer newClip();
-    
+
     static const QString FRAME_TYPE_MAP;
     static const QString FRAME_COMREPSSION_FLAG;
 
@@ -67,6 +67,6 @@ protected:
     mutable Mutex _mutex;
 };
 
-}
+} // namespace recording
 
 #endif

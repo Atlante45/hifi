@@ -13,8 +13,8 @@
 
 #include "KeyEvent.h"
 #include "MouseEvent.h"
-#include "SpatialEvent.h"
 #include "PointerEvent.h"
+#include "SpatialEvent.h"
 #include "TouchEvent.h"
 #include "WheelEvent.h"
 

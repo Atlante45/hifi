@@ -12,10 +12,9 @@
 
 #include <QtTest/QtTest>
 
-#include <ktx/KTX.h>
 #include <gpu/Texture.h>
 #include <image/Image.h>
-
+#include <ktx/KTX.h>
 
 QTEST_GUILESS_MAIN(KtxTests)
 
@@ -77,8 +76,9 @@ void KtxTests::testKtxSerialization() {
     const QString TEST_IMAGE = getRootPath() + "/scripts/developer/tests/cube_texture.png";
     QImage image(TEST_IMAGE);
     std::atomic<bool> abortSignal;
-    gpu::TexturePointer testTexture =
-        image::TextureUsage::process2DTextureColorFromImage(std::move(image), TEST_IMAGE.toStdString(), true, abortSignal);
+    gpu::TexturePointer testTexture = image::TextureUsage::process2DTextureColorFromImage(std::move(image),
+                                                                                          TEST_IMAGE.toStdString(), true,
+                                                                                          abortSignal);
     auto ktxMemory = gpu::Texture::serialize(*testTexture);
     QVERIFY(ktxMemory.get());
 
@@ -100,7 +100,6 @@ void KtxTests::testKtxSerialization() {
         outFile.unmap(dest);
         outFile.close();
     }
-
 
     {
         auto ktxStorage = std::make_shared<storage::FileStorage>(TEST_IMAGE_KTX.fileName());

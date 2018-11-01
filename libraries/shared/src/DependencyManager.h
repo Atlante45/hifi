@@ -12,31 +12,28 @@
 #ifndef hifi_DependencyManager_h
 #define hifi_DependencyManager_h
 
-#include <QtGlobal>
 #include <QDebug>
 #include <QHash>
 #include <QSharedPointer>
 #include <QWeakPointer>
+#include <QtGlobal>
 
 #include <functional>
 #include <typeinfo>
 
-#define SINGLETON_DEPENDENCY \
-    friend class ::DependencyManager;
+#define SINGLETON_DEPENDENCY friend class ::DependencyManager;
 
 class Dependency {
 public:
     typedef std::function<void(Dependency* pointer)> DeleterFunction;
-    
+
 protected:
     virtual ~Dependency() {}
-    virtual void customDeleter() {
-        _customDeleter(this);
-    }
-    
+    virtual void customDeleter() { _customDeleter(this); }
+
     void setCustomDeleter(DeleterFunction customDeleter) { _customDeleter = customDeleter; }
     DeleterFunction _customDeleter = [](Dependency* pointer) { delete pointer; };
-    
+
     friend class DependencyManager;
 };
 
@@ -49,60 +46,61 @@ class DependencyManager {
 public:
     template<typename T>
     static QSharedPointer<T> get();
-    
+
     template<typename T>
     static bool isSet();
-    
-    template<typename T, typename ...Args>
+
+    template<typename T, typename... Args>
     static QSharedPointer<T> set(Args&&... args);
 
-    template<typename T, typename I, typename ...Args>
+    template<typename T, typename I, typename... Args>
     static QSharedPointer<T> set(Args&&... args);
 
     template<typename T>
     static void destroy();
-    
+
     template<typename Base, typename Derived>
     static void registerInheritance();
-    
-    template <typename T>
+
+    template<typename T>
     static size_t typeHash() {
 #ifdef Q_OS_ANDROID
-        size_t hashCode = std::hash<std::string>{}( typeid(T).name() );
+        size_t hashCode = std::hash<std::string> {}(typeid(T).name());
 #else
         size_t hashCode = typeid(T).hash_code();
 #endif
         return hashCode;
     }
+
 private:
     static DependencyManager& manager();
 
     template<typename T>
     size_t getHashCode();
-    
+
     QSharedPointer<Dependency>& safeGet(size_t hashCode);
-    
+
     QHash<size_t, QSharedPointer<Dependency>> _instanceHash;
     QHash<size_t, size_t> _inheritanceHash;
 };
 
-template <typename T>
+template<typename T>
 QSharedPointer<T> DependencyManager::get() {
     static size_t hashCode = manager().getHashCode<T>();
     static QWeakPointer<T> instance;
-    
+
     if (instance.isNull()) {
         instance = qSharedPointerCast<T>(manager().safeGet(hashCode));
-        
+
         if (instance.isNull()) {
             qWarning() << "DependencyManager::get(): No instance available for" << typeid(T).name();
         }
     }
-    
+
     return instance.toStrongRef();
 }
 
-template <typename T>
+template<typename T>
 bool DependencyManager::isSet() {
     static size_t hashCode = manager().getHashCode<T>();
 
@@ -110,7 +108,7 @@ bool DependencyManager::isSet() {
     return !instance.isNull();
 }
 
-template <typename T, typename ...Args>
+template<typename T, typename... Args>
 QSharedPointer<T> DependencyManager::set(Args&&... args) {
     static size_t hashCode = manager().getHashCode<T>();
 
@@ -123,7 +121,7 @@ QSharedPointer<T> DependencyManager::set(Args&&... args) {
     return newInstance;
 }
 
-template <typename T, typename I, typename ...Args>
+template<typename T, typename I, typename... Args>
 QSharedPointer<T> DependencyManager::set(Args&&... args) {
     static size_t hashCode = manager().getHashCode<T>();
 
@@ -136,7 +134,7 @@ QSharedPointer<T> DependencyManager::set(Args&&... args) {
     return newInstance;
 }
 
-template <typename T>
+template<typename T>
 void DependencyManager::destroy() {
     static size_t hashCode = manager().getHashCode<T>();
     QSharedPointer<Dependency>& shared = manager().safeGet(hashCode);
@@ -159,12 +157,12 @@ template<typename T>
 size_t DependencyManager::getHashCode() {
     size_t hashCode = typeHash<T>();
     auto derivedHashCode = _inheritanceHash.find(hashCode);
-    
+
     while (derivedHashCode != _inheritanceHash.end()) {
         hashCode = derivedHashCode.value();
         derivedHashCode = _inheritanceHash.find(hashCode);
     }
-    
+
     return hashCode;
 }
 

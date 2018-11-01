@@ -11,21 +11,21 @@
 
 #include <QSize>
 
-#include <mutex>
-#include <gpu/Forward.h>
 #include <DependencyManager.h>
+#include <gpu/Forward.h>
+#include <mutex>
 
 /// Stores cached textures, including render-to-texture targets.
 class FramebufferCache : public Dependency {
     SINGLETON_DEPENDENCY
-    
+
 public:
     // Shadow map size is static
     static const int SHADOW_MAP_SIZE = 2048;
 
-    /// Sets the desired texture resolution for the framebuffer objects. 
+    /// Sets the desired texture resolution for the framebuffer objects.
     void setFrameBufferSize(QSize frameBufferSize);
-    const QSize& getFrameBufferSize() const { return _frameBufferSize; } 
+    const QSize& getFrameBufferSize() const { return _frameBufferSize; }
 
     /// Returns a free framebuffer with a single color attachment for temp or intra-frame operations
     gpu::FramebufferPointer getFramebuffer();
@@ -39,7 +39,7 @@ private:
 
     gpu::FramebufferPointer _shadowFramebuffer;
 
-    QSize _frameBufferSize{ 100, 100 };
+    QSize _frameBufferSize { 100, 100 };
 
     std::mutex _mutex;
     std::list<gpu::FramebufferPointer> _cachedFramebuffers;

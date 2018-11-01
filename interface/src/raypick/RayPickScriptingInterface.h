@@ -13,8 +13,8 @@
 
 #include <QtCore/QObject>
 
-#include "RegisteredMetaTypes.h"
 #include <DependencyManager.h>
+#include "RegisteredMetaTypes.h"
 
 #include "PickScriptingInterface.h"
 
@@ -61,7 +61,6 @@ class RayPickScriptingInterface : public QObject, public Dependency {
     SINGLETON_DEPENDENCY
 
 public:
-
     /**jsdoc
      * @function RayPick.createRayPick
      * @param {Picks.RayPickProperties}
@@ -94,7 +93,6 @@ public:
      */
     Q_INVOKABLE QVariantMap getPrevRayPickResult(unsigned int uid);
 
-
     /**jsdoc
      * @function RayPick.setPrecisionPicking
      * @param {number} id
@@ -115,7 +113,6 @@ public:
      * @param {Uuid[]) includeEntities
      */
     Q_INVOKABLE void setIncludeItems(unsigned int uid, const QScriptValue& includeEntities);
-
 
     /**jsdoc
      * @function RayPick.isLeftHand

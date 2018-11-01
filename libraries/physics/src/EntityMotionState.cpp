@@ -13,9 +13,9 @@
 
 #include <glm/gtx/norm.hpp>
 
+#include <EntityEditPacketSender.h>
 #include <EntityItem.h>
 #include <EntityItemProperties.h>
-#include <EntityEditPacketSender.h>
 #include <LogHandler.h>
 #include <PhysicsCollisionGroups.h>
 #include <Profile.h>
@@ -45,7 +45,6 @@ bool entityTreeIsLocked() {
 const uint8_t LOOPS_FOR_SIMULATION_ORPHAN = 50;
 const quint64 USECS_BETWEEN_OWNERSHIP_BIDS = USECS_PER_SECOND / 5;
 
-
 EntityMotionState::EntityMotionState(btCollisionShape* shape, EntityItemPointer entity) :
     ObjectMotionState(nullptr),
     _entity(entity),
@@ -64,8 +63,7 @@ EntityMotionState::EntityMotionState(btCollisionShape* shape, EntityItemPointer 
     _lastStep(0),
     _loopsWithoutOwner(0),
     _accelerationNearlyGravityCount(0),
-    _numInactiveUpdates(1)
-{
+    _numInactiveUpdates(1) {
     // Why is _numInactiveUpdates initialied to 1?
     // Because: when an entity is first created by a LOCAL operatioin its local simulation ownership is assumed,
     // which causes it to be immediately placed on the 'owned' list, but in this case an "update" already just
@@ -91,7 +89,6 @@ EntityMotionState::EntityMotionState(btCollisionShape* shape, EntityItemPointer 
     _serverRotation = localTransform.getRotation();
     _serverAcceleration = _entity->getAcceleration();
     _serverActionData = _entity->getDynamicData();
-
 }
 
 EntityMotionState::~EntityMotionState() {
@@ -139,7 +136,7 @@ void EntityMotionState::handleEasyChanges(uint32_t& flags) {
         if (_entity->getSimulatorID().isNull()) {
             // simulation ownership has been removed
             if (glm::length2(_entity->getWorldVelocity()) == 0.0f) {
-            // TODO: also check angularVelocity
+                // TODO: also check angularVelocity
                 // this object is coming to rest
                 flags &= ~Simulation::DIRTY_PHYSICS_ACTIVATION;
                 _body->setActivationState(WANTS_DEACTIVATION);
@@ -178,7 +175,6 @@ void EntityMotionState::handleEasyChanges(uint32_t& flags) {
     }
 }
 
-
 // virtual
 bool EntityMotionState::handleHardAndEasyChanges(uint32_t& flags, PhysicsEngine* engine) {
     updateServerPhysicsVariables();
@@ -191,8 +187,8 @@ PhysicsMotionType EntityMotionState::computePhysicsMotionType() const {
     }
     assert(entityTreeIsLocked());
 
-    if (_entity->getShapeType() == SHAPE_TYPE_STATIC_MESH
-        || (_body && _body->getCollisionShape()->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE)) {
+    if (_entity->getShapeType() == SHAPE_TYPE_STATIC_MESH ||
+        (_body && _body->getCollisionShape()->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE)) {
         return MOTION_TYPE_STATIC;
     }
 
@@ -210,9 +206,7 @@ PhysicsMotionType EntityMotionState::computePhysicsMotionType() const {
         }
         return MOTION_TYPE_DYNAMIC;
     }
-    if (_entity->isMovingRelativeToParent() ||
-        _entity->hasActions() ||
-        _entity->hasAncestorOfType(NestableType::Avatar)) {
+    if (_entity->isMovingRelativeToParent() || _entity->hasActions() || _entity->hasAncestorOfType(NestableType::Avatar)) {
         return MOTION_TYPE_KINEMATIC;
     }
     return MOTION_TYPE_STATIC;
@@ -293,7 +287,6 @@ void EntityMotionState::setWorldTransform(const btTransform& worldTrans) {
     }
 }
 
-
 // virtual and protected
 bool EntityMotionState::isReadyToComputeShape() const {
     return _entity->isReadyToComputeShape();
@@ -321,7 +314,7 @@ bool EntityMotionState::remoteSimulationOutOfSync(uint32_t simulationStep) {
     }
 
     int numSteps = simulationStep - _lastStep;
-    float dt = (float)(numSteps) * PHYSICS_ENGINE_FIXED_SUBSTEP;
+    float dt = (float)(numSteps)*PHYSICS_ENGINE_FIXED_SUBSTEP;
 
     if (_numInactiveUpdates > 0) {
         const uint8_t MAX_NUM_INACTIVE_UPDATES = 20;
@@ -467,13 +460,13 @@ void EntityMotionState::updateSendVelocities() {
         }
 
         if (!_body->isStaticOrKinematicObject()) {
-            const float DYNAMIC_LINEAR_VELOCITY_THRESHOLD = 0.05f;  // 5 cm/sec
-            const float DYNAMIC_ANGULAR_VELOCITY_THRESHOLD = 0.087266f;  // ~5 deg/sec
+            const float DYNAMIC_LINEAR_VELOCITY_THRESHOLD = 0.05f; // 5 cm/sec
+            const float DYNAMIC_ANGULAR_VELOCITY_THRESHOLD = 0.087266f; // ~5 deg/sec
 
-            bool movingSlowlyLinear =
-                glm::length2(_entity->getWorldVelocity()) < (DYNAMIC_LINEAR_VELOCITY_THRESHOLD * DYNAMIC_LINEAR_VELOCITY_THRESHOLD);
+            bool movingSlowlyLinear = glm::length2(_entity->getWorldVelocity()) <
+                                      (DYNAMIC_LINEAR_VELOCITY_THRESHOLD * DYNAMIC_LINEAR_VELOCITY_THRESHOLD);
             bool movingSlowlyAngular = glm::length2(_entity->getWorldAngularVelocity()) <
-                    (DYNAMIC_ANGULAR_VELOCITY_THRESHOLD * DYNAMIC_ANGULAR_VELOCITY_THRESHOLD);
+                                       (DYNAMIC_ANGULAR_VELOCITY_THRESHOLD * DYNAMIC_ANGULAR_VELOCITY_THRESHOLD);
             bool movingSlowly = movingSlowlyLinear && movingSlowlyAngular && _entity->getAcceleration() == Vectors::ZERO;
 
             if (movingSlowly) {
@@ -576,7 +569,8 @@ void EntityMotionState::sendUpdate(OctreeEditPacketSender* packetSender, uint32_
         // which we achive by just setting it to the max of the two
         newPriority = glm::max(newPriority, YIELD_SIMULATION_PRIORITY);
         if (newPriority != _entity->getSimulationPriority() &&
-                !(newPriority == VOLUNTEER_SIMULATION_PRIORITY && _entity->getSimulationPriority() == RECRUIT_SIMULATION_PRIORITY)) {
+            !(newPriority == VOLUNTEER_SIMULATION_PRIORITY &&
+              _entity->getSimulationPriority() == RECRUIT_SIMULATION_PRIORITY)) {
             // our desired priority has changed
             if (newPriority == 0) {
                 // we should release ownership
@@ -613,8 +607,8 @@ void EntityMotionState::sendUpdate(OctreeEditPacketSender* packetSender, uint32_
                 newQueryCubeProperties.setClientOnly(entityDescendant->getClientOnly());
                 newQueryCubeProperties.setOwningAvatarID(entityDescendant->getOwningAvatarID());
 
-                entityPacketSender->queueEditEntityMessage(PacketType::EntityPhysics, tree,
-                                                           descendant->getID(), newQueryCubeProperties);
+                entityPacketSender->queueEditEntityMessage(PacketType::EntityPhysics, tree, descendant->getID(),
+                                                           newQueryCubeProperties);
                 entityDescendant->setLastBroadcast(now); // for debug/physics status icons
             }
         }
@@ -639,7 +633,7 @@ uint32_t EntityMotionState::getIncomingDirtyFlags() {
             // bits for the avatar groups (e.g. MY_AVATAR vs OTHER_AVATAR)
             uint8_t entityCollisionMask = _entity->getCollisionless() ? 0 : _entity->getCollisionMask();
             if ((bool)(entityCollisionMask & USER_COLLISION_GROUP_MY_AVATAR) !=
-                    (bool)(entityCollisionMask & USER_COLLISION_GROUP_OTHER_AVATAR)) {
+                (bool)(entityCollisionMask & USER_COLLISION_GROUP_OTHER_AVATAR)) {
                 // bits are asymmetric --> flag for reinsertion in physics simulation
                 dirtyFlags |= Simulation::DIRTY_COLLISION_GROUP;
             }
@@ -648,11 +642,12 @@ uint32_t EntityMotionState::getIncomingDirtyFlags() {
         int bodyFlags = _body->getCollisionFlags();
         bool isMoving = _entity->isMovingRelativeToParent();
 
-        if (((bodyFlags & btCollisionObject::CF_STATIC_OBJECT) && isMoving) // ||
-            // TODO -- there is opportunity for an optimization here, but this currently causes
-            // excessive re-insertion of the rigid body.
-            // (bodyFlags & btCollisionObject::CF_KINEMATIC_OBJECT && !isMoving)
-            ) {
+        if (((bodyFlags & btCollisionObject::CF_STATIC_OBJECT) &&
+             isMoving) // ||
+                       // TODO -- there is opportunity for an optimization here, but this currently causes
+                       // excessive re-insertion of the rigid body.
+                       // (bodyFlags & btCollisionObject::CF_KINEMATIC_OBJECT && !isMoving)
+        ) {
             dirtyFlags |= Simulation::DIRTY_MOTION_TYPE;
         }
     }
@@ -764,15 +759,16 @@ void EntityMotionState::computeCollisionGroupAndMask(int32_t& group, int32_t& ma
 
 bool EntityMotionState::shouldSendBid() const {
     // NOTE: this method is only ever called when the entity's simulation is NOT locally owned
-    return _body->isActive()
-        && (_region == workload::Region::R1)
-        && glm::max(glm::max(VOLUNTEER_SIMULATION_PRIORITY, _bumpedPriority), _entity->getScriptSimulationPriority()) >= _entity->getSimulationPriority()
-        && !_entity->getLocked();
+    return _body->isActive() && (_region == workload::Region::R1) &&
+           glm::max(glm::max(VOLUNTEER_SIMULATION_PRIORITY, _bumpedPriority), _entity->getScriptSimulationPriority()) >=
+               _entity->getSimulationPriority() &&
+           !_entity->getLocked();
 }
 
 uint8_t EntityMotionState::computeFinalBidPriority() const {
-    return (_region == workload::Region::R1) ?
-        glm::max(glm::max(VOLUNTEER_SIMULATION_PRIORITY, _bumpedPriority), _entity->getScriptSimulationPriority()) : 0;
+    return (_region == workload::Region::R1)
+               ? glm::max(glm::max(VOLUNTEER_SIMULATION_PRIORITY, _bumpedPriority), _entity->getScriptSimulationPriority())
+               : 0;
 }
 
 bool EntityMotionState::isLocallyOwned() const {

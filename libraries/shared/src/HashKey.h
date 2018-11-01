@@ -12,11 +12,10 @@
 #ifndef hifi_HashKey_h
 #define hifi_HashKey_h
 
-#include <cstddef>
 #include <stdint.h>
+#include <cstddef>
 
 #include <glm/glm.hpp>
-
 
 // HashKey for use with btHashMap which requires a particular API for its keys.  In particular it
 // requires its Key to implement these methods:

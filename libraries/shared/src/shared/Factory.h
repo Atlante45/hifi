@@ -16,36 +16,37 @@
 
 namespace hifi {
 
-    template <typename T, typename Key>
-    class SimpleFactory {
+template<typename T, typename Key>
+class SimpleFactory {
+public:
+    using Pointer = std::shared_ptr<T>;
+    using Builder = std::function<Pointer()>;
+    using BuilderMap = std::map<Key, Builder>;
+
+    void registerBuilder(const Key name, Builder builder) {
+        // FIXME don't allow name collisions
+        _builders[name] = builder;
+    }
+
+    Pointer create(const Key name) const {
+        const auto& entryIt = _builders.find(name);
+        if (entryIt != _builders.end()) {
+            return (*entryIt).second();
+        }
+        return Pointer();
+    }
+
+    template<typename Impl>
+    class Registrar {
     public:
-        using Pointer = std::shared_ptr<T>;
-        using Builder = std::function<Pointer()>;
-        using BuilderMap = std::map<Key, Builder>;
-
-        void registerBuilder(const Key name, Builder builder) {
-            // FIXME don't allow name collisions
-            _builders[name] = builder;
+        Registrar(const Key name, SimpleFactory& factory) {
+            factory.registerBuilder(name, [] { return std::make_shared<Impl>(); });
         }
-
-        Pointer create(const Key name) const {
-            const auto& entryIt = _builders.find(name);
-            if (entryIt != _builders.end()) {
-                return (*entryIt).second();
-            }
-            return Pointer();
-        }
-
-        template <typename Impl>
-        class Registrar {
-        public:
-            Registrar(const Key name, SimpleFactory& factory) {
-                factory.registerBuilder(name, [] { return std::make_shared<Impl>(); });
-            }
-        };
-    protected:
-        BuilderMap _builders;
     };
-}
+
+protected:
+    BuilderMap _builders;
+};
+} // namespace hifi
 
 #endif

@@ -13,20 +13,16 @@
 
 #include "EntityItemProperties.h"
 
-RecurseOctreeToMapOperator::RecurseOctreeToMapOperator(QVariantMap& map,
-                                                       const OctreeElementPointer& top,
-                                                       QScriptEngine* engine,
-                                                       bool skipDefaultValues,
-                                                       bool skipThoseWithBadParents,
+RecurseOctreeToMapOperator::RecurseOctreeToMapOperator(QVariantMap& map, const OctreeElementPointer& top, QScriptEngine* engine,
+                                                       bool skipDefaultValues, bool skipThoseWithBadParents,
                                                        std::shared_ptr<AvatarData> myAvatar) :
-        RecurseOctreeOperator(),
-        _map(map),
-        _top(top),
-        _engine(engine),
-        _skipDefaultValues(skipDefaultValues),
-        _skipThoseWithBadParents(skipThoseWithBadParents),
-        _myAvatar(myAvatar)
-{
+    RecurseOctreeOperator(),
+    _map(map),
+    _top(top),
+    _engine(engine),
+    _skipDefaultValues(skipDefaultValues),
+    _skipThoseWithBadParents(skipThoseWithBadParents),
+    _myAvatar(myAvatar) {
     // if some element "top" was given, only save information for that element and its children.
     if (_top) {
         _withinTop = false;
@@ -44,7 +40,6 @@ bool RecurseOctreeToMapOperator::preRecursion(const OctreeElementPointer& elemen
 }
 
 bool RecurseOctreeToMapOperator::postRecursion(const OctreeElementPointer& element) {
-
     EntityItemProperties defaultProperties;
 
     EntityTreeElementPointer entityTreeElement = std::static_pointer_cast<EntityTreeElement>(element);
@@ -52,7 +47,7 @@ bool RecurseOctreeToMapOperator::postRecursion(const OctreeElementPointer& eleme
 
     entityTreeElement->forEachEntity([&](EntityItemPointer entityItem) {
         if (_skipThoseWithBadParents && !entityItem->isParentIDValid()) {
-            return;  // we weren't able to resolve a parent from _parentID, so don't save this entity.
+            return; // we weren't able to resolve a parent from _parentID, so don't save this entity.
         }
 
         EntityItemProperties properties = entityItem->getProperties();
@@ -66,12 +61,11 @@ bool RecurseOctreeToMapOperator::postRecursion(const OctreeElementPointer& eleme
         // handle parentJointName for wearables
         if (_myAvatar && entityItem->getParentID() == AVATAR_SELF_ID &&
             entityItem->getParentJointIndex() != INVALID_JOINT_INDEX) {
-
             auto jointNames = _myAvatar->getJointNames();
             auto parentJointIndex = entityItem->getParentJointIndex();
-        	if (parentJointIndex < jointNames.count()) {
+            if (parentJointIndex < jointNames.count()) {
                 qScriptValues.setProperty("parentJointName", jointNames.at(parentJointIndex));
-        	}
+            }
         }
 
         entitiesQList << qScriptValues.toVariant();

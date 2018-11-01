@@ -19,16 +19,15 @@
 #include "render-utils/ShaderConstants.h"
 
 namespace ru {
-    using render_utils::slot::texture::Texture;
-    using render_utils::slot::buffer::Buffer;
-}
+using render_utils::slot::buffer::Buffer;
+using render_utils::slot::texture::Texture;
+} // namespace ru
 
 VelocityFramebuffer::VelocityFramebuffer() {
 }
 
-
 void VelocityFramebuffer::updatePrimaryDepth(const gpu::TexturePointer& depthBuffer) {
-    //If the depth buffer or size changed, we need to delete our FBOs
+    // If the depth buffer or size changed, we need to delete our FBOs
     bool reset = false;
     if ((_primaryDepthTexture != depthBuffer)) {
         _primaryDepthTexture = depthBuffer;
@@ -55,13 +54,13 @@ void VelocityFramebuffer::clear() {
 }
 
 void VelocityFramebuffer::allocate() {
-
     auto width = _frameSize.x;
     auto height = _frameSize.y;
 
     // For Velocity Buffer:
-    _velocityTexture = gpu::Texture::createRenderBuffer(gpu::Element(gpu::VEC2, gpu::HALF, gpu::RGB), width, height, gpu::Texture::SINGLE_MIP,
-        gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_LINEAR));
+    _velocityTexture = gpu::Texture::createRenderBuffer(gpu::Element(gpu::VEC2, gpu::HALF, gpu::RGB), width, height,
+                                                        gpu::Texture::SINGLE_MIP,
+                                                        gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_LINEAR));
     _velocityFramebuffer = gpu::FramebufferPointer(gpu::Framebuffer::create("velocity"));
     _velocityFramebuffer->setRenderBuffer(0, _velocityTexture);
     _velocityFramebuffer->setDepthStencilBuffer(_primaryDepthTexture, _primaryDepthTexture->getTexelFormat());
@@ -97,7 +96,7 @@ void VelocityBufferPass::run(const render::RenderContextPointer& renderContext, 
     const auto& deferredFramebuffer = inputs.get1();
 
     if (!_gpuTimer) {
-        _gpuTimer = std::make_shared < gpu::RangeTimer>(__FUNCTION__);
+        _gpuTimer = std::make_shared<gpu::RangeTimer>(__FUNCTION__);
     }
 
     if (!_velocityFramebuffer) {
@@ -113,7 +112,7 @@ void VelocityBufferPass::run(const render::RenderContextPointer& renderContext, 
     outputs.edit0() = _velocityFramebuffer;
     outputs.edit1() = velocityFBO;
     outputs.edit2() = velocityTexture;
-   
+
     auto cameraMotionPipeline = getCameraMotionPipeline(renderContext);
 
     auto fullViewport = args->_viewport;
@@ -125,7 +124,8 @@ void VelocityBufferPass::run(const render::RenderContextPointer& renderContext, 
         batch.setViewportTransform(fullViewport);
         batch.setProjectionTransform(glm::mat4());
         batch.resetViewTransform();
-        batch.setModelTransform(gpu::Framebuffer::evalSubregionTexcoordTransform(_velocityFramebuffer->getDepthFrameSize(), fullViewport));
+        batch.setModelTransform(
+            gpu::Framebuffer::evalSubregionTexcoordTransform(_velocityFramebuffer->getDepthFrameSize(), fullViewport));
 
         batch.setUniformBuffer(ru::Buffer::DeferredFrameTransform, frameTransform->getFrameTransformBuffer());
 
@@ -143,23 +143,19 @@ void VelocityBufferPass::run(const render::RenderContextPointer& renderContext, 
     config->setGPUBatchRunTime(_gpuTimer->getGPUAverage(), _gpuTimer->getBatchAverage());
 }
 
-
 const gpu::PipelinePointer& VelocityBufferPass::getCameraMotionPipeline(const render::RenderContextPointer& renderContext) {
     if (!_cameraMotionPipeline) {
         gpu::ShaderPointer program = gpu::Shader::createProgram(shader::render_utils::program::velocityBuffer_cameraMotion);
         gpu::StatePointer state = gpu::StatePointer(new gpu::State());
 
         // Stencil test the curvature pass for objects pixels only, not the background
-       // PrepareStencil::testShape(*state);
+        // PrepareStencil::testShape(*state);
 
         state->setColorWriteMask(true, true, false, false);
-        
+
         // Good to go add the brand new pipeline
         _cameraMotionPipeline = gpu::Pipeline::create(program, state);
     }
 
     return _cameraMotionPipeline;
 }
-
-
-

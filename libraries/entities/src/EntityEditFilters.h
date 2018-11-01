@@ -11,10 +11,10 @@
 #ifndef hifi_EntityEditFilters_h
 #define hifi_EntityEditFilters_h
 
-#include <QObject>
 #include <QMap>
-#include <QScriptValue>
+#include <QObject>
 #include <QScriptEngine>
+#include <QScriptValue>
 #include <glm/glm.hpp>
 
 #include <functional>
@@ -43,18 +43,18 @@ public:
         std::function<bool()> uncaughtExceptions;
         QScriptEngine* engine;
         bool rejectAll;
-        
-        FilterData(): engine(nullptr), rejectAll(false) {};
+
+        FilterData() : engine(nullptr), rejectAll(false) {};
         bool valid() { return (rejectAll || (engine != nullptr && filterFn.isFunction() && uncaughtExceptions)); }
     };
 
     EntityEditFilters() {};
-    EntityEditFilters(EntityTreePointer tree ): _tree(tree) {};
+    EntityEditFilters(EntityTreePointer tree) : _tree(tree) {};
 
     void addFilter(EntityItemID entityID, QString filterURL);
     void removeFilter(EntityItemID entityID);
 
-    bool filter(glm::vec3& position, EntityItemProperties& propertiesIn, EntityItemProperties& propertiesOut, bool& wasChanged, 
+    bool filter(glm::vec3& position, EntityItemProperties& propertiesIn, EntityItemProperties& propertiesOut, bool& wasChanged,
                 EntityTree::FilterType filterType, EntityItemID& entityID, EntityItemPointer& existingEntity);
 
 signals:
@@ -62,16 +62,16 @@ signals:
 
 private slots:
     void scriptRequestFinished(EntityItemID entityID);
-    
+
 private:
     QList<EntityItemID> getZonesByPosition(glm::vec3& position);
 
     EntityTreePointer _tree {};
-    bool _rejectAll {false};
-    QScriptValue _nullObjectForFilter{};
-    
+    bool _rejectAll { false };
+    QScriptValue _nullObjectForFilter {};
+
     QReadWriteLock _lock;
     QMap<EntityItemID, FilterData> _filterDataMap;
 };
 
-#endif //hifi_EntityEditFilters_h
+#endif // hifi_EntityEditFilters_h

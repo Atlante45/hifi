@@ -10,17 +10,17 @@
 
 #include "ScriptsModel.h"
 
+#include <QDirIterator>
 #include <QUrl>
 #include <QUrlQuery>
 #include <QXmlStreamReader>
-#include <QDirIterator>
 
 #include <NetworkAccessManager.h>
 #include <PathUtils.h>
 
 #include "ScriptEngine.h"
-#include "ScriptEngines.h"
 #include "ScriptEngineLogging.h"
+#include "ScriptEngines.h"
 #define __STR2__(x) #x
 #define __STR1__(x) __STR2__(x)
 #define __LOC__ __FILE__ "(" __STR1__(__LINE__) ") : Warning Msg: "
@@ -34,27 +34,23 @@ static const QString KEY_NAME = "Key";
 TreeNodeBase::TreeNodeBase(TreeNodeFolder* parent, const QString& name, TreeNodeType type) :
     _parent(parent),
     _type(type),
-    _name(name) {
-};
+    _name(name) {};
 
 TreeNodeScript::TreeNodeScript(const QString& localPath, const QString& fullPath, ScriptOrigin origin) :
     TreeNodeBase(NULL, localPath.split("/").last(), TREE_NODE_TYPE_SCRIPT),
     _localPath(localPath),
     _fullPath(expandScriptUrl(QUrl(fullPath)).toString()),
-    _origin(origin) {
-};
+    _origin(origin) {};
 
 TreeNodeFolder::TreeNodeFolder(const QString& foldername, TreeNodeFolder* parent) :
-    TreeNodeBase(parent, foldername, TREE_NODE_TYPE_FOLDER) {
-};
+    TreeNodeBase(parent, foldername, TREE_NODE_TYPE_FOLDER) {};
 
 ScriptsModel::ScriptsModel(QObject* parent) :
     QAbstractItemModel(parent),
     _loadingScripts(false),
     _localDirectory(),
     _fsWatcher(),
-    _treeNodes()
-{
+    _treeNodes() {
     _localDirectory.setFilter(QDir::Files | QDir::Readable);
     _localDirectory.setNameFilters(QStringList("*.js"));
 
@@ -100,7 +96,6 @@ QVariant ScriptsModel::data(const QModelIndex& index, int role) const {
         return QVariant();
     }
     if (node->getType() == TREE_NODE_TYPE_SCRIPT) {
-
         TreeNodeScript* script = static_cast<TreeNodeScript*>(node);
         if (role == Qt::DisplayRole) {
             return QVariant(script->getName() + (script->getOrigin() == SCRIPT_ORIGIN_LOCAL ? " (local)" : ""));
@@ -143,8 +138,7 @@ void ScriptsModel::reloadDefaultFiles() {
         for (int i = _treeNodes.size() - 1; i >= 0; i--) {
             TreeNodeBase* node = _treeNodes.at(i);
             if (node->getType() == TREE_NODE_TYPE_SCRIPT &&
-                static_cast<TreeNodeScript*>(node)->getOrigin() == SCRIPT_ORIGIN_DEFAULT)
-            {
+                static_cast<TreeNodeScript*>(node)->getOrigin() == SCRIPT_ORIGIN_DEFAULT) {
                 delete node;
                 _treeNodes.removeAt(i);
             }
@@ -278,8 +272,7 @@ void ScriptsModel::reloadLocalFiles() {
     for (int i = _treeNodes.size() - 1; i >= 0; i--) {
         TreeNodeBase* node = _treeNodes.at(i);
         if (node->getType() == TREE_NODE_TYPE_SCRIPT &&
-            static_cast<TreeNodeScript*>(node)->getOrigin() == SCRIPT_ORIGIN_LOCAL)
-        {
+            static_cast<TreeNodeScript*>(node)->getOrigin() == SCRIPT_ORIGIN_LOCAL) {
             delete node;
             _treeNodes.removeAt(i);
         }

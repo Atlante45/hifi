@@ -1,12 +1,12 @@
 
 #include "SoundEffect.h"
 
-#include <RegisteredMetaTypes.h>
 #include <AudioInjector.h>
+#include <RegisteredMetaTypes.h>
 
 SoundEffect::~SoundEffect() {
     if (_injector) {
-         // stop will cause the AudioInjector to delete itself.
+        // stop will cause the AudioInjector to delete itself.
         _injector->stop();
     }
 }

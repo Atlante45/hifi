@@ -10,13 +10,13 @@
 #ifndef hifi_DebugDraw_h
 #define hifi_DebugDraw_h
 
-#include <mutex>
-#include <unordered_map>
-#include <tuple>
-#include <string>
-#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <mutex>
+#include <string>
+#include <tuple>
+#include <unordered_map>
+#include <vector>
 
 #include <QObject>
 #include <QString>
@@ -44,7 +44,8 @@ public:
      * @function DebugDraw.drawRay
      * @param {Vec3} start - start position of line in world space.
      * @param {Vec3} end - end position of line in world space.
-     * @param {Vec4} color - color of line, each component should be in the zero to one range.  x = red, y = blue, z = green, w = alpha.
+     * @param {Vec4} color - color of line, each component should be in the zero to one range.  x = red, y = blue, z = green, w
+     * = alpha.
      */
     Q_INVOKABLE void drawRay(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color);
 
@@ -57,7 +58,8 @@ public:
      * @param {Vec3} position - position of the marker in world space.
      * @param {Vec4} color - color of the marker.
      */
-    Q_INVOKABLE void addMarker(const QString& key, const glm::quat& rotation, const glm::vec3& position, const glm::vec4& color);
+    Q_INVOKABLE void addMarker(const QString& key, const glm::quat& rotation, const glm::vec3& position,
+                               const glm::vec4& color);
 
     /**jsdoc
      * Removes debug marker from the world.  Once a marker is removed, it will no longer be visible.
@@ -67,15 +69,16 @@ public:
     Q_INVOKABLE void removeMarker(const QString& key);
 
     /**jsdoc
-     * Adds a debug marker to the world, this marker will be drawn every frame until it is removed with DebugDraw.removeMyAvatarMarker.
-     * This can be called repeatedly to change the position of the marker.
+     * Adds a debug marker to the world, this marker will be drawn every frame until it is removed with
+     * DebugDraw.removeMyAvatarMarker. This can be called repeatedly to change the position of the marker.
      * @function DebugDraw.addMyAvatarMarker
      * @param {string} key - name to uniquely identify this marker, later used for DebugDraw.removeMyAvatarMarker.
      * @param {Quat} rotation - start position of line in avatar space.
      * @param {Vec3} position - position of the marker in avatar space.
      * @param {Vec4} color - color of the marker.
      */
-    Q_INVOKABLE void addMyAvatarMarker(const QString& key, const glm::quat& rotation, const glm::vec3& position, const glm::vec4& color);
+    Q_INVOKABLE void addMyAvatarMarker(const QString& key, const glm::quat& rotation, const glm::vec3& position,
+                                       const glm::vec4& color);
 
     /**jsdoc
      * Removes debug marker from the world.  Once a marker is removed, it will no longer be visible

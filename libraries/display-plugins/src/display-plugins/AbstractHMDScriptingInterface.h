@@ -43,7 +43,7 @@ signals:
     /**jsdoc
      * Triggered when Interface's display mode changes and when the user puts on or takes off their HMD.
      * @function HMD.displayModeChanged
-     * @param {boolean} isHMDMode - <code>true</code> if the display mode is HMD, otherwise <code>false</code>. This is the 
+     * @param {boolean} isHMDMode - <code>true</code> if the display mode is HMD, otherwise <code>false</code>. This is the
      *     same value as provided by <code>HMD.active</code>.
      * @returns {Signal}
      * @example <caption>Report when the display mode changes.</caption>
@@ -68,7 +68,7 @@ signals:
     void mountedChanged();
 
 private:
-    float _IPDScale{ 1.0 };
+    float _IPDScale { 1.0 };
 };
 
 #endif // hifi_AbstractHMDScriptingInterface_h

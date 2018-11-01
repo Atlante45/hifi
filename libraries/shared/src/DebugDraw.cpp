@@ -18,11 +18,9 @@ DebugDraw& DebugDraw::getInstance() {
 }
 
 DebugDraw::DebugDraw() {
-
 }
 
 DebugDraw::~DebugDraw() {
-
 }
 
 // world space line, drawn only once
@@ -41,7 +39,8 @@ void DebugDraw::removeMarker(const QString& key) {
     _markers.erase(key);
 }
 
-void DebugDraw::addMyAvatarMarker(const QString& key, const glm::quat& rotation, const glm::vec3& position, const glm::vec4& color) {
+void DebugDraw::addMyAvatarMarker(const QString& key, const glm::quat& rotation, const glm::vec3& position,
+                                  const glm::vec4& color) {
     Lock lock(_mapMutex);
     _myAvatarMarkers[key] = MarkerInfo(rotation, position, color);
 }

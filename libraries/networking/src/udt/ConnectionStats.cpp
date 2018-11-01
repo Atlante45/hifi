@@ -25,26 +25,26 @@ ConnectionStats::ConnectionStats() {
 ConnectionStats::Stats ConnectionStats::sample() {
     Stats sample = _currentSample;
     _currentSample = Stats();
-    
+
     auto now = duration_cast<microseconds>(system_clock::now().time_since_epoch());
     sample.endTime = now;
     _currentSample.startTime = now;
-    
+
     return sample;
 }
 
 void ConnectionStats::record(Stats::Event event) {
-    ++_currentSample.events[(int) event];
-    ++_total.events[(int) event];
+    ++_currentSample.events[(int)event];
+    ++_total.events[(int)event];
 }
 
 void ConnectionStats::recordSentPackets(int payload, int total) {
     ++_currentSample.sentPackets;
     ++_total.sentPackets;
-    
+
     _currentSample.sentUtilBytes += payload;
     _total.sentUtilBytes += payload;
-    
+
     _currentSample.sentBytes += total;
     _total.sentBytes += total;
 }
@@ -52,10 +52,10 @@ void ConnectionStats::recordSentPackets(int payload, int total) {
 void ConnectionStats::recordReceivedPackets(int payload, int total) {
     ++_currentSample.receivedPackets;
     ++_total.receivedPackets;
-    
+
     _currentSample.receivedUtilBytes += payload;
     _total.receivedUtilBytes += payload;
-    
+
     _currentSample.receivedBytes += total;
     _total.receivedBytes += total;
 }
@@ -63,10 +63,10 @@ void ConnectionStats::recordReceivedPackets(int payload, int total) {
 void ConnectionStats::recordUnreliableSentPackets(int payload, int total) {
     ++_currentSample.sentUnreliablePackets;
     ++_total.sentUnreliablePackets;
-    
+
     _currentSample.sentUnreliableUtilBytes += payload;
     _total.sentUnreliableUtilBytes += payload;
-    
+
     _currentSample.sentUnreliableBytes += total;
     _total.sentUnreliableBytes += total;
 }
@@ -74,10 +74,10 @@ void ConnectionStats::recordUnreliableSentPackets(int payload, int total) {
 void ConnectionStats::recordUnreliableReceivedPackets(int payload, int total) {
     ++_currentSample.receivedUnreliablePackets;
     ++_total.receivedUnreliablePackets;
-    
+
     _currentSample.receivedUnreliableUtilBytes += payload;
     _total.receivedUnreliableUtilBytes += payload;
-    
+
     _currentSample.sentUnreliableBytes += total;
     _total.receivedUnreliableBytes += total;
 }
@@ -102,24 +102,21 @@ void ConnectionStats::recordRTT(int sample) {
 
 void ConnectionStats::recordCongestionWindowSize(int sample) {
     _currentSample.congestionWindowSize = sample;
-    _total.congestionWindowSize = (int)((_total.congestionWindowSize * EWMA_PREVIOUS_SAMPLES_WEIGHT) + (sample * EWMA_CURRENT_SAMPLE_WEIGHT));
+    _total.congestionWindowSize = (int)((_total.congestionWindowSize * EWMA_PREVIOUS_SAMPLES_WEIGHT) +
+                                        (sample * EWMA_CURRENT_SAMPLE_WEIGHT));
 }
 
 void ConnectionStats::recordPacketSendPeriod(int sample) {
     _currentSample.packetSendPeriod = sample;
-    _total.packetSendPeriod = (int)((_total.packetSendPeriod * EWMA_PREVIOUS_SAMPLES_WEIGHT) + (sample * EWMA_CURRENT_SAMPLE_WEIGHT));
+    _total.packetSendPeriod = (int)((_total.packetSendPeriod * EWMA_PREVIOUS_SAMPLES_WEIGHT) +
+                                    (sample * EWMA_CURRENT_SAMPLE_WEIGHT));
 }
 
 QDebug& operator<<(QDebug&& debug, const udt::ConnectionStats::Stats& stats) {
     debug << "Connection stats:\n";
 #define HIFI_LOG_EVENT(x) << "    " #x " events: " << stats.events[ConnectionStats::Stats::Event::x] << "\n"
-    debug
-    HIFI_LOG_EVENT(SentACK)
-    HIFI_LOG_EVENT(ReceivedACK)
-    HIFI_LOG_EVENT(ProcessedACK)
-    HIFI_LOG_EVENT(Retransmission)
-    HIFI_LOG_EVENT(Duplicate)
-    ;
+    debug HIFI_LOG_EVENT(SentACK) HIFI_LOG_EVENT(ReceivedACK) HIFI_LOG_EVENT(ProcessedACK) HIFI_LOG_EVENT(Retransmission)
+        HIFI_LOG_EVENT(Duplicate);
 #undef HIFI_LOG_EVENT
 
     debug << "    Sent packets: " << stats.sentPackets;

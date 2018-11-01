@@ -14,8 +14,8 @@
 
 #include <gpu/gl/GLBackend.h>
 
-#include <gl/QOpenGLContextWrapper.h>
 #include <gl/GLHelpers.h>
+#include <gl/QOpenGLContextWrapper.h>
 
 #include <QDir>
 #include <QElapsedTimer>
@@ -28,18 +28,13 @@
 class RateCounter {
     std::vector<float> times;
     QElapsedTimer timer;
+
 public:
-    RateCounter() {
-        timer.start();
-    }
+    RateCounter() { timer.start(); }
 
-    void reset() {
-        times.clear();
-    }
+    void reset() { times.clear(); }
 
-    unsigned int count() const {
-        return (unsigned int)times.size() - 1;
-    }
+    unsigned int count() const { return (unsigned int)times.size() - 1; }
 
     float elapsed() const {
         if (times.size() < 1) {
@@ -49,18 +44,15 @@ public:
         return elapsed;
     }
 
-    void increment() {
-        times.push_back(timer.elapsed() / 1000.0f);
-    }
+    void increment() { times.push_back(timer.elapsed() / 1000.0f); }
 
     float rate() const {
         if (elapsed() == 0.0f) {
             return 0.0f;
         }
-        return (float) count() / elapsed();
+        return (float)count() / elapsed();
     }
 };
-
 
 const QString& getQmlDir() {
     static QString dir;
@@ -79,16 +71,14 @@ class QTestWindow : public QWindow {
 
     QOpenGLContextWrapper _context;
     QSize _size;
-    //TextRenderer* _textRenderer[4];
+    // TextRenderer* _textRenderer[4];
     RateCounter fps;
 
 protected:
     void renderText();
 
 private:
-    void resizeWindow(const QSize& size) {
-        _size = size;
-    }
+    void resizeWindow(const QSize& size) { _size = size; }
 
 public:
     QTestWindow() {
@@ -124,27 +114,21 @@ public:
         resize(QSize(800, 600));
     }
 
-    virtual ~QTestWindow() {
-    }
+    virtual ~QTestWindow() {}
 
     void draw();
-    void makeCurrent() {
-        _context.makeCurrent(this);
-    }
+    void makeCurrent() { _context.makeCurrent(this); }
 
 protected:
-
-    void resizeEvent(QResizeEvent* ev) override {
-        resizeWindow(ev->size());
-    }
+    void resizeEvent(QResizeEvent* ev) override { resizeWindow(ev->size()); }
 };
 
 #ifndef SERIF_FONT_FAMILY
 #define SERIF_FONT_FAMILY "Times New Roman"
 #endif
 
-//static const wchar_t* EXAMPLE_TEXT = L"Hello";
-//static const wchar_t* EXAMPLE_TEXT = L"\xC1y Hello 1.0\ny\xC1 line 2\n\xC1y";
+// static const wchar_t* EXAMPLE_TEXT = L"Hello";
+// static const wchar_t* EXAMPLE_TEXT = L"\xC1y Hello 1.0\ny\xC1 line 2\n\xC1y";
 
 void QTestWindow::draw() {
     if (!isVisible()) {
@@ -165,7 +149,7 @@ void QTestWindow::draw() {
     }
 }
 
-const char * LOG_FILTER_RULES = R"V0G0N(
+const char* LOG_FILTER_RULES = R"V0G0N(
 hifi.gpu=true
 )V0G0N";
 
@@ -177,9 +161,7 @@ int main(int argc, char** argv) {
     QTestWindow window;
     QTimer timer;
     timer.setInterval(1); // Qt::CoarseTimer acceptable
-    app.connect(&timer, &QTimer::timeout, &app, [&] {
-        window.draw();
-    });
+    app.connect(&timer, &QTimer::timeout, &app, [&] { window.draw(); });
     timer.start();
     app.exec();
     return 0;

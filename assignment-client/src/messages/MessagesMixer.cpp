@@ -11,18 +11,17 @@
 
 #include "MessagesMixer.h"
 
-#include <QtCore/QCoreApplication>
-#include <QtCore/QJsonObject>
-#include <QBuffer>
 #include <LogHandler.h>
 #include <MessagesClient.h>
 #include <NodeList.h>
 #include <udt/PacketHeaders.h>
+#include <QBuffer>
+#include <QtCore/QCoreApplication>
+#include <QtCore/QJsonObject>
 
 const QString MESSAGES_MIXER_LOGGING_NAME = "messages-mixer";
 
-MessagesMixer::MessagesMixer(ReceivedMessage& message) : ThreadedAssignment(message)
-{
+MessagesMixer::MessagesMixer(ReceivedMessage& message) : ThreadedAssignment(message) {
     connect(DependencyManager::get<NodeList>().data(), &NodeList::nodeKilled, this, &MessagesMixer::nodeKilled);
     auto& packetReceiver = DependencyManager::get<NodeList>()->getPacketReceiver();
     packetReceiver.registerListener(PacketType::MessagesData, this, "handleMessages");
@@ -46,14 +45,14 @@ void MessagesMixer::handleMessages(QSharedPointer<ReceivedMessage> receivedMessa
     auto nodeList = DependencyManager::get<NodeList>();
 
     nodeList->eachMatchingNode(
-        [&](const SharedNodePointer& node)->bool {
-        return node->getActiveSocket() && _channelSubscribers[channel].contains(node->getUUID());
-    },
+        [&](const SharedNodePointer& node) -> bool {
+            return node->getActiveSocket() && _channelSubscribers[channel].contains(node->getUUID());
+        },
         [&](const SharedNodePointer& node) {
-        auto packetList = isText ? MessagesClient::encodeMessagesPacket(channel, message, senderID) :
-                                   MessagesClient::encodeMessagesDataPacket(channel, data, senderID);
-        nodeList->sendPacketList(std::move(packetList), *node);
-    });
+            auto packetList = isText ? MessagesClient::encodeMessagesPacket(channel, message, senderID)
+                                     : MessagesClient::encodeMessagesDataPacket(channel, data, senderID);
+            nodeList->sendPacketList(std::move(packetList), *node);
+        });
 }
 
 void MessagesMixer::handleMessagesSubscribe(QSharedPointer<ReceivedMessage> message, SharedNodePointer senderNode) {

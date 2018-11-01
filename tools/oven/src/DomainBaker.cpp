@@ -18,19 +18,17 @@
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
 
-#include "Gzip.h"
-#include "Oven.h"
 #include "FBXBaker.h"
+#include "Gzip.h"
 #include "OBJBaker.h"
+#include "Oven.h"
 
-DomainBaker::DomainBaker(const QUrl& localModelFileURL, const QString& domainName,
-                         const QString& baseOutputPath, const QUrl& destinationPath,
-                         bool shouldRebakeOriginals) :
+DomainBaker::DomainBaker(const QUrl& localModelFileURL, const QString& domainName, const QString& baseOutputPath,
+                         const QUrl& destinationPath, bool shouldRebakeOriginals) :
     _localEntitiesFileURL(localModelFileURL),
     _domainName(domainName),
     _baseOutputPath(baseOutputPath),
-    _shouldRebakeOriginals(shouldRebakeOriginals)
-{
+    _shouldRebakeOriginals(shouldRebakeOriginals) {
     // make sure the destination path has a trailing slash
     if (!destinationPath.toString().endsWith('/')) {
         _destinationPath = destinationPath.toString() + '/';
@@ -178,7 +176,6 @@ void DomainBaker::enumerateEntities() {
                 bool isBakeable = isBakeableFBX || isBakeableOBJ;
 
                 if (isBakeable || (_shouldRebakeOriginals && isBakedModel)) {
-
                     if (isBakedModel) {
                         // grab a URL to the original, that we assume is stored a directory up, in the "original" folder
                         // with just the fbx extension
@@ -206,19 +203,17 @@ void DomainBaker::enumerateEntities() {
 
                         QSharedPointer<ModelBaker> baker;
                         if (isBakeableFBX) {
-                            baker = {
-                                new FBXBaker(modelURL, []() -> QThread* {
-                                    return Oven::instance().getNextWorkerThread();
-                                }, _contentOutputPath + subDirName + "/baked", _contentOutputPath + subDirName + "/original"),
-                                &FBXBaker::deleteLater
-                            };
+                            baker = { new FBXBaker(modelURL,
+                                                   []() -> QThread* { return Oven::instance().getNextWorkerThread(); },
+                                                   _contentOutputPath + subDirName + "/baked",
+                                                   _contentOutputPath + subDirName + "/original"),
+                                      &FBXBaker::deleteLater };
                         } else {
-                            baker = {
-                                new OBJBaker(modelURL, []() -> QThread* {
-                                    return Oven::instance().getNextWorkerThread();
-                                }, _contentOutputPath + subDirName + "/baked", _contentOutputPath + subDirName + "/original"),
-                                &OBJBaker::deleteLater
-                            };
+                            baker = { new OBJBaker(modelURL,
+                                                   []() -> QThread* { return Oven::instance().getNextWorkerThread(); },
+                                                   _contentOutputPath + subDirName + "/baked",
+                                                   _contentOutputPath + subDirName + "/original"),
+                                      &OBJBaker::deleteLater };
                         }
 
                         // make sure our handler is called when the baker is done
@@ -241,28 +236,28 @@ void DomainBaker::enumerateEntities() {
                     _entitiesNeedingRewrite.insert(modelURL, *it);
                 }
             } else {
-//                // We check now to see if we have either a texture for a skybox or a keylight, or both.
-//                if (entity.contains(ENTITY_SKYBOX_KEY)) {
-//                    auto skyboxObject = entity[ENTITY_SKYBOX_KEY].toObject();
-//                    if (skyboxObject.contains(ENTITY_SKYBOX_URL_KEY)) {
-//                        // we have a URL to a skybox, grab it
-//                        QUrl skyboxURL { skyboxObject[ENTITY_SKYBOX_URL_KEY].toString() };
-//
-//                        // setup a bake of the skybox
-//                        bakeSkybox(skyboxURL, *it);
-//                    }
-//                }
-//
-//                if (entity.contains(ENTITY_KEYLIGHT_KEY)) {
-//                    auto keyLightObject = entity[ENTITY_KEYLIGHT_KEY].toObject();
-//                    if (keyLightObject.contains(ENTITY_KEYLIGHT_AMBIENT_URL_KEY)) {
-//                        // we have a URL to a skybox, grab it
-//                        QUrl skyboxURL { keyLightObject[ENTITY_KEYLIGHT_AMBIENT_URL_KEY].toString() };
-//
-//                        // setup a bake of the skybox
-//                        bakeSkybox(skyboxURL, *it);
-//                    }
-//                }
+                //                // We check now to see if we have either a texture for a skybox or a keylight, or both.
+                //                if (entity.contains(ENTITY_SKYBOX_KEY)) {
+                //                    auto skyboxObject = entity[ENTITY_SKYBOX_KEY].toObject();
+                //                    if (skyboxObject.contains(ENTITY_SKYBOX_URL_KEY)) {
+                //                        // we have a URL to a skybox, grab it
+                //                        QUrl skyboxURL { skyboxObject[ENTITY_SKYBOX_URL_KEY].toString() };
+                //
+                //                        // setup a bake of the skybox
+                //                        bakeSkybox(skyboxURL, *it);
+                //                    }
+                //                }
+                //
+                //                if (entity.contains(ENTITY_KEYLIGHT_KEY)) {
+                //                    auto keyLightObject = entity[ENTITY_KEYLIGHT_KEY].toObject();
+                //                    if (keyLightObject.contains(ENTITY_KEYLIGHT_AMBIENT_URL_KEY)) {
+                //                        // we have a URL to a skybox, grab it
+                //                        QUrl skyboxURL { keyLightObject[ENTITY_KEYLIGHT_AMBIENT_URL_KEY].toString() };
+                //
+                //                        // setup a bake of the skybox
+                //                        bakeSkybox(skyboxURL, *it);
+                //                    }
+                //                }
             }
         }
     }
@@ -272,12 +267,10 @@ void DomainBaker::enumerateEntities() {
 }
 
 void DomainBaker::bakeSkybox(QUrl skyboxURL, QJsonValueRef entity) {
-
     auto skyboxFileName = skyboxURL.fileName();
 
-    static const QStringList BAKEABLE_SKYBOX_EXTENSIONS {
-        ".jpg", ".png", ".gif", ".bmp", ".pbm", ".pgm", ".ppm", ".xbm", ".xpm", ".svg"
-    };
+    static const QStringList BAKEABLE_SKYBOX_EXTENSIONS { ".jpg", ".png", ".gif", ".bmp", ".pbm",
+                                                          ".pgm", ".ppm", ".xbm", ".xpm", ".svg" };
     auto completeLowerExtension = skyboxFileName.mid(skyboxFileName.indexOf('.')).toLower();
 
     if (BAKEABLE_SKYBOX_EXTENSIONS.contains(completeLowerExtension)) {
@@ -289,8 +282,7 @@ void DomainBaker::bakeSkybox(QUrl skyboxURL, QJsonValueRef entity) {
             // setup a baker for this skybox
 
             QSharedPointer<TextureBaker> skyboxBaker {
-                new TextureBaker(skyboxURL, image::TextureUsage::CUBE_TEXTURE, _contentOutputPath),
-                &TextureBaker::deleteLater
+                new TextureBaker(skyboxURL, image::TextureUsage::CUBE_TEXTURE, _contentOutputPath), &TextureBaker::deleteLater
             };
 
             // make sure our handler is called when the skybox baker is done
@@ -324,7 +316,6 @@ void DomainBaker::handleFinishedModelBaker() {
             // enumerate the QJsonRef values for the URL of this FBX from our multi hash of
             // entity objects needing a URL re-write
             for (QJsonValueRef entityValue : _entitiesNeedingRewrite.values(baker->getModelURL())) {
-
                 // convert the entity QJsonValueRef to a QJsonObject so we can modify its URL
                 auto entity = entityValue.toObject();
 
@@ -374,7 +365,7 @@ void DomainBaker::handleFinishedModelBaker() {
                         }
                     }
                 }
-                
+
                 // replace our temp object with the value referenced by our QJsonValueRef
                 entityValue = entity;
             }
@@ -449,11 +440,11 @@ void DomainBaker::handleFinishedSkyboxBaker() {
         // drop our shared pointer to this baker so that it gets cleaned up
         _skyboxBakers.remove(baker->getTextureURL());
 
-         // emit progress to tell listeners how many models we have baked
-         emit bakeProgress(++_completedSubBakes, _totalNumberOfSubBakes);
+        // emit progress to tell listeners how many models we have baked
+        emit bakeProgress(++_completedSubBakes, _totalNumberOfSubBakes);
 
-         // check if this was the last model we needed to re-write and if we are done now
-         checkIfRewritingComplete();
+        // check if this was the last model we needed to re-write and if we are done now
+        checkIfRewritingComplete();
     }
 }
 
@@ -515,9 +506,7 @@ void DomainBaker::writeNewEntitiesFile() {
     auto bakedEntitiesFilePath = QDir(_uniqueOutputPath).filePath(MODELS_FILE_NAME);
     QFile compressedEntitiesFile { bakedEntitiesFilePath };
 
-    if (!compressedEntitiesFile.open(QIODevice::WriteOnly)
-        || (compressedEntitiesFile.write(compressedJson) == -1)) {
-
+    if (!compressedEntitiesFile.open(QIODevice::WriteOnly) || (compressedEntitiesFile.write(compressedJson) == -1)) {
         // add an error to our list to state that the output models file could not be created or could not be written to
         handleError("Failed to export baked entities file");
 
@@ -526,4 +515,3 @@ void DomainBaker::writeNewEntitiesFile() {
 
     qDebug() << "Exported entities file with baked model URLs to" << bakedEntitiesFilePath;
 }
-

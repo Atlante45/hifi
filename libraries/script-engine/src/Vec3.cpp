@@ -22,7 +22,6 @@
 #include "ScriptEngine.h"
 #include "ScriptEngineLogging.h"
 
-
 float Vec3::orientedAngle(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3) {
     float radians = glm::orientedAngle(glm::normalize(v1), glm::normalize(v2), glm::normalize(v3));
     return glm::degrees(radians);
@@ -39,7 +38,7 @@ void Vec3::print(const QString& label, const glm::vec3& v) {
 
 bool Vec3::withinEpsilon(const glm::vec3& v1, const glm::vec3& v2, float epsilon) {
     float distanceSquared = glm::length2(v1 - v2);
-    return (epsilon*epsilon) >= distanceSquared;
+    return (epsilon * epsilon) >= distanceSquared;
 }
 
 glm::vec3 Vec3::toPolar(const glm::vec3& v) {
@@ -47,14 +46,14 @@ glm::vec3 Vec3::toPolar(const glm::vec3& v) {
     if (glm::abs(radius) < EPSILON) {
         return glm::vec3(0.0f, 0.0f, 0.0f);
     }
-    
+
     glm::vec3 u = v / radius;
-    
+
     float elevation, azimuth;
-    
+
     elevation = glm::asin(-u.y);
     azimuth = atan2(v.x, v.z);
-    
+
     // Round off small decimal values
     if (glm::abs(elevation) < EPSILON) {
         elevation = 0.0f;
@@ -93,4 +92,3 @@ glm::vec3 Vec3::fromPolar(float elevation, float azimuth) {
 float Vec3::getAngle(const glm::vec3& v1, const glm::vec3& v2) {
     return glm::acos(glm::dot(glm::normalize(v1), glm::normalize(v2)));
 }
-

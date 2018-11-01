@@ -17,11 +17,11 @@
 class QNetworkReply;
 
 namespace SandboxUtils {
-    const QString SANDBOX_STATUS_URL = "http://localhost:60332/status";
+const QString SANDBOX_STATUS_URL = "http://localhost:60332/status";
 
-    QNetworkReply* getStatus();
-    bool readStatus(QByteArray statusData);
-    void runLocalSandbox(QString contentPath, bool autoShutdown, bool noUpdater);
-};
+QNetworkReply* getStatus();
+bool readStatus(QByteArray statusData);
+void runLocalSandbox(QString contentPath, bool autoShutdown, bool noUpdater);
+}; // namespace SandboxUtils
 
 #endif // hifi_SandboxUtils_h

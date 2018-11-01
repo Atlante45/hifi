@@ -26,23 +26,19 @@ using namespace render;
 
 class EngineTask {
 public:
-
     using JobModel = Task::Model<EngineTask>;
 
     EngineTask() {}
 
-    void build(JobModel& task, const Varying& in, Varying& out) {
-        task.addJob<EngineStats>("Stats");
-    }
+    void build(JobModel& task, const Varying& in, Varying& out) { task.addJob<EngineStats>("Stats"); }
 };
 
-RenderEngine::RenderEngine() : Engine(EngineTask::JobModel::create("Engine"), std::make_shared<RenderContext>())
-{
+RenderEngine::RenderEngine() : Engine(EngineTask::JobModel::create("Engine"), std::make_shared<RenderContext>()) {
 }
 
 void RenderEngine::load() {
     auto config = getConfiguration();
-    const QString configFile= "config/render.json";
+    const QString configFile = "config/render.json";
 
     QString path(PathUtils::resourcesPath() + configFile);
     QFile file(path);
@@ -59,8 +55,8 @@ void RenderEngine::load() {
             config->setPresetList(doc.object());
             qCDebug(renderlogging) << "Engine configuration file" << path << "loaded";
         } else {
-            qWarning() << "Engine configuration file" << path << "failed to load:" <<
-                error.errorString() << "at offset" << error.offset;
+            qWarning() << "Engine configuration file" << path << "failed to load:" << error.errorString() << "at offset"
+                       << error.offset;
         }
     }
 }

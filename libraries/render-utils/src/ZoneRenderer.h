@@ -16,8 +16,8 @@
 
 #include "DeferredFrameTransform.h"
 
-#include "LightStage.h"
 #include "BackgroundStage.h"
+#include "LightStage.h"
 
 class SetupZones {
 public:
@@ -33,9 +33,7 @@ class ZoneRendererConfig : public render::Task::Config {
     Q_OBJECT
     Q_PROPERTY(int maxDrawn MEMBER maxDrawn NOTIFY dirty)
 public:
-
-    ZoneRendererConfig() : render::Task::Config(
-    ) {}
+    ZoneRendererConfig() : render::Task::Config() {}
 
     int maxDrawn { -1 };
 
@@ -47,9 +45,7 @@ protected:
 
 class ZoneRendererTask {
 public:
-
     static const render::Selection::Name ZONES_SELECTION;
-
 
     using Inputs = render::ItemBounds;
     using Config = ZoneRendererConfig;
@@ -81,7 +77,6 @@ public:
     void run(const render::RenderContextPointer& context, const Inputs& inputs);
 
 protected:
-
     gpu::PipelinePointer _keyLightPipeline;
     gpu::PipelinePointer _ambientPipeline;
     gpu::PipelinePointer _backgroundPipeline;
@@ -90,6 +85,5 @@ protected:
     const gpu::PipelinePointer& getAmbientPipeline();
     const gpu::PipelinePointer& getBackgroundPipeline();
 };
-
 
 #endif

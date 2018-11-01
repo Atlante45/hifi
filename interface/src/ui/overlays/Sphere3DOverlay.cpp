@@ -12,8 +12,8 @@
 
 #include <DependencyManager.h>
 #include <GeometryCache.h>
-#include <gpu/Batch.h>
 #include <SharedUtil.h>
+#include <gpu/Batch.h>
 
 QString const Sphere3DOverlay::TYPE = "sphere";
 
@@ -21,9 +21,7 @@ QString const Sphere3DOverlay::TYPE = "sphere";
 // However, the geometry cache renders a UNIT sphere, so we need to scale down.
 static const float SPHERE_OVERLAY_SCALE = 0.5f;
 
-Sphere3DOverlay::Sphere3DOverlay(const Sphere3DOverlay* Sphere3DOverlay) :
-    Volume3DOverlay(Sphere3DOverlay)
-{
+Sphere3DOverlay::Sphere3DOverlay(const Sphere3DOverlay* Sphere3DOverlay) : Volume3DOverlay(Sphere3DOverlay) {
 }
 
 // If Sphere3DOverlay had a getProperty() method then it would go here; do JSDoc here.
@@ -60,7 +58,8 @@ Sphere3DOverlay::Sphere3DOverlay(const Sphere3DOverlay* Sphere3DOverlay) :
  *     Antonyms: <code>isWire</code> and <code>wire</code>.
  * @property {boolean} isDashedLine=false - If <code>true</code>, a dashed line is drawn on the overlay's edges. Synonym:
  *     <code>dashed</code>.
- * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.  <code>ignoreRayIntersection</code> is a synonym.
+ * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.
+ * <code>ignoreRayIntersection</code> is a synonym.
  * @property {boolean} drawInFront=false - If <code>true</code>, the overlay is rendered in front of other overlays that don't
  *     have <code>drawInFront</code> set to <code>true</code>, and in front of entities.
  * @property {boolean} grabbable=false - Signal to grabbing scripts whether or not this overlay can be grabbed.
@@ -69,7 +68,7 @@ Sphere3DOverlay::Sphere3DOverlay(const Sphere3DOverlay* Sphere3DOverlay) :
  *     <code>parentID</code> is an avatar skeleton. A value of <code>65535</code> means "no joint".
  *
  * @property {Vec3} dimensions - The dimensions of the overlay. Synonyms: <code>scale</code>, <code>size</code>.
- */ 
+ */
 
 void Sphere3DOverlay::render(RenderArgs* args) {
     if (!_renderVisible) {
@@ -116,12 +115,11 @@ Sphere3DOverlay* Sphere3DOverlay::createClone() const {
 
 Transform Sphere3DOverlay::evalRenderTransform() {
     Transform transform = getTransform();
-    transform.setScale(1.0f);  // ignore inherited scale from SpatiallyNestable
+    transform.setScale(1.0f); // ignore inherited scale from SpatiallyNestable
     transform.postScale(getDimensions() * SPHERE_OVERLAY_SCALE);
 
     return transform;
 }
-
 
 scriptable::ScriptableModelBase Sphere3DOverlay::getScriptableModel() {
     auto geometryCache = DependencyManager::get<GeometryCache>();

@@ -112,17 +112,23 @@ Transform PickManager::getResultTransform(unsigned int uid) const {
 void PickManager::update() {
     uint64_t expiry = usecTimestampNow() + _perFrameTimeBudget;
     std::unordered_map<PickQuery::PickType, std::unordered_map<unsigned int, std::shared_ptr<PickQuery>>> cachedPicks;
-    withReadLock([&] {
-        cachedPicks = _picks;
-    });
+    withReadLock([&] { cachedPicks = _picks; });
 
     bool shouldPickHUD = _shouldPickHUDOperator();
     // FIXME: give each type its own expiry
     // Each type will update at least one pick, regardless of the expiry
-    _updatedPickCounts[PickQuery::Stylus] = _stylusPickCacheOptimizer.update(cachedPicks[PickQuery::Stylus], _nextPickToUpdate[PickQuery::Stylus], expiry, false);
-    _updatedPickCounts[PickQuery::Ray] = _rayPickCacheOptimizer.update(cachedPicks[PickQuery::Ray], _nextPickToUpdate[PickQuery::Ray], expiry, shouldPickHUD);
-    _updatedPickCounts[PickQuery::Parabola] = _parabolaPickCacheOptimizer.update(cachedPicks[PickQuery::Parabola], _nextPickToUpdate[PickQuery::Parabola], expiry, shouldPickHUD);
-    _updatedPickCounts[PickQuery::Collision] = _collisionPickCacheOptimizer.update(cachedPicks[PickQuery::Collision], _nextPickToUpdate[PickQuery::Collision], expiry, false);
+    _updatedPickCounts[PickQuery::Stylus] = _stylusPickCacheOptimizer.update(cachedPicks[PickQuery::Stylus],
+                                                                             _nextPickToUpdate[PickQuery::Stylus], expiry,
+                                                                             false);
+    _updatedPickCounts[PickQuery::Ray] = _rayPickCacheOptimizer.update(cachedPicks[PickQuery::Ray],
+                                                                       _nextPickToUpdate[PickQuery::Ray], expiry,
+                                                                       shouldPickHUD);
+    _updatedPickCounts[PickQuery::Parabola] = _parabolaPickCacheOptimizer.update(cachedPicks[PickQuery::Parabola],
+                                                                                 _nextPickToUpdate[PickQuery::Parabola], expiry,
+                                                                                 shouldPickHUD);
+    _updatedPickCounts[PickQuery::Collision] = _collisionPickCacheOptimizer.update(cachedPicks[PickQuery::Collision],
+                                                                                   _nextPickToUpdate[PickQuery::Collision],
+                                                                                   expiry, false);
 }
 
 bool PickManager::isLeftHand(unsigned int uid) {

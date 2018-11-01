@@ -17,7 +17,6 @@
 
 #include <QtCore/QThread>
 
-
 void ResourceRequest::send() {
     if (QThread::currentThread() != thread()) {
         QMetaObject::invokeMethod(this, "send", Qt::QueuedConnection);
@@ -36,15 +35,24 @@ void ResourceRequest::send() {
 
 QString ResourceRequest::getResultString() const {
     switch (_result) {
-        case Success: return "Success";
-        case Error: return "Error";
-        case Timeout: return "Timeout";
-        case ServerUnavailable: return "Server Unavailable";
-        case AccessDenied: return "Access Denied";
-        case InvalidURL: return "Invalid URL";
-        case NotFound: return "Not Found";
-        case RedirectFail: return "Redirect Fail";
-        default: return "Unspecified Error";
+        case Success:
+            return "Success";
+        case Error:
+            return "Error";
+        case Timeout:
+            return "Timeout";
+        case ServerUnavailable:
+            return "Server Unavailable";
+        case AccessDenied:
+            return "Access Denied";
+        case InvalidURL:
+            return "Invalid URL";
+        case NotFound:
+            return "Not Found";
+        case RedirectFail:
+            return "Redirect Fail";
+        default:
+            return "Unspecified Error";
     }
 }
 

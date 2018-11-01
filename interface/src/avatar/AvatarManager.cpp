@@ -28,17 +28,16 @@
 #pragma GCC diagnostic pop
 #endif
 
-
-#include <shared/QtHelpers.h>
 #include <AvatarData.h>
 #include <PerfStat.h>
 #include <PrioritySortUtil.h>
 #include <RegisteredMetaTypes.h>
 #include <Rig.h>
 #include <SettingHandle.h>
-#include <UsersScriptingInterface.h>
 #include <UUID.h>
+#include <UsersScriptingInterface.h>
 #include <shared/ConicalViewFrustum.h>
+#include <shared/QtHelpers.h>
 
 #include "Application.h"
 #include "InterfaceLogging.h"
@@ -50,16 +49,16 @@
 // in the update loop - this also results in ~30hz when in desktop mode which is essentially
 // what we want
 const int CLIENT_TO_AVATAR_MIXER_BROADCAST_FRAMES_PER_SECOND = 50;
-static const quint64 MIN_TIME_BETWEEN_MY_AVATAR_DATA_SENDS = USECS_PER_SECOND / CLIENT_TO_AVATAR_MIXER_BROADCAST_FRAMES_PER_SECOND;
+static const quint64 MIN_TIME_BETWEEN_MY_AVATAR_DATA_SENDS = USECS_PER_SECOND /
+                                                             CLIENT_TO_AVATAR_MIXER_BROADCAST_FRAMES_PER_SECOND;
 
 // We add _myAvatar into the hash with all the other AvatarData, and we use the default NULL QUid as the key.
-const QUuid MY_AVATAR_KEY;  // NULL key
+const QUuid MY_AVATAR_KEY; // NULL key
 
 AvatarManager::AvatarManager(QObject* parent) :
-    _myAvatar(new MyAvatar(qApp->thread()), [](MyAvatar* ptr) { ptr->deleteLater(); })
-{
+    _myAvatar(new MyAvatar(qApp->thread()), [](MyAvatar* ptr) { ptr->deleteLater(); }) {
     // register a meta type for the weak pointer we'll use for the owning avatar mixer for each avatar
-    qRegisterMetaType<QWeakPointer<Node> >("NodeWeakPointer");
+    qRegisterMetaType<QWeakPointer<Node>>("NodeWeakPointer");
 
     auto nodeList = DependencyManager::get<NodeList>();
 
@@ -119,7 +118,7 @@ void AvatarManager::init() {
     }
 }
 
-void AvatarManager::setSpace(workload::SpacePointer& space ) {
+void AvatarManager::setSpace(workload::SpacePointer& space) {
     assert(!_space);
     _space = space;
 }
@@ -155,7 +154,8 @@ void AvatarManager::updateMyAvatar(float deltaTime) {
     bool showWarnings = Menu::getInstance()->isOptionChecked(MenuOption::PipelineWarnings);
     PerformanceWarning warn(showWarnings, "AvatarManager::updateMyAvatar()");
 
-    AvatarTransit::Status status = _myAvatar->updateTransit(deltaTime, _myAvatar->getNextPosition(), _myAvatar->getSensorToWorldScale(), _transitConfig);
+    AvatarTransit::Status status = _myAvatar->updateTransit(deltaTime, _myAvatar->getNextPosition(),
+                                                            _myAvatar->getSensorToWorldScale(), _transitConfig);
     handleTransitAnimations(status);
 
     _myAvatar->update(deltaTime);
@@ -168,13 +168,12 @@ void AvatarManager::updateMyAvatar(float deltaTime) {
 
     if (dt > MIN_TIME_BETWEEN_MY_AVATAR_DATA_SENDS && !_myAvatarDataPacketsPaused) {
         // send head/hand data to the avatar mixer and voxel server
-        PerformanceTimer perfTimer("send"); 
+        PerformanceTimer perfTimer("send");
         _myAvatar->sendAvatarDataPacket();
         _lastSendAvatarDataTime = now;
         _myAvatarSendRate.increment();
     }
 }
-
 
 Q_LOGGING_CATEGORY(trace_simulation_avatar, "trace.simulation.avatar");
 
@@ -214,7 +213,7 @@ void AvatarManager::updateOtherAvatars(float deltaTime) {
 
     PerformanceTimer perfTimer("otherAvatars");
 
-    class SortableAvatar: public PrioritySortUtil::Sortable {
+    class SortableAvatar : public PrioritySortUtil::Sortable {
     public:
         SortableAvatar() = delete;
         SortableAvatar(const std::shared_ptr<Avatar>& avatar) : _avatar(avatar) {}
@@ -222,6 +221,7 @@ void AvatarManager::updateOtherAvatars(float deltaTime) {
         float getRadius() const override { return _avatar->getBoundingRadius(); }
         uint64_t getTimestamp() const override { return _avatar->getLastRenderUpdateTime(); }
         std::shared_ptr<Avatar> getAvatar() const { return _avatar; }
+
     private:
         std::shared_ptr<Avatar> _avatar;
     };
@@ -229,10 +229,9 @@ void AvatarManager::updateOtherAvatars(float deltaTime) {
     auto avatarMap = getHashCopy();
 
     const auto& views = qApp->getConicalViews();
-    PrioritySortUtil::PriorityQueue<SortableAvatar> sortedAvatars(views,
-            AvatarData::_avatarSortCoefficientSize,
-            AvatarData::_avatarSortCoefficientCenter,
-            AvatarData::_avatarSortCoefficientAge);
+    PrioritySortUtil::PriorityQueue<SortableAvatar> sortedAvatars(views, AvatarData::_avatarSortCoefficientSize,
+                                                                  AvatarData::_avatarSortCoefficientCenter,
+                                                                  AvatarData::_avatarSortCoefficientAge);
     sortedAvatars.reserve(avatarMap.size() - 1); // don't include MyAvatar
 
     // Build vector and compute priorities
@@ -289,7 +288,8 @@ void AvatarManager::updateOtherAvatars(float deltaTime) {
                 numAvatarsUpdated++;
             }
             auto transitStatus = avatar->_transit.update(deltaTime, avatar->_serverPosition, _transitConfig);
-            if (avatar->getIsNewAvatar() && (transitStatus == AvatarTransit::Status::START_TRANSIT || transitStatus == AvatarTransit::Status::ABORT_TRANSIT)) {
+            if (avatar->getIsNewAvatar() && (transitStatus == AvatarTransit::Status::START_TRANSIT ||
+                                             transitStatus == AvatarTransit::Status::ABORT_TRANSIT)) {
                 avatar->_transit.reset();
                 avatar->setIsNewAvatar(false);
             }
@@ -350,20 +350,18 @@ void AvatarManager::postUpdate(float deltaTime, const render::ScenePointer& scen
 void AvatarManager::sendIdentityRequest(const QUuid& avatarID) const {
     auto nodeList = DependencyManager::get<NodeList>();
     QWeakPointer<NodeList> nodeListWeak = nodeList;
-    nodeList->eachMatchingNode(
-        [](const SharedNodePointer& node)->bool {
-            return node->getType() == NodeType::AvatarMixer && node->getActiveSocket();
-        },
-        [this, avatarID, nodeListWeak](const SharedNodePointer& node) {
-            auto nodeList = nodeListWeak.lock();
-            if (nodeList) {
-                auto packet = NLPacket::create(PacketType::AvatarIdentityRequest, NUM_BYTES_RFC4122_UUID, true);
-                packet->write(avatarID.toRfc4122());
-                nodeList->sendPacket(std::move(packet), *node);
-                ++_identityRequestsSent;
-            }
-        }
-    );
+    nodeList->eachMatchingNode([](const SharedNodePointer& node)
+                                   -> bool { return node->getType() == NodeType::AvatarMixer && node->getActiveSocket(); },
+                               [this, avatarID, nodeListWeak](const SharedNodePointer& node) {
+                                   auto nodeList = nodeListWeak.lock();
+                                   if (nodeList) {
+                                       auto packet = NLPacket::create(PacketType::AvatarIdentityRequest, NUM_BYTES_RFC4122_UUID,
+                                                                      true);
+                                       packet->write(avatarID.toRfc4122());
+                                       nodeList->sendPacket(std::move(packet), *node);
+                                       ++_identityRequestsSent;
+                                   }
+                               });
 }
 
 void AvatarManager::simulateAvatarFades(float deltaTime) {
@@ -410,7 +408,8 @@ void AvatarManager::buildPhysicsTransaction(PhysicsEngine::Transaction& transact
             } else {
                 ShapeInfo shapeInfo;
                 avatar->computeShapeInfo(shapeInfo);
-                btCollisionShape* shape = const_cast<btCollisionShape*>(ObjectMotionState::getShapeManager()->getShape(shapeInfo));
+                btCollisionShape* shape = const_cast<btCollisionShape*>(
+                    ObjectMotionState::getShapeManager()->getShape(shapeInfo));
                 if (shape) {
                     AvatarMotionState* motionState = new AvatarMotionState(avatar, shape);
                     motionState->setMass(avatar->computeMass());
@@ -492,7 +491,7 @@ void AvatarManager::clearOtherAvatars() {
 
         removedAvatars.reserve(_avatarHash.size());
 
-        auto avatarIterator =  _avatarHash.begin();
+        auto avatarIterator = _avatarHash.begin();
         while (avatarIterator != _avatarHash.end()) {
             auto avatar = std::static_pointer_cast<Avatar>(avatarIterator.value());
             if (avatar != _myAvatar) {
@@ -502,7 +501,7 @@ void AvatarManager::clearOtherAvatars() {
                 ++avatarIterator;
             }
         }
-    }    
+    }
 
     for (auto& av : removedAvatars) {
         handleRemovedAvatar(av);
@@ -539,26 +538,28 @@ void AvatarManager::handleCollisionEvents(const CollisionEvents& collisionEvents
             auto collisionSound = myAvatar->getCollisionSound();
             if (collisionSound) {
                 const auto characterController = myAvatar->getCharacterController();
-                const float avatarVelocityChange = (characterController ? glm::length(characterController->getVelocityChange()) : 0.0f);
+                const float avatarVelocityChange = (characterController ? glm::length(characterController->getVelocityChange())
+                                                                        : 0.0f);
                 const float velocityChange = glm::length(collision.velocityChange) + avatarVelocityChange;
                 const float MIN_AVATAR_COLLISION_ACCELERATION = 2.4f; // walking speed
-                const bool isSound = (collision.type == CONTACT_EVENT_TYPE_START) && (velocityChange > MIN_AVATAR_COLLISION_ACCELERATION);
+                const bool isSound = (collision.type == CONTACT_EVENT_TYPE_START) &&
+                                     (velocityChange > MIN_AVATAR_COLLISION_ACCELERATION);
 
                 if (!isSound) {
-                    return;  // No sense iterating for others. We only have one avatar.
+                    return; // No sense iterating for others. We only have one avatar.
                 }
-                // Your avatar sound is personal to you, so let's say the "mass" part of the kinetic energy is already accounted for.
+                // Your avatar sound is personal to you, so let's say the "mass" part of the kinetic energy is already accounted
+                // for.
                 const float energy = velocityChange * velocityChange;
                 const float COLLISION_ENERGY_AT_FULL_VOLUME = 10.0f;
                 const float energyFactorOfFull = fmin(1.0f, energy / COLLISION_ENERGY_AT_FULL_VOLUME);
 
-                // For general entity collisionSoundURL, playSound supports changing the pitch for the sound based on the size of the object,
-                // but most avatars are roughly the same size, so let's not be so fancy yet.
+                // For general entity collisionSoundURL, playSound supports changing the pitch for the sound based on the size
+                // of the object, but most avatars are roughly the same size, so let's not be so fancy yet.
                 const float AVATAR_STRETCH_FACTOR = 1.0f;
 
-                _collisionInjectors.remove_if([](const AudioInjectorPointer& injector) {
-                    return !injector || injector->isFinished();
-                });
+                _collisionInjectors.remove_if(
+                    [](const AudioInjectorPointer& injector) { return !injector || injector->isFinished(); });
 
                 static const int MAX_INJECTOR_COUNT = 3;
                 if (_collisionInjectors.size() < MAX_INJECTOR_COUNT) {
@@ -600,8 +601,7 @@ AvatarSharedPointer AvatarManager::getAvatarBySessionID(const QUuid& sessionID) 
     return findAvatar(sessionID);
 }
 
-RayToAvatarIntersectionResult AvatarManager::findRayIntersection(const PickRay& ray,
-                                                                 const QScriptValue& avatarIdsToInclude,
+RayToAvatarIntersectionResult AvatarManager::findRayIntersection(const PickRay& ray, const QScriptValue& avatarIdsToInclude,
                                                                  const QScriptValue& avatarIdsToDiscard) {
     QVector<EntityItemID> avatarsToInclude = qVectorEntityItemIDFromScriptValue(avatarIdsToInclude);
     QVector<EntityItemID> avatarsToDiscard = qVectorEntityItemIDFromScriptValue(avatarIdsToDiscard);
@@ -615,10 +615,9 @@ RayToAvatarIntersectionResult AvatarManager::findRayIntersectionVector(const Pic
     RayToAvatarIntersectionResult result;
     if (QThread::currentThread() != thread()) {
         BLOCKING_INVOKE_METHOD(const_cast<AvatarManager*>(this), "findRayIntersectionVector",
-                                  Q_RETURN_ARG(RayToAvatarIntersectionResult, result),
-                                  Q_ARG(const PickRay&, ray),
-                                  Q_ARG(const QVector<EntityItemID>&, avatarsToInclude),
-                                  Q_ARG(const QVector<EntityItemID>&, avatarsToDiscard));
+                               Q_RETURN_ARG(RayToAvatarIntersectionResult, result), Q_ARG(const PickRay&, ray),
+                               Q_ARG(const QVector<EntityItemID>&, avatarsToInclude),
+                               Q_ARG(const QVector<EntityItemID>&, avatarsToDiscard));
         return result;
     }
 
@@ -683,7 +682,8 @@ RayToAvatarIntersectionResult AvatarManager::findRayIntersectionVector(const Pic
         glm::vec3 surfaceNormal;
         QVariantMap extraInfo;
         SkeletonModelPointer avatarModel = sortedAvatar.second->getSkeletonModel();
-        if (avatarModel->findRayIntersectionAgainstSubMeshes(ray.origin, ray.direction, distance, face, surfaceNormal, extraInfo, true)) {
+        if (avatarModel->findRayIntersectionAgainstSubMeshes(ray.origin, ray.direction, distance, face, surfaceNormal,
+                                                             extraInfo, true)) {
             if (distance < result.distance) {
                 result.intersects = true;
                 result.avatarID = sortedAvatar.second->getID();
@@ -702,14 +702,12 @@ RayToAvatarIntersectionResult AvatarManager::findRayIntersectionVector(const Pic
     return result;
 }
 
-ParabolaToAvatarIntersectionResult AvatarManager::findParabolaIntersectionVector(const PickParabola& pick,
-                                                                                 const QVector<EntityItemID>& avatarsToInclude,
-                                                                                 const QVector<EntityItemID>& avatarsToDiscard) {
+ParabolaToAvatarIntersectionResult AvatarManager::findParabolaIntersectionVector(
+    const PickParabola& pick, const QVector<EntityItemID>& avatarsToInclude, const QVector<EntityItemID>& avatarsToDiscard) {
     ParabolaToAvatarIntersectionResult result;
     if (QThread::currentThread() != thread()) {
         BLOCKING_INVOKE_METHOD(const_cast<AvatarManager*>(this), "findParabolaIntersectionVector",
-                               Q_RETURN_ARG(ParabolaToAvatarIntersectionResult, result),
-                               Q_ARG(const PickParabola&, pick),
+                               Q_RETURN_ARG(ParabolaToAvatarIntersectionResult, result), Q_ARG(const PickParabola&, pick),
                                Q_ARG(const QVector<EntityItemID>&, avatarsToInclude),
                                Q_ARG(const QVector<EntityItemID>&, avatarsToDiscard));
         return result;
@@ -751,7 +749,8 @@ ParabolaToAvatarIntersectionResult AvatarManager::findParabolaIntersectionVector
         glm::vec3 end;
         float radius;
         avatar->getCapsule(start, end, radius);
-        findParabolaCapsuleIntersection(pick.origin, pick.velocity, pick.acceleration, start, end, radius, avatar->getWorldOrientation(), distance);
+        findParabolaCapsuleIntersection(pick.origin, pick.velocity, pick.acceleration, start, end, radius,
+                                        avatar->getWorldOrientation(), distance);
 #endif
 
         if (distance < FLT_MAX) {
@@ -776,7 +775,8 @@ ParabolaToAvatarIntersectionResult AvatarManager::findParabolaIntersectionVector
         glm::vec3 surfaceNormal;
         QVariantMap extraInfo;
         SkeletonModelPointer avatarModel = sortedAvatar.second->getSkeletonModel();
-        if (avatarModel->findParabolaIntersectionAgainstSubMeshes(pick.origin, pick.velocity, pick.acceleration, parabolicDistance, face, surfaceNormal, extraInfo, true)) {
+        if (avatarModel->findParabolaIntersectionAgainstSubMeshes(pick.origin, pick.velocity, pick.acceleration,
+                                                                  parabolicDistance, face, surfaceNormal, extraInfo, true)) {
             if (parabolicDistance < result.parabolicDistance) {
                 result.intersects = true;
                 result.avatarID = sortedAvatar.second->getID();
@@ -789,7 +789,8 @@ ParabolaToAvatarIntersectionResult AvatarManager::findParabolaIntersectionVector
     }
 
     if (result.intersects) {
-        result.intersection = pick.origin + pick.velocity * result.parabolicDistance + 0.5f * pick.acceleration * result.parabolicDistance * result.parabolicDistance;
+        result.intersection = pick.origin + pick.velocity * result.parabolicDistance +
+                              0.5f * pick.acceleration * result.parabolicDistance * result.parabolicDistance;
         result.distance = glm::distance(pick.origin, result.intersection);
     }
 
@@ -825,8 +826,7 @@ void AvatarManager::setAvatarSortCoefficient(const QString& name, const QScriptV
         }
     }
     if (somethingChanged) {
-        size_t packetSize = sizeof(AvatarData::_avatarSortCoefficientSize) + 
-                            sizeof(AvatarData::_avatarSortCoefficientCenter) +
+        size_t packetSize = sizeof(AvatarData::_avatarSortCoefficientSize) + sizeof(AvatarData::_avatarSortCoefficientCenter) +
                             sizeof(AvatarData::_avatarSortCoefficientAge);
 
         auto packet = NLPacket::create(PacketType::AdjustAvatarSorting, packetSize);

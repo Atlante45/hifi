@@ -12,8 +12,8 @@
 
 #include "RenderForwardTask.h"
 
-#include <PerfStat.h>
 #include <PathUtils.h>
+#include <PerfStat.h>
 #include <ViewFrustum.h>
 #include <gpu/Context.h>
 #include <gpu/Texture.h>
@@ -22,26 +22,26 @@
 
 #include <render/FilterTask.h>
 
-#include "RenderHifi.h"
-#include "render-utils/ShaderConstants.h"
-#include "StencilMaskPass.h"
-#include "ZoneRenderer.h"
-#include "FadeEffect.h"
-#include "ToneMappingEffect.h"
 #include "BackgroundStage.h"
+#include "FadeEffect.h"
 #include "FramebufferCache.h"
-#include "TextureCache.h"
 #include "RenderCommonTask.h"
+#include "RenderHifi.h"
+#include "StencilMaskPass.h"
+#include "TextureCache.h"
+#include "ToneMappingEffect.h"
+#include "ZoneRenderer.h"
+#include "render-utils/ShaderConstants.h"
 
 namespace ru {
-    using render_utils::slot::texture::Texture;
-    using render_utils::slot::buffer::Buffer;
-}
+using render_utils::slot::buffer::Buffer;
+using render_utils::slot::texture::Texture;
+} // namespace ru
 
 namespace gr {
-    using graphics::slot::texture::Texture;
-    using graphics::slot::buffer::Buffer;
-}
+using graphics::slot::buffer::Buffer;
+using graphics::slot::texture::Texture;
+} // namespace gr
 
 using namespace render;
 
@@ -58,13 +58,13 @@ void RenderForwardTask::build(JobModel& task, const render::Varying& input, rend
     // Extract opaques / transparents / lights / metas / overlays / background
     const auto& opaques = items.get0()[RenderFetchCullSortTask::OPAQUE_SHAPE];
     const auto& transparents = items.get0()[RenderFetchCullSortTask::TRANSPARENT_SHAPE];
-    //const auto& lights = items.get0()[RenderFetchCullSortTask::LIGHT];
+    // const auto& lights = items.get0()[RenderFetchCullSortTask::LIGHT];
     const auto& metas = items.get0()[RenderFetchCullSortTask::META];
     const auto& overlayOpaques = items.get0()[RenderFetchCullSortTask::OVERLAY_OPAQUE_SHAPE];
     const auto& overlayTransparents = items.get0()[RenderFetchCullSortTask::OVERLAY_TRANSPARENT_SHAPE];
 
-    //const auto& background = items.get0()[RenderFetchCullSortTask::BACKGROUND];
-    //const auto& spatialSelection = items[1];
+    // const auto& background = items.get0()[RenderFetchCullSortTask::BACKGROUND];
+    // const auto& spatialSelection = items[1];
 
     fadeEffect->build(task, opaques);
 
@@ -79,8 +79,8 @@ void RenderForwardTask::build(JobModel& task, const render::Varying& input, rend
     const auto currentFrames = task.addJob<FetchCurrentFrames>("FetchCurrentFrames");
     const auto lightFrame = currentFrames.getN<FetchCurrentFrames::Outputs>(0);
     const auto backgroundFrame = currentFrames.getN<FetchCurrentFrames::Outputs>(1);
-    //const auto hazeFrame = currentFrames.getN<FetchCurrentFrames::Outputs>(2);
-    //const auto bloomFrame = currentFrames.getN<FetchCurrentFrames::Outputs>(3);
+    // const auto hazeFrame = currentFrames.getN<FetchCurrentFrames::Outputs>(2);
+    // const auto bloomFrame = currentFrames.getN<FetchCurrentFrames::Outputs>(3);
 
     // GPU jobs: Start preparing the main framebuffer
     const auto framebuffer = task.addJob<PrepareFramebuffer>("PrepareFramebuffer");
@@ -91,14 +91,18 @@ void RenderForwardTask::build(JobModel& task, const render::Varying& input, rend
     task.addJob<PrepareStencil>("PrepareStencil", framebuffer);
 
     // Layered Overlays
-    const auto filteredOverlaysOpaque = task.addJob<FilterLayeredItems>("FilterOverlaysLayeredOpaque", overlayOpaques, render::hifi::LAYER_3D_FRONT);
-    const auto filteredOverlaysTransparent = task.addJob<FilterLayeredItems>("FilterOverlaysLayeredTransparent", overlayTransparents, render::hifi::LAYER_3D_FRONT);
+    const auto filteredOverlaysOpaque = task.addJob<FilterLayeredItems>("FilterOverlaysLayeredOpaque", overlayOpaques,
+                                                                        render::hifi::LAYER_3D_FRONT);
+    const auto filteredOverlaysTransparent = task.addJob<FilterLayeredItems>("FilterOverlaysLayeredTransparent",
+                                                                             overlayTransparents, render::hifi::LAYER_3D_FRONT);
     const auto overlaysInFrontOpaque = filteredOverlaysOpaque.getN<FilterLayeredItems::Outputs>(0);
     const auto overlaysInFrontTransparent = filteredOverlaysTransparent.getN<FilterLayeredItems::Outputs>(0);
     const auto nullJitter = Varying(glm::vec2(0.0f, 0.0f));
 
-    const auto overlayInFrontOpaquesInputs = DrawOverlay3D::Inputs(overlaysInFrontOpaque, lightingModel, nullJitter).asVarying();
-    const auto overlayInFrontTransparentsInputs = DrawOverlay3D::Inputs(overlaysInFrontTransparent, lightingModel, nullJitter).asVarying();
+    const auto overlayInFrontOpaquesInputs = DrawOverlay3D::Inputs(overlaysInFrontOpaque, lightingModel, nullJitter)
+                                                 .asVarying();
+    const auto overlayInFrontTransparentsInputs = DrawOverlay3D::Inputs(overlaysInFrontTransparent, lightingModel, nullJitter)
+                                                      .asVarying();
     task.addJob<DrawOverlay3D>("DrawOverlayInFrontOpaque", overlayInFrontOpaquesInputs, true);
     task.addJob<DrawOverlay3D>("DrawOverlayInFrontTransparent", overlayInFrontTransparentsInputs, false);
 
@@ -106,7 +110,8 @@ void RenderForwardTask::build(JobModel& task, const render::Varying& input, rend
     const auto opaqueInputs = DrawForward::Inputs(opaques, lightingModel).asVarying();
     task.addJob<DrawForward>("DrawOpaques", opaqueInputs, shapePlumber);
 
-    // Similar to light stage, background stage has been filled by several potential render items and resolved for the frame in this job
+    // Similar to light stage, background stage has been filled by several potential render items and resolved for the frame in
+    // this job
     const auto backgroundInputs = DrawBackgroundStage::Inputs(lightingModel, backgroundFrame).asVarying();
     task.addJob<DrawBackgroundStage>("DrawBackgroundForward", backgroundInputs);
 
@@ -114,7 +119,7 @@ void RenderForwardTask::build(JobModel& task, const render::Varying& input, rend
     const auto transparentInputs = DrawForward::Inputs(transparents, lightingModel).asVarying();
     task.addJob<DrawForward>("DrawTransparents", transparentInputs, shapePlumber);
 
-    {  // Debug the bounds of the rendered items, still look at the zbuffer
+    { // Debug the bounds of the rendered items, still look at the zbuffer
 
         task.addJob<DrawBounds>("DrawMetaBounds", metas);
         task.addJob<DrawBounds>("DrawBounds", opaques);
@@ -126,9 +131,10 @@ void RenderForwardTask::build(JobModel& task, const render::Varying& input, rend
     }
 
     // Lighting Buffer ready for tone mapping
-    // Forward rendering on GLES doesn't support tonemapping to and from the same FBO, so we specify 
+    // Forward rendering on GLES doesn't support tonemapping to and from the same FBO, so we specify
     // the output FBO as null, which causes the tonemapping to target the blit framebuffer
-    const auto toneMappingInputs = ToneMappingDeferred::Inputs(framebuffer, static_cast<gpu::FramebufferPointer>(nullptr) ).asVarying();
+    const auto toneMappingInputs = ToneMappingDeferred::Inputs(framebuffer, static_cast<gpu::FramebufferPointer>(nullptr))
+                                       .asVarying();
     task.addJob<ToneMappingDeferred>("ToneMapping", toneMappingInputs);
 
     // Layered Overlays
@@ -153,13 +159,13 @@ void PrepareFramebuffer::run(const RenderContextPointer& renderContext, gpu::Fra
 
         auto colorFormat = gpu::Element::COLOR_SRGBA_32;
         auto defaultSampler = gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_POINT);
-        auto colorTexture =
-            gpu::Texture::createRenderBuffer(colorFormat, frameSize.x, frameSize.y, gpu::Texture::SINGLE_MIP, defaultSampler);
+        auto colorTexture = gpu::Texture::createRenderBuffer(colorFormat, frameSize.x, frameSize.y, gpu::Texture::SINGLE_MIP,
+                                                             defaultSampler);
         _framebuffer->setRenderBuffer(0, colorTexture);
 
-        auto depthFormat = gpu::Element(gpu::SCALAR, gpu::UINT32, gpu::DEPTH_STENCIL);  // Depth24_Stencil8 texel format
-        auto depthTexture =
-            gpu::Texture::createRenderBuffer(depthFormat, frameSize.x, frameSize.y, gpu::Texture::SINGLE_MIP, defaultSampler);
+        auto depthFormat = gpu::Element(gpu::SCALAR, gpu::UINT32, gpu::DEPTH_STENCIL); // Depth24_Stencil8 texel format
+        auto depthTexture = gpu::Texture::createRenderBuffer(depthFormat, frameSize.x, frameSize.y, gpu::Texture::SINGLE_MIP,
+                                                             defaultSampler);
         _framebuffer->setDepthStencilBuffer(depthTexture, depthFormat);
     }
 
@@ -171,8 +177,8 @@ void PrepareFramebuffer::run(const RenderContextPointer& renderContext, gpu::Fra
 
         batch.setFramebuffer(_framebuffer);
         batch.clearFramebuffer(gpu::Framebuffer::BUFFER_COLOR0 | gpu::Framebuffer::BUFFER_DEPTH |
-            gpu::Framebuffer::BUFFER_STENCIL,
-            vec4(vec3(0), 0), 1.0, 0, true);
+                                   gpu::Framebuffer::BUFFER_STENCIL,
+                               vec4(vec3(0), 0), 1.0, 0, true);
     });
 
     framebuffer = _framebuffer;
@@ -218,7 +224,6 @@ void DrawForward::run(const RenderContextPointer& renderContext, const Inputs& i
     gpu::doInBatch("DrawForward::run", args->_context, [&](gpu::Batch& batch) {
         args->_batch = &batch;
 
-
         // Setup projection
         glm::mat4 projMat;
         Transform viewMat;
@@ -246,5 +251,3 @@ void DrawForward::run(const RenderContextPointer& renderContext, const Inputs& i
         args->_globalShapeKey = 0;
     });
 }
-
-

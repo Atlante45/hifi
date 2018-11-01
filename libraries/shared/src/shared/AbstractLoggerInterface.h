@@ -12,9 +12,9 @@
 #ifndef hifi_AbstractLoggerInterface_h
 #define hifi_AbstractLoggerInterface_h
 
-#include <QtCore/QObject>
 #include <QString>
 #include <QStringList>
+#include <QtCore/QObject>
 
 class AbstractLoggerInterface : public QObject {
     Q_OBJECT
@@ -49,14 +49,14 @@ signals:
     void logReceived(QString message);
 
 private:
-    bool _extraDebugging{ false };
-    bool _debugPrint{ true };
-    bool _infoPrint{ true };
-    bool _criticalPrint{ true };
-    bool _warningPrint{ true };
-    bool _suppressPrint{ true };
-    bool _fatalPrint{ true };
-    bool _unknownPrint{ true };
+    bool _extraDebugging { false };
+    bool _debugPrint { true };
+    bool _infoPrint { true };
+    bool _criticalPrint { true };
+    bool _warningPrint { true };
+    bool _suppressPrint { true };
+    bool _fatalPrint { true };
+    bool _unknownPrint { true };
 };
 
 #endif // hifi_AbstractLoggerInterface_h

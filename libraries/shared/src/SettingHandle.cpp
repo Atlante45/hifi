@@ -14,13 +14,9 @@
 
 #include <math.h>
 
-
-
 const QString Settings::firstRun { "firstRun" };
 
-
-Settings::Settings() : _manager(DependencyManager::get<Setting::Manager>())
-{
+Settings::Settings() : _manager(DependencyManager::get<Setting::Manager>()) {
 }
 
 QString Settings::fileName() const {
@@ -85,7 +81,6 @@ QVariant Settings::value(const QString& name, const QVariant& defaultValue) cons
     return _manager->value(name, defaultValue);
 }
 
-
 void Settings::getFloatValueIfValid(const QString& name, float& floatValue) {
     const QVariant badDefaultValue = NAN;
     bool ok = true;
@@ -99,7 +94,6 @@ void Settings::getBoolValue(const QString& name, bool& boolValue) {
     const QVariant defaultValue = false;
     boolValue = value(name, defaultValue).toBool();
 }
-
 
 void Settings::setVec3Value(const QString& name, const glm::vec3& vecValue) {
     beginGroup(name);
@@ -152,4 +146,3 @@ void Settings::getQuatValueIfValid(const QString& name, glm::quat& quatValue) {
     }
     endGroup();
 }
-

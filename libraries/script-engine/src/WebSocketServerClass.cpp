@@ -17,8 +17,7 @@
 
 WebSocketServerClass::WebSocketServerClass(QScriptEngine* engine, const QString& serverName, const quint16 port) :
     _webSocketServer(serverName, QWebSocketServer::SslMode::NonSecureMode),
-    _engine(engine)
-{
+    _engine(engine) {
     if (_webSocketServer.listen(QHostAddress::Any, port)) {
         connect(&_webSocketServer, &QWebSocketServer::newConnection, this, &WebSocketServerClass::onNewConnection);
     }
@@ -54,14 +53,12 @@ WebSocketServerClass::~WebSocketServerClass() {
 void WebSocketServerClass::onNewConnection() {
     WebSocketClass* newClient = new WebSocketClass(_engine, _webSocketServer.nextPendingConnection());
     _clients << newClient;
-    connect(newClient->getWebSocket(), &QWebSocket::disconnected, [newClient, this]() {
-        _clients.removeOne(newClient);
-    });
+    connect(newClient->getWebSocket(), &QWebSocket::disconnected, [newClient, this]() { _clients.removeOne(newClient); });
     emit newConnection(newClient);
 }
 
 void WebSocketServerClass::close() {
-    foreach(WebSocketClass* client, _clients) {
+    foreach (WebSocketClass* client, _clients) {
         if (client->getReadyState() != WebSocketClass::ReadyState::CLOSED) {
             client->close(QWebSocketProtocol::CloseCode::CloseCodeGoingAway, "Server closing.");
         }

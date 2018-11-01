@@ -11,12 +11,12 @@
 
 #include "AssetsBackupHandler.h"
 
-#include <QJsonDocument>
 #include <QDate>
+#include <QJsonDocument>
 #include <QtCore/QLoggingCategory>
 
-#include <quazip5/quazipfile.h>
 #include <quazip5/quazipdir.h>
+#include <quazip5/quazipfile.h>
 
 #include <AssetClient.h>
 #include <AssetRequest.h>
@@ -36,8 +36,7 @@ Q_LOGGING_CATEGORY(asset_backup, "hifi.asset-backup");
 
 AssetsBackupHandler::AssetsBackupHandler(const QString& backupDirectory, bool assetServerEnabled) :
     _assetsDirectory(backupDirectory + ASSETS_DIR),
-    _assetServerEnabled(assetServerEnabled)
-{
+    _assetServerEnabled(assetServerEnabled) {
     // Make sure the asset directory exists.
     QDir(_assetsDirectory).mkpath(".");
 
@@ -71,10 +70,7 @@ void AssetsBackupHandler::refreshAssetsOnDisk() {
     auto assetNames = assetsDir.entryList(QDir::Files);
 
     // store all valid hashes
-    copy_if(begin(assetNames), end(assetNames),
-            inserter(_assetsOnDisk, begin(_assetsOnDisk)),
-            AssetUtils::isValidHash);
-
+    copy_if(begin(assetNames), end(assetNames), inserter(_assetsOnDisk, begin(_assetsOnDisk)), AssetUtils::isValidHash);
 }
 
 void AssetsBackupHandler::refreshAssetsInBackups() {
@@ -88,8 +84,7 @@ void AssetsBackupHandler::refreshAssetsInBackups() {
 
 void AssetsBackupHandler::checkForMissingAssets() {
     vector<AssetUtils::AssetHash> missingAssets;
-    set_difference(begin(_assetsInBackups), end(_assetsInBackups),
-                   begin(_assetsOnDisk), end(_assetsOnDisk),
+    set_difference(begin(_assetsInBackups), end(_assetsInBackups), begin(_assetsOnDisk), end(_assetsOnDisk),
                    back_inserter(missingAssets));
     if (missingAssets.size() > 0) {
         qCWarning(asset_backup) << "Found" << missingAssets.size() << "backup assets missing from disk.";
@@ -98,15 +93,13 @@ void AssetsBackupHandler::checkForMissingAssets() {
 
 void AssetsBackupHandler::checkForAssetsToDelete() {
     vector<AssetUtils::AssetHash> deprecatedAssets;
-    set_difference(begin(_assetsOnDisk), end(_assetsOnDisk),
-                   begin(_assetsInBackups), end(_assetsInBackups),
+    set_difference(begin(_assetsOnDisk), end(_assetsOnDisk), begin(_assetsInBackups), end(_assetsInBackups),
                    back_inserter(deprecatedAssets));
 
     if (deprecatedAssets.size() > 0) {
         qCDebug(asset_backup) << "Found" << deprecatedAssets.size() << "backup assets to delete from disk.";
-        const auto noCorruptedBackups = none_of(begin(_backups), end(_backups), [&](const AssetServerBackup& backup) {
-            return backup.corruptedBackup;
-        });
+        const auto noCorruptedBackups = none_of(begin(_backups), end(_backups),
+                                                [&](const AssetServerBackup& backup) { return backup.corruptedBackup; });
         if (noCorruptedBackups) {
             for (const auto& hash : deprecatedAssets) {
                 auto success = QFile::remove(_assetsDirectory + hash);
@@ -123,9 +116,7 @@ void AssetsBackupHandler::checkForAssetsToDelete() {
 }
 
 bool AssetsBackupHandler::isCorruptedBackup(const QString& backupName) {
-    auto it = find_if(begin(_backups), end(_backups), [&](const AssetServerBackup& value) {
-        return value.name == backupName;
-    });
+    auto it = find_if(begin(_backups), end(_backups), [&](const AssetServerBackup& value) { return value.name == backupName; });
 
     if (it == end(_backups)) {
         return false;
@@ -135,9 +126,8 @@ bool AssetsBackupHandler::isCorruptedBackup(const QString& backupName) {
 }
 
 std::pair<bool, float> AssetsBackupHandler::isAvailable(const QString& backupName) {
-    const auto it = find_if(begin(_backups), end(_backups), [&](const AssetServerBackup& backup) {
-        return backup.name == backupName;
-    });
+    const auto it = find_if(begin(_backups), end(_backups),
+                            [&](const AssetServerBackup& backup) { return backup.name == backupName; });
     if (it == end(_backups)) {
         return { true, 1.0f };
     }
@@ -161,9 +151,7 @@ std::pair<bool, float> AssetsBackupHandler::isAvailable(const QString& backupNam
 }
 
 std::pair<bool, float> AssetsBackupHandler::getRecoveryStatus() {
-    if (_assetsLeftToUpload.empty() &&
-        _mappingsLeftToSet.empty() &&
-        _mappingsLeftToDelete.empty() &&
+    if (_assetsLeftToUpload.empty() && _mappingsLeftToSet.empty() && _mappingsLeftToDelete.empty() &&
         _mappingRequestsInFlight == 0) {
         return { false, 1.0f };
     }
@@ -286,9 +274,8 @@ void AssetsBackupHandler::recoverBackup(const QString& backupName, QuaZip& zip) 
         qCWarning(asset_backup) << "Recovering while current asset mappings might be stale.";
     }
 
-    auto it = find_if(begin(_backups), end(_backups), [&](const AssetServerBackup& backup) {
-        return backup.name == backupName;
-    });
+    auto it = find_if(begin(_backups), end(_backups),
+                      [&](const AssetServerBackup& backup) { return backup.name == backupName; });
     if (it == end(_backups)) {
         loadBackup(backupName, zip);
 
@@ -316,9 +303,8 @@ void AssetsBackupHandler::recoverBackup(const QString& backupName, QuaZip& zip) 
 
         // iterator is end() and has been invalidated in the `loadBackup` call
         // grab the new iterator
-        it = find_if(begin(_backups), end(_backups), [&](const AssetServerBackup& backup) {
-            return backup.name == backupName;
-        });
+        it = find_if(begin(_backups), end(_backups),
+                     [&](const AssetServerBackup& backup) { return backup.name == backupName; });
 
         if (it == end(_backups)) {
             qCCritical(asset_backup) << "Failed to recover backup:" << backupName;
@@ -340,9 +326,8 @@ void AssetsBackupHandler::deleteBackup(const QString& backupName) {
         return;
     }
 
-    const auto it = remove_if(begin(_backups), end(_backups), [&](const AssetServerBackup& backup) {
-        return backup.name == backupName;
-    });
+    const auto it = remove_if(begin(_backups), end(_backups),
+                              [&](const AssetServerBackup& backup) { return backup.name == backupName; });
     if (it == end(_backups)) {
         qCDebug(asset_backup) << "Could not find backup" << backupName << "to delete.";
         return;
@@ -363,9 +348,8 @@ void AssetsBackupHandler::consolidateBackup(const QString& backupName, QuaZip& z
         return;
     }
 
-    const auto it = find_if(begin(_backups), end(_backups), [&](const AssetServerBackup& backup) {
-        return backup.name == backupName;
-    });
+    const auto it = find_if(begin(_backups), end(_backups),
+                            [&](const AssetServerBackup& backup) { return backup.name == backupName; });
     if (it == end(_backups)) {
         qCDebug(asset_backup) << "Could not find backup" << backupName << "to consolidate.";
         return;
@@ -393,7 +377,6 @@ void AssetsBackupHandler::consolidateBackup(const QString& backupName, QuaZip& z
             continue;
         }
     }
-
 }
 
 void AssetsBackupHandler::refreshMappings() {

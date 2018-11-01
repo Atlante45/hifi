@@ -19,8 +19,8 @@
 #include <SpatialParentFinder.h>
 
 #include "AddEntityOperator.h"
-#include "EntityTreeElement.h"
 #include "DeleteEntityOperator.h"
+#include "EntityTreeElement.h"
 #include "MovingEntitiesOperator.h"
 
 class EntityTree;
@@ -29,7 +29,7 @@ using EntityTreePointer = std::shared_ptr<EntityTree>;
 class EntitySimulation;
 
 namespace EntityQueryFilterSymbol {
-    static const QString NonDefault = "+";
+static const QString NonDefault = "+";
 }
 
 class NewlyCreatedEntityHook {
@@ -45,21 +45,14 @@ public:
     QHash<EntityItemID, EntityItemID>* map;
 };
 
-
 class EntityTree : public Octree, public SpatialParentTree {
     Q_OBJECT
 public:
-    enum FilterType {
-        Add,
-        Edit,
-        Physics,
-        Delete
-    };
+    enum FilterType { Add, Edit, Physics, Delete };
     EntityTree(bool shouldReaverage = false);
     virtual ~EntityTree();
 
     void createRootElement();
-
 
     void setEntityMaxTmpLifetime(float maxTmpEntityLifetime) { _maxTmpEntityLifetime = maxTmpEntityLifetime; }
     void setEntityScriptSourceWhitelist(const QString& entityScriptSourceWhitelist);
@@ -77,8 +70,8 @@ public:
 
     virtual void eraseAllOctreeElements(bool createNewRoot = true) override;
 
-    virtual void readBitstreamToTree(const unsigned char* bitstream,
-            uint64_t bufferSizeBytes, ReadBitstreamToTreeParams& args) override;
+    virtual void readBitstreamToTree(const unsigned char* bitstream, uint64_t bufferSizeBytes,
+                                     ReadBitstreamToTreeParams& args) override;
     int readEntityDataFromBuffer(const unsigned char* data, int bytesLeftToRead, ReadBitstreamToTreeParams& args);
 
     // These methods will allow the OctreeServer to send your tree inbound edit packets of your
@@ -93,18 +86,18 @@ public:
     virtual void processChallengeOwnershipPacket(ReceivedMessage& message, const SharedNodePointer& sourceNode) override;
 
     virtual EntityItemID findRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-        QVector<EntityItemID> entityIdsToInclude, QVector<EntityItemID> entityIdsToDiscard,
-        bool visibleOnly, bool collidableOnly, bool precisionPicking, 
-        OctreeElementPointer& element, float& distance,
-        BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo,
-        Octree::lockType lockType = Octree::TryLock, bool* accurateResult = NULL);
+                                             QVector<EntityItemID> entityIdsToInclude, QVector<EntityItemID> entityIdsToDiscard,
+                                             bool visibleOnly, bool collidableOnly, bool precisionPicking,
+                                             OctreeElementPointer& element, float& distance, BoxFace& face,
+                                             glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                             Octree::lockType lockType = Octree::TryLock, bool* accurateResult = NULL);
 
-    virtual EntityItemID findParabolaIntersection(const PickParabola& parabola,
-        QVector<EntityItemID> entityIdsToInclude, QVector<EntityItemID> entityIdsToDiscard,
-        bool visibleOnly, bool collidableOnly, bool precisionPicking,
-        OctreeElementPointer& element, glm::vec3& intersection, float& distance, float& parabolicDistance,
-        BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo,
-        Octree::lockType lockType = Octree::TryLock, bool* accurateResult = NULL);
+    virtual EntityItemID findParabolaIntersection(const PickParabola& parabola, QVector<EntityItemID> entityIdsToInclude,
+                                                  QVector<EntityItemID> entityIdsToDiscard, bool visibleOnly,
+                                                  bool collidableOnly, bool precisionPicking, OctreeElementPointer& element,
+                                                  glm::vec3& intersection, float& distance, float& parabolicDistance,
+                                                  BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                                  Octree::lockType lockType = Octree::TryLock, bool* accurateResult = NULL);
 
     virtual bool rootElementHasData() const override { return true; }
 
@@ -120,7 +113,8 @@ public:
     EntityItemPointer addEntity(const EntityItemID& entityID, const EntityItemProperties& properties, bool isClone = false);
 
     // use this method if you only know the entityID
-    bool updateEntity(const EntityItemID& entityID, const EntityItemProperties& properties, const SharedNodePointer& senderNode = SharedNodePointer(nullptr));
+    bool updateEntity(const EntityItemID& entityID, const EntityItemProperties& properties,
+                      const SharedNodePointer& senderNode = SharedNodePointer(nullptr));
 
     // check if the avatar is a child of this entity, If so set the avatar parentID to null
     void unhookChildAvatar(const EntityItemID entityID);
@@ -136,7 +130,6 @@ public:
     virtual SpatiallyNestablePointer findByID(const QUuid& id) const override { return findEntityByID(id); }
 
     EntityItemID assignEntityID(const EntityItemID& entityItemID); /// Assigns a known ID for a creator token ID
-
 
     /// finds all entities that touch a sphere
     /// \param center the center of the sphere in world-frame (meters)
@@ -170,7 +163,7 @@ public:
     void addNewlyCreatedHook(NewlyCreatedEntityHook* hook);
     void removeNewlyCreatedHook(NewlyCreatedEntityHook* hook);
 
-    bool hasAnyDeletedEntities() const { 
+    bool hasAnyDeletedEntities() const {
         QReadLocker locker(&_recentlyDeletedEntitiesLock);
         return _recentlyDeletedEntityItemIDs.size() > 0;
     }
@@ -178,7 +171,7 @@ public:
     bool hasEntitiesDeletedSince(quint64 sinceTime);
     static quint64 getAdjustedConsiderSince(quint64 sinceTime);
 
-    QMultiMap<quint64, QUuid> getRecentlyDeletedEntityIDs() const { 
+    QMultiMap<quint64, QUuid> getRecentlyDeletedEntityIDs() const {
         QReadLocker locker(&_recentlyDeletedEntitiesLock);
         return _recentlyDeletedEntityItemIDs;
     }
@@ -194,8 +187,7 @@ public:
     int processEraseMessageDetails(const QByteArray& buffer, const SharedNodePointer& sourceNode);
     bool shouldEraseEntity(EntityItemID entityID, const SharedNodePointer& sourceNode);
 
-
-    EntityTreeElementPointer getContainingElement(const EntityItemID& entityItemID)  /*const*/;
+    EntityTreeElementPointer getContainingElement(const EntityItemID& entityItemID) /*const*/;
     void addEntityMapEntry(EntityItemPointer entity);
     void clearEntityMapEntry(const EntityItemID& id);
     void debugDumpMap();
@@ -204,8 +196,8 @@ public:
 
     static QByteArray remapActionDataIDs(QByteArray actionData, QHash<EntityItemID, EntityItemID>& map);
 
-    QVector<EntityItemID> sendEntities(EntityEditPacketSender* packetSender, EntityTreePointer localTree,
-                                       float x, float y, float z);
+    QVector<EntityItemID> sendEntities(EntityEditPacketSender* packetSender, EntityTreePointer localTree, float x, float y,
+                                       float z);
 
     void entityChanged(EntityItemPointer entity);
 
@@ -239,18 +231,24 @@ public:
         _totalLoggingTime = 0;
     }
 
-    virtual quint64 getAverageDecodeTime() const override { return _totalEditMessages == 0 ? 0 : _totalDecodeTime / _totalEditMessages; }
-    virtual quint64 getAverageLookupTime() const override { return _totalEditMessages == 0 ? 0 : _totalLookupTime / _totalEditMessages; }
+    virtual quint64 getAverageDecodeTime() const override {
+        return _totalEditMessages == 0 ? 0 : _totalDecodeTime / _totalEditMessages;
+    }
+    virtual quint64 getAverageLookupTime() const override {
+        return _totalEditMessages == 0 ? 0 : _totalLookupTime / _totalEditMessages;
+    }
     virtual quint64 getAverageUpdateTime() const override { return _totalUpdates == 0 ? 0 : _totalUpdateTime / _totalUpdates; }
     virtual quint64 getAverageCreateTime() const override { return _totalCreates == 0 ? 0 : _totalCreateTime / _totalCreates; }
-    virtual quint64 getAverageLoggingTime() const override { return _totalEditMessages == 0 ? 0 : _totalLoggingTime / _totalEditMessages; }
-    virtual quint64 getAverageFilterTime() const override { return _totalEditMessages == 0 ? 0 : _totalFilterTime / _totalEditMessages; }
+    virtual quint64 getAverageLoggingTime() const override {
+        return _totalEditMessages == 0 ? 0 : _totalLoggingTime / _totalEditMessages;
+    }
+    virtual quint64 getAverageFilterTime() const override {
+        return _totalEditMessages == 0 ? 0 : _totalFilterTime / _totalEditMessages;
+    }
 
     void trackIncomingEntityLastEdited(quint64 lastEditedTime, int bytesRead);
-    quint64 getAverageEditDeltas() const
-        { return _totalTrackedEdits == 0 ? 0 : _totalEditDeltas / _totalTrackedEdits; }
-    quint64 getAverageEditBytes() const
-        { return _totalTrackedEdits == 0 ? 0 : _totalEditBytes / _totalTrackedEdits; }
+    quint64 getAverageEditDeltas() const { return _totalTrackedEdits == 0 ? 0 : _totalEditDeltas / _totalTrackedEdits; }
+    quint64 getAverageEditBytes() const { return _totalTrackedEdits == 0 ? 0 : _totalEditBytes / _totalTrackedEdits; }
     quint64 getMaxEditDelta() const { return _maxEditDelta; }
     quint64 getTotalTrackedEdits() const { return _totalTrackedEdits; }
 
@@ -286,20 +284,44 @@ public:
     void setIsServerlessMode(bool value) { _serverlessDomain = value; }
     bool isServerlessMode() const { return _serverlessDomain; }
 
-    static void setAddMaterialToEntityOperator(std::function<bool(const QUuid&, graphics::MaterialLayer, const std::string&)> addMaterialToEntityOperator) { _addMaterialToEntityOperator = addMaterialToEntityOperator; }
-    static void setRemoveMaterialFromEntityOperator(std::function<bool(const QUuid&, graphics::MaterialPointer, const std::string&)> removeMaterialFromEntityOperator) { _removeMaterialFromEntityOperator = removeMaterialFromEntityOperator; }
-    static bool addMaterialToEntity(const QUuid& entityID, graphics::MaterialLayer material, const std::string& parentMaterialName);
-    static bool removeMaterialFromEntity(const QUuid& entityID, graphics::MaterialPointer material, const std::string& parentMaterialName);
+    static void setAddMaterialToEntityOperator(
+        std::function<bool(const QUuid&, graphics::MaterialLayer, const std::string&)> addMaterialToEntityOperator) {
+        _addMaterialToEntityOperator = addMaterialToEntityOperator;
+    }
+    static void setRemoveMaterialFromEntityOperator(
+        std::function<bool(const QUuid&, graphics::MaterialPointer, const std::string&)> removeMaterialFromEntityOperator) {
+        _removeMaterialFromEntityOperator = removeMaterialFromEntityOperator;
+    }
+    static bool addMaterialToEntity(const QUuid& entityID, graphics::MaterialLayer material,
+                                    const std::string& parentMaterialName);
+    static bool removeMaterialFromEntity(const QUuid& entityID, graphics::MaterialPointer material,
+                                         const std::string& parentMaterialName);
 
-    static void setAddMaterialToAvatarOperator(std::function<bool(const QUuid&, graphics::MaterialLayer, const std::string&)> addMaterialToAvatarOperator) { _addMaterialToAvatarOperator = addMaterialToAvatarOperator; }
-    static void setRemoveMaterialFromAvatarOperator(std::function<bool(const QUuid&, graphics::MaterialPointer, const std::string&)> removeMaterialFromAvatarOperator) { _removeMaterialFromAvatarOperator = removeMaterialFromAvatarOperator; }
-    static bool addMaterialToAvatar(const QUuid& avatarID, graphics::MaterialLayer material, const std::string& parentMaterialName);
-    static bool removeMaterialFromAvatar(const QUuid& avatarID, graphics::MaterialPointer material, const std::string& parentMaterialName);
+    static void setAddMaterialToAvatarOperator(
+        std::function<bool(const QUuid&, graphics::MaterialLayer, const std::string&)> addMaterialToAvatarOperator) {
+        _addMaterialToAvatarOperator = addMaterialToAvatarOperator;
+    }
+    static void setRemoveMaterialFromAvatarOperator(
+        std::function<bool(const QUuid&, graphics::MaterialPointer, const std::string&)> removeMaterialFromAvatarOperator) {
+        _removeMaterialFromAvatarOperator = removeMaterialFromAvatarOperator;
+    }
+    static bool addMaterialToAvatar(const QUuid& avatarID, graphics::MaterialLayer material,
+                                    const std::string& parentMaterialName);
+    static bool removeMaterialFromAvatar(const QUuid& avatarID, graphics::MaterialPointer material,
+                                         const std::string& parentMaterialName);
 
-    static void setAddMaterialToOverlayOperator(std::function<bool(const QUuid&, graphics::MaterialLayer, const std::string&)> addMaterialToOverlayOperator) { _addMaterialToOverlayOperator = addMaterialToOverlayOperator; }
-    static void setRemoveMaterialFromOverlayOperator(std::function<bool(const QUuid&, graphics::MaterialPointer, const std::string&)> removeMaterialFromOverlayOperator) { _removeMaterialFromOverlayOperator = removeMaterialFromOverlayOperator; }
-    static bool addMaterialToOverlay(const QUuid& overlayID, graphics::MaterialLayer material, const std::string& parentMaterialName);
-    static bool removeMaterialFromOverlay(const QUuid& overlayID, graphics::MaterialPointer material, const std::string& parentMaterialName);
+    static void setAddMaterialToOverlayOperator(
+        std::function<bool(const QUuid&, graphics::MaterialLayer, const std::string&)> addMaterialToOverlayOperator) {
+        _addMaterialToOverlayOperator = addMaterialToOverlayOperator;
+    }
+    static void setRemoveMaterialFromOverlayOperator(
+        std::function<bool(const QUuid&, graphics::MaterialPointer, const std::string&)> removeMaterialFromOverlayOperator) {
+        _removeMaterialFromOverlayOperator = removeMaterialFromOverlayOperator;
+    }
+    static bool addMaterialToOverlay(const QUuid& overlayID, graphics::MaterialLayer material,
+                                     const std::string& parentMaterialName);
+    static bool removeMaterialFromOverlay(const QUuid& overlayID, graphics::MaterialPointer material,
+                                          const std::string& parentMaterialName);
 
     std::map<QString, QString> getNamedPaths() const { return _namedPaths; }
 
@@ -315,10 +337,9 @@ signals:
     void killChallengeOwnershipTimeoutTimer(const QString& certID);
 
 protected:
-
     void processRemovedEntities(const DeleteEntityOperator& theOperator);
     bool updateEntity(EntityItemPointer entity, const EntityItemProperties& properties,
-            const SharedNodePointer& senderNode = SharedNodePointer(nullptr));
+                      const SharedNodePointer& senderNode = SharedNodePointer(nullptr));
     static bool findNearPointOperation(const OctreeElementPointer& element, void* extraData);
     static bool findInSphereOperation(const OctreeElementPointer& element, void* extraData);
     static bool findInCubeOperation(const OctreeElementPointer& element, void* extraData);
@@ -364,7 +385,6 @@ protected:
     bool _wantEditLogging = false;
     bool _wantTerseEditLogging = false;
 
-
     // some performance tracking properties - only used in server trees
     int _totalEditMessages = 0;
     int _totalUpdates = 0;
@@ -390,12 +410,13 @@ protected:
 
     // we maintain a list of avatarIDs to notice when an entity is a child of one.
     QSet<QUuid> _avatarIDs; // IDs of avatars connected to entity server
-    QHash<QUuid, QSet<EntityItemID>> _childrenOfAvatars;  // which entities are children of which avatars
+    QHash<QUuid, QSet<EntityItemID>> _childrenOfAvatars; // which entities are children of which avatars
 
     float _maxTmpEntityLifetime { DEFAULT_MAX_TMP_ENTITY_LIFETIME };
 
-    bool filterProperties(EntityItemPointer& existingEntity, EntityItemProperties& propertiesIn, EntityItemProperties& propertiesOut, bool& wasChanged, FilterType filterType);
-    bool _hasEntityEditFilter{ false };
+    bool filterProperties(EntityItemPointer& existingEntity, EntityItemProperties& propertiesIn,
+                          EntityItemProperties& propertiesOut, bool& wasChanged, FilterType filterType);
+    bool _hasEntityEditFilter { false };
     QStringList _entityScriptSourceWhitelist;
 
     MovingEntitiesOperator _entityMover;
@@ -404,11 +425,13 @@ protected:
     Q_INVOKABLE void startChallengeOwnershipTimer(const EntityItemID& entityItemID);
 
 private:
-    void sendChallengeOwnershipPacket(const QString& certID, const QString& ownerKey, const EntityItemID& entityItemID, const SharedNodePointer& senderNode);
-    void sendChallengeOwnershipRequestPacket(const QByteArray& certID, const QByteArray& text, const QByteArray& nodeToChallenge, const SharedNodePointer& senderNode);
+    void sendChallengeOwnershipPacket(const QString& certID, const QString& ownerKey, const EntityItemID& entityItemID,
+                                      const SharedNodePointer& senderNode);
+    void sendChallengeOwnershipRequestPacket(const QByteArray& certID, const QByteArray& text,
+                                             const QByteArray& nodeToChallenge, const SharedNodePointer& senderNode);
     void validatePop(const QString& certID, const EntityItemID& entityItemID, const SharedNodePointer& senderNode);
 
-    std::shared_ptr<AvatarData> _myAvatar{ nullptr };
+    std::shared_ptr<AvatarData> _myAvatar { nullptr };
 
     static std::function<bool(const QUuid&, graphics::MaterialLayer, const std::string&)> _addMaterialToEntityOperator;
     static std::function<bool(const QUuid&, graphics::MaterialPointer, const std::string&)> _removeMaterialFromEntityOperator;

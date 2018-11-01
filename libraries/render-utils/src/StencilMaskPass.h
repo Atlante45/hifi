@@ -12,9 +12,9 @@
 #ifndef hifi_StencilMaskPass_h
 #define hifi_StencilMaskPass_h
 
-#include <render/Engine.h>
 #include <gpu/Pipeline.h>
 #include <graphics/Geometry.h>
+#include <render/Engine.h>
 
 class PrepareStencilConfig : public render::Job::Config {
     Q_OBJECT
@@ -43,9 +43,9 @@ public:
 
     // Always use 0 to clear the stencil buffer to set it to background
     static const gpu::int8 STENCIL_BACKGROUND = 0; // must match values in Skybox.cpp and ProceduralSkybox.cpp
-    static const gpu::int8 STENCIL_MASK =       1 << 0;
-    static const gpu::int8 STENCIL_SHAPE =      1 << 1;
-    static const gpu::int8 STENCIL_NO_AA =      1 << 2;
+    static const gpu::int8 STENCIL_MASK = 1 << 0;
+    static const gpu::int8 STENCIL_SHAPE = 1 << 1;
+    static const gpu::int8 STENCIL_NO_AA = 1 << 2;
 
     static void drawMask(gpu::State& state);
     static void drawBackground(gpu::State& state);
@@ -69,6 +69,5 @@ private:
     int _maskMode { 0 };
     bool _forceDraw { false };
 };
-
 
 #endif // hifi_StencilMaskPass_h

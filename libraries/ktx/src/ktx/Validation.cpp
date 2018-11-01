@@ -8,8 +8,8 @@
 
 #include "KTX.h"
 
-#include <unordered_set>
 #include <QDebug>
+#include <unordered_set>
 
 using namespace ktx;
 
@@ -242,7 +242,6 @@ bool Header::isValid() const {
         return false;
     }
 
-
     if (numberOfFaces != 1 && numberOfFaces != NUM_CUBEMAPFACES) {
         qDebug() << "Invalid number of faces " << numberOfFaces;
         return false;
@@ -259,12 +258,9 @@ bool Header::isValid() const {
 }
 
 struct AlignedStreamBuffer {
-    AlignedStreamBuffer(size_t size, const uint8_t* data) 
-        : _size(size), _data(data) { }
+    AlignedStreamBuffer(size_t size, const uint8_t* data) : _size(size), _data(data) {}
 
-    AlignedStreamBuffer(const StoragePointer& storage) 
-        : AlignedStreamBuffer(storage->size(), storage->data()) { }
-
+    AlignedStreamBuffer(const StoragePointer& storage) : AlignedStreamBuffer(storage->size(), storage->data()) {}
 
     template<typename T>
     bool read(T& t) {
@@ -290,13 +286,9 @@ struct AlignedStreamBuffer {
         return true;
     }
 
-    AlignedStreamBuffer front(size_t size) const {
-        return AlignedStreamBuffer { std::min(size, _size), _data };
-    }
+    AlignedStreamBuffer front(size_t size) const { return AlignedStreamBuffer { std::min(size, _size), _data }; }
 
-    bool empty() const {
-        return _size == 0;
-    }
+    bool empty() const { return _size == 0; }
 
 private:
     size_t _size;
@@ -316,7 +308,7 @@ bool validateKeyValueData(AlignedStreamBuffer kvbuffer) {
             return false;
         }
     }
-    
+
     return true;
 }
 
@@ -352,7 +344,6 @@ bool KTX::validate(const StoragePointer& src) {
         return false;
     }
 
-
     // Validate the images
     for (uint32_t mip = 0; mip < header.numberOfMipmapLevels; ++mip) {
         uint32_t imageSize;
@@ -380,8 +371,6 @@ bool KTX::validate(const StoragePointer& src) {
     return true;
 }
 
-
-
 bool KTX::isValid() const {
     if (!_header.isValid()) {
         return false;
@@ -407,7 +396,6 @@ bool KTX::isValid() const {
             }
         }
     }
-
 
     for (uint8_t mip = 0; mip < _header.numberOfMipmapLevels; ++mip) {
         for (uint8_t face = 0; face < _header.numberOfFaces; ++face) {

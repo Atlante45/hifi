@@ -38,7 +38,6 @@ AnimPose boneLookAt(const glm::vec3& target, const AnimPose& bone);
 // and returns a bodyRot that is also z-forward and y-up
 glm::quat computeBodyFacingFromHead(const glm::quat& headRot, const glm::vec3& up);
 
-
 // Uses a approximation of a critically damped spring to smooth full AnimPoses.
 // It provides seperate timescales for horizontal, vertical and rotation components.
 // The timescale is roughly how much time it will take the spring will reach halfway toward it's target.
@@ -46,15 +45,9 @@ class CriticallyDampedSpringPoseHelper {
 public:
     CriticallyDampedSpringPoseHelper() : _prevPoseValid(false) {}
 
-    void setHorizontalTranslationTimescale(float timescale) {
-        _horizontalTranslationTimescale = timescale;
-    }
-    void setVerticalTranslationTimescale(float timescale) {
-        _verticalTranslationTimescale = timescale;
-    }
-    void setRotationTimescale(float timescale) {
-        _rotationTimescale = timescale;
-    }
+    void setHorizontalTranslationTimescale(float timescale) { _horizontalTranslationTimescale = timescale; }
+    void setVerticalTranslationTimescale(float timescale) { _verticalTranslationTimescale = timescale; }
+    void setRotationTimescale(float timescale) { _rotationTimescale = timescale; }
 
     AnimPose update(const AnimPose& pose, float deltaTime) {
         if (!_prevPoseValid) {
@@ -95,9 +88,7 @@ class SnapshotBlendPoseHelper {
 public:
     SnapshotBlendPoseHelper() : _snapshotValid(false) {}
 
-    void setBlendDuration(float duration) {
-        _duration = duration;
-    }
+    void setBlendDuration(float duration) { _duration = duration; }
 
     void setSnapshot(const AnimPose& pose) {
         _snapshotValid = true;

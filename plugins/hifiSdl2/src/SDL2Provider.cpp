@@ -9,11 +9,11 @@
 #include <mutex>
 
 #include <QtCore/QObject>
-#include <QtCore/QtPlugin>
 #include <QtCore/QStringList>
+#include <QtCore/QtPlugin>
 
-#include <plugins/RuntimePlugin.h>
 #include <plugins/InputPlugin.h>
+#include <plugins/RuntimePlugin.h>
 
 #include "SDL2Manager.h"
 
@@ -37,9 +37,7 @@ public:
         return _inputPlugins;
     }
 
-    virtual void destroyInputPlugins() override {
-        _inputPlugins.clear();
-    }
+    virtual void destroyInputPlugins() override { _inputPlugins.clear(); }
 
 private:
     InputPluginList _inputPlugins;

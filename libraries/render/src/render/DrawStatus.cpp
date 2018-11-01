@@ -11,8 +11,8 @@
 
 #include "DrawStatus.h"
 
-#include <algorithm>
 #include <assert.h>
+#include <algorithm>
 
 #include <PerfStat.h>
 #include <ViewFrustum.h>
@@ -39,9 +39,8 @@ const gpu::PipelinePointer DrawStatus::getDrawItemBoundsPipeline() {
         state->setDepthTest(true, false, gpu::LESS_EQUAL);
 
         // Blend on transparent
-        state->setBlendFunction(true,
-            gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
-            gpu::State::DEST_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ZERO);
+        state->setBlendFunction(true, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
+                                gpu::State::DEST_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ZERO);
 
         // Good to go add the brand new pipeline
         _drawItemBoundsPipeline = gpu::Pipeline::create(program, state);
@@ -58,9 +57,8 @@ const gpu::PipelinePointer DrawStatus::getDrawItemStatusPipeline() {
         state->setDepthTest(false, false, gpu::LESS_EQUAL);
 
         // Blend on transparent
-        state->setBlendFunction(true,
-            gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
-            gpu::State::DEST_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ZERO);
+        state->setBlendFunction(true, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
+                                gpu::State::DEST_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ZERO);
 
         // Good to go add the brand new pipeline
         _drawItemStatusPipeline = gpu::Pipeline::create(program, state);
@@ -157,11 +155,11 @@ void DrawStatus::run(const RenderContextPointer& renderContext, const Input& inp
         // bind the one gpu::Pipeline we need
         batch.setPipeline(getDrawItemBoundsPipeline());
 
-        _boundsBuffer->setData(itemBounds.size() * sizeof(render::ItemBound), (const gpu::Byte*) itemBounds.data());
+        _boundsBuffer->setData(itemBounds.size() * sizeof(render::ItemBound), (const gpu::Byte*)itemBounds.data());
 
         if (_showDisplay) {
             batch.setResourceBuffer(0, _boundsBuffer);
-            batch.draw(gpu::LINES, (gpu::uint32) itemBounds.size() * 24, 0);
+            batch.draw(gpu::LINES, (gpu::uint32)itemBounds.size() * 24, 0);
         }
         batch.setResourceBuffer(0, 0);
 
@@ -183,10 +181,14 @@ void DrawStatus::run(const RenderContextPointer& renderContext, const Input& inp
 
             if (!_vertexFormat) {
                 _vertexFormat = std::make_shared<gpu::Stream::Format>();
-                _vertexFormat->setAttribute(0, 0, gpu::Element(gpu::VEC4, gpu::FLOAT, gpu::XYZW), offsetof(InstanceData, boundPos), gpu::Stream::PER_INSTANCE);
-                _vertexFormat->setAttribute(1, 0, gpu::Element(gpu::VEC4, gpu::FLOAT, gpu::XYZW), offsetof(InstanceData, boundDim), gpu::Stream::PER_INSTANCE);
-                _vertexFormat->setAttribute(2, 0, gpu::Element(gpu::VEC4, gpu::INT32, gpu::XYZW), offsetof(InstanceData, status0), gpu::Stream::PER_INSTANCE);
-                _vertexFormat->setAttribute(3, 0, gpu::Element(gpu::VEC4, gpu::INT32, gpu::XYZW), offsetof(InstanceData, status1), gpu::Stream::PER_INSTANCE);
+                _vertexFormat->setAttribute(0, 0, gpu::Element(gpu::VEC4, gpu::FLOAT, gpu::XYZW),
+                                            offsetof(InstanceData, boundPos), gpu::Stream::PER_INSTANCE);
+                _vertexFormat->setAttribute(1, 0, gpu::Element(gpu::VEC4, gpu::FLOAT, gpu::XYZW),
+                                            offsetof(InstanceData, boundDim), gpu::Stream::PER_INSTANCE);
+                _vertexFormat->setAttribute(2, 0, gpu::Element(gpu::VEC4, gpu::INT32, gpu::XYZW),
+                                            offsetof(InstanceData, status0), gpu::Stream::PER_INSTANCE);
+                _vertexFormat->setAttribute(3, 0, gpu::Element(gpu::VEC4, gpu::INT32, gpu::XYZW),
+                                            offsetof(InstanceData, status1), gpu::Stream::PER_INSTANCE);
             }
 
             batch.setInputFormat(_vertexFormat);

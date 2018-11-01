@@ -21,10 +21,10 @@ class SpatialEvent {
 public:
     SpatialEvent();
     SpatialEvent(const SpatialEvent& other);
-    
+
     static QScriptValue toScriptValue(QScriptEngine* engine, const SpatialEvent& event);
     static void fromScriptValue(const QScriptValue& object, SpatialEvent& event);
-    
+
     glm::vec3 locTranslation;
     glm::quat locRotation;
     glm::vec3 absTranslation;

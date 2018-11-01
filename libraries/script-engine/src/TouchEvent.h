@@ -14,8 +14,8 @@
 
 #include <glm/glm.hpp>
 
-#include <QVector>
 #include <QTouchEvent>
+#include <QVector>
 
 class QScriptValue;
 class QScriptEngine;
@@ -25,10 +25,10 @@ public:
     TouchEvent();
     TouchEvent(const QTouchEvent& event);
     TouchEvent(const QTouchEvent& event, const TouchEvent& other);
-    
+
     static QScriptValue toScriptValue(QScriptEngine* engine, const TouchEvent& event);
     static void fromScriptValue(const QScriptValue& object, TouchEvent& event);
-    
+
     float x;
     float y;
     bool isPressed;
@@ -44,14 +44,14 @@ public:
     float radius;
     bool isPinching;
     bool isPinchOpening;
-    
+
     // angles are in degrees
     QVector<float> angles; // angle from center to each point
     float angle; // the average of the angles
     float deltaAngle; // the change in average angle from last event
     bool isRotating;
     QString rotating;
-    
+
 private:
     void initWithQTouchEvent(const QTouchEvent& event);
     void calculateMetaAttributes(const TouchEvent& other);

@@ -16,39 +16,39 @@
 
 namespace render {
 
-    class Selection {
-    public:
-        using Name = std::string;
+class Selection {
+public:
+    using Name = std::string;
 
-        ~Selection();
-        Selection();
-        Selection(const Selection& selection);
-        Selection& operator = (const Selection& selection);
-        Selection(Selection&& selection);
-        Selection& operator = (Selection&& selection);
+    ~Selection();
+    Selection();
+    Selection(const Selection& selection);
+    Selection& operator=(const Selection& selection);
+    Selection(Selection&& selection);
+    Selection& operator=(Selection&& selection);
 
-        Selection(const Name& name, const ItemIDs& items);
+    Selection(const Name& name, const ItemIDs& items);
 
-        const Name& getName() const { return _name; }
+    const Name& getName() const { return _name; }
 
-        const ItemIDs& getItems() const { return _items; }
+    const ItemIDs& getItems() const { return _items; }
 
-        bool isEmpty() const { return _items.empty(); }
+    bool isEmpty() const { return _items.empty(); }
 
-        // Test if the ID is in the selection, return the index or -1 if not present
-        static const int NOT_FOUND{ -1 };
-                
-        int find(ItemID id) const;
-        bool contains(ItemID id) const { return find(id) > NOT_FOUND; }
+    // Test if the ID is in the selection, return the index or -1 if not present
+    static const int NOT_FOUND { -1 };
 
-    protected:
-        Name _name;
-        ItemIDs _items;
-    };
-    using Selections = std::vector<Selection>;
+    int find(ItemID id) const;
+    bool contains(ItemID id) const { return find(id) > NOT_FOUND; }
 
-    using SelectionMap = std::map<const Selection::Name, Selection>;
+protected:
+    Name _name;
+    ItemIDs _items;
+};
+using Selections = std::vector<Selection>;
 
-}
+using SelectionMap = std::map<const Selection::Name, Selection>;
+
+} // namespace render
 
 #endif

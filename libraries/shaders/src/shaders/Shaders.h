@@ -9,9 +9,9 @@
 #pragma once
 #include <cstdint>
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <string>
 #include <vector>
 
 #include <QtCore/QtGlobal>
@@ -26,8 +26,7 @@ static const uint32_t INVALID_PROGRAM = (uint32_t)-1;
 const std::vector<uint32_t>& allPrograms();
 const std::vector<uint32_t>& allShaders();
 
-enum class Dialect
-{
+enum class Dialect {
 #if defined(USE_GLES)
     // GLES only support 3.1 es
     glsl310es,
@@ -56,11 +55,9 @@ static const uint32_t NUM_VARIANTS = 2;
 using Binary = std::vector<uint8_t>;
 using String = std::string;
 
-struct EnumClassHash
-{
-    template <typename T>
-    std::size_t operator()(T t) const
-    {
+struct EnumClassHash {
+    template<typename T>
+    std::size_t operator()(T t) const {
         return static_cast<std::size_t>(t);
     }
 };
@@ -79,7 +76,6 @@ struct Reflection {
     bool validUniformBuffer(int32_t location) const { return validLocation(validUniformBuffers, location); }
     bool validResourceBuffer(int32_t location) const { return validLocation(validResourceBuffers, location); }
 
-
     LocationMap inputs;
 
     LocationMap outputs;
@@ -97,10 +93,7 @@ struct Reflection {
     static std::vector<std::string> getNames(const LocationMap& locations);
 
 private:
-
-    bool validLocation(const ValidSet& locations, int32_t location) const {
-        return locations.count(location) != 0;
-    }
+    bool validLocation(const ValidSet& locations, int32_t location) const { return locations.count(location) != 0; }
 
     void updateValid();
 
@@ -134,7 +127,7 @@ struct Source {
     Source() = default;
     Source& operator=(const Source& other);
 
-    uint32_t id{ INVALID_SHADER };
+    uint32_t id { INVALID_SHADER };
 
     // The name of the shader file, with extension, i.e. DrawColor.frag
     std::string name;
@@ -158,11 +151,10 @@ private:
     // Disallow copy construction and assignment
     Source(const Source& other) = default;
 
-    static Source::Pointer loadSource(uint32_t shaderId) ;
+    static Source::Pointer loadSource(uint32_t shaderId);
 
     bool doReplacement(String& source) const;
     const DialectVariantSource& getDialectVariantSource(Dialect dialect, Variant variant) const;
-
 };
 
 inline uint32_t getVertexId(uint32_t programId) {
@@ -173,4 +165,4 @@ inline uint32_t getFragmentId(uint32_t programId) {
     return programId & UINT16_MAX;
 }
 
-}  // namespace shader
+} // namespace shader

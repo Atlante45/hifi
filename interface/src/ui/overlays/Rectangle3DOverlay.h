@@ -15,7 +15,7 @@
 
 class Rectangle3DOverlay : public Planar3DOverlay {
     Q_OBJECT
-    
+
 public:
     static QString const TYPE;
     virtual QString getType() const override { return TYPE; }
@@ -35,5 +35,4 @@ private:
     glm::vec2 _previousHalfDimensions;
 };
 
- 
 #endif // hifi_Rectangle3DOverlay_h

@@ -15,8 +15,8 @@
 #define hifi_AudioInjectorManager_h
 
 #include <condition_variable>
-#include <queue>
 #include <mutex>
+#include <queue>
 
 #include <QtCore/QPointer>
 #include <QtCore/QThread>
@@ -32,19 +32,15 @@ public:
     ~AudioInjectorManager();
 private slots:
     void run();
-private:
 
+private:
     using TimeInjectorPointerPair = std::pair<uint64_t, AudioInjectorPointer>;
 
     struct greaterTime {
-        bool operator() (const TimeInjectorPointerPair& x, const TimeInjectorPointerPair& y) const {
-            return x.first > y.first;
-        }
+        bool operator()(const TimeInjectorPointerPair& x, const TimeInjectorPointerPair& y) const { return x.first > y.first; }
     };
 
-    using InjectorQueue = std::priority_queue<TimeInjectorPointerPair,
-                                              std::deque<TimeInjectorPointerPair>,
-                                              greaterTime>;
+    using InjectorQueue = std::priority_queue<TimeInjectorPointerPair, std::deque<TimeInjectorPointerPair>, greaterTime>;
     using Mutex = std::mutex;
     using Lock = std::unique_lock<Mutex>;
 
@@ -67,7 +63,5 @@ private:
 
     friend class AudioInjector;
 };
-
-
 
 #endif // hifi_AudioInjectorManager_h

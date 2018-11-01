@@ -36,8 +36,8 @@ QJsonObject DomainServerNodeData::overrideValuesIfNeeded(const QJsonObject& newS
     for (auto it = newStats.constBegin(); it != newStats.constEnd(); ++it) {
         const auto& key = it.key();
         const auto& value = it.value();
-        
-        auto overrideIt = value.isString() ? _overrideHash.find({key, value.toString()}) : _overrideHash.end();
+
+        auto overrideIt = value.isString() ? _overrideHash.find({ key, value.toString() }) : _overrideHash.end();
         if (overrideIt != _overrideHash.end()) {
             // We have a match, override the value
             result[key] = *overrideIt;
@@ -66,13 +66,12 @@ QJsonArray DomainServerNodeData::overrideValuesIfNeeded(const QJsonArray& newSta
     return result;
 }
 
-void DomainServerNodeData::addOverrideForKey(const QString& key, const QString& value,
-                                             const QString& overrideValue) {
+void DomainServerNodeData::addOverrideForKey(const QString& key, const QString& value, const QString& overrideValue) {
     // Insert override value
-    _overrideHash.insert({key, value}, overrideValue);
+    _overrideHash.insert({ key, value }, overrideValue);
 }
 
 void DomainServerNodeData::removeOverrideForKey(const QString& key, const QString& value) {
     // Remove override value
-    _overrideHash.remove({key, value});
+    _overrideHash.remove({ key, value });
 }

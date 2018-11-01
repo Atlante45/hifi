@@ -47,10 +47,8 @@ QUrl getATPUrl(const QString& input) {
         return QUrl();
     }
     // this strips extraneous info from the URL (while preserving fragment/querystring)
-    QString path = url.toEncoded(
-        QUrl::RemoveAuthority | QUrl::RemoveScheme |
-        QUrl::StripTrailingSlash | QUrl::NormalizePathSegments
-    );
+    QString path = url.toEncoded(QUrl::RemoveAuthority | QUrl::RemoveScheme | QUrl::StripTrailingSlash |
+                                 QUrl::NormalizePathSegments);
     QString baseName = QFileInfo(url.path()).baseName();
     if (isValidPath(path) || isValidHash(baseName)) {
         return QUrl(QString("%1:%2").arg(URL_SCHEME_ATP).arg(path));
@@ -64,7 +62,6 @@ QByteArray hashData(const QByteArray& data) {
 
 QByteArray loadFromCache(const QUrl& url) {
     if (auto cache = NetworkAccessManager::getInstance().cache()) {
-
         // caller is responsible for the deletion of the ioDevice, hence the unique_ptr
         if (auto ioDevice = std::unique_ptr<QIODevice>(cache->data(url))) {
             qCDebug(asset_client) << url.toDisplayString() << "loaded from disk cache.";
@@ -72,7 +69,6 @@ QByteArray loadFromCache(const QUrl& url) {
         } else {
             qCDebug(asset_client) << url.toDisplayString() << "not in disk cache";
         }
-
     }
 
     return QByteArray();
@@ -97,7 +93,7 @@ bool saveToCache(const QUrl& url, const QByteArray& file) {
             qCWarning(asset_client) << "Could not save" << url.toDisplayString() << "to disk cache.";
         }
     }
-    
+
     return false;
 }
 

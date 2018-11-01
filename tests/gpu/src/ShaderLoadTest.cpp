@@ -8,18 +8,18 @@
 
 #include "ShaderLoadTest.h"
 
-#include <iostream>
 #include <QtCore/QTemporaryFile>
+#include <iostream>
 
 #include <NumericalConstants.h>
-#include <gpu/Forward.h>
+#include <SettingManager.h>
 #include <gl/Config.h>
 #include <gl/GLHelpers.h>
 #include <gl/GLShaders.h>
-#include <gpu/gl/GLShader.h>
+#include <gpu/Forward.h>
 #include <gpu/gl/GLBackend.h>
+#include <gpu/gl/GLShader.h>
 #include <shared/FileUtils.h>
-#include <SettingManager.h>
 
 #include <test-utils/QTestExtensions.h>
 
@@ -32,14 +32,12 @@ extern std::atomic<size_t> gpuBinaryShadersLoaded;
 extern const QString& getShaderCacheFile();
 
 std::pair<int, std::vector<std::pair<QString, QString>>> parseCachedShaderString(const QString& cachedShaderString) {
-
     std::pair<int, std::vector<std::pair<QString, QString>>> result;
     {
         static const QRegularExpression versionRegex("^// VERSION (\\d+)");
         auto match = versionRegex.match(cachedShaderString);
         result.first = match.captured(1).toInt();
     }
-
 
     int rangeStart = 0;
     QString type;
@@ -169,7 +167,7 @@ void ShaderLoadTest::parseCacheFile() {
         }
         _programs.insert(program);
     }
-}        
+}
 
 bool ShaderLoadTest::buildProgram(const Program& programFiles) {
     const auto& vertexName = programFiles.first;
@@ -279,6 +277,4 @@ void ShaderLoadTest::testShaderLoad() {
         qDebug() << "Cached shader load took" << timer.elapsed() << "ms";
         QVERIFY(gpuBinaryShadersLoaded == _programs.size() * gpu::gl::GLShader::NumVersions);
     }
-
 }
-

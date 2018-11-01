@@ -38,7 +38,8 @@ public:
     ParsedMaterials parsedMaterials;
 
     static ParsedMaterials parseJSONMaterials(const QJsonDocument& materialJSON, const QUrl& baseUrl);
-    static std::pair<std::string, std::shared_ptr<NetworkMaterial>> parseJSONMaterial(const QJsonObject& materialJSON, const QUrl& baseUrl);
+    static std::pair<std::string, std::shared_ptr<NetworkMaterial>> parseJSONMaterial(const QJsonObject& materialJSON,
+                                                                                      const QUrl& baseUrl);
 
 private:
     static bool parseJSONColor(const QJsonValue& array, glm::vec3& color, bool& isSRGB);
@@ -53,7 +54,8 @@ public:
     NetworkMaterialResourcePointer getMaterial(const QUrl& url);
 
 protected:
-    virtual QSharedPointer<Resource> createResource(const QUrl& url, const QSharedPointer<Resource>& fallback, const void* extra) override;
+    virtual QSharedPointer<Resource> createResource(const QUrl& url, const QSharedPointer<Resource>& fallback,
+                                                    const void* extra) override;
 };
 
 #endif

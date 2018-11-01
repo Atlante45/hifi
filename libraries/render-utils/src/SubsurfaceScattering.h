@@ -14,11 +14,11 @@
 
 #include <DependencyManager.h>
 
-#include "render/DrawTask.h"
 #include "DeferredFrameTransform.h"
 #include "DeferredFramebuffer.h"
-#include "SurfaceGeometryPass.h"
 #include "LightingModel.h"
+#include "SurfaceGeometryPass.h"
+#include "render/DrawTask.h"
 
 class SubsurfaceScatteringResource {
 public:
@@ -34,7 +34,6 @@ public:
 
     void setLevel(float level);
     float getLevel() const;
-
 
     void setShowBRDF(bool show);
     bool isShowBRDF() const;
@@ -56,27 +55,22 @@ public:
     static gpu::TexturePointer generateScatteringSpecularBeckmann(RenderArgs* args);
 
 protected:
-
-
     // Class describing the uniform buffer with the transform info common to the AO shaders
     // It s changing every frame
     class Parameters {
     public:
-        glm::vec4 normalBentInfo{ 1.5f, 0.8f, 0.3f, 1.5f };
-        glm::vec2 curvatureInfo{ 0.08f, 0.8f };
-        float level{ 1.0f };
-        float showBRDF{ 0.0f };
-        float showCurvature{ 0.0f };
-        float showDiffusedNormal{ 0.0f };
-        float spare1{ 0.0f };
-        float spare2{ 0.0f };
-
+        glm::vec4 normalBentInfo { 1.5f, 0.8f, 0.3f, 1.5f };
+        glm::vec2 curvatureInfo { 0.08f, 0.8f };
+        float level { 1.0f };
+        float showBRDF { 0.0f };
+        float showCurvature { 0.0f };
+        float showDiffusedNormal { 0.0f };
+        float spare1 { 0.0f };
+        float spare2 { 0.0f };
 
         Parameters() {}
     };
     UniformBufferView _parametersBuffer;
-
-
 
     gpu::TexturePointer _scatteringProfile;
     gpu::TexturePointer _scatteringTable;
@@ -84,8 +78,6 @@ protected:
 };
 
 using SubsurfaceScatteringResourcePointer = std::shared_ptr<SubsurfaceScatteringResource>;
-
-
 
 class SubsurfaceScatteringConfig : public render::Job::Config {
     Q_OBJECT
@@ -105,18 +97,18 @@ class SubsurfaceScatteringConfig : public render::Job::Config {
 public:
     SubsurfaceScatteringConfig() : render::Job::Config(true) {}
 
-    float bentRed{ 1.5f };
-    float bentGreen{ 0.8f };
-    float bentBlue{ 0.3f };
-    float bentScale{ 1.5f };
+    float bentRed { 1.5f };
+    float bentGreen { 0.8f };
+    float bentBlue { 0.3f };
+    float bentScale { 1.5f };
 
-    float curvatureOffset{ 0.08f };
-    float curvatureScale{ 0.9f };
+    float curvatureOffset { 0.08f };
+    float curvatureScale { 0.9f };
 
-    bool enableScattering{ true };
-    bool showScatteringBRDF{ false };
-    bool showCurvature{ false };
-    bool showDiffusedNormal{ false };
+    bool enableScattering { true };
+    bool showScatteringBRDF { false };
+    bool showCurvature { false };
+    bool showDiffusedNormal { false };
 
 signals:
     void dirty();
@@ -124,7 +116,8 @@ signals:
 
 class SubsurfaceScattering {
 public:
-    //using Inputs = render::VaryingSet4<DeferredFrameTransformPointer, gpu::FramebufferPointer, gpu::FramebufferPointer, SubsurfaceScatteringResourcePointer>;
+    // using Inputs = render::VaryingSet4<DeferredFrameTransformPointer, gpu::FramebufferPointer, gpu::FramebufferPointer,
+    // SubsurfaceScatteringResourcePointer>;
     using Outputs = SubsurfaceScatteringResourcePointer;
     using Config = SubsurfaceScatteringConfig;
     using JobModel = render::Job::ModelO<SubsurfaceScattering, Outputs, Config>;
@@ -138,8 +131,6 @@ private:
     SubsurfaceScatteringResourcePointer _scatteringResource;
 };
 
-
-
 class DebugSubsurfaceScatteringConfig : public render::Job::Config {
     Q_OBJECT
 
@@ -151,11 +142,11 @@ class DebugSubsurfaceScatteringConfig : public render::Job::Config {
 public:
     DebugSubsurfaceScatteringConfig() : render::Job::Config(false) {}
 
-    bool showProfile{ false };
-    bool showLUT{ false };
-    bool showSpecularTable{ false };
-    bool showCursorPixel{ false };
-    glm::vec2 debugCursorTexcoord{ 0.5, 0.5 };
+    bool showProfile { false };
+    bool showLUT { false };
+    bool showSpecularTable { false };
+    bool showCursorPixel { false };
+    glm::vec2 debugCursorTexcoord { 0.5, 0.5 };
 
 signals:
     void dirty();
@@ -163,7 +154,9 @@ signals:
 
 class DebugSubsurfaceScattering {
 public:
-    using Inputs = render::VaryingSet6<DeferredFrameTransformPointer, DeferredFramebufferPointer, LightingModelPointer, SurfaceGeometryFramebufferPointer, gpu::FramebufferPointer, SubsurfaceScatteringResourcePointer>;
+    using Inputs = render::VaryingSet6<DeferredFrameTransformPointer, DeferredFramebufferPointer, LightingModelPointer,
+                                       SurfaceGeometryFramebufferPointer, gpu::FramebufferPointer,
+                                       SubsurfaceScatteringResourcePointer>;
     using Config = DebugSubsurfaceScatteringConfig;
     using JobModel = render::Job::ModelI<DebugSubsurfaceScattering, Inputs, Config>;
 
@@ -173,17 +166,16 @@ public:
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs);
 
 private:
-
     gpu::PipelinePointer _scatteringPipeline;
     gpu::PipelinePointer getScatteringPipeline();
 
     gpu::PipelinePointer _showLUTPipeline;
     gpu::PipelinePointer getShowLUTPipeline();
     gpu::BufferPointer _debugParams;
-    bool _showProfile{ false };
-    bool _showLUT{ false };
-    bool _showSpecularTable{ false };
-    bool _showCursorPixel{ false };
+    bool _showProfile { false };
+    bool _showLUT { false };
+    bool _showSpecularTable { false };
+    bool _showCursorPixel { false };
     glm::vec2 _debugCursorTexcoord;
 };
 

@@ -35,14 +35,11 @@ public:
     virtual QScriptValue newInstance(QScriptValue array);
     virtual QScriptValue newInstance(QScriptValue buffer, quint32 byteOffset, quint32 length);
 
-    virtual QueryFlags queryProperty(const QScriptValue& object,
-                                     const QScriptString& name,
-                                     QueryFlags flags, uint* id) override;
-    virtual QScriptValue property(const QScriptValue& object,
-                                  const QScriptString& name, uint id) override;
+    virtual QueryFlags queryProperty(const QScriptValue& object, const QScriptString& name, QueryFlags flags,
+                                     uint* id) override;
+    virtual QScriptValue property(const QScriptValue& object, const QScriptString& name, uint id) override;
     virtual void setProperty(QScriptValue& object, const QScriptString& name, uint id, const QScriptValue& value) override = 0;
-    virtual QScriptValue::PropertyFlags propertyFlags(const QScriptValue& object,
-                                                      const QScriptString& name, uint id) override;
+    virtual QScriptValue::PropertyFlags propertyFlags(const QScriptValue& object, const QScriptString& name, uint id) override;
 
     QString name() const override;
     QScriptValue prototype() const override;

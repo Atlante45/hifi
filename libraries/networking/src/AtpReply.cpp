@@ -14,8 +14,8 @@
 #include "ResourceManager.h"
 
 AtpReply::AtpReply(const QUrl& url, QObject* parent) :
-    _resourceRequest(DependencyManager::get<ResourceManager>()->createResourceRequest(
-        parent, url, true, -1, "AtpReply::AtpReply")) {
+    _resourceRequest(
+        DependencyManager::get<ResourceManager>()->createResourceRequest(parent, url, true, -1, "AtpReply::AtpReply")) {
     setOperation(QNetworkAccessManager::GetOperation);
 
     connect(_resourceRequest, &AssetResourceRequest::progress, this, &AtpReply::downloadProgress);

@@ -10,13 +10,14 @@
 
 #include "EntityItemProperties.h"
 
-#include "QJsonDocument"
 #include "QJsonArray"
+#include "QJsonDocument"
 
 EntityItemPointer MaterialEntityItem::factory(const EntityItemID& entityID, const EntityItemProperties& properties) {
     Pointer entity(new MaterialEntityItem(entityID), [](EntityItem* ptr) { ptr->deleteLater(); });
     entity->setProperties(properties);
-    // When you reload content, setProperties doesn't have any of the propertiesChanged flags set, so it won't trigger a material add
+    // When you reload content, setProperties doesn't have any of the propertiesChanged flags set, so it won't trigger a
+    // material add
     entity->removeMaterial();
     entity->applyMaterial();
     return entity;
@@ -31,8 +32,10 @@ MaterialEntityItem::~MaterialEntityItem() {
     removeMaterial();
 }
 
-EntityItemProperties MaterialEntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
-    EntityItemProperties properties = EntityItem::getProperties(desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
+EntityItemProperties MaterialEntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                                       bool allowEmptyDesiredProperties) const {
+    EntityItemProperties properties = EntityItem::getProperties(
+        desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(materialURL, getMaterialURL);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(materialMappingMode, getMaterialMappingMode);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(priority, getPriority);
@@ -61,8 +64,8 @@ bool MaterialEntityItem::setProperties(const EntityItemProperties& properties) {
         if (wantDebug) {
             uint64_t now = usecTimestampNow();
             int elapsed = now - getLastEdited();
-            qCDebug(entities) << "MaterialEntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                    "now=" << now << " getLastEdited()=" << getLastEdited();
+            qCDebug(entities) << "MaterialEntityItem::setProperties() AFTER update... edited AGO=" << elapsed << "now=" << now
+                              << " getLastEdited()=" << getLastEdited();
         }
         setLastEdited(properties.getLastEdited());
     }
@@ -70,10 +73,8 @@ bool MaterialEntityItem::setProperties(const EntityItemProperties& properties) {
 }
 
 int MaterialEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) {
-
+                                                         ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                         bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 
@@ -103,13 +104,10 @@ EntityPropertyFlags MaterialEntityItem::getEntityProperties(EncodeBitstreamParam
 }
 
 void MaterialEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
-                                    EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount, 
-                                    OctreeElement::AppendState& appendState) const { 
-
+                                            EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
+                                            EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                            EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                            OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
     APPEND_ENTITY_PROPERTY(PROP_MATERIAL_URL, getMaterialURL());
     APPEND_ENTITY_PROPERTY(PROP_MATERIAL_MAPPING_MODE, (uint32_t)getMaterialMappingMode());
@@ -164,7 +162,8 @@ void MaterialEntityItem::setMaterialURL(const QString& materialURLString, bool m
         }
 
         if (usingMaterialData) {
-            _parsedMaterials = NetworkMaterialResource::parseJSONMaterials(QJsonDocument::fromJson(getMaterialData().toUtf8()), materialURLString);
+            _parsedMaterials = NetworkMaterialResource::parseJSONMaterials(QJsonDocument::fromJson(getMaterialData().toUtf8()),
+                                                                           materialURLString);
 
             // Since our material changed, the current name might not be valid anymore, so we need to update
             setCurrentMaterialName(_currentMaterialName);

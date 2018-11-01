@@ -23,7 +23,6 @@
 class NLPacket;
 
 class SentPacketHistory {
-
 public:
     SentPacketHistory(int size = MAX_REASONABLE_SEQUENCE_GAP);
 
@@ -34,7 +33,7 @@ public:
 
 private:
     mutable QReadWriteLock _packetsLock { QReadWriteLock::Recursive };
-    RingBufferHistory<std::unique_ptr<NLPacket>> _sentPackets;    // circular buffer
+    RingBufferHistory<std::unique_ptr<NLPacket>> _sentPackets; // circular buffer
 
     uint16_t _newestSequenceNumber;
 };

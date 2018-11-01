@@ -19,7 +19,7 @@ public:
     QString getPythonCommand();
 
 private:
-    const QString _pythonExe{ "python.exe" };
+    const QString _pythonExe { "python.exe" };
     QString _pythonCommand;
 };
 

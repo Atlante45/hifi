@@ -20,37 +20,37 @@
 class QJsonValue;
 
 namespace controller {
-    /*
-    * encapsulates a source, destination and filters to apply
-    */
-    class Conditional {
-    public:
-        using Pointer = std::shared_ptr<Conditional>;
-        using List = std::list<Pointer>;
-        using Factory = hifi::SimpleFactory<Conditional, QString>;
-        using Lambda = std::function<bool()>;
+/*
+ * encapsulates a source, destination and filters to apply
+ */
+class Conditional {
+public:
+    using Pointer = std::shared_ptr<Conditional>;
+    using List = std::list<Pointer>;
+    using Factory = hifi::SimpleFactory<Conditional, QString>;
+    using Lambda = std::function<bool()>;
 
-        virtual ~Conditional() = default;
+    virtual ~Conditional() = default;
 
-        virtual bool satisfied() = 0;
-        virtual bool parseParameters(const QJsonValue& parameters) { return true; }
+    virtual bool satisfied() = 0;
+    virtual bool parseParameters(const QJsonValue& parameters) { return true; }
 
-        static Pointer parse(const QJsonValue& json);
-        static void registerBuilder(const QString& name, Factory::Builder builder);
-        static Factory& getFactory() { return _factory; }
-    protected:
-        static Factory _factory;
-    };
+    static Pointer parse(const QJsonValue& json);
+    static void registerBuilder(const QString& name, Factory::Builder builder);
+    static Factory& getFactory() { return _factory; }
 
-}
+protected:
+    static Factory _factory;
+};
 
-#define REGISTER_CONDITIONAL_CLASS(classEntry) \
-    private: \
-    using Registrar = Conditional::Factory::Registrar<classEntry>; \
+} // namespace controller
+
+#define REGISTER_CONDITIONAL_CLASS(classEntry)                                                                                 \
+private:                                                                                                                       \
+    using Registrar = Conditional::Factory::Registrar<classEntry>;                                                             \
     static Registrar _registrar;
 
-#define REGISTER_CONDITIONAL_CLASS_INSTANCE(classEntry, className) \
+#define REGISTER_CONDITIONAL_CLASS_INSTANCE(classEntry, className)                                                             \
     classEntry::Registrar classEntry::_registrar(className, Conditional::getFactory());
-
 
 #endif

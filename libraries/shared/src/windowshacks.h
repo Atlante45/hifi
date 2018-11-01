@@ -25,8 +25,8 @@ inline double roundf(double value) {
 #ifdef _MSC_VER
 #ifndef SNPRINTF_FIX
 #define SNPRINTF_FIX
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 #define snprintf c99_snprintf
 
@@ -54,8 +54,8 @@ inline int c99_snprintf(char* str, size_t size, const char* format, ...) {
 #endif // SNPRINTF_FIX
 #endif // _MSC_VER
 
-#include <winsock2.h>
 #include <WS2tcpip.h>
+#include <winsock2.h>
 
 #else // WIN32
 

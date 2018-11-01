@@ -14,8 +14,8 @@
 #include "avatar/MyAvatar.h"
 
 #include <DependencyManager.h>
-#include "PickScriptingInterface.h"
 #include <PickManager.h>
+#include "PickScriptingInterface.h"
 
 // TODO: make these configurable per pointer
 static const float WEB_STYLUS_LENGTH = 0.2f;
@@ -30,8 +30,7 @@ static const float TOUCH_HYSTERESIS = 0.001f;
 
 StylusPointer::StylusPointer(const QVariant& props, const OverlayID& stylusOverlay, bool hover, bool enabled) :
     Pointer(DependencyManager::get<PickScriptingInterface>()->createStylusPick(props), enabled, hover),
-    _stylusOverlay(stylusOverlay)
-{
+    _stylusOverlay(stylusOverlay) {
 }
 
 StylusPointer::~StylusPointer() {
@@ -72,7 +71,7 @@ void StylusPointer::updateVisuals(const PickResultPointer& pickResult) {
 void StylusPointer::show(const StylusTip& tip) {
     if (!_stylusOverlay.isNull()) {
         QVariantMap props;
-        static const glm::quat X_ROT_NEG_90{ 0.70710678f, -0.70710678f, 0.0f, 0.0f };
+        static const glm::quat X_ROT_NEG_90 { 0.70710678f, -0.70710678f, 0.0f, 0.0f };
         auto modelOrientation = tip.orientation * X_ROT_NEG_90;
         auto sensorToWorldScale = DependencyManager::get<AvatarManager>()->getMyAvatar()->getSensorToWorldScale();
         auto modelPositionOffset = modelOrientation * (vec3(0.0f, 0.0f, -WEB_STYLUS_LENGTH / 2.0f) * sensorToWorldScale);
@@ -126,7 +125,7 @@ bool StylusPointer::shouldTrigger(const PickResultPointer& pickResult) {
 
         float hysteresis = _state.triggering ? TOUCH_HYSTERESIS * sensorScaleFactor : 0.0f;
         if (isWithinBounds(distance, TABLET_MIN_TOUCH_DISTANCE * sensorScaleFactor,
-            TABLET_MAX_TOUCH_DISTANCE * sensorScaleFactor, hysteresis)) {
+                           TABLET_MAX_TOUCH_DISTANCE * sensorScaleFactor, hysteresis)) {
             _state.wasTriggering = _state.triggering;
             if (!_state.triggering) {
                 _state.triggeredObject = PickedObject(stylusPickResult->objectID, stylusPickResult->type);
@@ -169,7 +168,8 @@ Pointer::Buttons StylusPointer::getPressedButtons(const PickResultPointer& pickR
     return toReturn;
 }
 
-PointerEvent StylusPointer::buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult, const std::string& button, bool hover) {
+PointerEvent StylusPointer::buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult,
+                                              const std::string& button, bool hover) {
     QUuid pickedID;
     glm::vec2 pos2D;
     glm::vec3 intersection, surfaceNormal, direction, origin;
@@ -187,7 +187,8 @@ PointerEvent StylusPointer::buildPointerEvent(const PickedObject& target, const 
     // If we just started triggering and we haven't moved too much, don't update intersection and pos2D
     float sensorToWorldScale = DependencyManager::get<AvatarManager>()->getMyAvatar()->getSensorToWorldScale();
     float deadspotSquared = TOUCH_PRESS_TO_MOVE_DEADSPOT_SQUARED * sensorToWorldScale * sensorToWorldScale;
-    bool withinDeadspot = usecTimestampNow() - _state.triggerStartTime < POINTER_MOVE_DELAY && glm::distance2(pos2D, _state.triggerPos2D) < deadspotSquared;
+    bool withinDeadspot = usecTimestampNow() - _state.triggerStartTime < POINTER_MOVE_DELAY &&
+                          glm::distance2(pos2D, _state.triggerPos2D) < deadspotSquared;
     if ((_state.triggering || _state.wasTriggering) && !_state.deadspotExpired && withinDeadspot) {
         pos2D = _state.triggerPos2D;
         intersection = _state.intersection;
@@ -219,7 +220,8 @@ QVariantMap StylusPointer::toVariantMap() const {
     return QVariantMap();
 }
 
-glm::vec3 StylusPointer::findIntersection(const PickedObject& pickedObject, const glm::vec3& origin, const glm::vec3& direction) {
+glm::vec3 StylusPointer::findIntersection(const PickedObject& pickedObject, const glm::vec3& origin,
+                                          const glm::vec3& direction) {
     switch (pickedObject.type) {
         case ENTITY:
             return RayPick::intersectRayWithEntityXYPlane(pickedObject.objectID, origin, direction);

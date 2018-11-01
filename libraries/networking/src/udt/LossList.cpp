@@ -19,7 +19,7 @@ using namespace std;
 void LossList::append(SequenceNumber seq) {
     Q_ASSERT_X(_lossList.empty() || (_lossList.back().second < seq), "LossList::append(SequenceNumber)",
                "SequenceNumber appended is not greater than the last SequenceNumber in the list");
-    
+
     if (getLength() > 0 && _lossList.back().second + 1 == seq) {
         ++_lossList.back().second;
     } else {
@@ -29,11 +29,9 @@ void LossList::append(SequenceNumber seq) {
 }
 
 void LossList::append(SequenceNumber start, SequenceNumber end) {
-    Q_ASSERT_X(_lossList.empty() || (_lossList.back().second < start),
-               "LossList::append(SequenceNumber, SequenceNumber)",
+    Q_ASSERT_X(_lossList.empty() || (_lossList.back().second < start), "LossList::append(SequenceNumber, SequenceNumber)",
                "SequenceNumber range appended is not greater than the last SequenceNumber in the list");
-    Q_ASSERT_X(start <= end,
-               "LossList::append(SequenceNumber, SequenceNumber)", "Range start greater than range end");
+    Q_ASSERT_X(start <= end, "LossList::append(SequenceNumber, SequenceNumber)", "Range start greater than range end");
 
     if (getLength() > 0 && _lossList.back().second + 1 == start) {
         _lossList.back().second = end;
@@ -44,13 +42,11 @@ void LossList::append(SequenceNumber start, SequenceNumber end) {
 }
 
 void LossList::insert(SequenceNumber start, SequenceNumber end) {
-    Q_ASSERT_X(start <= end,
-               "LossList::insert(SequenceNumber, SequenceNumber)", "Range start greater than range end");
-    
-    auto it = find_if_not(_lossList.begin(), _lossList.end(), [&start](pair<SequenceNumber, SequenceNumber> pair){
-        return pair.second < start;
-    });
-    
+    Q_ASSERT_X(start <= end, "LossList::insert(SequenceNumber, SequenceNumber)", "Range start greater than range end");
+
+    auto it = find_if_not(_lossList.begin(), _lossList.end(),
+                          [&start](pair<SequenceNumber, SequenceNumber> pair) { return pair.second < start; });
+
     if (it == _lossList.end() || end < it->first) {
         // No overlap, simply insert
         _length += seqlen(start, end);
@@ -61,13 +57,13 @@ void LossList::insert(SequenceNumber start, SequenceNumber end) {
             _length += seqlen(start, it->first - 1);
             it->first = start;
         }
-        
+
         // If it ends after segment, extend segment
         if (end > it->second) {
             _length += seqlen(it->second + 1, end);
             it->second = end;
         }
-        
+
         auto it2 = it;
         ++it2;
         // For all ranges touching the current range
@@ -77,7 +73,7 @@ void LossList::insert(SequenceNumber start, SequenceNumber end) {
                 _length += seqlen(it->second + 1, it2->second);
                 it->second = it2->second;
             }
-            
+
             // Remove overlapping range
             _length -= seqlen(it2->first, it2->second);
             it2 = _lossList.erase(it2);
@@ -86,10 +82,9 @@ void LossList::insert(SequenceNumber start, SequenceNumber end) {
 }
 
 bool LossList::remove(SequenceNumber seq) {
-    auto it = find_if(_lossList.begin(), _lossList.end(), [&seq](pair<SequenceNumber, SequenceNumber> pair) {
-        return pair.first <= seq && seq <= pair.second;
-    });
-    
+    auto it = find_if(_lossList.begin(), _lossList.end(),
+                      [&seq](pair<SequenceNumber, SequenceNumber> pair) { return pair.first <= seq && seq <= pair.second; });
+
     if (it != end(_lossList)) {
         if (it->first == it->second) {
             _lossList.erase(it);
@@ -103,7 +98,7 @@ bool LossList::remove(SequenceNumber seq) {
             _lossList.insert(++it, make_pair(seq + 1, temp));
         }
         _length -= 1;
-        
+
         // this sequence number was found in the loss list, return true
         return true;
     } else {
@@ -113,16 +108,14 @@ bool LossList::remove(SequenceNumber seq) {
 }
 
 void LossList::remove(SequenceNumber start, SequenceNumber end) {
-    Q_ASSERT_X(start <= end,
-               "LossList::remove(SequenceNumber, SequenceNumber)", "Range start greater than range end");
+    Q_ASSERT_X(start <= end, "LossList::remove(SequenceNumber, SequenceNumber)", "Range start greater than range end");
     // Find the first segment sharing sequence numbers
     auto it = find_if(_lossList.begin(), _lossList.end(), [&start, &end](pair<SequenceNumber, SequenceNumber> pair) {
         return (pair.first <= start && start <= pair.second) || (start <= pair.first && pair.first <= end);
     });
-    
+
     // If we found one
     if (it != _lossList.end()) {
-        
         // While the end of the current segment is contained, either shorten it (first one only - sometimes)
         // or remove it altogether since it is fully contained it the range
         while (it != _lossList.end() && end >= it->second) {
@@ -138,7 +131,7 @@ void LossList::remove(SequenceNumber start, SequenceNumber end) {
                 ++it;
             }
         }
-        
+
         // There might be more to remove
         if (it != _lossList.end() && it->first <= end) {
             if (start <= it->first) {
@@ -169,13 +162,13 @@ SequenceNumber LossList::popFirstSequenceNumber() {
 
 void LossList::write(ControlPacket& packet, int maxPairs) {
     int writtenPairs = 0;
-    
+
     for (const auto& pair : _lossList) {
         packet.writePrimitive(pair.first);
         packet.writePrimitive(pair.second);
-        
+
         ++writtenPairs;
-        
+
         // check if we've written the maximum number we were told to write
         if (maxPairs != -1 && writtenPairs >= maxPairs) {
             break;

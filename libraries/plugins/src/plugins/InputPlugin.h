@@ -10,11 +10,11 @@
 //
 #pragma once
 
-#include "Plugin.h"
 #include <QJsonObject>
+#include "Plugin.h"
 
 namespace controller {
-    struct InputCalibrationData;
+struct InputCalibrationData;
 }
 
 class InputPlugin : public Plugin {
@@ -25,7 +25,7 @@ public:
     // Some input plugins are comprised of multiple subdevices (SDL2, for instance).
     // If an input plugin is only a single device, it will only return it's primary name.
     virtual QStringList getSubdeviceNames() { return { getName() }; };
-    virtual void setConfigurationSettings(const QJsonObject configurationSettings) { }
+    virtual void setConfigurationSettings(const QJsonObject configurationSettings) {}
     virtual QJsonObject configurationSettings() { return QJsonObject(); }
     virtual QString configurationLayout() { return QString(); }
     virtual QString getDeviceName() { return QString(); }

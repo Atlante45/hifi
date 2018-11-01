@@ -32,15 +32,9 @@ class Worker;
 class TestRunner : public QObject {
     Q_OBJECT
 public:
-    explicit TestRunner(std::vector<QCheckBox*> dayCheckboxes,
-                        std::vector<QCheckBox*> timeEditCheckboxes,
-                        std::vector<QTimeEdit*> timeEdits,
-                        QLabel* workingFolderLabel,
-                        QCheckBox* runServerless,
-                        QCheckBox* runLatest,
-                        QLineEdit* url,
-                        QPushButton* runNow,
-                        QObject* parent = 0);
+    explicit TestRunner(std::vector<QCheckBox*> dayCheckboxes, std::vector<QCheckBox*> timeEditCheckboxes,
+                        std::vector<QTimeEdit*> timeEdits, QLabel* workingFolderLabel, QCheckBox* runServerless,
+                        QCheckBox* runLatest, QLineEdit* url, QPushButton* runNow, QObject* parent = 0);
 
     ~TestRunner();
 
@@ -56,10 +50,10 @@ public:
     void restoreHighFidelityAppDataFolder();
 
     void createSnapshotFolder();
-    
+
     void killProcesses();
     void startLocalServerProcesses();
-    
+
     void runInterfaceWithTestScript();
 
     void evaluateResults();
@@ -86,14 +80,14 @@ signals:
     void startInterface();
 
 private:
-    bool _automatedTestIsRunning{ false };
+    bool _automatedTestIsRunning { false };
 
-    const QString INSTALLER_FILENAME_LATEST{ "HighFidelity-Beta-latest-dev.exe" };
+    const QString INSTALLER_FILENAME_LATEST { "HighFidelity-Beta-latest-dev.exe" };
 
     QString _installerURL;
     QString _installerFilename;
-    const QString DEV_BUILD_XML_URL{ "https://highfidelity.com/dev-builds.xml" };
-    const QString DEV_BUILD_XML_FILENAME{ "dev-builds.xml" };
+    const QString DEV_BUILD_XML_URL { "https://highfidelity.com/dev-builds.xml" };
+    const QString DEV_BUILD_XML_FILENAME { "dev-builds.xml" };
 
     bool buildXMLDownloaded;
 
@@ -104,8 +98,8 @@ private:
     QString _installationFolder;
     QString _snapshotFolder;
 
-    const QString UNIQUE_FOLDER_NAME{ "fgadhcUDHSFaidsfh3478JJJFSDFIUSOEIrf" };
-    const QString SNAPSHOT_FOLDER_NAME{ "snapshots" };
+    const QString UNIQUE_FOLDER_NAME { "fgadhcUDHSFaidsfh3478JJJFSDFIUSOEIrf" };
+    const QString SNAPSHOT_FOLDER_NAME { "snapshots" };
 
     QString _branch;
     QString _user;
@@ -148,4 +142,4 @@ signals:
 private:
     QString _commandLine;
 };
-#endif  // hifi_testRunner_h
+#endif // hifi_testRunner_h

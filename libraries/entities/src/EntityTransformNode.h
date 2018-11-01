@@ -14,7 +14,8 @@
 
 class EntityTransformNode : public BaseNestableTransformNode<EntityItem> {
 public:
-    EntityTransformNode(std::weak_ptr<EntityItem> spatiallyNestable, int jointIndex) : BaseNestableTransformNode(spatiallyNestable, jointIndex) {};
+    EntityTransformNode(std::weak_ptr<EntityItem> spatiallyNestable, int jointIndex) :
+        BaseNestableTransformNode(spatiallyNestable, jointIndex) {};
 };
 
 #endif // hifi_EntityTransformNode_h

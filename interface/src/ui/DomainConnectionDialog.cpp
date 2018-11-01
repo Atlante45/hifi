@@ -19,9 +19,7 @@
 #include <NodeList.h>
 #include <NumericalConstants.h>
 
-DomainConnectionDialog::DomainConnectionDialog(QWidget* parent) :
-    QDialog(parent, Qt::Window | Qt::WindowCloseButtonHint)
-{
+DomainConnectionDialog::DomainConnectionDialog(QWidget* parent) : QDialog(parent, Qt::Window | Qt::WindowCloseButtonHint) {
     setWindowTitle("Domain Connection Timing");
     setAttribute(Qt::WA_DeleteOnClose);
 
@@ -30,7 +28,10 @@ DomainConnectionDialog::DomainConnectionDialog(QWidget* parent) :
 
     timeTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    const QStringList TABLE_HEADERS = QStringList() << "Name" << "Timestamp (ms)" << "Delta (ms)" << "Time elapsed (ms)";
+    const QStringList TABLE_HEADERS = QStringList() << "Name"
+                                                    << "Timestamp (ms)"
+                                                    << "Delta (ms)"
+                                                    << "Time elapsed (ms)";
 
     timeTable->setColumnCount(TABLE_HEADERS.size());
 
@@ -47,10 +48,10 @@ DomainConnectionDialog::DomainConnectionDialog(QWidget* parent) :
 
     int thisRow = 0;
 
-    const QMetaObject &nodeListMeta = NodeList::staticMetaObject;
+    const QMetaObject& nodeListMeta = NodeList::staticMetaObject;
     QMetaEnum stepEnum = nodeListMeta.enumerator(nodeListMeta.indexOfEnumerator("ConnectionStep"));
 
-    foreach(quint64 timestamp, times.keys()) {
+    foreach (quint64 timestamp, times.keys()) {
         // When did this step occur, how long since the last step, how long since the start?
         quint64 stepTime = timestamp / USECS_PER_MSEC;
         quint64 delta = (stepTime - lastStepTime);
@@ -59,7 +60,7 @@ DomainConnectionDialog::DomainConnectionDialog(QWidget* parent) :
         lastStepTime = stepTime;
 
         // setup the columns for this row in the table
-        int stepIndex = (int) times.value(timestamp);
+        int stepIndex = (int)times.value(timestamp);
 
         timeTable->setItem(thisRow, 0, new QTableWidgetItem(stepEnum.valueToKey(stepIndex)));
         timeTable->setItem(thisRow, 1, new QTableWidgetItem(QString::number(stepTime)));

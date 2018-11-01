@@ -17,17 +17,20 @@
 #include <glm/gtx/component_wise.hpp>
 
 #include <QDebug>
-#include "StreamUtils.h"
 #include "GLMHelpers.h"
+#include "StreamUtils.h"
 
 class AABox;
 class Transform;
 
 class Extents {
 public:
-    Extents() { }
+    Extents() {}
     Extents(const glm::vec3& minimum, const glm::vec3& maximum) : minimum(minimum), maximum(maximum) {}
-    Extents(const AABox& box) { reset(); add(box); }
+    Extents(const AABox& box) {
+        reset();
+        add(box);
+    }
 
     /// set minimum and maximum to FLT_MAX and -FLT_MAX respectively
     void reset();
@@ -54,15 +57,24 @@ public:
 
     /// \param vec3 for delta amount to shift the extents by
     /// \return true if point is within current limits
-    void shiftBy(const glm::vec3& delta) { minimum += delta; maximum += delta; }
-    
+    void shiftBy(const glm::vec3& delta) {
+        minimum += delta;
+        maximum += delta;
+    }
+
     /// rotate the extents around orign by rotation
     void rotate(const glm::quat& rotation);
-    
+
     /// scale the extents around orign by scale
-    void scale(float scale) { minimum *= scale; maximum *= scale; }
-    void scale(const glm::vec3& scale) { minimum *= scale; maximum *= scale; }
-    
+    void scale(float scale) {
+        minimum *= scale;
+        maximum *= scale;
+    }
+    void scale(const glm::vec3& scale) {
+        minimum *= scale;
+        maximum *= scale;
+    }
+
     // Transform the extents with transform
     void transform(const Transform& transform);
 
@@ -76,19 +88,16 @@ public:
         return temp;
     }
 
-    glm::vec3 minimum{ Vectors::MAX };
-    glm::vec3 maximum{ Vectors::MIN };
+    glm::vec3 minimum { Vectors::MAX };
+    glm::vec3 maximum { Vectors::MIN };
 };
 
 inline QDebug operator<<(QDebug debug, const Extents& extents) {
-    debug << "Extents[ (" 
-            << extents.minimum << " ) to ("
-            << extents.maximum << ") size: ("
-            << (extents.maximum - extents.minimum) << ")"
-            << " ]";
+    debug << "Extents[ (" << extents.minimum << " ) to (" << extents.maximum << ") size: ("
+          << (extents.maximum - extents.minimum) << ")"
+          << " ]";
 
     return debug;
 }
-
 
 #endif // hifi_Extents_h

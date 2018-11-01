@@ -16,8 +16,7 @@
 OctreeScriptingInterface::OctreeScriptingInterface(OctreeEditPacketSender* packetSender) :
     _packetSender(packetSender),
     _managedPacketSender(false),
-    _initialized(false)
-{
+    _initialized(false) {
 }
 
 OctreeScriptingInterface::~OctreeScriptingInterface() {
@@ -41,7 +40,7 @@ void OctreeScriptingInterface::init() {
     if (_initialized) {
         return;
     }
-    
+
     if (_packetSender) {
         _managedPacketSender = false;
     } else {

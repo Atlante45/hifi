@@ -8,19 +8,18 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #include "Text3DOverlay.h"
 
-#include <TextureCache.h>
 #include <GeometryCache.h>
 #include <RegisteredMetaTypes.h>
 #include <RenderDeferredTask.h>
 #include <TextRenderer3D.h>
+#include <TextureCache.h>
 
 #include <AbstractViewStateInterface.h>
 
 const int FIXED_FONT_POINT_SIZE = 40;
-const int FIXED_FONT_SCALING_RATIO = FIXED_FONT_POINT_SIZE * 92.0f; // Determined through experimentation to fit font to line 
+const int FIXED_FONT_SCALING_RATIO = FIXED_FONT_POINT_SIZE * 92.0f; // Determined through experimentation to fit font to line
                                                                     // height.
 const float LINE_SCALE_RATIO = 1.2f;
 
@@ -40,8 +39,7 @@ Text3DOverlay::Text3DOverlay(const Text3DOverlay* text3DOverlay) :
     _leftMargin(text3DOverlay->_leftMargin),
     _topMargin(text3DOverlay->_topMargin),
     _rightMargin(text3DOverlay->_rightMargin),
-    _bottomMargin(text3DOverlay->_bottomMargin)
-{
+    _bottomMargin(text3DOverlay->_bottomMargin) {
     _textRenderer = TextRenderer3D::getInstance(SANS_FONT_FAMILY, FIXED_FONT_POINT_SIZE);
     _geometryId = DependencyManager::get<GeometryCache>()->allocateID();
 }
@@ -110,19 +108,19 @@ void Text3DOverlay::render(RenderArgs* args) {
     // Same font properties as textSize()
     float maxHeight = (float)_textRenderer->computeExtent("Xy").y * LINE_SCALE_RATIO;
 
-    float scaleFactor =  (maxHeight / FIXED_FONT_SCALING_RATIO) * _lineHeight;
+    float scaleFactor = (maxHeight / FIXED_FONT_SCALING_RATIO) * _lineHeight;
 
     glm::vec2 clipDimensions((dimensions.x - (_leftMargin + _rightMargin)) / scaleFactor,
                              (dimensions.y - (_topMargin + _bottomMargin)) / scaleFactor);
 
-    transform.postTranslate(glm::vec3(-(halfDimensions.x - _leftMargin),
-                                      halfDimensions.y - _topMargin, 0.001f));
+    transform.postTranslate(glm::vec3(-(halfDimensions.x - _leftMargin), halfDimensions.y - _topMargin, 0.001f));
     transform.setScale(scaleFactor);
     batch.setModelTransform(transform);
 
     glm::vec4 textColor = { toGlm(_color), getTextAlpha() };
 
-    // FIXME: Factor out textRenderer so that Text3DOverlay overlay parts can be grouped by pipeline for a gpu performance increase.
+    // FIXME: Factor out textRenderer so that Text3DOverlay overlay parts can be grouped by pipeline for a gpu performance
+    // increase.
     _textRenderer->draw(batch, 0, 0, getText(), textColor, glm::vec2(-1.0f), true);
 }
 
@@ -225,7 +223,8 @@ void Text3DOverlay::setProperties(const QVariantMap& properties) {
  *     Antonyms: <code>isWire</code> and <code>wire</code>.
  * @property {boolean} isDashedLine=false - If <code>true</code>, a dashed line is drawn on the overlay's edges. Synonym:
  *     <code>dashed</code>.
- * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.  <code>ignoreRayIntersection</code> is a synonym.
+ * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.
+ * <code>ignoreRayIntersection</code> is a synonym.
  * @property {boolean} drawInFront=false - If <code>true</code>, the overlay is rendered in front of other overlays that don't
  *     have <code>drawInFront</code> set to <code>true</code>, and in front of entities.
  * @property {boolean} grabbable=false - Signal to grabbing scripts whether or not this overlay can be grabbed.
@@ -282,7 +281,8 @@ QVariant Text3DOverlay::getProperty(const QString& property) {
 }
 
 Text3DOverlay* Text3DOverlay::createClone() const {
-    return new Text3DOverlay(this);;
+    return new Text3DOverlay(this);
+    ;
 }
 
 QSizeF Text3DOverlay::textSize(const QString& text) const {

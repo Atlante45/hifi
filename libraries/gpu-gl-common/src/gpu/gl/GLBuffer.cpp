@@ -27,9 +27,7 @@ GLBuffer::~GLBuffer() {
 GLBuffer::GLBuffer(const std::weak_ptr<GLBackend>& backend, const Buffer& buffer, GLuint id) :
     GLObject(backend, buffer, id),
     _size((GLuint)buffer._renderSysmem.getSize()),
-    _stamp(buffer._renderSysmem.getStamp())
-{
+    _stamp(buffer._renderSysmem.getStamp()) {
     Backend::bufferCount.increment();
     Backend::bufferGPUMemSize.update(0, _size);
 }
-

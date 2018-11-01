@@ -18,33 +18,28 @@
 #include "EntityTree.h"
 #include "PhysicsLogging.h"
 
-
 const uint16_t ObjectConstraintBallSocket::constraintVersion = 1;
-
 
 ObjectConstraintBallSocket::ObjectConstraintBallSocket(const QUuid& id, EntityItemPointer ownerEntity) :
     ObjectConstraint(DYNAMIC_TYPE_BALL_SOCKET, id, ownerEntity),
     _pivotInA(glm::vec3(0.0f)),
-    _pivotInB(glm::vec3(0.0f))
-{
-    #if WANT_DEBUG
+    _pivotInB(glm::vec3(0.0f)) {
+#if WANT_DEBUG
     qCDebug(physics) << "ObjectConstraintBallSocket::ObjectConstraintBallSocket";
-    #endif
+#endif
 }
 
 ObjectConstraintBallSocket::~ObjectConstraintBallSocket() {
-    #if WANT_DEBUG
+#if WANT_DEBUG
     qCDebug(physics) << "ObjectConstraintBallSocket::~ObjectConstraintBallSocket";
-    #endif
+#endif
 }
 
 QList<btRigidBody*> ObjectConstraintBallSocket::getRigidBodies() {
     QList<btRigidBody*> result;
     result += getRigidBody();
     QUuid otherEntityID;
-    withReadLock([&]{
-        otherEntityID = _otherID;
-    });
+    withReadLock([&] { otherEntityID = _otherID; });
     if (!otherEntityID.isNull()) {
         result += getOtherRigidBody(otherEntityID);
     }
@@ -57,9 +52,7 @@ void ObjectConstraintBallSocket::prepareForPhysicsSimulation() {
 void ObjectConstraintBallSocket::updateBallSocket() {
     btPoint2PointConstraint* constraint { nullptr };
 
-    withReadLock([&]{
-        constraint = static_cast<btPoint2PointConstraint*>(_constraint);
-    });
+    withReadLock([&] { constraint = static_cast<btPoint2PointConstraint*>(_constraint); });
 
     if (!constraint) {
         return;
@@ -69,14 +62,13 @@ void ObjectConstraintBallSocket::updateBallSocket() {
     constraint->setPivotB(glmToBullet(_pivotInB));
 }
 
-
 btTypedConstraint* ObjectConstraintBallSocket::getConstraint() {
     btPoint2PointConstraint* constraint { nullptr };
     QUuid otherEntityID;
     glm::vec3 pivotInA;
     glm::vec3 pivotInB;
 
-    withReadLock([&]{
+    withReadLock([&] {
         constraint = static_cast<btPoint2PointConstraint*>(_constraint);
         pivotInA = _pivotInA;
         otherEntityID = _otherID;
@@ -110,9 +102,7 @@ btTypedConstraint* ObjectConstraintBallSocket::getConstraint() {
         constraint = new btPoint2PointConstraint(*rigidBodyA, glmToBullet(pivotInA));
     }
 
-    withWriteLock([&]{
-        _constraint = constraint;
-    });
+    withWriteLock([&] { _constraint = constraint; });
 
     // if we don't wake up rigidBodyA, we may not send the dynamicData property over the network
     forceBodyNonStatic();
@@ -123,7 +113,6 @@ btTypedConstraint* ObjectConstraintBallSocket::getConstraint() {
     return constraint;
 }
 
-
 bool ObjectConstraintBallSocket::updateArguments(QVariantMap arguments) {
     glm::vec3 pivotInA;
     QUuid otherEntityID;
@@ -131,7 +120,7 @@ bool ObjectConstraintBallSocket::updateArguments(QVariantMap arguments) {
 
     bool needUpdate = false;
     bool somethingChanged = ObjectDynamic::updateArguments(arguments);
-    withReadLock([&]{
+    withReadLock([&] {
         bool ok = true;
         pivotInA = EntityDynamicInterface::extractVec3Argument("ball-socket constraint", arguments, "pivot", ok, false);
         if (!ok) {
@@ -139,8 +128,8 @@ bool ObjectConstraintBallSocket::updateArguments(QVariantMap arguments) {
         }
 
         ok = true;
-        otherEntityID = QUuid(EntityDynamicInterface::extractStringArgument("ball-socket constraint",
-                                                                            arguments, "otherEntityID", ok, false));
+        otherEntityID = QUuid(
+            EntityDynamicInterface::extractStringArgument("ball-socket constraint", arguments, "otherEntityID", ok, false));
         if (!ok) {
             otherEntityID = _otherID;
         }
@@ -151,10 +140,7 @@ bool ObjectConstraintBallSocket::updateArguments(QVariantMap arguments) {
             pivotInB = _pivotInB;
         }
 
-        if (somethingChanged ||
-            pivotInA != _pivotInA ||
-            otherEntityID != _otherID ||
-            pivotInB != _pivotInB) {
+        if (somethingChanged || pivotInA != _pivotInA || otherEntityID != _otherID || pivotInB != _pivotInB) {
             // something changed
             needUpdate = true;
         }
@@ -182,7 +168,7 @@ bool ObjectConstraintBallSocket::updateArguments(QVariantMap arguments) {
 }
 
 /**jsdoc
- * The <code>"ball-socket"</code> {@link Entities.ActionType|ActionType} connects two entities with a ball and socket joint. 
+ * The <code>"ball-socket"</code> {@link Entities.ActionType|ActionType} connects two entities with a ball and socket joint.
  * It has arguments in addition to the common {@link Entities.ActionArguments|ActionArguments}.
  *
  * @typedef {object} Entities.ActionArguments-BallSocket

@@ -1,28 +1,27 @@
 #include <functional>
 
-
 #include <QtCore/QBuffer>
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
-#include <QtCore/QThread>
-#include <QtCore/QStringList>
 #include <QtCore/QStandardPaths>
+#include <QtCore/QStringList>
 #include <QtCore/QTextStream>
+#include <QtCore/QThread>
 
 #include <QtAndroidExtras/QAndroidJniObject>
 
-#include <android/log.h>
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
+#include <android/log.h>
 
 #include <shared/Storage.h>
 #include <QObject>
 
 #include <AddressManager.h>
-#include "AndroidHelper.h"
-#include <udt/PacketHeaders.h>
 #include <SettingHandle.h>
+#include <udt/PacketHeaders.h>
+#include "AndroidHelper.h"
 
 QAndroidJniObject __interfaceActivity;
 QAndroidJniObject __loginCompletedListener;
@@ -31,23 +30,23 @@ QAndroidJniObject __loadCompleteListener;
 QAndroidJniObject __usernameChangedListener;
 void tempMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& message) {
     if (!message.isEmpty()) {
-        const char * local=message.toStdString().c_str();
+        const char* local = message.toStdString().c_str();
         switch (type) {
             case QtDebugMsg:
-                __android_log_write(ANDROID_LOG_DEBUG,"Interface",local);
+                __android_log_write(ANDROID_LOG_DEBUG, "Interface", local);
                 break;
             case QtInfoMsg:
-                __android_log_write(ANDROID_LOG_INFO,"Interface",local);
+                __android_log_write(ANDROID_LOG_INFO, "Interface", local);
                 break;
             case QtWarningMsg:
-                __android_log_write(ANDROID_LOG_WARN,"Interface",local);
+                __android_log_write(ANDROID_LOG_WARN, "Interface", local);
                 break;
             case QtCriticalMsg:
-                __android_log_write(ANDROID_LOG_ERROR,"Interface",local);
+                __android_log_write(ANDROID_LOG_ERROR, "Interface", local);
                 break;
             case QtFatalMsg:
             default:
-                __android_log_write(ANDROID_LOG_FATAL,"Interface",local);
+                __android_log_write(ANDROID_LOG_FATAL, "Interface", local);
                 abort();
         }
     }
@@ -68,7 +67,7 @@ void withAssetData(const char* filename, const std::function<void(off64_t, const
 
 QStringList readAssetLines(const char* filename) {
     QStringList result;
-    withAssetData(filename, [&](off64_t size, const void* data){
+    withAssetData(filename, [&](off64_t size, const void* data) {
         QByteArray buffer = QByteArray::fromRawData((const char*)data, size);
         {
             QTextStream in(&buffer);
@@ -82,7 +81,7 @@ QStringList readAssetLines(const char* filename) {
 }
 
 void copyAsset(const char* sourceAsset, const QString& destFilename) {
-    withAssetData(sourceAsset, [&](off64_t size, const void* data){
+    withAssetData(sourceAsset, [&](off64_t size, const void* data) {
         QFile file(destFilename);
         if (!file.open(QFile::ReadWrite | QIODevice::Truncate)) {
             throw std::runtime_error("Unable to open output file for writing");
@@ -146,7 +145,8 @@ void unpackAndroidAssets() {
 
 extern "C" {
 
-JNIEXPORT void Java_io_highfidelity_hifiinterface_InterfaceActivity_nativeOnCreate(JNIEnv* env, jobject obj, jobject instance, jobject asset_mgr) {
+JNIEXPORT void Java_io_highfidelity_hifiinterface_InterfaceActivity_nativeOnCreate(JNIEnv* env, jobject obj, jobject instance,
+                                                                                   jobject asset_mgr) {
     g_assetManager = AAssetManager_fromJava(env, asset_mgr);
     qRegisterMetaType<QAndroidJniObject>("QAndroidJniObject");
     __interfaceActivity = QAndroidJniObject(instance);
@@ -157,54 +157,57 @@ JNIEXPORT void Java_io_highfidelity_hifiinterface_InterfaceActivity_nativeOnCrea
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    QObject::connect(&AndroidHelper::instance(), &AndroidHelper::androidActivityRequested, [jvm](const QString& a, const bool backToScene, QMap<QString, QString> args) {
-        JNIEnv* myNewEnv;
-        JavaVMAttachArgs jvmArgs;
-        jvmArgs.version = JNI_VERSION_1_6; // choose your JNI version
-        jvmArgs.name = NULL; // you might want to give the java thread a name
-        jvmArgs.group = NULL; // you might want to assign the java thread to a ThreadGroup
+    QObject::connect(
+        &AndroidHelper::instance(), &AndroidHelper::androidActivityRequested,
+        [jvm](const QString& a, const bool backToScene, QMap<QString, QString> args) {
+            JNIEnv* myNewEnv;
+            JavaVMAttachArgs jvmArgs;
+            jvmArgs.version = JNI_VERSION_1_6; // choose your JNI version
+            jvmArgs.name = NULL; // you might want to give the java thread a name
+            jvmArgs.group = NULL; // you might want to assign the java thread to a ThreadGroup
 
-        int attachedHere = 0; // know if detaching at the end is necessary
-        jint res = jvm->GetEnv((void**)&myNewEnv, JNI_VERSION_1_6); // checks if current env needs attaching or it is already attached
-        if (JNI_OK != res) {
-            qDebug() << "[JCRASH] GetEnv env not attached yet, attaching now..";
-            res = jvm->AttachCurrentThread(reinterpret_cast<JNIEnv **>(&myNewEnv), &jvmArgs);
+            int attachedHere = 0; // know if detaching at the end is necessary
+            jint res = jvm->GetEnv((void**)&myNewEnv,
+                                   JNI_VERSION_1_6); // checks if current env needs attaching or it is already attached
             if (JNI_OK != res) {
-                qDebug() << "[JCRASH] Failed to AttachCurrentThread, ErrorCode = " << res;
-                return;
-            } else {
-                attachedHere = 1;
+                qDebug() << "[JCRASH] GetEnv env not attached yet, attaching now..";
+                res = jvm->AttachCurrentThread(reinterpret_cast<JNIEnv**>(&myNewEnv), &jvmArgs);
+                if (JNI_OK != res) {
+                    qDebug() << "[JCRASH] Failed to AttachCurrentThread, ErrorCode = " << res;
+                    return;
+                } else {
+                    attachedHere = 1;
+                }
             }
-        }
 
-        QAndroidJniObject string = QAndroidJniObject::fromString(a);
-        jboolean jBackToScene = (jboolean) backToScene;
-        jclass hashMapClass = myNewEnv->FindClass("java/util/HashMap");
-        jmethodID mapClassConstructor =  myNewEnv->GetMethodID(hashMapClass, "<init>", "()V");
-        jobject hashmap = myNewEnv->NewObject(hashMapClass, mapClassConstructor);
-        jmethodID mapClassPut = myNewEnv->GetMethodID(hashMapClass, "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
-        QMap<QString, QString>::iterator i;
-        for (i = args.begin(); i != args.end(); ++i) {
-            QAndroidJniObject jKey = QAndroidJniObject::fromString(i.key());
-            QAndroidJniObject jValue = QAndroidJniObject::fromString(i.value());
-            myNewEnv->CallObjectMethod(hashmap, mapClassPut, jKey.object<jstring>(), jValue.object<jstring>());
-        }
-        __interfaceActivity.callMethod<void>("openAndroidActivity", "(Ljava/lang/String;ZLjava/util/HashMap;)V", string.object<jstring>(), jBackToScene, hashmap);
-        if (attachedHere) {
-            jvm->DetachCurrentThread();
-        }
-    });
+            QAndroidJniObject string = QAndroidJniObject::fromString(a);
+            jboolean jBackToScene = (jboolean)backToScene;
+            jclass hashMapClass = myNewEnv->FindClass("java/util/HashMap");
+            jmethodID mapClassConstructor = myNewEnv->GetMethodID(hashMapClass, "<init>", "()V");
+            jobject hashmap = myNewEnv->NewObject(hashMapClass, mapClassConstructor);
+            jmethodID mapClassPut = myNewEnv->GetMethodID(hashMapClass, "put",
+                                                          "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+            QMap<QString, QString>::iterator i;
+            for (i = args.begin(); i != args.end(); ++i) {
+                QAndroidJniObject jKey = QAndroidJniObject::fromString(i.key());
+                QAndroidJniObject jValue = QAndroidJniObject::fromString(i.value());
+                myNewEnv->CallObjectMethod(hashmap, mapClassPut, jKey.object<jstring>(), jValue.object<jstring>());
+            }
+            __interfaceActivity.callMethod<void>("openAndroidActivity", "(Ljava/lang/String;ZLjava/util/HashMap;)V",
+                                                 string.object<jstring>(), jBackToScene, hashmap);
+            if (attachedHere) {
+                jvm->DetachCurrentThread();
+            }
+        });
 
     QObject::connect(&AndroidHelper::instance(), &AndroidHelper::hapticFeedbackRequested, [](int duration) {
-        jint iDuration = (jint) duration;
+        jint iDuration = (jint)duration;
         __interfaceActivity.callMethod<void>("performHapticFeedback", "(I)V", iDuration);
     });
 }
 
 JNIEXPORT void Java_io_highfidelity_hifiinterface_InterfaceActivity_nativeOnDestroy(JNIEnv* env, jobject obj) {
-    QObject::disconnect(&AndroidHelper::instance(), &AndroidHelper::androidActivityRequested,
-                        nullptr, nullptr);
-
+    QObject::disconnect(&AndroidHelper::instance(), &AndroidHelper::androidActivityRequested, nullptr, nullptr);
 }
 
 JNIEXPORT void Java_io_highfidelity_hifiinterface_InterfaceActivity_nativeGotoUrl(JNIEnv* env, jobject obj, jstring url) {
@@ -227,7 +230,7 @@ JNIEXPORT void Java_io_highfidelity_hifiinterface_InterfaceActivity_nativeOnExit
 }
 
 // HifiUtils
-JNIEXPORT jstring JNICALL Java_io_highfidelity_hifiinterface_HifiUtils_getCurrentAddress(JNIEnv *env, jobject instance) {
+JNIEXPORT jstring JNICALL Java_io_highfidelity_hifiinterface_HifiUtils_getCurrentAddress(JNIEnv* env, jobject instance) {
     QSharedPointer<AddressManager> addressManager = DependencyManager::get<AddressManager>();
     if (!addressManager) {
         return env->NewString(nullptr, 0);
@@ -241,47 +244,46 @@ JNIEXPORT jstring JNICALL Java_io_highfidelity_hifiinterface_HifiUtils_getCurren
     }
 
     QRegExp pathRegEx("(\\/[^\\/]+)");
-    if (!addressManager->currentPath().isEmpty() && addressManager->currentPath().contains(pathRegEx) && pathRegEx.matchedLength() > 0) {
+    if (!addressManager->currentPath().isEmpty() && addressManager->currentPath().contains(pathRegEx) &&
+        pathRegEx.matchedLength() > 0) {
         str += pathRegEx.cap(0);
     }
 
     return env->NewStringUTF(str.toLatin1().data());
 }
 
-JNIEXPORT jstring JNICALL Java_io_highfidelity_hifiinterface_HifiUtils_protocolVersionSignature(JNIEnv *env, jobject instance) {
+JNIEXPORT jstring JNICALL Java_io_highfidelity_hifiinterface_HifiUtils_protocolVersionSignature(JNIEnv* env, jobject instance) {
     return env->NewStringUTF(protocolVersionsSignatureBase64().toLatin1().data());
 }
 
-JNIEXPORT jstring JNICALL Java_io_highfidelity_hifiinterface_fragment_HomeFragment_nativeGetLastLocation(JNIEnv *env, jobject instance) {
-    Setting::Handle<QUrl> currentAddressHandle(QStringList() << "AddressManager" << "address", QString());
+JNIEXPORT jstring JNICALL Java_io_highfidelity_hifiinterface_fragment_HomeFragment_nativeGetLastLocation(JNIEnv* env,
+                                                                                                         jobject instance) {
+    Setting::Handle<QUrl> currentAddressHandle(QStringList() << "AddressManager"
+                                                             << "address",
+                                               QString());
     QUrl lastLocation = currentAddressHandle.get();
     return env->NewStringUTF(lastLocation.toString().toLatin1().data());
 }
 
-JNIEXPORT void JNICALL
-Java_io_highfidelity_hifiinterface_fragment_LoginFragment_nativeCancelLogin(JNIEnv *env, jobject instance) {
-
+JNIEXPORT void JNICALL Java_io_highfidelity_hifiinterface_fragment_LoginFragment_nativeCancelLogin(JNIEnv* env,
+                                                                                                   jobject instance) {
     auto accountManager = DependencyManager::get<AccountManager>();
 
     QObject::disconnect(accountManager.data(), &AccountManager::loginComplete, nullptr, nullptr);
     QObject::disconnect(accountManager.data(), &AccountManager::loginFailed, nullptr, nullptr);
-
 }
 
-JNIEXPORT void JNICALL
-Java_io_highfidelity_hifiinterface_fragment_SignupFragment_nativeCancelLogin(JNIEnv *env,
-                                                                             jobject instance) {
-
+JNIEXPORT void JNICALL Java_io_highfidelity_hifiinterface_fragment_SignupFragment_nativeCancelLogin(JNIEnv* env,
+                                                                                                    jobject instance) {
     Java_io_highfidelity_hifiinterface_fragment_LoginFragment_nativeCancelLogin(env, instance);
 }
 
-
-JNIEXPORT void JNICALL
-Java_io_highfidelity_hifiinterface_fragment_LoginFragment_nativeLogin(JNIEnv *env, jobject instance,
-                                                            jstring username_, jstring password_,
-                                                            jobject usernameChangedListener) {
-    const char *c_username = env->GetStringUTFChars(username_, 0);
-    const char *c_password = env->GetStringUTFChars(password_, 0);
+JNIEXPORT void JNICALL Java_io_highfidelity_hifiinterface_fragment_LoginFragment_nativeLogin(JNIEnv* env, jobject instance,
+                                                                                             jstring username_,
+                                                                                             jstring password_,
+                                                                                             jobject usernameChangedListener) {
+    const char* c_username = env->GetStringUTFChars(username_, 0);
+    const char* c_password = env->GetStringUTFChars(password_, 0);
     QString username = QString(c_username);
     QString password = QString(c_password);
     env->ReleaseStringUTFChars(username_, c_username);
@@ -309,35 +311,34 @@ Java_io_highfidelity_hifiinterface_fragment_LoginFragment_nativeLogin(JNIEnv *en
     QObject::connect(accountManager.data(), &AccountManager::usernameChanged, [](const QString& username) {
         QAndroidJniObject string = QAndroidJniObject::fromString(username);
         if (__usernameChangedListener.isValid()) {
-            __usernameChangedListener.callMethod<void>("handleUsernameChanged", "(Ljava/lang/String;)V", string.object<jstring>());
+            __usernameChangedListener.callMethod<void>("handleUsernameChanged", "(Ljava/lang/String;)V",
+                                                       string.object<jstring>());
         }
     });
 
-    QMetaObject::invokeMethod(accountManager.data(), "requestAccessToken",
-                              Q_ARG(const QString&, username), Q_ARG(const QString&, password));
+    QMetaObject::invokeMethod(accountManager.data(), "requestAccessToken", Q_ARG(const QString&, username),
+                              Q_ARG(const QString&, password));
 }
 
-JNIEXPORT void JNICALL
-Java_io_highfidelity_hifiinterface_fragment_SignupFragment_nativeLogin(JNIEnv *env,
-                                                                       jobject instance,
-                                                                       jstring username_,
-                                                                       jstring password_,
-                                                                       jobject usernameChangedListener) {
-    Java_io_highfidelity_hifiinterface_fragment_LoginFragment_nativeLogin(env, instance, username_, password_, usernameChangedListener);
+JNIEXPORT void JNICALL Java_io_highfidelity_hifiinterface_fragment_SignupFragment_nativeLogin(JNIEnv* env, jobject instance,
+                                                                                              jstring username_,
+                                                                                              jstring password_,
+                                                                                              jobject usernameChangedListener) {
+    Java_io_highfidelity_hifiinterface_fragment_LoginFragment_nativeLogin(env, instance, username_, password_,
+                                                                          usernameChangedListener);
 }
 
 JNIEXPORT void Java_io_highfidelity_hifiinterface_InterfaceActivity_nativeInitAfterAppLoaded(JNIEnv* env, jobject obj) {
     AndroidHelper::instance().moveToThread(qApp->thread());
 }
 
-JNIEXPORT void JNICALL
-Java_io_highfidelity_hifiinterface_fragment_SignupFragment_nativeSignup(JNIEnv *env, jobject instance,
-                                                                       jstring email_, jstring username_,
-                                                                       jstring password_) {
-
-    const char *c_email = env->GetStringUTFChars(email_, 0);
-    const char *c_username = env->GetStringUTFChars(username_, 0);
-    const char *c_password = env->GetStringUTFChars(password_, 0);
+JNIEXPORT void JNICALL Java_io_highfidelity_hifiinterface_fragment_SignupFragment_nativeSignup(JNIEnv* env, jobject instance,
+                                                                                               jstring email_,
+                                                                                               jstring username_,
+                                                                                               jstring password_) {
+    const char* c_email = env->GetStringUTFChars(email_, 0);
+    const char* c_username = env->GetStringUTFChars(username_, 0);
+    const char* c_password = env->GetStringUTFChars(password_, 0);
     QString email = QString(c_email);
     QString username = QString(c_username);
     QString password = QString(c_password);
@@ -370,87 +371,72 @@ Java_io_highfidelity_hifiinterface_fragment_SignupFragment_nativeSignup(JNIEnv *
     AndroidHelper::instance().signup(email, username, password);
 }
 
-JNIEXPORT void JNICALL
-Java_io_highfidelity_hifiinterface_fragment_SignupFragment_nativeCancelSignup(JNIEnv *env, jobject instance) {
+JNIEXPORT void JNICALL Java_io_highfidelity_hifiinterface_fragment_SignupFragment_nativeCancelSignup(JNIEnv* env,
+                                                                                                     jobject instance) {
     QObject::disconnect(&AndroidHelper::instance(), &AndroidHelper::handleSignupCompleted, nullptr, nullptr);
     QObject::disconnect(&AndroidHelper::instance(), &AndroidHelper::handleSignupFailed, nullptr, nullptr);
 
     __signupCompletedListener = nullptr;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_io_highfidelity_hifiinterface_fragment_FriendsFragment_nativeIsLoggedIn(JNIEnv *env, jobject instance) {
+JNIEXPORT jboolean JNICALL Java_io_highfidelity_hifiinterface_fragment_FriendsFragment_nativeIsLoggedIn(JNIEnv* env,
+                                                                                                        jobject instance) {
     auto accountManager = DependencyManager::get<AccountManager>();
     return accountManager->isLoggedIn();
 }
 
-JNIEXPORT jstring JNICALL
-Java_io_highfidelity_hifiinterface_fragment_FriendsFragment_nativeGetAccessToken(JNIEnv *env, jobject instance) {
+JNIEXPORT jstring JNICALL Java_io_highfidelity_hifiinterface_fragment_FriendsFragment_nativeGetAccessToken(JNIEnv* env,
+                                                                                                           jobject instance) {
     auto accountManager = DependencyManager::get<AccountManager>();
     return env->NewStringUTF(accountManager->getAccountInfo().getAccessToken().token.toLatin1().data());
 }
 
-JNIEXPORT void JNICALL
-Java_io_highfidelity_hifiinterface_SplashActivity_registerLoadCompleteListener(JNIEnv *env,
-                                                                               jobject instance) {
-
+JNIEXPORT void JNICALL Java_io_highfidelity_hifiinterface_SplashActivity_registerLoadCompleteListener(JNIEnv* env,
+                                                                                                      jobject instance) {
     __loadCompleteListener = QAndroidJniObject(instance);
 
     QObject::connect(&AndroidHelper::instance(), &AndroidHelper::qtAppLoadComplete, []() {
-
         __loadCompleteListener.callMethod<void>("onAppLoadedComplete", "()V");
         __interfaceActivity.callMethod<void>("onAppLoadedComplete", "()V");
 
-        QObject::disconnect(&AndroidHelper::instance(), &AndroidHelper::qtAppLoadComplete, nullptr,
-                            nullptr);
+        QObject::disconnect(&AndroidHelper::instance(), &AndroidHelper::qtAppLoadComplete, nullptr, nullptr);
     });
-
 }
-JNIEXPORT jboolean JNICALL
-Java_io_highfidelity_hifiinterface_MainActivity_nativeIsLoggedIn(JNIEnv *env, jobject instance) {
+JNIEXPORT jboolean JNICALL Java_io_highfidelity_hifiinterface_MainActivity_nativeIsLoggedIn(JNIEnv* env, jobject instance) {
     return DependencyManager::get<AccountManager>()->isLoggedIn();
 }
 
-JNIEXPORT void JNICALL
-Java_io_highfidelity_hifiinterface_MainActivity_nativeLogout(JNIEnv *env, jobject instance) {
+JNIEXPORT void JNICALL Java_io_highfidelity_hifiinterface_MainActivity_nativeLogout(JNIEnv* env, jobject instance) {
     DependencyManager::get<AccountManager>()->logout();
 }
 
-JNIEXPORT jstring JNICALL
-Java_io_highfidelity_hifiinterface_MainActivity_nativeGetDisplayName(JNIEnv *env,
-                                                                     jobject instance) {
+JNIEXPORT jstring JNICALL Java_io_highfidelity_hifiinterface_MainActivity_nativeGetDisplayName(JNIEnv* env, jobject instance) {
     QString username = DependencyManager::get<AccountManager>()->getAccountInfo().getUsername();
     return env->NewStringUTF(username.toLatin1().data());
 }
 
-JNIEXPORT void JNICALL
-Java_io_highfidelity_hifiinterface_InterfaceActivity_nativeBeforeEnterBackground(JNIEnv *env, jobject obj) {
+JNIEXPORT void JNICALL Java_io_highfidelity_hifiinterface_InterfaceActivity_nativeBeforeEnterBackground(JNIEnv* env,
+                                                                                                        jobject obj) {
     AndroidHelper::instance().notifyBeforeEnterBackground();
 }
 
-JNIEXPORT void JNICALL
-Java_io_highfidelity_hifiinterface_InterfaceActivity_nativeEnterBackground(JNIEnv *env, jobject obj) {
+JNIEXPORT void JNICALL Java_io_highfidelity_hifiinterface_InterfaceActivity_nativeEnterBackground(JNIEnv* env, jobject obj) {
     AndroidHelper::instance().notifyEnterBackground();
 }
 
-JNIEXPORT void JNICALL
-Java_io_highfidelity_hifiinterface_InterfaceActivity_nativeEnterForeground(JNIEnv *env, jobject obj) {
+JNIEXPORT void JNICALL Java_io_highfidelity_hifiinterface_InterfaceActivity_nativeEnterForeground(JNIEnv* env, jobject obj) {
     AndroidHelper::instance().notifyEnterForeground();
 }
 
 JNIEXPORT void Java_io_highfidelity_hifiinterface_WebViewActivity_nativeProcessURL(JNIEnv* env, jobject obj, jstring url_str) {
-    const char *nativeString = env->GetStringUTFChars(url_str, 0);
+    const char* nativeString = env->GetStringUTFChars(url_str, 0);
     AndroidHelper::instance().processURL(QString::fromUtf8(nativeString));
 }
 
-JNIEXPORT void JNICALL
-Java_io_highfidelity_hifiinterface_fragment_SettingsFragment_updateHifiSetting(JNIEnv *env,
-                                                                               jobject instance,
-                                                                               jstring group_,
-                                                                               jstring key_,
-                                                                               jboolean value_) {
-    const char *c_group = env->GetStringUTFChars(group_, 0);
-    const char *c_key = env->GetStringUTFChars(key_, 0);
+JNIEXPORT void JNICALL Java_io_highfidelity_hifiinterface_fragment_SettingsFragment_updateHifiSetting(
+    JNIEnv* env, jobject instance, jstring group_, jstring key_, jboolean value_) {
+    const char* c_group = env->GetStringUTFChars(group_, 0);
+    const char* c_key = env->GetStringUTFChars(key_, 0);
 
     const QString group = QString::fromUtf8(c_group);
     const QString key = QString::fromUtf8(c_key);
@@ -460,18 +446,14 @@ Java_io_highfidelity_hifiinterface_fragment_SettingsFragment_updateHifiSetting(J
 
     bool value = value_;
 
-    Setting::Handle<bool> setting { QStringList() << group << key , !value };
+    Setting::Handle<bool> setting { QStringList() << group << key, !value };
     setting.set(value);
 }
 
-JNIEXPORT jboolean JNICALL
-Java_io_highfidelity_hifiinterface_fragment_SettingsFragment_getHifiSettingBoolean(JNIEnv *env,
-                                                                                   jobject instance,
-                                                                                   jstring group_,
-                                                                                   jstring key_,
-                                                                                   jboolean defaultValue) {
-    const char *c_group = env->GetStringUTFChars(group_, 0);
-    const char *c_key = env->GetStringUTFChars(key_, 0);
+JNIEXPORT jboolean JNICALL Java_io_highfidelity_hifiinterface_fragment_SettingsFragment_getHifiSettingBoolean(
+    JNIEnv* env, jobject instance, jstring group_, jstring key_, jboolean defaultValue) {
+    const char* c_group = env->GetStringUTFChars(group_, 0);
+    const char* c_key = env->GetStringUTFChars(key_, 0);
 
     const QString group = QString::fromUtf8(c_group);
     const QString key = QString::fromUtf8(c_key);
@@ -479,15 +461,13 @@ Java_io_highfidelity_hifiinterface_fragment_SettingsFragment_getHifiSettingBoole
     env->ReleaseStringUTFChars(group_, c_group);
     env->ReleaseStringUTFChars(key_, c_key);
 
-    Setting::Handle<bool> setting { QStringList() << group << key , defaultValue};
+    Setting::Handle<bool> setting { QStringList() << group << key, defaultValue };
     return setting.get();
 }
 
-JNIEXPORT void JNICALL
-Java_io_highfidelity_hifiinterface_receiver_HeadsetStateReceiver_notifyHeadsetOn(JNIEnv *env,
-                                                                                 jobject instance,
-                                                                                 jboolean pluggedIn) {
+JNIEXPORT void JNICALL Java_io_highfidelity_hifiinterface_receiver_HeadsetStateReceiver_notifyHeadsetOn(JNIEnv* env,
+                                                                                                        jobject instance,
+                                                                                                        jboolean pluggedIn) {
     AndroidHelper::instance().notifyHeadsetOn(pluggedIn);
 }
-
 }

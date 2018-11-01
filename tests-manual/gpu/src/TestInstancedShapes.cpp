@@ -26,7 +26,6 @@ const gpu::Element POSITION_ELEMENT { gpu::VEC3, gpu::FLOAT, gpu::XYZ };
 const gpu::Element NORMAL_ELEMENT { gpu::VEC3, gpu::FLOAT, gpu::XYZ };
 const gpu::Element COLOR_ELEMENT { gpu::VEC4, gpu::NUINT8, gpu::RGBA };
 
-
 TestInstancedShapes::TestInstancedShapes() {
     auto geometryCache = DependencyManager::get<GeometryCache>();
     colorBuffer = std::make_shared<gpu::Buffer>();
@@ -34,7 +33,7 @@ TestInstancedShapes::TestInstancedShapes() {
     static const float ITEM_RADIUS = 20;
     static const vec3 ITEM_TRANSLATION { 0, 0, -ITEM_RADIUS };
     for (size_t i = 0; i < TYPE_COUNT; ++i) {
-        //indirectCommand._count
+        // indirectCommand._count
         float startingInterval = ITEM_INTERVAL * i;
         std::vector<mat4> typeTransforms;
         for (size_t j = 0; j < ITEM_COUNT; ++j) {
@@ -60,28 +59,27 @@ void TestInstancedShapes::renderTest(size_t testId, RenderArgs* args) {
     batch.setInputFormat(getInstancedSolidStreamFormat());
     for (size_t i = 0; i < TYPE_COUNT; ++i) {
         GeometryCache::Shape shape = SHAPE[i];
-        const GeometryCache::ShapeData *shapeData = geometryCache->getShapeData( shape );
+        const GeometryCache::ShapeData* shapeData = geometryCache->getShapeData(shape);
         if (!shapeData) {
-
             //--EARLY ITERATION EXIT--( didn't have shape data yet )
             continue;
         }
-        
+
         std::string namedCall = __FUNCTION__ + std::to_string(i);
 
-        //batch.addInstanceModelTransforms(transforms[i]);
+        // batch.addInstanceModelTransforms(transforms[i]);
         for (size_t j = 0; j < ITEM_COUNT; ++j) {
             batch.setModelTransform(transforms[i][j]);
             batch.setupNamedCalls(namedCall, [=](gpu::Batch& batch, gpu::Batch::NamedBatchData&) {
-                batch.setInputBuffer(gpu::Stream::COLOR, gpu::BufferView(colorBuffer, i * ITEM_COUNT * 4, colorBuffer->getSize(), COLOR_ELEMENT));
+                batch.setInputBuffer(gpu::Stream::COLOR,
+                                     gpu::BufferView(colorBuffer, i * ITEM_COUNT * 4, colorBuffer->getSize(), COLOR_ELEMENT));
                 shapeData->drawInstances(batch, ITEM_COUNT);
             });
         }
 
-        //for (size_t j = 0; j < ITEM_COUNT; ++j) {
+        // for (size_t j = 0; j < ITEM_COUNT; ++j) {
         //    batch.setModelTransform(transforms[j + i * ITEM_COUNT]);
         //    shapeData->draw(batch);
         //}
     }
 }
-

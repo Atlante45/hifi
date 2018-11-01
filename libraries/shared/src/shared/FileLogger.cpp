@@ -19,10 +19,10 @@
 #include "NetworkUtils.h"
 
 #include "../NumericalConstants.h"
-#include "../SharedUtil.h"
 #include "../SharedLogging.h"
+#include "../SharedUtil.h"
 
-class FilePersistThread : public GenericQueueThread < QString > {
+class FilePersistThread : public GenericQueueThread<QString> {
     Q_OBJECT
 public:
     FilePersistThread(const FileLogger& logger);
@@ -105,7 +105,7 @@ void FilePersistThread::rollFileIfNecessary(QFile& file, bool force, bool notify
                 continue;
             }
             totalSizeOfDir += fileInfo.size();
-            if (totalSizeOfDir > MAX_LOG_DIR_SIZE){
+            if (totalSizeOfDir > MAX_LOG_DIR_SIZE) {
                 qDebug() << "Removing log file: " << fileInfo.fileName();
                 QFile oldLogFile(fileInfo.filePath());
                 oldLogFile.remove();
@@ -127,10 +127,7 @@ bool FilePersistThread::processQueueItems(const Queue& messages) {
     return true;
 }
 
-FileLogger::FileLogger(QObject* parent) :
-    AbstractLoggerInterface(parent),
-    _fileName(getLogFilename())
-{
+FileLogger::FileLogger(QObject* parent) : AbstractLoggerInterface(parent), _fileName(getLogFilename()) {
     _persistThreadInstance = new FilePersistThread(*this);
     _persistThreadInstance->initialize(true, QThread::LowestPriority);
     connect(_persistThreadInstance, &FilePersistThread::rollingLogFile, this, &FileLogger::rollingLogFile);
@@ -141,10 +138,10 @@ FileLogger::~FileLogger() {
 }
 
 void FileLogger::setSessionID(const QUuid& message) {
-    // This is for the output of log files. Once the application is first started, 
+    // This is for the output of log files. Once the application is first started,
     // this function runs and grabs the AccountManager Session ID and saves it here.
     SESSION_ID = message;
-    }
+}
 
 void FileLogger::addMessage(const QString& message) {
     _persistThreadInstance->queueItem(message);

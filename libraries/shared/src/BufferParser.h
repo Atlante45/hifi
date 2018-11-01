@@ -15,15 +15,13 @@
 #include <QUuid>
 #include <QtEndian>
 
-#include "GLMHelpers.h"
 #include "ByteCountCoding.h"
+#include "GLMHelpers.h"
 #include "PropertyFlags.h"
 
 class BufferParser {
 public:
-    BufferParser(const uint8_t* data, size_t size, size_t offset = 0) :
-        _offset(offset), _data(data), _size(size) {
-    }
+    BufferParser(const uint8_t* data, size_t size, size_t offset = 0) : _offset(offset), _data(data), _size(size) {}
 
     template<typename T>
     inline void readValue(T& result) {
@@ -42,7 +40,7 @@ public:
         result.data3 = qFromBigEndian<quint16>(result.data3);
     }
 
-    template <typename T>
+    template<typename T>
     inline void readFlags(PropertyFlags<T>& result) {
         _offset += result.decode(_data + _offset, remaining());
     }
@@ -55,25 +53,17 @@ public:
         result = codec.data;
     }
 
-    inline size_t remaining() const {
-        return _size - _offset;
-    }
+    inline size_t remaining() const { return _size - _offset; }
 
-    inline size_t offset() const {
-        return _offset;
-    }
+    inline size_t offset() const { return _offset; }
 
-    inline const uint8_t* data() const {
-        return _data;
-    }
+    inline const uint8_t* data() const { return _data; }
 
 private:
-
-    size_t _offset{ 0 };
+    size_t _offset { 0 };
     const uint8_t* const _data;
     const size_t _size;
 };
-
 
 template<>
 inline void BufferParser::readValue<quat>(quat& result) {
@@ -83,20 +73,23 @@ inline void BufferParser::readValue<quat>(quat& result) {
 
 template<>
 inline void BufferParser::readValue(QString& result) {
-    uint16_t length; readValue(length);
+    uint16_t length;
+    readValue(length);
     result = QString((const char*)_data + _offset);
 }
 
 template<>
 inline void BufferParser::readValue(QUuid& result) {
-    uint16_t length; readValue(length);
+    uint16_t length;
+    readValue(length);
     Q_ASSERT(16 == length);
     readUuid(result);
 }
 
 template<>
 inline void BufferParser::readValue(QVector<glm::vec3>& result) {
-    uint16_t length; readValue(length);
+    uint16_t length;
+    readValue(length);
     result.resize(length);
     memcpy(result.data(), _data + _offset, sizeof(glm::vec3) * length);
     _offset += sizeof(glm::vec3) * length;
@@ -104,7 +97,8 @@ inline void BufferParser::readValue(QVector<glm::vec3>& result) {
 
 template<>
 inline void BufferParser::readValue(QByteArray& result) {
-    uint16_t length; readValue(length);
+    uint16_t length;
+    readValue(length);
     result = QByteArray((char*)_data + _offset, (int)length);
     _offset += length;
 }

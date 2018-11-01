@@ -14,8 +14,8 @@
 
 #include "XMLHttpRequestClass.h"
 
-#include <QEventLoop>
 #include <qurlquery.h>
+#include <QEventLoop>
 
 #include <AccountManager.h>
 #include <NetworkAccessManager.h>
@@ -46,14 +46,17 @@ XMLHttpRequestClass::XMLHttpRequestClass(QScriptEngine* engine) :
     _timeout(0),
     _timer(this),
     _numRedirects(0) {
-
     _request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
     _timer.setSingleShot(true);
 }
 
 XMLHttpRequestClass::~XMLHttpRequestClass() {
-    if (_reply) { delete _reply; }
-    if (_sendData) { delete _sendData; }
+    if (_reply) {
+        delete _reply;
+    }
+    if (_sendData) {
+        delete _sendData;
+    }
 }
 
 QScriptValue XMLHttpRequestClass::constructor(QScriptContext* context, QScriptEngine* engine) {
@@ -63,7 +66,7 @@ QScriptValue XMLHttpRequestClass::constructor(QScriptContext* context, QScriptEn
 QScriptValue XMLHttpRequestClass::getStatus() const {
     if (_reply) {
         return QScriptValue(_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt());
-    } 
+    }
     return QScriptValue(0);
 }
 
@@ -144,7 +147,7 @@ void XMLHttpRequestClass::open(const QString& method, const QString& url, bool a
 
         if (url.toLower().left(METAVERSE_API_URL.length()) == METAVERSE_API_URL) {
             auto accountManager = DependencyManager::get<AccountManager>();
-                
+
             if (accountManager->hasValidAccessToken()) {
                 static const QString HTTP_AUTHORIZATION_HEADER = "Authorization";
                 QString bearerString = "Bearer " + accountManager->getAccountInfo().getAccessToken().token;

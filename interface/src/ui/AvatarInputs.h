@@ -9,21 +9,22 @@
 #ifndef hifi_AvatarInputs_h
 #define hifi_AvatarInputs_h
 
-#include <QQuickItem>
 #include <OffscreenUi.h>
+#include <QQuickItem>
 
-#define AI_PROPERTY(type, name, initialValue) \
-    Q_PROPERTY(type name READ name NOTIFY name##Changed) \
-public: \
-    type name() { return _##name; }; \
-private: \
-    type _##name{ initialValue };
+#define AI_PROPERTY(type, name, initialValue)                                                                                  \
+    Q_PROPERTY(type name READ name NOTIFY name##Changed)                                                                       \
+public:                                                                                                                        \
+    type name() { return _##name; };                                                                                           \
+                                                                                                                               \
+private:                                                                                                                       \
+    type _##name { initialValue };
 
 class AvatarInputs : public QObject {
     Q_OBJECT
     HIFI_QML_DECL
 
-    /**jsdoc 
+    /**jsdoc
      * API to help manage your Avatar's input
      * @namespace AvatarInputs
      *
@@ -54,7 +55,7 @@ public:
 
     AvatarInputs(QObject* parent = nullptr);
     void update();
-    bool showAudioTools() const   { return _showAudioTools; }
+    bool showAudioTools() const { return _showAudioTools; }
 
 public slots:
 
@@ -93,7 +94,6 @@ signals:
     void showAudioToolsChanged(bool show);
 
 protected:
-
     /**jsdoc
      * @function AvatarInputs.resetSensors
      */
@@ -104,8 +104,8 @@ protected:
      */
     Q_INVOKABLE void toggleCameraMute();
 
-private: 
-    float _trailingAudioLoudness{ 0 };
+private:
+    float _trailingAudioLoudness { 0 };
     bool _showAudioTools { false };
 };
 

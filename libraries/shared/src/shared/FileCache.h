@@ -11,16 +11,16 @@
 #define hifi_FileCache_h
 
 #include <atomic>
-#include <memory>
 #include <cstddef>
 #include <map>
-#include <unordered_set>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
-#include <QObject>
 #include <QLoggingCategory>
+#include <QObject>
 
 Q_DECLARE_LOGGING_CATEGORY(file_cache)
 
@@ -48,8 +48,8 @@ class FileCache : public QObject, public std::enable_shared_from_this<FileCache>
     friend class ::FileCacheTests;
 
 public:
-    // You can initialize the FileCache with a directory name (ex.: "temp_jpgs") that will be relative to the application local data, OR with a full path
-    // The file cache will ignore any file that doesn't match the extension provided
+    // You can initialize the FileCache with a directory name (ex.: "temp_jpgs") that will be relative to the application local
+    // data, OR with a full path The file cache will ignore any file that doesn't match the extension provided
     FileCache(const std::string& dirname, const std::string& ext, QObject* parent = nullptr);
     virtual ~FileCache();
 
@@ -65,14 +65,13 @@ public:
     void setMaxSize(size_t maxCacheSize);
 
     // Set the minumum amount of free disk space to retain.  This supercedes the max size,
-    // so if the cache is consuming all but 500 MB of the drive, unused entries will be ejected 
+    // so if the cache is consuming all but 500 MB of the drive, unused entries will be ejected
     // to free up more space, regardless of the cache max size
     void setMinFreeSize(size_t size);
 
     using Key = std::string;
     struct Metadata {
-        Metadata(const Key& key, size_t length) :
-            key(key), length(length) {}
+        Metadata(const Key& key, size_t length) : key(key), length(length) {}
         Key key;
         size_t length;
     };
@@ -95,7 +94,7 @@ public:
     /// must be called after construction to create the cache on the fs and restore persisted files
     virtual void initialize();
 
-    // Add file to the cache and return the cache entry.  
+    // Add file to the cache and return the cache entry.
     FilePointer writeFile(const char* data, Metadata&& metadata, bool overwrite = false);
     FilePointer getFile(const Key& key);
 
@@ -176,6 +175,6 @@ private:
     bool _shouldPersist { false };
 };
 
-}
+} // namespace cache
 
 #endif // hifi_FileCache_h

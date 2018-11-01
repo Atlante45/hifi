@@ -23,20 +23,26 @@
 
 #include <QString>
 
-#define RETURN_ON_FAIL(result) if (FAILED(result)) { return; }
-#define CONTINUE_ON_FAIL(result) if (FAILED(result)) { continue; }
+#define RETURN_ON_FAIL(result)                                                                                                 \
+    if (FAILED(result)) {                                                                                                      \
+        return;                                                                                                                \
+    }
+#define CONTINUE_ON_FAIL(result)                                                                                               \
+    if (FAILED(result)) {                                                                                                      \
+        continue;                                                                                                              \
+    }
 
 extern QString getWinDeviceName(IMMDevice* pEndpoint);
 extern std::mutex _deviceMutex;
 
 std::map<std::wstring, std::shared_ptr<IAudioClient>> activeClients;
 
-template <class T>
+template<class T>
 void release(T* t) {
     t->Release();
 }
 
-template <>
+template<>
 void release(IAudioClient* audioClient) {
     audioClient->Stop();
     audioClient->Release();
@@ -76,9 +82,8 @@ void AudioClient::checkPeakValues() {
     std::shared_ptr<IMMDeviceEnumerator> enumerator;
     {
         IMMDeviceEnumerator* pEnumerator;
-        result = CoCreateInstance(
-            __uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER,
-            __uuidof(IMMDeviceEnumerator), (void**)&pEnumerator);
+        result = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, __uuidof(IMMDeviceEnumerator),
+                                  (void**)&pEnumerator);
         RETURN_ON_FAIL(result);
         enumerator = std::shared_ptr<IMMDeviceEnumerator>(pEnumerator, &release<IMMDeviceEnumerator>);
     }
@@ -117,7 +122,7 @@ void AudioClient::checkPeakValues() {
         // if the device isn't listed through Qt, skip it
         deviceName = ::getWinDeviceName(pDevice);
         deviceIndex = 0;
-        for (;  deviceIndex < _inputDevices.size(); ++deviceIndex) {
+        for (; deviceIndex < _inputDevices.size(); ++deviceIndex) {
             if (deviceName == _inputDevices[deviceIndex].deviceName()) {
                 break;
             }
@@ -126,19 +131,19 @@ void AudioClient::checkPeakValues() {
             continue;
         }
 
-        //continue;
+        // continue;
 
         result = device->Activate(__uuidof(IAudioMeterInformation), CLSCTX_ALL, NULL, (void**)&pMeterInfo);
         CONTINUE_ON_FAIL(result);
         meterInfo = std::shared_ptr<IAudioMeterInformation>(pMeterInfo, &release<IAudioMeterInformation>);
 
-        //continue;
+        // continue;
 
         hardwareSupport;
         result = meterInfo->QueryHardwareSupport(&hardwareSupport);
         CONTINUE_ON_FAIL(result);
 
-        //continue;
+        // continue;
 
         // if the device has no hardware support (USB)...
         if (!(hardwareSupport & ENDPOINT_HARDWARE_SUPPORT_METER)) {
@@ -147,7 +152,7 @@ void AudioClient::checkPeakValues() {
             std::wstring deviceId(pDeviceId);
             CoTaskMemFree(pDeviceId);
 
-            //continue;
+            // continue;
 
             // ...and no active client...
             if (activeClients.find(deviceId) == activeClients.end()) {
@@ -155,14 +160,14 @@ void AudioClient::checkPeakValues() {
                 CONTINUE_ON_FAIL(result);
                 audioClient = std::shared_ptr<IAudioClient>(pAudioClient, &release<IAudioClient>);
 
-                //continue;
+                // continue;
 
                 // ...activate a client
                 audioClient->GetMixFormat(&format);
                 audioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, 0, 0, 0, format, NULL);
                 audioClient->Start();
 
-                //continue;
+                // continue;
 
                 activeClients[deviceId] = audioClient;
             }

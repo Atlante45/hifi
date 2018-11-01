@@ -10,17 +10,17 @@
 #ifndef hifi_AutoTester_h
 #define hifi_AutoTester_h
 
-#include <QtWidgets/QMainWindow>
 #include <QSignalMapper>
 #include <QTextEdit>
+#include <QtWidgets/QMainWindow>
 #include "ui_AutoTester.h"
 
 #include "../Downloader.h"
 #include "../Test.h"
 
-#include "HelpWindow.h"
-#include "../TestRunner.h"
 #include "../AWSInterface.h"
+#include "../TestRunner.h"
+#include "HelpWindow.h"
 
 class AutoTester : public QMainWindow {
     Q_OBJECT
@@ -31,11 +31,8 @@ public:
 
     void setup();
 
-    void startTestsEvaluation(const bool isRunningFromCommandLine,
-                              const bool isRunningInAutomaticTestRun,
-                              const QString& snapshotDirectory,
-                              const QString& branch,
-                              const QString& user);
+    void startTestsEvaluation(const bool isRunningFromCommandLine, const bool isRunningInAutomaticTestRun,
+                              const QString& snapshotDirectory, const QString& branch, const QString& user);
 
     void automaticTestRunEvaluationComplete(QString zippedFolderName, int numberOfFailures);
 
@@ -96,8 +93,8 @@ private slots:
 
 private:
     Ui::AutoTesterClass _ui;
-    Test* _test{ nullptr };
-    TestRunner* _testRunner{ nullptr };
+    Test* _test { nullptr };
+    TestRunner* _testRunner { nullptr };
 
     AWSInterface _awsInterface;
 
@@ -110,15 +107,15 @@ private:
     // Used to enable passing a parameter to slots
     QSignalMapper* _signalMapper;
 
-    int _numberOfFilesToDownload{ 0 };
-    int _numberOfFilesDownloaded{ 0 };
-    int _index{ 0 };
+    int _numberOfFilesToDownload { 0 };
+    int _numberOfFilesDownloaded { 0 };
+    int _index { 0 };
 
-    bool _isRunningFromCommandline{ false };
+    bool _isRunningFromCommandline { false };
 
     HelpWindow _helpWindow;
 
     void* _caller;
 };
 
-#endif  // hifi_AutoTester_h
+#endif // hifi_AutoTester_h

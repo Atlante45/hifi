@@ -18,13 +18,9 @@
 
 #include "Application.h"
 
-
 QString const ModelOverlay::TYPE = "model";
 
-ModelOverlay::ModelOverlay()
-    : _model(std::make_shared<Model>(nullptr, this)),
-      _modelTextures(QVariantMap())
-{
+ModelOverlay::ModelOverlay() : _model(std::make_shared<Model>(nullptr, this)), _modelTextures(QVariantMap()) {
     _model->setLoadingPriority(_loadPriority);
     _isLoaded = false;
     render::ScenePointer scene = qApp->getMain3DScene();
@@ -50,7 +46,7 @@ ModelOverlay::ModelOverlay(const ModelOverlay* modelOverlay) :
     _animationHold(modelOverlay->_animationHold),
     _animationAllowTranslation(modelOverlay->_animationAllowTranslation)
 
-    // Joint translations and rotations aren't copied because the model needs to load before they can be applied.
+// Joint translations and rotations aren't copied because the model needs to load before they can be applied.
 {
     _model->setLoadingPriority(_loadPriority);
     if (_url.isValid()) {
@@ -90,17 +86,19 @@ void ModelOverlay::update(float deltatime) {
     render::ScenePointer scene = qApp->getMain3DScene();
     render::Transaction transaction;
     if (_model->needsFixupInScene()) {
-        emit DependencyManager::get<scriptable::ModelProviderFactory>()->modelRemovedFromScene(getID(), NestableType::Overlay, _model);
+        emit DependencyManager::get<scriptable::ModelProviderFactory>()->modelRemovedFromScene(getID(), NestableType::Overlay,
+                                                                                               _model);
         _model->removeFromScene(scene, transaction);
         _model->addToScene(scene, transaction);
 
-        auto newRenderItemIDs{ _model->fetchRenderItemIDs() };
+        auto newRenderItemIDs { _model->fetchRenderItemIDs() };
         transaction.updateItem<Overlay>(getRenderItemID(), [newRenderItemIDs](Overlay& data) {
             auto modelOverlay = static_cast<ModelOverlay*>(&data);
             modelOverlay->setSubRenderItemIDs(newRenderItemIDs);
         });
         processMaterials();
-        emit DependencyManager::get<scriptable::ModelProviderFactory>()->modelAddedToScene(getID(), NestableType::Overlay, _model);
+        emit DependencyManager::get<scriptable::ModelProviderFactory>()->modelAddedToScene(getID(), NestableType::Overlay,
+                                                                                           _model);
     }
     bool metaDirty = false;
     if (_visibleDirty && _texturesLoaded) {
@@ -153,10 +151,12 @@ bool ModelOverlay::addToScene(Overlay::Pointer overlay, const render::ScenePoint
     return true;
 }
 
-void ModelOverlay::removeFromScene(Overlay::Pointer overlay, const render::ScenePointer& scene, render::Transaction& transaction) {
+void ModelOverlay::removeFromScene(Overlay::Pointer overlay, const render::ScenePointer& scene,
+                                   render::Transaction& transaction) {
     Volume3DOverlay::removeFromScene(overlay, scene, transaction);
     _model->removeFromScene(scene, transaction);
-    emit DependencyManager::get<scriptable::ModelProviderFactory>()->modelRemovedFromScene(getID(), NestableType::Overlay, _model);
+    emit DependencyManager::get<scriptable::ModelProviderFactory>()->modelRemovedFromScene(getID(), NestableType::Overlay,
+                                                                                           _model);
     transaction.updateItem<Overlay>(getRenderItemID(), [](Overlay& data) {
         auto modelOverlay = static_cast<ModelOverlay*>(&data);
         modelOverlay->clearSubRenderItemIDs();
@@ -217,7 +217,8 @@ void ModelOverlay::setProperties(const QVariantMap& properties) {
         _scaleToFit = false;
     }
 
-    if (origPosition != getWorldPosition() || origRotation != getWorldOrientation() || origDimensions != getDimensions() || origScale != getSNScale()) {
+    if (origPosition != getWorldPosition() || origRotation != getWorldOrientation() || origDimensions != getDimensions() ||
+        origScale != getSNScale()) {
         _updateModel = true;
     }
 
@@ -261,7 +262,7 @@ void ModelOverlay::setProperties(const QVariantMap& properties) {
         if (translationCount < jointCount) {
             jointCount = translationCount;
         }
-        for (int i=0; i < jointCount; i++) {
+        for (int i = 0; i < jointCount; i++) {
             const auto& translationValue = jointTranslations[i];
             if (translationValue.isValid()) {
                 _model->setJointTranslation(i, true, vec3FromVariant(translationValue), 1.0f);
@@ -279,7 +280,7 @@ void ModelOverlay::setProperties(const QVariantMap& properties) {
         if (rotationCount < jointCount) {
             jointCount = rotationCount;
         }
-        for (int i=0; i < jointCount; i++) {
+        for (int i = 0; i < jointCount; i++) {
             const auto& rotationValue = jointRotations[i];
             if (rotationValue.isValid()) {
                 _model->setJointRotation(i, true, quatFromVariant(rotationValue), 1.0f);
@@ -330,11 +331,10 @@ void ModelOverlay::setProperties(const QVariantMap& properties) {
         if (animationAllowTranslation.canConvert(QVariant::Bool)) {
             _animationAllowTranslation = animationAllowTranslation.toBool();
         }
-
     }
 }
 
-template <typename vectorType, typename itemType>
+template<typename vectorType, typename itemType>
 vectorType ModelOverlay::mapJoints(mapFunction<itemType> function) const {
     vectorType result;
     if (_model && _model->isActive()) {
@@ -381,7 +381,8 @@ vectorType ModelOverlay::mapJoints(mapFunction<itemType> function) const {
  *     Antonyms: <code>isWire</code> and <code>wire</code>.
  * @property {boolean} isDashedLine=false - If <code>true</code>, a dashed line is drawn on the overlay's edges. Synonym:
  *     <code>dashed</code>.
- * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.  <code>ignoreRayIntersection</code> is a synonym.
+ * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the overlay.
+ * <code>ignoreRayIntersection</code> is a synonym.
  * @property {boolean} drawInFront=false - If <code>true</code>, the overlay is rendered in front of other overlays that don't
  *     have <code>drawInFront</code> set to <code>true</code>, and in front of entities.
  * @property {boolean} isGroupCulled=false - If <code>true</code>, the mesh parts of the model are LOD culled as a group.
@@ -392,28 +393,28 @@ vectorType ModelOverlay::mapJoints(mapFunction<itemType> function) const {
  *     <code>parentID</code> is an avatar skeleton. A value of <code>65535</code> means "no joint".
  *
  * @property {string} url - The URL of the FBX or OBJ model used for the overlay.
- * @property {number} loadPriority=0.0 - The priority for loading and displaying the overlay. Overlays with higher values load 
+ * @property {number} loadPriority=0.0 - The priority for loading and displaying the overlay. Overlays with higher values load
  *     first.
  * @property {Vec3} dimensions - The dimensions of the overlay. Synonym: <code>size</code>.
  * @property {Vec3} scale - The scale factor applied to the model's dimensions.
  * @property {object.<name, url>} textures - Maps the named textures in the model to the JPG or PNG images in the urls.
  * @property {Array.<string>} jointNames - The names of the joints - if any - in the model. <em>Read-only.</em>
- * @property {Array.<Quat>} jointRotations - The relative rotations of the model's joints. <em>Not copied if overlay is 
+ * @property {Array.<Quat>} jointRotations - The relative rotations of the model's joints. <em>Not copied if overlay is
  *     cloned.</em>
- * @property {Array.<Vec3>} jointTranslations - The relative translations of the model's joints. <em>Not copied if overlay is 
+ * @property {Array.<Vec3>} jointTranslations - The relative translations of the model's joints. <em>Not copied if overlay is
  *     cloned.</em>
  * @property {Array.<Quat>} jointOrientations - The absolute orientations of the model's joints, in world coordinates.
  *     <em>Read-only.</em>
  * @property {Array.<Vec3>} jointPositions - The absolute positions of the model's joints, in world coordinates.
  *     <em>Read-only.</em>
  * @property {string} animationSettings.url="" - The URL of an FBX file containing an animation to play.
- * @property {number} animationSettings.fps=0 - The frame rate (frames/sec) to play the animation at. 
+ * @property {number} animationSettings.fps=0 - The frame rate (frames/sec) to play the animation at.
  * @property {number} animationSettings.firstFrame=0 - The frame to start playing at.
  * @property {number} animationSettings.lastFrame=0 - The frame to finish playing at.
  * @property {number} animationSettings.currentFrame=0 - The current frame being played.
  * @property {boolean} animationSettings.running=false - Whether or not the animation is playing.
  * @property {boolean} animationSettings.loop=false - Whether or not the animation should repeat in a loop.
- * @property {boolean} animationSettings.hold=false - Whether or not when the animation finishes, the rotations and 
+ * @property {boolean} animationSettings.hold=false - Whether or not when the animation finishes, the rotations and
  *     translations of the last frame played should be maintained.
  * @property {boolean} animationSettings.allowTranslation=false - Whether or not translations contained in the animation should
  *     be played.
@@ -431,9 +432,7 @@ QVariant ModelOverlay::getProperty(const QString& property) {
     if (property == "textures") {
         if (_modelTextures.size() > 0) {
             QVariantMap textures;
-            foreach(const QString& key, _modelTextures.keys()) {
-                textures[key] = _modelTextures[key].toString();
-            }
+            foreach (const QString& key, _modelTextures.keys()) { textures[key] = _modelTextures[key].toString(); }
             return textures;
         } else {
             return QVariant();
@@ -448,50 +447,44 @@ QVariant ModelOverlay::getProperty(const QString& property) {
         if (_model && _model->isActive()) {
             // note: going through Rig because Model::getJointNames() (which proxies to FBXGeometry) was always empty
             const Rig* rig = &(_model->getRig());
-            return mapJoints<QStringList, QString>([rig](int jointIndex) -> QString {
-                return rig->nameOfJoint(jointIndex);
-            });
+            return mapJoints<QStringList, QString>([rig](int jointIndex) -> QString { return rig->nameOfJoint(jointIndex); });
         }
     }
 
     // relative
     if (property == "jointRotations") {
-        return mapJoints<QVariantList, QVariant>(
-            [this](int jointIndex) -> QVariant {
-                glm::quat rotation;
-                _model->getJointRotation(jointIndex, rotation);
-                return quatToVariant(rotation);
-            });
+        return mapJoints<QVariantList, QVariant>([this](int jointIndex) -> QVariant {
+            glm::quat rotation;
+            _model->getJointRotation(jointIndex, rotation);
+            return quatToVariant(rotation);
+        });
     }
 
     // relative
     if (property == "jointTranslations") {
-        return mapJoints<QVariantList, QVariant>(
-            [this](int jointIndex) -> QVariant {
-                glm::vec3 translation;
-                _model->getJointTranslation(jointIndex, translation);
-                return vec3toVariant(translation);
-            });
+        return mapJoints<QVariantList, QVariant>([this](int jointIndex) -> QVariant {
+            glm::vec3 translation;
+            _model->getJointTranslation(jointIndex, translation);
+            return vec3toVariant(translation);
+        });
     }
 
     // absolute
     if (property == "jointOrientations") {
-        return mapJoints<QVariantList, QVariant>(
-            [this](int jointIndex) -> QVariant {
-                glm::quat orientation;
-                _model->getJointRotationInWorldFrame(jointIndex, orientation);
-                return quatToVariant(orientation);
-            });
+        return mapJoints<QVariantList, QVariant>([this](int jointIndex) -> QVariant {
+            glm::quat orientation;
+            _model->getJointRotationInWorldFrame(jointIndex, orientation);
+            return quatToVariant(orientation);
+        });
     }
 
     // absolute
     if (property == "jointPositions") {
-        return mapJoints<QVariantList, QVariant>(
-            [this](int jointIndex) -> QVariant {
-                glm::vec3 position;
-                _model->getJointPositionInWorldFrame(jointIndex, position);
-                return vec3toVariant(position);
-            });
+        return mapJoints<QVariantList, QVariant>([this](int jointIndex) -> QVariant {
+            glm::vec3 position;
+            _model->getJointPositionInWorldFrame(jointIndex, position);
+            return vec3toVariant(position);
+        });
     }
 
     // animation properties
@@ -505,36 +498,42 @@ QVariant ModelOverlay::getProperty(const QString& property) {
         animationSettingsMap["lastFrame"] = _animationLastFrame;
         animationSettingsMap["running"] = _animationRunning;
         animationSettingsMap["loop"] = _animationLoop;
-        animationSettingsMap["hold"]= _animationHold;
+        animationSettingsMap["hold"] = _animationHold;
         animationSettingsMap["allowTranslation"] = _animationAllowTranslation;
 
         return animationSettingsMap;
     }
 
-
     return Volume3DOverlay::getProperty(property);
 }
 
-bool ModelOverlay::findRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                                       float& distance, BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking) {
+bool ModelOverlay::findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, float& distance, BoxFace& face,
+                                       glm::vec3& surfaceNormal, bool precisionPicking) {
     QVariantMap extraInfo;
-    return _model->findRayIntersectionAgainstSubMeshes(origin, direction, distance, face, surfaceNormal, extraInfo, precisionPicking);
+    return _model->findRayIntersectionAgainstSubMeshes(origin, direction, distance, face, surfaceNormal, extraInfo,
+                                                       precisionPicking);
 }
 
-bool ModelOverlay::findRayIntersectionExtraInfo(const glm::vec3& origin, const glm::vec3& direction,
-                                                float& distance, BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo, bool precisionPicking) {
-    return _model->findRayIntersectionAgainstSubMeshes(origin, direction, distance, face, surfaceNormal, extraInfo, precisionPicking);
+bool ModelOverlay::findRayIntersectionExtraInfo(const glm::vec3& origin, const glm::vec3& direction, float& distance,
+                                                BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                                bool precisionPicking) {
+    return _model->findRayIntersectionAgainstSubMeshes(origin, direction, distance, face, surfaceNormal, extraInfo,
+                                                       precisionPicking);
 }
 
 bool ModelOverlay::findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                            float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal, bool precisionPicking) {
+                                            float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+                                            bool precisionPicking) {
     QVariantMap extraInfo;
-    return _model->findParabolaIntersectionAgainstSubMeshes(origin, velocity, acceleration, parabolicDistance, face, surfaceNormal, extraInfo, precisionPicking);
+    return _model->findParabolaIntersectionAgainstSubMeshes(origin, velocity, acceleration, parabolicDistance, face,
+                                                            surfaceNormal, extraInfo, precisionPicking);
 }
 
-bool ModelOverlay::findParabolaIntersectionExtraInfo(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                                     float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo, bool precisionPicking) {
-    return _model->findParabolaIntersectionAgainstSubMeshes(origin, velocity, acceleration, parabolicDistance, face, surfaceNormal, extraInfo, precisionPicking);
+bool ModelOverlay::findParabolaIntersectionExtraInfo(const glm::vec3& origin, const glm::vec3& velocity,
+                                                     const glm::vec3& acceleration, float& parabolicDistance, BoxFace& face,
+                                                     glm::vec3& surfaceNormal, QVariantMap& extraInfo, bool precisionPicking) {
+    return _model->findParabolaIntersectionAgainstSubMeshes(origin, velocity, acceleration, parabolicDistance, face,
+                                                            surfaceNormal, extraInfo, precisionPicking);
 }
 
 ModelOverlay* ModelOverlay::createClone() const {
@@ -550,7 +549,8 @@ Transform ModelOverlay::evalRenderTransform() {
 void ModelOverlay::locationChanged(bool tellPhysics) {
     Base3DOverlay::locationChanged(tellPhysics);
 
-    // FIXME Start using the _renderTransform instead of calling for Transform and Dimensions from here, do the custom things needed in evalRenderTransform()
+    // FIXME Start using the _renderTransform instead of calling for Transform and Dimensions from here, do the custom things
+    // needed in evalRenderTransform()
     if (_model && _model->isActive()) {
         _model->setRotation(getWorldOrientation());
         _model->setTranslation(getWorldPosition());
@@ -564,17 +564,14 @@ QString ModelOverlay::getName() const {
     return QString("Overlay:") + getType() + ":" + _url.toString();
 }
 
-
 void ModelOverlay::animate() {
-
     if (!_animation || !_animation->isLoaded() || !_model || !_model->isLoaded()) {
         return;
     }
 
-
     QVector<JointData> jointsData;
 
-    const QVector<FBXAnimationFrame>&  frames = _animation->getFramesReference(); // NOTE: getFrames() is too heavy
+    const QVector<FBXAnimationFrame>& frames = _animation->getFramesReference(); // NOTE: getFrames() is too heavy
     int frameCount = frames.size();
     if (frameCount <= 0) {
         return;
@@ -629,8 +626,10 @@ void ModelOverlay::animate() {
                 QString jointName = fbxJoints[index].name;
 
                 if (originalFbxIndices.contains(jointName)) {
-                    // Making sure the joint names exist in the original model the animation is trying to apply onto. If they do, then remap and get its translation.
-                    int remappedIndex = originalFbxIndices[jointName] - 1; // JointIndeces seem to always start from 1 and the found index is always 1 higher than actual.
+                    // Making sure the joint names exist in the original model the animation is trying to apply onto. If they
+                    // do, then remap and get its translation.
+                    int remappedIndex = originalFbxIndices[jointName] - 1; // JointIndeces seem to always start from 1 and the
+                                                                           // found index is always 1 higher than actual.
                     translationMat = glm::translate(originalFbxJoints[remappedIndex].translation);
                 }
             }
@@ -641,8 +640,8 @@ void ModelOverlay::animate() {
                 rotationMat = glm::mat4_cast(fbxJoints[index].preRotation * fbxJoints[index].postRotation);
             }
 
-            glm::mat4 finalMat = (translationMat * fbxJoints[index].preTransform *
-                rotationMat * fbxJoints[index].postTransform);
+            glm::mat4 finalMat = (translationMat * fbxJoints[index].preTransform * rotationMat *
+                                  fbxJoints[index].postTransform);
             auto& jointData = jointsData[j];
             jointData.translation = extractTranslation(finalMat);
             jointData.translationIsDefaultPose = false;
@@ -654,9 +653,7 @@ void ModelOverlay::animate() {
     copyAnimationJointDataToModel(jointsData);
 }
 
-
 void ModelOverlay::mapAnimationJoints(const QStringList& modelJointNames) {
-
     // if we don't have animation, or we're already joint mapped then bail early
     if (!hasAnimation() || jointsMapped()) {
         return;
@@ -742,9 +739,10 @@ bool ModelOverlay::canReplaceModelMeshPart(int meshIndex, int partIndex) {
     return _model && _model->isLoaded();
 }
 
-bool ModelOverlay::replaceScriptableModelMeshPart(scriptable::ScriptableModelBasePointer newModel, int meshIndex, int partIndex) {
+bool ModelOverlay::replaceScriptableModelMeshPart(scriptable::ScriptableModelBasePointer newModel, int meshIndex,
+                                                  int partIndex) {
     return canReplaceModelMeshPart(meshIndex, partIndex) &&
-        _model->replaceScriptableModelMeshPart(newModel, meshIndex, partIndex);
+           _model->replaceScriptableModelMeshPart(newModel, meshIndex, partIndex);
 }
 
 scriptable::ScriptableModelBase ModelOverlay::getScriptableModel() {
