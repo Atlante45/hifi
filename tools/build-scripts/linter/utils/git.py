@@ -143,11 +143,16 @@ class Repository(object):  # pylint: disable=too-many-public-methods
     def does_branch_exist(self, branch):
         """Return True if the branch exists."""
         # rev-parse returns 0 if the branch exists
-        return not self._callgit("rev-parse", ["--verify", branch])
+        return not self._callgit("rev-parse", ["--verify", "--quiet", branch])
 
-    def get_merge_base(self, commit):
+    def does_tag_exist(self, tag):
+        """Return True if the tag exists."""
+        # rev-parse returns 0 if the tag exists
+        return not self._callgit("rev-parse", ["--verify", "--quiet", tag])
+
+    def get_merge_base(self, commit1, commit2 = "HEAD"):
         """Get the merge base between 'commit' and HEAD."""
-        return self._callgito("merge-base", ["HEAD", commit]).rstrip()
+        return self._callgito("merge-base", [commit1, commit2]).rstrip()
 
     def commit_with_message(self, message):
         """Commit the staged changes with the given message."""
@@ -228,6 +233,7 @@ class Repository(object):  # pylint: disable=too-many-public-methods
     def _run_cmd(self, cmd, args):
         """Run the git command and return a GitCommandResult instance."""
 
+        LOGGER.debug("Running: git {} {}".format(cmd, " ".join(args)))
         params = ["git", cmd] + args
         return self._run_process(cmd, params, cwd=self.directory)
 
@@ -237,9 +243,9 @@ class Repository(object):  # pylint: disable=too-many-public-methods
         (stdout, stderr) = process.communicate()
         if process.returncode:
             if stdout:
-                LOGGER.error("Output of '%s': %s", " ".join(params), stdout)
+                LOGGER.error("Output of '%s': %s", " ".join(params), stdout.rstrip())
             if stderr:
-                LOGGER.error("Error output of '%s': %s", " ".join(params), stderr)
+                LOGGER.error("Error output of '%s': %s", " ".join(params), stderr.rstrip())
         return GitCommandResult(cmd, params, process.returncode, stdout=stdout, stderr=stderr)
 
 
