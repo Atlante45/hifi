@@ -34,6 +34,8 @@ static const int PROTOTYPE_TAPS_LQ = 32;    // filter taps per phase
 static const int PROTOTYPE_PHASES_LQ = 32;  // oversampling factor
 static const int PROTOTYPE_COEFS_LQ = PROTOTYPE_TAPS_LQ * PROTOTYPE_PHASES_LQ;
 
+// clang-format off
+
 static const float prototypeFilterLQ[PROTOTYPE_COEFS_LQ] = {
      0.00000000e+00f,  7.28975116e-04f,  5.28021918e-04f,  7.16707449e-04f, 
      9.46880205e-04f,  1.22626464e-03f,  1.56097789e-03f,  1.95857740e-03f, 

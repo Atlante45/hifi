@@ -111,6 +111,8 @@
 // Now passes ISO/IEC 11172-4 "full accuracy" compliance testing.
 //
 
+// clang-format off
+
 #ifndef __FLUMP3DEC_H__
 #define __FLUMP3DEC_H__
 

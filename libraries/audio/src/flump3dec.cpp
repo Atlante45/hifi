@@ -111,6 +111,8 @@
 // Now passes ISO/IEC 11172-4 "full accuracy" compliance testing.
 //
 
+// clang-format off
+
 #include "flump3dec.h"
 
 #include <stdlib.h>

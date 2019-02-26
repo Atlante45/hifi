@@ -30,6 +30,8 @@
 #define ALIGN32
 #endif
 
+// clang-format off
+
 ALIGN32 static const float foa_1002_table[4][2][FOA_NFFT] = {
     // W kernel
     {{
