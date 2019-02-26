@@ -15,6 +15,10 @@
 #include <stdint.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
+
+#include <QVector>
+#include <QUuid>
 
 #include <NumericalConstants.h>
 

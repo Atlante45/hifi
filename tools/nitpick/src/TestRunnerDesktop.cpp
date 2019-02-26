@@ -14,8 +14,10 @@
 #include <QtWidgets/QFileDialog>
 
 #ifdef Q_OS_WIN
+// clang-format off
 #include <windows.h>
 #include <tlhelp32.h>
+// clang-format on
 #endif
 
 #include "Nitpick.h"
