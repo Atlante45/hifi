@@ -21,21 +21,20 @@ const float DISPLAYNAME_FADE_TIME = 0.5f;
 const float DISPLAYNAME_FADE_FACTOR = pow(0.01f, 1.0f / DISPLAYNAME_FADE_TIME);
 
 static glm::u8vec3 getLoadingOrbColor(Avatar::LoadingStatus loadingStatus) {
-
     const glm::u8vec3 NO_MODEL_COLOR(0xe3, 0xe3, 0xe3);
     const glm::u8vec3 LOAD_MODEL_COLOR(0xef, 0x93, 0xd1);
     const glm::u8vec3 LOAD_SUCCESS_COLOR(0x1f, 0xc6, 0xa6);
     const glm::u8vec3 LOAD_FAILURE_COLOR(0xc6, 0x21, 0x47);
     switch (loadingStatus) {
-    case Avatar::LoadingStatus::NoModel:
-        return NO_MODEL_COLOR;
-    case Avatar::LoadingStatus::LoadModel:
-        return LOAD_MODEL_COLOR;
-    case Avatar::LoadingStatus::LoadSuccess:
-        return LOAD_SUCCESS_COLOR;
-    case Avatar::LoadingStatus::LoadFailure:
-    default:
-        return LOAD_FAILURE_COLOR;
+        case Avatar::LoadingStatus::NoModel:
+            return NO_MODEL_COLOR;
+        case Avatar::LoadingStatus::LoadModel:
+            return LOAD_MODEL_COLOR;
+        case Avatar::LoadingStatus::LoadSuccess:
+            return LOAD_SUCCESS_COLOR;
+        case Avatar::LoadingStatus::LoadFailure:
+        default:
+            return LOAD_FAILURE_COLOR;
     }
 }
 
@@ -85,7 +84,8 @@ void OtherAvatar::createOrb() {
         properties.setDimensions(glm::vec3(0.5f, 0.5f, 0.5f));
         properties.setVisible(true);
 
-        _otherAvatarOrbMeshPlaceholderID = DependencyManager::get<EntityScriptingInterface>()->addEntityInternal(properties, entity::HostType::LOCAL);
+        _otherAvatarOrbMeshPlaceholderID = DependencyManager::get<EntityScriptingInterface>()->addEntityInternal(
+            properties, entity::HostType::LOCAL);
     }
 }
 
@@ -126,47 +126,47 @@ int OtherAvatar::parseDataFromBuffer(const QByteArray& buffer) {
 btCollisionShape* OtherAvatar::createCollisionShape(int jointIndex, bool& isBound, std::vector<int>& boundJoints) {
     ShapeInfo shapeInfo;
     isBound = false;
-    QString jointName = ""; 
+    QString jointName = "";
     if (jointIndex > -1 && jointIndex < (int)_multiSphereShapes.size()) {
         jointName = _multiSphereShapes[jointIndex].getJointName();
     }
     switch (_bodyLOD) {
-    case BodyLOD::Sphere:
-        shapeInfo.setSphere(0.5f * getFitBounds().getDimensions().y);
-        boundJoints.clear();
-        for (auto &spheres : _multiSphereShapes) {
-            if (spheres.isValid()) {
-                boundJoints.push_back(spheres.getJointIndex());
-            }
-        }
-        isBound = true;
-        break;
-    case BodyLOD::MultiSphereLow:
-        if (jointName.contains("RightHand", Qt::CaseInsensitive) || jointName.contains("LeftHand", Qt::CaseInsensitive))  {
-            if (jointName.size() <= QString("RightHand").size()) {
-                AABox handBound;
-                for (auto &spheres : _multiSphereShapes) {
-                    if (spheres.isValid() && spheres.getJointName().contains(jointName, Qt::CaseInsensitive)) {
-                        boundJoints.push_back(spheres.getJointIndex());
-                        handBound += spheres.getBoundingBox();
-                    }
+        case BodyLOD::Sphere:
+            shapeInfo.setSphere(0.5f * getFitBounds().getDimensions().y);
+            boundJoints.clear();
+            for (auto& spheres : _multiSphereShapes) {
+                if (spheres.isValid()) {
+                    boundJoints.push_back(spheres.getJointIndex());
                 }
-                shapeInfo.setSphere(0.5f * handBound.getLargestDimension());
-                glm::vec3 jointPosition;
-                glm::quat jointRotation;
-                _skeletonModel->getJointPositionInWorldFrame(jointIndex, jointPosition);
-                _skeletonModel->getJointRotationInWorldFrame(jointIndex, jointRotation);
-                glm::vec3 positionOffset = glm::inverse(jointRotation) * (handBound.calcCenter() - jointPosition);
-                shapeInfo.setOffset(positionOffset);
-                isBound = true;
             }
+            isBound = true;
             break;
-        }
-    case BodyLOD::MultiSphereHigh:
-        computeDetailedShapeInfo(shapeInfo, jointIndex);
-        break;
-    default:
-        break;
+        case BodyLOD::MultiSphereLow:
+            if (jointName.contains("RightHand", Qt::CaseInsensitive) || jointName.contains("LeftHand", Qt::CaseInsensitive)) {
+                if (jointName.size() <= QString("RightHand").size()) {
+                    AABox handBound;
+                    for (auto& spheres : _multiSphereShapes) {
+                        if (spheres.isValid() && spheres.getJointName().contains(jointName, Qt::CaseInsensitive)) {
+                            boundJoints.push_back(spheres.getJointIndex());
+                            handBound += spheres.getBoundingBox();
+                        }
+                    }
+                    shapeInfo.setSphere(0.5f * handBound.getLargestDimension());
+                    glm::vec3 jointPosition;
+                    glm::quat jointRotation;
+                    _skeletonModel->getJointPositionInWorldFrame(jointIndex, jointPosition);
+                    _skeletonModel->getJointRotationInWorldFrame(jointIndex, jointRotation);
+                    glm::vec3 positionOffset = glm::inverse(jointRotation) * (handBound.calcCenter() - jointPosition);
+                    shapeInfo.setOffset(positionOffset);
+                    isBound = true;
+                }
+                break;
+            }
+        case BodyLOD::MultiSphereHigh:
+            computeDetailedShapeInfo(shapeInfo, jointIndex);
+            break;
+        default:
+            break;
     }
     if (shapeInfo.getType() != SHAPE_TYPE_NONE) {
         auto shape = const_cast<btCollisionShape*>(ObjectMotionState::getShapeManager()->getShape(shapeInfo));
@@ -219,18 +219,18 @@ void OtherAvatar::computeShapeLOD() {
     // auto newBodyLOD = BodyLOD::CapsuleShape;
     BodyLOD newLOD;
     switch (_workloadRegion) {
-    case workload::Region::R1:
-        newLOD = BodyLOD::MultiSphereHigh;
-        break;
-    case workload::Region::R2:
-        newLOD = BodyLOD::MultiSphereLow;
-        break;
-    case workload::Region::UNKNOWN:
-    case workload::Region::INVALID:
-    case workload::Region::R3:
-    default:
-        newLOD = BodyLOD::Sphere;
-        break;
+        case workload::Region::R1:
+            newLOD = BodyLOD::MultiSphereHigh;
+            break;
+        case workload::Region::R2:
+            newLOD = BodyLOD::MultiSphereLow;
+            break;
+        case workload::Region::UNKNOWN:
+        case workload::Region::INVALID:
+        case workload::Region::R3:
+        default:
+            newLOD = BodyLOD::Sphere;
+            break;
     }
     if (newLOD != _bodyLOD) {
         _bodyLOD = newLOD;
@@ -250,7 +250,8 @@ bool OtherAvatar::shouldBeInPhysicsSimulation() const {
 }
 
 bool OtherAvatar::needsPhysicsUpdate() const {
-    constexpr uint32_t FLAGS_OF_INTEREST = Simulation::DIRTY_SHAPE | Simulation::DIRTY_MASS | Simulation::DIRTY_POSITION | Simulation::DIRTY_COLLISION_GROUP;
+    constexpr uint32_t FLAGS_OF_INTEREST = Simulation::DIRTY_SHAPE | Simulation::DIRTY_MASS | Simulation::DIRTY_POSITION |
+                                           Simulation::DIRTY_COLLISION_GROUP;
     return (_needsReinsertion || (_motionState && (bool)(_motionState->getIncomingDirtyFlags() & FLAGS_OF_INTEREST)));
 }
 
@@ -329,14 +330,15 @@ void OtherAvatar::simulate(float deltaTime, bool inView) {
             head->simulate(deltaTime);
             relayJointDataToChildren();
         } else {
-            // a non-full update is still required so that the position, rotation, scale and bounds of the skeletonModel are updated.
+            // a non-full update is still required so that the position, rotation, scale and bounds of the skeletonModel are
+            // updated.
             _skeletonModel->simulate(deltaTime, false);
         }
         _skeletonModelSimulationRate.increment();
     }
 
     // update animation for display name fade in/out
-    if ( _displayNameTargetAlpha != _displayNameAlpha) {
+    if (_displayNameTargetAlpha != _displayNameAlpha) {
         // the alpha function is
         // Fade out => alpha(t) = factor ^ t => alpha(t+dt) = alpha(t) * factor^(dt)
         // Fade in  => alpha(t) = 1 - factor^t => alpha(t+dt) = 1-(1-alpha(t))*coef^(dt)
@@ -349,7 +351,8 @@ void OtherAvatar::simulate(float deltaTime, bool inView) {
             // Fading in
             _displayNameAlpha = 1.0f - (1.0f - _displayNameAlpha) * coef;
         }
-        _displayNameAlpha = glm::abs(_displayNameAlpha - _displayNameTargetAlpha) < 0.01f ? _displayNameTargetAlpha : _displayNameAlpha;
+        _displayNameAlpha = glm::abs(_displayNameAlpha - _displayNameTargetAlpha) < 0.01f ? _displayNameTargetAlpha
+                                                                                          : _displayNameAlpha;
     }
 
     {
@@ -377,7 +380,8 @@ void OtherAvatar::handleChangedAvatarEntityData() {
     // AVATAR ENTITY UPDATE FLOW
     // - if queueEditEntityMessage() sees "AvatarEntity" HostType it calls _myAvatar->storeAvatarEntityDataPayload()
     // - storeAvatarEntityDataPayload() saves the payload and flags the trait instance for the entity as updated,
-    // - ClientTraitsHandler::sendChangedTraitsToMixea() sends the entity bytes to the mixer which relays them to other interfaces
+    // - ClientTraitsHandler::sendChangedTraitsToMixea() sends the entity bytes to the mixer which relays them to other
+    // interfaces
     // - AvatarHashMap::processBulkAvatarTraits() on other interfaces calls avatar->processTraitInstance()
     // - AvatarData::processTraitInstance() calls storeAvatarEntityDataPayload(), which sets _avatarEntityDataChanged = true
     // - (My)Avatar::simulate() calls handleChangedAvatarEntityData() every frame which checks _avatarEntityDataChanged
@@ -404,9 +408,7 @@ void OtherAvatar::handleChangedAvatarEntityData() {
     }
 
     PackedAvatarEntityMap packedAvatarEntityData;
-    _avatarEntitiesLock.withReadLock([&] {
-        packedAvatarEntityData = _packedAvatarEntityData;
-    });
+    _avatarEntitiesLock.withReadLock([&] { packedAvatarEntityData = _packedAvatarEntityData; });
     entityTree->withWriteLock([&] {
         AvatarEntityMap::const_iterator dataItr = packedAvatarEntityData.begin();
         while (dataItr != packedAvatarEntityData.end()) {
@@ -478,7 +480,8 @@ void OtherAvatar::handleChangedAvatarEntityData() {
 
             auto specifiedHref = properties.getHref();
             if (!isMyAvatar() && !specifiedHref.isEmpty()) {
-                qCDebug(avatars) << "removing entity href from avatar attached entity:" << entityID << "old href:" << specifiedHref;
+                qCDebug(avatars) << "removing entity href from avatar attached entity:" << entityID
+                                 << "old href:" << specifiedHref;
                 QString noHref;
                 properties.setHref(noHref);
             }
@@ -538,9 +541,7 @@ void OtherAvatar::handleChangedAvatarEntityData() {
         if (!recentlyRemovedAvatarEntities.empty()) {
             // only lock this thread when absolutely necessary
             AvatarEntityMap packedAvatarEntityData;
-            _avatarEntitiesLock.withReadLock([&] {
-                packedAvatarEntityData = _packedAvatarEntityData;
-            });
+            _avatarEntitiesLock.withReadLock([&] { packedAvatarEntityData = _packedAvatarEntityData; });
             foreach (auto entityID, recentlyRemovedAvatarEntities) {
                 if (!packedAvatarEntityData.contains(entityID)) {
                     entityTree->deleteEntity(entityID, true, true);

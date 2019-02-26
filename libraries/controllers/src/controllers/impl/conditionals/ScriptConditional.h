@@ -20,15 +20,18 @@ namespace controller {
 
 class ScriptConditional : public QObject, public Conditional {
     Q_OBJECT;
+
 public:
-    ScriptConditional(const QScriptValue& callable) : _callable(callable) { }
+    ScriptConditional(const QScriptValue& callable) : _callable(callable) {}
     virtual bool satisfied() override;
+
 protected:
     Q_INVOKABLE void updateValue();
+
 private:
     QScriptValue _callable;
     bool _lastValue { false };
 };
 
-}
+} // namespace controller
 #endif

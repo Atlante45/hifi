@@ -24,15 +24,13 @@ void PrepareStencil::configure(const Config& config) {
 
 graphics::MeshPointer PrepareStencil::getMesh() {
     if (!_mesh) {
-
-        std::vector<glm::vec3> vertices {
-            { -1.0f, -1.0f, 0.0f }, { -1.0f, 0.0f, 0.0f },
-            { -1.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f },
-            { 1.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f },
-            { 1.0f, -1.0f, 0.0f }, { 0.0f, -1.0f, 0.0f } };
+        std::vector<glm::vec3> vertices { { -1.0f, -1.0f, 0.0f }, { -1.0f, 0.0f, 0.0f }, { -1.0f, 1.0f, 0.0f },
+                                          { 0.0f, 1.0f, 0.0f },   { 1.0f, 1.0f, 0.0f },  { 1.0f, 0.0f, 0.0f },
+                                          { 1.0f, -1.0f, 0.0f },  { 0.0f, -1.0f, 0.0f } };
 
         std::vector<uint32_t> indices { 0, 7, 1, 1, 3, 2, 3, 5, 4, 5, 7, 6 };
-        _mesh = graphics::Mesh::createIndexedTriangles_P3F((uint32_t) vertices.size(), (uint32_t) indices.size(), vertices.data(), indices.data());
+        _mesh = graphics::Mesh::createIndexedTriangles_P3F((uint32_t)vertices.size(), (uint32_t)indices.size(), vertices.data(),
+                                                           indices.data());
     }
     return _mesh;
 }
@@ -94,49 +92,59 @@ void PrepareStencil::run(const RenderContextPointer& renderContext, const gpu::F
 
 // Always draw MASK to the stencil buffer (used to always prevent drawing in certain areas later)
 void PrepareStencil::drawMask(gpu::State& state) {
-    state.setStencilTest(true, 0xFF, gpu::State::StencilTest(STENCIL_MASK, 0xFF, gpu::ALWAYS,
-        gpu::State::STENCIL_OP_REPLACE, gpu::State::STENCIL_OP_REPLACE, gpu::State::STENCIL_OP_REPLACE));
+    state.setStencilTest(true, 0xFF,
+                         gpu::State::StencilTest(STENCIL_MASK, 0xFF, gpu::ALWAYS, gpu::State::STENCIL_OP_REPLACE,
+                                                 gpu::State::STENCIL_OP_REPLACE, gpu::State::STENCIL_OP_REPLACE));
 }
 
 // Draw BACKGROUND to the stencil buffer behind everything else
 void PrepareStencil::drawBackground(gpu::State& state) {
-    state.setStencilTest(true, 0xFF, gpu::State::StencilTest(STENCIL_BACKGROUND, 0xFF, gpu::ALWAYS,
-        gpu::State::STENCIL_OP_REPLACE, gpu::State::STENCIL_OP_REPLACE, gpu::State::STENCIL_OP_KEEP));
+    state.setStencilTest(true, 0xFF,
+                         gpu::State::StencilTest(STENCIL_BACKGROUND, 0xFF, gpu::ALWAYS, gpu::State::STENCIL_OP_REPLACE,
+                                                 gpu::State::STENCIL_OP_REPLACE, gpu::State::STENCIL_OP_KEEP));
 }
 
 // Pass if this area has NOT been marked as MASK or anything containing MASK
 void PrepareStencil::testMask(gpu::State& state) {
-    state.setStencilTest(true, 0x00, gpu::State::StencilTest(STENCIL_MASK, STENCIL_MASK, gpu::NOT_EQUAL,
-        gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
+    state.setStencilTest(true, 0x00,
+                         gpu::State::StencilTest(STENCIL_MASK, STENCIL_MASK, gpu::NOT_EQUAL, gpu::State::STENCIL_OP_KEEP,
+                                                 gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
 }
 
 // Pass if this area has NOT been marked as NO_AA or anything containing NO_AA
 void PrepareStencil::testNoAA(gpu::State& state) {
-    state.setStencilTest(true, 0x00, gpu::State::StencilTest(STENCIL_NO_AA, STENCIL_NO_AA, gpu::NOT_EQUAL,
-        gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
+    state.setStencilTest(true, 0x00,
+                         gpu::State::StencilTest(STENCIL_NO_AA, STENCIL_NO_AA, gpu::NOT_EQUAL, gpu::State::STENCIL_OP_KEEP,
+                                                 gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
 }
 
 // Pass if this area WAS marked as BACKGROUND
 // (see: graphics/src/Skybox.cpp, procedural/src/ProceduralSkybox.cpp)
 void PrepareStencil::testBackground(gpu::State& state) {
-    state.setStencilTest(true, 0x00, gpu::State::StencilTest(STENCIL_BACKGROUND, 0xFF, gpu::EQUAL,
-        gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
+    state.setStencilTest(true, 0x00,
+                         gpu::State::StencilTest(STENCIL_BACKGROUND, 0xFF, gpu::EQUAL, gpu::State::STENCIL_OP_KEEP,
+                                                 gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
 }
 
 // Pass if this area WAS marked as SHAPE or anything containing SHAPE
 void PrepareStencil::testShape(gpu::State& state) {
-    state.setStencilTest(true, 0x00, gpu::State::StencilTest(STENCIL_SHAPE, STENCIL_SHAPE, gpu::EQUAL,
-        gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
+    state.setStencilTest(true, 0x00,
+                         gpu::State::StencilTest(STENCIL_SHAPE, STENCIL_SHAPE, gpu::EQUAL, gpu::State::STENCIL_OP_KEEP,
+                                                 gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
 }
 
 // Pass if this area was NOT marked as MASK, write to SHAPE if it passes
 void PrepareStencil::testMaskDrawShape(gpu::State& state) {
-    state.setStencilTest(true, STENCIL_SHAPE, gpu::State::StencilTest(STENCIL_MASK | STENCIL_SHAPE, STENCIL_MASK, gpu::NOT_EQUAL,
-        gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_REPLACE));
+    state.setStencilTest(true, STENCIL_SHAPE,
+                         gpu::State::StencilTest(STENCIL_MASK | STENCIL_SHAPE, STENCIL_MASK, gpu::NOT_EQUAL,
+                                                 gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP,
+                                                 gpu::State::STENCIL_OP_REPLACE));
 }
 
 // Pass if this area was NOT marked as MASK, write to SHAPE and NO_AA if it passes
 void PrepareStencil::testMaskDrawShapeNoAA(gpu::State& state) {
-    state.setStencilTest(true, STENCIL_SHAPE | STENCIL_NO_AA, gpu::State::StencilTest(STENCIL_MASK | STENCIL_SHAPE | STENCIL_NO_AA, STENCIL_MASK, gpu::NOT_EQUAL,
-        gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_REPLACE));
+    state.setStencilTest(true, STENCIL_SHAPE | STENCIL_NO_AA,
+                         gpu::State::StencilTest(STENCIL_MASK | STENCIL_SHAPE | STENCIL_NO_AA, STENCIL_MASK, gpu::NOT_EQUAL,
+                                                 gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP,
+                                                 gpu::State::STENCIL_OP_REPLACE));
 }

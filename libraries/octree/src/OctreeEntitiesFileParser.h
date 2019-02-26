@@ -37,4 +37,4 @@ private:
     std::string _errorString;
 };
 
-#endif  // hifi_OctreeEntitiesFileParser_h
+#endif // hifi_OctreeEntitiesFileParser_h

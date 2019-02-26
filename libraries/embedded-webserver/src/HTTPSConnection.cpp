@@ -14,8 +14,7 @@
 #include "EmbeddedWebserverLogging.h"
 
 HTTPSConnection::HTTPSConnection(QSslSocket* sslSocket, HTTPSManager* parentManager) :
-    HTTPConnection(sslSocket, parentManager)
-{
+    HTTPConnection(sslSocket, parentManager) {
     connect(sslSocket, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(handleSSLErrors(const QList<QSslError>&)));
     sslSocket->startServerEncryption();
 }

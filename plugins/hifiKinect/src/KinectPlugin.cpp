@@ -8,18 +8,17 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #include "KinectPlugin.h"
 
-#include <controllers/UserInputMapper.h>
-#include <QLoggingCategory>
-#include <PathUtils.h>
 #include <DebugDraw.h>
-#include <cassert>
 #include <NumericalConstants.h>
-#include <StreamUtils.h>
+#include <PathUtils.h>
 #include <Preferences.h>
 #include <SettingHandle.h>
+#include <StreamUtils.h>
+#include <controllers/UserInputMapper.h>
+#include <QLoggingCategory>
+#include <cassert>
 
 Q_DECLARE_LOGGING_CATEGORY(inputplugins)
 Q_LOGGING_CATEGORY(inputplugins, "hifi.inputplugins")
@@ -27,33 +26,11 @@ Q_LOGGING_CATEGORY(inputplugins, "hifi.inputplugins")
 const char* KinectPlugin::NAME = "Kinect";
 const char* KinectPlugin::KINECT_ID_STRING = "Kinect";
 
-QStringList kinectJointNames = {
-    "SpineBase",
-    "SpineMid",
-    "Neck",
-    "Head",
-    "ShoulderLeft",
-    "ElbowLeft",
-    "WristLeft",
-    "HandLeft",
-    "ShoulderRight",
-    "ElbowRight",
-    "WristRight",
-    "HandRight",
-    "HipLeft",
-    "KneeLeft",
-    "AnkleLeft",
-    "FootLeft",
-    "HipRight",
-    "KneeRight",
-    "AnkleRight",
-    "FootRight",
-    "SpineShoulder",
-    "HandTipLeft",
-    "ThumbLeft",
-    "HandTipRight",
-    "ThumbRight"
-};
+QStringList kinectJointNames = { "SpineBase",     "SpineMid",    "Neck",      "Head",          "ShoulderLeft",
+                                 "ElbowLeft",     "WristLeft",   "HandLeft",  "ShoulderRight", "ElbowRight",
+                                 "WristRight",    "HandRight",   "HipLeft",   "KneeLeft",      "AnkleLeft",
+                                 "FootLeft",      "HipRight",    "KneeRight", "AnkleRight",    "FootRight",
+                                 "SpineShoulder", "HandTipLeft", "ThumbLeft", "HandTipRight",  "ThumbRight" };
 
 const bool DEFAULT_ENABLED = false;
 
@@ -94,7 +71,7 @@ enum KinectJointIndex {
     Size
 };
 
-#define UNKNOWN_JOINT (controller::StandardPoseChannel)0 
+#define UNKNOWN_JOINT (controller::StandardPoseChannel)0
 
 static controller::StandardPoseChannel KinectJointIndexToPoseIndexMap[KinectJointIndex::Size] = {
     controller::HIPS,
@@ -112,15 +89,15 @@ static controller::StandardPoseChannel KinectJointIndexToPoseIndexMap[KinectJoin
     controller::RIGHT_FORE_ARM,
     controller::RIGHT_HAND,
 
-    controller::LEFT_UP_LEG,   // hip socket
-    controller::LEFT_LEG,      // knee?
-    controller::LEFT_FOOT,     // ankle?
-    UNKNOWN_JOINT,              // ????
+    controller::LEFT_UP_LEG, // hip socket
+    controller::LEFT_LEG, // knee?
+    controller::LEFT_FOOT, // ankle?
+    UNKNOWN_JOINT, // ????
 
-    controller::RIGHT_UP_LEG,   // hip socket
-    controller::RIGHT_LEG,      // knee?
-    controller::RIGHT_FOOT,     // ankle?
-    UNKNOWN_JOINT,              // ????
+    controller::RIGHT_UP_LEG, // hip socket
+    controller::RIGHT_LEG, // knee?
+    controller::RIGHT_FOOT, // ankle?
+    UNKNOWN_JOINT, // ????
 
     UNKNOWN_JOINT, /* SpineShoulder */
 
@@ -144,69 +121,67 @@ static controller::StandardPoseChannel KinectJointIndexToPoseIndex(KinectJointIn
     }
 }
 
-QStringList controllerJointNames = {
-    "Hips",
-    "RightUpLeg",
-    "RightLeg",
-    "RightFoot",
-    "LeftUpLeg",
-    "LeftLeg",
-    "LeftFoot",
-    "Spine",
-    "Spine1",
-    "Spine2",
-    "Spine3",
-    "Neck",
-    "Head",
-    "RightShoulder",
-    "RightArm",
-    "RightForeArm",
-    "RightHand",
-    "RightHandThumb1",
-    "RightHandThumb2",
-    "RightHandThumb3",
-    "RightHandThumb4",
-    "RightHandIndex1",
-    "RightHandIndex2",
-    "RightHandIndex3",
-    "RightHandIndex4",
-    "RightHandMiddle1",
-    "RightHandMiddle2",
-    "RightHandMiddle3",
-    "RightHandMiddle4",
-    "RightHandRing1",
-    "RightHandRing2",
-    "RightHandRing3",
-    "RightHandRing4",
-    "RightHandPinky1",
-    "RightHandPinky2",
-    "RightHandPinky3",
-    "RightHandPinky4",
-    "LeftShoulder",
-    "LeftArm",
-    "LeftForeArm",
-    "LeftHand",
-    "LeftHandThumb1",
-    "LeftHandThumb2",
-    "LeftHandThumb3",
-    "LeftHandThumb4",
-    "LeftHandIndex1",
-    "LeftHandIndex2",
-    "LeftHandIndex3",
-    "LeftHandIndex4",
-    "LeftHandMiddle1",
-    "LeftHandMiddle2",
-    "LeftHandMiddle3",
-    "LeftHandMiddle4",
-    "LeftHandRing1",
-    "LeftHandRing2",
-    "LeftHandRing3",
-    "LeftHandRing4",
-    "LeftHandPinky1",
-    "LeftHandPinky2",
-    "LeftHandPinky3",
-    "LeftHandPinky4"
-};
+QStringList controllerJointNames = { "Hips",
+                                     "RightUpLeg",
+                                     "RightLeg",
+                                     "RightFoot",
+                                     "LeftUpLeg",
+                                     "LeftLeg",
+                                     "LeftFoot",
+                                     "Spine",
+                                     "Spine1",
+                                     "Spine2",
+                                     "Spine3",
+                                     "Neck",
+                                     "Head",
+                                     "RightShoulder",
+                                     "RightArm",
+                                     "RightForeArm",
+                                     "RightHand",
+                                     "RightHandThumb1",
+                                     "RightHandThumb2",
+                                     "RightHandThumb3",
+                                     "RightHandThumb4",
+                                     "RightHandIndex1",
+                                     "RightHandIndex2",
+                                     "RightHandIndex3",
+                                     "RightHandIndex4",
+                                     "RightHandMiddle1",
+                                     "RightHandMiddle2",
+                                     "RightHandMiddle3",
+                                     "RightHandMiddle4",
+                                     "RightHandRing1",
+                                     "RightHandRing2",
+                                     "RightHandRing3",
+                                     "RightHandRing4",
+                                     "RightHandPinky1",
+                                     "RightHandPinky2",
+                                     "RightHandPinky3",
+                                     "RightHandPinky4",
+                                     "LeftShoulder",
+                                     "LeftArm",
+                                     "LeftForeArm",
+                                     "LeftHand",
+                                     "LeftHandThumb1",
+                                     "LeftHandThumb2",
+                                     "LeftHandThumb3",
+                                     "LeftHandThumb4",
+                                     "LeftHandIndex1",
+                                     "LeftHandIndex2",
+                                     "LeftHandIndex3",
+                                     "LeftHandIndex4",
+                                     "LeftHandMiddle1",
+                                     "LeftHandMiddle2",
+                                     "LeftHandMiddle3",
+                                     "LeftHandMiddle4",
+                                     "LeftHandRing1",
+                                     "LeftHandRing2",
+                                     "LeftHandRing3",
+                                     "LeftHandRing4",
+                                     "LeftHandPinky1",
+                                     "LeftHandPinky2",
+                                     "LeftHandPinky3",
+                                     "LeftHandPinky4" };
 
 static const char* getControllerJointName(controller::StandardPoseChannel i) {
     if (i >= 0 && i < controller::NUM_STANDARD_POSES) {
@@ -224,22 +199,20 @@ void KinectPlugin::init() {
     auto preferences = DependencyManager::get<Preferences>();
     static const QString KINECT_PLUGIN { "Kinect" };
     {
-        auto getter = [this]()->bool { return _enabled; };
-        auto setter = [this](bool value) { 
-            _enabled = value; 
-            saveSettings(); 
+        auto getter = [this]() -> bool { return _enabled; };
+        auto setter = [this](bool value) {
+            _enabled = value;
+            saveSettings();
             if (!_enabled) {
                 auto userInputMapper = DependencyManager::get<controller::UserInputMapper>();
-                userInputMapper->withLock([&, this]() {
-                    _inputDevice->clearState();
-                });
+                userInputMapper->withLock([&, this]() { _inputDevice->clearState(); });
             }
         };
         auto preference = new CheckPreference(KINECT_PLUGIN, "Enabled", getter, setter);
         preferences->addPreference(preference);
     }
     {
-        auto debugGetter = [this]()->bool { return _debug; };
+        auto debugGetter = [this]() -> bool { return _debug; };
         auto debugSetter = [this](bool value) {
             _debug = value;
             saveSettings();
@@ -263,7 +236,6 @@ bool KinectPlugin::activate() {
     loadSettings();
 
     if (_enabled) {
-
         // register with userInputMapper
         auto userInputMapper = DependencyManager::get<controller::UserInputMapper>();
         userInputMapper->registerDevice(_inputDevice);
@@ -288,7 +260,6 @@ bool KinectPlugin::isHandController() const {
 bool KinectPlugin::isHeadController() const {
     return isHandController();
 }
-
 
 bool KinectPlugin::initializeDefaultSensor() const {
 #ifdef HAVE_KINECT
@@ -350,7 +321,7 @@ void KinectPlugin::updateBody() {
     if (SUCCEEDED(hr)) {
         INT64 nTime = 0;
         hr = pBodyFrame->get_RelativeTime(&nTime);
-        IBody* bodies[BODY_COUNT] = {0};
+        IBody* bodies[BODY_COUNT] = { 0 };
         if (SUCCEEDED(hr)) {
             hr = pBodyFrame->GetAndRefreshBodyData(_countof(bodies), bodies);
         }
@@ -402,28 +373,24 @@ void KinectPlugin::ProcessBody(INT64 time, int bodyCount, IBody** bodies) {
                     if (SUCCEEDED(hr)) {
                         auto jointCount = _countof(joints);
                         if (_debug) {
-                            qDebug() << __FUNCTION__ << "nBodyCount:" << bodyCount << "body:" << i << "jointCount:" << jointCount;
+                            qDebug() << __FUNCTION__ << "nBodyCount:" << bodyCount << "body:" << i
+                                     << "jointCount:" << jointCount;
                         }
-                        
-                        for (int j = 0; j < jointCount; ++j) {
 
-                            glm::vec3 jointPosition { joints[j].Position.X,
-                                                      joints[j].Position.Y,
-                                                      joints[j].Position.Z };
+                        for (int j = 0; j < jointCount; ++j) {
+                            glm::vec3 jointPosition { joints[j].Position.X, joints[j].Position.Y, joints[j].Position.Z };
 
                             // This is the rotation in the kinect camera/sensor frame... we adjust that in update...
                             // NOTE: glm::quat(W!!!, x, y, z)... not (x,y,z,w)!!!
-                            glm::quat jointOrientation { jointOrientations[j].Orientation.w,
-                                                         jointOrientations[j].Orientation.x,
+                            glm::quat jointOrientation { jointOrientations[j].Orientation.w, jointOrientations[j].Orientation.x,
                                                          jointOrientations[j].Orientation.y,
                                                          jointOrientations[j].Orientation.z };
 
                             if (_debug) {
                                 QString jointName = kinectJointNames[joints[j].JointType];
-                                qDebug() << __FUNCTION__ << "joint[" << j << "]:" << jointName
-                                        << "position:" << jointPosition
-                                        << "orientation:" << jointOrientation
-                                        << "isTracked:" << (joints[j].TrackingState != TrackingState_NotTracked);
+                                qDebug() << __FUNCTION__ << "joint[" << j << "]:" << jointName << "position:" << jointPosition
+                                         << "orientation:" << jointOrientation
+                                         << "isTracked:" << (joints[j].TrackingState != TrackingState_NotTracked);
                             }
 
                             // filling in the _joints data...
@@ -434,9 +401,10 @@ void KinectPlugin::ProcessBody(INT64 time, int bodyCount, IBody** bodies) {
                                 //
                                 // https://social.msdn.microsoft.com/Forums/en-US/31c9aff6-7dab-433d-9af9-59942dfd3d69/kinect-v20-preview-sdk-jointorientation-vs-boneorientation?forum=kinectv2sdk
                                 // seems to suggest these are absolute...
-                                //    "These quaternions are absolute, so you can take a mesh in local space, transform it by the quaternion, 
-                                //    and it will match the exact orientation of the bone.  If you want relative orientation quaternion, you 
-                                //    can multiply the absolute quaternion by the inverse of the parent joint's quaternion."
+                                //    "These quaternions are absolute, so you can take a mesh in local space, transform it by
+                                //    the quaternion, and it will match the exact orientation of the bone.  If you want relative
+                                //    orientation quaternion, you can multiply the absolute quaternion by the inverse of the
+                                //    parent joint's quaternion."
                                 //
                                 // This is consistent with our findings, but does not include "enough information"
                                 //  - Bone direction(Y green) - always matches the skeleton.
@@ -464,13 +432,13 @@ void KinectPlugin::ProcessBody(INT64 time, int bodyCount, IBody** bodies) {
                                 //                x     \_     |
                                 //                        |   |
                                 //                        |   |
-                                //  
+                                //
                                 //   Expected... identity rotation for left hand..... [to be verified]
                                 //   Left Hand with fingers pointing up (green/y)
                                 //                   thumb pointing forward (blue/z)
                                 //                   palm facing outward away from head (point out back of my hand, red/x)
                                 //
-                                // Our desired coordinate system... 
+                                // Our desired coordinate system...
                                 //     "the local coordinate of the palm in our system"...
                                 //
                                 // From ABOVE the hand canonical axes look like this:
@@ -489,24 +457,24 @@ void KinectPlugin::ProcessBody(INT64 time, int bodyCount, IBody** bodies) {
                                 //     fisted fingers curl in positive rotation direction....
                                 //
                                 // To transform from Kinect to our RIGHT Hand.... Negative 90 deg around Y
-                                // 
-                                // FIXME -- Double check if JointType_HandRight vs JointType_WristRight is actually 
+                                //
+                                // FIXME -- Double check if JointType_HandRight vs JointType_WristRight is actually
                                 //          the joint we want to be using!!
-                                // 
+                                //
                                 //_joints[j].orientation = jointOrientation;
                                 if (joints[j].JointType == JointType_HandRight) {
                                     static const quat kinectToHandRight = glm::angleAxis(-PI / 2.0f, Vectors::UNIT_Y);
-                                    // add moving average of orientation quaternion 
+                                    // add moving average of orientation quaternion
                                     glm::quat jointSample = jointOrientation * kinectToHandRight;
                                     if (glm::dot(jointSample, _RightHandOrientationAverage.getAverage()) < 0) {
                                         jointSample = -jointSample;
                                     }
                                     _RightHandOrientationAverage.addSample(jointSample);
                                     _joints[j].orientation = glm::normalize(_RightHandOrientationAverage.getAverage());
-                                }  else if (joints[j].JointType == JointType_HandLeft) {
+                                } else if (joints[j].JointType == JointType_HandLeft) {
                                     // To transform from Kinect to our LEFT  Hand.... Postive 90 deg around Y
                                     static const quat kinectToHandLeft = glm::angleAxis(PI / 2.0f, Vectors::UNIT_Y);
-                                    // add moving average of orientation quaternion 
+                                    // add moving average of orientation quaternion
                                     glm::quat jointSample = jointOrientation * kinectToHandLeft;
                                     if (glm::dot(jointSample, _LeftHandOrientationAverage.getAverage()) < 0) {
                                         jointSample = -jointSample;
@@ -516,7 +484,6 @@ void KinectPlugin::ProcessBody(INT64 time, int bodyCount, IBody** bodies) {
                                 } else {
                                     _joints[j].orientation = jointOrientation;
                                 }
-
                             }
                         }
                     }
@@ -526,7 +493,6 @@ void KinectPlugin::ProcessBody(INT64 time, int bodyCount, IBody** bodies) {
     }
 }
 #endif
-
 
 void KinectPlugin::deactivate() {
     // unregister from userInputMapper
@@ -552,11 +518,9 @@ void KinectPlugin::deactivate() {
 
     SafeRelease(_kinectSensor);
 #endif // HAVE_KINECT
-
 }
 
 void KinectPlugin::pluginUpdate(float deltaTime, const controller::InputCalibrationData& inputCalibrationData) {
-
     if (!_enabled) {
         return;
     }
@@ -566,9 +530,7 @@ void KinectPlugin::pluginUpdate(float deltaTime, const controller::InputCalibrat
     std::vector<KinectJoint> joints = _joints;
 
     auto userInputMapper = DependencyManager::get<controller::UserInputMapper>();
-    userInputMapper->withLock([&, this]() {
-        _inputDevice->update(deltaTime, inputCalibrationData, joints, _prevJoints);
-    });
+    userInputMapper->withLock([&, this]() { _inputDevice->update(deltaTime, inputCalibrationData, joints, _prevJoints); });
 
     _prevJoints = joints;
 }
@@ -616,9 +578,9 @@ QString KinectPlugin::InputDevice::getDefaultMappingConfig() const {
     return MAPPING_JSON;
 }
 
-void KinectPlugin::InputDevice::update(float deltaTime, const controller::InputCalibrationData& inputCalibrationData, 
-                                        const std::vector<KinectPlugin::KinectJoint>& joints, const std::vector<KinectPlugin::KinectJoint>& prevJoints) {
-
+void KinectPlugin::InputDevice::update(float deltaTime, const controller::InputCalibrationData& inputCalibrationData,
+                                       const std::vector<KinectPlugin::KinectJoint>& joints,
+                                       const std::vector<KinectPlugin::KinectJoint>& prevJoints) {
     glm::mat4 controllerToAvatar = glm::inverse(inputCalibrationData.avatarMat) * inputCalibrationData.sensorToWorldMat;
     glm::quat controllerToAvatarRotation = glmExtractRotation(controllerToAvatar);
 
@@ -643,7 +605,7 @@ void KinectPlugin::InputDevice::update(float deltaTime, const controller::InputC
         glm::quat rot = controllerToAvatarRotation * joints[i].orientation;
 
         if (i < prevJoints.size()) {
-            linearVel = (pos - (prevJoints[i].position * METERS_PER_CENTIMETER)) / deltaTime;  // m/s
+            linearVel = (pos - (prevJoints[i].position * METERS_PER_CENTIMETER)) / deltaTime; // m/s
             // quat log imaginary part points along the axis of rotation, with length of one half the angle of rotation.
             glm::quat d = glm::log(rot * glm::inverse(prevJoints[i].orientation));
             angularVel = glm::vec3(d.x, d.y, d.z) / (0.5f * deltaTime); // radians/s

@@ -9,16 +9,14 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef hifi_ICEClientApp_h
 #define hifi_ICEClientApp_h
 
-#include <QCoreApplication>
+#include <NetworkPeer.h>
+#include <ReceivedMessage.h>
 #include <udt/Constants.h>
 #include <udt/Socket.h>
-#include <ReceivedMessage.h>
-#include <NetworkPeer.h>
-
+#include <QCoreApplication>
 
 class ICEClientApp : public QCoreApplication {
     Q_OBJECT
@@ -54,8 +52,8 @@ private:
     void setState(int newState);
 
     void doSomething();
-    void sendPacketToIceServer(PacketType packetType, const HifiSockAddr& iceServerSockAddr,
-                               const QUuid& clientID, const QUuid& peerID);
+    void sendPacketToIceServer(PacketType packetType, const HifiSockAddr& iceServerSockAddr, const QUuid& clientID,
+                               const QUuid& peerID);
     void icePingDomainServer();
     void processSTUNResponse(std::unique_ptr<udt::BasePacket> packet);
     void processPacket(std::unique_ptr<udt::Packet> packet);
@@ -91,8 +89,4 @@ private:
     int _domainPingCount { 0 };
 };
 
-
-
-
-
-#endif //hifi_ICEClientApp_h
+#endif // hifi_ICEClientApp_h

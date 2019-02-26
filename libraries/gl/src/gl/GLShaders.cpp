@@ -2,11 +2,11 @@
 
 #include "GLLogging.h"
 
-#include <QtCore/QJsonDocument>
-#include <QtCore/QJsonValue>
-#include <QtCore/QJsonObject>
-#include <QtCore/QFileInfo>
 #include <QtCore/QCryptographicHash>
+#include <QtCore/QFileInfo>
+#include <QtCore/QJsonDocument>
+#include <QtCore/QJsonObject>
+#include <QtCore/QJsonValue>
 
 #include <shared/FileUtils.h>
 
@@ -62,7 +62,6 @@ Uniforms Uniform::load(GLuint glprogram, const std::function<bool(const Uniform&
     return result;
 }
 
-
 Uniforms Uniform::loadTextures(GLuint glprogram) {
     return load(glprogram, [](const Uniform& uniform) -> bool {
         if (std::string::npos != uniform.name.find('.')) {
@@ -116,7 +115,6 @@ Uniform Uniform::loadByName(GLuint glprogram, const std::string& name) {
     return result;
 }
 
-
 Uniforms Uniform::load(GLuint glprogram, const std::vector<const char*>& cnames) {
     GLsizei count = static_cast<GLsizei>(cnames.size());
     if (0 == count) {
@@ -128,8 +126,7 @@ Uniforms Uniform::load(GLuint glprogram, const std::vector<const char*>& cnames)
     return load(glprogram, indices);
 }
 
-
-template <typename C, typename F>
+template<typename C, typename F>
 std::vector<const char*> toCNames(const C& container, F lambda) {
     std::vector<const char*> result;
     result.reserve(container.size());
@@ -199,29 +196,21 @@ Inputs Input::load(GLuint glprogram) {
 }
 
 #ifdef SEPARATE_PROGRAM
-bool gl::compileShader(GLenum shaderDomain,
-                       const std::string& shaderSource,
-                       GLuint& shaderObject,
-                       GLuint& programObject,
+bool gl::compileShader(GLenum shaderDomain, const std::string& shaderSource, GLuint& shaderObject, GLuint& programObject,
                        std::string& message) {
-    return compileShader(shaderDomain, std::vector<std::string>{ shaderSource }, shaderObject, programObject, message);
+    return compileShader(shaderDomain, std::vector<std::string> { shaderSource }, shaderObject, programObject, message);
 }
 #else
 bool gl::compileShader(GLenum shaderDomain, const std::string& shaderSource, GLuint& shaderObject, std::string& message) {
-    return compileShader(shaderDomain, std::vector<std::string>{ shaderSource }, shaderObject, message);
+    return compileShader(shaderDomain, std::vector<std::string> { shaderSource }, shaderObject, message);
 }
 #endif
 
 #ifdef SEPARATE_PROGRAM
-bool gl::compileShader(GLenum shaderDomain,
-                       const std::string& shaderSource,
-                       GLuint& shaderObject,
-                       GLuint& programObject,
+bool gl::compileShader(GLenum shaderDomain, const std::string& shaderSource, GLuint& shaderObject, GLuint& programObject,
                        std::string& message) {
 #else
-bool gl::compileShader(GLenum shaderDomain,
-                       const std::vector<std::string>& shaderSources,
-                       GLuint& shaderObject,
+bool gl::compileShader(GLenum shaderDomain, const std::vector<std::string>& shaderSources, GLuint& shaderObject,
                        std::string& message) {
 #endif
     if (shaderSources.empty()) {
@@ -386,7 +375,6 @@ GLuint gl::buildProgram(const std::vector<GLuint>& glshaders) {
     return glprogram;
 }
 
-
 GLuint gl::buildProgram(const CachedShader& cachedShader) {
     // A brand new program:
     GLuint glprogram = glCreateProgram();
@@ -404,7 +392,6 @@ GLuint gl::buildProgram(const CachedShader& cachedShader) {
 
     return glprogram;
 }
-
 
 bool gl::linkProgram(GLuint glprogram, std::string& message) {
     glLinkProgram(glprogram);
@@ -427,8 +414,8 @@ bool gl::linkProgram(GLuint glprogram, std::string& message) {
 }
 
 const QString& getShaderCacheFile() {
-    static const QString SHADER_CACHE_FOLDER{ "shaders" };
-    static const QString SHADER_CACHE_FILE_NAME{ "cache.json" };
+    static const QString SHADER_CACHE_FOLDER { "shaders" };
+    static const QString SHADER_CACHE_FILE_NAME { "cache.json" };
     static const QString SHADER_CACHE_FILE = FileUtils::standardPath(SHADER_CACHE_FOLDER) + SHADER_CACHE_FILE_NAME;
     return SHADER_CACHE_FILE;
 }
@@ -468,7 +455,7 @@ void gl::saveShaderCache(const ShaderCache& cache) {
             QVariantMap qentry;
             qentry[SHADER_JSON_TYPE_KEY] = QVariant(type);
             qentry[SHADER_JSON_SOURCE_KEY] = QString(entry.second.source.c_str());
-            qentry[SHADER_JSON_DATA_KEY] = QByteArray{ binary.data(), (int)binary.size() }.toBase64();
+            qentry[SHADER_JSON_DATA_KEY] = QByteArray { binary.data(), (int)binary.size() }.toBase64();
             variantMap[key.c_str()] = qentry;
         }
         json = QJsonDocument::fromVariant(variantMap).toJson(QJsonDocument::Indented);

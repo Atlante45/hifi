@@ -14,9 +14,9 @@
 #include <QtGui/QMouseEvent>
 #include <QtGui/QTouchEvent>
 
-#include <controllers/UserInputMapper.h>
-#include <PathUtils.h>
 #include <NumericalConstants.h>
+#include <PathUtils.h>
+#include <controllers/UserInputMapper.h>
 
 const char* KeyboardMouseDevice::NAME = "Keyboard/Mouse";
 bool KeyboardMouseDevice::_enableTouch = true;
@@ -48,7 +48,7 @@ void KeyboardMouseDevice::pluginUpdate(float deltaTime, const controller::InputC
     // Maybe it's a Qt issue, but the touch event sequence (begin, update, end) is not always called properly
     // The following is a workaround to detect that the touch sequence is over in case we didn;t see the end event
     if (_isTouching) {
-        const auto TOUCH_EVENT_MAXIMUM_WAIT = 100; //ms
+        const auto TOUCH_EVENT_MAXIMUM_WAIT = 100; // ms
         auto currentTime = _clock.now();
         auto sinceLastTouch = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - _lastTouchTime);
         if (sinceLastTouch.count() > TOUCH_EVENT_MAXIMUM_WAIT) {
@@ -66,7 +66,7 @@ void KeyboardMouseDevice::InputDevice::focusOutEvent() {
 }
 
 void KeyboardMouseDevice::keyPressEvent(QKeyEvent* event) {
-    auto input = _inputDevice->makeInput((Qt::Key) event->key());
+    auto input = _inputDevice->makeInput((Qt::Key)event->key());
     auto result = _inputDevice->_buttonPressedMap.insert(input.getChannel());
     if (result.second) {
         // key pressed again ? without catching the release event ?
@@ -74,12 +74,12 @@ void KeyboardMouseDevice::keyPressEvent(QKeyEvent* event) {
 }
 
 void KeyboardMouseDevice::keyReleaseEvent(QKeyEvent* event) {
-    auto input = _inputDevice->makeInput((Qt::Key) event->key());
+    auto input = _inputDevice->makeInput((Qt::Key)event->key());
     _inputDevice->_buttonPressedMap.erase(input.getChannel());
 }
 
 void KeyboardMouseDevice::mousePressEvent(QMouseEvent* event) {
-    auto input = _inputDevice->makeInput((Qt::MouseButton) event->button());
+    auto input = _inputDevice->makeInput((Qt::MouseButton)event->button());
     auto result = _inputDevice->_buttonPressedMap.insert(input.getChannel());
     if (!result.second) {
         // key pressed again ? without catching the release event ?
@@ -92,15 +92,15 @@ void KeyboardMouseDevice::mousePressEvent(QMouseEvent* event) {
 }
 
 void KeyboardMouseDevice::mouseReleaseEvent(QMouseEvent* event) {
-    auto input = _inputDevice->makeInput((Qt::MouseButton) event->button());
+    auto input = _inputDevice->makeInput((Qt::MouseButton)event->button());
     _inputDevice->_buttonPressedMap.erase(input.getChannel());
 
-    // if we pressed and released at the same location within a small time window, then create a "_CLICKED" 
-    // input for this button we might want to add some small tolerance to this so if you do a small drag it 
+    // if we pressed and released at the same location within a small time window, then create a "_CLICKED"
+    // input for this button we might want to add some small tolerance to this so if you do a small drag it
     // still counts as a click.
     static const int CLICK_TIME = USECS_PER_MSEC * 500; // 500 ms to click
     if (_clickDeadspotActive && (usecTimestampNow() - _mousePressTime < CLICK_TIME)) {
-        _inputDevice->_buttonPressedMap.insert(_inputDevice->makeInput((Qt::MouseButton) event->button(), true).getChannel());
+        _inputDevice->_buttonPressedMap.insert(_inputDevice->makeInput((Qt::MouseButton)event->button(), true).getChannel());
     }
 
     _clickDeadspotActive = false;
@@ -128,17 +128,25 @@ void KeyboardMouseDevice::mouseMoveEvent(QMouseEvent* event) {
 
 void KeyboardMouseDevice::wheelEvent(QWheelEvent* event) {
     auto currentMove = event->angleDelta() / 120.0f;
-    _inputDevice->_axisStateMap[_inputDevice->makeInput(MOUSE_AXIS_WHEEL_X_POS).getChannel()].value = currentMove.x() > 0 ? currentMove.x() : 0;
-    _inputDevice->_axisStateMap[_inputDevice->makeInput(MOUSE_AXIS_WHEEL_X_NEG).getChannel()].value = currentMove.x() < 0 ? -currentMove.x() : 0;
-    _inputDevice->_axisStateMap[_inputDevice->makeInput(MOUSE_AXIS_WHEEL_Y_POS).getChannel()].value = currentMove.y() > 0 ? currentMove.y() : 0;
-    _inputDevice->_axisStateMap[_inputDevice->makeInput(MOUSE_AXIS_WHEEL_Y_NEG).getChannel()].value = currentMove.y() < 0 ? -currentMove.y() : 0;
+    _inputDevice->_axisStateMap[_inputDevice->makeInput(MOUSE_AXIS_WHEEL_X_POS).getChannel()].value = currentMove.x() > 0
+                                                                                                          ? currentMove.x()
+                                                                                                          : 0;
+    _inputDevice->_axisStateMap[_inputDevice->makeInput(MOUSE_AXIS_WHEEL_X_NEG).getChannel()].value = currentMove.x() < 0
+                                                                                                          ? -currentMove.x()
+                                                                                                          : 0;
+    _inputDevice->_axisStateMap[_inputDevice->makeInput(MOUSE_AXIS_WHEEL_Y_POS).getChannel()].value = currentMove.y() > 0
+                                                                                                          ? currentMove.y()
+                                                                                                          : 0;
+    _inputDevice->_axisStateMap[_inputDevice->makeInput(MOUSE_AXIS_WHEEL_Y_NEG).getChannel()].value = currentMove.y() < 0
+                                                                                                          ? -currentMove.y()
+                                                                                                          : 0;
 }
 
 glm::vec2 evalAverageTouchPoints(const QList<QTouchEvent::TouchPoint>& points) {
     glm::vec2 averagePoint(0.0f);
     if (points.count() > 0) {
         for (auto& point : points) {
-            averagePoint += glm::vec2(point.pos().x(), point.pos().y()); 
+            averagePoint += glm::vec2(point.pos().x(), point.pos().y());
         }
         averagePoint /= (float)(points.count());
     }
@@ -170,11 +178,19 @@ void KeyboardMouseDevice::touchUpdateEvent(const QTouchEvent* event) {
             _isTouching = event->touchPointStates().testFlag(Qt::TouchPointPressed);
         } else {
             auto currentMove = currentPos - _lastTouch;
-            _inputDevice->_axisStateMap[_inputDevice->makeInput(TOUCH_AXIS_X_POS).getChannel()].value = (currentMove.x > 0 ? currentMove.x : 0.0f);
-            _inputDevice->_axisStateMap[_inputDevice->makeInput(TOUCH_AXIS_X_NEG).getChannel()].value = (currentMove.x < 0 ? -currentMove.x : 0.0f);
+            _inputDevice->_axisStateMap[_inputDevice->makeInput(TOUCH_AXIS_X_POS).getChannel()].value = (currentMove.x > 0
+                                                                                                             ? currentMove.x
+                                                                                                             : 0.0f);
+            _inputDevice->_axisStateMap[_inputDevice->makeInput(TOUCH_AXIS_X_NEG).getChannel()].value = (currentMove.x < 0
+                                                                                                             ? -currentMove.x
+                                                                                                             : 0.0f);
             // Y mouse is inverted positive is pointing up the screen
-            _inputDevice->_axisStateMap[_inputDevice->makeInput(TOUCH_AXIS_Y_POS).getChannel()].value = (currentMove.y < 0 ? -currentMove.y : 0.0f);
-            _inputDevice->_axisStateMap[_inputDevice->makeInput(TOUCH_AXIS_Y_NEG).getChannel()].value = (currentMove.y > 0 ? currentMove.y : 0.0f);
+            _inputDevice->_axisStateMap[_inputDevice->makeInput(TOUCH_AXIS_Y_POS).getChannel()].value = (currentMove.y < 0
+                                                                                                             ? -currentMove.y
+                                                                                                             : 0.0f);
+            _inputDevice->_axisStateMap[_inputDevice->makeInput(TOUCH_AXIS_Y_NEG).getChannel()].value = (currentMove.y > 0
+                                                                                                             ? currentMove.y
+                                                                                                             : 0.0f);
         }
 
         _lastTouch = currentPos;
@@ -184,7 +200,7 @@ void KeyboardMouseDevice::touchUpdateEvent(const QTouchEvent* event) {
 controller::Input KeyboardMouseDevice::InputDevice::makeInput(Qt::Key code) const {
     auto shortCode = (uint16_t)(code & KEYBOARD_MASK);
     if (shortCode != code) {
-       shortCode |= 0x0800; // add this bit instead of the way Qt::Key add a bit on the 3rd byte for some keys
+        shortCode |= 0x0800; // add this bit instead of the way Qt::Key add a bit on the 3rd byte for some keys
     }
     return controller::Input(_deviceID, shortCode, controller::ChannelType::BUTTON);
 }
@@ -192,14 +208,14 @@ controller::Input KeyboardMouseDevice::InputDevice::makeInput(Qt::Key code) cons
 controller::Input KeyboardMouseDevice::InputDevice::makeInput(Qt::MouseButton code, bool clicked) const {
     switch (code) {
         case Qt::LeftButton:
-            return controller::Input(_deviceID, clicked ? MOUSE_BUTTON_LEFT_CLICKED :
-                                                MOUSE_BUTTON_LEFT, controller::ChannelType::BUTTON);
+            return controller::Input(_deviceID, clicked ? MOUSE_BUTTON_LEFT_CLICKED : MOUSE_BUTTON_LEFT,
+                                     controller::ChannelType::BUTTON);
         case Qt::RightButton:
-            return controller::Input(_deviceID, clicked ? MOUSE_BUTTON_RIGHT_CLICKED :
-                                                MOUSE_BUTTON_RIGHT, controller::ChannelType::BUTTON);
+            return controller::Input(_deviceID, clicked ? MOUSE_BUTTON_RIGHT_CLICKED : MOUSE_BUTTON_RIGHT,
+                                     controller::ChannelType::BUTTON);
         case Qt::MiddleButton:
-            return controller::Input(_deviceID, clicked ? MOUSE_BUTTON_MIDDLE_CLICKED :
-                                                MOUSE_BUTTON_MIDDLE, controller::ChannelType::BUTTON);
+            return controller::Input(_deviceID, clicked ? MOUSE_BUTTON_MIDDLE_CLICKED : MOUSE_BUTTON_MIDDLE,
+                                     controller::ChannelType::BUTTON);
         default:
             return controller::Input();
     };
@@ -218,27 +234,27 @@ controller::Input KeyboardMouseDevice::InputDevice::makeInput(KeyboardMouseDevic
 }
 
 /**jsdoc
- * <p>The <code>Controller.Hardware.Keyboard</code> object has properties representing keyboard, mouse, and display touch 
- * events. The property values are integer IDs, uniquely identifying each output. <em>Read-only.</em> These can be mapped to 
- * actions or functions or <code>Controller.Standard</code> items in a {@link RouteObject} mapping. For presses, each data 
+ * <p>The <code>Controller.Hardware.Keyboard</code> object has properties representing keyboard, mouse, and display touch
+ * events. The property values are integer IDs, uniquely identifying each output. <em>Read-only.</em> These can be mapped to
+ * actions or functions or <code>Controller.Standard</code> items in a {@link RouteObject} mapping. For presses, each data
  * value is either <code>1.0</code> for "true" or <code>0.0</code> for "false".</p>
  * <table>
  *   <thead>
  *     <tr><th>Property</th><th>Type</th><td>Data</th><th>Description</th></tr>
  *   </thead>
  *   <tbody>
- *     <tr><td><code>0</code> &ndash; <code>9</code></td><td>number</td><td>number</td><td>A "0" &ndash; "1" key on the 
+ *     <tr><td><code>0</code> &ndash; <code>9</code></td><td>number</td><td>number</td><td>A "0" &ndash; "1" key on the
  *       keyboard or keypad is pressed.</td></tr>
- *     <tr><td><code>A</code> &ndash; <code>Z</code></td><td>number</td><td>number</td><td>A "A" &ndash; "Z" key on the 
+ *     <tr><td><code>A</code> &ndash; <code>Z</code></td><td>number</td><td>number</td><td>A "A" &ndash; "Z" key on the
  *       keyboard is pressed.</td></tr>
  *     <tr><td><code>Space</code></td><td>number</td><td>number</td><td>The space bar on the keyboard is pressed.</td></tr>
  *     <tr><td><code>Tab</code></td><td>number</td><td>number</td><td>The tab key on the keyboard is pressed.</td></tr>
  *     <tr><td><code>Shift</code></td><td>number</td><td>number</td><td>The shift key on the keyboard is pressed.</td></tr>
- *     <tr><td><code>Control</code></td><td>number</td><td>number</td><td>The control key on the keyboard is pressed. (The 
+ *     <tr><td><code>Control</code></td><td>number</td><td>number</td><td>The control key on the keyboard is pressed. (The
  *       "Command" key on OSX.)</td></tr>
  *     <tr><td><code>Left</code></td><td>number</td><td>number</td><td>The left arrow key on the keyboard or keypad is pressed.
  *       </td></tr>
- *     <tr><td><code>Right</code></td><td>number</td><td>number</td><td>The right arrow key on the keyboard or keypad is 
+ *     <tr><td><code>Right</code></td><td>number</td><td>number</td><td>The right arrow key on the keyboard or keypad is
  *       pressed.</td></tr>
  *     <tr><td><code>Up</code></td><td>number</td><td>number</td><td>The up arrow key on the keyboard or keypad is pressed.
  *       </td></tr>
@@ -257,35 +273,35 @@ controller::Input KeyboardMouseDevice::InputDevice::makeInput(KeyboardMouseDevic
  *       </td></tr>
  *     <tr><td><code>RightMouseClicked</code></td><td>number</td><td>number</td><td>The right mouse button was clicked.
  *       </td></tr>
- *     <tr><td><code>MouseMoveRight</code></td><td>number</td><td>number</td><td>The mouse moved right. The data value is how 
+ *     <tr><td><code>MouseMoveRight</code></td><td>number</td><td>number</td><td>The mouse moved right. The data value is how
  *       far it moved.</td></tr>
- *     <tr><td><code>MouseMoveLeft</code></td><td>number</td><td>number</td><td>The mouse moved left. The data value is how far 
+ *     <tr><td><code>MouseMoveLeft</code></td><td>number</td><td>number</td><td>The mouse moved left. The data value is how far
  *       it moved.</td></tr>
- *     <tr><td><code>MouseMoveUp</code></td><td>number</td><td>number</td><td>The mouse moved up. The data value is how far it 
+ *     <tr><td><code>MouseMoveUp</code></td><td>number</td><td>number</td><td>The mouse moved up. The data value is how far it
  *       moved.</td></tr>
- *     <tr><td><code>MouseMoveDown</code></td><td>number</td><td>number</td><td>The mouse moved down. The data value is how far 
+ *     <tr><td><code>MouseMoveDown</code></td><td>number</td><td>number</td><td>The mouse moved down. The data value is how far
  *       it moved.</td></tr>
- *     <tr><td><code>MouseX</code></td><td>number</td><td>number</td><td>The mouse x-coordinate changed. The data value is its 
+ *     <tr><td><code>MouseX</code></td><td>number</td><td>number</td><td>The mouse x-coordinate changed. The data value is its
  *       new x-coordinate value.</td></tr>
- *     <tr><td><code>MouseY</code></td><td>number</td><td>number</td><td>The mouse y-coordinate changed. The data value is its 
+ *     <tr><td><code>MouseY</code></td><td>number</td><td>number</td><td>The mouse y-coordinate changed. The data value is its
  *       new y-coordinate value.</td></tr>
- *     <tr><td><code>MouseWheelRight</code></td><td>number</td><td>number</td><td>The mouse wheel rotated left. The data value 
+ *     <tr><td><code>MouseWheelRight</code></td><td>number</td><td>number</td><td>The mouse wheel rotated left. The data value
  *       is the number of units rotated (typically <code>1.0</code>).</td></tr>
- *     <tr><td><code>MouseWheelLeft</code></td><td>number</td><td>number</td><td>The mouse wheel rotated left. The data value 
+ *     <tr><td><code>MouseWheelLeft</code></td><td>number</td><td>number</td><td>The mouse wheel rotated left. The data value
  *       is the number of units rotated (typically <code>1.0</code>).</td></tr>
- *     <tr><td><code>MouseWheelUp</code></td><td>number</td><td>number</td><td>The mouse wheel rotated up. The data value 
+ *     <tr><td><code>MouseWheelUp</code></td><td>number</td><td>number</td><td>The mouse wheel rotated up. The data value
  *       is the number of units rotated (typically <code>1.0</code>).</td></tr>
- *     <tr><td><code>MouseWheelDown</code></td><td>number</td><td>number</td><td>The mouse wheel rotated down. The data value 
+ *     <tr><td><code>MouseWheelDown</code></td><td>number</td><td>number</td><td>The mouse wheel rotated down. The data value
  *       is the number of units rotated (typically <code>1.0</code>).</td></tr>
-  *     <tr><td><code>TouchpadRight</code></td><td>number</td><td>number</td><td>The average touch on a touch-enabled device 
+ *     <tr><td><code>TouchpadRight</code></td><td>number</td><td>number</td><td>The average touch on a touch-enabled device
  *       moved right. The data value is how far the average position of all touch points moved.</td></tr>
- *     <tr><td><code>TouchpadLeft</code></td><td>number</td><td>number</td><td>The average touch on a touch-enabled device 
+ *     <tr><td><code>TouchpadLeft</code></td><td>number</td><td>number</td><td>The average touch on a touch-enabled device
  *       moved left. The data value is how far the average position of all touch points moved.</td></tr>
- *     <tr><td><code>TouchpadUp</code></td><td>number</td><td>number</td><td>The average touch on a touch-enabled device 
+ *     <tr><td><code>TouchpadUp</code></td><td>number</td><td>number</td><td>The average touch on a touch-enabled device
  *       moved up. The data value is how far the average position of all touch points moved.</td></tr>
- *     <tr><td><code>TouchpadDown</code></td><td>number</td><td>number</td><td>The average touch on a touch-enabled device 
+ *     <tr><td><code>TouchpadDown</code></td><td>number</td><td>number</td><td>The average touch on a touch-enabled device
  *       moved down. The data value is how far the average position of all touch points moved.</td></tr>
-  *   </tbody>
+ *   </tbody>
  * </table>
  * @typedef {object} Controller.Hardware-Keyboard
  * @todo <em>Currently, the mouse wheel in an ordinary mouse generates left/right wheel events instead of up/down.</em>

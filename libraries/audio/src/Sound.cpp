@@ -15,20 +15,20 @@
 
 #include <glm/glm.hpp>
 
+#include <qendian.h>
+#include <QDataStream>
 #include <QRunnable>
 #include <QThreadPool>
-#include <QDataStream>
 #include <QtCore/QDebug>
-#include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
-#include <qendian.h>
+#include <QtNetwork/QNetworkRequest>
 
 #include <LimitedNodeList.h>
 #include <NetworkAccessManager.h>
 #include <SharedUtil.h>
 
-#include "AudioRingBuffer.h"
 #include "AudioLogging.h"
+#include "AudioRingBuffer.h"
 #include "AudioSRC.h"
 
 #include "flump3dec.h"
@@ -37,8 +37,7 @@ int audioDataPointerMetaTypeID = qRegisterMetaType<AudioDataPointer>("AudioDataP
 
 using AudioConstants::AudioSample;
 
-AudioDataPointer AudioData::make(uint32_t numSamples, uint32_t numChannels,
-                                 const AudioSample* samples) {
+AudioDataPointer AudioData::make(uint32_t numSamples, uint32_t numChannels, const AudioSample* samples) {
     // Compute the amount of memory required for the audio data object
     const size_t bufferSize = numSamples * sizeof(AudioSample);
     const size_t memorySize = sizeof(AudioData) + bufferSize;
@@ -50,7 +49,7 @@ AudioDataPointer AudioData::make(uint32_t numSamples, uint32_t numChannels,
     assert(((char*)buffer - (char*)audioData) == sizeof(AudioData));
 
     // Use placement new to construct the audio data object at the memory allocated
-    ::new(audioData) AudioData(numSamples, numChannels, buffer);
+    ::new (audioData) AudioData(numSamples, numChannels, buffer);
 
     // Copy the samples to the buffer
     memcpy(buffer, samples, bufferSize);
@@ -62,12 +61,11 @@ AudioDataPointer AudioData::make(uint32_t numSamples, uint32_t numChannels,
     });
 }
 
-
-AudioData::AudioData(uint32_t numSamples, uint32_t numChannels, const AudioSample* samples)
-    : _numSamples(numSamples),
-      _numChannels(numChannels),
-      _data(samples)
-{}
+AudioData::AudioData(uint32_t numSamples, uint32_t numChannels, const AudioSample* samples) :
+    _numSamples(numSamples),
+    _numChannels(numChannels),
+    _data(samples) {
+}
 
 void Sound::downloadFinished(const QByteArray& data) {
     if (!_self) {
@@ -97,11 +95,7 @@ void Sound::soundProcessError(int error, QString str) {
     finishedLoading(false);
 }
 
-
-SoundProcessor::SoundProcessor(QWeakPointer<Resource> sound, QByteArray data) :
-    _sound(sound),
-    _data(data)
-{
+SoundProcessor::SoundProcessor(QWeakPointer<Resource> sound, QByteArray data) : _sound(sound), _data(data) {
 }
 
 void SoundProcessor::run() {
@@ -158,14 +152,11 @@ void SoundProcessor::run() {
     auto data = downSample(outputAudioByteArray, properties);
 
     int numSamples = data.size() / AudioConstants::SAMPLE_SIZE;
-    auto audioData = AudioData::make(numSamples, properties.numChannels,
-                                     (const AudioSample*)data.constData());
+    auto audioData = AudioData::make(numSamples, properties.numChannels, (const AudioSample*)data.constData());
     emit onSuccess(audioData);
 }
 
-QByteArray SoundProcessor::downSample(const QByteArray& rawAudioByteArray,
-                                      AudioProperties properties) {
-
+QByteArray SoundProcessor::downSample(const QByteArray& rawAudioByteArray, AudioProperties properties) {
     // we want to convert it to the format that the audio-mixer wants
     // which is signed, 16-bit, 24Khz
 
@@ -174,8 +165,7 @@ QByteArray SoundProcessor::downSample(const QByteArray& rawAudioByteArray,
         return rawAudioByteArray;
     }
 
-    AudioSRC resampler(properties.sampleRate, AudioConstants::SAMPLE_RATE,
-                       properties.numChannels);
+    AudioSRC resampler(properties.sampleRate, AudioConstants::SAMPLE_RATE, properties.numChannels);
 
     // resize to max possible output
     int numSourceFrames = rawAudioByteArray.size() / (properties.numChannels * AudioConstants::SAMPLE_SIZE);
@@ -183,9 +173,7 @@ QByteArray SoundProcessor::downSample(const QByteArray& rawAudioByteArray,
     int maxDestinationBytes = maxDestinationFrames * properties.numChannels * AudioConstants::SAMPLE_SIZE;
     QByteArray data(maxDestinationBytes, Qt::Uninitialized);
 
-    int numDestinationFrames = resampler.render((int16_t*)rawAudioByteArray.data(),
-                                                (int16_t*)data.data(),
-                                                numSourceFrames);
+    int numDestinationFrames = resampler.render((int16_t*)rawAudioByteArray.data(), (int16_t*)data.data(), numSourceFrames);
 
     // truncate to actual output
     int numDestinationBytes = numDestinationFrames * properties.numChannels * sizeof(AudioSample);
@@ -217,25 +205,25 @@ QByteArray SoundProcessor::downSample(const QByteArray& rawAudioByteArray,
 //
 
 struct chunk {
-    char        id[4];
-    quint32     size;
+    char id[4];
+    quint32 size;
 };
 
 struct RIFFHeader {
-    chunk       descriptor;     // "RIFF"
-    char        type[4];        // "WAVE"
+    chunk descriptor; // "RIFF"
+    char type[4]; // "WAVE"
 };
 
 static const int WAVEFORMAT_PCM = 1;
 static const int WAVEFORMAT_EXTENSIBLE = 0xfffe;
 
 struct WAVEFormat {
-    quint16     audioFormat;    // Format type: 1=PCM, 257=Mu-Law, 258=A-Law, 259=ADPCM
-    quint16     numChannels;    // Number of channels: 1=mono, 2=stereo
-    quint32     sampleRate;
-    quint32     byteRate;       // Sample rate * Number of Channels * Bits per sample / 8
-    quint16     blockAlign;     // (Number of Channels * Bits per sample) / 8.1
-    quint16     bitsPerSample;
+    quint16 audioFormat; // Format type: 1=PCM, 257=Mu-Law, 258=A-Law, 259=ADPCM
+    quint16 numChannels; // Number of channels: 1=mono, 2=stereo
+    quint32 sampleRate;
+    quint32 byteRate; // Sample rate * Number of Channels * Bits per sample / 8
+    quint16 blockAlign; // (Number of Channels * Bits per sample) / 8.1
+    quint16 bitsPerSample;
 };
 
 // returns wavfile sample rate, used for resampling
@@ -244,7 +232,7 @@ SoundProcessor::AudioProperties SoundProcessor::interpretAsWav(const QByteArray&
     AudioProperties properties;
 
     // Create a data stream to analyze the data
-    QDataStream waveStream(const_cast<QByteArray *>(&inputAudioByteArray), QIODevice::ReadOnly);
+    QDataStream waveStream(const_cast<QByteArray*>(&inputAudioByteArray), QIODevice::ReadOnly);
 
     // Read the "RIFF" chunk
     RIFFHeader riff;
@@ -275,7 +263,7 @@ SoundProcessor::AudioProperties SoundProcessor::interpretAsWav(const QByteArray&
         if (strncmp(fmt.id, "fmt ", 4) == 0) {
             break;
         }
-        waveStream.skipRawData(qFromLittleEndian<quint32>(fmt.size));   // next chunk
+        waveStream.skipRawData(qFromLittleEndian<quint32>(fmt.size)); // next chunk
     }
 
     // Read the "fmt " chunk
@@ -293,9 +281,7 @@ SoundProcessor::AudioProperties SoundProcessor::interpretAsWav(const QByteArray&
     }
 
     properties.numChannels = qFromLittleEndian<quint16>(wave.numChannels);
-    if (properties.numChannels != 1 &&
-        properties.numChannels != 2 &&
-        properties.numChannels != 4) {
+    if (properties.numChannels != 1 && properties.numChannels != 2 && properties.numChannels != 4) {
         qCWarning(audio) << "Currently not supporting audio files with other than 1/2/4 channels.";
         return AudioProperties();
     }
@@ -317,7 +303,7 @@ SoundProcessor::AudioProperties SoundProcessor::interpretAsWav(const QByteArray&
         if (strncmp(data.id, "data", 4) == 0) {
             break;
         }
-        waveStream.skipRawData(qFromLittleEndian<quint32>(data.size));  // next chunk
+        waveStream.skipRawData(qFromLittleEndian<quint32>(data.size)); // next chunk
     }
 
     // Read the "data" chunk
@@ -346,13 +332,13 @@ SoundProcessor::AudioProperties SoundProcessor::interpretAsMP3(const QByteArray&
     uint8_t mp3Buffer[MP3_BUFFER_SIZE];
 
     // create bitstream
-    Bit_stream_struc *bitstream = bs_new();
+    Bit_stream_struc* bitstream = bs_new();
     if (bitstream == nullptr) {
         return AudioProperties();
     }
 
     // create decoder
-    mp3tl *decoder = mp3tl_new(bitstream, MP3TL_MODE_16BIT);
+    mp3tl* decoder = mp3tl_new(bitstream, MP3TL_MODE_16BIT);
     if (decoder == nullptr) {
         bs_free(bitstream);
         return AudioProperties();
@@ -366,19 +352,15 @@ SoundProcessor::AudioProperties SoundProcessor::interpretAsMP3(const QByteArray&
     Mp3TlRetcode result = mp3tl_skip_id3(decoder);
 
     while (!(result == MP3TL_ERR_NO_SYNC || result == MP3TL_ERR_NEED_DATA)) {
-
         mp3tl_sync(decoder);
 
         // find MP3 header
-        const fr_header *header = nullptr;
+        const fr_header* header = nullptr;
         result = mp3tl_decode_header(decoder, &header);
 
         if (result == MP3TL_ERR_OK) {
-
             if (frameCount++ == 0) {
-
-                qCDebug(audio) << "Decoding MP3 with bitrate =" << header->bitrate
-                               << "sample rate =" << header->sample_rate
+                qCDebug(audio) << "Decoding MP3 with bitrate =" << header->bitrate << "sample rate =" << header->sample_rate
                                << "channels =" << header->channels;
 
                 // save header info
@@ -391,7 +373,6 @@ SoundProcessor::AudioProperties SoundProcessor::interpretAsMP3(const QByteArray&
 
             // decode MP3 frame
             if (result == MP3TL_ERR_OK) {
-
                 result = mp3tl_decode_frame(decoder, mp3Buffer, MP3_BUFFER_SIZE);
 
                 // fill bad frames with silence
@@ -420,7 +401,6 @@ SoundProcessor::AudioProperties SoundProcessor::interpretAsMP3(const QByteArray&
 
     return properties;
 }
-
 
 QScriptValue soundSharedPointerToScriptValue(QScriptEngine* engine, const SharedSoundPointer& in) {
     return engine->newQObject(new SoundScriptingInterface(in), QScriptEngine::ScriptOwnership);

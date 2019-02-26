@@ -132,8 +132,8 @@ static const int MAX_INJECTORS_PER_THREAD = 40; // calculated based on AudioInje
 
 bool AudioInjectorManager::wouldExceedLimits() { // Should be called inside of a lock.
     if (_injectors.size() >= MAX_INJECTORS_PER_THREAD) {
-        qCDebug(audio)  << "AudioInjectorManager::threadInjector could not thread AudioInjector - at max of"
-            << MAX_INJECTORS_PER_THREAD << "current audio injectors.";
+        qCDebug(audio) << "AudioInjectorManager::threadInjector could not thread AudioInjector - at max of"
+                       << MAX_INJECTORS_PER_THREAD << "current audio injectors.";
         return true;
     }
     return false;
@@ -141,7 +141,7 @@ bool AudioInjectorManager::wouldExceedLimits() { // Should be called inside of a
 
 bool AudioInjectorManager::threadInjector(const AudioInjectorPointer& injector) {
     if (_shouldStop) {
-        qCDebug(audio)  << "AudioInjectorManager::threadInjector asked to thread injector but is shutting down.";
+        qCDebug(audio) << "AudioInjectorManager::threadInjector asked to thread injector but is shutting down.";
         return false;
     }
 
@@ -170,7 +170,7 @@ bool AudioInjectorManager::threadInjector(const AudioInjectorPointer& injector) 
 
 bool AudioInjectorManager::restartFinishedInjector(const AudioInjectorPointer& injector) {
     if (_shouldStop) {
-        qCDebug(audio)  << "AudioInjectorManager::threadInjector asked to thread injector but is shutting down.";
+        qCDebug(audio) << "AudioInjectorManager::threadInjector asked to thread injector but is shutting down.";
         return false;
     }
 

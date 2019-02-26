@@ -20,7 +20,6 @@
 #include <test-utils/GLMTestUtils.h>
 #include <test-utils/QTestExtensions.h>
 
-
 QTEST_MAIN(AABoxTests)
 
 void AABoxTests::testCtorsAndSetters() {
@@ -182,4 +181,3 @@ void AABoxTests::testFindSpherePenetration() {
     bool hit = testBox.findSpherePenetration(searchPosition, searchRadius, penetration);
     QCOMPARE(hit, true);
 }
-

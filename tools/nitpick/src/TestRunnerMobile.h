@@ -11,32 +11,23 @@
 #ifndef hifi_testRunnerMobile_h
 #define hifi_testRunnerMobile_h
 
-#include <QMap>
 #include <QLabel>
+#include <QMap>
 #include <QObject>
 #include <QPushButton>
 
-#include "TestRunner.h"
 #include "AdbInterface.h"
+#include "TestRunner.h"
 
 class TestRunnerMobile : public QObject, public TestRunner {
     Q_OBJECT
 public:
-    explicit TestRunnerMobile(
-        QLabel* workingFolderLabel,
-        QPushButton *connectDeviceButton,
-        QPushButton *pullFolderButton,
-        QLabel* detectedDeviceLabel,
-        QLineEdit *folderLineEdit,
-        QPushButton* downloadAPKPushbutton,
-        QPushButton* installAPKPushbutton,
-        QPushButton* runInterfacePushbutton,
-        QCheckBox* runLatest,
-        QLineEdit* url,
-        QLabel* statusLabel,
+    explicit TestRunnerMobile(QLabel* workingFolderLabel, QPushButton* connectDeviceButton, QPushButton* pullFolderButton,
+                              QLabel* detectedDeviceLabel, QLineEdit* folderLineEdit, QPushButton* downloadAPKPushbutton,
+                              QPushButton* installAPKPushbutton, QPushButton* runInterfacePushbutton, QCheckBox* runLatest,
+                              QLineEdit* url, QLabel* statusLabel,
 
-        QObject* parent = 0
-    );
+                              QObject* parent = 0);
     ~TestRunnerMobile();
 
     void setWorkingFolderAndEnableControls();
@@ -60,10 +51,10 @@ private:
     QPushButton* _runInterfacePushbutton;
 
 #ifdef Q_OS_WIN
-    const QString _adbExe{ "adb.exe" };
+    const QString _adbExe { "adb.exe" };
 #else
     // Both Mac and Linux use "adb"
-    const QString _adbExe{ "adb" };
+    const QString _adbExe { "adb" };
 #endif
 
     QString _installerFilename;

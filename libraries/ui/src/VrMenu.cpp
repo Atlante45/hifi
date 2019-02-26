@@ -10,9 +10,9 @@
 
 #include "VrMenu.h"
 
-#include <QtQml>
-#include <QMenuBar>
 #include <QDebug>
+#include <QMenuBar>
+#include <QtQml>
 
 #include "OffscreenUi.h"
 #include "ui/Logging.h"
@@ -39,34 +39,32 @@ public:
         qmlObject->setObjectName(uuid.toString());
         // Make sure we can find it again in the future
         updateQmlItemFromAction();
-        _changedConnection = QObject::connect(action, &QAction::changed, [=] {
-            updateQmlItemFromAction();
-        });
-        _shutdownConnection = QObject::connect(qApp, &QCoreApplication::aboutToQuit, [=] {
-            QObject::disconnect(_changedConnection);
-        });
+        _changedConnection = QObject::connect(action, &QAction::changed, [=] { updateQmlItemFromAction(); });
+        _shutdownConnection = QObject::connect(qApp, &QCoreApplication::aboutToQuit,
+                                               [=] { QObject::disconnect(_changedConnection); });
 
         class ExclusionGroupSetter : public QObject {
         public:
-            ExclusionGroupSetter(QObject* from, QObject* to, QObject* qmlParent) : QObject(from), _from(from), _to(to), _qmlParent(qmlParent) {
+            ExclusionGroupSetter(QObject* from, QObject* to, QObject* qmlParent) :
+                QObject(from),
+                _from(from),
+                _to(to),
+                _qmlParent(qmlParent) {
                 _from->installEventFilter(this);
             }
 
-            ~ExclusionGroupSetter() {
-                _from->removeEventFilter(this);
-            }
+            ~ExclusionGroupSetter() { _from->removeEventFilter(this); }
+
         protected:
             virtual bool eventFilter(QObject* o, QEvent* e) override {
                 if (e->type() == QEvent::DynamicPropertyChange) {
                     QDynamicPropertyChangeEvent* dpc = static_cast<QDynamicPropertyChangeEvent*>(e);
-                    if (dpc->propertyName() == "exclusionGroup")
-                    {
-                        // unfortunately Qt doesn't support passing dynamic properties between C++ / QML, so we have to use this ugly helper function
-                        QMetaObject::invokeMethod(_qmlParent,
-                            "addExclusionGroup",
-                            Qt::DirectConnection,
-                            Q_ARG(QVariant, QVariant::fromValue(_to)),
-                            Q_ARG(QVariant, _from->property(dpc->propertyName())));
+                    if (dpc->propertyName() == "exclusionGroup") {
+                        // unfortunately Qt doesn't support passing dynamic properties between C++ / QML, so we have to use this
+                        // ugly helper function
+                        QMetaObject::invokeMethod(_qmlParent, "addExclusionGroup", Qt::DirectConnection,
+                                                  Q_ARG(QVariant, QVariant::fromValue(_to)),
+                                                  Q_ARG(QVariant, _from->property(dpc->propertyName())));
                     }
                 }
 
@@ -111,8 +109,7 @@ public:
         _qml->setUserData(USER_DATA_ID, nullptr);
     }
 
-
-    const QUuid uuid{ QUuid::createUuid() };
+    const QUuid uuid { QUuid::createUuid() };
 
     static bool hasData(QAction* object) {
         if (!object) {
@@ -147,9 +144,8 @@ private:
     QMetaObject::Connection _changedConnection;
     QAction* _action { nullptr };
     QObject* _qml { nullptr };
-    QObject* _qmlParent{ nullptr };
+    QObject* _qmlParent { nullptr };
 };
-
 
 VrMenu::VrMenu(OffscreenUi* parent) : QObject(parent) {
     _rootMenu = parent->getRootItem()->findChild<QObject*>("rootMenu");
@@ -163,7 +159,6 @@ QObject* VrMenu::findMenuObject(const QString& menuOption) {
     QObject* result = _rootMenu->findChild<QObject*>(menuOption);
     return result;
 }
-
 
 void VrMenu::addMenu(QMenu* menu) {
     Q_ASSERT(!MenuUserData::hasData(menu->menuAction()));
@@ -205,9 +200,7 @@ void bindActionToQmlAction(QObject* qmlAction, QAction* action, QObject* qmlPare
     }
 
     new MenuUserData(action, qmlAction, qmlParent);
-    QObject::connect(action, &QAction::toggled, [=](bool checked) {
-        qmlAction->setProperty("checked", checked);
-    });
+    QObject::connect(action, &QAction::toggled, [=](bool checked) { qmlAction->setProperty("checked", checked); });
     QObject::connect(qmlAction, SIGNAL(triggered()), action, SLOT(trigger()));
 }
 
@@ -225,8 +218,8 @@ void VrMenu::addAction(QMenu* menu, QAction* action) {
     Q_ASSERT(menuQml);
     QQuickMenuItem1* returnedValue { nullptr };
     bool invokeResult = QMetaObject::invokeMethod(menuQml, "addItem", Qt::DirectConnection,
-        Q_RETURN_ARG(QQuickMenuItem1*, returnedValue),
-        Q_ARG(QString, action->text()));
+                                                  Q_RETURN_ARG(QQuickMenuItem1*, returnedValue),
+                                                  Q_ARG(QString, action->text()));
 
     Q_ASSERT(invokeResult);
     Q_UNUSED(invokeResult); // FIXME - apparently we haven't upgraded the Qt on our unix Jenkins environments to 5.5.x
@@ -251,7 +244,7 @@ void VrMenu::addSeparator(QMenu* menu) {
 }
 
 void VrMenu::insertAction(QAction* before, QAction* action) {
-    QObject* beforeQml{ nullptr };
+    QObject* beforeQml { nullptr };
     {
         MenuUserData* beforeUserData = MenuUserData::forObject(before);
         Q_ASSERT(beforeUserData);
@@ -264,8 +257,8 @@ void VrMenu::insertAction(QAction* before, QAction* action) {
     QQuickMenuItem1* returnedValue { nullptr };
     // FIXME this needs to find the index of the beforeQml item and call insertItem(int, object)
     bool invokeResult = QMetaObject::invokeMethod(menu, "addItem", Qt::DirectConnection,
-        Q_RETURN_ARG(QQuickMenuItem1*, returnedValue),
-        Q_ARG(QString, action->text()));
+                                                  Q_RETURN_ARG(QQuickMenuItem1*, returnedValue),
+                                                  Q_ARG(QString, action->text()));
     Q_ASSERT(invokeResult);
     QObject* result = reinterpret_cast<QObject*>(returnedValue); // returnedValue.value<QObject*>();
     Q_ASSERT(result);

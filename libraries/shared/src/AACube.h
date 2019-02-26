@@ -25,7 +25,6 @@ class AABox;
 class Extents;
 
 class AACube {
-
 public:
     AACube(const AABox& other);
     AACube(const Extents& other);
@@ -39,7 +38,7 @@ public:
     void scale(float scale);
     const glm::vec3& getCorner() const { return _corner; }
     float getScale() const { return _scale; }
-    glm::vec3 getDimensions() const { return glm::vec3(_scale,_scale,_scale); }
+    glm::vec3 getDimensions() const { return glm::vec3(_scale, _scale, _scale); }
     float getLargestDimension() const { return _scale; }
 
     glm::vec3 calcCenter() const;
@@ -67,7 +66,7 @@ public:
     AABox clamp(const glm::vec3& min, const glm::vec3& max) const;
     AABox clamp(float min, float max) const;
 
-    AACube& operator += (const glm::vec3& point);
+    AACube& operator+=(const glm::vec3& point);
 
     bool containsNaN() const;
 
@@ -91,13 +90,11 @@ inline bool operator!=(const AACube& a, const AACube& b) {
 }
 
 inline QDebug operator<<(QDebug debug, const AACube& cube) {
-    debug << "AACube[ ("
-            << cube.getCorner().x << "," << cube.getCorner().y << "," << cube.getCorner().z << " ) to ("
-            << cube.calcTopFarLeft().x << "," << cube.calcTopFarLeft().y << "," << cube.calcTopFarLeft().z << ") size: ("
-            << cube.getDimensions().x << "," << cube.getDimensions().y << "," << cube.getDimensions().z << ")"
-            << "]";
+    debug << "AACube[ (" << cube.getCorner().x << "," << cube.getCorner().y << "," << cube.getCorner().z << " ) to ("
+          << cube.calcTopFarLeft().x << "," << cube.calcTopFarLeft().y << "," << cube.calcTopFarLeft().z << ") size: ("
+          << cube.getDimensions().x << "," << cube.getDimensions().y << "," << cube.getDimensions().z << ")"
+          << "]";
     return debug;
 }
-
 
 #endif // hifi_AACube_h

@@ -17,10 +17,10 @@
 #include <AABox.h>
 #include <AudioHRTF.h>
 #include <AudioRingBuffer.h>
-#include <ThreadedAssignment.h>
-#include <UUIDHasher.h>
 #include <NodeList.h>
 #include <PositionalAudioStream.h>
+#include <ThreadedAssignment.h>
+#include <UUIDHasher.h>
 
 #include "AudioMixerClientData.h"
 #include "AudioMixerStats.h"
@@ -31,7 +31,7 @@ class AudioHRTF;
 class AudioMixerSlave {
 public:
     using ConstIter = NodeList::const_iterator;
-    
+
     struct SharedData {
         AudioMixerClientData::ConcurrentAddedStreams addedStreams;
         std::vector<Node::LocalID> removedNodes;
@@ -55,11 +55,9 @@ public:
 private:
     // create mix, returns true if mix has audio
     bool prepareMix(const SharedNodePointer& listener);
-    void addStream(AudioMixerClientData::MixableStream& mixableStream,
-                   AvatarAudioStream& listeningNodeStream,
+    void addStream(AudioMixerClientData::MixableStream& mixableStream, AvatarAudioStream& listeningNodeStream,
                    float masterListenerGain, bool isSoloing);
-    void updateHRTFParameters(AudioMixerClientData::MixableStream& mixableStream,
-                              AvatarAudioStream& listeningNodeStream,
+    void updateHRTFParameters(AudioMixerClientData::MixableStream& mixableStream, AvatarAudioStream& listeningNodeStream,
                               float masterListenerGain);
     void resetHRTFState(AudioMixerClientData::MixableStream& mixableStream);
 

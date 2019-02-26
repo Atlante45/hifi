@@ -17,10 +17,15 @@ class StylusPickResult : public PickResult {
 public:
     StylusPickResult() {}
     StylusPickResult(const QVariantMap& pickVariant) : PickResult(pickVariant) {}
-    StylusPickResult(const IntersectionType type, const QUuid& objectID, float distance, const glm::vec3& intersection, const StylusTip& stylusTip,
-        const glm::vec3& surfaceNormal = glm::vec3(NAN)) :
-        PickResult(stylusTip.toVariantMap()), type(type), intersects(type != NONE), objectID(objectID), distance(distance), intersection(intersection), surfaceNormal(surfaceNormal) {
-    }
+    StylusPickResult(const IntersectionType type, const QUuid& objectID, float distance, const glm::vec3& intersection,
+                     const StylusTip& stylusTip, const glm::vec3& surfaceNormal = glm::vec3(NAN)) :
+        PickResult(stylusTip.toVariantMap()),
+        type(type),
+        intersects(type != NONE),
+        objectID(objectID),
+        distance(distance),
+        intersection(intersection),
+        surfaceNormal(surfaceNormal) {}
 
     StylusPickResult(const StylusPickResult& stylusPickResult) : PickResult(stylusPickResult.pickVariant) {
         type = stylusPickResult.type;
@@ -57,6 +62,7 @@ public:
 
 class StylusPick : public Pick<StylusTip> {
     using Side = bilateral::Side;
+
 public:
     StylusPick(Side side, const PickFilter& filter, float maxDistance, bool enabled, const glm::vec3& tipOffset);
 

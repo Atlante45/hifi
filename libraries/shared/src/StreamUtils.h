@@ -23,9 +23,9 @@
 class QDataStream;
 
 namespace StreamUtil {
-    // dump the buffer, 32 bytes per row, each byte in hex, separated by whitespace
-    void dump(std::ostream& s, const QByteArray& buffer);
-}
+// dump the buffer, 32 bytes per row, each byte in hex, separated by whitespace
+void dump(std::ostream& s, const QByteArray& buffer);
+} // namespace StreamUtil
 
 std::ostream& operator<<(std::ostream& s, const glm::vec3& v);
 std::ostream& operator<<(std::ostream& s, const glm::quat& q);

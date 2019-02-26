@@ -18,9 +18,9 @@ int main(int argc, char* argv[]) {
     setupHifiApplication(BuildInfo::ASSIGNMENT_CLIENT_NAME);
 
     AssignmentClientApp app(argc, argv);
-    
+
     int acReturn = app.exec();
-    qDebug() << "assignment-client process" <<  app.applicationPid() << "exiting with status code" << acReturn;
+    qDebug() << "assignment-client process" << app.applicationPid() << "exiting with status code" << acReturn;
 
     qInfo() << "Quitting.";
     return acReturn;

@@ -16,21 +16,19 @@
 #include <QProcess>
 #include <QRegularExpression>
 
-#include <quazip5/quazip.h>
 #include <quazip5/JlCompress.h>
+#include <quazip5/quazip.h>
 
 AWSInterface::AWSInterface(QObject* parent) : QObject(parent) {
     _pythonInterface = new PythonInterface();
     _pythonCommand = _pythonInterface->getPythonCommand();
 }
 
-void AWSInterface::createWebPageFromResults(const QString& testResults,
-                                            const QString& workingDirectory,
-                                            QCheckBox* updateAWSCheckBox,
-                                            QLineEdit* urlLineEdit) {
+void AWSInterface::createWebPageFromResults(const QString& testResults, const QString& workingDirectory,
+                                            QCheckBox* updateAWSCheckBox, QLineEdit* urlLineEdit) {
     _workingDirectory = workingDirectory;
 
-    // Verify filename is in correct format 
+    // Verify filename is in correct format
     // For example `D:/tt/TestResults--2019-02-10_17-30-57(local)[DESKTOP-6BO62Q9].zip`
     QStringList parts = testResults.split('/');
     QString zipFilename = parts[parts.length() - 1];
@@ -38,8 +36,8 @@ void AWSInterface::createWebPageFromResults(const QString& testResults,
     QStringList zipFolderNameParts = zipFilename.split(QRegExp("[\\(\\)\\[\\]]"), QString::SkipEmptyParts);
 
     if (!QRegularExpression("TestResults--\\d{4}(-\\d\\d){2}_\\d\\d(-\\d\\d){2}").match(zipFolderNameParts[0]).hasMatch() ||
-        !QRegularExpression("\\w").match(zipFolderNameParts[1]).hasMatch() ||                                                 // build (local, build number or PR number)
-        !QRegularExpression("\\w").match(zipFolderNameParts[2]).hasMatch()                                                  // machine name
+        !QRegularExpression("\\w").match(zipFolderNameParts[1]).hasMatch() || // build (local, build number or PR number)
+        !QRegularExpression("\\w").match(zipFolderNameParts[2]).hasMatch() // machine name
     ) {
         QMessageBox::critical(0, "Filename is in wrong format", "'" + zipFilename + "' is not in nitpick format");
         return;
@@ -75,7 +73,7 @@ void AWSInterface::extractTestFailuresFromZippedFolder(const QString& folderName
 }
 
 void AWSInterface::createHTMLFile() {
-    // For file named `D:/tt/snapshots/TestResults--2018-10-03_15-35-28(9433)[DESKTOP-PMKNLSQ].zip` 
+    // For file named `D:/tt/snapshots/TestResults--2018-10-03_15-35-28(9433)[DESKTOP-PMKNLSQ].zip`
     //    - the HTML will be in a folder named `TestResults--2018-10-03_15-35-28(9433)[DESKTOP-PMKNLSQ]`
     QStringList pathComponents = _testResults.split('/');
     QString filename = pathComponents[pathComponents.length() - 1];
@@ -108,17 +106,34 @@ void AWSInterface::startHTMLpage(QTextStream& stream) {
 }
 
 void AWSInterface::writeHead(QTextStream& stream) {
-    stream << "\t" << "<head>\n";
-    stream << "\t" << "\t" << "<style>\n";
-    stream << "\t" << "\t" << "\t" << "table, th, td {\n";
-    stream << "\t" << "\t" << "\t" << "\t" << "border: 1px solid blue;\n";
-    stream << "\t" << "\t" << "\t" << "}\n";
-    stream << "\t" << "\t" << "</style>\n";
-    stream << "\t" << "</head>\n";
+    stream << "\t"
+           << "<head>\n";
+    stream << "\t"
+           << "\t"
+           << "<style>\n";
+    stream << "\t"
+           << "\t"
+           << "\t"
+           << "table, th, td {\n";
+    stream << "\t"
+           << "\t"
+           << "\t"
+           << "\t"
+           << "border: 1px solid blue;\n";
+    stream << "\t"
+           << "\t"
+           << "\t"
+           << "}\n";
+    stream << "\t"
+           << "\t"
+           << "</style>\n";
+    stream << "\t"
+           << "</head>\n";
 }
 
 void AWSInterface::writeBody(QTextStream& stream) {
-    stream << "\t" << "<body>\n";
+    stream << "\t"
+           << "<body>\n";
 
     // The results are read here as they are used both in the title (for the summary) and for table
     QStringList originalNamesFailures;
@@ -149,14 +164,16 @@ void AWSInterface::writeBody(QTextStream& stream) {
 
     writeTitle(stream, originalNamesFailures, originalNamesSuccesses);
     writeTable(stream, originalNamesFailures, originalNamesSuccesses);
-    stream << "\t" << "</body>\n";
+    stream << "\t"
+           << "</body>\n";
 }
 
 void AWSInterface::finishHTMLpage(QTextStream& stream) {
     stream << "</html>\n";
 }
 
-void AWSInterface::writeTitle(QTextStream& stream, const QStringList& originalNamesFailures, const QStringList& originalNamesSuccesses) {
+void AWSInterface::writeTitle(QTextStream& stream, const QStringList& originalNamesFailures,
+                              const QStringList& originalNamesSuccesses) {
     // Separate relevant components from the results name
     // The expected format is as follows: `D:/tt/snapshots/TestResults--2018-10-04_11-09-41(PR14128)[DESKTOP-PMKNLSQ].zip`
     QStringList tokens = _testResults.split('/');
@@ -179,8 +196,12 @@ void AWSInterface::writeTitle(QTextStream& stream, const QStringList& originalNa
 
     const QString months[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
-    stream << "\t" << "\t" << "<font color=\"Green\">\n";
-    stream << "\t" << "\t" << "<h1>Results for ";
+    stream << "\t"
+           << "\t"
+           << "<font color=\"Green\">\n";
+    stream << "\t"
+           << "\t"
+           << "<h1>Results for ";
     stream << months[month.toInt() - 1] << " " << day << ", " << year << ", ";
     stream << hour << ":" << minute << ":" << second << ", ";
 
@@ -195,17 +216,23 @@ void AWSInterface::writeTitle(QTextStream& stream, const QStringList& originalNa
     int numberOfFailures = originalNamesFailures.length();
     int numberOfSuccesses = originalNamesSuccesses.length();
 
-    stream << "<h2>" << QString::number(numberOfFailures) << " failed, out of a total of " << QString::number(numberOfSuccesses) << " tests</h2>\n";
+    stream << "<h2>" << QString::number(numberOfFailures) << " failed, out of a total of " << QString::number(numberOfSuccesses)
+           << " tests</h2>\n";
 
-    stream << "\t" << "\t" << "<font color=\"red\">\n";
-    stream << "\t" << "\t" << "<h1>The following tests failed:</h1>";
+    stream << "\t"
+           << "\t"
+           << "<font color=\"red\">\n";
+    stream << "\t"
+           << "\t"
+           << "<h1>The following tests failed:</h1>";
 }
 
-void AWSInterface::writeTable(QTextStream& stream, const QStringList& originalNamesFailures, const QStringList& originalNamesSuccesses) {
-    QString previousTestName{ "" };
+void AWSInterface::writeTable(QTextStream& stream, const QStringList& originalNamesFailures,
+                              const QStringList& originalNamesSuccesses) {
+    QString previousTestName { "" };
 
     // Loop over all entries in directory.  This is done in stages, as the names are not in the order of the tests
-    //      The first stage reads the directory names into a list 
+    //      The first stage reads the directory names into a list
     //      The second stage renames the tests by removing everything up to "--tests."
     //      The third stage renames the directories
     //      The fourth and lasts stage creates the HTML entries
@@ -262,7 +289,8 @@ void AWSInterface::writeTable(QTextStream& stream, const QStringList& originalNa
 
         int testNumber = folderName.right(folderName.length() - (splitIndex + 1)).toInt();
 
-        // The failures are ordered lexicographically, so we know that we can rely on the testName changing to create a new table
+        // The failures are ordered lexicographically, so we know that we can rely on the testName changing to create a new
+        // table
         if (testName != previousTestName) {
             if (!previousTestName.isEmpty()) {
                 closeTable(stream);
@@ -278,8 +306,12 @@ void AWSInterface::writeTable(QTextStream& stream, const QStringList& originalNa
     }
 
     closeTable(stream);
-    stream << "\t" << "\t" << "<font color=\"blue\">\n";
-    stream << "\t" << "\t" << "<h1>The following tests passed:</h1>";
+    stream << "\t"
+           << "\t"
+           << "<font color=\"blue\">\n";
+    stream << "\t"
+           << "\t"
+           << "<h1>The following tests passed:</h1>";
 
     // Now do the same for passes
     folderNames.clear();
@@ -306,7 +338,8 @@ void AWSInterface::writeTable(QTextStream& stream, const QStringList& originalNa
 
         int testNumber = folderName.right(folderName.length() - (splitIndex + 1)).toInt();
 
-        // The failures are ordered lexicographically, so we know that we can rely on the testName changing to create a new table
+        // The failures are ordered lexicographically, so we know that we can rely on the testName changing to create a new
+        // table
         if (testName != previousTestName) {
             if (!previousTestName.isEmpty()) {
                 closeTable(stream);
@@ -363,8 +396,9 @@ void AWSInterface::closeTable(QTextStream& stream) {
 }
 
 void AWSInterface::createEntry(const int index, const QString& testResult, QTextStream& stream, const bool isFailure) {
-    // For a test named `D:/t/fgadhcUDHSFaidsfh3478JJJFSDFIUSOEIrf/Failure_1--tests.engine.interaction.pick.collision.many.00000`
-    // we need `Failure_1--tests.engine.interaction.pick.collision.many.00000`
+    // For a test named
+    // `D:/t/fgadhcUDHSFaidsfh3478JJJFSDFIUSOEIrf/Failure_1--tests.engine.interaction.pick.collision.many.00000` we need
+    // `Failure_1--tests.engine.interaction.pick.collision.many.00000`
     QStringList resultNameComponents = testResult.split('/');
     QString resultName = resultNameComponents[resultNameComponents.length() - 1];
 
@@ -374,7 +408,7 @@ void AWSInterface::createEntry(const int index, const QString& testResult, QText
     } else {
         textResultFilename = _htmlSuccessesFolder + "/" + resultName + "/Result.txt";
     }
-    bool textResultsFileFound{ QFile::exists(textResultFilename) };
+    bool textResultsFileFound { QFile::exists(textResultFilename) };
 
     QString folder;
     bool differenceFileFound;
@@ -392,7 +426,7 @@ void AWSInterface::createEntry(const int index, const QString& testResult, QText
         file.setFileName(textResultFilename);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             QMessageBox::critical(0, "Internal error: " + QString(__FILE__) + ":" + QString::number(__LINE__),
-                "Failed to open file " + textResultFilename);
+                                  "Failed to open file " + textResultFilename);
         }
 
         QString value = file.readAll();
@@ -409,7 +443,7 @@ void AWSInterface::createEntry(const int index, const QString& testResult, QText
 
         QJsonDocument document = QJsonDocument::fromJson(value.toUtf8());
         QJsonObject json = document.object();
-        foreach(const QString& key, json.keys()) {
+        foreach (const QString& key, json.keys()) {
             QJsonValue value = json.value(key);
             QJsonObject object = value.toObject();
 
@@ -433,7 +467,7 @@ void AWSInterface::createEntry(const int index, const QString& testResult, QText
                 expectedValueString = QString::number(expectedValue.toDouble());
             }
             QString result = object.value("result").toString();
-           
+
             if (result == "fail") {
                 stream << "\t\t\t<tr>\n";
                 stream << "\t\t\t\t<td><font size=\"6\">" + key + "</td>\n";
@@ -446,18 +480,20 @@ void AWSInterface::createEntry(const int index, const QString& testResult, QText
         stream << "\t\t\t<tr>\n";
         stream << "\t\t\t\t<td><h1>" << QString::number(index) << "</h1></td>\n";
 
-        stream << "\t\t\t\t<td><img src=\"./" << folder << "/" << resultName << "/Actual Image.png\" width = \"576\" height = \"324\" ></td>\n";
-        stream << "\t\t\t\t<td><img src=\"./" << folder << "/" << resultName << "/Expected Image.png\" width = \"576\" height = \"324\" ></td>\n";
+        stream << "\t\t\t\t<td><img src=\"./" << folder << "/" << resultName
+               << "/Actual Image.png\" width = \"576\" height = \"324\" ></td>\n";
+        stream << "\t\t\t\t<td><img src=\"./" << folder << "/" << resultName
+               << "/Expected Image.png\" width = \"576\" height = \"324\" ></td>\n";
 
         if (differenceFileFound) {
-            stream << "\t\t\t\t<td><img src=\"./" << folder << "/" << resultName << "/Difference Image.png\" width = \"576\" height = \"324\" ></td>\n";
+            stream << "\t\t\t\t<td><img src=\"./" << folder << "/" << resultName
+                   << "/Difference Image.png\" width = \"576\" height = \"324\" ></td>\n";
         } else {
             stream << "\t\t\t\t<td><h2>No Image Found</h2>\n";
         }
 
         stream << "\t\t\t</tr>\n";
     }
-
 }
 
 void AWSInterface::updateAWS() {
@@ -487,37 +523,47 @@ void AWSInterface::updateAWS() {
             continue;
         }
 
-        // nextDirectory looks like `D:/t/TestResults--2018-10-02_16-54-11(9426)[DESKTOP-PMKNLSQ]/failures/engine.render.effect.bloom.00000`
-        // We need to concatenate the last 3 components, to get `TestResults--2018-10-02_16-54-11(9426)[DESKTOP-PMKNLSQ]/failures/engine.render.effect.bloom.00000`
+        // nextDirectory looks like
+        // `D:/t/TestResults--2018-10-02_16-54-11(9426)[DESKTOP-PMKNLSQ]/failures/engine.render.effect.bloom.00000` We need to
+        // concatenate the last 3 components, to get
+        // `TestResults--2018-10-02_16-54-11(9426)[DESKTOP-PMKNLSQ]/failures/engine.render.effect.bloom.00000`
         QStringList parts = nextDirectory.split('/');
         QString filename = parts[parts.length() - 3] + "/" + parts[parts.length() - 2] + "/" + parts[parts.length() - 1];
 
         // The directory may contain either 'Result.txt', or 3 images (and a text file named 'TestResults.txt' that is not used)
         if (QFile::exists(_htmlFailuresFolder + "/" + parts[parts.length() - 1] + "/Result.txt")) {
             stream << "data = open('" << _workingDirectory << "/" << filename << "/"
-                << "Result.txt"
-                << "', 'rb')\n";
+                   << "Result.txt"
+                   << "', 'rb')\n";
 
-            stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/" << "Result.txt" << "', Body=data)\n\n";
+            stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/"
+                   << "Result.txt"
+                   << "', Body=data)\n\n";
         } else {
             stream << "data = open('" << _workingDirectory << "/" << filename << "/"
-                << "Actual Image.png"
-                << "', 'rb')\n";
+                   << "Actual Image.png"
+                   << "', 'rb')\n";
 
-            stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/" << "Actual Image.png" << "', Body=data)\n\n";
+            stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/"
+                   << "Actual Image.png"
+                   << "', Body=data)\n\n";
 
             stream << "data = open('" << _workingDirectory << "/" << filename << "/"
-                << "Expected Image.png"
-                << "', 'rb')\n";
+                   << "Expected Image.png"
+                   << "', 'rb')\n";
 
-            stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/" << "Expected Image.png" << "', Body=data)\n\n";
+            stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/"
+                   << "Expected Image.png"
+                   << "', Body=data)\n\n";
 
             if (QFile::exists(_htmlFailuresFolder + "/" + parts[parts.length() - 1] + "/Difference Image.png")) {
                 stream << "data = open('" << _workingDirectory << "/" << filename << "/"
-                    << "Difference Image.png"
-                    << "', 'rb')\n";
+                       << "Difference Image.png"
+                       << "', 'rb')\n";
 
-                stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/" << "Difference Image.png" << "', Body=data)\n\n";
+                stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/"
+                       << "Difference Image.png"
+                       << "', Body=data)\n\n";
             }
         }
     }
@@ -531,43 +577,53 @@ void AWSInterface::updateAWS() {
             continue;
         }
 
-        // nextDirectory looks like `D:/t/TestResults--2018-10-02_16-54-11(9426)[DESKTOP-PMKNLSQ]/successes/engine.render.effect.bloom.00000`
-        // We need to concatenate the last 3 components, to get `TestResults--2018-10-02_16-54-11(9426)[DESKTOP-PMKNLSQ]/successes/engine.render.effect.bloom.00000`
+        // nextDirectory looks like
+        // `D:/t/TestResults--2018-10-02_16-54-11(9426)[DESKTOP-PMKNLSQ]/successes/engine.render.effect.bloom.00000` We need to
+        // concatenate the last 3 components, to get
+        // `TestResults--2018-10-02_16-54-11(9426)[DESKTOP-PMKNLSQ]/successes/engine.render.effect.bloom.00000`
         QStringList parts = nextDirectory.split('/');
         QString filename = parts[parts.length() - 3] + "/" + parts[parts.length() - 2] + "/" + parts[parts.length() - 1];
         // The directory may contain either 'Result.txt', or 3 images (and a text file named 'TestResults.txt' that is not used)
         if (QFile::exists(_htmlSuccessesFolder + "/" + parts[parts.length() - 1] + "/Result.txt")) {
             stream << "data = open('" << _workingDirectory << "/" << filename << "/"
-                << "Result.txt"
-                << "', 'rb')\n";
+                   << "Result.txt"
+                   << "', 'rb')\n";
 
-            stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/" << "Result.txt" << "', Body=data)\n\n";
+            stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/"
+                   << "Result.txt"
+                   << "', Body=data)\n\n";
         } else {
             stream << "data = open('" << _workingDirectory << "/" << filename << "/"
-                << "Actual Image.png"
-                << "', 'rb')\n";
+                   << "Actual Image.png"
+                   << "', 'rb')\n";
 
-            stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/" << "Actual Image.png" << "', Body=data)\n\n";
+            stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/"
+                   << "Actual Image.png"
+                   << "', Body=data)\n\n";
 
             stream << "data = open('" << _workingDirectory << "/" << filename << "/"
-                << "Expected Image.png"
-                << "', 'rb')\n";
+                   << "Expected Image.png"
+                   << "', 'rb')\n";
 
-            stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/" << "Expected Image.png" << "', Body=data)\n\n";
+            stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/"
+                   << "Expected Image.png"
+                   << "', Body=data)\n\n";
 
             if (QFile::exists(_htmlSuccessesFolder + "/" + parts[parts.length() - 1] + "/Difference Image.png")) {
                 stream << "data = open('" << _workingDirectory << "/" << filename << "/"
-                    << "Difference Image.png"
-                    << "', 'rb')\n";
+                       << "Difference Image.png"
+                       << "', 'rb')\n";
 
-                stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/" << "Difference Image.png" << "', Body=data)\n\n";
+                stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << filename << "/"
+                       << "Difference Image.png"
+                       << "', Body=data)\n\n";
             }
         }
     }
 
     stream << "data = open('" << _workingDirectory << "/" << _resultsFolder << "/" << HTML_FILENAME << "', 'rb')\n";
     stream << "s3.Bucket('hifi-content').put_object(Bucket='" << AWS_BUCKET << "', Key='" << _resultsFolder << "/"
-        << HTML_FILENAME << "', Body=data, ContentType='text/html')\n";
+           << HTML_FILENAME << "', Body=data, ContentType='text/html')\n";
 
     file.close();
 
@@ -581,7 +637,7 @@ void AWSInterface::updateAWS() {
     connect(process, &QProcess::started, this, [=]() { _busyWindow.exec(); });
     connect(process, SIGNAL(finished(int)), process, SLOT(deleteLater()));
     connect(process, static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this,
-        [=](int exitCode, QProcess::ExitStatus exitStatus) { _busyWindow.hide(); });
+            [=](int exitCode, QProcess::ExitStatus exitStatus) { _busyWindow.hide(); });
 
 #ifdef Q_OS_WIN
     QStringList parameters = QStringList() << filename;

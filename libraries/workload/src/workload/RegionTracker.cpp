@@ -24,13 +24,12 @@ void RegionTracker::run(const WorkloadContextPointer& context, Outputs& outputs)
     auto& outChanges = outputs.edit0();
     auto& outRegionChanges = outputs.edit1();
 
-
     outChanges.clear();
     outRegionChanges.clear();
 
     auto space = context->_space;
     if (space) {
-        //Changes changes;
+        // Changes changes;
         space->categorizeAndGetChanges(outChanges);
 
         // use exit/enter lists for each region less than Region::UNKNOWN

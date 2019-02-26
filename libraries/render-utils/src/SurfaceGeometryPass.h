@@ -14,14 +14,13 @@
 
 #include <DependencyManager.h>
 
-#include "render/DrawTask.h"
-#include "render/BlurTask.h"
 #include "DeferredFrameTransform.h"
 #include "DeferredFramebuffer.h"
+#include "render/BlurTask.h"
+#include "render/DrawTask.h"
 
-
-// SurfaceGeometryFramebuffer is  a helper class gathering in one place theframebuffers and targets describing the surface geometry linear depth
-// from a z buffer
+// SurfaceGeometryFramebuffer is  a helper class gathering in one place theframebuffers and targets describing the surface
+// geometry linear depth from a z buffer
 class LinearDepthFramebuffer {
 public:
     LinearDepthFramebuffer();
@@ -55,11 +54,10 @@ protected:
     gpu::TexturePointer _halfLinearDepthTexture;
     gpu::TexturePointer _halfNormalTexture;
 
-    
     glm::ivec2 _frameSize;
     glm::ivec2 _halfFrameSize;
-    int _resolutionLevel{ 0 };
-    bool _isStereo{ false };
+    int _resolutionLevel { 0 };
+    bool _isStereo { false };
 };
 
 using LinearDepthFramebufferPointer = std::shared_ptr<LinearDepthFramebuffer>;
@@ -69,7 +67,8 @@ using LinearDepthPassConfig = render::GPUJobConfig;
 class LinearDepthPass {
 public:
     using Inputs = render::VaryingSet2<DeferredFrameTransformPointer, DeferredFramebufferPointer>;
-    using Outputs = render::VaryingSet5<LinearDepthFramebufferPointer, gpu::FramebufferPointer, gpu::TexturePointer, gpu::TexturePointer, gpu::TexturePointer>;
+    using Outputs = render::VaryingSet5<LinearDepthFramebufferPointer, gpu::FramebufferPointer, gpu::TexturePointer,
+                                        gpu::TexturePointer, gpu::TexturePointer>;
     using Config = LinearDepthPassConfig;
     using JobModel = render::Job::ModelIO<LinearDepthPass, Inputs, Outputs, Config>;
 
@@ -77,7 +76,7 @@ public:
 
     void configure(const Config& config);
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs);
-    
+
 private:
     typedef gpu::BufferView UniformBufferView;
 
@@ -92,16 +91,15 @@ private:
     gpu::RangeTimerPointer _gpuTimer;
 };
 
-
-// SurfaceGeometryFramebuffer is  a helper class gathering in one place theframebuffers and targets describing the surface geometry linear depth and curvature generated
-// from a z buffer and a normal buffer
+// SurfaceGeometryFramebuffer is  a helper class gathering in one place theframebuffers and targets describing the surface
+// geometry linear depth and curvature generated from a z buffer and a normal buffer
 class SurfaceGeometryFramebuffer {
 public:
     SurfaceGeometryFramebuffer();
 
     gpu::FramebufferPointer getCurvatureFramebuffer();
     gpu::TexturePointer getCurvatureTexture();
-  
+
     gpu::FramebufferPointer getLowCurvatureFramebuffer();
     gpu::TexturePointer getLowCurvatureTexture();
 
@@ -132,7 +130,7 @@ protected:
     gpu::TexturePointer _lowCurvatureTexture;
 
     glm::ivec2 _frameSize;
-    int _resolutionLevel{ 0 };
+    int _resolutionLevel { 0 };
 };
 
 using SurfaceGeometryFramebufferPointer = std::shared_ptr<SurfaceGeometryFramebuffer>;
@@ -150,12 +148,12 @@ class SurfaceGeometryPassConfig : public render::GPUJobConfig {
 public:
     SurfaceGeometryPassConfig() : render::GPUJobConfig(true) {}
 
-    float depthThreshold{ 5.0f }; // centimeters
-    float basisScale{ 1.0f };
-    float curvatureScale{ 10.0f };
-    int resolutionLevel{ 1 };
-    float diffuseFilterScale{ 0.2f };
-    float diffuseDepthThreshold{ 1.0f };
+    float depthThreshold { 5.0f }; // centimeters
+    float basisScale { 1.0f };
+    float curvatureScale { 10.0f };
+    int resolutionLevel { 1 };
+    float diffuseFilterScale { 0.2f };
+    float diffuseDepthThreshold { 1.0f };
 
 signals:
     void dirty();
@@ -163,8 +161,10 @@ signals:
 
 class SurfaceGeometryPass {
 public:
-    using Inputs = render::VaryingSet3<DeferredFrameTransformPointer, DeferredFramebufferPointer, LinearDepthFramebufferPointer>;
-    using Outputs = render::VaryingSet4<SurfaceGeometryFramebufferPointer, gpu::FramebufferPointer, gpu::FramebufferPointer, gpu::FramebufferPointer>;
+    using Inputs = render::VaryingSet3<DeferredFrameTransformPointer, DeferredFramebufferPointer,
+                                       LinearDepthFramebufferPointer>;
+    using Outputs = render::VaryingSet4<SurfaceGeometryFramebufferPointer, gpu::FramebufferPointer, gpu::FramebufferPointer,
+                                        gpu::FramebufferPointer>;
     using Config = SurfaceGeometryPassConfig;
     using JobModel = render::Job::ModelIO<SurfaceGeometryPass, Inputs, Outputs, Config>;
 
@@ -172,7 +172,6 @@ public:
 
     void configure(const Config& config);
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs);
-    
 
     float getCurvatureDepthThreshold() const { return _parametersBuffer.get<Parameters>().curvatureInfo.x; }
     float getCurvatureBasisScale() const { return _parametersBuffer.get<Parameters>().curvatureInfo.y; }
@@ -188,21 +187,19 @@ private:
         // Resolution info
         glm::vec4 resolutionInfo { 0.0f, 0.0f, 0.0f, 1.0f }; // Default Curvature & Diffusion is running half res
         // Curvature algorithm
-        glm::vec4 curvatureInfo{ 0.0f };
+        glm::vec4 curvatureInfo { 0.0f };
 
         Parameters() {}
     };
     gpu::BufferView _parametersBuffer;
-
 
     SurfaceGeometryFramebufferPointer _surfaceGeometryFramebuffer;
 
     const gpu::PipelinePointer& getCurvaturePipeline(const render::RenderContextPointer& renderContext);
 
     gpu::PipelinePointer _curvaturePipeline;
-    
-    render::BlurGaussianDepthAware _diffusePass;
 
+    render::BlurGaussianDepthAware _diffusePass;
 
     gpu::RangeTimerPointer _gpuTimer;
 };

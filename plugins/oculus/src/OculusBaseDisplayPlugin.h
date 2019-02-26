@@ -18,6 +18,7 @@
 
 class OculusBaseDisplayPlugin : public HmdDisplayPlugin {
     using Parent = HmdDisplayPlugin;
+
 public:
     bool isSupported() const override;
     bool hasAsyncReprojection() const override { return true; }
@@ -42,7 +43,7 @@ protected:
     void updatePresentPose() override;
 
 protected:
-    ovrSession _session{ nullptr };
+    ovrSession _session { nullptr };
     ovrGraphicsLuid _luid;
     std::array<ovrEyeRenderDesc, 2> _eyeRenderDescs;
     std::array<ovrFovPort, 2> _eyeFovs;

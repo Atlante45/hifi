@@ -18,7 +18,8 @@
 
 AccountServicesScriptingInterface::AccountServicesScriptingInterface() {
     auto accountManager = DependencyManager::get<AccountManager>();
-    connect(accountManager.data(), &AccountManager::usernameChanged, this, &AccountServicesScriptingInterface::onUsernameChanged);
+    connect(accountManager.data(), &AccountManager::usernameChanged, this,
+            &AccountServicesScriptingInterface::onUsernameChanged);
     connect(accountManager.data(), &AccountManager::logoutComplete, this, &AccountServicesScriptingInterface::loggedOut);
     connect(accountManager.data(), &AccountManager::loginComplete, this, &AccountServicesScriptingInterface::connected);
 
@@ -29,8 +30,8 @@ AccountServicesScriptingInterface::AccountServicesScriptingInterface() {
     checkDownloadTimer->start(CHECK_DOWNLOAD_INTERVAL);
 
     auto discoverabilityManager = DependencyManager::get<DiscoverabilityManager>();
-    connect(discoverabilityManager.data(), &DiscoverabilityManager::discoverabilityModeChanged,
-            this, &AccountServicesScriptingInterface::discoverabilityModeChanged);
+    connect(discoverabilityManager.data(), &DiscoverabilityManager::discoverabilityModeChanged, this,
+            &AccountServicesScriptingInterface::discoverabilityModeChanged);
 
     _loggedIn = isLoggedIn();
     emit loggedInChanged(_loggedIn);
@@ -38,7 +39,8 @@ AccountServicesScriptingInterface::AccountServicesScriptingInterface() {
 
 AccountServicesScriptingInterface::~AccountServicesScriptingInterface() {
     auto accountManager = DependencyManager::get<AccountManager>();
-    disconnect(accountManager.data(), &AccountManager::usernameChanged, this, &AccountServicesScriptingInterface::onUsernameChanged);
+    disconnect(accountManager.data(), &AccountManager::usernameChanged, this,
+               &AccountServicesScriptingInterface::onUsernameChanged);
     disconnect(accountManager.data(), &AccountManager::logoutComplete, this, &AccountServicesScriptingInterface::loggedOut);
     disconnect(accountManager.data(), &AccountManager::loginComplete, this, &AccountServicesScriptingInterface::connected);
 }
@@ -106,10 +108,7 @@ void AccountServicesScriptingInterface::onUsernameChanged(const QString& usernam
     emit loggedInChanged(_loggedIn);
 }
 
-DownloadInfoResult::DownloadInfoResult() :
-    downloading(QList<float>()),
-    pending(0.0f)
-{
+DownloadInfoResult::DownloadInfoResult() : downloading(QList<float>()), pending(0.0f) {
 }
 
 /**jsdoc
@@ -143,7 +142,7 @@ void DownloadInfoResultFromScriptValue(const QScriptValue& object, DownloadInfoR
 
 DownloadInfoResult AccountServicesScriptingInterface::getDownloadInfo() {
     DownloadInfoResult result;
-    foreach(const auto& resource, ResourceCache::getLoadingRequests()) {
+    foreach (const auto& resource, ResourceCache::getLoadingRequests()) {
         result.downloading.append(resource->getProgress() * 100.0f);
     }
     result.pending = ResourceCache::getPendingRequestCount();
@@ -164,4 +163,3 @@ void AccountServicesScriptingInterface::checkDownloadInfo() {
 void AccountServicesScriptingInterface::updateDownloadInfo() {
     emit downloadInfoChanged(getDownloadInfo());
 }
-

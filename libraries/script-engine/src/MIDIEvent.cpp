@@ -29,7 +29,7 @@ QScriptValue midiEventToScriptValue(QScriptEngine* engine, const MIDIEvent& even
     return obj;
 }
 
-void midiEventFromScriptValue(const QScriptValue &object, MIDIEvent& event) {
+void midiEventFromScriptValue(const QScriptValue& object, MIDIEvent& event) {
     event.deltaTime = object.property(MIDI_DELTA_TIME_PROP_NAME).toVariant().toDouble();
     event.type = object.property(MIDI_EVENT_TYPE_PROP_NAME).toVariant().toUInt();
     event.data1 = object.property(MIDI_DATA_1_PROP_NAME).toVariant().toUInt();

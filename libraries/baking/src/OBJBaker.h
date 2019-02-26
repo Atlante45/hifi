@@ -13,8 +13,8 @@
 #define hifi_OBJBaker_h
 
 #include "Baker.h"
-#include "TextureBaker.h"
 #include "ModelBaker.h"
+#include "TextureBaker.h"
 
 #include "ModelBakingLoggingCategory.h"
 
@@ -42,7 +42,6 @@ private:
     void createFBXNodeTree(FBXNode& rootNode, HFMModel& hfmModel);
     void setMaterialNodeProperties(FBXNode& materialNode, QString material, HFMModel& hfmModel);
     NodeID nextNodeID() { return _nodeID++; }
-
 
     NodeID _nodeID { 0 };
     std::vector<NodeID> _materialIDs;

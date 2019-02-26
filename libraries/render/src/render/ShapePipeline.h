@@ -58,8 +58,8 @@ public:
 
     Flags _flags;
 
-    ShapeKey() : _flags{ 0 } {}
-    ShapeKey(const Flags& flags) : _flags{flags} {}
+    ShapeKey() : _flags { 0 } {}
+    ShapeKey(const Flags& flags) : _flags { flags } {}
 
     friend ShapeKey operator&(const ShapeKey& _Left, const ShapeKey& _Right) { return ShapeKey(_Left._flags & _Right._flags); }
     friend ShapeKey operator|(const ShapeKey& _Left, const ShapeKey& _Right) { return ShapeKey(_Left._flags | _Right._flags); }
@@ -68,40 +68,83 @@ public:
     class Builder {
     public:
         Builder() {}
-        Builder(ShapeKey key) : _flags{key._flags} {}
+        Builder(ShapeKey key) : _flags { key._flags } {}
 
-        ShapeKey build() const { return ShapeKey{_flags}; }
+        ShapeKey build() const { return ShapeKey { _flags }; }
 
-        Builder& withMaterial() { _flags.set(MATERIAL); return (*this); }
-        Builder& withTranslucent() { _flags.set(TRANSLUCENT); return (*this); }
-        Builder& withLightmap() { _flags.set(LIGHTMAP); return (*this); }
-        Builder& withTangents() { _flags.set(TANGENTS); return (*this); }
-        Builder& withUnlit() { _flags.set(UNLIT); return (*this); }
-        Builder& withDeformed() { _flags.set(DEFORMED); return (*this); }
-        Builder& withDualQuatSkinned() { _flags.set(DUAL_QUAT_SKINNED); return (*this); }
-        Builder& withDepthBias() { _flags.set(DEPTH_BIAS); return (*this); }
-        Builder& withWireframe() { _flags.set(WIREFRAME); return (*this); }
-        Builder& withoutCullFace() { _flags.set(NO_CULL_FACE); return (*this); }
-        Builder& withFade() { _flags.set(FADE); return (*this); }
+        Builder& withMaterial() {
+            _flags.set(MATERIAL);
+            return (*this);
+        }
+        Builder& withTranslucent() {
+            _flags.set(TRANSLUCENT);
+            return (*this);
+        }
+        Builder& withLightmap() {
+            _flags.set(LIGHTMAP);
+            return (*this);
+        }
+        Builder& withTangents() {
+            _flags.set(TANGENTS);
+            return (*this);
+        }
+        Builder& withUnlit() {
+            _flags.set(UNLIT);
+            return (*this);
+        }
+        Builder& withDeformed() {
+            _flags.set(DEFORMED);
+            return (*this);
+        }
+        Builder& withDualQuatSkinned() {
+            _flags.set(DUAL_QUAT_SKINNED);
+            return (*this);
+        }
+        Builder& withDepthBias() {
+            _flags.set(DEPTH_BIAS);
+            return (*this);
+        }
+        Builder& withWireframe() {
+            _flags.set(WIREFRAME);
+            return (*this);
+        }
+        Builder& withoutCullFace() {
+            _flags.set(NO_CULL_FACE);
+            return (*this);
+        }
+        Builder& withFade() {
+            _flags.set(FADE);
+            return (*this);
+        }
 
-        Builder& withOwnPipeline() { _flags.set(OWN_PIPELINE); return (*this); }
-        Builder& invalidate() { _flags.set(INVALID); return (*this); }
+        Builder& withOwnPipeline() {
+            _flags.set(OWN_PIPELINE);
+            return (*this);
+        }
+        Builder& invalidate() {
+            _flags.set(INVALID);
+            return (*this);
+        }
 
-        Builder& withCustom(uint8_t custom) {  _flags &= (~CUSTOM_MASK); _flags |= (custom << CUSTOM_0); return (*this); }
-        
+        Builder& withCustom(uint8_t custom) {
+            _flags &= (~CUSTOM_MASK);
+            _flags |= (custom << CUSTOM_0);
+            return (*this);
+        }
+
         static const ShapeKey ownPipeline() { return Builder().withOwnPipeline(); }
         static const ShapeKey invalid() { return Builder().invalidate(); }
 
     protected:
         friend class ShapeKey;
-        Flags _flags{0};
+        Flags _flags { 0 };
     };
-    ShapeKey(const Builder& builder) : ShapeKey{builder._flags} {}
+    ShapeKey(const Builder& builder) : ShapeKey { builder._flags } {}
 
     class Filter {
     public:
-        Filter(Flags flags, Flags mask) : _flags{flags}, _mask{mask} {}
-        Filter(const ShapeKey& key) : _flags{ key._flags } { _mask.set(); }
+        Filter(Flags flags, Flags mask) : _flags { flags }, _mask { mask } {}
+        Filter(const ShapeKey& key) : _flags { key._flags } { _mask.set(); }
 
         // Build a standard filter (will always exclude OWN_PIPELINE, INVALID)
         class Builder {
@@ -110,53 +153,151 @@ public:
 
             Filter build() const { return Filter(_flags, _mask); }
 
-            Builder& withMaterial() { _flags.set(MATERIAL); _mask.set(MATERIAL); return (*this); }
-            Builder& withoutMaterial() { _flags.reset(MATERIAL); _mask.set(MATERIAL); return (*this); }
+            Builder& withMaterial() {
+                _flags.set(MATERIAL);
+                _mask.set(MATERIAL);
+                return (*this);
+            }
+            Builder& withoutMaterial() {
+                _flags.reset(MATERIAL);
+                _mask.set(MATERIAL);
+                return (*this);
+            }
 
-            Builder& withTranslucent() { _flags.set(TRANSLUCENT); _mask.set(TRANSLUCENT); return (*this); }
-            Builder& withOpaque() { _flags.reset(TRANSLUCENT); _mask.set(TRANSLUCENT); return (*this); }
+            Builder& withTranslucent() {
+                _flags.set(TRANSLUCENT);
+                _mask.set(TRANSLUCENT);
+                return (*this);
+            }
+            Builder& withOpaque() {
+                _flags.reset(TRANSLUCENT);
+                _mask.set(TRANSLUCENT);
+                return (*this);
+            }
 
-            Builder& withLightmap() { _flags.set(LIGHTMAP); _mask.set(LIGHTMAP); return (*this); }
-            Builder& withoutLightmap() { _flags.reset(LIGHTMAP); _mask.set(LIGHTMAP); return (*this); }
+            Builder& withLightmap() {
+                _flags.set(LIGHTMAP);
+                _mask.set(LIGHTMAP);
+                return (*this);
+            }
+            Builder& withoutLightmap() {
+                _flags.reset(LIGHTMAP);
+                _mask.set(LIGHTMAP);
+                return (*this);
+            }
 
-            Builder& withTangents() { _flags.set(TANGENTS); _mask.set(TANGENTS); return (*this); }
-            Builder& withoutTangents() { _flags.reset(TANGENTS); _mask.set(TANGENTS); return (*this); }
+            Builder& withTangents() {
+                _flags.set(TANGENTS);
+                _mask.set(TANGENTS);
+                return (*this);
+            }
+            Builder& withoutTangents() {
+                _flags.reset(TANGENTS);
+                _mask.set(TANGENTS);
+                return (*this);
+            }
 
-            Builder& withUnlit() { _flags.set(UNLIT); _mask.set(UNLIT); return (*this); }
-            Builder& withoutUnlit() { _flags.reset(UNLIT); _mask.set(UNLIT); return (*this); }
+            Builder& withUnlit() {
+                _flags.set(UNLIT);
+                _mask.set(UNLIT);
+                return (*this);
+            }
+            Builder& withoutUnlit() {
+                _flags.reset(UNLIT);
+                _mask.set(UNLIT);
+                return (*this);
+            }
 
-            Builder& withDeformed() { _flags.set(DEFORMED); _mask.set(DEFORMED); return (*this); }
-            Builder& withoutDeformed() { _flags.reset(DEFORMED); _mask.set(DEFORMED); return (*this); }
+            Builder& withDeformed() {
+                _flags.set(DEFORMED);
+                _mask.set(DEFORMED);
+                return (*this);
+            }
+            Builder& withoutDeformed() {
+                _flags.reset(DEFORMED);
+                _mask.set(DEFORMED);
+                return (*this);
+            }
 
-            Builder& withDualQuatSkinned() { _flags.set(DUAL_QUAT_SKINNED); _mask.set(DUAL_QUAT_SKINNED); return (*this); }
-            Builder& withoutDualQuatSkinned() { _flags.reset(DUAL_QUAT_SKINNED); _mask.set(DUAL_QUAT_SKINNED); return (*this); }
+            Builder& withDualQuatSkinned() {
+                _flags.set(DUAL_QUAT_SKINNED);
+                _mask.set(DUAL_QUAT_SKINNED);
+                return (*this);
+            }
+            Builder& withoutDualQuatSkinned() {
+                _flags.reset(DUAL_QUAT_SKINNED);
+                _mask.set(DUAL_QUAT_SKINNED);
+                return (*this);
+            }
 
-            Builder& withDepthBias() { _flags.set(DEPTH_BIAS); _mask.set(DEPTH_BIAS); return (*this); }
-            Builder& withoutDepthBias() { _flags.reset(DEPTH_BIAS); _mask.set(DEPTH_BIAS); return (*this); }
+            Builder& withDepthBias() {
+                _flags.set(DEPTH_BIAS);
+                _mask.set(DEPTH_BIAS);
+                return (*this);
+            }
+            Builder& withoutDepthBias() {
+                _flags.reset(DEPTH_BIAS);
+                _mask.set(DEPTH_BIAS);
+                return (*this);
+            }
 
-            Builder& withWireframe() { _flags.set(WIREFRAME); _mask.set(WIREFRAME); return (*this); }
-            Builder& withoutWireframe() { _flags.reset(WIREFRAME); _mask.set(WIREFRAME); return (*this); }
+            Builder& withWireframe() {
+                _flags.set(WIREFRAME);
+                _mask.set(WIREFRAME);
+                return (*this);
+            }
+            Builder& withoutWireframe() {
+                _flags.reset(WIREFRAME);
+                _mask.set(WIREFRAME);
+                return (*this);
+            }
 
-            Builder& withCullFace() { _flags.reset(NO_CULL_FACE); _mask.set(NO_CULL_FACE); return (*this); }
-            Builder& withoutCullFace() { _flags.set(NO_CULL_FACE); _mask.set(NO_CULL_FACE); return (*this); }
+            Builder& withCullFace() {
+                _flags.reset(NO_CULL_FACE);
+                _mask.set(NO_CULL_FACE);
+                return (*this);
+            }
+            Builder& withoutCullFace() {
+                _flags.set(NO_CULL_FACE);
+                _mask.set(NO_CULL_FACE);
+                return (*this);
+            }
 
-            Builder& withFade() { _flags.set(FADE); _mask.set(FADE); return (*this); }
-            Builder& withoutFade() { _flags.reset(FADE); _mask.set(FADE); return (*this); }
+            Builder& withFade() {
+                _flags.set(FADE);
+                _mask.set(FADE);
+                return (*this);
+            }
+            Builder& withoutFade() {
+                _flags.reset(FADE);
+                _mask.set(FADE);
+                return (*this);
+            }
 
-            Builder& withCustom(uint8_t custom) { _flags &= (~CUSTOM_MASK); _flags |= (custom << CUSTOM_0); _mask |= (CUSTOM_MASK); return (*this); }
-            Builder& withoutCustom() { _flags &= (~CUSTOM_MASK);  _mask |= (CUSTOM_MASK); return (*this); }
+            Builder& withCustom(uint8_t custom) {
+                _flags &= (~CUSTOM_MASK);
+                _flags |= (custom << CUSTOM_0);
+                _mask |= (CUSTOM_MASK);
+                return (*this);
+            }
+            Builder& withoutCustom() {
+                _flags &= (~CUSTOM_MASK);
+                _mask |= (CUSTOM_MASK);
+                return (*this);
+            }
 
         protected:
             friend class Filter;
-            Flags _flags{0};
-            Flags _mask{0};
+            Flags _flags { 0 };
+            Flags _mask { 0 };
         };
         Filter(const Filter::Builder& builder) : Filter(builder._flags, builder._mask) {}
         ShapeKey key() const { return ShapeKey(_flags); }
+
     protected:
         friend class ShapePlumber;
-        Flags _flags{0};
-        Flags _mask{0};
+        Flags _flags { 0 };
+        Flags _mask { 0 };
     };
 
     bool useMaterial() const { return _flags[MATERIAL]; }
@@ -180,9 +321,7 @@ public:
     // Comparator for use in stl containers
     class Hash {
     public:
-        size_t operator() (const ShapeKey& key) const {
-            return std::hash<ShapeKey::Flags>()(key._flags);
-        }
+        size_t operator()(const ShapeKey& key) const { return std::hash<ShapeKey::Flags>()(key._flags); }
     };
 
     // Comparator for use in stl containers
@@ -198,18 +337,12 @@ inline QDebug operator<<(QDebug debug, const ShapeKey& key) {
             debug << "[ShapeKey: OWN_PIPELINE]";
         } else {
             debug << "[ShapeKey:"
-                << "useMaterial:" << key.useMaterial()
-                << "hasLightmap:" << key.hasLightmap()
-                << "hasTangents:" << key.hasTangents()
-                << "isUnlit:" << key.isUnlit()
-                << "isTranslucent:" << key.isTranslucent()
-                << "isDeformed:" << key.isDeformed()
-                << "isDualQuatSkinned:" << key.isDualQuatSkinned()
-                << "isDepthBiased:" << key.isDepthBiased()
-                << "isWireframe:" << key.isWireframe()
-                << "isCullFace:" << key.isCullFace()
-                << "isFaded:" << key.isFaded()
-                << "]";
+                  << "useMaterial:" << key.useMaterial() << "hasLightmap:" << key.hasLightmap()
+                  << "hasTangents:" << key.hasTangents() << "isUnlit:" << key.isUnlit()
+                  << "isTranslucent:" << key.isTranslucent() << "isDeformed:" << key.isDeformed()
+                  << "isDualQuatSkinned:" << key.isDualQuatSkinned() << "isDepthBiased:" << key.isDepthBiased()
+                  << "isWireframe:" << key.isWireframe() << "isCullFace:" << key.isCullFace() << "isFaded:" << key.isFaded()
+                  << "]";
         }
     } else {
         debug << "[ShapeKey: INVALID]";
@@ -223,26 +356,26 @@ class ShapePipeline {
 public:
     class Locations {
     public:
-        bool albedoTextureUnit{ false };
-        bool normalTextureUnit{ false };
-        bool roughnessTextureUnit{ false };
-        bool metallicTextureUnit{ false };
-        bool emissiveTextureUnit{ false };
-        bool occlusionTextureUnit{ false };
-        bool lightingModelBufferUnit{ false };
-        bool skinClusterBufferUnit{ false };
-        bool materialBufferUnit{ false };
-        bool keyLightBufferUnit{ false };
-        bool lightBufferUnit{ false };
-        bool lightAmbientBufferUnit{ false };
-        bool lightAmbientMapUnit{ false };
-        bool fadeMaskTextureUnit{ false };
-        bool fadeParameterBufferUnit{ false };
-        bool fadeObjectParameterBufferUnit{ false };
-        bool hazeParameterBufferUnit{ false };
-        bool lightClusterGridBufferUnit{ false };
-        bool lightClusterContentBufferUnit{ false };
-        bool lightClusterFrustumBufferUnit{ false };
+        bool albedoTextureUnit { false };
+        bool normalTextureUnit { false };
+        bool roughnessTextureUnit { false };
+        bool metallicTextureUnit { false };
+        bool emissiveTextureUnit { false };
+        bool occlusionTextureUnit { false };
+        bool lightingModelBufferUnit { false };
+        bool skinClusterBufferUnit { false };
+        bool materialBufferUnit { false };
+        bool keyLightBufferUnit { false };
+        bool lightBufferUnit { false };
+        bool lightAmbientBufferUnit { false };
+        bool lightAmbientMapUnit { false };
+        bool fadeMaskTextureUnit { false };
+        bool fadeParameterBufferUnit { false };
+        bool fadeObjectParameterBufferUnit { false };
+        bool hazeParameterBufferUnit { false };
+        bool lightClusterGridBufferUnit { false };
+        bool lightClusterContentBufferUnit { false };
+        bool lightClusterFrustumBufferUnit { false };
     };
     using LocationsPointer = std::shared_ptr<Locations>;
 
@@ -250,7 +383,8 @@ public:
 
     using ItemSetter = std::function<void(const ShapePipeline&, render::Args*, const render::Item&)>;
 
-    ShapePipeline(const gpu::PipelinePointer& pipeline, const LocationsPointer& locations, const BatchSetter& batchSetter = nullptr, const ItemSetter& itemSetter = nullptr) :
+    ShapePipeline(const gpu::PipelinePointer& pipeline, const LocationsPointer& locations,
+                  const BatchSetter& batchSetter = nullptr, const ItemSetter& itemSetter = nullptr) :
         pipeline(pipeline),
         locations(locations),
         _batchSetter(batchSetter),
@@ -270,15 +404,16 @@ protected:
 
     BatchSetter _batchSetter;
     ItemSetter _itemSetter;
+
 public:
     using CustomKey = uint8_t;
-    using CustomFactory = std::function<std::shared_ptr<ShapePipeline> (const ShapePlumber& plumber, const ShapeKey& key, gpu::Batch& batch)>;
+    using CustomFactory = std::function<std::shared_ptr<ShapePipeline>(const ShapePlumber& plumber, const ShapeKey& key,
+                                                                       gpu::Batch& batch)>;
     using CustomFactoryMap = std::map<CustomKey, CustomFactory>;
 
     static CustomFactoryMap _globalCustomFactoryMap;
 
     static CustomKey registerCustomShapePipelineFactory(CustomFactory factory);
-
 };
 using ShapePipelinePointer = std::shared_ptr<ShapePipeline>;
 
@@ -296,9 +431,9 @@ public:
     using ItemSetter = Pipeline::ItemSetter;
 
     void addPipeline(const Key& key, const gpu::ShaderPointer& program, const gpu::StatePointer& state,
-        BatchSetter batchSetter = nullptr, ItemSetter itemSetter = nullptr);
+                     BatchSetter batchSetter = nullptr, ItemSetter itemSetter = nullptr);
     void addPipeline(const Filter& filter, const gpu::ShaderPointer& program, const gpu::StatePointer& state,
-        BatchSetter batchSetter = nullptr, ItemSetter itemSetter = nullptr);
+                     BatchSetter batchSetter = nullptr, ItemSetter itemSetter = nullptr);
 
     const PipelinePointer pickPipeline(RenderArgs* args, const Key& key) const;
 
@@ -310,9 +445,8 @@ private:
     mutable std::unordered_set<Key, Key::Hash, Key::KeyEqual> _missingKeys;
 };
 
-
 using ShapePlumberPointer = std::shared_ptr<ShapePlumber>;
 
-}
+} // namespace render
 
 #endif // hifi_render_ShapePipeline_h

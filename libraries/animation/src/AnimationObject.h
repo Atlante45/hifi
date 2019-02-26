@@ -26,9 +26,8 @@ class AnimationObject : public QObject, protected QScriptable {
     Q_PROPERTY(QVector<HFMAnimationFrame> frames READ getFrames)
 
 public:
-    
     Q_INVOKABLE QStringList getJointNames() const;
-    
+
     Q_INVOKABLE QVector<HFMAnimationFrame> getFrames() const;
 };
 
@@ -38,7 +37,6 @@ class AnimationFrameObject : public QObject, protected QScriptable {
     Q_PROPERTY(QVector<glm::quat> rotations READ getRotations)
 
 public:
-    
     Q_INVOKABLE QVector<glm::quat> getRotations() const;
 };
 

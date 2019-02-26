@@ -14,9 +14,9 @@
 #include <QtCore/QDebug>
 #include <QtCore/QFileInfo>
 
-#include <SettingHandle.h>
-#include <NetworkingConstants.h>
 #include <AccountManager.h>
+#include <NetworkingConstants.h>
+#include <SettingHandle.h>
 
 #include "ContextAwareProfile.h"
 
@@ -24,44 +24,42 @@
 
 namespace {
 
-    bool isAuthableHighFidelityURL(const QUrl& url) {
-        auto metaverseServerURL = NetworkingConstants::METAVERSE_SERVER_URL();
-        static const QStringList HF_HOSTS = {
-            "highfidelity.com", "highfidelity.io",
-            metaverseServerURL.toString(), "metaverse.highfidelity.io"
-        };
-        const auto& scheme = url.scheme();
-        const auto& host = url.host();
+bool isAuthableHighFidelityURL(const QUrl& url) {
+    auto metaverseServerURL = NetworkingConstants::METAVERSE_SERVER_URL();
+    static const QStringList HF_HOSTS = { "highfidelity.com", "highfidelity.io", metaverseServerURL.toString(),
+                                          "metaverse.highfidelity.io" };
+    const auto& scheme = url.scheme();
+    const auto& host = url.host();
 
-        return (scheme == "https" && HF_HOSTS.contains(host)) ||
-            ((scheme == metaverseServerURL.scheme()) && (host == metaverseServerURL.host()));
+    return (scheme == "https" && HF_HOSTS.contains(host)) ||
+           ((scheme == metaverseServerURL.scheme()) && (host == metaverseServerURL.host()));
+}
+
+bool isScript(const QString filename) {
+    return filename.endsWith(".js", Qt::CaseInsensitive);
+}
+
+bool isJSON(const QString filename) {
+    return filename.endsWith(".json", Qt::CaseInsensitive);
+}
+
+bool blockLocalFiles(QWebEngineUrlRequestInfo& info) {
+    auto requestUrl = info.requestUrl();
+    if (!requestUrl.isLocalFile()) {
+        // Not a local file, do not block
+        return false;
     }
 
-     bool isScript(const QString filename) {
-         return filename.endsWith(".js", Qt::CaseInsensitive);
-     }
+    // We can potentially add whitelisting logic or development environment variables that
+    // will allow people to override this setting on a per-client basis here.
+    QString targetFilePath = QFileInfo(requestUrl.toLocalFile()).canonicalFilePath();
 
-     bool isJSON(const QString filename) {
-        return filename.endsWith(".json", Qt::CaseInsensitive);
-     }
-
-     bool blockLocalFiles(QWebEngineUrlRequestInfo& info) {
-         auto requestUrl = info.requestUrl();
-         if (!requestUrl.isLocalFile()) {
-             // Not a local file, do not block
-             return false;
-         }
-
-         // We can potentially add whitelisting logic or development environment variables that
-         // will allow people to override this setting on a per-client basis here.
-         QString targetFilePath = QFileInfo(requestUrl.toLocalFile()).canonicalFilePath();
-
-         // If we get here, we've determined it's a local file and we have no reason not to block it
-         qWarning() << "Blocking web access to local file path" << targetFilePath;
-         info.block(true);
-         return true;
-     }
+    // If we get here, we've determined it's a local file and we have no reason not to block it
+    qWarning() << "Blocking web access to local file path" << targetFilePath;
+    info.block(true);
+    return true;
 }
+} // namespace
 
 void RequestFilters::interceptHFWebEngineRequest(QWebEngineUrlRequestInfo& info, QQmlContext* context) {
     if (ContextAwareProfile::isRestricted(context) && blockLocalFiles(info)) {
@@ -82,11 +80,14 @@ void RequestFilters::interceptHFWebEngineRequest(QWebEngineUrlRequestInfo& info,
         }
     }
     static const QString USER_AGENT = "User-Agent";
-    const QString tokenStringMobile{ "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Mobile Safari/537.36" };
-    const QString tokenStringMetaverse{ "Chrome/48.0 (HighFidelityInterface)" };
-    const QString tokenStringLimitedCommerce{ "Chrome/48.0 (HighFidelityInterface limitedCommerce)" };
+    const QString tokenStringMobile { "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like "
+                                      "Gecko) Chrome/56.0.2924.87 Mobile Safari/537.36" };
+    const QString tokenStringMetaverse { "Chrome/48.0 (HighFidelityInterface)" };
+    const QString tokenStringLimitedCommerce { "Chrome/48.0 (HighFidelityInterface limitedCommerce)" };
 
-    const QString tokenString = !isAuthable ? tokenStringMobile : (accountManager->getLimitedCommerce() ? tokenStringLimitedCommerce : tokenStringMetaverse);
+    const QString tokenString = !isAuthable ? tokenStringMobile
+                                            : (accountManager->getLimitedCommerce() ? tokenStringLimitedCommerce
+                                                                                    : tokenStringMetaverse);
     info.setHttpHeader(USER_AGENT.toLocal8Bit(), tokenString.toLocal8Bit());
 }
 

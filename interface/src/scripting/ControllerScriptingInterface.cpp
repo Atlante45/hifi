@@ -99,17 +99,36 @@ void ControllerScriptingInterface::setVPadExtraBottomMargin(const int margin) {
     virtualPadManager.setExtraBottomMargin(margin);
 }
 
-void ControllerScriptingInterface::emitKeyPressEvent(QKeyEvent* event) { emit keyPressEvent(KeyEvent(*event)); }
-void ControllerScriptingInterface::emitKeyReleaseEvent(QKeyEvent* event) { emit keyReleaseEvent(KeyEvent(*event)); }
+void ControllerScriptingInterface::emitKeyPressEvent(QKeyEvent* event) {
+    emit keyPressEvent(KeyEvent(*event));
+}
+void ControllerScriptingInterface::emitKeyReleaseEvent(QKeyEvent* event) {
+    emit keyReleaseEvent(KeyEvent(*event));
+}
 
-void ControllerScriptingInterface::emitMouseMoveEvent(QMouseEvent* event) { emit mouseMoveEvent(MouseEvent(*event)); }
-void ControllerScriptingInterface::emitMousePressEvent(QMouseEvent* event) { emit mousePressEvent(MouseEvent(*event)); }
-void ControllerScriptingInterface::emitMouseDoublePressEvent(QMouseEvent* event) { emit mouseDoublePressEvent(MouseEvent(*event)); }
-void ControllerScriptingInterface::emitMouseReleaseEvent(QMouseEvent* event) { emit mouseReleaseEvent(MouseEvent(*event)); }
+void ControllerScriptingInterface::emitMouseMoveEvent(QMouseEvent* event) {
+    emit mouseMoveEvent(MouseEvent(*event));
+}
+void ControllerScriptingInterface::emitMousePressEvent(QMouseEvent* event) {
+    emit mousePressEvent(MouseEvent(*event));
+}
+void ControllerScriptingInterface::emitMouseDoublePressEvent(QMouseEvent* event) {
+    emit mouseDoublePressEvent(MouseEvent(*event));
+}
+void ControllerScriptingInterface::emitMouseReleaseEvent(QMouseEvent* event) {
+    emit mouseReleaseEvent(MouseEvent(*event));
+}
 
-void ControllerScriptingInterface::emitTouchBeginEvent(const TouchEvent& event) { emit touchBeginEvent(event); }
-void ControllerScriptingInterface::emitTouchEndEvent(const TouchEvent& event) { emit touchEndEvent(event); }
-void ControllerScriptingInterface::emitTouchUpdateEvent(const TouchEvent& event) { emit touchUpdateEvent(event); }
+void ControllerScriptingInterface::emitTouchBeginEvent(const TouchEvent& event) {
+    emit touchBeginEvent(event);
+}
+void ControllerScriptingInterface::emitTouchEndEvent(const TouchEvent& event) {
+    emit touchEndEvent(event);
+}
+void ControllerScriptingInterface::emitTouchUpdateEvent(const TouchEvent& event) {
+    emit touchUpdateEvent(event);
+}
 
-void ControllerScriptingInterface::emitWheelEvent(QWheelEvent* event) { emit wheelEvent(*event); }
-
+void ControllerScriptingInterface::emitWheelEvent(QWheelEvent* event) {
+    emit wheelEvent(*event);
+}

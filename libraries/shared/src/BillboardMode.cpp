@@ -8,11 +8,7 @@
 
 #include "BillboardMode.h"
 
-const char* billboardModeNames[] = {
-    "none",
-    "yaw",
-    "full"
-};
+const char* billboardModeNames[] = { "none", "yaw", "full" };
 
 static const size_t BILLBOARD_MODE_NAMES = (sizeof(billboardModeNames) / sizeof(billboardModeNames[0]));
 

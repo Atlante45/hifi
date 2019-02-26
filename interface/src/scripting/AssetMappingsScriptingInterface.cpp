@@ -11,9 +11,9 @@
 
 #include "AssetMappingsScriptingInterface.h"
 
-#include <QtScript/QScriptEngine>
 #include <QtCore/QFile>
 #include <QtCore/QThread>
+#include <QtScript/QScriptEngine>
 
 #include <AssetRequest.h>
 #include <AssetUpload.h>
@@ -67,14 +67,13 @@ void AssetMappingsScriptingInterface::getMapping(QString path, QJSValue callback
     request->start();
 }
 
-void AssetMappingsScriptingInterface::uploadFile(QString path, QString mapping, QJSValue startedCallback, QJSValue completedCallback, bool dropEvent) {
-    static const QString helpText =
-        "Upload your asset to a specific folder by entering the full path. Specifying "
-        "a new folder name will automatically create that folder for you.";
-    static const QString dropHelpText =
-        "This file will be added to your Asset Server.\n"
-        "Use the field below to place your file in a specific folder or to rename it. "
-        "Specifying a new folder name will automatically create that folder for you.";
+void AssetMappingsScriptingInterface::uploadFile(QString path, QString mapping, QJSValue startedCallback,
+                                                 QJSValue completedCallback, bool dropEvent) {
+    static const QString helpText = "Upload your asset to a specific folder by entering the full path. Specifying "
+                                    "a new folder name will automatically create that folder for you.";
+    static const QString dropHelpText = "This file will be added to your Asset Server.\n"
+                                        "Use the field below to place your file in a specific folder or to rename it. "
+                                        "Specifying a new folder name will automatically create that folder for you.";
 
     auto offscreenUi = DependencyManager::get<OffscreenUi>();
     auto result = offscreenUi->inputDialog(OffscreenUi::ICON_INFORMATION, "Specify Asset Path",
@@ -113,11 +112,9 @@ void AssetMappingsScriptingInterface::uploadFile(QString path, QString mapping, 
         extension = path.mid(idx + 1);
     }
 
-    UserActivityLogger::getInstance().logAction("uploading_asset", {
-        { "size", (qint64)size },
-        { "mapping", mapping },
-        { "extension", extension}
-    });
+    UserActivityLogger::getInstance().logAction("uploading_asset", { { "size", (qint64)size },
+                                                                     { "mapping", mapping },
+                                                                     { "extension", extension } });
 
     auto upload = DependencyManager::get<AssetClient>()->createUpload(path);
     QObject::connect(upload, &AssetUpload::finished, this, [=](AssetUpload* upload, const QString& hash) mutable {
@@ -164,7 +161,7 @@ void AssetMappingsScriptingInterface::getAllMappings(QJSValue callback) {
         auto mappings = request->getMappings();
         auto map = callback.engine()->newObject();
 
-        for (auto& kv : mappings ) {
+        for (auto& kv : mappings) {
             map.setProperty(kv.first, kv.second.hash);
         }
 
@@ -185,7 +182,7 @@ void AssetMappingsScriptingInterface::renameMapping(QString oldPath, QString new
 
     connect(request, &RenameMappingRequest::finished, this, [callback](RenameMappingRequest* request) mutable {
         if (callback.isCallable()) {
-            QJSValueList args{ request->getErrorString() };
+            QJSValueList args { request->getErrorString() };
             callback.call(args);
         }
 
@@ -201,7 +198,7 @@ void AssetMappingsScriptingInterface::setBakingEnabled(QStringList paths, bool e
 
     connect(request, &SetBakingEnabledRequest::finished, this, [callback](SetBakingEnabledRequest* request) mutable {
         if (callback.isCallable()) {
-            QJSValueList args{ request->getErrorString() };
+            QJSValueList args { request->getErrorString() };
             callback.call(args);
         }
 

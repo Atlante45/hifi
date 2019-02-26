@@ -11,10 +11,10 @@
 
 #include "AnimVariant.h" // which has AnimVariant/AnimVariantMap
 
+#include <RegisteredMetaTypes.h>
 #include <QScriptEngine>
 #include <QScriptValueIterator>
 #include <QThread>
-#include <RegisteredMetaTypes.h>
 
 const AnimVariant AnimVariant::False = AnimVariant();
 
@@ -25,7 +25,7 @@ QScriptValue AnimVariantMap::animVariantMapToScriptValue(QScriptEngine* engine, 
         return QScriptValue();
     }
     QScriptValue target = engine->newObject();
-    auto setOne = [&] (const QString& name, const AnimVariant& value) {
+    auto setOne = [&](const QString& name, const AnimVariant& value) {
         switch (value.getType()) {
             case AnimVariant::Type::Bool:
                 target.setProperty(name, value.getBool());
@@ -60,7 +60,7 @@ QScriptValue AnimVariantMap::animVariantMapToScriptValue(QScriptEngine* engine, 
             } // scripts are allowed to request names that do not exist
         }
 
-    } else {  // copy all of them
+    } else { // copy all of them
         for (auto& pair : _map) {
             setOne(pair.first, pair.second);
         }
@@ -80,10 +80,11 @@ void AnimVariantMap::animVariantMapFromScriptValue(const QScriptValue& source) {
         Q_ASSERT(false);
         return;
     }
-    // POTENTIAL OPTIMIZATION: cache the types we've seen. I.e, keep a dictionary mapping property names to an enumeration of types.
-    // Whenever we identify a new outbound type in animVariantMapToScriptValue above, or a new inbound type in the code that follows here,
-    // we would enter it into the dictionary. Then switch on that type here, with the code that follow being executed only if
-    // the type is not known. One problem with that is that there is no checking that two different script use the same name differently.
+    // POTENTIAL OPTIMIZATION: cache the types we've seen. I.e, keep a dictionary mapping property names to an enumeration of
+    // types. Whenever we identify a new outbound type in animVariantMapToScriptValue above, or a new inbound type in the code
+    // that follows here, we would enter it into the dictionary. Then switch on that type here, with the code that follow being
+    // executed only if the type is not known. One problem with that is that there is no checking that two different script use
+    // the same name differently.
     QScriptValueIterator property(source);
     // Note: QScriptValueIterator iterates only over source's own properties. It does not follow the prototype chain.
     while (property.hasNext()) {
@@ -120,7 +121,8 @@ void AnimVariantMap::animVariantMapFromScriptValue(const QScriptValue& source) {
                     }
                 }
             }
-            qCWarning(animation) << "Ignoring unrecognized data" << value.toString() << "for animation property" << property.name();
+            qCWarning(animation) << "Ignoring unrecognized data" << value.toString() << "for animation property"
+                                 << property.name();
             Q_ASSERT(false);
         }
     }
@@ -130,47 +132,47 @@ std::map<QString, QString> AnimVariantMap::toDebugMap() const {
     std::map<QString, QString> result;
     for (auto& pair : _map) {
         switch (pair.second.getType()) {
-        case AnimVariant::Type::Bool:
-            result[pair.first] = QString("%1").arg(pair.second.getBool());
-            break;
-        case AnimVariant::Type::Int:
-            result[pair.first] = QString("%1").arg(pair.second.getInt());
-            break;
-        case AnimVariant::Type::Float:
-            result[pair.first] = QString::number(pair.second.getFloat(), 'f', 3);
-            break;
-        case AnimVariant::Type::Vec3: {
-            // To prevent filling up debug stats, don't show vec3 values
-            /*
-            glm::vec3 value = pair.second.getVec3();
-            result[pair.first] = QString("(%1, %2, %3)").
-                arg(QString::number(value.x, 'f', 3)).
-                arg(QString::number(value.y, 'f', 3)).
-                arg(QString::number(value.z, 'f', 3));
-            */
-            break;
-        }
-        case AnimVariant::Type::Quat: {
-            // To prevent filling up the anim stats, don't show quat values
-            /*
-            glm::quat value = pair.second.getQuat();
-            result[pair.first] = QString("(%1, %2, %3, %4)").
-                arg(QString::number(value.x, 'f', 3)).
-                arg(QString::number(value.y, 'f', 3)).
-                arg(QString::number(value.z, 'f', 3)).
-                arg(QString::number(value.w, 'f', 3));
-            break;
-            */
-        }
-        case AnimVariant::Type::String:
-            // To prevent filling up anim stats, don't show string values
-            /*
-            result[pair.first] = pair.second.getString();
-            break;
-            */
-        default:
-            // invalid AnimVariant::Type
-            assert(false);
+            case AnimVariant::Type::Bool:
+                result[pair.first] = QString("%1").arg(pair.second.getBool());
+                break;
+            case AnimVariant::Type::Int:
+                result[pair.first] = QString("%1").arg(pair.second.getInt());
+                break;
+            case AnimVariant::Type::Float:
+                result[pair.first] = QString::number(pair.second.getFloat(), 'f', 3);
+                break;
+            case AnimVariant::Type::Vec3: {
+                // To prevent filling up debug stats, don't show vec3 values
+                /*
+                glm::vec3 value = pair.second.getVec3();
+                result[pair.first] = QString("(%1, %2, %3)").
+                    arg(QString::number(value.x, 'f', 3)).
+                    arg(QString::number(value.y, 'f', 3)).
+                    arg(QString::number(value.z, 'f', 3));
+                */
+                break;
+            }
+            case AnimVariant::Type::Quat: {
+                // To prevent filling up the anim stats, don't show quat values
+                /*
+                glm::quat value = pair.second.getQuat();
+                result[pair.first] = QString("(%1, %2, %3, %4)").
+                    arg(QString::number(value.x, 'f', 3)).
+                    arg(QString::number(value.y, 'f', 3)).
+                    arg(QString::number(value.z, 'f', 3)).
+                    arg(QString::number(value.w, 'f', 3));
+                break;
+                */
+            }
+            case AnimVariant::Type::String:
+                // To prevent filling up anim stats, don't show string values
+                /*
+                result[pair.first] = pair.second.getString();
+                break;
+                */
+            default:
+                // invalid AnimVariant::Type
+                assert(false);
         }
     }
     return result;

@@ -15,42 +15,43 @@
 #include "EntityItem.h"
 
 class PolyVoxEntityItem : public EntityItem {
- public:
+public:
     static EntityItemPointer factory(const EntityItemID& entityID, const EntityItemProperties& properties);
 
     PolyVoxEntityItem(const EntityItemID& entityItemID);
 
     ALLOW_INSTANTIATION // This class can be instantiated
 
-    // methods for getting/setting all properties of an entity
-    virtual EntityItemProperties getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const override;
+        // methods for getting/setting all properties of an entity
+        virtual EntityItemProperties
+        getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const override;
     virtual bool setProperties(const EntityItemProperties& properties) override;
 
     virtual EntityPropertyFlags getEntityProperties(EncodeBitstreamParams& params) const override;
 
     virtual void appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                     EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
+                                    EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                    EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                                     OctreeElement::AppendState& appendState) const override;
 
     virtual int readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                 ReadBitstreamToTreeParams& args,
-                                                 EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                 bool& somethingChanged) override;
+                                                 ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                 bool overwriteLocalData, bool& somethingChanged) override;
 
     // never have a ray intersection pick a PolyVoxEntityItem.
     virtual bool supportsDetailedIntersection() const override { return true; }
-    virtual bool findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                                             OctreeElementPointer& element, float& distance,
-                                             BoxFace& face, glm::vec3& surfaceNormal,
-                                             QVariantMap& extraInfo, bool precisionPicking) const override { return false; }
+    virtual bool findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction, OctreeElementPointer& element,
+                                             float& distance, BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                             bool precisionPicking) const override {
+        return false;
+    }
     virtual bool findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
-                                                  const glm::vec3& acceleration, OctreeElementPointer& element, float& parabolicDistance,
-                                                  BoxFace& face, glm::vec3& surfaceNormal,
-                                                  QVariantMap& extraInfo, bool precisionPicking) const override { return false; }
+                                                  const glm::vec3& acceleration, OctreeElementPointer& element,
+                                                  float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+                                                  QVariantMap& extraInfo, bool precisionPicking) const override {
+        return false;
+    }
 
     virtual void debugDump() const override;
 
@@ -81,18 +82,12 @@ class PolyVoxEntityItem : public EntityItem {
      * </table>
      * @typedef {number} Entities.PolyVoxSurfaceStyle
      */
-    enum PolyVoxSurfaceStyle {
-        SURFACE_MARCHING_CUBES,
-        SURFACE_CUBIC,
-        SURFACE_EDGED_CUBIC,
-        SURFACE_EDGED_MARCHING_CUBES
-    };
+    enum PolyVoxSurfaceStyle { SURFACE_MARCHING_CUBES, SURFACE_CUBIC, SURFACE_EDGED_CUBIC, SURFACE_EDGED_MARCHING_CUBES };
     static bool isEdged(PolyVoxSurfaceStyle surfaceStyle);
-
 
     virtual void setVoxelSurfaceStyle(PolyVoxSurfaceStyle voxelSurfaceStyle) { _voxelSurfaceStyle = voxelSurfaceStyle; }
     // this other version of setVoxelSurfaceStyle is needed for SET_ENTITY_PROPERTY_FROM_PROPERTIES
-    void setVoxelSurfaceStyle(uint16_t voxelSurfaceStyle) { setVoxelSurfaceStyle((PolyVoxSurfaceStyle) voxelSurfaceStyle); }
+    void setVoxelSurfaceStyle(uint16_t voxelSurfaceStyle) { setVoxelSurfaceStyle((PolyVoxSurfaceStyle)voxelSurfaceStyle); }
     virtual PolyVoxSurfaceStyle getVoxelSurfaceStyle() const { return _voxelSurfaceStyle; }
 
     static const glm::vec3 DEFAULT_VOXEL_VOLUME_SIZE;
@@ -111,13 +106,15 @@ class PolyVoxEntityItem : public EntityItem {
     virtual bool setVoxelInVolume(const vec3& position, uint8_t toValue) { return false; }
     // coords are in world-space
     virtual bool setSphere(const vec3& center, float radius, uint8_t toValue) { return false; }
-    virtual bool setCapsule(const vec3& startWorldCoords, const vec3& endWorldCoords,
-                            float radiusWorldCoords, uint8_t toValue) { return false; }
+    virtual bool setCapsule(const vec3& startWorldCoords, const vec3& endWorldCoords, float radiusWorldCoords,
+                            uint8_t toValue) {
+        return false;
+    }
     virtual bool setAll(uint8_t toValue) { return false; }
     virtual bool setCuboid(const vec3& lowPosition, const vec3& cuboidSize, int value) { return false; }
 
     virtual uint8_t getVoxel(int x, int y, int z) const final { return getVoxel({ x, y, z }); }
-    virtual bool setVoxel(int x, int y, int z, uint8_t toValue) final{ return setVoxel({ x, y, z }, toValue); }
+    virtual bool setVoxel(int x, int y, int z, uint8_t toValue) final { return setVoxel({ x, y, z }, toValue); }
 
     virtual uint8_t getVoxel(const ivec3& v) const { return 0; }
     virtual bool setVoxel(const ivec3& v, uint8_t toValue) { return false; }
@@ -147,7 +144,6 @@ class PolyVoxEntityItem : public EntityItem {
     EntityItemID getZNNeighborID() const;
 
     std::array<EntityItemID, 3> getNNeigborIDs() const;
-    
 
     virtual void setXPNeighborID(const EntityItemID& xPNeighborID);
     void setXPNeighborID(const QString& xPNeighborID);
@@ -173,8 +169,10 @@ class PolyVoxEntityItem : public EntityItem {
     glm::mat4 voxelToLocalMatrix() const;
     glm::mat4 localToVoxelMatrix() const;
 
- protected:
-    void setVoxelDataDirty(bool value) { withWriteLock([&] { _voxelDataDirty = value; }); }
+protected:
+    void setVoxelDataDirty(bool value) {
+        withWriteLock([&] { _voxelDataDirty = value; });
+    }
 
     glm::vec3 _voxelVolumeSize { DEFAULT_VOXEL_VOLUME_SIZE }; // this is always 3 bytes
 
@@ -188,13 +186,13 @@ class PolyVoxEntityItem : public EntityItem {
     QString _zTextureURL { DEFAULT_Z_TEXTURE_URL };
 
     // for non-edged surface styles, these are used to compute the high-axis edges
-    EntityItemID _xNNeighborID{UNKNOWN_ENTITY_ID};
-    EntityItemID _yNNeighborID{UNKNOWN_ENTITY_ID};
-    EntityItemID _zNNeighborID{UNKNOWN_ENTITY_ID};
+    EntityItemID _xNNeighborID { UNKNOWN_ENTITY_ID };
+    EntityItemID _yNNeighborID { UNKNOWN_ENTITY_ID };
+    EntityItemID _zNNeighborID { UNKNOWN_ENTITY_ID };
 
-    EntityItemID _xPNeighborID{UNKNOWN_ENTITY_ID};
-    EntityItemID _yPNeighborID{UNKNOWN_ENTITY_ID};
-    EntityItemID _zPNeighborID{UNKNOWN_ENTITY_ID};
+    EntityItemID _xPNeighborID { UNKNOWN_ENTITY_ID };
+    EntityItemID _yPNeighborID { UNKNOWN_ENTITY_ID };
+    EntityItemID _zPNeighborID { UNKNOWN_ENTITY_ID };
 };
 
 #endif // hifi_PolyVoxEntityItem_h

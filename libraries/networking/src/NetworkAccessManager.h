@@ -21,6 +21,7 @@ class NetworkAccessManager : public QNetworkAccessManager {
     Q_OBJECT
 public:
     static QNetworkAccessManager& getInstance();
+
 protected:
     NetworkAccessManager(QObject* parent = Q_NULLPTR) : QNetworkAccessManager(parent) {}
     virtual QNetworkReply* createRequest(Operation op, const QNetworkRequest& request, QIODevice* device = Q_NULLPTR) override;

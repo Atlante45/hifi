@@ -8,6 +8,7 @@ namespace controller {
 
 class NotFilter : public Filter {
     REGISTER_FILTER_CLASS(NotFilter);
+
 public:
     NotFilter();
 
@@ -15,7 +16,6 @@ public:
     virtual Pose apply(Pose value) const override { return value; }
 };
 
-}
+} // namespace controller
 
 #endif
-

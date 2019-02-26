@@ -22,7 +22,6 @@ public:
     Q_INVOKABLE void finish();
     Q_INVOKABLE QVariantList getValues() const;
 
-
     uint64_t getMax() const { return _max; }
     uint64_t getMin() const { return _min; }
     float getStandardDeviation() const { return _stdDev; }

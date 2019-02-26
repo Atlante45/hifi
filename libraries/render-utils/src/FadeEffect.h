@@ -18,7 +18,6 @@ class FadeEffect : public Dependency {
     SINGLETON_DEPENDENCY;
 
 public:
-
     void build(render::Task::TaskConcept& task, const task::Varying& editableItems);
 
     render::ShapePipeline::BatchSetter getBatchSetter() const;
@@ -32,11 +31,10 @@ public:
     const glm::vec3& getLastBaseInvSize() const { return _lastBaseInvSize; }
 
     static void packToAttributes(const int category, const float threshold, const glm::vec3& noiseOffset,
-        const glm::vec3& baseOffset, const glm::vec3& baseInvSize,
-        glm::vec4& packedData1, glm::vec4& packedData2, glm::vec4& packedData3);
+                                 const glm::vec3& baseOffset, const glm::vec3& baseInvSize, glm::vec4& packedData1,
+                                 glm::vec4& packedData2, glm::vec4& packedData3);
 
 private:
-
     gpu::BufferView _configurations;
     gpu::TexturePointer _maskMap;
 
@@ -48,7 +46,6 @@ private:
     glm::vec3 _lastBaseInvSize { 1.f, 1.f, 1.f };
 
     explicit FadeEffect();
-    virtual ~FadeEffect() { }
-
+    virtual ~FadeEffect() {}
 };
 #endif // hifi_render_utils_FadeEffect_h

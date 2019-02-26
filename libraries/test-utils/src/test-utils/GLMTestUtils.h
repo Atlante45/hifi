@@ -12,16 +12,16 @@
 #ifndef hifi_GLMTestUtils_h
 #define hifi_GLMTestUtils_h
 
+#include <QTextStream>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <QTextStream>
 
 // Implements functionality in QTestExtensions.h for glm types
 
 // Computes the error value between two quaternions (using glm::dot)
 float getErrorDifference(const glm::quat& a, const glm::quat& b) {
     return fabsf(glm::dot(a, b)) - 1.0f;
-}       
+}
 
 inline float getErrorDifference(const glm::vec3& a, const glm::vec3& b) {
     return glm::distance(a, b);
@@ -43,10 +43,10 @@ inline QTextStream& operator<<(QTextStream& stream, const glm::vec3& v) {
 }
 
 QTextStream& operator<<(QTextStream& stream, const glm::quat& q) {
-            return stream << "glm::quat { " << q.x << ", " << q.y << ", " << q.z << ", " << q.w << " }";
-} 
+    return stream << "glm::quat { " << q.x << ", " << q.y << ", " << q.z << ", " << q.w << " }";
+}
 
-inline QTextStream& operator<< (QTextStream& stream, const glm::mat4& matrix) {
+inline QTextStream& operator<<(QTextStream& stream, const glm::mat4& matrix) {
     stream << "[\n\t\t";
     stream.setFieldWidth(15);
     for (int r = 0; r < 4; ++r) {
@@ -56,11 +56,11 @@ inline QTextStream& operator<< (QTextStream& stream, const glm::mat4& matrix) {
         stream << "\n\t\t";
     }
     stream.setFieldWidth(0);
-    stream << "]\n\t";   // hacky as hell, but this should work...
+    stream << "]\n\t"; // hacky as hell, but this should work...
     return stream;
 }
 
-#define QCOMPARE_QUATS(rotationA, rotationB, angle) \
+#define QCOMPARE_QUATS(rotationA, rotationB, angle)                                                                            \
     QVERIFY(fabsf(1.0f - fabsf(glm::dot(rotationA, rotationB))) < 2.0f * sinf(angle))
 
 #endif

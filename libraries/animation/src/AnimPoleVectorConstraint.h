@@ -21,21 +21,16 @@ class AnimPoleVectorConstraint : public AnimNode {
 public:
     friend class AnimTests;
 
-    AnimPoleVectorConstraint(const QString& id, bool enabled, glm::vec3 referenceVector,
-                             const QString& baseJointName, const QString& midJointName, const QString& tipJointName,
-                             const QString& enabledVar, const QString& poleVectorVar);
+    AnimPoleVectorConstraint(const QString& id, bool enabled, glm::vec3 referenceVector, const QString& baseJointName,
+                             const QString& midJointName, const QString& tipJointName, const QString& enabledVar,
+                             const QString& poleVectorVar);
     virtual ~AnimPoleVectorConstraint() override;
 
-    virtual const AnimPoseVec& evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) override;
+    virtual const AnimPoseVec& evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                        AnimVariantMap& triggersOut) override;
 
 protected:
-
-    enum class InterpType {
-        None = 0,
-        SnapshotToUnderPoses,
-        SnapshotToSolve,
-        NumTypes
-    };
+    enum class InterpType { None = 0, SnapshotToUnderPoses, SnapshotToSolve, NumTypes };
 
     // for AnimDebugDraw rendering
     virtual const AnimPoseVec& getPosesInternal() const override;

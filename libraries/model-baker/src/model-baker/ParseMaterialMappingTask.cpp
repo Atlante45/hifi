@@ -45,28 +45,36 @@ void ParseMaterialMappingTask::run(const baker::BakeContextPointer& context, con
 
                             material->setDefaultFallthrough(true);
 
-                            NetworkMaterialResourcePointer materialResource = NetworkMaterialResourcePointer(new NetworkMaterialResource(), [](NetworkMaterialResource* ptr) { ptr->deleteLater(); });
+                            NetworkMaterialResourcePointer materialResource = NetworkMaterialResourcePointer(
+                                new NetworkMaterialResource(), [](NetworkMaterialResource* ptr) { ptr->deleteLater(); });
                             materialResource->moveToThread(qApp->thread());
                             materialResource->parsedMaterials.names.push_back("scattering");
                             materialResource->parsedMaterials.networkMaterials["scattering"] = material;
 
-                            materialMapping.push_back(std::pair<std::string, NetworkMaterialResourcePointer>("mat::" + mapping.toStdString(), materialResource));
+                            materialMapping.push_back(
+                                std::pair<std::string, NetworkMaterialResourcePointer>("mat::" + mapping.toStdString(),
+                                                                                       materialResource));
                             continue;
                         }
                     }
 
                     // Material JSON description
                     {
-                        NetworkMaterialResourcePointer materialResource = NetworkMaterialResourcePointer(new NetworkMaterialResource(), [](NetworkMaterialResource* ptr) { ptr->deleteLater(); });
+                        NetworkMaterialResourcePointer materialResource = NetworkMaterialResourcePointer(
+                            new NetworkMaterialResource(), [](NetworkMaterialResource* ptr) { ptr->deleteLater(); });
                         materialResource->moveToThread(qApp->thread());
                         // TODO: add baseURL to allow FSTs to reference relative files next to them
-                        materialResource->parsedMaterials = NetworkMaterialResource::parseJSONMaterials(QJsonDocument(mappingValue), QUrl());
-                        materialMapping.push_back(std::pair<std::string, NetworkMaterialResourcePointer>(mapping.toStdString(), materialResource));
+                        materialResource->parsedMaterials = NetworkMaterialResource::parseJSONMaterials(QJsonDocument(
+                                                                                                            mappingValue),
+                                                                                                        QUrl());
+                        materialMapping.push_back(
+                            std::pair<std::string, NetworkMaterialResourcePointer>(mapping.toStdString(), materialResource));
                     }
 
                 } else if (mappingJSON.isString()) {
                     auto mappingValue = mappingJSON.toString();
-                    materialMapping.push_back(std::pair<std::string, NetworkMaterialResourcePointer>(mapping.toStdString(), MaterialCache::instance().getMaterial(mappingValue)));
+                    materialMapping.push_back(std::pair<std::string, NetworkMaterialResourcePointer>(
+                        mapping.toStdString(), MaterialCache::instance().getMaterial(mappingValue)));
                 }
             }
         }

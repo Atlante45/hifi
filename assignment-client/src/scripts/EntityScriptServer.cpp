@@ -21,8 +21,6 @@
 #include <EntityScriptingInterface.h>
 #include <LogHandler.h>
 #include <MessagesClient.h>
-#include <plugins/CodecPlugin.h>
-#include <plugins/PluginManager.h>
 #include <ResourceManager.h>
 #include <ResourceScriptingInterface.h>
 #include <ScriptCache.h>
@@ -30,12 +28,14 @@
 #include <SoundCacheScriptingInterface.h>
 #include <UUID.h>
 #include <WebSocketServerClass.h>
+#include <plugins/CodecPlugin.h>
+#include <plugins/PluginManager.h>
 
 #include <EntityScriptClient.h> // for EntityScriptServerServices
 
 #include "../AssignmentDynamicFactory.h"
-#include "EntityScriptServerLogging.h"
 #include "../entities/AssignmentParentFinder.h"
+#include "EntityScriptServerLogging.h"
 
 using Mutex = std::mutex;
 using Lock = std::lock_guard<Mutex>;
@@ -44,7 +44,7 @@ static std::mutex logBufferMutex;
 static std::string logBuffer;
 
 void messageHandler(QtMsgType type, const QMessageLogContext& context, const QString& message) {
-    auto logMessage = LogHandler::getInstance().printMessage((LogMsgType) type, context, message);
+    auto logMessage = LogHandler::getInstance().printMessage((LogMsgType)type, context, message);
 
     if (!logMessage.isEmpty()) {
         Lock lock(logBufferMutex);
@@ -77,13 +77,12 @@ EntityScriptServer::EntityScriptServer(ReceivedMessage& message) : ThreadedAssig
 
     DependencyManager::set<ScriptCache>();
 
-
     // Needed to ensure the creation of the DebugDraw instance on the main thread
     DebugDraw::getInstance();
 
     auto& packetReceiver = DependencyManager::get<NodeList>()->getPacketReceiver();
-    packetReceiver.registerListenerForTypes({ PacketType::OctreeStats, PacketType::EntityData, PacketType::EntityErase },
-                                            this, "handleOctreePacket");
+    packetReceiver.registerListenerForTypes({ PacketType::OctreeStats, PacketType::EntityData, PacketType::EntityErase }, this,
+                                            "handleOctreePacket");
     packetReceiver.registerListener(PacketType::SelectedAudioFormat, this, "handleSelectedAudioFormat");
 
     auto avatarHashMap = DependencyManager::set<AvatarHashMap>();
@@ -106,8 +105,10 @@ EntityScriptServer::~EntityScriptServer() {
 
 static const QString ENTITY_SCRIPT_SERVER_LOGGING_NAME = "entity-script-server";
 
-void EntityScriptServer::handleReloadEntityServerScriptPacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer senderNode) {
-    if (senderNode->getCanRez() || senderNode->getCanRezTmp() || senderNode->getCanRezCertified() || senderNode->getCanRezTmpCertified()) {
+void EntityScriptServer::handleReloadEntityServerScriptPacket(QSharedPointer<ReceivedMessage> message,
+                                                              SharedNodePointer senderNode) {
+    if (senderNode->getCanRez() || senderNode->getCanRezTmp() || senderNode->getCanRezCertified() ||
+        senderNode->getCanRezTmpCertified()) {
         auto entityID = QUuid::fromRfc4122(message->read(NUM_BYTES_RFC4122_UUID));
 
         if (_entityViewer.getTree() && !_shuttingDown) {
@@ -117,8 +118,10 @@ void EntityScriptServer::handleReloadEntityServerScriptPacket(QSharedPointer<Rec
     }
 }
 
-void EntityScriptServer::handleEntityScriptGetStatusPacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer senderNode) {
-    if (senderNode->getCanRez() || senderNode->getCanRezTmp() || senderNode->getCanRezCertified() || senderNode->getCanRezTmpCertified()) {
+void EntityScriptServer::handleEntityScriptGetStatusPacket(QSharedPointer<ReceivedMessage> message,
+                                                           SharedNodePointer senderNode) {
+    if (senderNode->getCanRez() || senderNode->getCanRezTmp() || senderNode->getCanRezCertified() ||
+        senderNode->getCanRezTmpCertified()) {
         MessageID messageID;
         message->readPrimitive(&messageID);
         auto entityID = QUuid::fromRfc4122(message->read(NUM_BYTES_RFC4122_UUID));
@@ -141,7 +144,6 @@ void EntityScriptServer::handleEntityScriptGetStatusPacket(QSharedPointer<Receiv
 }
 
 void EntityScriptServer::handleSettings() {
-
     auto nodeList = DependencyManager::get<NodeList>();
 
     auto& domainHandler = nodeList->getDomainHandler();
@@ -159,8 +161,10 @@ void EntityScriptServer::handleSettings() {
     static const QString MAX_ENTITY_PPS_OPTION = "max_total_entity_pps";
     static const QString ENTITY_PPS_PER_SCRIPT = "entity_pps_per_script";
 
-    if (!entityScriptServerSettings.contains(MAX_ENTITY_PPS_OPTION) || !entityScriptServerSettings.contains(ENTITY_PPS_PER_SCRIPT)) {
-        qWarning() << "Received settings from the domain-server with no max_total_entity_pps or entity_pps_per_script properties.";
+    if (!entityScriptServerSettings.contains(MAX_ENTITY_PPS_OPTION) ||
+        !entityScriptServerSettings.contains(ENTITY_PPS_PER_SCRIPT)) {
+        qWarning()
+            << "Received settings from the domain-server with no max_total_entity_pps or entity_pps_per_script properties.";
         return;
     }
 
@@ -168,14 +172,17 @@ void EntityScriptServer::handleSettings() {
     _entityPPSPerScript = std::max(0, entityScriptServerSettings[ENTITY_PPS_PER_SCRIPT].toInt());
 
     qDebug() << QString("Received entity script server settings, Max Entity PPS: %1, Entity PPS Per Entity Script: %2")
-                .arg(_maxEntityPPS).arg(_entityPPSPerScript);
+                    .arg(_maxEntityPPS)
+                    .arg(_entityPPSPerScript);
 }
 
 void EntityScriptServer::updateEntityPPS() {
     int numRunningScripts = _entitiesScriptEngine->getNumRunningEntityScripts();
     int pps;
     if (std::numeric_limits<int>::max() / _entityPPSPerScript < numRunningScripts) {
-        qWarning() << QString("Integer multiplication would overflow, clamping to maxint: %1 * %2").arg(numRunningScripts).arg(_entityPPSPerScript);
+        qWarning() << QString("Integer multiplication would overflow, clamping to maxint: %1 * %2")
+                          .arg(numRunningScripts)
+                          .arg(_entityPPSPerScript);
         pps = std::numeric_limits<int>::max();
         pps = std::min(_maxEntityPPS, pps);
     } else {
@@ -185,8 +192,10 @@ void EntityScriptServer::updateEntityPPS() {
     _entityEditSender.setPacketsPerSecond(pps);
 }
 
-void EntityScriptServer::handleEntityServerScriptLogPacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer senderNode) {
-    bool canRezAny = senderNode->getCanRez() || senderNode->getCanRezTmp() || senderNode->getCanRezCertified() || senderNode->getCanRezTmpCertified();
+void EntityScriptServer::handleEntityServerScriptLogPacket(QSharedPointer<ReceivedMessage> message,
+                                                           SharedNodePointer senderNode) {
+    bool canRezAny = senderNode->getCanRez() || senderNode->getCanRezTmp() || senderNode->getCanRezCertified() ||
+                     senderNode->getCanRezTmpCertified();
     bool enable = false;
     message->readPrimitive(&enable);
 
@@ -231,8 +240,8 @@ void EntityScriptServer::pushLogs() {
     }
 }
 
-void EntityScriptServer::handleEntityScriptCallMethodPacket(QSharedPointer<ReceivedMessage> receivedMessage, SharedNodePointer senderNode) {
-
+void EntityScriptServer::handleEntityScriptCallMethodPacket(QSharedPointer<ReceivedMessage> receivedMessage,
+                                                            SharedNodePointer senderNode) {
     if (_entitiesScriptEngine && _entityViewer.getTree() && !_shuttingDown) {
         auto entityID = QUuid::fromRfc4122(receivedMessage->read(NUM_BYTES_RFC4122_UUID));
 
@@ -250,7 +259,6 @@ void EntityScriptServer::handleEntityScriptCallMethodPacket(QSharedPointer<Recei
         _entitiesScriptEngine->callEntityScriptMethod(entityID, method, params, senderNode->getUUID());
     }
 }
-
 
 void EntityScriptServer::run() {
     DependencyManager::set<ScriptEngines>(ScriptEngine::ENTITY_SERVER_SCRIPT);
@@ -272,10 +280,8 @@ void EntityScriptServer::run() {
     connect(nodeList.data(), &LimitedNodeList::nodeActivated, this, &EntityScriptServer::nodeActivated);
     connect(nodeList.data(), &LimitedNodeList::nodeKilled, this, &EntityScriptServer::nodeKilled);
 
-    nodeList->addSetOfNodeTypesToNodeInterestSet({
-        NodeType::Agent, NodeType::AudioMixer, NodeType::AvatarMixer,
-        NodeType::EntityServer, NodeType::MessagesMixer, NodeType::AssetServer
-    });
+    nodeList->addSetOfNodeTypesToNodeInterestSet({ NodeType::Agent, NodeType::AudioMixer, NodeType::AvatarMixer,
+                                                   NodeType::EntityServer, NodeType::MessagesMixer, NodeType::AssetServer });
 
     // Setup Script Engine
     resetEntitiesScriptEngine();
@@ -284,7 +290,7 @@ void EntityScriptServer::run() {
     entityScriptingInterface->init();
 
     _entityViewer.init();
-    
+
     // setup the JSON filter that asks for entities with a non-default serverScripts property
     QJsonObject queryJSONParameters;
     queryJSONParameters[EntityJSONQueryProperties::SERVER_SCRIPTS_PROPERTY] = EntityQueryFilterSymbol::NonDefault;
@@ -295,7 +301,7 @@ void EntityScriptServer::run() {
     queryFlags[EntityJSONQueryProperties::INCLUDE_DESCENDANTS_PROPERTY] = true;
 
     queryJSONParameters[EntityJSONQueryProperties::FLAGS_PROPERTY] = queryFlags;
-    
+
     // setup the JSON parameters so that OctreeQuery does not use a frustum and uses our JSON filter
     _entityViewer.getOctreeQuery().setJSONParameters(queryJSONParameters);
 
@@ -303,19 +309,18 @@ void EntityScriptServer::run() {
 
     DependencyManager::set<AssignmentParentFinder>(_entityViewer.getTree());
 
-
     auto tree = _entityViewer.getTree().get();
     connect(tree, &EntityTree::deletingEntity, this, &EntityScriptServer::deletingEntity, Qt::QueuedConnection);
     connect(tree, &EntityTree::addingEntity, this, &EntityScriptServer::addingEntity, Qt::QueuedConnection);
-    connect(tree, &EntityTree::entityServerScriptChanging, this, &EntityScriptServer::entityServerScriptChanging, Qt::QueuedConnection);
+    connect(tree, &EntityTree::entityServerScriptChanging, this, &EntityScriptServer::entityServerScriptChanging,
+            Qt::QueuedConnection);
 }
 
 void EntityScriptServer::cleanupOldKilledListeners() {
     auto threshold = usecTimestampNow() - 5 * USECS_PER_SECOND;
     using ValueType = std::pair<QUuid, quint64>;
-    auto it = std::remove_if(std::begin(_killedListeners), std::end(_killedListeners), [&](ValueType value) {
-        return value.second < threshold;
-    });
+    auto it = std::remove_if(std::begin(_killedListeners), std::end(_killedListeners),
+                             [&](ValueType value) { return value.second < threshold; });
     _killedListeners.erase(it, std::end(_killedListeners));
 }
 
@@ -327,9 +332,8 @@ void EntityScriptServer::nodeActivated(SharedNodePointer activatedNode) {
         case NodeType::Agent: {
             auto activatedNodeUUID = activatedNode->getUUID();
             using ValueType = std::pair<QUuid, quint64>;
-            auto it = std::find_if(std::begin(_killedListeners), std::end(_killedListeners), [&](ValueType value) {
-                return value.first == activatedNodeUUID;
-            });
+            auto it = std::find_if(std::begin(_killedListeners), std::end(_killedListeners),
+                                   [&](ValueType value) { return value.first == activatedNodeUUID; });
             if (it != std::end(_killedListeners)) {
                 _killedListeners.erase(it);
                 _logListeners.insert(activatedNodeUUID);
@@ -352,7 +356,7 @@ void EntityScriptServer::nodeKilled(SharedNodePointer killedNode) {
             bool hasAnotherEntityServer = false;
             auto nodeList = DependencyManager::get<NodeList>();
 
-            nodeList->eachNodeBreakable([&hasAnotherEntityServer, &killedNode](const SharedNodePointer& node){
+            nodeList->eachNodeBreakable([&hasAnotherEntityServer, &killedNode](const SharedNodePointer& node) {
                 if (node->getType() == NodeType::EntityServer && node->getUUID() != killedNode->getUUID()) {
                     // we're talking to > 1 entity servers, we know we won't clear
                     hasAnotherEntityServer = true;
@@ -365,7 +369,7 @@ void EntityScriptServer::nodeKilled(SharedNodePointer killedNode) {
             if (!hasAnotherEntityServer) {
                 clear();
             }
-            
+
             break;
         }
         case NodeType::Agent: {
@@ -454,21 +458,19 @@ void EntityScriptServer::resetEntitiesScriptEngine() {
         _entityViewer.getTree()->update();
     });
 
-
     newEngine->runInThread();
     auto newEngineSP = qSharedPointerCast<EntitiesScriptEngineProvider>(newEngine);
     DependencyManager::get<EntityScriptingInterface>()->setEntitiesScriptEngine(newEngineSP);
 
     if (_entitiesScriptEngine) {
-        disconnect(_entitiesScriptEngine.data(), &ScriptEngine::entityScriptDetailsUpdated,
-                   this, &EntityScriptServer::updateEntityPPS);
+        disconnect(_entitiesScriptEngine.data(), &ScriptEngine::entityScriptDetailsUpdated, this,
+                   &EntityScriptServer::updateEntityPPS);
     }
 
     _entitiesScriptEngine.swap(newEngine);
-    connect(_entitiesScriptEngine.data(), &ScriptEngine::entityScriptDetailsUpdated,
-            this, &EntityScriptServer::updateEntityPPS);
+    connect(_entitiesScriptEngine.data(), &ScriptEngine::entityScriptDetailsUpdated, this,
+            &EntityScriptServer::updateEntityPPS);
 }
-
 
 void EntityScriptServer::clear() {
     // unload and stop the engine
@@ -489,7 +491,8 @@ void EntityScriptServer::clear() {
 
 void EntityScriptServer::shutdownScriptEngine() {
     if (_entitiesScriptEngine) {
-        _entitiesScriptEngine->disconnectNonEssentialSignals(); // disconnect all slots/signals from the script engine, except essential
+        _entitiesScriptEngine
+            ->disconnectNonEssentialSignals(); // disconnect all slots/signals from the script engine, except essential
     }
     _shuttingDown = true;
 
@@ -529,7 +532,6 @@ void EntityScriptServer::entityServerScriptChanging(const EntityItemID& entityID
 
 void EntityScriptServer::checkAndCallPreload(const EntityItemID& entityID, bool forceRedownload) {
     if (_entityViewer.getTree() && !_shuttingDown && _entitiesScriptEngine) {
-
         EntityItemPointer entity = _entityViewer.getTree()->findEntityByEntityItemID(entityID);
         EntityScriptDetails details;
         bool isRunning = _entitiesScriptEngine->getEntityScriptDetails(entityID, details);
@@ -548,14 +550,12 @@ void EntityScriptServer::checkAndCallPreload(const EntityItemID& entityID, bool 
 }
 
 void EntityScriptServer::sendStatsPacket() {
-
 }
 
 void EntityScriptServer::handleOctreePacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer senderNode) {
     auto packetType = message->getType();
 
     if (packetType == PacketType::OctreeStats) {
-
         int statsMessageLength = OctreeHeadlessViewer::parseOctreeStats(message, senderNode);
         if (message->getSize() > statsMessageLength) {
             // pull out the piggybacked packet and create a new QSharedPointer<NLPacket> for it
@@ -564,7 +564,8 @@ void EntityScriptServer::handleOctreePacket(QSharedPointer<ReceivedMessage> mess
             auto buffer = std::unique_ptr<char[]>(new char[piggyBackedSizeWithHeader]);
             memcpy(buffer.get(), message->getRawMessage() + statsMessageLength, piggyBackedSizeWithHeader);
 
-            auto newPacket = NLPacket::fromReceivedPacket(std::move(buffer), piggyBackedSizeWithHeader, message->getSenderSockAddr());
+            auto newPacket = NLPacket::fromReceivedPacket(std::move(buffer), piggyBackedSizeWithHeader,
+                                                          message->getSenderSockAddr());
             message = QSharedPointer<ReceivedMessage>::create(*newPacket);
         } else {
             return; // bail since no piggyback data
@@ -603,9 +604,7 @@ void EntityScriptServer::aboutToFinish() {
     DependencyManager::destroy<AssignmentParentFinder>();
     DependencyManager::destroy<AvatarHashMap>();
 
-
     DependencyManager::destroy<PluginManager>();
-
 
     // cleanup the AudioInjectorManager (and any still running injectors)
     DependencyManager::destroy<AudioInjectorManager>();

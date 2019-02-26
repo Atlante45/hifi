@@ -19,12 +19,12 @@
 #include <QHash>
 #include <QIODevice>
 #include <QList>
-#include <QtNetwork/QHostAddress>
-#include <QtNetwork/QNetworkAccessManager>
 #include <QObject>
 #include <QPair>
 #include <QTemporaryFile>
 #include <QUrl>
+#include <QtNetwork/QHostAddress>
+#include <QtNetwork/QNetworkAccessManager>
 
 #include <memory>
 
@@ -41,7 +41,7 @@ typedef QPair<Headers, QByteArray> FormData;
 
 /// Handles a single HTTP connection.
 class HTTPConnection : public QObject {
-   Q_OBJECT
+    Q_OBJECT
 
 public:
     static const char* StatusCode200;
@@ -97,12 +97,10 @@ public:
     QHash<QString, QString> parseUrlEncodedForm();
 
     /// Sends a response and closes the connection.
-    void respond(const char* code, const QByteArray& content = QByteArray(),
-        const char* contentType = DefaultContentType,
-        const Headers& headers = Headers());
-    void respond(const char* code, std::unique_ptr<QIODevice> device,
-        const char* contentType = DefaultContentType,
-        const Headers& headers = Headers());
+    void respond(const char* code, const QByteArray& content = QByteArray(), const char* contentType = DefaultContentType,
+                 const Headers& headers = Headers());
+    void respond(const char* code, std::unique_ptr<QIODevice> device, const char* contentType = DefaultContentType,
+                 const Headers& headers = Headers());
 
 protected slots:
 

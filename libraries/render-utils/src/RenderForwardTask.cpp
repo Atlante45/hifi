@@ -12,8 +12,8 @@
 
 #include "RenderForwardTask.h"
 
-#include <PerfStat.h>
 #include <PathUtils.h>
+#include <PerfStat.h>
 #include <ViewFrustum.h>
 #include <gpu/Context.h>
 #include <gpu/Texture.h>
@@ -22,26 +22,26 @@
 
 #include <render/FilterTask.h>
 
-#include "RenderHifi.h"
-#include "render-utils/ShaderConstants.h"
-#include "StencilMaskPass.h"
-#include "ZoneRenderer.h"
-#include "FadeEffect.h"
-#include "ToneMappingEffect.h"
 #include "BackgroundStage.h"
+#include "FadeEffect.h"
 #include "FramebufferCache.h"
-#include "TextureCache.h"
 #include "RenderCommonTask.h"
+#include "RenderHifi.h"
+#include "StencilMaskPass.h"
+#include "TextureCache.h"
+#include "ToneMappingEffect.h"
+#include "ZoneRenderer.h"
+#include "render-utils/ShaderConstants.h"
 
 namespace ru {
-    using render_utils::slot::texture::Texture;
-    using render_utils::slot::buffer::Buffer;
-}
+using render_utils::slot::buffer::Buffer;
+using render_utils::slot::texture::Texture;
+} // namespace ru
 
 namespace gr {
-    using graphics::slot::texture::Texture;
-    using graphics::slot::buffer::Buffer;
-}
+using graphics::slot::buffer::Buffer;
+using graphics::slot::texture::Texture;
+} // namespace gr
 
 using namespace render;
 
@@ -55,32 +55,32 @@ void RenderForwardTask::build(JobModel& task, const render::Varying& input, rend
 
     // Unpack inputs
     const auto& inputs = input.get<Input>();
-    
+
     // Separate the fetched items
     const auto& fetchedItems = inputs.get0();
 
-        const auto& items = fetchedItems.get0();
+    const auto& items = fetchedItems.get0();
 
-            // Extract opaques / transparents / lights / metas / layered / background
-            const auto& opaques = items[RenderFetchCullSortTask::OPAQUE_SHAPE];
-            const auto& transparents = items[RenderFetchCullSortTask::TRANSPARENT_SHAPE];
-            const auto& metas = items[RenderFetchCullSortTask::META];
-            const auto& inFrontOpaque = items[RenderFetchCullSortTask::LAYER_FRONT_OPAQUE_SHAPE];
-            const auto& inFrontTransparent = items[RenderFetchCullSortTask::LAYER_FRONT_TRANSPARENT_SHAPE];
-            const auto& hudOpaque = items[RenderFetchCullSortTask::LAYER_HUD_OPAQUE_SHAPE];
-            const auto& hudTransparent = items[RenderFetchCullSortTask::LAYER_HUD_TRANSPARENT_SHAPE];
+    // Extract opaques / transparents / lights / metas / layered / background
+    const auto& opaques = items[RenderFetchCullSortTask::OPAQUE_SHAPE];
+    const auto& transparents = items[RenderFetchCullSortTask::TRANSPARENT_SHAPE];
+    const auto& metas = items[RenderFetchCullSortTask::META];
+    const auto& inFrontOpaque = items[RenderFetchCullSortTask::LAYER_FRONT_OPAQUE_SHAPE];
+    const auto& inFrontTransparent = items[RenderFetchCullSortTask::LAYER_FRONT_TRANSPARENT_SHAPE];
+    const auto& hudOpaque = items[RenderFetchCullSortTask::LAYER_HUD_OPAQUE_SHAPE];
+    const auto& hudTransparent = items[RenderFetchCullSortTask::LAYER_HUD_TRANSPARENT_SHAPE];
 
     // Lighting model comes next, the big configuration of the view
     const auto& lightingModel = inputs[1];
 
     // Extract the Lighting Stages Current frame ( and zones)
     const auto& lightingStageInputs = inputs.get2();
-        // Fetch the current frame stacks from all the stages
-        const auto currentStageFrames = lightingStageInputs.get0();
-            const auto lightFrame = currentStageFrames[0];
-            const auto backgroundFrame = currentStageFrames[1];
- 
-        const auto& zones = lightingStageInputs[1];
+    // Fetch the current frame stacks from all the stages
+    const auto currentStageFrames = lightingStageInputs.get0();
+    const auto lightFrame = currentStageFrames[0];
+    const auto backgroundFrame = currentStageFrames[1];
+
+    const auto& zones = lightingStageInputs[1];
 
     // First job, alter faded
     fadeEffect->build(task, opaques);
@@ -107,7 +107,8 @@ void RenderForwardTask::build(JobModel& task, const render::Varying& input, rend
     const auto opaqueInputs = DrawForward::Inputs(opaques, lightingModel).asVarying();
     task.addJob<DrawForward>("DrawOpaques", opaqueInputs, shapePlumber);
 
-    // Similar to light stage, background stage has been filled by several potential render items and resolved for the frame in this job
+    // Similar to light stage, background stage has been filled by several potential render items and resolved for the frame in
+    // this job
     const auto backgroundInputs = DrawBackgroundStage::Inputs(lightingModel, backgroundFrame).asVarying();
     task.addJob<DrawBackgroundStage>("DrawBackgroundForward", backgroundInputs);
 
@@ -115,7 +116,7 @@ void RenderForwardTask::build(JobModel& task, const render::Varying& input, rend
     const auto transparentInputs = DrawForward::Inputs(transparents, lightingModel).asVarying();
     task.addJob<DrawForward>("DrawTransparents", transparentInputs, shapePlumber);
 
-    {  // Debug the bounds of the rendered items, still look at the zbuffer
+    { // Debug the bounds of the rendered items, still look at the zbuffer
 
         task.addJob<DrawBounds>("DrawMetaBounds", metas);
         task.addJob<DrawBounds>("DrawBounds", opaques);
@@ -127,17 +128,19 @@ void RenderForwardTask::build(JobModel& task, const render::Varying& input, rend
     }
 
     // Just resolve the msaa
-    const auto resolveInputs =
-        ResolveFramebuffer::Inputs(framebuffer, static_cast<gpu::FramebufferPointer>(nullptr)).asVarying();
+    const auto resolveInputs = ResolveFramebuffer::Inputs(framebuffer, static_cast<gpu::FramebufferPointer>(nullptr))
+                                   .asVarying();
     const auto resolvedFramebuffer = task.addJob<ResolveFramebuffer>("Resolve", resolveInputs);
-    //auto resolvedFramebuffer = task.addJob<ResolveNewFramebuffer>("Resolve", framebuffer);
+    // auto resolvedFramebuffer = task.addJob<ResolveNewFramebuffer>("Resolve", framebuffer);
 
 #if defined(Q_OS_ANDROID)
 #else
     // Lighting Buffer ready for tone mapping
-    // Forward rendering on GLES doesn't support tonemapping to and from the same FBO, so we specify 
+    // Forward rendering on GLES doesn't support tonemapping to and from the same FBO, so we specify
     // the output FBO as null, which causes the tonemapping to target the blit framebuffer
-    const auto toneMappingInputs = ToneMappingDeferred::Inputs(resolvedFramebuffer, static_cast<gpu::FramebufferPointer>(nullptr)).asVarying();
+    const auto toneMappingInputs = ToneMappingDeferred::Inputs(resolvedFramebuffer,
+                                                               static_cast<gpu::FramebufferPointer>(nullptr))
+                                       .asVarying();
     task.addJob<ToneMappingDeferred>("ToneMapping", toneMappingInputs);
 #endif
 
@@ -174,13 +177,13 @@ void PrepareFramebuffer::run(const RenderContextPointer& renderContext, gpu::Fra
 
         auto colorFormat = gpu::Element::COLOR_SRGBA_32;
         auto defaultSampler = gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_LINEAR);
-        auto colorTexture =
-            gpu::Texture::createRenderBufferMultisample(colorFormat, frameSize.x, frameSize.y, numSamples, defaultSampler);
+        auto colorTexture = gpu::Texture::createRenderBufferMultisample(colorFormat, frameSize.x, frameSize.y, numSamples,
+                                                                        defaultSampler);
         _framebuffer->setRenderBuffer(0, colorTexture);
 
-        auto depthFormat = gpu::Element(gpu::SCALAR, gpu::UINT32, gpu::DEPTH_STENCIL);  // Depth24_Stencil8 texel format
-        auto depthTexture =
-           gpu::Texture::createRenderBufferMultisample(depthFormat, frameSize.x, frameSize.y, numSamples, defaultSampler);
+        auto depthFormat = gpu::Element(gpu::SCALAR, gpu::UINT32, gpu::DEPTH_STENCIL); // Depth24_Stencil8 texel format
+        auto depthTexture = gpu::Texture::createRenderBufferMultisample(depthFormat, frameSize.x, frameSize.y, numSamples,
+                                                                        defaultSampler);
         _framebuffer->setDepthStencilBuffer(depthTexture, depthFormat);
     }
 
@@ -192,8 +195,8 @@ void PrepareFramebuffer::run(const RenderContextPointer& renderContext, gpu::Fra
 
         batch.setFramebuffer(_framebuffer);
         batch.clearFramebuffer(gpu::Framebuffer::BUFFER_COLOR0 | gpu::Framebuffer::BUFFER_DEPTH |
-            gpu::Framebuffer::BUFFER_STENCIL,
-            vec4(vec3(0), 0), 1.0, 0, true);
+                                   gpu::Framebuffer::BUFFER_STENCIL,
+                               vec4(vec3(0), 0), 1.0, 0, true);
     });
 
     framebuffer = _framebuffer;
@@ -239,7 +242,6 @@ void DrawForward::run(const RenderContextPointer& renderContext, const Inputs& i
     gpu::doInBatch("DrawForward::run", args->_context, [&](gpu::Batch& batch) {
         args->_batch = &batch;
 
-
         // Setup projection
         glm::mat4 projMat;
         Transform viewMat;
@@ -267,5 +269,3 @@ void DrawForward::run(const RenderContextPointer& renderContext, const Inputs& i
         args->_globalShapeKey = 0;
     });
 }
-
-

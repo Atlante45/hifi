@@ -8,12 +8,12 @@
 #ifndef hifi_Pointer_h
 #define hifi_Pointer_h
 
-#include <unordered_set>
 #include <unordered_map>
+#include <unordered_set>
 
-#include <QtCore/QUuid>
-#include <QVector>
 #include <QVariant>
+#include <QVector>
+#include <QtCore/QUuid>
 
 #include <shared/ReadWriteLockable.h>
 #include "Pick.h"
@@ -48,8 +48,9 @@ public:
     virtual PickResultPointer getPrevPickResult();
 
     virtual void setRenderState(const std::string& state) = 0;
-    virtual void editRenderState(const std::string& state, const QVariant& startProps, const QVariant& pathProps, const QVariant& endProps) = 0;
-    
+    virtual void editRenderState(const std::string& state, const QVariant& startProps, const QVariant& pathProps,
+                                 const QVariant& endProps) = 0;
+
     virtual QVariantMap toVariantMap() const = 0;
 
     virtual void setPrecisionPicking(bool precisionPicking);
@@ -69,7 +70,9 @@ public:
     void generatePointerEvents(unsigned int pointerID, const PickResultPointer& pickResult);
 
     struct PickedObject {
-        PickedObject(const QUuid& objectID = QUuid(), IntersectionType type = IntersectionType::NONE) : objectID(objectID), type(type) {}
+        PickedObject(const QUuid& objectID = QUuid(), IntersectionType type = IntersectionType::NONE) :
+            objectID(objectID),
+            type(type) {}
 
         QUuid objectID;
         IntersectionType type;
@@ -84,7 +87,8 @@ protected:
     bool _enabled;
     bool _hover;
 
-    virtual PointerEvent buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult, const std::string& button = "", bool hover = true) = 0;
+    virtual PointerEvent buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult,
+                                           const std::string& button = "", bool hover = true) = 0;
 
     virtual PickedObject getHoveredObject(const PickResultPointer& pickResult) = 0;
     virtual Buttons getPressedButtons(const PickResultPointer& pickResult) = 0;
@@ -105,7 +109,6 @@ private:
     std::unordered_map<std::string, PickedObject> _triggeredObjects;
 
     PointerEvent::Button chooseButton(const std::string& button);
-
 };
 
 #endif // hifi_Pick_h

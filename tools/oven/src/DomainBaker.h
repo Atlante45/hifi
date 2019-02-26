@@ -14,8 +14,8 @@
 
 #include <QtCore/QJsonArray>
 #include <QtCore/QObject>
-#include <QtCore/QUrl>
 #include <QtCore/QThread>
+#include <QtCore/QUrl>
 
 #include "Baker.h"
 #include "FBXBaker.h"
@@ -27,9 +27,8 @@ public:
     // This is a real bummer, but the FBX SDK is not thread safe - even with separate FBXManager objects.
     // This means that we need to put all of the FBX importing/exporting from the same process on the same thread.
     // That means you must pass a usable running QThread when constructing a domain baker.
-    DomainBaker(const QUrl& localEntitiesFileURL, const QString& domainName,
-                const QString& baseOutputPath, const QUrl& destinationPath,
-                bool shouldRebakeOriginals = false);
+    DomainBaker(const QUrl& localEntitiesFileURL, const QString& domainName, const QString& baseOutputPath,
+                const QUrl& destinationPath, bool shouldRebakeOriginals = false);
 
 signals:
     void allModelsFinished();
@@ -63,7 +62,7 @@ private:
 
     QHash<QUrl, QSharedPointer<ModelBaker>> _modelBakers;
     QHash<QUrl, QSharedPointer<TextureBaker>> _skyboxBakers;
-    
+
     QMultiHash<QUrl, QJsonValueRef> _entitiesNeedingRewrite;
 
     int _totalNumberOfSubBakes { 0 };

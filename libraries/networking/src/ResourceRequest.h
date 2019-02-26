@@ -43,24 +43,16 @@ public:
     static const bool IS_OBSERVABLE = true;
     static const bool IS_NOT_OBSERVABLE = false;
 
-    ResourceRequest(
-        const QUrl& url,
-        const bool isObservable = IS_OBSERVABLE,
-        const qint64 callerId = -1,
-        const QString& extra = ""
-    ) : _url(url),
+    ResourceRequest(const QUrl& url, const bool isObservable = IS_OBSERVABLE, const qint64 callerId = -1,
+                    const QString& extra = "") :
+        _url(url),
         _isObservable(isObservable),
         _callerId(callerId),
-        _extra(extra)
-    { }
+        _extra(extra) {}
 
     virtual ~ResourceRequest() = default;
 
-    enum State {
-        NotStarted = 0,
-        InProgress,
-        Finished
-    };
+    enum State { NotStarted = 0, InProgress, Finished };
 
     enum Result {
         Success,

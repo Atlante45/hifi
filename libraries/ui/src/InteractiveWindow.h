@@ -14,29 +14,23 @@
 #ifndef hifi_InteractiveWindow_h
 #define hifi_InteractiveWindow_h
 
+#include <QQmlEngine>
 #include <QtCore/QObject>
 #include <QtCore/QPointer>
 #include <QtScript/QScriptValue>
-#include <QQmlEngine>
 
-#include <glm/glm.hpp>
 #include <GLMHelpers.h>
+#include <glm/glm.hpp>
 
 namespace InteractiveWindowEnums {
-    Q_NAMESPACE
+Q_NAMESPACE
 
-    enum InteractiveWindowFlags : uint8_t {
-        AlwaysOnTop = 1 << 0,
-        CloseButtonHides = 1 << 1
-    };
-    Q_ENUM_NS(InteractiveWindowFlags);
+enum InteractiveWindowFlags : uint8_t { AlwaysOnTop = 1 << 0, CloseButtonHides = 1 << 1 };
+Q_ENUM_NS(InteractiveWindowFlags);
 
-    enum InteractiveWindowPresentationMode {
-        Virtual,
-        Native
-    };
-    Q_ENUM_NS(InteractiveWindowPresentationMode);
-}
+enum InteractiveWindowPresentationMode { Virtual, Native };
+Q_ENUM_NS(InteractiveWindowPresentationMode);
+} // namespace InteractiveWindowEnums
 
 using namespace InteractiveWindowEnums;
 
@@ -52,7 +46,7 @@ using namespace InteractiveWindowEnums;
  * @property {Vec2} size
  * @property {boolean} visible
  * @property {Desktop.PresentationMode} presentationMode
- * 
+ *
  */
 class InteractiveWindow : public QObject {
     Q_OBJECT

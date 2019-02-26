@@ -6,15 +6,14 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-#include <QtGui/QGuiApplication>
-#include <QtCore/QTimer>
 #include <gl/Config.h>
 #include <gl/GLWindow.h>
-
+#include <QtCore/QTimer>
+#include <QtGui/QGuiApplication>
 
 int main(int argc, char** argv) {
     QGuiApplication app(argc, argv);
-    
+
     GLWindow* window = new GLWindow();
     window->create();
     window->show();

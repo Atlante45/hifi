@@ -24,14 +24,10 @@
 const QString ATP_SCHEME { "atp:" };
 
 class AssetRequest : public QObject {
-   Q_OBJECT
+    Q_OBJECT
 public:
-    enum State {
-        NotStarted = 0,
-        WaitingForData,
-        Finished
-    };
-    
+    enum State { NotStarted = 0, WaitingForData, Finished };
+
     enum Error {
         NoError,
         NotFound,

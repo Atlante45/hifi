@@ -11,8 +11,8 @@
 
 #include "SnapshotUploader.h"
 
-#include <QtCore/QJsonDocument>
 #include <QtCore/QJsonArray>
+#include <QtCore/QJsonDocument>
 
 #include <AddressManager.h>
 
@@ -37,7 +37,8 @@ void SnapshotUploader::uploadSuccess(QNetworkReply* reply) {
         QString snapshotID = dataObject.value("id").toString();
         QString originalImageFileName = dataObject.value("original_image_file_name").toString();
         auto addressManager = DependencyManager::get<AddressManager>();
-        QString placeName = _inWorldLocation.authority(); // We currently only upload shareable places, in which case this is just host.
+        QString placeName = _inWorldLocation
+                                .authority(); // We currently only upload shareable places, in which case this is just host.
         QString currentPath = _inWorldLocation.path();
 
         // create json post data
@@ -62,11 +63,8 @@ void SnapshotUploader::uploadSuccess(QNetworkReply* reply) {
         auto accountManager = DependencyManager::get<AccountManager>();
         JSONCallbackParameters callbackParams(this, "createStorySuccess", "createStoryFailure");
 
-        accountManager->sendRequest(STORY_UPLOAD_URL,
-            AccountManagerAuth::Required,
-            QNetworkAccessManager::PostOperation,
-            callbackParams,
-            QJsonDocument(rootObject).toJson());
+        accountManager->sendRequest(STORY_UPLOAD_URL, AccountManagerAuth::Required, QNetworkAccessManager::PostOperation,
+                                    callbackParams, QJsonDocument(rootObject).toJson());
 
     } else {
         emit DependencyManager::get<WindowScriptingInterface>()->snapshotShared(true, contents);
@@ -82,7 +80,8 @@ void SnapshotUploader::uploadFailure(QNetworkReply* reply) {
     }
     replyString = replyString.left(1000); // Only print first 1000 characters of error
     qDebug() << "Snapshot upload reply error (truncated):" << replyString;
-    emit DependencyManager::get<WindowScriptingInterface>()->snapshotShared(true, replyString); // maybe someday include _inWorldLocation, _filename?
+    emit DependencyManager::get<WindowScriptingInterface>()->snapshotShared(
+        true, replyString); // maybe someday include _inWorldLocation, _filename?
     this->deleteLater();
 }
 
@@ -103,4 +102,3 @@ void SnapshotUploader::createStoryFailure(QNetworkReply* reply) {
     emit DependencyManager::get<WindowScriptingInterface>()->snapshotShared(true, replyString);
     this->deleteLater();
 }
-

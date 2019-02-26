@@ -15,31 +15,29 @@
 #include "EntityItem.h"
 
 class PolyLineEntityItem : public EntityItem {
- public:
+public:
     static EntityItemPointer factory(const EntityItemID& entityID, const EntityItemProperties& properties);
 
     PolyLineEntityItem(const EntityItemID& entityItemID);
 
     ALLOW_INSTANTIATION // This class can be instantiated
 
-    // methods for getting/setting all properties of an entity
-    virtual EntityItemProperties getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const override;
+        // methods for getting/setting all properties of an entity
+        virtual EntityItemProperties
+        getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const override;
     virtual bool setProperties(const EntityItemProperties& properties) override;
 
     virtual EntityPropertyFlags getEntityProperties(EncodeBitstreamParams& params) const override;
 
     virtual void appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                     EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
+                                    EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                    EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                                     OctreeElement::AppendState& appendState) const override;
 
     virtual int readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                 ReadBitstreamToTreeParams& args,
-                                                 EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                 bool& somethingChanged) override;
+                                                 ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                 bool overwriteLocalData, bool& somethingChanged) override;
 
     glm::u8vec3 getColor() const;
     void setColor(const glm::u8vec3& value);
@@ -58,8 +56,8 @@ class PolyLineEntityItem : public EntityItem {
     void setStrokeColors(const QVector<glm::vec3>& strokeColors);
     QVector<glm::vec3> getStrokeColors() const;
 
-    void setIsUVModeStretch(bool isUVModeStretch){ _isUVModeStretch = isUVModeStretch; }
-    bool getIsUVModeStretch() const{ return _isUVModeStretch; }
+    void setIsUVModeStretch(bool isUVModeStretch) { _isUVModeStretch = isUVModeStretch; }
+    bool getIsUVModeStretch() const { return _isUVModeStretch; }
 
     QString getTextures() const;
     void setTextures(const QString& textures);
@@ -70,7 +68,7 @@ class PolyLineEntityItem : public EntityItem {
     void setFaceCamera(bool faceCamera) { _faceCamera = faceCamera; }
     bool getFaceCamera() const { return _faceCamera; }
 
-    bool pointsChanged() const { return _pointsChanged; } 
+    bool pointsChanged() const { return _pointsChanged; }
     bool normalsChanged() const { return _normalsChanged; }
     bool colorsChanged() const { return _colorsChanged; }
     bool widthsChanged() const { return _widthsChanged; }
@@ -81,20 +79,24 @@ class PolyLineEntityItem : public EntityItem {
 
     // never have a ray intersection pick a PolyLineEntityItem.
     virtual bool supportsDetailedIntersection() const override { return true; }
-    virtual bool findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                                             OctreeElementPointer& element, float& distance,
-                                             BoxFace& face, glm::vec3& surfaceNormal,
-                                             QVariantMap& extraInfo, bool precisionPicking) const override { return false; }
+    virtual bool findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction, OctreeElementPointer& element,
+                                             float& distance, BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                             bool precisionPicking) const override {
+        return false;
+    }
     virtual bool findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
-                                                  const glm::vec3& acceleration, OctreeElementPointer& element, float& parabolicDistance,
-                                                  BoxFace& face, glm::vec3& surfaceNormal,
-                                                  QVariantMap& extraInfo, bool precisionPicking) const override { return false; }
+                                                  const glm::vec3& acceleration, OctreeElementPointer& element,
+                                                  float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+                                                  QVariantMap& extraInfo, bool precisionPicking) const override {
+        return false;
+    }
 
     virtual void debugDump() const override;
+
 private:
     void computeAndUpdateDimensionsAndPosition();
-    
- protected:
+
+protected:
     glm::u8vec3 _color;
     QVector<glm::vec3> _points;
     QVector<glm::vec3> _normals;

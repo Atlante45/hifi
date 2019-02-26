@@ -41,7 +41,5 @@ InputPluginList getInputPlugins() {
 #endif
 
 void saveInputPluginSettings(const InputPluginList& plugins) {
-    foreach (auto inputPlugin, plugins) {
-        inputPlugin->saveSettings();
-    }
+    foreach (auto inputPlugin, plugins) { inputPlugin->saveSettings(); }
 }

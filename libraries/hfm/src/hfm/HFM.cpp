@@ -69,9 +69,7 @@ bool HFMMaterial::needTangentSpace() const {
 
 QStringList HFMModel::getJointNames() const {
     QStringList names;
-    foreach (const HFMJoint& joint, joints) {
-        names.append(joint.name);
-    }
+    foreach (const HFMJoint& joint, joints) { names.append(joint.name); }
     return names;
 }
 
@@ -106,16 +104,11 @@ bool HFMModel::convexHullContains(const glm::vec3& point) const {
         // But first must transform from model-frame into mesh-frame
         glm::vec3 transformedPoint = glm::vec3(glm::inverse(mesh.modelTransform) * glm::vec4(point, 1.0f));
         int verticesSize = mesh.vertices.size();
-        for (int j = 0;
-            j < indices.size() - 2; // -2 in case the vertices aren't the right size -- we access j + 2 below
-            j += primitiveSize) {
-            if (indices[j] < verticesSize &&
-                indices[j + 1] < verticesSize &&
-                indices[j + 2] < verticesSize &&
-                !isPointBehindTrianglesPlane(transformedPoint,
-                    mesh.vertices[indices[j]],
-                    mesh.vertices[indices[j + 1]],
-                    mesh.vertices[indices[j + 2]])) {
+        for (int j = 0; j < indices.size() - 2; // -2 in case the vertices aren't the right size -- we access j + 2 below
+             j += primitiveSize) {
+            if (indices[j] < verticesSize && indices[j + 1] < verticesSize && indices[j + 2] < verticesSize &&
+                !isPointBehindTrianglesPlane(transformedPoint, mesh.vertices[indices[j]], mesh.vertices[indices[j + 1]],
+                                             mesh.vertices[indices[j + 2]])) {
                 // it's not behind at least one so we bail
                 return false;
             }
@@ -131,8 +124,7 @@ bool HFMModel::convexHullContains(const glm::vec3& point) const {
         // the point needs to be "behind" all the primitives respective planes.
         for (auto part : mesh.parts) {
             // run through all the triangles and quads
-            if (!checkEachPrimitive(mesh, part.triangleIndices, 3) ||
-                !checkEachPrimitive(mesh, part.quadIndices, 4)) {
+            if (!checkEachPrimitive(mesh, part.triangleIndices, 3) || !checkEachPrimitive(mesh, part.quadIndices, 4)) {
                 // If not, the point is outside, bail for this mesh
                 insideMesh = false;
                 continue;

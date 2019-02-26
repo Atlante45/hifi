@@ -10,9 +10,9 @@
 
 #include <gl/Config.h>
 #include <gl/GLHelpers.h>
-#include <gpu/Forward.h>
-#include <gpu/Format.h>
 #include <gpu/Context.h>
+#include <gpu/Format.h>
+#include <gpu/Forward.h>
 #include <QLoggingCategory>
 
 Q_DECLARE_LOGGING_CATEGORY(gpugllogging)
@@ -22,10 +22,11 @@ Q_DECLARE_LOGGING_CATEGORY(trace_render_gpu_gl_detail)
 #if defined(__clang__)
 #define BUFFER_OFFSET(bytes) (reinterpret_cast<GLvoid*>(bytes))
 #else
-#define BUFFER_OFFSET(bytes) ((GLubyte*) nullptr + (bytes))
+#define BUFFER_OFFSET(bytes) ((GLubyte*)nullptr + (bytes))
 #endif
 
-namespace gpu { namespace gl { 
+namespace gpu {
+namespace gl {
 
 // Create a fence and inject a GPU wait on the fence
 void serverWait();
@@ -42,24 +43,19 @@ void getCurrentGLState(State::Data& state);
 
 enum GLSyncState {
     // The object is currently undergoing no processing, although it's content
-    // may be out of date, or it's storage may be invalid relative to the 
+    // may be out of date, or it's storage may be invalid relative to the
     // owning GPU object
     Idle,
     // The object has been queued for transfer to the GPU
     Pending,
     // The object has been transferred to the GPU, but is awaiting
-    // any post transfer operations that may need to occur on the 
+    // any post transfer operations that may need to occur on the
     // primary rendering thread
     Transferred,
 };
 
-static const GLenum BLEND_OPS_TO_GL[State::NUM_BLEND_OPS] = {
-    GL_FUNC_ADD,
-    GL_FUNC_SUBTRACT,
-    GL_FUNC_REVERSE_SUBTRACT,
-    GL_MIN,
-    GL_MAX 
-};
+static const GLenum BLEND_OPS_TO_GL[State::NUM_BLEND_OPS] = { GL_FUNC_ADD, GL_FUNC_SUBTRACT, GL_FUNC_REVERSE_SUBTRACT, GL_MIN,
+                                                              GL_MAX };
 
 static const GLenum BLEND_ARGS_TO_GL[State::NUM_BLEND_ARGS] = {
     GL_ZERO,
@@ -79,24 +75,11 @@ static const GLenum BLEND_ARGS_TO_GL[State::NUM_BLEND_ARGS] = {
     GL_ONE_MINUS_CONSTANT_ALPHA,
 };
 
-static const GLenum COMPARISON_TO_GL[gpu::NUM_COMPARISON_FUNCS] = {
-    GL_NEVER,
-    GL_LESS,
-    GL_EQUAL,
-    GL_LEQUAL,
-    GL_GREATER,
-    GL_NOTEQUAL,
-    GL_GEQUAL,
-    GL_ALWAYS 
-};
+static const GLenum COMPARISON_TO_GL[gpu::NUM_COMPARISON_FUNCS] = { GL_NEVER,   GL_LESS,     GL_EQUAL,  GL_LEQUAL,
+                                                                    GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS };
 
 static const GLenum PRIMITIVE_TO_GL[gpu::NUM_PRIMITIVES] = {
-    GL_POINTS,
-    GL_LINES,
-    GL_LINE_STRIP,
-    GL_TRIANGLES,
-    GL_TRIANGLE_STRIP,
-    GL_TRIANGLE_FAN,
+    GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN,
 };
 
 static const GLenum ELEMENT_TYPE_TO_GL[gpu::NUM_TYPES] = {
@@ -121,15 +104,19 @@ static const GLenum ELEMENT_TYPE_TO_GL[gpu::NUM_TYPES] = {
 
 class GLBackend;
 
-template <typename GPUType>
+template<typename GPUType>
 struct GLObject : public GPUObject {
 public:
-    GLObject(const std::weak_ptr<GLBackend>& backend, const GPUType& gpuObject, GLuint id) : _gpuObject(gpuObject), _id(id), _backend(backend) {}
+    GLObject(const std::weak_ptr<GLBackend>& backend, const GPUType& gpuObject, GLuint id) :
+        _gpuObject(gpuObject),
+        _id(id),
+        _backend(backend) {}
 
-    virtual ~GLObject() { }
+    virtual ~GLObject() {}
 
     const GPUType& _gpuObject;
     const GLuint _id;
+
 protected:
     const std::weak_ptr<GLBackend> _backend;
 };
@@ -145,9 +132,7 @@ class GLTextureTransferEngine;
 using GLTextureTransferEnginePointer = std::shared_ptr<GLTextureTransferEngine>;
 struct ShaderObject;
 
-} } // namespace gpu::gl 
+} // namespace gl
+} // namespace gpu
 
 #endif
-
-
-

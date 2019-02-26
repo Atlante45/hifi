@@ -23,15 +23,15 @@ namespace gl {
 struct ShaderBinding {
     int index;
     std::string name;
-    GLint size{ -1 };
-    GLint binding{ -1 };
+    GLint size { -1 };
+    GLint binding { -1 };
 };
 
 struct Uniform : public ShaderBinding {
-    Uniform(){};
+    Uniform() {};
     Uniform(GLint program, int index) { load(program, index); };
     using Vector = std::vector<Uniform>;
-    GLenum type{ GL_FLOAT };
+    GLenum type { GL_FLOAT };
 
     void load(GLuint glprogram, int index);
     // Incredibly slow on mac, DO NOT USE
@@ -43,7 +43,7 @@ struct Uniform : public ShaderBinding {
     static Vector load(GLuint glprogram, const std::vector<std::string>& names);
     static Uniform loadByName(GLuint glprogram, const std::string& names);
 
-    template <typename C>
+    template<typename C>
     static Vector loadByName(GLuint glprogram, const C& names) {
         if (names.empty()) {
             return {};
@@ -60,7 +60,7 @@ struct Uniform : public ShaderBinding {
 using Uniforms = Uniform::Vector;
 
 struct UniformBlock : public ShaderBinding {
-    UniformBlock(){};
+    UniformBlock() {};
     UniformBlock(GLint program, int index) { load(program, index); };
 
     using Vector = std::vector<UniformBlock>;
@@ -71,10 +71,10 @@ struct UniformBlock : public ShaderBinding {
 using UniformBlocks = UniformBlock::Vector;
 
 struct Input : public ShaderBinding {
-    Input(){};
+    Input() {};
     Input(GLint program, int index) { load(program, index); };
     using Vector = std::vector<Uniform>;
-    GLenum type{ GL_FLOAT };
+    GLenum type { GL_FLOAT };
 
     void load(GLuint glprogram, int index);
     static Vector load(GLuint glprogram);
@@ -83,7 +83,7 @@ struct Input : public ShaderBinding {
 using Inputs = Input::Vector;
 
 struct CachedShader {
-    GLenum format{ 0 };
+    GLenum format { 0 };
     std::string source;
     std::vector<char> binary;
     inline operator bool() const { return format != 0 && !binary.empty(); }
@@ -96,21 +96,13 @@ void loadShaderCache(ShaderCache& cache);
 void saveShaderCache(const ShaderCache& cache);
 
 #ifdef SEPARATE_PROGRAM
-bool compileShader(GLenum shaderDomain,
-                   const std::string& shaderSource,
-                   GLuint& shaderObject,
-                   GLuint& programObject,
+bool compileShader(GLenum shaderDomain, const std::string& shaderSource, GLuint& shaderObject, GLuint& programObject,
                    std::string& message);
-bool compileShader(GLenum shaderDomain,
-                   const std::vector<std::string>& shaderSources,
-                   GLuint& shaderObject,
-                   GLuint& programObject,
-                   std::string& message);
+bool compileShader(GLenum shaderDomain, const std::vector<std::string>& shaderSources, GLuint& shaderObject,
+                   GLuint& programObject, std::string& message);
 #else
 bool compileShader(GLenum shaderDomain, const std::string& shaderSource, GLuint& shaderObject, std::string& message);
-bool compileShader(GLenum shaderDomain,
-                   const std::vector<std::string>& shaderSources,
-                   GLuint& shaderObject,
+bool compileShader(GLenum shaderDomain, const std::vector<std::string>& shaderSources, GLuint& shaderObject,
                    std::string& message);
 #endif
 
@@ -120,6 +112,6 @@ bool linkProgram(GLuint glprogram, std::string& message);
 void getShaderInfoLog(GLuint glshader, std::string& message);
 void getProgramInfoLog(GLuint glprogram, std::string& message);
 void getProgramBinary(GLuint glprogram, CachedShader& cachedShader);
-}  // namespace gl
+} // namespace gl
 
 #endif

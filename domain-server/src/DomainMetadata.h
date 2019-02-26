@@ -13,11 +13,11 @@
 
 #include <stdint.h>
 
-#include <QVariantMap>
 #include <QJsonObject>
+#include <QVariantMap>
 
 class DomainMetadata : public QObject {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     using Tic = uint32_t;
@@ -59,8 +59,8 @@ protected:
     void sendDescriptors();
 
     QVariantMap _metadata;
-    uint32_t _lastTic{ (uint32_t)-1 };
-    uint32_t _tic{ 0 };
+    uint32_t _lastTic { (uint32_t)-1 };
+    uint32_t _tic { 0 };
 };
 
 #endif // hifi_DomainMetadata_h

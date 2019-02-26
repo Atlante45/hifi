@@ -8,13 +8,12 @@
 
 #include "QmlWrapper.h"
 
-#include <QtCore/QThread>
 #include <QtCore/QCoreApplication>
+#include <QtCore/QThread>
 
 #include <shared/QtHelpers.h>
 
-QmlWrapper::QmlWrapper(QObject* qmlObject, QObject* parent)
-    : QObject(parent), _qmlObject(qmlObject) {
+QmlWrapper::QmlWrapper(QObject* qmlObject, QObject* parent) : QObject(parent), _qmlObject(qmlObject) {
     Q_ASSERT(QThread::currentThread() == qApp->thread());
 }
 

@@ -23,7 +23,7 @@ void TestRunner::setWorkingFolder(QLabel* workingFolderLabel) {
     }
 
     _workingFolder = QFileDialog::getExistingDirectory(nullptr, "Please select a working folder for temporary files", parent,
-        QFileDialog::ShowDirsOnly);
+                                                       QFileDialog::ShowDirsOnly);
 
     // If user canceled then restore previous selection and return
     if (_workingFolder == "") {
@@ -55,7 +55,7 @@ void TestRunner::downloadBuildXml(void* caller) {
 void TestRunner::parseBuildInformation() {
     try {
         QDomDocument domDocument;
-        QString filename{ _workingFolder + "/" + DEV_BUILD_XML_FILENAME };
+        QString filename { _workingFolder + "/" + DEV_BUILD_XML_FILENAME };
         QFile file(filename);
         if (!file.open(QIODevice::ReadOnly) || !domDocument.setContent(&file)) {
             throw QString("Could not open " + filename);
@@ -85,7 +85,7 @@ void TestRunner::parseBuildInformation() {
         }
 
         // Now loop over the platforms, looking for ours
-        bool platformFound{ false };
+        bool platformFound { false };
         element = element.firstChild().toElement();
         while (!element.isNull()) {
             if (element.attribute("name") == platformOfInterest) {
@@ -126,29 +126,26 @@ void TestRunner::parseBuildInformation() {
         }
         _buildInformation.url = element.text();
 
-    }
-    catch (QString errorMessage) {
+    } catch (QString errorMessage) {
         QMessageBox::critical(0, "Internal error: " + QString(__FILE__) + ":" + QString::number(__LINE__), errorMessage);
         exit(-1);
-    }
-    catch (...) {
+    } catch (...) {
         QMessageBox::critical(0, "Internal error: " + QString(__FILE__) + ":" + QString::number(__LINE__), "unknown error");
         exit(-1);
     }
 }
 
 QString TestRunner::getInstallerNameFromURL(const QString& url) {
-    // An example URL: https://deployment.highfidelity.com/jobs/pr-build/label%3Dwindows/13023/HighFidelity-Beta-Interface-PR14006-be76c43.exe
+    // An example URL:
+    // https://deployment.highfidelity.com/jobs/pr-build/label%3Dwindows/13023/HighFidelity-Beta-Interface-PR14006-be76c43.exe
     // On Mac, replace `exe` with `dmg`
     try {
         QStringList urlParts = url.split("/");
         return urlParts[urlParts.size() - 1];
-    }
-    catch (QString errorMessage) {
+    } catch (QString errorMessage) {
         QMessageBox::critical(0, "Internal error: " + QString(__FILE__) + ":" + QString::number(__LINE__), errorMessage);
         exit(-1);
-    }
-    catch (...) {
+    } catch (...) {
         QMessageBox::critical(0, "Internal error: " + QString(__FILE__) + ":" + QString::number(__LINE__), "unknown error");
         exit(-1);
     }
@@ -157,7 +154,7 @@ QString TestRunner::getInstallerNameFromURL(const QString& url) {
 void TestRunner::appendLog(const QString& message) {
     if (!_logFile.open(QIODevice::Append | QIODevice::Text)) {
         QMessageBox::critical(0, "Internal error: " + QString(__FILE__) + ":" + QString::number(__LINE__),
-            "Could not open the log file");
+                              "Could not open the log file");
         exit(-1);
     }
 

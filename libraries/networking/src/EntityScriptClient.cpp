@@ -1,7 +1,7 @@
 #include "EntityScriptClient.h"
-#include "NodeList.h"
-#include "NetworkLogging.h"
 #include "EntityScriptUtils.h"
+#include "NetworkLogging.h"
+#include "NodeList.h"
 
 #include <QThread>
 
@@ -11,12 +11,12 @@ GetScriptStatusRequest::GetScriptStatusRequest(QUuid entityID) : _entityID(entit
 }
 
 GetScriptStatusRequest::~GetScriptStatusRequest() {
-
 }
 
 void GetScriptStatusRequest::start() {
     auto client = DependencyManager::get<EntityScriptClient>();
-    client->getEntityServerScriptStatus(_entityID, [this](bool responseReceived, bool isRunning, EntityScriptStatus status, QString errorInfo) {
+    client->getEntityServerScriptStatus(_entityID, [this](bool responseReceived, bool isRunning, EntityScriptStatus status,
+                                                          QString errorInfo) {
         _responseReceived = responseReceived;
         _isRunning = isRunning;
         _status = status;
@@ -27,18 +27,16 @@ void GetScriptStatusRequest::start() {
 }
 
 EntityScriptClient::EntityScriptClient() {
-    setCustomDeleter([](Dependency* dependency){
-        static_cast<EntityScriptClient*>(dependency)->deleteLater();
-    });
-    
+    setCustomDeleter([](Dependency* dependency) { static_cast<EntityScriptClient*>(dependency)->deleteLater(); });
+
     auto nodeList = DependencyManager::get<NodeList>();
     auto& packetReceiver = nodeList->getPacketReceiver();
 
     packetReceiver.registerListener(PacketType::EntityScriptGetStatusReply, this, "handleGetScriptStatusReply");
 
     connect(nodeList.data(), &LimitedNodeList::nodeKilled, this, &EntityScriptClient::handleNodeKilled);
-    connect(nodeList.data(), &LimitedNodeList::clientConnectionToNodeReset,
-            this, &EntityScriptClient::handleNodeClientConnectionReset);
+    connect(nodeList.data(), &LimitedNodeList::clientConnectionToNodeReset, this,
+            &EntityScriptClient::handleNodeClientConnectionReset);
 }
 
 GetScriptStatusRequest* EntityScriptClient::createScriptStatusRequest(QUuid entityID) {
@@ -58,7 +56,7 @@ bool EntityScriptClient::reloadServerScript(QUuid entityID) {
         auto id = entityID.toRfc4122();
         auto payloadSize = id.size();
         auto packet = NLPacket::create(PacketType::ReloadEntityServerScript, payloadSize, true);
-        
+
         packet->write(id);
 
         if (nodeList->sendPacket(std::move(packet), *entityScriptServer) != -1) {
@@ -84,15 +82,14 @@ void EntityScriptClient::callEntityServerMethod(QUuid entityID, const QString& m
         quint16 paramCount = params.length();
         packetList->writePrimitive(paramCount);
 
-        foreach(const QString& param, params) {
-            packetList->writeString(param);
-        }
+        foreach (const QString& param, params) { packetList->writeString(param); }
 
         nodeList->sendPacketList(std::move(packetList), *entityScriptServer);
     }
 }
 
-void EntityScriptServerServices::callEntityClientMethod(QUuid clientSessionID, QUuid entityID, const QString& method, const QStringList& params) {
+void EntityScriptServerServices::callEntityClientMethod(QUuid clientSessionID, QUuid entityID, const QString& method,
+                                                        const QStringList& params) {
     // only valid to call this function if you are the entity script server
     auto nodeList = DependencyManager::get<NodeList>();
     SharedNodePointer targetClient = nodeList->nodeWithUUID(clientSessionID);
@@ -107,9 +104,7 @@ void EntityScriptServerServices::callEntityClientMethod(QUuid clientSessionID, Q
         quint16 paramCount = params.length();
         packetList->writePrimitive(paramCount);
 
-        foreach(const QString& param, params) {
-            packetList->writeString(param);
-        }
+        foreach (const QString& param, params) { packetList->writeString(param); }
 
         nodeList->sendPacketList(std::move(packetList), *targetClient);
     }
@@ -157,7 +152,6 @@ void EntityScriptClient::handleGetScriptStatusReply(QSharedPointer<ReceivedMessa
     // Check if we have any pending requests for this node
     auto messageMapIt = _pendingEntityScriptStatusRequests.find(senderNode);
     if (messageMapIt != _pendingEntityScriptStatusRequests.end()) {
-
         // Found the node, get the MessageID -> Callback map
         auto& messageCallbackMap = messageMapIt->second;
 
@@ -196,7 +190,6 @@ void EntityScriptClient::handleNodeClientConnectionReset(SharedNodePointer node)
 }
 
 void EntityScriptClient::forceFailureOfPendingRequests(SharedNodePointer node) {
-
     {
         auto messageMapIt = _pendingEntityScriptStatusRequests.find(node);
         if (messageMapIt != _pendingEntityScriptStatusRequests.end()) {

@@ -12,9 +12,9 @@
 #ifndef hifi_DataServerAccountInfo_h
 #define hifi_DataServerAccountInfo_h
 
+#include <QtNetwork/qnetworkreply.h>
 #include <QtCore/QObject>
 #include <QtCore/QUuid>
-#include <QtNetwork/qnetworkreply.h>
 
 #include "OAuthAccessToken.h"
 
@@ -23,6 +23,7 @@ const float SATOSHIS_PER_CREDIT = 100000000.0f;
 class DataServerAccountInfo : public QObject {
     Q_OBJECT
     const static QString EMPTY_KEY;
+
 public:
     DataServerAccountInfo() {};
     DataServerAccountInfo(const DataServerAccountInfo& otherInfo);
@@ -40,7 +41,7 @@ public:
 
     const QString& getDiscourseApiKey() const { return _discourseApiKey; }
     void setDiscourseApiKey(const QString& discourseApiKey);
-    
+
     const QUuid& getWalletID() const { return _walletID; }
     void setWalletID(const QUuid& walletID);
 
@@ -53,15 +54,20 @@ public:
     void setDomainID(const QUuid& domainID) { _domainID = domainID; }
     const QUuid& getDomainID() const { return _domainID; }
 
-    void setTemporaryDomain(const QUuid& domainID, const QString& key) { _temporaryDomainID = domainID; _temporaryDomainApiKey = key; }
-    const QString& getTemporaryDomainKey(const QUuid& domainID) { return domainID == _temporaryDomainID ? _temporaryDomainApiKey : EMPTY_KEY; }
+    void setTemporaryDomain(const QUuid& domainID, const QString& key) {
+        _temporaryDomainID = domainID;
+        _temporaryDomainApiKey = key;
+    }
+    const QString& getTemporaryDomainKey(const QUuid& domainID) {
+        return domainID == _temporaryDomainID ? _temporaryDomainApiKey : EMPTY_KEY;
+    }
 
     bool hasProfile() const;
 
     void setProfileInfoFromJSON(const QJsonObject& jsonObject);
 
-    friend QDataStream& operator<<(QDataStream &out, const DataServerAccountInfo& info);
-    friend QDataStream& operator>>(QDataStream &in, DataServerAccountInfo& info);
+    friend QDataStream& operator<<(QDataStream& out, const DataServerAccountInfo& info);
+    friend QDataStream& operator>>(QDataStream& in, DataServerAccountInfo& info);
 
 private:
     void swap(DataServerAccountInfo& otherInfo);
@@ -75,7 +81,6 @@ private:
     QUuid _temporaryDomainID;
     QString _temporaryDomainApiKey;
     QByteArray _privateKey;
-
 };
 
 #endif // hifi_DataServerAccountInfo_h

@@ -24,7 +24,7 @@ QList<EntityItemID> EntityEditFilters::getZonesByPosition(glm::vec3& position) {
     for (auto id : zoneIDs) {
         if (!id.isInvalidID()) {
             // for now, look it up in the tree (soon we need to cache or similar?)
-            EntityItemPointer itemPtr = _tree->findEntityByEntityItemID(id); 
+            EntityItemPointer itemPtr = _tree->findEntityByEntityItemID(id);
             auto zone = std::dynamic_pointer_cast<ZoneEntityItem>(itemPtr);
             if (!zone) {
                 // TODO: maybe remove later?
@@ -33,7 +33,7 @@ QList<EntityItemID> EntityEditFilters::getZonesByPosition(glm::vec3& position) {
                 zones.append(id);
             }
         } else {
-            // the null id is the global filter we put in the domain server's 
+            // the null id is the global filter we put in the domain server's
             // advanced entity server settings
             zones.append(id);
         }
@@ -42,8 +42,8 @@ QList<EntityItemID> EntityEditFilters::getZonesByPosition(glm::vec3& position) {
 }
 
 bool EntityEditFilters::filter(glm::vec3& position, EntityItemProperties& propertiesIn, EntityItemProperties& propertiesOut,
-        bool& wasChanged, EntityTree::FilterType filterType, EntityItemID& itemID, EntityItemPointer& existingEntity) {
-    
+                               bool& wasChanged, EntityTree::FilterType filterType, EntityItemID& itemID,
+                               EntityItemPointer& existingEntity) {
     // get the ids of all the zones (plus the global entity edit filter) that the position
     // lies within
     auto zoneIDs = getZonesByPosition(position);
@@ -51,12 +51,12 @@ bool EntityEditFilters::filter(glm::vec3& position, EntityItemProperties& proper
         if (!itemID.isInvalidID() && id == itemID) {
             continue;
         }
-        
-        // get the filter pair, etc...  
+
+        // get the filter pair, etc...
         _lock.lockForRead();
         FilterData filterData = _filterDataMap.value(id);
         _lock.unlock();
-    
+
         if (filterData.valid()) {
             if (filterData.rejectAll) {
                 return false;
@@ -67,7 +67,6 @@ bool EntityEditFilters::filter(glm::vec3& position, EntityItemProperties& proper
                 (!filterData.wantsToFilterPhysics && filterType == EntityTree::FilterType::Physics) ||
                 (!filterData.wantsToFilterDelete && filterType == EntityTree::FilterType::Delete) ||
                 (!filterData.wantsToFilterAdd && filterType == EntityTree::FilterType::Add)) {
-
                 wasChanged = false;
                 return true; // accept the message
             }
@@ -78,7 +77,8 @@ bool EntityEditFilters::filter(glm::vec3& position, EntityItemProperties& proper
             QScriptValue inputValues = propertiesIn.copyToScriptValue(filterData.engine, false, true, true);
             propertiesIn.setDesiredProperties(oldProperties);
 
-            auto in = QJsonValue::fromVariant(inputValues.toVariant()); // grab json copy now, because the inputValues might be side effected by the filter.
+            auto in = QJsonValue::fromVariant(
+                inputValues.toVariant()); // grab json copy now, because the inputValues might be side effected by the filter.
 
             QScriptValueList args;
             args << inputValues;
@@ -90,7 +90,6 @@ bool EntityEditFilters::filter(glm::vec3& position, EntityItemProperties& proper
                 QScriptValue currentValues = currentProperties.copyToScriptValue(filterData.engine, false, true, true);
                 args << currentValues;
             }
-
 
             // get the zone properties
             if (filterData.wantsZoneProperties) {
@@ -144,7 +143,6 @@ bool EntityEditFilters::filter(glm::vec3& position, EntityItemProperties& proper
                 auto out = QJsonValue::fromVariant(result.toVariant());
                 wasChanged |= (in != out);
             } else if (result.isBool()) {
-
                 // if the filter returned false, then it's authoritative
                 if (!result.toBool()) {
                     return false;
@@ -153,13 +151,13 @@ bool EntityEditFilters::filter(glm::vec3& position, EntityItemProperties& proper
                 // otherwise, assume it wants to pass all properties
                 propertiesOut = propertiesIn;
                 wasChanged = false;
-                
+
             } else {
                 return false;
             }
         }
     }
-    // if we made it here, 
+    // if we made it here,
     return true;
 }
 
@@ -173,25 +171,24 @@ void EntityEditFilters::removeFilter(EntityItemID entityID) {
 }
 
 void EntityEditFilters::addFilter(EntityItemID entityID, QString filterURL) {
-
     QUrl scriptURL(filterURL);
-    
-    // setting it to an empty string is same as removing 
+
+    // setting it to an empty string is same as removing
     if (filterURL.size() == 0) {
         removeFilter(entityID);
         return;
     }
-   
+
     // The following should be abstracted out for use in Agent.cpp (and maybe later AvatarMixer.cpp)
     if (scriptURL.scheme().isEmpty() || (scriptURL.scheme() == HIFI_URL_SCHEME_FILE)) {
         qWarning() << "Cannot load script from local filesystem, because assignment may be on a different computer.";
         scriptRequestFinished(entityID);
         return;
     }
-   
+
     // first remove any existing info for this entity
     removeFilter(entityID);
-    
+
     // reject all edits until we load the script
     FilterData filterData;
     filterData.rejectAll = true;
@@ -199,23 +196,25 @@ void EntityEditFilters::addFilter(EntityItemID entityID, QString filterURL) {
     _lock.lockForWrite();
     _filterDataMap.insert(entityID, filterData);
     _lock.unlock();
-   
-    auto scriptRequest = DependencyManager::get<ResourceManager>()->createResourceRequest(
-        this, scriptURL, true, -1, "EntityEditFilters::addFilter");
+
+    auto scriptRequest = DependencyManager::get<ResourceManager>()->createResourceRequest(this, scriptURL, true, -1,
+                                                                                          "EntityEditFilters::addFilter");
     if (!scriptRequest) {
         qWarning() << "Could not create ResourceRequest for Entity Edit filter.";
         scriptRequestFinished(entityID);
         return;
     }
     // Agent.cpp sets up a timeout here, but that is unnecessary, as ResourceRequest has its own.
-    connect(scriptRequest, &ResourceRequest::finished, this, [this, entityID]{ EntityEditFilters::scriptRequestFinished(entityID);} );
+    connect(scriptRequest, &ResourceRequest::finished, this,
+            [this, entityID] { EntityEditFilters::scriptRequestFinished(entityID); });
     // FIXME: handle atp rquests setup here. See Agent::requestScript()
     scriptRequest->send();
     qDebug() << "script request sent for entity " << entityID;
 }
 
 // Copied from ScriptEngine.cpp. We should make this a class method for reuse.
-// Note: I've deliberately stopped short of using ScriptEngine instead of QScriptEngine, as that is out of project scope at this point.
+// Note: I've deliberately stopped short of using ScriptEngine instead of QScriptEngine, as that is out of project scope at this
+// point.
 static bool hasCorrectSyntax(const QScriptProgram& program) {
     const auto syntaxCheck = QScriptEngine::checkSyntax(program.sourceCode());
     if (syntaxCheck.state() != QScriptSyntaxCheckResult::Valid) {
@@ -264,10 +263,12 @@ void EntityEditFilters::scriptRequestFinished(EntityItemID entityID) {
                 FilterData filterData;
                 filterData.engine = engine;
                 filterData.rejectAll = false;
-                
+
                 // define the uncaughtException function
                 QScriptEngine& engineRef = *engine;
-                filterData.uncaughtExceptions = [&engineRef, urlString]() { return hadUncaughtExceptions(engineRef, urlString); };
+                filterData.uncaughtExceptions = [&engineRef, urlString]() {
+                    return hadUncaughtExceptions(engineRef, urlString);
+                };
 
                 // now get the filter function
                 auto global = engine->globalObject();
@@ -281,7 +282,7 @@ void EntityEditFilters::scriptRequestFinished(EntityItemID entityID) {
                 if (!filterData.filterFn.isFunction()) {
                     qDebug() << "Filter function specified but not found. Will reject all edits for those without lock rights.";
                     delete engine;
-                    filterData.rejectAll=true;
+                    filterData.rejectAll = true;
                 }
 
                 // if the wantsToFilterEdit is a boolean evaluate as a boolean, otherwise assume true
@@ -294,7 +295,8 @@ void EntityEditFilters::scriptRequestFinished(EntityItemID entityID) {
 
                 // if the wantsToFilterPhysics is a boolean evaluate as a boolean, otherwise assume true
                 QScriptValue wantsToFilterPhysicsValue = filterData.filterFn.property("wantsToFilterPhysics");
-                filterData.wantsToFilterPhysics = wantsToFilterPhysicsValue.isBool() ? wantsToFilterPhysicsValue.toBool() : true;
+                filterData.wantsToFilterPhysics = wantsToFilterPhysicsValue.isBool() ? wantsToFilterPhysicsValue.toBool()
+                                                                                     : true;
 
                 // if the wantsToFilterDelete is a boolean evaluate as a boolean, otherwise assume false
                 QScriptValue wantsToFilterDeleteValue = filterData.filterFn.property("wantsToFilterDelete");
@@ -355,7 +357,6 @@ void EntityEditFilters::scriptRequestFinished(EntityItemID entityID) {
                                 filterData.wantsZoneBoundingBox = true;
                                 break; // we can break here, since there are no other special cases
                             }
-
                         }
                     }
                     if (filterData.wantsZoneProperties) {
@@ -368,15 +369,16 @@ void EntityEditFilters::scriptRequestFinished(EntityItemID entityID) {
                 _lock.unlock();
 
                 qDebug() << "script request filter processed for entity id " << entityID;
-                
+
                 emit filterAdded(entityID, true);
                 return;
             }
-        } 
+        }
     } else if (scriptRequest) {
         const QString urlString = scriptRequest->getUrl().toString();
         qCritical() << "Failed to download script";
-        // See HTTPResourceRequest::onRequestFinished for interpretation of codes. For example, a 404 is code 6 and 403 is 3. A timeout is 2. Go figure.
+        // See HTTPResourceRequest::onRequestFinished for interpretation of codes. For example, a 404 is code 6 and 403 is 3. A
+        // timeout is 2. Go figure.
         qCritical() << "ResourceRequest error was" << scriptRequest->getResult();
     } else {
         qCritical() << "Failed to create script request.";

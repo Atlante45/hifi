@@ -22,8 +22,7 @@ Buffer::Size Buffer::getBufferCPUMemSize() {
     return _bufferCPUMemSize.getValue();
 }
 
-Buffer::Buffer(Size pageSize) :
-    _renderPages(pageSize), _pages(pageSize) {
+Buffer::Buffer(Size pageSize) : _renderPages(pageSize), _pages(pageSize) {
     _bufferCPUCount.increment();
 }
 
@@ -66,19 +65,21 @@ void Buffer::markDirty(Size offset, Size bytes) {
 
 extern bool isRenderThread();
 
-Buffer::Update::Update(const Update& other) : 
+Buffer::Update::Update(const Update& other) :
     buffer(other.buffer),
     updateNumber(other.updateNumber),
     size(other.size),
     dirtyPages(other.dirtyPages),
-    dirtyData(other.dirtyData) { }
+    dirtyData(other.dirtyData) {
+}
 
-Buffer::Update::Update(Update&& other) : 
+Buffer::Update::Update(Update&& other) :
     buffer(other.buffer),
     updateNumber(other.updateNumber),
     size(other.size),
     dirtyPages(std::move(other.dirtyPages)),
-    dirtyData(std::move(other.dirtyData)) { }
+    dirtyData(std::move(other.dirtyData)) {
+}
 
 Buffer::Update::Update(const Buffer& parent) : buffer(parent) {
     const auto pageSize = buffer._pages._pageSize;
@@ -156,31 +157,34 @@ Buffer::Size Buffer::append(Size size, const Byte* data) {
     return _end;
 }
 
-Buffer::Size Buffer::getSize() const { 
+Buffer::Size Buffer::getSize() const {
     Q_ASSERT(getSysmem().getSize() >= _end);
     return _end;
 }
 
-const Element BufferView::DEFAULT_ELEMENT = Element( gpu::SCALAR, gpu::UINT8, gpu::RAW );
+const Element BufferView::DEFAULT_ELEMENT = Element(gpu::SCALAR, gpu::UINT8, gpu::RAW);
 
-BufferView::BufferView() :
-BufferView(DEFAULT_ELEMENT) {}
+BufferView::BufferView() : BufferView(DEFAULT_ELEMENT) {
+}
 
-BufferView::BufferView(const Element& element) :
-    BufferView(BufferPointer(), element) {}
+BufferView::BufferView(const Element& element) : BufferView(BufferPointer(), element) {
+}
 
-BufferView::BufferView(Buffer* newBuffer, const Element& element) :
-    BufferView(BufferPointer(newBuffer), element) {}
+BufferView::BufferView(Buffer* newBuffer, const Element& element) : BufferView(BufferPointer(newBuffer), element) {
+}
 
 BufferView::BufferView(const BufferPointer& buffer, const Element& element) :
-    BufferView(buffer, DEFAULT_OFFSET, buffer ? buffer->getSize() : 0, element.getSize(), element) {}
+    BufferView(buffer, DEFAULT_OFFSET, buffer ? buffer->getSize() : 0, element.getSize(), element) {
+}
 
 BufferView::BufferView(const BufferPointer& buffer, Size offset, Size size, const Element& element) :
-    BufferView(buffer, offset, size, element.getSize(), element) {}
+    BufferView(buffer, offset, size, element.getSize(), element) {
+}
 
 BufferView::BufferView(const BufferPointer& buffer, Size offset, Size size, uint16 stride, const Element& element) :
     _buffer(buffer),
     _offset(offset),
     _size(size),
     _element(element),
-    _stride(stride) {}
+    _stride(stride) {
+}

@@ -65,7 +65,8 @@ bool GridEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityPoint
     return needsUpdate;
 }
 
-void GridEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) {
+void GridEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                        const TypedEntityPointer& entity) {
     withWriteLock([&] {
         _color = entity->getColor();
         _alpha = entity->getAlpha();
@@ -132,7 +133,8 @@ void GridEntityRenderer::doRender(RenderArgs* args) {
     if (_followCamera) {
         // Get the camera position rounded to the nearest major grid line
         // This grid is for UI and should lie on worldlines
-        glm::vec3 localCameraPosition = glm::inverse(transform.getRotation()) * (args->getViewFrustum().getPosition() - renderTransform.getTranslation());
+        glm::vec3 localCameraPosition = glm::inverse(transform.getRotation()) *
+                                        (args->getViewFrustum().getPosition() - renderTransform.getTranslation());
         localCameraPosition.z = 0;
         localCameraPosition = (float)_majorGridEvery * glm::round(localCameraPosition / (float)_majorGridEvery);
         transform.setTranslation(renderTransform.getTranslation() + transform.getRotation() * localCameraPosition);
@@ -150,8 +152,7 @@ void GridEntityRenderer::doRender(RenderArgs* args) {
 
     const float MINOR_GRID_EDGE = 0.0025f;
     const float MAJOR_GRID_EDGE = 0.005f;
-    DependencyManager::get<GeometryCache>()->renderGrid(*batch, minCorner, maxCorner,
-        minorGridRowDivisions, minorGridColDivisions, MINOR_GRID_EDGE,
-        majorGridRowDivisions, majorGridColDivisions, MAJOR_GRID_EDGE,
-        color, _geometryId);
+    DependencyManager::get<GeometryCache>()->renderGrid(*batch, minCorner, maxCorner, minorGridRowDivisions,
+                                                        minorGridColDivisions, MINOR_GRID_EDGE, majorGridRowDivisions,
+                                                        majorGridColDivisions, MAJOR_GRID_EDGE, color, _geometryId);
 }

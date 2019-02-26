@@ -13,39 +13,37 @@
 
 #include <utility>
 
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
 #include <QtGui/qevent.h>
 #include <QFile>
-#include <QTextStream>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonParseError>
+#include <QTextStream>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
+#include <AudioInjector.h>
+#include <PathUtils.h>
+#include <Pick.h>
 #include <PointerEvent.h>
 #include <PointerManager.h>
-#include <Pick.h>
-#include <controllers/UserInputMapper.h>
-#include <PathUtils.h>
+#include <RegisteredMetaTypes.h>
 #include <ResourceManager.h>
 #include <SoundCache.h>
-#include <AudioInjector.h>
-#include <RegisteredMetaTypes.h>
+#include <controllers/UserInputMapper.h>
 #include <ui/TabletScriptingInterface.h>
 
+#include "DependencyManager.h"
 #include "avatar/AvatarManager.h"
 #include "avatar/MyAvatar.h"
-#include "avatar/AvatarManager.h"
 #include "raypick/PickScriptingInterface.h"
 #include "scripting/HMDScriptingInterface.h"
-#include "scripting/WindowScriptingInterface.h"
 #include "scripting/SelectionScriptingInterface.h"
-#include "scripting/HMDScriptingInterface.h"
-#include "DependencyManager.h"
+#include "scripting/WindowScriptingInterface.h"
 
-#include "raypick/StylusPointer.h"
-#include "GLMHelpers.h"
 #include "Application.h"
+#include "GLMHelpers.h"
+#include "raypick/StylusPointer.h"
 
 static const int LEFT_HAND_CONTROLLER_INDEX = 0;
 static const int RIGHT_HAND_CONTROLLER_INDEX = 1;
@@ -54,19 +52,18 @@ static const float MALLET_LENGTH = 0.18f;
 static const float MALLET_TOUCH_Y_OFFSET = 0.050f;
 static const float MALLET_Y_OFFSET = 0.160f;
 
-static const glm::quat MALLET_ROTATION_OFFSET{0.70710678f, 0.0f, -0.70710678f, 0.0f};
-static const glm::vec3 MALLET_MODEL_DIMENSIONS{0.01f, MALLET_LENGTH, 0.01f};
-static const glm::vec3 MALLET_POSITION_OFFSET{0.0f, -MALLET_Y_OFFSET / 2.0f, 0.0f};
-static const glm::vec3 MALLET_TIP_OFFSET{0.0f, MALLET_LENGTH - MALLET_TOUCH_Y_OFFSET, 0.0f};
+static const glm::quat MALLET_ROTATION_OFFSET { 0.70710678f, 0.0f, -0.70710678f, 0.0f };
+static const glm::vec3 MALLET_MODEL_DIMENSIONS { 0.01f, MALLET_LENGTH, 0.01f };
+static const glm::vec3 MALLET_POSITION_OFFSET { 0.0f, -MALLET_Y_OFFSET / 2.0f, 0.0f };
+static const glm::vec3 MALLET_TIP_OFFSET { 0.0f, MALLET_LENGTH - MALLET_TOUCH_Y_OFFSET, 0.0f };
 
-
-static const glm::vec3 Z_AXIS {0.0f, 0.0f, 1.0f};
-static const glm::vec3 KEYBOARD_TABLET_OFFSET{0.30f, -0.38f, -0.04f};
-static const glm::vec3 KEYBOARD_TABLET_DEGREES_OFFSET{-45.0f, 0.0f, 0.0f};
-static const glm::vec3 KEYBOARD_TABLET_LANDSCAPE_OFFSET{-0.2f, -0.27f, -0.05f};
-static const glm::vec3 KEYBOARD_TABLET_LANDSCAPE_DEGREES_OFFSET{-45.0f, 0.0f, -90.0f};
-static const glm::vec3 KEYBOARD_AVATAR_OFFSET{-0.6f, 0.3f, -0.7f};
-static const glm::vec3 KEYBOARD_AVATAR_DEGREES_OFFSET{0.0f, 180.0f, 0.0f};
+static const glm::vec3 Z_AXIS { 0.0f, 0.0f, 1.0f };
+static const glm::vec3 KEYBOARD_TABLET_OFFSET { 0.30f, -0.38f, -0.04f };
+static const glm::vec3 KEYBOARD_TABLET_DEGREES_OFFSET { -45.0f, 0.0f, 0.0f };
+static const glm::vec3 KEYBOARD_TABLET_LANDSCAPE_OFFSET { -0.2f, -0.27f, -0.05f };
+static const glm::vec3 KEYBOARD_TABLET_LANDSCAPE_DEGREES_OFFSET { -45.0f, 0.0f, -90.0f };
+static const glm::vec3 KEYBOARD_AVATAR_OFFSET { -0.6f, 0.3f, -0.7f };
+static const glm::vec3 KEYBOARD_AVATAR_DEGREES_OFFSET { 0.0f, 180.0f, 0.0f };
 
 static const QString SOUND_FILE = PathUtils::resourcesUrl() + "sounds/keyboardPress.mp3";
 static const QString MALLET_MODEL_URL = PathUtils::resourcesUrl() + "meshes/drumstick.fbx";
@@ -87,25 +84,23 @@ static const QString ENTER_STRING = "enter";
 
 static const QString KEY_HOVER_HIGHLIGHT = "keyHoverHiglight";
 static const QString KEY_PRESSED_HIGHLIGHT = "keyPressesHighlight";
-static const QVariantMap KEY_HOVERING_STYLE {
-    { "isOutlineSmooth", true },
-    { "outlineWidth", 3 },
-    { "outlineUnoccludedColor", QVariantMap {{"red", 13}, {"green", 152}, {"blue", 186}}},
-    { "outlineUnoccludedAlpha", 1.0 },
-    { "outlineOccludedAlpha", 0.0 },
-    { "fillUnoccludedAlpha", 0.0 },
-    { "fillOccludedAlpha", 0.0 }
-};
+static const QVariantMap KEY_HOVERING_STYLE { { "isOutlineSmooth", true },
+                                              { "outlineWidth", 3 },
+                                              { "outlineUnoccludedColor",
+                                                QVariantMap { { "red", 13 }, { "green", 152 }, { "blue", 186 } } },
+                                              { "outlineUnoccludedAlpha", 1.0 },
+                                              { "outlineOccludedAlpha", 0.0 },
+                                              { "fillUnoccludedAlpha", 0.0 },
+                                              { "fillOccludedAlpha", 0.0 } };
 
-static const QVariantMap KEY_PRESSING_STYLE {
-    { "isOutlineSmooth", true },
-    { "outlineWidth", 3 },
-    { "fillUnoccludedColor", QVariantMap {{"red", 50}, {"green", 50}, {"blue", 50}}},
-    { "outlineUnoccludedAlpha", 0.0 },
-    { "outlineOccludedAlpha", 0.0 },
-    { "fillUnoccludedAlpha", 0.6 },
-    { "fillOccludedAlpha", 0.0 }
-};
+static const QVariantMap KEY_PRESSING_STYLE { { "isOutlineSmooth", true },
+                                              { "outlineWidth", 3 },
+                                              { "fillUnoccludedColor",
+                                                QVariantMap { { "red", 50 }, { "green", 50 }, { "blue", 50 } } },
+                                              { "outlineUnoccludedAlpha", 0.0 },
+                                              { "outlineOccludedAlpha", 0.0 },
+                                              { "fillUnoccludedAlpha", 0.6 },
+                                              { "fillOccludedAlpha", 0.0 } };
 
 std::pair<glm::vec3, glm::quat> calculateKeyboardPositionAndOrientation() {
     auto myAvatar = DependencyManager::get<AvatarManager>()->getMyAvatar();
@@ -123,7 +118,8 @@ std::pair<glm::vec3, glm::quat> calculateKeyboardPositionAndOrientation() {
         auto tablet = DependencyManager::get<TabletScriptingInterface>()->getTablet("com.highfidelity.interface.tablet.system");
         bool landscapeMode = tablet->getLandscape();
         glm::vec3 keyboardOffset = landscapeMode ? KEYBOARD_TABLET_LANDSCAPE_OFFSET : KEYBOARD_TABLET_OFFSET;
-        glm::vec3 keyboardDegreesOffset = landscapeMode ? KEYBOARD_TABLET_LANDSCAPE_DEGREES_OFFSET : KEYBOARD_TABLET_DEGREES_OFFSET;
+        glm::vec3 keyboardDegreesOffset = landscapeMode ? KEYBOARD_TABLET_LANDSCAPE_DEGREES_OFFSET
+                                                        : KEYBOARD_TABLET_DEGREES_OFFSET;
         glm::vec3 tabletWorldPosition = properties.getPosition();
         glm::quat tabletWorldOrientation = properties.getRotation();
         glm::vec3 scaledKeyboardTabletOffset = keyboardOffset * sensorToWorldScale;
@@ -214,8 +210,10 @@ Keyboard::Keyboard() {
     auto windowScriptingInterface = DependencyManager::get<WindowScriptingInterface>();
     auto myAvatar = DependencyManager::get<AvatarManager>()->getMyAvatar();
     auto hmdScriptingInterface = DependencyManager::get<HMDScriptingInterface>();
-    connect(pointerManager.data(), &PointerManager::triggerBeginOverlay, this, &Keyboard::handleTriggerBegin, Qt::QueuedConnection);
-    connect(pointerManager.data(), &PointerManager::triggerContinueOverlay, this, &Keyboard::handleTriggerContinue, Qt::QueuedConnection);
+    connect(pointerManager.data(), &PointerManager::triggerBeginOverlay, this, &Keyboard::handleTriggerBegin,
+            Qt::QueuedConnection);
+    connect(pointerManager.data(), &PointerManager::triggerContinueOverlay, this, &Keyboard::handleTriggerContinue,
+            Qt::QueuedConnection);
     connect(pointerManager.data(), &PointerManager::triggerEndOverlay, this, &Keyboard::handleTriggerEnd, Qt::QueuedConnection);
     connect(pointerManager.data(), &PointerManager::hoverBeginOverlay, this, &Keyboard::handleHoverBegin, Qt::QueuedConnection);
     connect(pointerManager.data(), &PointerManager::hoverEndOverlay, this, &Keyboard::handleHoverEnd, Qt::QueuedConnection);
@@ -245,42 +243,34 @@ void Keyboard::enableSelectionLists() {
 }
 
 bool Keyboard::getUse3DKeyboard() const {
-    return _use3DKeyboardLock.resultWithReadLock<bool>([&] {
-        return _use3DKeyboard.get();
-    });
+    return _use3DKeyboardLock.resultWithReadLock<bool>([&] { return _use3DKeyboard.get(); });
 }
 
 void Keyboard::setUse3DKeyboard(bool use) {
-    _use3DKeyboardLock.withWriteLock([&] {
-        _use3DKeyboard.set(use);
-    });
+    _use3DKeyboardLock.withWriteLock([&] { _use3DKeyboard.set(use); });
 }
 
 void Keyboard::createKeyboard() {
     auto pointerManager = DependencyManager::get<PointerManager>();
 
-    QVariantMap modelProperties {
-        { "url", MALLET_MODEL_URL }
-    };
+    QVariantMap modelProperties { { "url", MALLET_MODEL_URL } };
 
-    QVariantMap leftStylusProperties {
-        { "hand", LEFT_HAND_CONTROLLER_INDEX },
-        { "filter", PickScriptingInterface::PICK_LOCAL_ENTITIES() },
-        { "model", modelProperties },
-        { "tipOffset", vec3toVariant(MALLET_TIP_OFFSET) }
-    };
+    QVariantMap leftStylusProperties { { "hand", LEFT_HAND_CONTROLLER_INDEX },
+                                       { "filter", PickScriptingInterface::PICK_LOCAL_ENTITIES() },
+                                       { "model", modelProperties },
+                                       { "tipOffset", vec3toVariant(MALLET_TIP_OFFSET) } };
 
-    QVariantMap rightStylusProperties {
-        { "hand", RIGHT_HAND_CONTROLLER_INDEX },
-        { "filter", PickScriptingInterface::PICK_LOCAL_ENTITIES() },
-        { "model", modelProperties },
-        { "tipOffset", vec3toVariant(MALLET_TIP_OFFSET) }
-    };
+    QVariantMap rightStylusProperties { { "hand", RIGHT_HAND_CONTROLLER_INDEX },
+                                        { "filter", PickScriptingInterface::PICK_LOCAL_ENTITIES() },
+                                        { "model", modelProperties },
+                                        { "tipOffset", vec3toVariant(MALLET_TIP_OFFSET) } };
 
-    _leftHandStylus = pointerManager->addPointer(std::make_shared<StylusPointer>(leftStylusProperties, StylusPointer::buildStylus(leftStylusProperties), true, true,
-                                                                                 MALLET_POSITION_OFFSET, MALLET_ROTATION_OFFSET, MALLET_MODEL_DIMENSIONS));
-    _rightHandStylus = pointerManager->addPointer(std::make_shared<StylusPointer>(rightStylusProperties, StylusPointer::buildStylus(rightStylusProperties), true, true,
-                                                                                  MALLET_POSITION_OFFSET, MALLET_ROTATION_OFFSET, MALLET_MODEL_DIMENSIONS));
+    _leftHandStylus = pointerManager->addPointer(
+        std::make_shared<StylusPointer>(leftStylusProperties, StylusPointer::buildStylus(leftStylusProperties), true, true,
+                                        MALLET_POSITION_OFFSET, MALLET_ROTATION_OFFSET, MALLET_MODEL_DIMENSIONS));
+    _rightHandStylus = pointerManager->addPointer(
+        std::make_shared<StylusPointer>(rightStylusProperties, StylusPointer::buildStylus(rightStylusProperties), true, true,
+                                        MALLET_POSITION_OFFSET, MALLET_ROTATION_OFFSET, MALLET_MODEL_DIMENSIONS));
 
     pointerManager->disablePointer(_rightHandStylus);
     pointerManager->disablePointer(_leftHandStylus);
@@ -296,7 +286,6 @@ bool Keyboard::isRaised() const {
 }
 
 void Keyboard::setRaised(bool raised) {
-
     bool isRaised;
     withReadLock([&] { isRaised = _raised; });
     if (isRaised != raised) {
@@ -431,22 +420,16 @@ void Keyboard::setPassword(bool password) {
 
 void Keyboard::setResetKeyboardPositionOnRaise(bool reset) {
     if (_resetKeyboardPositionOnRaise != reset) {
-        withWriteLock([&] {
-            _resetKeyboardPositionOnRaise = reset;
-        });
+        withWriteLock([&] { _resetKeyboardPositionOnRaise = reset; });
     }
 }
 
 void Keyboard::setPreferMalletsOverLasers(bool preferMalletsOverLasers) {
-    _preferMalletsOverLasersSettingLock.withWriteLock([&] {
-        _preferMalletsOverLasers.set(preferMalletsOverLasers);
-    });
+    _preferMalletsOverLasersSettingLock.withWriteLock([&] { _preferMalletsOverLasers.set(preferMalletsOverLasers); });
 }
 
 bool Keyboard::getPreferMalletsOverLasers() const {
-    return _preferMalletsOverLasersSettingLock.resultWithReadLock<bool>([&] {
-        return _preferMalletsOverLasers.get();
-    });
+    return _preferMalletsOverLasersSettingLock.resultWithReadLock<bool>([&] { return _preferMalletsOverLasers.get(); });
 }
 
 void Keyboard::switchToLayer(int layerIndex) {
@@ -460,22 +443,22 @@ void Keyboard::switchToLayer(int layerIndex) {
         glm::vec3 currentPosition = oldProperties.getPosition();
         glm::quat currentOrientation = oldProperties.getRotation();
 
-         raiseKeyboardAnchor(false);
-         raiseKeyboard(false);
+        raiseKeyboardAnchor(false);
+        raiseKeyboard(false);
 
-         setLayerIndex(layerIndex);
+        setLayerIndex(layerIndex);
 
-         raiseKeyboardAnchor(true);
-         raiseKeyboard(true);
+        raiseKeyboardAnchor(true);
+        raiseKeyboard(true);
 
-         EntityItemProperties properties;
-         properties.setPosition(currentPosition);
-         properties.setRotation(currentOrientation);
-         entityScriptingInterface->editEntity(_anchor.entityID, properties);
+        EntityItemProperties properties;
+        properties.setPosition(currentPosition);
+        properties.setRotation(currentOrientation);
+        entityScriptingInterface->editEntity(_anchor.entityID, properties);
 
-         addIncludeItemsToMallets();
+        addIncludeItemsToMallets();
 
-         startLayerSwitchTimer();
+        startLayerSwitchTimer();
     }
 }
 
@@ -508,15 +491,17 @@ void Keyboard::handleTriggerBegin(const QUuid& id, const PointerEvent& event) {
 
     if (key.timerFinished()) {
         unsigned int pointerID = event.getID();
-        auto handIndex = (pointerID == _leftHandStylus || pointerID == _leftHandLaser)
-            ? controller::Hand::LEFT : controller::Hand::RIGHT;
+        auto handIndex = (pointerID == _leftHandStylus || pointerID == _leftHandLaser) ? controller::Hand::LEFT
+                                                                                       : controller::Hand::RIGHT;
 
         auto userInputMapper = DependencyManager::get<UserInputMapper>();
         userInputMapper->triggerHapticPulse(PULSE_STRENGTH, PULSE_DURATION, handIndex);
 
         EntityPropertyFlags desiredProperties;
         desiredProperties += PROP_POSITION;
-        glm::vec3 keyWorldPosition = DependencyManager::get<EntityScriptingInterface>()->getEntityProperties(id, desiredProperties).getPosition();
+        glm::vec3 keyWorldPosition = DependencyManager::get<EntityScriptingInterface>()
+                                         ->getEntityProperties(id, desiredProperties)
+                                         .getPosition();
 
         AudioInjectorOptions audioOptions;
         audioOptions.localOnly = true;
@@ -547,7 +532,7 @@ void Keyboard::handleTriggerBegin(const QUuid& id, const PointerEvent& event) {
             case Key::Type::BACKSPACE:
                 scanCode = Qt::Key_Backspace;
                 keyString = "\x08";
-                _typedCharacters = _typedCharacters.left(_typedCharacters.length() -1);
+                _typedCharacters = _typedCharacters.left(_typedCharacters.length() - 1);
                 updateTextDisplay();
                 break;
             case Key::Type::ENTER:
@@ -583,15 +568,11 @@ void Keyboard::handleTriggerBegin(const QUuid& id, const PointerEvent& event) {
 }
 
 void Keyboard::setLeftHandLaser(unsigned int leftHandLaser) {
-    _handLaserLock.withWriteLock([&] {
-        _leftHandLaser = leftHandLaser;
-    });
+    _handLaserLock.withWriteLock([&] { _leftHandLaser = leftHandLaser; });
 }
 
 void Keyboard::setRightHandLaser(unsigned int rightHandLaser) {
-    _handLaserLock.withWriteLock([&] {
-        _rightHandLaser = rightHandLaser;
-    });
+    _handLaserLock.withWriteLock([&] { _rightHandLaser = rightHandLaser; });
 }
 
 void Keyboard::handleTriggerEnd(const QUuid& id, const PointerEvent& event) {
@@ -720,7 +701,6 @@ void Keyboard::loadKeyboardFile(const QString& keyboardFile) {
         qCWarning(interfaceapp) << "Could not create resource for Keyboard file" << keyboardFile;
     }
 
-
     connect(request, &ResourceRequest::finished, this, [=]() {
         if (request->getResult() != ResourceRequest::Success) {
             qCWarning(interfaceapp) << "Keyboard file failed to download";
@@ -742,7 +722,6 @@ void Keyboard::loadKeyboardFile(const QString& keyboardFile) {
         QJsonObject anchorObject = jsonObject["anchor"].toObject();
         bool useResourcePath = jsonObject["useResourcesPath"].toBool();
         QString resourcePath = PathUtils::resourcesUrl();
-
 
         if (anchorObject.isEmpty()) {
             qCWarning(interfaceapp) << "No Anchor specified. Not creating keyboard";
@@ -804,7 +783,6 @@ void Keyboard::loadKeyboardFile(const QString& keyboardFile) {
 
             QHash<QUuid, Key> keyboardLayerKeys;
             foreach (const QJsonValue& keyboardKeyValue, keyboardLayer.toArray()) {
-
                 QVariantMap textureMap;
                 if (!keyboardKeyValue["texture"].isNull()) {
                     textureMap = keyboardKeyValue["texture"].toObject().toVariantMap();
@@ -838,7 +816,7 @@ void Keyboard::loadKeyboardFile(const QString& keyboardFile) {
 
                 Key key;
                 if (!keyType.isNull()) {
-                    Key::Type type= Key::getKeyTypeFromString(keyType);
+                    Key::Type type = Key::getKeyTypeFromString(keyType);
                     key.setKeyType(type);
 
                     if (type == Key::Type::LAYER || type == Key::Type::CAPS) {
@@ -855,7 +833,6 @@ void Keyboard::loadKeyboardFile(const QString& keyboardFile) {
             }
 
             _keyboardLayers.push_back(keyboardLayerKeys);
-
         }
 
         {
@@ -901,11 +878,8 @@ void Keyboard::loadKeyboardFile(const QString& keyboardFile) {
     request->send();
 }
 
-
 QUuid Keyboard::getAnchorID() {
-    return _ignoreItemsLock.resultWithReadLock<QUuid>([&] {
-        return _anchor.entityID;
-    });
+    return _ignoreItemsLock.resultWithReadLock<QUuid>([&] { return _anchor.entityID; });
 }
 
 bool Keyboard::shouldProcessEntity() const {
@@ -913,14 +887,12 @@ bool Keyboard::shouldProcessEntity() const {
 }
 
 QSet<QUuid> Keyboard::getKeyIDs() {
-    return _ignoreItemsLock.resultWithReadLock<QSet<QUuid>>([&] {
-        return _itemsToIgnore;
-    });
+    return _ignoreItemsLock.resultWithReadLock<QSet<QUuid>>([&] { return _itemsToIgnore; });
 }
 
 void Keyboard::clearKeyboardKeys() {
     auto entityScriptingInterface = DependencyManager::get<EntityScriptingInterface>();
-    for (const auto& keyboardLayer: _keyboardLayers) {
+    for (const auto& keyboardLayer : _keyboardLayers) {
         for (auto iter = keyboardLayer.begin(); iter != keyboardLayer.end(); iter++) {
             entityScriptingInterface->deleteEntity(iter.key());
         }
@@ -932,9 +904,7 @@ void Keyboard::clearKeyboardKeys() {
 
     _keyboardLayers.clear();
 
-    _ignoreItemsLock.withWriteLock([&] {
-        _itemsToIgnore.clear();
-    });
+    _ignoreItemsLock.withWriteLock([&] { _itemsToIgnore.clear(); });
 }
 
 void Keyboard::enableStylus() {
@@ -951,9 +921,9 @@ void Keyboard::enableRightMallet() {
 }
 
 void Keyboard::enableLeftMallet() {
-     auto pointerManager = DependencyManager::get<PointerManager>();
-     pointerManager->setRenderState(_leftHandStylus, "events on");
-     pointerManager->enablePointer(_leftHandStylus);
+    auto pointerManager = DependencyManager::get<PointerManager>();
+    pointerManager->setRenderState(_leftHandStylus, "events on");
+    pointerManager->enablePointer(_leftHandStylus);
 }
 
 void Keyboard::disableLeftMallet() {
@@ -969,7 +939,5 @@ void Keyboard::disableRightMallet() {
 }
 
 bool Keyboard::containsID(const QUuid& id) const {
-    return resultWithReadLock<bool>([&] {
-        return _itemsToIgnore.contains(id) || _backPlate.entityID == id;
-    });
+    return resultWithReadLock<bool>([&] { return _itemsToIgnore.contains(id) || _backPlate.entityID == id; });
 }

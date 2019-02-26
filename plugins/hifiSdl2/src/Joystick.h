@@ -25,7 +25,7 @@ class Joystick : public QObject, public controller::InputDevice {
     Q_OBJECT
     Q_PROPERTY(QString name READ getName)
     Q_PROPERTY(int instanceId READ getInstanceId)
-    
+
 public:
     using Pointer = std::shared_ptr<Joystick>;
 
@@ -40,19 +40,19 @@ public:
     virtual void focusOutEvent() override;
 
     bool triggerHapticPulse(float strength, float duration, controller::Hand hand) override;
-    
+
     Joystick() : InputDevice("GamePad") {}
     ~Joystick();
-    
+
     Joystick(SDL_JoystickID instanceId, SDL_GameController* sdlGameController);
-    
+
     void closeJoystick();
 
     void handleAxisEvent(const SDL_ControllerAxisEvent& event);
     void handleButtonEvent(const SDL_ControllerButtonEvent& event);
-    
+
     int getInstanceId() const { return _instanceId; }
-    
+
 private:
     SDL_GameController* _sdlGameController;
     SDL_Joystick* _sdlJoystick;

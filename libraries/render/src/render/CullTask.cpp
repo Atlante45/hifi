@@ -11,15 +11,16 @@
 
 #include "CullTask.h"
 
-#include <algorithm>
 #include <assert.h>
+#include <algorithm>
 
-#include <PerfStat.h>
 #include <OctreeUtils.h>
+#include <PerfStat.h>
 
 using namespace render;
 
-CullTest::CullTest(CullFunctor& functor, RenderArgs* pargs, RenderDetails::Item& renderDetails, ViewFrustumPointer antiFrustum) :
+CullTest::CullTest(CullFunctor& functor, RenderArgs* pargs, RenderDetails::Item& renderDetails,
+                   ViewFrustumPointer antiFrustum) :
     _functor(functor),
     _args(pargs),
     _renderDetails(renderDetails),
@@ -53,10 +54,10 @@ bool CullTest::antiFrustumTest(const AABox& bound) {
 
 bool CullTest::solidAngleTest(const AABox& bound) {
     // FIXME: Keep this code here even though we don't use it yet
-    //auto eyeToPoint = bound.calcCenter() - _eyePos;
-    //auto boundSize = bound.getDimensions();
-    //float test = (glm::dot(boundSize, boundSize) / glm::dot(eyeToPoint, eyeToPoint)) - squareTanAlpha;
-    //if (test < 0.0f) {
+    // auto eyeToPoint = bound.calcCenter() - _eyePos;
+    // auto boundSize = bound.getDimensions();
+    // float test = (glm::dot(boundSize, boundSize) / glm::dot(eyeToPoint, eyeToPoint)) - squareTanAlpha;
+    // if (test < 0.0f) {
     if (!_functor(_args, bound)) {
         _renderDetails._tooSmall++;
         return false;
@@ -129,7 +130,8 @@ void FetchSpatialTree::configure(const Config& config) {
     _lodAngle = config.lodAngle;
 }
 
-void FetchSpatialTree::run(const RenderContextPointer& renderContext, const Inputs& inputs, ItemSpatialTree::ItemSelection& outSelection) {
+void FetchSpatialTree::run(const RenderContextPointer& renderContext, const Inputs& inputs,
+                           ItemSpatialTree::ItemSelection& outSelection) {
     // start fresh
     outSelection.clear();
 
@@ -175,8 +177,7 @@ void CullSpatialSelection::configure(const Config& config) {
     _skipCulling = config.skipCulling;
 }
 
-void CullSpatialSelection::run(const RenderContextPointer& renderContext,
-                               const Inputs& inputs, ItemBounds& outItems) {
+void CullSpatialSelection::run(const RenderContextPointer& renderContext, const Inputs& inputs, ItemBounds& outItems) {
     assert(renderContext->args);
     assert(renderContext->args->hasViewFrustum());
     RenderArgs* args = renderContext->args;
@@ -208,7 +209,8 @@ void CullSpatialSelection::run(const RenderContextPointer& renderContext,
         // Now get the bound, and
         // filter individually against the _filter
         // visibility cull if partially selected ( octree cell contianing it was partial)
-        // distance cull if was a subcell item ( octree cell is way bigger than the item bound itself, so now need to test per item)
+        // distance cull if was a subcell item ( octree cell is way bigger than the item bound itself, so now need to test per
+        // item)
         if (_skipCulling) {
             // inside & fit items: filter only, culling is disabled
             {
@@ -271,7 +273,6 @@ void CullSpatialSelection::run(const RenderContextPointer& renderContext,
             }
 
         } else {
-
             // inside & fit items: easy, just filter
             {
                 PerformanceTimer perfTimer("insideFitItems");
@@ -379,7 +380,7 @@ void CullShapeBounds::run(const RenderContextPointer& renderContext, const Input
             auto key = inItems.first;
             auto outItems = outShapes.find(key);
             if (outItems == outShapes.end()) {
-                outItems = outShapes.insert(std::make_pair(key, ItemBounds{})).first;
+                outItems = outShapes.insert(std::make_pair(key, ItemBounds {})).first;
                 outItems->second.reserve(inItems.second.size());
             }
 
@@ -445,8 +446,7 @@ void ApplyCullFunctorOnItemBounds::run(const RenderContextPointer& renderContext
     }
 }
 
-void FilterSpatialSelection::run(const RenderContextPointer& renderContext,
-                               const Inputs& inputs, ItemBounds& outItems) {
+void FilterSpatialSelection::run(const RenderContextPointer& renderContext, const Inputs& inputs, ItemBounds& outItems) {
     assert(renderContext->args);
     auto& scene = renderContext->_scene;
     auto& inSelection = inputs.get0();
@@ -480,7 +480,6 @@ void FilterSpatialSelection::run(const RenderContextPointer& renderContext,
                 if (filter.test(item.getKey())) {
                     ItemBound itemBound(id, item.getBound());
                     outItems.emplace_back(itemBound);
-
                 }
             }
         }

@@ -35,17 +35,11 @@ public:
     virtual void releaseEncoder(Encoder* encoder) override;
     virtual void releaseDecoder(Decoder* decoder) override;
 
-    virtual void encode(const QByteArray& decodedBuffer, QByteArray& encodedBuffer) override {
-        encodedBuffer = decodedBuffer;
-    }
+    virtual void encode(const QByteArray& decodedBuffer, QByteArray& encodedBuffer) override { encodedBuffer = decodedBuffer; }
 
-    virtual void decode(const QByteArray& encodedBuffer, QByteArray& decodedBuffer) override {
-        decodedBuffer = encodedBuffer;
-    }
+    virtual void decode(const QByteArray& encodedBuffer, QByteArray& decodedBuffer) override { decodedBuffer = encodedBuffer; }
 
-    virtual void lostFrame(QByteArray& decodedBuffer) override {
-        memset(decodedBuffer.data(), 0, decodedBuffer.size());
-    }
+    virtual void lostFrame(QByteArray& decodedBuffer) override { memset(decodedBuffer.data(), 0, decodedBuffer.size()); }
 
 private:
     static const char* NAME;
@@ -80,9 +74,7 @@ public:
         decodedBuffer = qUncompress(encodedBuffer);
     }
 
-    virtual void lostFrame(QByteArray& decodedBuffer) override {
-        memset(decodedBuffer.data(), 0, decodedBuffer.size());
-    }
+    virtual void lostFrame(QByteArray& decodedBuffer) override { memset(decodedBuffer.data(), 0, decodedBuffer.size()); }
 
 private:
     static const char* NAME;

@@ -20,7 +20,7 @@
 // For example: This can be used to copy values between C++ code running on the application thread
 // and JavaScript which is running on a different thread.
 
-template <typename T>
+template<typename T>
 class ThreadSafeValueCache {
 public:
     ThreadSafeValueCache() {}

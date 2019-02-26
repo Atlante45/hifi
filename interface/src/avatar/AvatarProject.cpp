@@ -18,8 +18,8 @@
 #include <QQmlEngine>
 #include <QTimer>
 
-#include "FBXSerializer.h"
 #include <ui/TabletScriptingInterface.h>
+#include "FBXSerializer.h"
 #include "scripting/HMDScriptingInterface.h"
 
 AvatarProject* AvatarProject::openAvatarProject(const QString& path, AvatarProjectStatus::AvatarProjectStatus& status) {
@@ -30,7 +30,7 @@ AvatarProject* AvatarProject::openAvatarProject(const QString& path, AvatarProje
         return nullptr;
     }
 
-    QFileInfo fstFileInfo{ path };
+    QFileInfo fstFileInfo { path };
     if (!fstFileInfo.absoluteDir().exists()) {
         status = AvatarProjectStatus::ERROR_OPEN_PROJECT_FOLDER;
         return nullptr;
@@ -41,7 +41,7 @@ AvatarProject* AvatarProject::openAvatarProject(const QString& path, AvatarProje
         return nullptr;
     }
 
-    QFile file{ fstFileInfo.filePath() };
+    QFile file { fstFileInfo.filePath() };
     if (!file.open(QIODevice::ReadOnly)) {
         status = AvatarProjectStatus::ERROR_OPEN_OPEN_FST;
         return nullptr;
@@ -49,7 +49,7 @@ AvatarProject* AvatarProject::openAvatarProject(const QString& path, AvatarProje
 
     const auto project = new AvatarProject(path, file.readAll());
 
-    QFileInfo fbxFileInfo{ project->getFBXPath() };
+    QFileInfo fbxFileInfo { project->getFBXPath() };
     if (!fbxFileInfo.exists()) {
         project->deleteLater();
         status = AvatarProjectStatus::ERROR_OPEN_FIND_MODEL;
@@ -94,13 +94,13 @@ AvatarProject* AvatarProject::createAvatarProject(const QString& projectsFolder,
     const auto newFSTPath = projectDir.absoluteFilePath("avatar.fst");
     QFile::copy(avatarModelPath, newModelPath);
 
-    QFileInfo fbxInfo{ newModelPath };
+    QFileInfo fbxInfo { newModelPath };
     if (!fbxInfo.exists() || !fbxInfo.isFile()) {
         status = AvatarProjectStatus::ERROR_CREATE_FIND_MODEL;
         return nullptr;
     }
 
-    QFile fbx{ fbxInfo.filePath() };
+    QFile fbx { fbxInfo.filePath() };
     if (!fbx.open(QIODevice::ReadOnly)) {
         status = AvatarProjectStatus::ERROR_CREATE_OPEN_MODEL;
         return nullptr;
@@ -116,7 +116,7 @@ AvatarProject* AvatarProject::createAvatarProject(const QString& projectsFolder,
         status = AvatarProjectStatus::ERROR_CREATE_READ_MODEL;
         return nullptr;
     }
-    QStringList textures{};
+    QStringList textures {};
 
     auto addTextureToList = [&textures](hfm::Texture texture) mutable {
         if (!texture.filename.isEmpty() && texture.content.isEmpty() && !textures.contains(texture.filename)) {
@@ -124,7 +124,7 @@ AvatarProject* AvatarProject::createAvatarProject(const QString& projectsFolder,
         }
     };
 
-    foreach(const HFMMaterial material, hfmModel->materials) {
+    foreach (const HFMMaterial material, hfmModel->materials) {
         addTextureToList(material.normalTexture);
         addTextureToList(material.albedoTexture);
         addTextureToList(material.opacityTexture);
@@ -163,7 +163,7 @@ AvatarProject* AvatarProject::createAvatarProject(const QString& projectsFolder,
 }
 
 QStringList AvatarProject::getScriptPaths(const QDir& scriptsDir) const {
-    QStringList result{};
+    QStringList result {};
     constexpr auto flags = QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot | QDir::Hidden;
     if (!scriptsDir.exists()) {
         return result;
@@ -221,7 +221,7 @@ void AvatarProject::refreshProjectFiles() {
 QStringList AvatarProject::getProjectFiles() const {
     QStringList paths;
     for (auto& path : _projectFiles) {
-        paths.append(path.relativePath); 
+        paths.append(path.relativePath);
     }
     return paths;
 }
@@ -231,8 +231,8 @@ MarketplaceItemUploader* AvatarProject::upload(bool updateExisting) {
     if (updateExisting) {
         itemID = _fst->getMarketplaceID();
     }
-    auto uploader = new MarketplaceItemUploader(getProjectName(), "", QFileInfo(getFSTPath()).fileName(),
-                                                itemID, _projectFiles);
+    auto uploader = new MarketplaceItemUploader(getProjectName(), "", QFileInfo(getFSTPath()).fileName(), itemID,
+                                                _projectFiles);
     connect(uploader, &MarketplaceItemUploader::completed, this, [this, uploader]() {
         if (uploader->getError() == MarketplaceItemUploader::Error::None) {
             _fst->setMarketplaceID(uploader->getMarketplaceID());

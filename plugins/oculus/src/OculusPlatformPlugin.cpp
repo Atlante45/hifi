@@ -77,7 +77,8 @@ void OculusAPIPlugin::handleOVREvents() {
                     _user = ovr_User_GetOculusID(user);
                     // went all the way through the `requestNonceAndUserID()` pipeline successfully.
                 } else {
-                    qCDebug(oculusLog) << "Oculus Platform user retrieval failed" << QString(ovr_Error_GetMessage(ovr_Message_GetError(message)));
+                    qCDebug(oculusLog) << "Oculus Platform user retrieval failed"
+                                       << QString(ovr_Error_GetMessage(ovr_Message_GetError(message)));
                     // emit the signal so we don't hang for it anywhere else.
                     _user = "";
                 }
@@ -89,7 +90,8 @@ void OculusAPIPlugin::handleOVREvents() {
                     _userID = ovr_User_GetID(user);
                     ovr_User_Get(_userID);
                 } else {
-                    qCDebug(oculusLog) << "Oculus Platform user ID retrieval failed" << QString(ovr_Error_GetMessage(ovr_Message_GetError(message)));
+                    qCDebug(oculusLog) << "Oculus Platform user ID retrieval failed"
+                                       << QString(ovr_Error_GetMessage(ovr_Message_GetError(message)));
                     // emit the signal so we don't hang for it anywhere else.
                 }
                 _userIDChanged = true;
@@ -101,7 +103,8 @@ void OculusAPIPlugin::handleOVREvents() {
                     _nonce = ovr_UserProof_GetNonce(userProof);
                     qCDebug(oculusLog) << "Oculus Platform nonce retrieval succeeded: " << _nonce;
                 } else {
-                    qCDebug(oculusLog) << "Oculus Platform nonce retrieval failed" << QString(ovr_Error_GetMessage(ovr_Message_GetError(message)));
+                    qCDebug(oculusLog) << "Oculus Platform nonce retrieval failed"
+                                       << QString(ovr_Error_GetMessage(ovr_Message_GetError(message)));
                     _nonce = "";
                     // emit the signal so we don't hang for it anywhere else.
                 }

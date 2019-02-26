@@ -24,13 +24,15 @@ public:
     void loadConfig();
 
     const QVariant value(const QString& key) const { return _userConfig.value(key); }
-    QVariant* valueForKeyPath(const QString& keyPath, bool shouldCreateIfMissing = false)
-        { return ::valueForKeyPath(_userConfig, keyPath, shouldCreateIfMissing); }
+    QVariant* valueForKeyPath(const QString& keyPath, bool shouldCreateIfMissing = false) {
+        return ::valueForKeyPath(_userConfig, keyPath, shouldCreateIfMissing);
+    }
 
     QVariantMap& getConfig() { return _userConfig; }
 
     const QString& getUserConfigFilename() const { return _userConfigFilename; }
     void setUserConfigFilename(const QString& filename) { _userConfigFilename = filename; }
+
 private:
     QString _userConfigFilename;
 

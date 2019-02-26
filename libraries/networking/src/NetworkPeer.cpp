@@ -11,15 +11,15 @@
 
 #include "NetworkPeer.h"
 
+#include <QtCore/QDataStream>
 #include <QtCore/QDateTime>
 #include <QtCore/QDebug>
-#include <QtCore/QDataStream>
 
 #include <SharedUtil.h>
 #include <UUID.h>
 
-#include "NetworkLogging.h"
 #include <Trace.h>
+#include "NetworkLogging.h"
 #include "NodeType.h"
 
 const NetworkPeer::LocalID NetworkPeer::NULL_LOCAL_ID;
@@ -32,12 +32,12 @@ NetworkPeer::NetworkPeer(QObject* parent) :
     _symmetricSocket(),
     _activeSocket(NULL),
     _wakeTimestamp(QDateTime::currentMSecsSinceEpoch()),
-    _connectionAttempts(0)
-{
+    _connectionAttempts(0) {
     _lastHeardMicrostamp = usecTimestampNow();
 }
 
-NetworkPeer::NetworkPeer(const QUuid& uuid, const HifiSockAddr& publicSocket, const HifiSockAddr& localSocket, QObject* parent) :
+NetworkPeer::NetworkPeer(const QUuid& uuid, const HifiSockAddr& publicSocket, const HifiSockAddr& localSocket,
+                         QObject* parent) :
     QObject(parent),
     _uuid(uuid),
     _publicSocket(publicSocket),
@@ -45,8 +45,7 @@ NetworkPeer::NetworkPeer(const QUuid& uuid, const HifiSockAddr& publicSocket, co
     _symmetricSocket(),
     _activeSocket(NULL),
     _wakeTimestamp(QDateTime::currentMSecsSinceEpoch()),
-    _connectionAttempts(0)
-{
+    _connectionAttempts(0) {
     _lastHeardMicrostamp = usecTimestampNow();
 }
 
@@ -56,13 +55,13 @@ void NetworkPeer::setPublicSocket(const HifiSockAddr& publicSocket) {
             // if the active socket was the public socket then reset it to NULL
             _activeSocket = NULL;
         }
-        
+
         bool wasOldSocketNull = _publicSocket.isNull();
 
         auto temp = _publicSocket.objectName();
         _publicSocket = publicSocket;
         _publicSocket.setObjectName(temp);
-        
+
         if (!wasOldSocketNull) {
             qCDebug(networking) << "Public socket change for node" << *this;
             emit socketUpdated();
@@ -76,9 +75,9 @@ void NetworkPeer::setLocalSocket(const HifiSockAddr& localSocket) {
             // if the active socket was the local socket then reset it to NULL
             _activeSocket = NULL;
         }
-        
+
         bool wasOldSocketNull = _localSocket.isNull();
-        
+
         auto temp = _localSocket.objectName();
         _localSocket = localSocket;
         _localSocket.setObjectName(temp);
@@ -96,13 +95,13 @@ void NetworkPeer::setSymmetricSocket(const HifiSockAddr& symmetricSocket) {
             // if the active socket was the symmetric socket then reset it to NULL
             _activeSocket = NULL;
         }
-        
+
         bool wasOldSocketNull = _symmetricSocket.isNull();
-        
+
         auto temp = _symmetricSocket.objectName();
         _symmetricSocket = symmetricSocket;
         _symmetricSocket.setObjectName(temp);
-        
+
         if (!wasOldSocketNull) {
             qCDebug(networking) << "Symmetric socket change for node" << *this;
             emit socketUpdated();
@@ -118,7 +117,7 @@ void NetworkPeer::setActiveSocket(HifiSockAddr* discoveredSocket) {
 
     // we're now considered connected to this peer - reset the number of connection attemps
     resetConnectionAttempts();
-    
+
     if (_activeSocket) {
         emit socketActivated(*_activeSocket);
     }
@@ -222,9 +221,8 @@ QDataStream& operator>>(QDataStream& in, NetworkPeer& peer) {
     return in;
 }
 
-QDebug operator<<(QDebug debug, const NetworkPeer &peer) {
-    debug << uuidStringWithoutCurlyBraces(peer.getUUID())
-        << "- public:" << peer.getPublicSocket()
-        << "- local:" << peer.getLocalSocket();
+QDebug operator<<(QDebug debug, const NetworkPeer& peer) {
+    debug << uuidStringWithoutCurlyBraces(peer.getUUID()) << "- public:" << peer.getPublicSocket()
+          << "- local:" << peer.getLocalSocket();
     return debug;
 }

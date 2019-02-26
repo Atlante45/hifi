@@ -17,9 +17,9 @@
 
 #include <graphics/Asset.h>
 
-#include "FBXSerializer.h"
 #include <material-networking/MaterialCache.h>
 #include <material-networking/TextureCache.h>
+#include "FBXSerializer.h"
 #include "ModelLoader.h"
 
 class MeshPart;
@@ -69,7 +69,7 @@ protected:
     NetworkMaterials _materials;
 
     QUrl _animGraphOverrideUrl;
-    QVariantHash _mapping;  // parsed contents of FST file.
+    QVariantHash _mapping; // parsed contents of FST file.
 
 private:
     mutable bool _areTexturesLoaded { false };
@@ -143,13 +143,10 @@ class ModelCache : public ResourceCache, public Dependency {
     SINGLETON_DEPENDENCY
 
 public:
-
-    GeometryResource::Pointer getGeometryResource(const QUrl& url,
-                                                  const QVariantHash& mapping = QVariantHash(),
+    GeometryResource::Pointer getGeometryResource(const QUrl& url, const QVariantHash& mapping = QVariantHash(),
                                                   const QUrl& textureBaseUrl = QUrl());
 
-    GeometryResource::Pointer getCollisionGeometryResource(const QUrl& url,
-                                                           const QVariantHash& mapping = QVariantHash(),
+    GeometryResource::Pointer getCollisionGeometryResource(const QUrl& url, const QVariantHash& mapping = QVariantHash(),
                                                            const QUrl& textureBaseUrl = QUrl());
 
 protected:

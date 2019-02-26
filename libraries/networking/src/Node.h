@@ -12,9 +12,9 @@
 #ifndef hifi_Node_h
 #define hifi_Node_h
 
+#include <stdint.h>
 #include <memory>
 #include <ostream>
-#include <stdint.h>
 #include <vector>
 
 #include <QtCore/QDebug>
@@ -22,29 +22,28 @@
 #include <QtCore/QSharedPointer>
 #include <QtCore/QUuid>
 
-#include <QReadLocker>
 #include <UUIDHasher.h>
+#include <QReadLocker>
 
 #include <TBBHelpers.h>
 
+#include "HMACAuth.h"
 #include "HifiSockAddr.h"
+#include "MovingPercentile.h"
 #include "NetworkPeer.h"
 #include "NodeData.h"
-#include "NodeType.h"
-#include "SimpleMovingAverage.h"
-#include "MovingPercentile.h"
 #include "NodePermissions.h"
-#include "HMACAuth.h"
-#include "udt/ConnectionStats.h"
+#include "NodeType.h"
 #include "NumericalConstants.h"
+#include "SimpleMovingAverage.h"
+#include "udt/ConnectionStats.h"
 
 class Node : public NetworkPeer {
     Q_OBJECT
 public:
     using Stats = udt::ConnectionStats::Stats;
 
-    Node(const QUuid& uuid, NodeType_t type,
-         const HifiSockAddr& publicSocket, const HifiSockAddr& localSocket,
+    Node(const QUuid& uuid, NodeType_t type, const HifiSockAddr& publicSocket, const HifiSockAddr& localSocket,
          QObject* parent = nullptr);
 
     bool operator==(const Node& otherNode) const { return _uuid == otherNode._uuid; }
@@ -79,7 +78,9 @@ public:
     bool getCanRez() const { return _permissions.can(NodePermissions::Permission::canRezPermanentEntities); }
     bool getCanRezTmp() const { return _permissions.can(NodePermissions::Permission::canRezTemporaryEntities); }
     bool getCanRezCertified() const { return _permissions.can(NodePermissions::Permission::canRezPermanentCertifiedEntities); }
-    bool getCanRezTmpCertified() const { return _permissions.can(NodePermissions::Permission::canRezTemporaryCertifiedEntities); }
+    bool getCanRezTmpCertified() const {
+        return _permissions.can(NodePermissions::Permission::canRezTemporaryCertifiedEntities);
+    }
     bool getCanWriteToAssetServer() const { return _permissions.can(NodePermissions::Permission::canWriteToAssetServer); }
     bool getCanKick() const { return _permissions.can(NodePermissions::Permission::canKick); }
     bool getCanReplaceContent() const { return _permissions.can(NodePermissions::Permission::canReplaceDomainContent); }
@@ -107,7 +108,7 @@ public:
 
 private:
     // privatize copy and assignment operator to disallow Node copying
-    Node(const Node &otherNode);
+    Node(const Node& otherNode);
     Node& operator=(Node otherNode);
 
     NodeType_t _type;
@@ -125,7 +126,7 @@ private:
 
     IgnoredNodeIDs _ignoredNodeIDs;
     mutable QReadWriteLock _ignoredNodeIDSetLock;
-    std::vector<QString> _replicatedUsernames { };
+    std::vector<QString> _replicatedUsernames {};
 
     Stats _stats;
 };
@@ -136,14 +137,14 @@ typedef QSharedPointer<Node> SharedNodePointer;
 Q_DECLARE_METATYPE(SharedNodePointer)
 
 namespace std {
-    template<>
-    struct hash<SharedNodePointer> {
-        size_t operator()(const SharedNodePointer& p) const {
-            // Return the hash of the pointer
-            return hash<Node*>()(p.data());
-        }
-    };
-}
+template<>
+struct hash<SharedNodePointer> {
+    size_t operator()(const SharedNodePointer& p) const {
+        // Return the hash of the pointer
+        return hash<Node*>()(p.data());
+    }
+};
+} // namespace std
 
 QDebug operator<<(QDebug debug, const Node& node);
 

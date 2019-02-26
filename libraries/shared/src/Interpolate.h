@@ -15,7 +15,6 @@
 #include "SharedUtil.h"
 
 class Interpolate {
-
 public:
     // Bezier interpolate at position u [0.0 - 1.0] between y values equally spaced along the x-axis. The interpolated values
     // pass through y1 and y3 but not y2; y2 is the Bezier control point.

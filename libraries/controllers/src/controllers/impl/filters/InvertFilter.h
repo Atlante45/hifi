@@ -16,6 +16,7 @@ namespace controller {
 
 class InvertFilter : public ScaleFilter {
     REGISTER_FILTER_CLASS(InvertFilter);
+
 public:
     using ScaleFilter::parseParameters;
     InvertFilter() : ScaleFilter(-1.0f) {}
@@ -23,6 +24,6 @@ public:
     virtual bool parseParameters(const QJsonArray& parameters) { return true; }
 };
 
-}
+} // namespace controller
 
 #endif

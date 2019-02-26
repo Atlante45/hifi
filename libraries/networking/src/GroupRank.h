@@ -16,7 +16,10 @@ class GroupRank {
 public:
     GroupRank() {}
     GroupRank(QUuid id, unsigned int order, QString name, unsigned int membersCount) :
-        id(id), order(order), name(name), membersCount(membersCount) {}
+        id(id),
+        order(order),
+        name(name),
+        membersCount(membersCount) {}
 
     QUuid id;
     int order { -1 };
@@ -25,12 +28,10 @@ public:
 };
 
 inline bool operator==(const GroupRank& lhs, const GroupRank& rhs) {
-    return
-        lhs.id == rhs.id &&
-        lhs.order == rhs.order &&
-        lhs.name == rhs.name &&
-        lhs.membersCount == rhs.membersCount;
+    return lhs.id == rhs.id && lhs.order == rhs.order && lhs.name == rhs.name && lhs.membersCount == rhs.membersCount;
 }
-inline bool operator!=(const GroupRank& lhs, const GroupRank& rhs) { return !(lhs == rhs); }
+inline bool operator!=(const GroupRank& lhs, const GroupRank& rhs) {
+    return !(lhs == rhs);
+}
 
 #endif // hifi_GroupRank_h

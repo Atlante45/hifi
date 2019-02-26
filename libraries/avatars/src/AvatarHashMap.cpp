@@ -14,9 +14,9 @@
 #include <QtCore/QDataStream>
 
 #include <NodeList.h>
-#include <udt/PacketHeaders.h>
 #include <PerfStat.h>
 #include <SharedUtil.h>
+#include <udt/PacketHeaders.h>
 
 #include "AvatarLogging.h"
 #include "AvatarTraits.h"
@@ -31,7 +31,7 @@ void AvatarReplicas::addReplica(const QUuid& parentID, AvatarSharedPointer repli
         std::vector<AvatarSharedPointer> emptyReplicas = std::vector<AvatarSharedPointer>();
         _replicasMap.insert(std::pair<QUuid, std::vector<AvatarSharedPointer>>(parentID, emptyReplicas));
     }
-    auto &replicas = _replicasMap[parentID];
+    auto& replicas = _replicasMap[parentID];
     replica->setReplicaIndex((int)replicas.size() + 1);
     replicas.push_back(replica);
 }
@@ -39,7 +39,7 @@ void AvatarReplicas::addReplica(const QUuid& parentID, AvatarSharedPointer repli
 std::vector<QUuid> AvatarReplicas::getReplicaIDs(const QUuid& parentID) {
     std::vector<QUuid> ids;
     if (_replicasMap.find(parentID) != _replicasMap.end()) {
-        auto &replicas = _replicasMap[parentID];
+        auto& replicas = _replicasMap[parentID];
         for (int i = 0; i < (int)replicas.size(); i++) {
             ids.push_back(replicas[i]->getID());
         }
@@ -53,7 +53,7 @@ std::vector<QUuid> AvatarReplicas::getReplicaIDs(const QUuid& parentID) {
 
 void AvatarReplicas::parseDataFromBuffer(const QUuid& parentID, const QByteArray& buffer) {
     if (_replicasMap.find(parentID) != _replicasMap.end()) {
-        auto &replicas = _replicasMap[parentID];
+        auto& replicas = _replicasMap[parentID];
         for (auto avatar : replicas) {
             avatar->parseDataFromBuffer(buffer);
         }
@@ -82,9 +82,10 @@ std::vector<AvatarSharedPointer> AvatarReplicas::takeReplicas(const QUuid& paren
     return replicas;
 }
 
-void AvatarReplicas::processAvatarIdentity(const QUuid& parentID, const QByteArray& identityData, bool& identityChanged, bool& displayNameChanged) {
+void AvatarReplicas::processAvatarIdentity(const QUuid& parentID, const QByteArray& identityData, bool& identityChanged,
+                                           bool& displayNameChanged) {
     if (_replicasMap.find(parentID) != _replicasMap.end()) {
-        auto &replicas = _replicasMap[parentID];
+        auto& replicas = _replicasMap[parentID];
         QDataStream identityDataStream(identityData);
         for (auto avatar : replicas) {
             avatar->processAvatarIdentity(identityDataStream, identityChanged, displayNameChanged);
@@ -93,24 +94,25 @@ void AvatarReplicas::processAvatarIdentity(const QUuid& parentID, const QByteArr
 }
 void AvatarReplicas::processTrait(const QUuid& parentID, AvatarTraits::TraitType traitType, QByteArray traitBinaryData) {
     if (_replicasMap.find(parentID) != _replicasMap.end()) {
-        auto &replicas = _replicasMap[parentID];
+        auto& replicas = _replicasMap[parentID];
         for (auto avatar : replicas) {
             avatar->processTrait(traitType, traitBinaryData);
         }
     }
 }
-void AvatarReplicas::processDeletedTraitInstance(const QUuid& parentID, AvatarTraits::TraitType traitType, AvatarTraits::TraitInstanceID instanceID) {
+void AvatarReplicas::processDeletedTraitInstance(const QUuid& parentID, AvatarTraits::TraitType traitType,
+                                                 AvatarTraits::TraitInstanceID instanceID) {
     if (_replicasMap.find(parentID) != _replicasMap.end()) {
-        auto &replicas = _replicasMap[parentID];
+        auto& replicas = _replicasMap[parentID];
         for (auto avatar : replicas) {
             avatar->processDeletedTraitInstance(traitType, instanceID);
         }
     }
 }
 void AvatarReplicas::processTraitInstance(const QUuid& parentID, AvatarTraits::TraitType traitType,
-    AvatarTraits::TraitInstanceID instanceID, QByteArray traitBinaryData) {
+                                          AvatarTraits::TraitInstanceID instanceID, QByteArray traitBinaryData) {
     if (_replicasMap.find(parentID) != _replicasMap.end()) {
-        auto &replicas = _replicasMap[parentID];
+        auto& replicas = _replicasMap[parentID];
         for (auto avatar : replicas) {
             avatar->processTraitInstance(traitType, instanceID, traitBinaryData);
         }
@@ -128,7 +130,7 @@ AvatarHashMap::AvatarHashMap() {
 
     connect(nodeList.data(), &NodeList::uuidChanged, this, &AvatarHashMap::sessionUUIDChanged);
 
-    connect(nodeList.data(), &NodeList::nodeKilled, this, [this](SharedNodePointer killedNode){
+    connect(nodeList.data(), &NodeList::nodeKilled, this, [this](SharedNodePointer killedNode) {
         if (killedNode->getType() == NodeType::AvatarMixer) {
             clearOtherAvatars();
         }
@@ -156,7 +158,7 @@ QVector<QUuid> AvatarHashMap::getAvatarsInRange(const glm::vec3& position, float
 
 bool AvatarHashMap::isAvatarInRange(const glm::vec3& position, const float range) {
     auto hashCopy = getHashCopy();
-    foreach(const AvatarSharedPointer& sharedAvatar, hashCopy) {
+    foreach (const AvatarSharedPointer& sharedAvatar, hashCopy) {
         glm::vec3 avatarPosition = sharedAvatar->getWorldPosition();
         float distance = glm::distance(avatarPosition, position);
         if (distance < range) {
@@ -216,7 +218,8 @@ AvatarSharedPointer AvatarHashMap::addAvatar(const QUuid& sessionUUID, const QWe
     return avatar;
 }
 
-AvatarSharedPointer AvatarHashMap::newOrExistingAvatar(const QUuid& sessionUUID, const QWeakPointer<Node>& mixerWeakPointer, bool& isNew) {
+AvatarSharedPointer AvatarHashMap::newOrExistingAvatar(const QUuid& sessionUUID, const QWeakPointer<Node>& mixerWeakPointer,
+                                                       bool& isNew) {
     auto avatar = findAvatar(sessionUUID);
     if (!avatar) {
         avatar = addAvatar(sessionUUID, mixerWeakPointer);
@@ -255,7 +258,8 @@ AvatarSharedPointer AvatarHashMap::parseAvatarData(QSharedPointer<ReceivedMessag
     // make sure this isn't our own avatar data or for a previously ignored node
     auto nodeList = DependencyManager::get<NodeList>();
     bool isNewAvatar;
-    if (sessionUUID != _lastOwnerSessionUUID && (!nodeList->isIgnoringNode(sessionUUID) || nodeList->getRequestsDomainListData())) {
+    if (sessionUUID != _lastOwnerSessionUUID &&
+        (!nodeList->isIgnoringNode(sessionUUID) || nodeList->getRequestsDomainListData())) {
         auto avatar = newOrExistingAvatar(sessionUUID, sendingNode, isNewAvatar);
 
         if (isNewAvatar) {
@@ -267,13 +271,12 @@ AvatarSharedPointer AvatarHashMap::parseAvatarData(QSharedPointer<ReceivedMessag
                 replicaAvatar->setIsNewAvatar(true);
                 _replicas.addReplica(sessionUUID, replicaAvatar);
             }
-        } 
-        
+        }
+
         // have the matching (or new) avatar parse the data from the packet
         int bytesRead = avatar->parseDataFromBuffer(byteArray);
         message->seek(positionBeforeRead + bytesRead);
         _replicas.parseDataFromBuffer(sessionUUID, byteArray);
-        
 
         return avatar;
     } else {
@@ -378,8 +381,8 @@ void AvatarHashMap::processBulkAvatarTraits(QSharedPointer<ReceivedMessage> mess
                     skipBinaryTrait = true;
                 }
             } else {
-                AvatarTraits::TraitInstanceID traitInstanceID =
-                    QUuid::fromRfc4122(message->readWithoutCopy(NUM_BYTES_RFC4122_UUID));
+                AvatarTraits::TraitInstanceID traitInstanceID = QUuid::fromRfc4122(
+                    message->readWithoutCopy(NUM_BYTES_RFC4122_UUID));
 
                 message->readPrimitive(&traitBinarySize);
 
@@ -445,7 +448,7 @@ void AvatarHashMap::removeAvatar(const QUuid& sessionUUID, KillAvatarReason remo
         }
     }
 
-    for (auto& removedAvatar: removedAvatars) {
+    for (auto& removedAvatar : removedAvatars) {
         handleRemovedAvatar(removedAvatar, removalReason);
     }
 }
@@ -455,7 +458,7 @@ void AvatarHashMap::handleRemovedAvatar(const AvatarSharedPointer& removedAvatar
     _processedTraitVersions.erase(removedAvatar->getID());
 
     qCDebug(avatars) << "Removed avatar with UUID" << uuidStringWithoutCurlyBraces(removedAvatar->getSessionUUID())
-        << "from AvatarHashMap" << removalReason;
+                     << "from AvatarHashMap" << removalReason;
     emit avatarRemovedEvent(removedAvatar->getSessionUUID());
 }
 

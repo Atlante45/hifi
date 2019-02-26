@@ -7,8 +7,8 @@
 //
 #include "VrHandler.h"
 
-#include <android/native_window_jni.h>
 #include <android/log.h>
+#include <android/native_window_jni.h>
 
 #include <unistd.h>
 
@@ -17,11 +17,9 @@
 #include <VrApi_Types.h>
 //#include <OVR_Platform.h>
 
+#include "Framebuffer.h"
 #include "GLContext.h"
 #include "Helpers.h"
-#include "Framebuffer.h"
-
-
 
 using namespace ovr;
 
@@ -30,18 +28,18 @@ static thread_local bool isRenderThread { false };
 struct VrSurface : public TaskQueue {
     using HandlerTask = VrHandler::HandlerTask;
 
-    JavaVM* vm{nullptr};
-    jobject oculusActivity{ nullptr };
-    ANativeWindow* nativeWindow{ nullptr };
+    JavaVM* vm { nullptr };
+    jobject oculusActivity { nullptr };
+    ANativeWindow* nativeWindow { nullptr };
 
-    VrHandler* handler{nullptr};
-    ovrMobile* session{nullptr};
+    VrHandler* handler { nullptr };
+    ovrMobile* session { nullptr };
     bool resumed { false };
     GLContext vrglContext;
     Framebuffer eyeFbos[2];
-    uint32_t readFbo{0};
-    std::atomic<uint32_t> presentIndex{1};
-    double displayTime{0};
+    uint32_t readFbo { 0 };
+    std::atomic<uint32_t> presentIndex { 1 };
+    double displayTime { 0 };
 
     static constexpr float EYE_BUFFER_SCALE = 1.0f;
 
@@ -52,7 +50,7 @@ struct VrSurface : public TaskQueue {
 
     void setResumed(bool newResumed) {
         this->resumed = newResumed;
-        submitRenderThreadTask([this](VrHandler* handler){ updateVrMode(); });
+        submitRenderThreadTask([this](VrHandler* handler) { updateVrMode(); });
     }
 
     void setNativeWindow(ANativeWindow* newNativeWindow) {
@@ -61,7 +59,7 @@ struct VrSurface : public TaskQueue {
         if (oldNativeWindow) {
             ANativeWindow_release(oldNativeWindow);
         }
-        submitRenderThreadTask([this](VrHandler* handler){ updateVrMode(); });
+        submitRenderThreadTask([this](VrHandler* handler) { updateVrMode(); });
     }
 
     void init() {
@@ -75,25 +73,22 @@ struct VrSurface : public TaskQueue {
         vrglContext.makeCurrent();
 
         glm::uvec2 eyeTargetSize;
-        withEnv([&](JNIEnv* env){
-            ovrJava java{ vm, env, oculusActivity };
+        withEnv([&](JNIEnv* env) {
+            ovrJava java { vm, env, oculusActivity };
             eyeTargetSize = glm::uvec2 {
                 vrapi_GetSystemPropertyInt(&java, VRAPI_SYS_PROP_SUGGESTED_EYE_TEXTURE_WIDTH) * EYE_BUFFER_SCALE,
                 vrapi_GetSystemPropertyInt(&java, VRAPI_SYS_PROP_SUGGESTED_EYE_TEXTURE_HEIGHT) * EYE_BUFFER_SCALE,
             };
         });
         __android_log_print(ANDROID_LOG_WARN, "QQQ_OVR", "QQQ Eye Size %d, %d", eyeTargetSize.x, eyeTargetSize.y);
-        ovr::for_each_eye([&](ovrEye eye) {
-            eyeFbos[eye].create(eyeTargetSize);
-        });
+        ovr::for_each_eye([&](ovrEye eye) { eyeFbos[eye].create(eyeTargetSize); });
         glGenFramebuffers(1, &readFbo);
         vrglContext.doneCurrent();
     }
 
-    void shutdown() {
-    }
+    void shutdown() {}
 
-    void setHandler(VrHandler *newHandler) {
+    void setHandler(VrHandler* newHandler) {
         withLock([&] {
             isRenderThread = newHandler != nullptr;
             if (handler != newHandler) {
@@ -107,12 +102,10 @@ struct VrSurface : public TaskQueue {
         });
     }
 
-    void submitRenderThreadTask(const HandlerTask &task) {
-        withLockConditional([&](Lock &lock) {
+    void submitRenderThreadTask(const HandlerTask& task) {
+        withLockConditional([&](Lock& lock) {
             if (handler != nullptr) {
-                submitTaskBlocking(lock, [&] {
-                    task(handler);
-                });
+                submitTaskBlocking(lock, [&] { task(handler); });
             }
         });
     }
@@ -145,16 +138,17 @@ struct VrSurface : public TaskQueue {
                 oculusActivity = nullptr;
             } else {
                 __android_log_write(ANDROID_LOG_WARN, "QQQ_OVR", "vrapi_EnterVrMode");
-                withEnv([&](JNIEnv* env){
-                    ovrJava java{ vm, env, oculusActivity };
+                withEnv([&](JNIEnv* env) {
+                    ovrJava java { vm, env, oculusActivity };
                     ovrModeParms modeParms = vrapi_DefaultModeParms(&java);
                     modeParms.Flags |= VRAPI_MODE_FLAG_NATIVE_WINDOW;
-                    modeParms.Display = (unsigned long long) vrglContext.display;
-                    modeParms.ShareContext = (unsigned long long) vrglContext.context;
-                    modeParms.WindowSurface = (unsigned long long) nativeWindow;
+                    modeParms.Display = (unsigned long long)vrglContext.display;
+                    modeParms.ShareContext = (unsigned long long)vrglContext.context;
+                    modeParms.WindowSurface = (unsigned long long)nativeWindow;
                     session = vrapi_EnterVrMode(&modeParms);
-                    ovrPosef trackingTransform = vrapi_GetTrackingTransform( session, VRAPI_TRACKING_TRANSFORM_SYSTEM_CENTER_EYE_LEVEL);
-                    vrapi_SetTrackingTransform( session, trackingTransform );
+                    ovrPosef trackingTransform = vrapi_GetTrackingTransform(session,
+                                                                            VRAPI_TRACKING_TRANSFORM_SYSTEM_CENTER_EYE_LEVEL);
+                    vrapi_SetTrackingTransform(session, trackingTransform);
                     vrapi_SetPerfThread(session, VRAPI_PERF_THREAD_TYPE_RENDERER, pthread_self());
                     vrapi_SetClockLevels(session, 2, 4);
                     vrapi_SetExtraLatencyMode(session, VRAPI_EXTRA_LATENCY_MODE_DYNAMIC);
@@ -164,7 +158,7 @@ struct VrSurface : public TaskQueue {
         }
     }
 
-    void presentFrame(uint32_t sourceTexture, const glm::uvec2 &sourceSize, const ovrTracking2& tracking) {
+    void presentFrame(uint32_t sourceTexture, const glm::uvec2& sourceSize, const ovrTracking2& tracking) {
         ovrLayerProjection2 layer = vrapi_DefaultLayerProjection2();
         layer.HeadPose = tracking.HeadPose;
         if (sourceTexture) {
@@ -178,18 +172,16 @@ struct VrSurface : public TaskQueue {
         GLenum invalidateAttachment = GL_COLOR_ATTACHMENT0;
 
         ovr::for_each_eye([&](ovrEye eye) {
-            const auto &eyeTracking = tracking.Eye[eye];
-            auto &eyeFbo = eyeFbos[eye];
-            const auto &destSize = eyeFbo._size;
+            const auto& eyeTracking = tracking.Eye[eye];
+            auto& eyeFbo = eyeFbos[eye];
+            const auto& destSize = eyeFbo._size;
             eyeFbo.bind();
             glInvalidateFramebuffer(GL_DRAW_FRAMEBUFFER, 1, &invalidateAttachment);
             if (sourceTexture) {
                 auto sourceWidth = sourceSize.x / 2;
                 auto sourceX = (eye == VRAPI_EYE_LEFT) ? 0 : sourceWidth;
-                glBlitFramebuffer(
-                    sourceX, 0, sourceX + sourceWidth, sourceSize.y,
-                    0, 0, destSize.x, destSize.y,
-                    GL_COLOR_BUFFER_BIT, GL_NEAREST);
+                glBlitFramebuffer(sourceX, 0, sourceX + sourceWidth, sourceSize.y, 0, 0, destSize.x, destSize.y,
+                                  GL_COLOR_BUFFER_BIT, GL_NEAREST);
             }
             eyeFbo.updateLayer(eye, layer, &eyeTracking.ProjectionMatrix);
             eyeFbo.advance();
@@ -200,7 +192,7 @@ struct VrSurface : public TaskQueue {
         }
         glFlush();
 
-        ovrLayerHeader2 *layerHeader = &layer.Header;
+        ovrLayerHeader2* layerHeader = &layer.Header;
         ovrSubmitFrameDescription2 frameDesc = {};
         frameDesc.SwapInterval = 2;
         frameDesc.FrameIndex = presentIndex;
@@ -249,20 +241,20 @@ ovrTracking2 VrHandler::beginFrame() {
     return SURFACE.beginFrame();
 }
 
-void VrHandler::presentFrame(uint32_t sourceTexture, const glm::uvec2 &sourceSize, const ovrTracking2& tracking) const {
+void VrHandler::presentFrame(uint32_t sourceTexture, const glm::uvec2& sourceSize, const ovrTracking2& tracking) const {
     SURFACE.presentFrame(sourceTexture, sourceSize, tracking);
 }
 
 bool VrHandler::withOvrJava(const OvrJavaTask& task) {
-    SURFACE.withEnv([&](JNIEnv* env){
-        ovrJava java{ SURFACE.vm, env, SURFACE.oculusActivity };
+    SURFACE.withEnv([&](JNIEnv* env) {
+        ovrJava java { SURFACE.vm, env, SURFACE.oculusActivity };
         task(&java);
     });
     return true;
 }
 
-bool VrHandler::withOvrMobile(const OvrMobileTask &task) {
-    auto sessionTask = [&]()->bool{
+bool VrHandler::withOvrMobile(const OvrMobileTask& task) {
+    auto sessionTask = [&]() -> bool {
         if (!SURFACE.session) {
             return false;
         }
@@ -275,15 +267,12 @@ bool VrHandler::withOvrMobile(const OvrMobileTask &task) {
     }
 
     bool result = false;
-    SURFACE.withLock([&]{
-        result = sessionTask();
-    });
+    SURFACE.withLock([&] { result = sessionTask(); });
     return result;
 }
 
-
 void VrHandler::initVr(const char* appId) {
-    withOvrJava([&](const ovrJava* java){
+    withOvrJava([&](const ovrJava* java) {
         ovrInitParms initParms = vrapi_DefaultInitParms(java);
         initParms.GraphicsAPI = VRAPI_GRAPHICS_API_OPENGL_ES_3;
         if (vrapi_Initialize(&initParms) != VRAPI_INITIALIZE_SUCCESS) {
@@ -291,12 +280,12 @@ void VrHandler::initVr(const char* appId) {
         }
     });
 
-  //  if (appId) {
-  //      auto platformInitResult = ovr_PlatformInitializeAndroid(appId, activity.object(), env);
-  //      if (ovrPlatformInitialize_Success != platformInitResult) {
-  //          __android_log_write(ANDROID_LOG_WARN, "QQQ_OVR", "Failed ovr platform init");
-  //      }
-  //  }
+    //  if (appId) {
+    //      auto platformInitResult = ovr_PlatformInitializeAndroid(appId, activity.object(), env);
+    //      if (ovrPlatformInitialize_Success != platformInitResult) {
+    //          __android_log_write(ANDROID_LOG_WARN, "QQQ_OVR", "Failed ovr platform init");
+    //      }
+    //  }
 }
 
 void VrHandler::shutdownVr() {
@@ -305,7 +294,7 @@ void VrHandler::shutdownVr() {
 
 extern "C" {
 
-JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *, void *) {
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM*, void*) {
     __android_log_write(ANDROID_LOG_WARN, "QQQ", "oculusMobile::JNI_OnLoad");
     return JNI_VERSION_1_6;
 }
@@ -325,9 +314,10 @@ JNIEXPORT void JNICALL Java_io_highfidelity_oculus_OculusMobileActivity_nativeOn
     SURFACE.setResumed(false);
 }
 
-JNIEXPORT void JNICALL Java_io_highfidelity_oculus_OculusMobileActivity_nativeOnSurfaceChanged(JNIEnv* env, jclass, jobject surface) {
+JNIEXPORT void JNICALL Java_io_highfidelity_oculus_OculusMobileActivity_nativeOnSurfaceChanged(JNIEnv* env, jclass,
+                                                                                               jobject surface) {
     __android_log_write(ANDROID_LOG_WARN, "QQQ_JNI", __FUNCTION__);
-    SURFACE.setNativeWindow(surface ? ANativeWindow_fromSurface( env, surface ) : nullptr);
+    SURFACE.setNativeWindow(surface ? ANativeWindow_fromSurface(env, surface) : nullptr);
 }
 
 } // extern "C"

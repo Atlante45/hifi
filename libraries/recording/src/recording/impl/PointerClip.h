@@ -38,12 +38,11 @@ public:
 
     void init(uchar* data, size_t size);
     virtual void addFrame(FrameConstPointer) override;
-    const QJsonDocument& getHeader() const {
-        return _header;
-    }
+    const QJsonDocument& getHeader() const { return _header; }
 
     // FIXME move to frame?
     static const qint64 MINIMUM_FRAME_SIZE = sizeof(FrameType) + sizeof(Frame::Time) + sizeof(FrameSize);
+
 protected:
     void reset() override;
     virtual FrameConstPointer readFrame(size_t index) const override;
@@ -53,6 +52,6 @@ protected:
     bool _compressed { true };
 };
 
-}
+} // namespace recording
 
 #endif

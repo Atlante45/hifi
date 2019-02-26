@@ -15,20 +15,19 @@
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
+#include <QtWidgets/QMessageBox>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStackedWidget>
-#include <QtWidgets/QMessageBox>
 
-#include <QtCore/QDir>
 #include <QtCore/QDebug>
+#include <QtCore/QDir>
 #include <QtCore/QThread>
 
 #include "../Oven.h"
 #include "../OvenGUIApplication.h"
-#include "OvenMainWindow.h"
 #include "FBXBaker.h"
 #include "OBJBaker.h"
-
+#include "OvenMainWindow.h"
 
 static const auto EXPORT_DIR_SETTING_KEY = "model_export_directory";
 static const auto MODEL_START_DIR_SETTING_KEY = "model_search_directory";
@@ -159,7 +158,6 @@ void ModelBakeWidget::outputDirectoryChanged(const QString& newDirectory) {
 }
 
 void ModelBakeWidget::bakeButtonClicked() {
-
     // make sure we have a non empty URL to a model to bake
     if (_modelLineEdit->text().isEmpty()) {
         QMessageBox::warning(this, "Model URL unspecified", "A model file is required.");
@@ -196,7 +194,9 @@ void ModelBakeWidget::bakeButtonClicked() {
         outputDirectory.mkpath(subFolderName);
 
         if (!outputDirectory.exists()) {
-            QMessageBox::warning(this, "Unable to create directory", "Unable to create output directory. Please create it manually or choose a different directory.");
+            QMessageBox::warning(
+                this, "Unable to create directory",
+                "Unable to create output directory. Please create it manually or choose a different directory.");
             return;
         }
 
@@ -209,16 +209,14 @@ void ModelBakeWidget::bakeButtonClicked() {
         originalOutputDirectory.mkdir(".");
 
         std::unique_ptr<Baker> baker;
-        auto getWorkerThreadCallback = []() -> QThread* {
-            return Oven::instance().getNextWorkerThread();
-        };
+        auto getWorkerThreadCallback = []() -> QThread* { return Oven::instance().getNextWorkerThread(); };
         // everything seems to be in place, kick off a bake for this model now
         if (modelToBakeURL.fileName().endsWith(".fbx")) {
             baker.reset(new FBXBaker(modelToBakeURL, getWorkerThreadCallback, bakedOutputDirectory.absolutePath(),
-                        originalOutputDirectory.absolutePath()));
+                                     originalOutputDirectory.absolutePath()));
         } else if (modelToBakeURL.fileName().endsWith(".obj")) {
             baker.reset(new OBJBaker(modelToBakeURL, getWorkerThreadCallback, bakedOutputDirectory.absolutePath(),
-                        originalOutputDirectory.absolutePath()));
+                                     originalOutputDirectory.absolutePath()));
         } else {
             qWarning() << "Unknown model type: " << modelToBakeURL.fileName();
             continue;
@@ -251,9 +249,8 @@ void ModelBakeWidget::handleFinishedBaker() {
     }
 
     // add the results of this bake to the results window
-    auto it = std::find_if(_bakers.begin(), _bakers.end(), [baker](const BakerRowPair& value) {
-        return value.first.get() == baker;
-    });
+    auto it = std::find_if(_bakers.begin(), _bakers.end(),
+                           [baker](const BakerRowPair& value) { return value.first.get() == baker; });
 
     for (auto& file : baker->getOutputFiles()) {
         qDebug() << "Baked file: " << file;

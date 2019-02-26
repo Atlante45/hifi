@@ -13,7 +13,8 @@
 
 namespace hfm {
 
-FormatRegistry::MediaTypeID FormatRegistry::registerMediaType(const MediaType& mediaType, std::unique_ptr<Serializer::Factory> supportedFactory) {
+FormatRegistry::MediaTypeID FormatRegistry::registerMediaType(const MediaType& mediaType,
+                                                              std::unique_ptr<Serializer::Factory> supportedFactory) {
     std::lock_guard<std::mutex> lock(_libraryLock);
 
     MediaTypeID id = _mediaTypeLibrary.registerMediaType(mediaType);
@@ -45,7 +46,8 @@ std::shared_ptr<Serializer> FormatRegistry::getSerializerForMediaTypeID(FormatRe
     return std::shared_ptr<Serializer>();
 }
 
-std::shared_ptr<Serializer> FormatRegistry::getSerializerForMediaType(const hifi::ByteArray& data, const hifi::URL& url, const std::string& webMediaType) const {
+std::shared_ptr<Serializer> FormatRegistry::getSerializerForMediaType(const hifi::ByteArray& data, const hifi::URL& url,
+                                                                      const std::string& webMediaType) const {
     MediaTypeID id;
     {
         // TODO: shared_lock in C++14
@@ -62,4 +64,4 @@ std::shared_ptr<Serializer> FormatRegistry::getSerializerForMediaType(const hifi
     return getSerializerForMediaTypeID(id);
 }
 
-};
+}; // namespace hfm

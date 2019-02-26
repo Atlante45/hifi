@@ -19,7 +19,6 @@ QString BufferClip::getName() const {
     return _name;
 }
 
-
 void BufferClip::addFrame(FrameConstPointer newFrame) {
     if (newFrame->timeOffset < 0.0f) {
         throw std::runtime_error("Frames may not have negative time offsets");
@@ -27,13 +26,10 @@ void BufferClip::addFrame(FrameConstPointer newFrame) {
 
     Locker lock(_mutex);
     auto itr = std::lower_bound(_frames.begin(), _frames.end(), newFrame->timeOffset,
-        [](const Frame& a, Frame::Time b)->bool {
-            return a.timeOffset < b;
-        }
-    );
+                                [](const Frame& a, Frame::Time b) -> bool { return a.timeOffset < b; });
 
     auto newFrameIndex = itr - _frames.begin();
-    //qDebug(recordingLog) << "Adding frame with time offset " << newFrame->timeOffset << " @ index " << newFrameIndex;
+    // qDebug(recordingLog) << "Adding frame with time offset " << newFrame->timeOffset << " @ index " << newFrameIndex;
     _frames.insert(_frames.begin() + newFrameIndex, Frame(*newFrame));
 }
 

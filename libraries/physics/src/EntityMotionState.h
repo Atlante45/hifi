@@ -12,12 +12,11 @@
 #ifndef hifi_EntityMotionState_h
 #define hifi_EntityMotionState_h
 
-#include <EntityTypes.h>
 #include <AACube.h>
+#include <EntityTypes.h>
 #include <workload/Region.h>
 
 #include "ObjectMotionState.h"
-
 
 // From the MotionState's perspective:
 //      Inside = physics simulation
@@ -25,12 +24,7 @@
 
 class EntityMotionState : public ObjectMotionState {
 public:
-    enum class OwnershipState {
-        NotLocallyOwned = 0,
-        PendingBid,
-        LocallyOwned,
-        Unownable
-    };
+    enum class OwnershipState { NotLocallyOwned = 0, PendingBid, LocallyOwned, Unownable };
 
     EntityMotionState() = delete;
     EntityMotionState(btCollisionShape* shape, EntityItemPointer item);
@@ -63,7 +57,9 @@ public:
     virtual float getObjectLinearDamping() const override { return _entity->getDamping(); }
     virtual float getObjectAngularDamping() const override { return _entity->getAngularDamping(); }
 
-    virtual glm::vec3 getObjectPosition() const override { return _entity->getWorldPosition() - ObjectMotionState::getWorldOffset(); }
+    virtual glm::vec3 getObjectPosition() const override {
+        return _entity->getWorldPosition() - ObjectMotionState::getWorldOffset();
+    }
     virtual glm::quat getObjectRotation() const override { return _entity->getWorldOrientation(); }
     virtual glm::vec3 getObjectLinearVelocity() const override { return _entity->getWorldVelocity(); }
     virtual glm::vec3 getObjectAngularVelocity() const override { return _entity->getWorldAngularVelocity(); }
@@ -112,9 +108,9 @@ protected:
 
     void clearObjectVelocities() const;
 
-    #ifdef WANT_DEBUG_ENTITY_TREE_LOCKS
+#ifdef WANT_DEBUG_ENTITY_TREE_LOCKS
     bool entityTreeIsLocked() const;
-    #endif
+#endif
 
     bool isReadyToComputeShape() const override;
     const btCollisionShape* computeNewShape() override;
@@ -135,7 +131,7 @@ protected:
     //     according to how we think the server doing it.  We calculate the error between the true local transform
     //     and the remote to decide whether to send another update or not.
     //
-    glm::vec3 _serverPosition;    // in simulation-frame (not world-frame)
+    glm::vec3 _serverPosition; // in simulation-frame (not world-frame)
     glm::quat _serverRotation;
     glm::vec3 _serverVelocity;
     glm::vec3 _serverAngularVelocity; // radians per second

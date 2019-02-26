@@ -45,7 +45,7 @@ QString QmlWebWindowClass::getURL() {
     if (_qmlWindow.isNull()) {
         return QString();
     }
-        
+
     return _qmlWindow->property(URL_PROPERTY).toString();
 }
 

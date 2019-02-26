@@ -14,29 +14,34 @@
 #ifndef hifi_Ledger_h
 #define hifi_Ledger_h
 
-#include <QJsonObject>
 #include <DependencyManager.h>
+#include <QJsonObject>
 #include <QtNetwork/QNetworkReply>
 #include "AccountManager.h"
-
 
 class Ledger : public QObject, public Dependency {
     Q_OBJECT
     SINGLETON_DEPENDENCY
 
 public:
-    void buy(const QString& hfc_key, int cost, const QString& asset_id, const QString& inventory_key, const bool controlled_failure = false);
+    void buy(const QString& hfc_key, int cost, const QString& asset_id, const QString& inventory_key,
+             const bool controlled_failure = false);
     bool receiveAt(const QString& hfc_key, const QString& signing_key, const QByteArray& locker);
     bool receiveAt();
     void balance(const QStringList& keys);
-    void inventory(const QString& editionFilter, const QString& typeFilter, const QString& titleFilter, const int& page, const int& perPage);
+    void inventory(const QString& editionFilter, const QString& typeFilter, const QString& titleFilter, const int& page,
+                   const int& perPage);
     void history(const QStringList& keys, const int& pageNumber, const int& itemsPerPage);
     void account();
-    void updateLocation(const QString& asset_id, const QString& location, const bool& alsoUpdateSiblings = false, const bool controlledFailure = false);
+    void updateLocation(const QString& asset_id, const QString& location, const bool& alsoUpdateSiblings = false,
+                        const bool controlledFailure = false);
     void certificateInfo(const QString& certificateId);
-    void transferAssetToNode(const QString& hfc_key, const QString& nodeID, const QString& certificateID, const int& amount, const QString& optionalMessage);
-    void transferAssetToUsername(const QString& hfc_key, const QString& username, const QString& certificateID, const int& amount, const QString& optionalMessage);
-    void authorizeAssetTransfer(const QString& hfc_key, const QString& couponID, const QString& certificateID, const int& amount, const QString& optionalMessage);
+    void transferAssetToNode(const QString& hfc_key, const QString& nodeID, const QString& certificateID, const int& amount,
+                             const QString& optionalMessage);
+    void transferAssetToUsername(const QString& hfc_key, const QString& username, const QString& certificateID,
+                                 const int& amount, const QString& optionalMessage);
+    void authorizeAssetTransfer(const QString& hfc_key, const QString& couponID, const QString& certificateID,
+                                const int& amount, const QString& optionalMessage);
     void alreadyOwned(const QString& marketplaceId);
     void getAvailableUpdates(const QString& itemId = "", const int& pageNumber = 1, const int& itemsPerPage = 10);
     void updateItem(const QString& hfc_key, const QString& certificate_id);
@@ -100,10 +105,12 @@ public slots:
 private:
     QJsonObject apiResponse(const QString& label, QNetworkReply* reply);
     QJsonObject failResponse(const QString& label, QNetworkReply* reply);
-    void send(const QString& endpoint, const QString& success, const QString& fail, QNetworkAccessManager::Operation method, AccountManagerAuth::Type authType, QJsonObject request);
+    void send(const QString& endpoint, const QString& success, const QString& fail, QNetworkAccessManager::Operation method,
+              AccountManagerAuth::Type authType, QJsonObject request);
     void keysQuery(const QString& endpoint, const QString& success, const QString& fail, QJsonObject& extraRequestParams);
     void keysQuery(const QString& endpoint, const QString& success, const QString& fail);
-    void signedSend(const QString& propertyName, const QByteArray& text, const QString& key, const QString& endpoint, const QString& success, const QString& fail, const bool controlled_failure = false);
+    void signedSend(const QString& propertyName, const QByteArray& text, const QString& key, const QString& endpoint,
+                    const QString& success, const QString& fail, const bool controlled_failure = false);
 };
 
 #endif // hifi_Ledger_h

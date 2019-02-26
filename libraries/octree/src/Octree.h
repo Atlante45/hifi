@@ -12,17 +12,17 @@
 #ifndef hifi_Octree_h
 #define hifi_Octree_h
 
+#include <stdint.h>
 #include <memory>
 #include <set>
-#include <stdint.h>
 
 #include <QHash>
 #include <QObject>
 #include <QtCore/QJsonObject>
 
-#include <shared/ReadWriteLockable.h>
 #include <SimpleMovingAverage.h>
 #include <ViewFrustum.h>
+#include <shared/ReadWriteLockable.h>
 
 #include "OctreeElement.h"
 #include "OctreeElementBag.h"
@@ -54,11 +54,11 @@ using RecurseOctreeSortingOperation = std::function<float(const OctreeElementPoi
 using SortedChild = std::pair<float, OctreeElementPointer>;
 typedef QHash<uint, AACube> CubeList;
 
-const bool NO_EXISTS_BITS         = false;
-const bool WANT_EXISTS_BITS       = true;
+const bool NO_EXISTS_BITS = false;
+const bool WANT_EXISTS_BITS = true;
 
-const int NO_BOUNDARY_ADJUST     = 0;
-const int LOW_RES_MOVING_ADJUST  = 1;
+const int NO_BOUNDARY_ADJUST = 0;
+const int LOW_RES_MOVING_ADJUST = 1;
 
 class EncodeBitstreamParams {
 public:
@@ -66,39 +66,44 @@ public:
     NodeData* nodeData;
 
     // output hints from the encode process
-    typedef enum {
-        UNKNOWN,
-        DIDNT_FIT,
-        FINISHED
-    } reason;
+    typedef enum { UNKNOWN, DIDNT_FIT, FINISHED } reason;
     reason stopReason;
 
-    EncodeBitstreamParams(bool includeExistsBits = WANT_EXISTS_BITS,
-                          NodeData* nodeData = nullptr) :
-            includeExistsBits(includeExistsBits),
-            nodeData(nodeData),
-            stopReason(UNKNOWN)
-    {
-    }
+    EncodeBitstreamParams(bool includeExistsBits = WANT_EXISTS_BITS, NodeData* nodeData = nullptr) :
+        includeExistsBits(includeExistsBits),
+        nodeData(nodeData),
+        stopReason(UNKNOWN) {}
 
     void displayStopReason() {
         printf("StopReason: ");
         switch (stopReason) {
-            case UNKNOWN: qDebug("UNKNOWN"); break;
-            case DIDNT_FIT: qDebug("DIDNT_FIT"); break;
-            case FINISHED: qDebug("FINISHED"); break;
+            case UNKNOWN:
+                qDebug("UNKNOWN");
+                break;
+            case DIDNT_FIT:
+                qDebug("DIDNT_FIT");
+                break;
+            case FINISHED:
+                qDebug("FINISHED");
+                break;
         }
     }
 
     QString getStopReason() {
         switch (stopReason) {
-            case UNKNOWN: return QString("UNKNOWN"); break;
-            case DIDNT_FIT: return QString("DIDNT_FIT"); break;
-            case FINISHED: return QString("FINISHED"); break;
+            case UNKNOWN:
+                return QString("UNKNOWN");
+                break;
+            case DIDNT_FIT:
+                return QString("DIDNT_FIT");
+                break;
+            case FINISHED:
+                return QString("FINISHED");
+                break;
         }
     }
 
-    std::function<void(const QUuid& dataID, quint64 itemLastEdited)> trackSend { [](const QUuid&, quint64){} };
+    std::function<void(const QUuid& dataID, quint64 itemLastEdited)> trackSend { [](const QUuid&, quint64) {} };
 };
 
 class ReadBitstreamToTreeParams {
@@ -110,16 +115,12 @@ public:
     int elementsPerPacket = 0;
     int entitiesPerPacket = 0;
 
-    ReadBitstreamToTreeParams(
-        bool includeExistsBits = WANT_EXISTS_BITS,
-        OctreeElementPointer destinationElement = NULL,
-        QUuid sourceUUID = QUuid(),
-        SharedNodePointer sourceNode = SharedNodePointer()) :
-            includeExistsBits(includeExistsBits),
-            destinationElement(destinationElement),
-            sourceUUID(sourceUUID),
-            sourceNode(sourceNode)
-    {}
+    ReadBitstreamToTreeParams(bool includeExistsBits = WANT_EXISTS_BITS, OctreeElementPointer destinationElement = NULL,
+                              QUuid sourceUUID = QUuid(), SharedNodePointer sourceNode = SharedNodePointer()) :
+        includeExistsBits(includeExistsBits),
+        destinationElement(destinationElement),
+        sourceUUID(sourceUUID),
+        sourceNode(sourceNode) {}
 };
 
 class Octree : public QObject, public std::enable_shared_from_this<Octree>, public ReadWriteLockable {
@@ -129,7 +130,7 @@ public:
     virtual ~Octree();
 
     /// Your tree class must implement this to create the correct element type
-    virtual OctreeElementPointer createNewElement(unsigned char * octalCode = NULL) = 0;
+    virtual OctreeElementPointer createNewElement(unsigned char* octalCode = NULL) = 0;
 
     // These methods will allow the OctreeServer to send your tree inbound edit packets of your
     // own definition. Implement these to allow your octree based server to support editing
@@ -137,22 +138,26 @@ public:
     virtual PacketVersion expectedVersion() const { return versionForPacketType(expectedDataPacketType()); }
     virtual bool handlesEditPacketType(PacketType packetType) const { return false; }
     virtual int processEditPacketData(ReceivedMessage& message, const unsigned char* editData, int maxLength,
-                                      const SharedNodePointer& sourceNode) { return 0; }
-    virtual void processChallengeOwnershipRequestPacket(ReceivedMessage& message, const SharedNodePointer& sourceNode) { return; }
+                                      const SharedNodePointer& sourceNode) {
+        return 0;
+    }
+    virtual void processChallengeOwnershipRequestPacket(ReceivedMessage& message, const SharedNodePointer& sourceNode) {
+        return;
+    }
     virtual void processChallengeOwnershipReplyPacket(ReceivedMessage& message, const SharedNodePointer& sourceNode) { return; }
     virtual void processChallengeOwnershipPacket(ReceivedMessage& message, const SharedNodePointer& sourceNode) { return; }
 
     virtual bool rootElementHasData() const { return false; }
-    virtual void releaseSceneEncodeData(OctreeElementExtraEncodeData* extraEncodeData) const { }
+    virtual void releaseSceneEncodeData(OctreeElementExtraEncodeData* extraEncodeData) const {}
 
-    virtual void update() { } // nothing to do by default
+    virtual void update() {} // nothing to do by default
 
     OctreeElementPointer getRoot() { return _rootElement; }
 
     virtual void eraseNonLocalEntities() { _isDirty = true; };
     virtual void eraseAllOctreeElements(bool createNewRoot = true);
 
-    virtual void readBitstreamToTree(const unsigned char* bitstream,  uint64_t bufferSizeBytes, ReadBitstreamToTreeParams& args);
+    virtual void readBitstreamToTree(const unsigned char* bitstream, uint64_t bufferSizeBytes, ReadBitstreamToTreeParams& args);
     void reaverageOctreeElements(OctreeElementPointer startElement = OctreeElementPointer());
 
     /// Find the voxel at position x,y,z,s
@@ -167,7 +172,8 @@ public:
     OctreeElementPointer getOrCreateChildElementContaining(const AACube& box);
 
     void recurseTreeWithOperation(const RecurseOctreeOperation& operation, void* extraData = NULL);
-    void recurseTreeWithOperationSorted(const RecurseOctreeOperation& operation, const RecurseOctreeSortingOperation& sortingOperation, void* extraData = NULL);
+    void recurseTreeWithOperationSorted(const RecurseOctreeOperation& operation,
+                                        const RecurseOctreeSortingOperation& sortingOperation, void* extraData = NULL);
 
     void recurseTreeWithOperator(RecurseOctreeOperator* operatorObject);
 
@@ -176,17 +182,13 @@ public:
     void setDirtyBit() { _isDirty = true; }
 
     // output hints from the encode process
-    typedef enum {
-        Lock,
-        TryLock
-    } lockType;
-
+    typedef enum { Lock, TryLock } lockType;
 
     bool findSpherePenetration(const glm::vec3& center, float radius, glm::vec3& penetration, void** penetratedObject = NULL,
-                                    Octree::lockType lockType = Octree::TryLock, bool* accurateResult = NULL);
+                               Octree::lockType lockType = Octree::TryLock, bool* accurateResult = NULL);
 
     bool findCapsulePenetration(const glm::vec3& start, const glm::vec3& end, float radius, glm::vec3& penetration,
-                                    Octree::lockType lockType = Octree::TryLock, bool* accurateResult = NULL);
+                                Octree::lockType lockType = Octree::TryLock, bool* accurateResult = NULL);
 
     /// \param cube query cube in world-frame (meters)
     /// \param[out] cubes list of cubes (world-frame) of child elements that have content
@@ -195,8 +197,8 @@ public:
     /// \param point query point in world-frame (meters)
     /// \param lockType how to lock the tree (Lock, TryLock, NoLock)
     /// \param[out] accurateResult pointer to output result, will be set "true" or "false" if non-null
-    OctreeElementPointer getElementEnclosingPoint(const glm::vec3& point,
-                                    Octree::lockType lockType = Octree::TryLock, bool* accurateResult = NULL);
+    OctreeElementPointer getElementEnclosingPoint(const glm::vec3& point, Octree::lockType lockType = Octree::TryLock,
+                                                  bool* accurateResult = NULL);
 
     // Note: this assumes the fileFormat is the HIO individual voxels code files
     void loadOctreeFile(const char* fileName);
@@ -205,7 +207,8 @@ public:
     bool toJSONDocument(QJsonDocument* doc, const OctreeElementPointer& element = nullptr);
     bool toJSONString(QString& jsonString, const OctreeElementPointer& element = nullptr);
     bool toJSON(QByteArray* data, const OctreeElementPointer& element = nullptr, bool doGzip = false);
-    bool writeToFile(const char* filename, const OctreeElementPointer& element = nullptr, QString persistAsFileType = "json.gz");
+    bool writeToFile(const char* filename, const OctreeElementPointer& element = nullptr,
+                     QString persistAsFileType = "json.gz");
     bool writeToJSONFile(const char* filename, const OctreeElementPointer& element = nullptr, bool doGzip = false);
     virtual bool writeToMap(QVariantMap& entityDescription, OctreeElementPointer element, bool skipDefaultValues,
                             bool skipThoseWithBadParents) = 0;
@@ -213,10 +216,11 @@ public:
 
     // Octree importers
     bool readFromFile(const char* filename);
-    bool readFromURL(const QString& url, const bool isObservable = true, const qint64 callerId = -1); // will support file urls as well...
-    bool readFromStream(uint64_t streamLength, QDataStream& inputStream, const QString& marketplaceID="");
+    bool readFromURL(const QString& url, const bool isObservable = true,
+                     const qint64 callerId = -1); // will support file urls as well...
+    bool readFromStream(uint64_t streamLength, QDataStream& inputStream, const QString& marketplaceID = "");
     bool readSVOFromStream(uint64_t streamLength, QDataStream& inputStream);
-    bool readJSONFromStream(uint64_t streamLength, QDataStream& inputStream, const QString& marketplaceID="");
+    bool readJSONFromStream(uint64_t streamLength, QDataStream& inputStream, const QString& marketplaceID = "");
     bool readJSONFromGzippedFile(QString qFileName);
     virtual bool readFromMap(QVariantMap& entityDescription) = 0;
 
@@ -225,11 +229,13 @@ public:
     bool getShouldReaverage() const { return _shouldReaverage; }
 
     void recurseElementWithOperation(const OctreeElementPointer& element, const RecurseOctreeOperation& operation,
-                void* extraData, int recursionCount = 0);
+                                     void* extraData, int recursionCount = 0);
     bool recurseElementWithOperationSorted(const OctreeElementPointer& element, const RecurseOctreeOperation& operation,
-        const RecurseOctreeSortingOperation& sortingOperation, void* extraData, int recursionCount = 0);
+                                           const RecurseOctreeSortingOperation& sortingOperation, void* extraData,
+                                           int recursionCount = 0);
 
-    bool recurseElementWithOperator(const OctreeElementPointer& element, RecurseOctreeOperator* operatorObject, int recursionCount = 0);
+    bool recurseElementWithOperator(const OctreeElementPointer& element, RecurseOctreeOperator* operatorObject,
+                                    int recursionCount = 0);
 
     bool getIsViewing() const { return _isViewing; } /// This tree is receiving inbound viewer datagrams.
     void setIsViewing(bool isViewing) { _isViewing = isViewing; }
@@ -240,34 +246,35 @@ public:
     bool getIsClient() const { return !_isServer; } /// Is this a client based tree. Allows guards for certain operations
     void setIsClient(bool isClient) { _isServer = !isClient; }
 
-    virtual void dumpTree() { }
-    virtual void pruneTree() { }
+    virtual void dumpTree() {}
+    virtual void pruneTree() {}
 
     void setOctreeVersionInfo(QUuid id, int64_t dataVersion) {
         _persistID = id;
         _persistDataVersion = dataVersion;
     }
 
-    virtual void resetEditStats() { }
+    virtual void resetEditStats() {}
     virtual quint64 getAverageDecodeTime() const { return 0; }
-    virtual quint64 getAverageLookupTime() const { return 0;  }
-    virtual quint64 getAverageUpdateTime() const { return 0;  }
-    virtual quint64 getAverageCreateTime() const { return 0;  }
-    virtual quint64 getAverageLoggingTime() const { return 0;  }
+    virtual quint64 getAverageLookupTime() const { return 0; }
+    virtual quint64 getAverageUpdateTime() const { return 0; }
+    virtual quint64 getAverageCreateTime() const { return 0; }
+    virtual quint64 getAverageLoggingTime() const { return 0; }
     virtual quint64 getAverageFilterTime() const { return 0; }
 
     void incrementPersistDataVersion() { _persistDataVersion++; }
-
 
 protected:
     void deleteOctalCodeFromTreeRecursion(const OctreeElementPointer& element, void* extraData);
 
     static bool countOctreeElementsOperation(const OctreeElementPointer& element, void* extraData);
 
-    OctreeElementPointer nodeForOctalCode(const OctreeElementPointer& ancestorElement, const unsigned char* needleCode, OctreeElementPointer* parentOfFoundElement) const;
-    OctreeElementPointer createMissingElement(const OctreeElementPointer& lastParentElement, const unsigned char* codeToReach, int recursionCount = 0);
-    int readElementData(const OctreeElementPointer& destinationElement, const unsigned char* nodeData,
-                int bufferSizeBytes, ReadBitstreamToTreeParams& args);
+    OctreeElementPointer nodeForOctalCode(const OctreeElementPointer& ancestorElement, const unsigned char* needleCode,
+                                          OctreeElementPointer* parentOfFoundElement) const;
+    OctreeElementPointer createMissingElement(const OctreeElementPointer& lastParentElement, const unsigned char* codeToReach,
+                                              int recursionCount = 0);
+    int readElementData(const OctreeElementPointer& destinationElement, const unsigned char* nodeData, int bufferSizeBytes,
+                        ReadBitstreamToTreeParams& args);
 
     OctreeElementPointer _rootElement = nullptr;
 

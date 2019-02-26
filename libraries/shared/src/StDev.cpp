@@ -11,13 +11,11 @@
 
 #include "StDev.h"
 
-#include <limits>   
 #include <cmath>
 #include <cstring>
+#include <limits>
 
-StDev::StDev() :
-    _sampleCount(0)
-{
+StDev::StDev() : _sampleCount(0) {
     reset();
 }
 
@@ -28,7 +26,8 @@ void StDev::reset() {
 
 void StDev::addValue(float v) {
     _data[_sampleCount++] = v;
-    if (_sampleCount == NUM_SAMPLES) _sampleCount = 0;
+    if (_sampleCount == NUM_SAMPLES)
+        _sampleCount = 0;
 }
 
 float StDev::getAverage() const {
@@ -38,7 +37,8 @@ float StDev::getAverage() const {
     }
     if (_sampleCount > 0)
         return average / (float)_sampleCount;
-    else return 0;
+    else
+        return 0;
 }
 
 float StDev::getStDev() const {

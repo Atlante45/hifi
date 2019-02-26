@@ -11,11 +11,11 @@
 
 #include "OBJWriter.h"
 
-#include <QFile>
-#include <QFileInfo>
 #include <graphics/BufferViewHelpers.h>
 #include <graphics/Geometry.h>
 #include <hfm/ModelFormatLogging.h>
+#include <QFile>
+#include <QFileInfo>
 
 static QString formatFloat(double n) {
     // limit precision to 6, but don't output trailing zeros.
@@ -30,9 +30,7 @@ static QString formatFloat(double n) {
     // check for non-numbers.  if we get NaN or inf or scientific notation, just return 0
     for (int i = 0; i < s.length(); i++) {
         auto c = s.at(i).toLatin1();
-        if (c != '-' &&
-            c != '.' &&
-            (c < '0' || c > '9')) {
+        if (c != '-' && c != '.' && (c < '0' || c > '9')) {
             qCDebug(modelformat) << "OBJWriter zeroing bad vertex coordinate:" << s << "because of" << c;
             return QString("0");
         }
@@ -109,8 +107,9 @@ bool writeOBJToTextStream(QTextStream& out, QList<MeshPointer> meshes) {
         const gpu::BufferView& indexBuffer = mesh->getIndexBuffer();
 
         graphics::Index partCount = (graphics::Index)mesh->getNumParts();
-        QString name = (!mesh->displayName.size() ? QString("mesh-%1-part").arg(nth) : QString::fromStdString(mesh->displayName))
-            .replace(QRegExp("[^-_a-zA-Z0-9]"), "_");
+        QString name = (!mesh->displayName.size() ? QString("mesh-%1-part").arg(nth)
+                                                  : QString::fromStdString(mesh->displayName))
+                           .replace(QRegExp("[^-_a-zA-Z0-9]"), "_");
         for (int partIndex = 0; partIndex < partCount; partIndex++) {
             const graphics::Mesh::Part& part = partBuffer.get<graphics::Mesh::Part>(partIndex);
 
@@ -120,9 +119,12 @@ bool writeOBJToTextStream(QTextStream& out, QList<MeshPointer> meshes) {
             auto face = [&](uint32_t i0, uint32_t i1, uint32_t i2) {
                 out << "f ";
                 if (haveNormals) {
-                    out << currentVertexStartOffset + indices[i0] + 1 << "//" << currentVertexStartOffset + indices[i0] + 1 << " ";
-                    out << currentVertexStartOffset + indices[i1] + 1 << "//" << currentVertexStartOffset + indices[i1] + 1 << " ";
-                    out << currentVertexStartOffset + indices[i2] + 1 << "//" << currentVertexStartOffset + indices[i2] + 1 << "\n";
+                    out << currentVertexStartOffset + indices[i0] + 1 << "//" << currentVertexStartOffset + indices[i0] + 1
+                        << " ";
+                    out << currentVertexStartOffset + indices[i1] + 1 << "//" << currentVertexStartOffset + indices[i1] + 1
+                        << " ";
+                    out << currentVertexStartOffset + indices[i2] + 1 << "//" << currentVertexStartOffset + indices[i2] + 1
+                        << "\n";
                 } else {
                     out << currentVertexStartOffset + indices[i0] + 1 << " ";
                     out << currentVertexStartOffset + indices[i1] + 1 << " ";
@@ -142,13 +144,13 @@ bool writeOBJToTextStream(QTextStream& out, QList<MeshPointer> meshes) {
                 qCDebug(modelformat) << "OBJWriter -- len > index size" << len << indexBuffer.getNumElements();
             }
             if (part._topology == graphics::Mesh::QUADS) {
-                for (uint32_t idx = part._startIndex; idx+3 < len; idx += 4) {
-                    face(idx+0, idx+1, idx+3);
-                    face(idx+1, idx+2, idx+3);
+                for (uint32_t idx = part._startIndex; idx + 3 < len; idx += 4) {
+                    face(idx + 0, idx + 1, idx + 3);
+                    face(idx + 1, idx + 2, idx + 3);
                 }
             } else if (part._topology == graphics::Mesh::TRIANGLES) {
-                for (uint32_t idx = part._startIndex; idx+2 < len; idx += 3) {
-                    face(idx+0, idx+1, idx+2);
+                for (uint32_t idx = part._startIndex; idx + 2 < len; idx += 3) {
+                    face(idx + 0, idx + 1, idx + 2);
                 }
             }
             out << "\n";

@@ -11,22 +11,22 @@
 #ifndef hifi_SpacemouseManager_h
 #define hifi_SpacemouseManager_h
 
-#include <QObject>
-#include <QLibrary>
-#include <controllers/UserInputMapper.h>
 #include <controllers/InputDevice.h>
 #include <controllers/StandardControls.h>
+#include <controllers/UserInputMapper.h>
+#include <QLibrary>
+#include <QObject>
 
 #include <plugins/InputPlugin.h>
 
 // the windows connexion rawinput
 #ifdef Q_OS_WIN
 
-#include "../../../interface/external/3dconnexionclient/include/I3dMouseParams.h"
-#include <QAbstractNativeEventFilter>
-#include <QAbstractEventDispatcher>
 #include <Winsock2.h>
 #include <windows.h>
+#include <QAbstractEventDispatcher>
+#include <QAbstractNativeEventFilter>
+#include "../../../interface/external/3dconnexionclient/include/I3dMouseParams.h"
 
 // windows rawinput parameters
 class MouseParameters : public I3dMouseParam {
@@ -54,12 +54,10 @@ public:
     void SetPivotVisibility(PivotVisibility visibility);
 
     static bool Is3dmouseAttached();
-    
-    
 
 private:
     MouseParameters(const MouseParameters&);
-    const MouseParameters& operator = (const MouseParameters&);
+    const MouseParameters& operator=(const MouseParameters&);
 
     Navigation fNavigation;
     Pivot fPivot;
@@ -72,7 +70,6 @@ private:
 };
 
 class SpacemouseManager : public InputPlugin, public QAbstractNativeEventFilter {
-   
     Q_OBJECT
 public:
     bool isSupported() const override;
@@ -105,24 +102,23 @@ private:
         TInputData() : fAxes(6) {}
 
         bool IsZero() {
-            return (0.0f == fAxes[0] && 0.0f == fAxes[1] && 0.0f == fAxes[2] &&
-                0.0f == fAxes[3] && 0.0f == fAxes[4] && 0.0f == fAxes[5]);
+            return (0.0f == fAxes[0] && 0.0f == fAxes[1] && 0.0f == fAxes[2] && 0.0f == fAxes[3] && 0.0f == fAxes[4] &&
+                    0.0f == fAxes[5]);
         }
 
         int fTimeToLive; // For telling if the device was unplugged while sending data
         bool fIsDirty;
         std::vector<float> fAxes;
-
     };
 
     HWND fWindow;
 
     // Data cache to handle multiple rawinput devices
-    std::map< HANDLE, TInputData> fDevice2Data;
-    std::map< HANDLE, unsigned long> fDevice2Keystate;
+    std::map<HANDLE, TInputData> fDevice2Data;
+    std::map<HANDLE, unsigned long> fDevice2Keystate;
 
     // 3dmouse parameters
-    MouseParameters f3dMouseParams;     // Rotate, Pan Zoom etc.
+    MouseParameters f3dMouseParams; // Rotate, Pan Zoom etc.
 
     // use to calculate distance traveled since last event
     DWORD fLast3dmouseInputTime;
@@ -143,12 +139,11 @@ public:
     void init();
     void destroy();
     bool Is3dmouseAttached();
-    public slots:
+public slots:
     void toggleSpacemouse(bool shouldEnable);
 };
 
 #endif // __APPLE__
-
 
 // connnects to the userinputmapper
 class SpacemouseDevice : public QObject, public controller::InputDevice {
@@ -165,11 +160,7 @@ public:
         ROTATE_Z,
     };
 
-    enum ButtonChannel {
-        BUTTON_1 = 1,
-        BUTTON_2 = 2,
-        BUTTON_3 = 3
-    };
+    enum ButtonChannel { BUTTON_1 = 1, BUTTON_2 = 2, BUTTON_3 = 3 };
 
     typedef std::unordered_set<int> ButtonPressedMap;
     typedef std::map<int, float> AxisStateMap;

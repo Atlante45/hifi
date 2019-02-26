@@ -9,7 +9,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef hifi_MyCharacterController_h
 #define hifi_MyCharacterController_h
 
@@ -24,7 +23,7 @@ class DetailedMotionState;
 class MyCharacterController : public CharacterController {
 public:
     explicit MyCharacterController(std::shared_ptr<MyAvatar> avatar);
-    ~MyCharacterController ();
+    ~MyCharacterController();
 
     void setDynamicsWorld(btDynamicsWorld* world) override;
     void updateShapeIfNecessary() override;
@@ -53,7 +52,6 @@ public:
     void buildPhysicsTransaction(PhysicsEngine::Transaction& transaction);
     void handleProcessedPhysicsTransaction(PhysicsEngine::Transaction& transaction);
 
-
     struct RayAvatarResult {
         bool _intersect { false };
         bool _isBound { false };
@@ -72,7 +70,7 @@ public:
     int32_t computeCollisionMask() const override;
     void handleChangedCollisionMask() override;
 
-    bool _collideWithOtherAvatars{ true };
+    bool _collideWithOtherAvatars { true };
     void setCollideWithOtherAvatars(bool collideWithOtherAvatars) { _collideWithOtherAvatars = collideWithOtherAvatars; }
 
 protected:

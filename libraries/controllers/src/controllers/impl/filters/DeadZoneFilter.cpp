@@ -8,8 +8,8 @@
 
 #include "DeadZoneFilter.h"
 
-#include <QtCore/QJsonObject>
 #include <QtCore/QJsonArray>
+#include <QtCore/QJsonObject>
 
 using namespace controller;
 AxisValue DeadZoneFilter::apply(AxisValue value) const {

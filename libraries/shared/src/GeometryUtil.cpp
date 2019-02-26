@@ -12,16 +12,16 @@
 #include "GeometryUtil.h"
 
 #include <assert.h>
-#include <cstring>
-#include <cmath>
-#include <bitset>
-#include <complex>
 #include <qmath.h>
+#include <bitset>
+#include <cmath>
+#include <complex>
+#include <cstring>
 #include <glm/gtx/quaternion.hpp>
 #include "glm/gtc/matrix_transform.hpp"
 
-#include "NumericalConstants.h"
 #include "GLMHelpers.h"
+#include "NumericalConstants.h"
 #include "Plane.h"
 
 glm::vec3 computeVectorFromPointToSegment(const glm::vec3& point, const glm::vec3& start, const glm::vec3& end) {
@@ -39,7 +39,7 @@ glm::vec3 computeVectorFromPointToSegment(const glm::vec3& point, const glm::vec
         return end - point;
 
     } else { // closest to the middle
-        return start + segmentVector*proj - point;
+        return start + segmentVector * proj - point;
     }
 }
 
@@ -62,41 +62,39 @@ bool findSpherePenetration(const glm::vec3& point, const glm::vec3& defaultDirec
     return false;
 }
 
-bool findSpherePointPenetration(const glm::vec3& sphereCenter, float sphereRadius,
-                                const glm::vec3& point, glm::vec3& penetration) {
+bool findSpherePointPenetration(const glm::vec3& sphereCenter, float sphereRadius, const glm::vec3& point,
+                                glm::vec3& penetration) {
     return findSpherePenetration(point - sphereCenter, glm::vec3(0.0f, -1.0f, 0.0f), sphereRadius, penetration);
 }
 
-bool findPointSpherePenetration(const glm::vec3& point, const glm::vec3& sphereCenter,
-       float sphereRadius, glm::vec3& penetration) {
+bool findPointSpherePenetration(const glm::vec3& point, const glm::vec3& sphereCenter, float sphereRadius,
+                                glm::vec3& penetration) {
     return findSpherePenetration(sphereCenter - point, glm::vec3(0.0f, -1.0f, 0.0f), sphereRadius, penetration);
 }
 
-bool findSphereSpherePenetration(const glm::vec3& firstCenter, float firstRadius,
-                                 const glm::vec3& secondCenter, float secondRadius, glm::vec3& penetration) {
+bool findSphereSpherePenetration(const glm::vec3& firstCenter, float firstRadius, const glm::vec3& secondCenter,
+                                 float secondRadius, glm::vec3& penetration) {
     return findSpherePointPenetration(firstCenter, firstRadius + secondRadius, secondCenter, penetration);
 }
 
-bool findSphereSegmentPenetration(const glm::vec3& sphereCenter, float sphereRadius,
-                                  const glm::vec3& segmentStart, const glm::vec3& segmentEnd, glm::vec3& penetration) {
+bool findSphereSegmentPenetration(const glm::vec3& sphereCenter, float sphereRadius, const glm::vec3& segmentStart,
+                                  const glm::vec3& segmentEnd, glm::vec3& penetration) {
     return findSpherePenetration(computeVectorFromPointToSegment(sphereCenter, segmentStart, segmentEnd),
                                  glm::vec3(0.0f, -1.0f, 0.0f), sphereRadius, penetration);
 }
 
 bool findSphereCapsulePenetration(const glm::vec3& sphereCenter, float sphereRadius, const glm::vec3& capsuleStart,
                                   const glm::vec3& capsuleEnd, float capsuleRadius, glm::vec3& penetration) {
-    return findSphereSegmentPenetration(sphereCenter, sphereRadius + capsuleRadius,
-        capsuleStart, capsuleEnd, penetration);
+    return findSphereSegmentPenetration(sphereCenter, sphereRadius + capsuleRadius, capsuleStart, capsuleEnd, penetration);
 }
 
-bool findPointCapsuleConePenetration(const glm::vec3& point, const glm::vec3& capsuleStart,
-        const glm::vec3& capsuleEnd, float startRadius, float endRadius, glm::vec3& penetration) {
+bool findPointCapsuleConePenetration(const glm::vec3& point, const glm::vec3& capsuleStart, const glm::vec3& capsuleEnd,
+                                     float startRadius, float endRadius, glm::vec3& penetration) {
     // compute the projection of the point vector onto the segment vector
     glm::vec3 segmentVector = capsuleEnd - capsuleStart;
     float lengthSquared = glm::dot(segmentVector, segmentVector);
     if (lengthSquared < EPSILON) { // start and end the same
-        return findPointSpherePenetration(point, capsuleStart,
-            glm::max(startRadius, endRadius), penetration);
+        return findPointSpherePenetration(point, capsuleStart, glm::max(startRadius, endRadius), penetration);
     }
     float proj = glm::dot(point - capsuleStart, segmentVector) / lengthSquared;
     if (proj <= 0.0f) { // closest to the start
@@ -106,20 +104,19 @@ bool findPointCapsuleConePenetration(const glm::vec3& point, const glm::vec3& ca
         return findPointSpherePenetration(point, capsuleEnd, endRadius, penetration);
 
     } else { // closest to the middle
-        return findPointSpherePenetration(point, capsuleStart + segmentVector * proj,
-            glm::mix(startRadius, endRadius, proj), penetration);
+        return findPointSpherePenetration(point, capsuleStart + segmentVector * proj, glm::mix(startRadius, endRadius, proj),
+                                          penetration);
     }
 }
 
-bool findSphereCapsuleConePenetration(const glm::vec3& sphereCenter,
-        float sphereRadius, const glm::vec3& capsuleStart, const glm::vec3& capsuleEnd,
-        float startRadius, float endRadius, glm::vec3& penetration) {
-    return findPointCapsuleConePenetration(sphereCenter, capsuleStart, capsuleEnd,
-        startRadius + sphereRadius, endRadius + sphereRadius, penetration);
+bool findSphereCapsuleConePenetration(const glm::vec3& sphereCenter, float sphereRadius, const glm::vec3& capsuleStart,
+                                      const glm::vec3& capsuleEnd, float startRadius, float endRadius, glm::vec3& penetration) {
+    return findPointCapsuleConePenetration(sphereCenter, capsuleStart, capsuleEnd, startRadius + sphereRadius,
+                                           endRadius + sphereRadius, penetration);
 }
 
-bool findSpherePlanePenetration(const glm::vec3& sphereCenter, float sphereRadius,
-                                const glm::vec4& plane, glm::vec3& penetration) {
+bool findSpherePlanePenetration(const glm::vec3& sphereCenter, float sphereRadius, const glm::vec4& plane,
+                                glm::vec3& penetration) {
     float distance = glm::dot(plane, glm::vec4(sphereCenter, 1.0f)) - sphereRadius;
     if (distance < 0.0f) {
         penetration = glm::vec3(plane) * distance;
@@ -128,9 +125,8 @@ bool findSpherePlanePenetration(const glm::vec3& sphereCenter, float sphereRadiu
     return false;
 }
 
-bool findSphereDiskPenetration(const glm::vec3& sphereCenter, float sphereRadius,
-                               const glm::vec3& diskCenter, float diskRadius, float diskThickness, const glm::vec3& diskNormal,
-                               glm::vec3& penetration) {
+bool findSphereDiskPenetration(const glm::vec3& sphereCenter, float sphereRadius, const glm::vec3& diskCenter, float diskRadius,
+                               float diskThickness, const glm::vec3& diskNormal, glm::vec3& penetration) {
     glm::vec3 localCenter = sphereCenter - diskCenter;
     float axialDistance = glm::dot(localCenter, diskNormal);
     if (std::fabs(axialDistance) < (sphereRadius + 0.5f * diskThickness)) {
@@ -139,7 +135,7 @@ bool findSphereDiskPenetration(const glm::vec3& sphereCenter, float sphereRadius
         glm::vec3 axialOffset = axialDistance * diskNormal;
         if (glm::length(localCenter - axialOffset) < diskRadius) {
             // yes, hit the disk
-            penetration = (std::fabs(axialDistance) - (sphereRadius + 0.5f * diskThickness) ) * diskNormal;
+            penetration = (std::fabs(axialDistance) - (sphereRadius + 0.5f * diskThickness)) * diskNormal;
             if (axialDistance < 0.0f) {
                 // hit the backside of the disk, so negate penetration vector
                 penetration *= -1.0f;
@@ -152,8 +148,7 @@ bool findSphereDiskPenetration(const glm::vec3& sphereCenter, float sphereRadius
 
 bool findCapsuleSpherePenetration(const glm::vec3& capsuleStart, const glm::vec3& capsuleEnd, float capsuleRadius,
                                   const glm::vec3& sphereCenter, float sphereRadius, glm::vec3& penetration) {
-    if (findSphereCapsulePenetration(sphereCenter, sphereRadius,
-            capsuleStart, capsuleEnd, capsuleRadius, penetration)) {
+    if (findSphereCapsulePenetration(sphereCenter, sphereRadius, capsuleStart, capsuleEnd, capsuleRadius, penetration)) {
         penetration = -penetration;
         return true;
     }
@@ -162,8 +157,8 @@ bool findCapsuleSpherePenetration(const glm::vec3& capsuleStart, const glm::vec3
 
 bool findCapsulePlanePenetration(const glm::vec3& capsuleStart, const glm::vec3& capsuleEnd, float capsuleRadius,
                                  const glm::vec4& plane, glm::vec3& penetration) {
-    float distance = glm::min(glm::dot(plane, glm::vec4(capsuleStart, 1.0f)),
-        glm::dot(plane, glm::vec4(capsuleEnd, 1.0f))) - capsuleRadius;
+    float distance = glm::min(glm::dot(plane, glm::vec4(capsuleStart, 1.0f)), glm::dot(plane, glm::vec4(capsuleEnd, 1.0f))) -
+                     capsuleRadius;
     if (distance < 0.0f) {
         penetration = glm::vec3(plane) * distance;
         return true;
@@ -186,8 +181,8 @@ glm::vec3 addPenetrations(const glm::vec3& currentPenetration, const glm::vec3& 
     }
 
     // otherwise, we need to take the maximum component of current and new
-    return currentDirection * glm::max(directionalComponent, currentLength) +
-        newPenetration - (currentDirection * directionalComponent);
+    return currentDirection * glm::max(directionalComponent, currentLength) + newPenetration -
+           (currentDirection * directionalComponent);
 }
 
 // finds the intersection between a ray and the facing plane on one axis
@@ -216,7 +211,8 @@ bool findInsideOutIntersection(float origin, float direction, float corner, floa
 
 // https://tavianator.com/fast-branchless-raybounding-box-intersections/
 bool findRayAABoxIntersection(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& invDirection,
-                              const glm::vec3& corner, const glm::vec3& scale, float& distance, BoxFace& face, glm::vec3& surfaceNormal) {
+                              const glm::vec3& corner, const glm::vec3& scale, float& distance, BoxFace& face,
+                              glm::vec3& surfaceNormal) {
     float t1, t2, newTmin, newTmax, tmin = -INFINITY, tmax = INFINITY;
     int minAxis = -1, maxAxis = -1;
 
@@ -252,8 +248,8 @@ bool findRayAABoxIntersection(const glm::vec3& origin, const glm::vec3& directio
     return false;
 }
 
-bool findRaySphereIntersection(const glm::vec3& origin, const glm::vec3& direction,
-        const glm::vec3& center, float radius, float& distance) {
+bool findRaySphereIntersection(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& center, float radius,
+                               float& distance) {
     glm::vec3 relativeOrigin = origin - center;
     float c = glm::dot(relativeOrigin, relativeOrigin) - radius * radius;
     if (c < 0.0f) {
@@ -280,7 +276,6 @@ bool pointInSphere(const glm::vec3& origin, const glm::vec3& center, float radiu
     return c <= 0.0f;
 }
 
-
 bool pointInCapsule(const glm::vec3& origin, const glm::vec3& start, const glm::vec3& end, float radius) {
     glm::vec3 relativeOrigin = origin - start;
     glm::vec3 relativeEnd = end - start;
@@ -301,8 +296,8 @@ bool pointInCapsule(const glm::vec3& origin, const glm::vec3& start, const glm::
     return false;
 }
 
-bool findRayCapsuleIntersection(const glm::vec3& origin, const glm::vec3& direction,
-        const glm::vec3& start, const glm::vec3& end, float radius, float& distance) {
+bool findRayCapsuleIntersection(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& start,
+                                const glm::vec3& end, float radius, float& distance) {
     if (start == end) {
         return findRaySphereIntersection(origin, direction, start, radius, distance); // handle degenerate case
     }
@@ -359,16 +354,13 @@ glm::vec3 Triangle::getNormal() const {
 }
 
 Triangle Triangle::operator*(const glm::mat4& transform) const {
-    return {
-        glm::vec3(transform * glm::vec4(v0, 1.0f)),
-        glm::vec3(transform * glm::vec4(v1, 1.0f)),
-        glm::vec3(transform * glm::vec4(v2, 1.0f))
-    };
+    return { glm::vec3(transform * glm::vec4(v0, 1.0f)), glm::vec3(transform * glm::vec4(v1, 1.0f)),
+             glm::vec3(transform * glm::vec4(v2, 1.0f)) };
 }
 
 // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
-bool findRayTriangleIntersection(const glm::vec3& origin, const glm::vec3& direction,
-        const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, float& distance, bool allowBackface) {
+bool findRayTriangleIntersection(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& v0, const glm::vec3& v1,
+                                 const glm::vec3& v2, float& distance, bool allowBackface) {
     glm::vec3 firstSide = v1 - v0;
     glm::vec3 secondSide = v2 - v0;
     glm::vec3 P = glm::cross(direction, secondSide);
@@ -415,7 +407,8 @@ static void getTrianglePlaneIntersectionPoints(const glm::vec3 trianglePoints[3]
     }
 }
 
-int clipTriangleWithPlane(const Triangle& triangle, const Plane& plane, Triangle* clippedTriangles, int maxClippedTriangleCount) {
+int clipTriangleWithPlane(const Triangle& triangle, const Plane& plane, Triangle* clippedTriangles,
+                          int maxClippedTriangleCount) {
     float pointDistanceToPlane[3];
     std::bitset<3> arePointsClipped;
     glm::vec3 triangleVertices[3] = { triangle.v0, triangle.v1, triangle.v2 };
@@ -434,8 +427,7 @@ int clipTriangleWithPlane(const Triangle& triangle, const Plane& plane, Triangle
             clippedTriangleCount = 1;
             break;
 
-        case 1:
-        {
+        case 1: {
             int clippedPointIndex = 2;
             int keptPointIndices[2] = { 0, 1 };
             glm::vec3 newVertices[2];
@@ -449,7 +441,8 @@ int clipTriangleWithPlane(const Triangle& triangle, const Plane& plane, Triangle
                 keptPointIndices[1] = 2;
             }
             // We have a quad now, so we need to create two triangles.
-            getTrianglePlaneIntersectionPoints(triangleVertices, pointDistanceToPlane, clippedPointIndex, keptPointIndices, newVertices);
+            getTrianglePlaneIntersectionPoints(triangleVertices, pointDistanceToPlane, clippedPointIndex, keptPointIndices,
+                                               newVertices);
             clippedTriangles->v0 = triangleVertices[keptPointIndices[0]];
             clippedTriangles->v1 = triangleVertices[keptPointIndices[1]];
             clippedTriangles->v2 = newVertices[1];
@@ -463,11 +456,9 @@ int clipTriangleWithPlane(const Triangle& triangle, const Plane& plane, Triangle
                 clippedTriangles++;
                 clippedTriangleCount++;
             }
-        }
-        break;
+        } break;
 
-        case 2:
-        {
+        case 2: {
             int keptPointIndex = 2;
             int clippedPointIndices[2] = { 0, 1 };
             glm::vec3 newVertices[2];
@@ -481,23 +472,24 @@ int clipTriangleWithPlane(const Triangle& triangle, const Plane& plane, Triangle
                 clippedPointIndices[1] = 2;
             }
             // We have a single triangle
-            getTrianglePlaneIntersectionPoints(triangleVertices, pointDistanceToPlane, keptPointIndex, clippedPointIndices, newVertices);
+            getTrianglePlaneIntersectionPoints(triangleVertices, pointDistanceToPlane, keptPointIndex, clippedPointIndices,
+                                               newVertices);
             clippedTriangles->v0 = triangleVertices[keptPointIndex];
             clippedTriangles->v1 = newVertices[0];
             clippedTriangles->v2 = newVertices[1];
             clippedTriangleCount = 1;
-        }
-        break;
+        } break;
 
         default:
             // Entire triangle is clipped.
-           break;
+            break;
     }
 
     return clippedTriangleCount;
 }
 
-int clipTriangleWithPlanes(const Triangle& triangle, const Plane* planes, int planeCount, Triangle* clippedTriangles, int maxClippedTriangleCount) {
+int clipTriangleWithPlanes(const Triangle& triangle, const Plane* planes, int planeCount, Triangle* clippedTriangles,
+                           int maxClippedTriangleCount) {
     auto planesEnd = planes + planeCount;
     int triangleCount = 1;
     std::vector<Triangle> trianglesToTest;
@@ -514,8 +506,8 @@ int clipTriangleWithPlanes(const Triangle& triangle, const Plane* planes, int pl
         triangleCount = 0;
 
         for (const auto& triangleToTest : trianglesToTest) {
-            clippedSubTriangleCount = clipTriangleWithPlane(triangleToTest, *planes,
-                                                            clippedTriangles + triangleCount, maxClippedTriangleCount - triangleCount);
+            clippedSubTriangleCount = clipTriangleWithPlane(triangleToTest, *planes, clippedTriangles + triangleCount,
+                                                            maxClippedTriangleCount - triangleCount);
             triangleCount += clippedSubTriangleCount;
             if (triangleCount >= maxClippedTriangleCount) {
                 return triangleCount;
@@ -529,29 +521,26 @@ int clipTriangleWithPlanes(const Triangle& triangle, const Plane* planes, int pl
 // Do line segments (r1p1.x, r1p1.y)--(r1p2.x, r1p2.y) and (r2p1.x, r2p1.y)--(r2p2.x, r2p2.y) intersect?
 // from: http://ptspts.blogspot.com/2010/06/how-to-determine-if-two-line-segments.html
 bool doLineSegmentsIntersect(glm::vec2 r1p1, glm::vec2 r1p2, glm::vec2 r2p1, glm::vec2 r2p2) {
-  int d1 = computeDirection(r2p1.x, r2p1.y, r2p2.x, r2p2.y, r1p1.x, r1p1.y);
-  int d2 = computeDirection(r2p1.x, r2p1.y, r2p2.x, r2p2.y, r1p2.x, r1p2.y);
-  int d3 = computeDirection(r1p1.x, r1p1.y, r1p2.x, r1p2.y, r2p1.x, r2p1.y);
-  int d4 = computeDirection(r1p1.x, r1p1.y, r1p2.x, r1p2.y, r2p2.x, r2p2.y);
-  return (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
-          ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) ||
-         (d1 == 0 && isOnSegment(r2p1.x, r2p1.y, r2p2.x, r2p2.y, r1p1.x, r1p1.y)) ||
-         (d2 == 0 && isOnSegment(r2p1.x, r2p1.y, r2p2.x, r2p2.y, r1p2.x, r1p2.y)) ||
-         (d3 == 0 && isOnSegment(r1p1.x, r1p1.y, r1p2.x, r1p2.y, r2p1.x, r2p1.y)) ||
-         (d4 == 0 && isOnSegment(r1p1.x, r1p1.y, r1p2.x, r1p2.y, r2p2.x, r2p2.y));
+    int d1 = computeDirection(r2p1.x, r2p1.y, r2p2.x, r2p2.y, r1p1.x, r1p1.y);
+    int d2 = computeDirection(r2p1.x, r2p1.y, r2p2.x, r2p2.y, r1p2.x, r1p2.y);
+    int d3 = computeDirection(r1p1.x, r1p1.y, r1p2.x, r1p2.y, r2p1.x, r2p1.y);
+    int d4 = computeDirection(r1p1.x, r1p1.y, r1p2.x, r1p2.y, r2p2.x, r2p2.y);
+    return (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) ||
+           (d1 == 0 && isOnSegment(r2p1.x, r2p1.y, r2p2.x, r2p2.y, r1p1.x, r1p1.y)) ||
+           (d2 == 0 && isOnSegment(r2p1.x, r2p1.y, r2p2.x, r2p2.y, r1p2.x, r1p2.y)) ||
+           (d3 == 0 && isOnSegment(r1p1.x, r1p1.y, r1p2.x, r1p2.y, r2p1.x, r2p1.y)) ||
+           (d4 == 0 && isOnSegment(r1p1.x, r1p1.y, r1p2.x, r1p2.y, r2p2.x, r2p2.y));
 }
 
-bool isOnSegment(float xi, float yi, float xj, float yj, float xk, float yk)  {
-  return (xi <= xk || xj <= xk) && (xk <= xi || xk <= xj) &&
-         (yi <= yk || yj <= yk) && (yk <= yi || yk <= yj);
+bool isOnSegment(float xi, float yi, float xj, float yj, float xk, float yk) {
+    return (xi <= xk || xj <= xk) && (xk <= xi || xk <= xj) && (yi <= yk || yj <= yk) && (yk <= yi || yk <= yj);
 }
 
 int computeDirection(float xi, float yi, float xj, float yj, float xk, float yk) {
-  float a = (xk - xi) * (yj - yi);
-  float b = (xj - xi) * (yk - yi);
-  return a < b ? -1 : a > b ? 1 : 0;
+    float a = (xk - xi) * (yj - yi);
+    float b = (xj - xi) * (yk - yi);
+    return a < b ? -1 : a > b ? 1 : 0;
 }
-
 
 //
 // Polygon Clipping routines inspired by, pseudo code found here: http://www.cs.rit.edu/~icss571/clipTrans/PolyClipBack.html
@@ -574,15 +563,15 @@ int computeDirection(float xi, float yi, float xj, float yj, float xk, float yk)
 // (0,windowHeight)                (windowWidth,windowHeight)
 //
 
-const float PolygonClip::TOP_OF_CLIPPING_WINDOW    =  1.0f;
+const float PolygonClip::TOP_OF_CLIPPING_WINDOW = 1.0f;
 const float PolygonClip::BOTTOM_OF_CLIPPING_WINDOW = -1.0f;
-const float PolygonClip::LEFT_OF_CLIPPING_WINDOW   = -1.0f;
-const float PolygonClip::RIGHT_OF_CLIPPING_WINDOW  =  1.0f;
+const float PolygonClip::LEFT_OF_CLIPPING_WINDOW = -1.0f;
+const float PolygonClip::RIGHT_OF_CLIPPING_WINDOW = 1.0f;
 
-const glm::vec2 PolygonClip::TOP_LEFT_CLIPPING_WINDOW       ( LEFT_OF_CLIPPING_WINDOW , TOP_OF_CLIPPING_WINDOW    );
-const glm::vec2 PolygonClip::TOP_RIGHT_CLIPPING_WINDOW      ( RIGHT_OF_CLIPPING_WINDOW, TOP_OF_CLIPPING_WINDOW    );
-const glm::vec2 PolygonClip::BOTTOM_LEFT_CLIPPING_WINDOW    ( LEFT_OF_CLIPPING_WINDOW , BOTTOM_OF_CLIPPING_WINDOW );
-const glm::vec2 PolygonClip::BOTTOM_RIGHT_CLIPPING_WINDOW   ( RIGHT_OF_CLIPPING_WINDOW, BOTTOM_OF_CLIPPING_WINDOW );
+const glm::vec2 PolygonClip::TOP_LEFT_CLIPPING_WINDOW(LEFT_OF_CLIPPING_WINDOW, TOP_OF_CLIPPING_WINDOW);
+const glm::vec2 PolygonClip::TOP_RIGHT_CLIPPING_WINDOW(RIGHT_OF_CLIPPING_WINDOW, TOP_OF_CLIPPING_WINDOW);
+const glm::vec2 PolygonClip::BOTTOM_LEFT_CLIPPING_WINDOW(LEFT_OF_CLIPPING_WINDOW, BOTTOM_OF_CLIPPING_WINDOW);
+const glm::vec2 PolygonClip::BOTTOM_RIGHT_CLIPPING_WINDOW(RIGHT_OF_CLIPPING_WINDOW, BOTTOM_OF_CLIPPING_WINDOW);
 
 void PolygonClip::clipToScreen(const glm::vec2* inputVertexArray, int inLength, glm::vec2*& outputVertexArray, int& outLength) {
     int tempLengthA = inLength;
@@ -629,7 +618,7 @@ void PolygonClip::clipToScreen(const glm::vec2* inputVertexArray, int inLength, 
 
     // copy final output to outputVertexArray
     outputVertexArray = tempVertexArrayA;
-    outLength         = tempLengthA;
+    outLength = tempLengthA;
 
     // cleanup our unused temporary buffer...
     delete[] tempVertexArrayB;
@@ -637,10 +626,10 @@ void PolygonClip::clipToScreen(const glm::vec2* inputVertexArray, int inLength, 
     // Note: we don't delete tempVertexArrayA, because that's the caller's responsibility
 }
 
-void PolygonClip::sutherlandHodgmanPolygonClip(glm::vec2* inVertexArray, glm::vec2* outVertexArray,
-                                               int inLength, int& outLength,  const LineSegment2& clipBoundary) {
+void PolygonClip::sutherlandHodgmanPolygonClip(glm::vec2* inVertexArray, glm::vec2* outVertexArray, int inLength,
+                                               int& outLength, const LineSegment2& clipBoundary) {
     glm::vec2 start, end; // Start, end point of current polygon edge
-    glm::vec2 intersection;   // Intersection point with a clip boundary
+    glm::vec2 intersection; // Intersection point with a clip boundary
 
     outLength = 0;
     start = inVertexArray[inLength - 1]; // Start with the last vertex in inVertexArray
@@ -648,7 +637,7 @@ void PolygonClip::sutherlandHodgmanPolygonClip(glm::vec2* inVertexArray, glm::ve
         end = inVertexArray[j]; // Now start and end correspond to the vertices
 
         // Cases 1 and 4 - the endpoint is inside the boundary
-        if (pointInsideBoundary(end,clipBoundary)) {
+        if (pointInsideBoundary(end, clipBoundary)) {
             // Case 1 - Both inside
             if (pointInsideBoundary(start, clipBoundary)) {
                 appendPoint(end, outLength, outVertexArray);
@@ -658,15 +647,15 @@ void PolygonClip::sutherlandHodgmanPolygonClip(glm::vec2* inVertexArray, glm::ve
                 appendPoint(end, outLength, outVertexArray);
             }
         } else { // Cases 2 and 3 - end is outside
-            if (pointInsideBoundary(start, clipBoundary))  {
+            if (pointInsideBoundary(start, clipBoundary)) {
                 // Cases 2 - start is inside, end is outside
                 segmentIntersectsBoundary(start, end, clipBoundary, intersection);
                 appendPoint(intersection, outLength, outVertexArray);
             } else {
                 // Case 3 - both are outside, No action
             }
-       }
-       start = end;  // Advance to next pair of vertices
+        }
+        start = end; // Advance to next pair of vertices
     }
 }
 
@@ -698,10 +687,10 @@ bool PolygonClip::pointInsideBoundary(const glm::vec2& testVertex, const LineSeg
     return false;
 }
 
-void PolygonClip::segmentIntersectsBoundary(const glm::vec2& first, const glm::vec2&  second,
-                                           const LineSegment2& clipBoundary, glm::vec2& intersection) {
+void PolygonClip::segmentIntersectsBoundary(const glm::vec2& first, const glm::vec2& second, const LineSegment2& clipBoundary,
+                                            glm::vec2& intersection) {
     // horizontal
-    if (clipBoundary[0].y==clipBoundary[1].y) {
+    if (clipBoundary[0].y == clipBoundary[1].y) {
         intersection.y = clipBoundary[0].y;
         intersection.x = first.x + (clipBoundary[0].y - first.y) * (second.x - first.x) / (second.y - first.y);
     } else { // Vertical
@@ -726,13 +715,13 @@ void PolygonClip::copyCleanArray(int& lengthA, glm::vec2* vertexArrayA, int& len
         // The first vertex should be copied as is.
         vertexArrayA[0] = vertexArrayB[0];
         // If the first two vertices of the "B" array are same, then collapse them down to be the 2nd vertex
-        if (vertexArrayB[0].x == vertexArrayB[1].x)  {
+        if (vertexArrayB[0].x == vertexArrayB[1].x) {
             vertexArrayA[1] = vertexArrayB[2];
         } else {
             // Otherwise the first vertex should be the same as third vertex
             vertexArrayA[1] = vertexArrayB[1];
         }
-        lengthA=2;
+        lengthA = 2;
     } else {
         // for all other polygons, then just copy the vertexArrayB to vertextArrayA for next step
         lengthA = lengthB;
@@ -743,7 +732,7 @@ void PolygonClip::copyCleanArray(int& lengthA, glm::vec2* vertexArrayA, int& len
 }
 
 bool findRayRectangleIntersection(const glm::vec3& origin, const glm::vec3& direction, const glm::quat& rotation,
-        const glm::vec3& position, const glm::vec2& dimensions, float& distance) {
+                                  const glm::vec3& position, const glm::vec2& dimensions, float& distance) {
     const glm::vec3 UNROTATED_NORMAL(0.0f, 0.0f, -1.0f);
     glm::vec3 normal = rotation * UNROTATED_NORMAL;
 
@@ -759,14 +748,14 @@ bool findRayRectangleIntersection(const glm::vec3& origin, const glm::vec3& dire
             maybeIntersects = true;
 
             // compute distance to closest approach
-            d = - glm::dot(offset, direction);  // distance to closest approach of center of rectangle
+            d = -glm::dot(offset, direction); // distance to closest approach of center of rectangle
             if (d < 0.0f) {
                 // ray points away from center of rectangle, so ray's start is the closest approach
                 d = 0.0f;
             }
         }
     } else {
-        d = - normDotOffset / denominator;
+        d = -normDotOffset / denominator;
         if (d > 0.0f) {
             // ray points toward plane
             maybeIntersects = true;
@@ -793,15 +782,13 @@ bool isWithin(float value, float corner, float size) {
 }
 
 bool aaBoxContains(const glm::vec3& point, const glm::vec3& corner, const glm::vec3& scale) {
-    return isWithin(point.x, corner.x, scale.x) &&
-        isWithin(point.y, corner.y, scale.y) &&
-        isWithin(point.z, corner.z, scale.z);
+    return isWithin(point.x, corner.x, scale.x) && isWithin(point.y, corner.y, scale.y) && isWithin(point.z, corner.z, scale.z);
 }
 
-void checkPossibleParabolicIntersectionWithZPlane(float t, float& minDistance,
-    const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration, const glm::vec2& corner, const glm::vec2& scale) {
-    if (t < minDistance && t > 0.0f &&
-        isWithin(origin.x + velocity.x * t + 0.5f * acceleration.x * t * t, corner.x, scale.x) &&
+void checkPossibleParabolicIntersectionWithZPlane(float t, float& minDistance, const glm::vec3& origin,
+                                                  const glm::vec3& velocity, const glm::vec3& acceleration,
+                                                  const glm::vec2& corner, const glm::vec2& scale) {
+    if (t < minDistance && t > 0.0f && isWithin(origin.x + velocity.x * t + 0.5f * acceleration.x * t * t, corner.x, scale.x) &&
         isWithin(origin.y + velocity.y * t + 0.5f * acceleration.y * t * t, corner.y, scale.y)) {
         minDistance = t;
     }
@@ -809,7 +796,7 @@ void checkPossibleParabolicIntersectionWithZPlane(float t, float& minDistance,
 
 // Intersect with the plane z = 0 and make sure the intersection is within dimensions
 bool findParabolaRectangleIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-    const glm::vec2& dimensions, float& parabolicDistance) {
+                                       const glm::vec2& dimensions, float& parabolicDistance) {
     glm::vec2 localCorner = -0.5f * dimensions;
 
     float minDistance = FLT_MAX;
@@ -817,7 +804,8 @@ bool findParabolaRectangleIntersection(const glm::vec3& origin, const glm::vec3&
         if (fabsf(velocity.z) > EPSILON) {
             // Handle the degenerate case where we only have a line in the z-axis
             float possibleDistance = -origin.z / velocity.z;
-            checkPossibleParabolicIntersectionWithZPlane(possibleDistance, minDistance, origin, velocity, acceleration, localCorner, dimensions);
+            checkPossibleParabolicIntersectionWithZPlane(possibleDistance, minDistance, origin, velocity, acceleration,
+                                                         localCorner, dimensions);
         }
     } else {
         float a = 0.5f * acceleration.z;
@@ -826,7 +814,8 @@ bool findParabolaRectangleIntersection(const glm::vec3& origin, const glm::vec3&
         glm::vec2 possibleDistances = { FLT_MAX, FLT_MAX };
         if (computeRealQuadraticRoots(a, b, c, possibleDistances)) {
             for (int i = 0; i < 2; i++) {
-                checkPossibleParabolicIntersectionWithZPlane(possibleDistances[i], minDistance, origin, velocity, acceleration, localCorner, dimensions);
+                checkPossibleParabolicIntersectionWithZPlane(possibleDistances[i], minDistance, origin, velocity, acceleration,
+                                                             localCorner, dimensions);
             }
         }
     }
@@ -910,10 +899,11 @@ bool findParabolaSphereIntersection(const glm::vec3& origin, const glm::vec3& ve
     return false;
 }
 
-void checkPossibleParabolicIntersectionWithTriangle(float t, float& minDistance,
-    const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-    const glm::vec3& localVelocity, const glm::vec3& localAcceleration, const glm::vec3& normal,
-    const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, bool allowBackface) {
+void checkPossibleParabolicIntersectionWithTriangle(float t, float& minDistance, const glm::vec3& origin,
+                                                    const glm::vec3& velocity, const glm::vec3& acceleration,
+                                                    const glm::vec3& localVelocity, const glm::vec3& localAcceleration,
+                                                    const glm::vec3& normal, const glm::vec3& v0, const glm::vec3& v1,
+                                                    const glm::vec3& v2, bool allowBackface) {
     // Check if we're hitting the backface in the rotated coordinate space
     float localIntersectionVelocityZ = localVelocity.z + localAcceleration.z * t;
     if (!allowBackface && localIntersectionVelocityZ < 0.0f) {
@@ -922,16 +912,15 @@ void checkPossibleParabolicIntersectionWithTriangle(float t, float& minDistance,
 
     // Check that the point is within all three sides
     glm::vec3 point = origin + velocity * t + 0.5f * acceleration * t * t;
-    if (t < minDistance && t > 0.0f &&
-        glm::dot(normal, glm::cross(point - v1, v0 - v1)) > 0.0f &&
-        glm::dot(normal, glm::cross(v2 - v1, point - v1)) > 0.0f &&
-        glm::dot(normal, glm::cross(point - v0, v2 - v0)) > 0.0f) {
+    if (t < minDistance && t > 0.0f && glm::dot(normal, glm::cross(point - v1, v0 - v1)) > 0.0f &&
+        glm::dot(normal, glm::cross(v2 - v1, point - v1)) > 0.0f && glm::dot(normal, glm::cross(point - v0, v2 - v0)) > 0.0f) {
         minDistance = t;
     }
 }
 
 bool findParabolaTriangleIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-    const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, float& parabolicDistance, bool allowBackface) {
+                                      const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, float& parabolicDistance,
+                                      bool allowBackface) {
     glm::vec3 normal = glm::normalize(glm::cross(v2 - v1, v0 - v1));
 
     // We transform the parabola and triangle so that the triangle is in the plane z = 0, with v0 at the origin
@@ -954,7 +943,7 @@ bool findParabolaTriangleIntersection(const glm::vec3& origin, const glm::vec3& 
         if (fabsf(localVelocity.z) > EPSILON) {
             float possibleDistance = -localOrigin.z / localVelocity.z;
             checkPossibleParabolicIntersectionWithTriangle(possibleDistance, minDistance, origin, velocity, acceleration,
-                localVelocity, localAcceleration, normal, v0, v1, v2, allowBackface);
+                                                           localVelocity, localAcceleration, normal, v0, v1, v2, allowBackface);
         }
     } else {
         float a = 0.5f * localAcceleration.z;
@@ -963,8 +952,9 @@ bool findParabolaTriangleIntersection(const glm::vec3& origin, const glm::vec3& 
         glm::vec2 possibleDistances = { FLT_MAX, FLT_MAX };
         if (computeRealQuadraticRoots(a, b, c, possibleDistances)) {
             for (int i = 0; i < 2; i++) {
-                checkPossibleParabolicIntersectionWithTriangle(possibleDistances[i], minDistance, origin, velocity, acceleration,
-                    localVelocity, localAcceleration, normal, v0, v1, v2, allowBackface);
+                checkPossibleParabolicIntersectionWithTriangle(possibleDistances[i], minDistance, origin, velocity,
+                                                               acceleration, localVelocity, localAcceleration, normal, v0, v1,
+                                                               v2, allowBackface);
             }
         }
     }
@@ -976,9 +966,11 @@ bool findParabolaTriangleIntersection(const glm::vec3& origin, const glm::vec3& 
 }
 
 bool findParabolaCapsuleIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-    const glm::vec3& start, const glm::vec3& end, float radius, const glm::quat& rotation, float& parabolicDistance) {
+                                     const glm::vec3& start, const glm::vec3& end, float radius, const glm::quat& rotation,
+                                     float& parabolicDistance) {
     if (start == end) {
-        return findParabolaSphereIntersection(origin, velocity, acceleration, start, radius, parabolicDistance); // handle degenerate case
+        return findParabolaSphereIntersection(origin, velocity, acceleration, start, radius,
+                                              parabolicDistance); // handle degenerate case
     }
     if (glm::distance2(origin, start) < radius * radius) { // inside start sphere
         float startDistance;
@@ -1020,7 +1012,8 @@ bool findParabolaCapsuleIntersection(const glm::vec3& origin, const glm::vec3& v
         if (computeRealQuadraticRoots(a, b, c, possibleDistances)) {
             for (int i = 0; i < 2; i++) {
                 if (possibleDistances[i] < results[2] && possibleDistances[i] > 0.0f) {
-                    float y = localOrigin.y + localVelocity.y * possibleDistances[i] + 0.5f * localAcceleration.y * possibleDistances[i] * possibleDistances[i];
+                    float y = localOrigin.y + localVelocity.y * possibleDistances[i] +
+                              0.5f * localAcceleration.y * possibleDistances[i] * possibleDistances[i];
                     if (y > 0.0f && y < capsuleLength) {
                         results[2] = possibleDistances[i];
                     }
@@ -1030,14 +1023,16 @@ bool findParabolaCapsuleIntersection(const glm::vec3& origin, const glm::vec3& v
     } else {
         float a = 0.25f * (localAcceleration.x * localAcceleration.x + localAcceleration.z * localAcceleration.z);
         float b = localVelocity.x * localAcceleration.x + localVelocity.z * localAcceleration.z;
-        float c = localOrigin.x * localAcceleration.x + localOrigin.z * localAcceleration.z + localVelocity.x * localVelocity.x + localVelocity.z * localVelocity.z;
+        float c = localOrigin.x * localAcceleration.x + localOrigin.z * localAcceleration.z +
+                  localVelocity.x * localVelocity.x + localVelocity.z * localVelocity.z;
         float d = 2.0f * (localOrigin.x * localVelocity.x + localOrigin.z * localVelocity.z);
         float e = localOrigin.x * localOrigin.x + localOrigin.z * localOrigin.z - radius * radius;
         glm::vec4 possibleDistances(FLT_MAX);
         if (computeRealQuarticRoots(a, b, c, d, e, possibleDistances)) {
             for (int i = 0; i < 4; i++) {
                 if (possibleDistances[i] < results[2] && possibleDistances[i] > 0.0f) {
-                    float y = localOrigin.y + localVelocity.y * possibleDistances[i] + 0.5f * localAcceleration.y * possibleDistances[i] * possibleDistances[i];
+                    float y = localOrigin.y + localVelocity.y * possibleDistances[i] +
+                              0.5f * localAcceleration.y * possibleDistances[i] * possibleDistances[i];
                     if (y > 0.0f && y < capsuleLength) {
                         results[2] = possibleDistances[i];
                     }
@@ -1054,11 +1049,14 @@ bool findParabolaCapsuleIntersection(const glm::vec3& origin, const glm::vec3& v
     return minDistance != FLT_MAX;
 }
 
-void checkPossibleParabolicIntersection(float t, int i, float& minDistance, const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                        const glm::vec3& corner, const glm::vec3& scale, bool& hit) {
+void checkPossibleParabolicIntersection(float t, int i, float& minDistance, const glm::vec3& origin, const glm::vec3& velocity,
+                                        const glm::vec3& acceleration, const glm::vec3& corner, const glm::vec3& scale,
+                                        bool& hit) {
     if (t < minDistance && t > 0.0f &&
-        isWithin(origin[(i + 1) % 3] + velocity[(i + 1) % 3] * t + 0.5f * acceleration[(i + 1) % 3] * t * t, corner[(i + 1) % 3], scale[(i + 1) % 3]) &&
-        isWithin(origin[(i + 2) % 3] + velocity[(i + 2) % 3] * t + 0.5f * acceleration[(i + 2) % 3] * t * t, corner[(i + 2) % 3], scale[(i + 2) % 3])) {
+        isWithin(origin[(i + 1) % 3] + velocity[(i + 1) % 3] * t + 0.5f * acceleration[(i + 1) % 3] * t * t,
+                 corner[(i + 1) % 3], scale[(i + 1) % 3]) &&
+        isWithin(origin[(i + 2) % 3] + velocity[(i + 2) % 3] * t + 0.5f * acceleration[(i + 2) % 3] * t * t,
+                 corner[(i + 2) % 3], scale[(i + 2) % 3])) {
         minDistance = t;
         hit = true;
     }
@@ -1069,7 +1067,8 @@ inline float parabolaVelocityAtT(float velocity, float acceleration, float t) {
 }
 
 bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                   const glm::vec3& corner, const glm::vec3& scale, float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal) {
+                                   const glm::vec3& corner, const glm::vec3& scale, float& parabolicDistance, BoxFace& face,
+                                   glm::vec3& surfaceNormal) {
     float minDistance = FLT_MAX;
     BoxFace minFace = UNKNOWN_FACE;
     glm::vec3 minNormal;
@@ -1086,7 +1085,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                     if (velocity[i] > 0.0f) {
                         float possibleDistance = (corner[i] - origin[i]) / velocity[i];
                         bool hit = false;
-                        checkPossibleParabolicIntersection(possibleDistance, i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                        checkPossibleParabolicIntersection(possibleDistance, i, minDistance, origin, velocity, acceleration,
+                                                           corner, scale, hit);
                         if (hit) {
                             minFace = BoxFace(2 * i);
                             minNormal = glm::vec3(0.0f);
@@ -1099,7 +1099,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                     if (velocity[i] < 0.0f) {
                         float possibleDistance = (corner[i] + scale[i] - origin[i]) / velocity[i];
                         bool hit = false;
-                        checkPossibleParabolicIntersection(possibleDistance, i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                        checkPossibleParabolicIntersection(possibleDistance, i, minDistance, origin, velocity, acceleration,
+                                                           corner, scale, hit);
                         if (hit) {
                             minFace = BoxFace(2 * i + 1);
                             minNormal = glm::vec3(0.0f);
@@ -1112,7 +1113,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                     if (velocity[i] < 0.0f) {
                         float possibleDistance = (corner[i] - origin[i]) / velocity[i];
                         bool hit = false;
-                        checkPossibleParabolicIntersection(possibleDistance, i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                        checkPossibleParabolicIntersection(possibleDistance, i, minDistance, origin, velocity, acceleration,
+                                                           corner, scale, hit);
                         if (hit) {
                             minFace = BoxFace(2 * i + 1);
                             minNormal = glm::vec3(0.0f);
@@ -1124,7 +1126,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                     if (velocity[i] > 0.0f) {
                         float possibleDistance = (corner[i] + scale[i] - origin[i]) / velocity[i];
                         bool hit = false;
-                        checkPossibleParabolicIntersection(possibleDistance, i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                        checkPossibleParabolicIntersection(possibleDistance, i, minDistance, origin, velocity, acceleration,
+                                                           corner, scale, hit);
                         if (hit) {
                             minFace = BoxFace(2 * i);
                             minNormal = glm::vec3(0.0f);
@@ -1147,8 +1150,10 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                 //     - else if +velocity
                 //         - can hit MIN_FACE with -normal iff velocity at intersection is +
                 //         - else can hit MAX_FACE with +normal iff velocity at intersection is -
-                if (origin[(i + 1) % 3] > corner[(i + 1) % 3] && origin[(i + 1) % 3] < corner[(i + 1) % 3] + scale[(i + 1) % 3] &&
-                    origin[(i + 2) % 3] > corner[(i + 2) % 3] && origin[(i + 2) % 3] < corner[(i + 2) % 3] + scale[(i + 2) % 3]) {
+                if (origin[(i + 1) % 3] > corner[(i + 1) % 3] &&
+                    origin[(i + 1) % 3] < corner[(i + 1) % 3] + scale[(i + 1) % 3] &&
+                    origin[(i + 2) % 3] > corner[(i + 2) % 3] &&
+                    origin[(i + 2) % 3] < corner[(i + 2) % 3] + scale[(i + 2) % 3]) {
                     if (velocity[i] > 0.0f || acceleration[i] > 0.0f) {
                         { // min
                             c = origin[i] - corner[i];
@@ -1156,7 +1161,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                             if (computeRealQuadraticRoots(a, b, c, possibleDistances)) {
                                 bool hit = false;
                                 for (int j = 0; j < 2; j++) {
-                                    checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                                    checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity,
+                                                                       acceleration, corner, scale, hit);
                                 }
                                 if (hit) {
                                     minFace = BoxFace(2 * i);
@@ -1174,7 +1180,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                             if (computeRealQuadraticRoots(a, b, c, possibleDistances)) {
                                 bool hit = false;
                                 for (int j = 0; j < 2; j++) {
-                                    checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                                    checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity,
+                                                                       acceleration, corner, scale, hit);
                                 }
                                 if (hit) {
                                     minFace = BoxFace(2 * i);
@@ -1191,7 +1198,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                             if (computeRealQuadraticRoots(a, b, c, possibleDistances)) {
                                 for (int j = 0; j < 2; j++) {
                                     if (parabolaVelocityAtT(velocity[i], acceleration[i], possibleDistances[j]) > 0.0f) {
-                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin,
+                                                                           velocity, acceleration, corner, scale, hit);
                                     }
                                 }
                                 if (hit) {
@@ -1207,7 +1215,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                             if (computeRealQuadraticRoots(a, b, c, possibleDistances)) {
                                 for (int j = 0; j < 2; j++) {
                                     if (parabolaVelocityAtT(velocity[i], acceleration[i], possibleDistances[j]) < 0.0f) {
-                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin,
+                                                                           velocity, acceleration, corner, scale, hit);
                                     }
                                 }
                                 if (hit) {
@@ -1230,8 +1239,10 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                 //     - else if -velocity
                 //         - can hit MAX_FACE with +normal iff velocity at intersection is -
                 //         - else can hit MIN_FACE with -normal iff velocity at intersection is +
-                if (origin[(i + 1) % 3] > corner[(i + 1) % 3] && origin[(i + 1) % 3] < corner[(i + 1) % 3] + scale[(i + 1) % 3] &&
-                    origin[(i + 2) % 3] > corner[(i + 2) % 3] && origin[(i + 2) % 3] < corner[(i + 2) % 3] + scale[(i + 2) % 3]) {
+                if (origin[(i + 1) % 3] > corner[(i + 1) % 3] &&
+                    origin[(i + 1) % 3] < corner[(i + 1) % 3] + scale[(i + 1) % 3] &&
+                    origin[(i + 2) % 3] > corner[(i + 2) % 3] &&
+                    origin[(i + 2) % 3] < corner[(i + 2) % 3] + scale[(i + 2) % 3]) {
                     if (velocity[i] < 0.0f || acceleration[i] < 0.0f) {
                         { // max
                             c = origin[i] - (corner[i] + scale[i]);
@@ -1239,7 +1250,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                             if (computeRealQuadraticRoots(a, b, c, possibleDistances)) {
                                 bool hit = false;
                                 for (int j = 0; j < 2; j++) {
-                                    checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                                    checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity,
+                                                                       acceleration, corner, scale, hit);
                                 }
                                 if (hit) {
                                     minFace = BoxFace(2 * i + 1);
@@ -1257,7 +1269,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                             if (computeRealQuadraticRoots(a, b, c, possibleDistances)) {
                                 bool hit = false;
                                 for (int j = 0; j < 2; j++) {
-                                    checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                                    checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity,
+                                                                       acceleration, corner, scale, hit);
                                 }
                                 if (hit) {
                                     minFace = BoxFace(2 * i + 1);
@@ -1274,7 +1287,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                             if (computeRealQuadraticRoots(a, b, c, possibleDistances)) {
                                 for (int j = 0; j < 2; j++) {
                                     if (parabolaVelocityAtT(velocity[i], acceleration[i], possibleDistances[j]) < 0.0f) {
-                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin,
+                                                                           velocity, acceleration, corner, scale, hit);
                                     }
                                 }
                                 if (hit) {
@@ -1290,7 +1304,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                             if (computeRealQuadraticRoots(a, b, c, possibleDistances)) {
                                 for (int j = 0; j < 2; j++) {
                                     if (parabolaVelocityAtT(velocity[i], acceleration[i], possibleDistances[j]) > 0.0f) {
-                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin,
+                                                                           velocity, acceleration, corner, scale, hit);
                                     }
                                 }
                                 if (hit) {
@@ -1317,8 +1332,10 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                 //         - can hit MIN_FACE with -normal iff velocity at intersection is +
                 //     - else if +velocity and -acceleration
                 //         - can hit MAX_FACE with +normal iff velocity at intersection is -
-                if (origin[(i + 1) % 3] > corner[(i + 1) % 3] && origin[(i + 1) % 3] < corner[(i + 1) % 3] + scale[(i + 1) % 3] &&
-                    origin[(i + 2) % 3] > corner[(i + 2) % 3] && origin[(i + 2) % 3] < corner[(i + 2) % 3] + scale[(i + 2) % 3]) {
+                if (origin[(i + 1) % 3] > corner[(i + 1) % 3] &&
+                    origin[(i + 1) % 3] < corner[(i + 1) % 3] + scale[(i + 1) % 3] &&
+                    origin[(i + 2) % 3] > corner[(i + 2) % 3] &&
+                    origin[(i + 2) % 3] < corner[(i + 2) % 3] + scale[(i + 2) % 3]) {
                     if (velocity[i] < 0.0f && acceleration[i] < 0.0f) {
                         { // min
                             c = origin[i] - corner[i];
@@ -1326,7 +1343,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                             if (computeRealQuadraticRoots(a, b, c, possibleDistances)) {
                                 bool hit = false;
                                 for (int j = 0; j < 2; j++) {
-                                    checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                                    checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity,
+                                                                       acceleration, corner, scale, hit);
                                 }
                                 if (hit) {
                                     minFace = BoxFace(2 * i);
@@ -1342,7 +1360,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                             if (computeRealQuadraticRoots(a, b, c, possibleDistances)) {
                                 bool hit = false;
                                 for (int j = 0; j < 2; j++) {
-                                    checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                                    checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity,
+                                                                       acceleration, corner, scale, hit);
                                 }
                                 if (hit) {
                                     minFace = BoxFace(2 * i + 1);
@@ -1359,7 +1378,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                                 bool hit = false;
                                 for (int j = 0; j < 2; j++) {
                                     if (parabolaVelocityAtT(velocity[i], acceleration[i], possibleDistances[j]) < 0.0f) {
-                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin,
+                                                                           velocity, acceleration, corner, scale, hit);
                                     }
                                 }
                                 if (hit) {
@@ -1376,7 +1396,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                                 bool hit = false;
                                 for (int j = 0; j < 2; j++) {
                                     if (parabolaVelocityAtT(velocity[i], acceleration[i], possibleDistances[j]) > 0.0f) {
-                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin,
+                                                                           velocity, acceleration, corner, scale, hit);
                                     }
                                 }
                                 if (hit) {
@@ -1396,7 +1417,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                                 bool hit = false;
                                 for (int j = 0; j < 2; j++) {
                                     if (parabolaVelocityAtT(velocity[i], acceleration[i], possibleDistances[j]) > 0.0f) {
-                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin,
+                                                                           velocity, acceleration, corner, scale, hit);
                                     }
                                 }
                                 if (hit) {
@@ -1414,7 +1436,8 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
                                 bool hit = false;
                                 for (int j = 0; j < 2; j++) {
                                     if (parabolaVelocityAtT(velocity[i], acceleration[i], possibleDistances[j]) < 0.0f) {
-                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin, velocity, acceleration, corner, scale, hit);
+                                        checkPossibleParabolicIntersection(possibleDistances[j], i, minDistance, origin,
+                                                                           velocity, acceleration, corner, scale, hit);
                                     }
                                 }
                                 if (hit) {
@@ -1439,12 +1462,9 @@ bool findParabolaAABoxIntersection(const glm::vec3& origin, const glm::vec3& vel
     return false;
 }
 
-void swingTwistDecomposition(const glm::quat& rotation,
-        const glm::vec3& direction,
-        glm::quat& swing,
-        glm::quat& twist) {
+void swingTwistDecomposition(const glm::quat& rotation, const glm::vec3& direction, glm::quat& swing, glm::quat& twist) {
     // direction MUST be normalized else the decomposition will be inaccurate
-    assert(fabsf(glm::length2(direction) - 1.0f) < 1.0e-4f); 
+    assert(fabsf(glm::length2(direction) - 1.0f) < 1.0e-4f);
 
     // the twist part has an axis (imaginary component) that is parallel to direction argument
     glm::vec3 axisOfRotation(rotation.x, rotation.y, rotation.z);
@@ -1458,7 +1478,8 @@ void swingTwistDecomposition(const glm::quat& rotation,
 }
 
 // calculate the minimum angle between a point and a sphere.
-float coneSphereAngle(const glm::vec3& coneCenter, const glm::vec3& coneDirection, const glm::vec3& sphereCenter, float sphereRadius) {
+float coneSphereAngle(const glm::vec3& coneCenter, const glm::vec3& coneDirection, const glm::vec3& sphereCenter,
+                      float sphereRadius) {
     glm::vec3 d = sphereCenter - coneCenter;
     float dLen = glm::length(d);
 
@@ -1523,14 +1544,15 @@ bool findPlaneFromPoints(const glm::vec3* points, size_t numPoints, glm::vec3& p
     return true;
 }
 
-bool findIntersectionOfThreePlanes(const glm::vec4& planeA, const glm::vec4& planeB, const glm::vec4& planeC, glm::vec3& intersectionPointOut) {
+bool findIntersectionOfThreePlanes(const glm::vec4& planeA, const glm::vec4& planeB, const glm::vec4& planeC,
+                                   glm::vec3& intersectionPointOut) {
     glm::vec3 normalA(planeA);
     glm::vec3 normalB(planeB);
     glm::vec3 normalC(planeC);
     glm::vec3 u = glm::cross(normalB, normalC);
     float denom = glm::dot(normalA, u);
     if (fabsf(denom) < EPSILON) {
-        return false;  // planes do not intersect in a point.
+        return false; // planes do not intersect in a point.
     } else {
         intersectionPointOut = (planeA.w * u + glm::cross(normalA, planeC.w * normalB - planeB.w * normalC)) / denom;
         return true;
@@ -1539,85 +1561,79 @@ bool findIntersectionOfThreePlanes(const glm::vec4& planeA, const glm::vec4& pla
 
 const float INV_SQRT_3 = 1.0f / sqrtf(3.0f);
 const int DOP14_COUNT = 14;
-const glm::vec3 DOP14_NORMALS[DOP14_COUNT] = {
-    Vectors::UNIT_X,
-    -Vectors::UNIT_X,
-    Vectors::UNIT_Y,
-    -Vectors::UNIT_Y,
-    Vectors::UNIT_Z,
-    -Vectors::UNIT_Z,
-    glm::vec3(INV_SQRT_3, INV_SQRT_3, INV_SQRT_3),
-    -glm::vec3(INV_SQRT_3, INV_SQRT_3, INV_SQRT_3),
-    glm::vec3(INV_SQRT_3, -INV_SQRT_3, INV_SQRT_3),
-    -glm::vec3(INV_SQRT_3, -INV_SQRT_3, INV_SQRT_3),
-    glm::vec3(INV_SQRT_3, INV_SQRT_3, -INV_SQRT_3),
-    -glm::vec3(INV_SQRT_3, INV_SQRT_3, -INV_SQRT_3),
-    glm::vec3(INV_SQRT_3, -INV_SQRT_3, -INV_SQRT_3),
-    -glm::vec3(INV_SQRT_3, -INV_SQRT_3, -INV_SQRT_3)
-};
+const glm::vec3 DOP14_NORMALS[DOP14_COUNT] = { Vectors::UNIT_X,
+                                               -Vectors::UNIT_X,
+                                               Vectors::UNIT_Y,
+                                               -Vectors::UNIT_Y,
+                                               Vectors::UNIT_Z,
+                                               -Vectors::UNIT_Z,
+                                               glm::vec3(INV_SQRT_3, INV_SQRT_3, INV_SQRT_3),
+                                               -glm::vec3(INV_SQRT_3, INV_SQRT_3, INV_SQRT_3),
+                                               glm::vec3(INV_SQRT_3, -INV_SQRT_3, INV_SQRT_3),
+                                               -glm::vec3(INV_SQRT_3, -INV_SQRT_3, INV_SQRT_3),
+                                               glm::vec3(INV_SQRT_3, INV_SQRT_3, -INV_SQRT_3),
+                                               -glm::vec3(INV_SQRT_3, INV_SQRT_3, -INV_SQRT_3),
+                                               glm::vec3(INV_SQRT_3, -INV_SQRT_3, -INV_SQRT_3),
+                                               -glm::vec3(INV_SQRT_3, -INV_SQRT_3, -INV_SQRT_3) };
 
 typedef std::tuple<int, int, int> Int3Tuple;
 const std::tuple<int, int, int> DOP14_PLANE_COMBINATIONS[] = {
-    Int3Tuple(0, 2, 4),  Int3Tuple(0, 2, 5),  Int3Tuple(0, 2, 6),  Int3Tuple(0, 2, 7),  Int3Tuple(0, 2, 8),  Int3Tuple(0, 2, 9),  Int3Tuple(0, 2, 10),  Int3Tuple(0, 2, 11),  Int3Tuple(0, 2, 12),  Int3Tuple(0, 2, 13),
-    Int3Tuple(0, 3, 4),  Int3Tuple(0, 3, 5),  Int3Tuple(0, 3, 6),  Int3Tuple(0, 3, 7),  Int3Tuple(0, 3, 8),  Int3Tuple(0, 3, 9),  Int3Tuple(0, 3, 10),  Int3Tuple(0, 3, 11),  Int3Tuple(0, 3, 12),  Int3Tuple(0, 3, 13),
-    Int3Tuple(0, 4, 6),  Int3Tuple(0, 4, 7),  Int3Tuple(0, 4, 8),  Int3Tuple(0, 4, 9),  Int3Tuple(0, 4, 10),  Int3Tuple(0, 4, 11),  Int3Tuple(0, 4, 12),  Int3Tuple(0, 4, 13),
-    Int3Tuple(0, 5, 6),  Int3Tuple(0, 5, 7),  Int3Tuple(0, 5, 8),  Int3Tuple(0, 5, 9),  Int3Tuple(0, 5, 10),  Int3Tuple(0, 5, 11),  Int3Tuple(0, 5, 12),  Int3Tuple(0, 5, 13),
-    Int3Tuple(0, 6, 8),  Int3Tuple(0, 6, 9),  Int3Tuple(0, 6, 10),  Int3Tuple(0, 6, 11),  Int3Tuple(0, 6, 12),  Int3Tuple(0, 6, 13),
-    Int3Tuple(0, 7, 8),  Int3Tuple(0, 7, 9),  Int3Tuple(0, 7, 10),  Int3Tuple(0, 7, 11),  Int3Tuple(0, 7, 12),  Int3Tuple(0, 7, 13),
-    Int3Tuple(0, 8, 10),  Int3Tuple(0, 8, 11),  Int3Tuple(0, 8, 12),  Int3Tuple(0, 8, 13),  Int3Tuple(0, 9, 10),
-    Int3Tuple(0, 9, 11),  Int3Tuple(0, 9, 12),  Int3Tuple(0, 9, 13),
-    Int3Tuple(0, 10, 12),  Int3Tuple(0, 10, 13),
-    Int3Tuple(0, 11, 12),  Int3Tuple(0, 11, 13),
-    Int3Tuple(1, 2, 4),  Int3Tuple(1, 2, 5),  Int3Tuple(1, 2, 6),  Int3Tuple(1, 2, 7),  Int3Tuple(1, 2, 8),  Int3Tuple(1, 2, 9),  Int3Tuple(1, 2, 10),  Int3Tuple(1, 2, 11),  Int3Tuple(1, 2, 12),  Int3Tuple(1, 2, 13),
-    Int3Tuple(1, 3, 4),  Int3Tuple(1, 3, 5),  Int3Tuple(1, 3, 6),  Int3Tuple(1, 3, 7),  Int3Tuple(1, 3, 8),  Int3Tuple(1, 3, 9),  Int3Tuple(1, 3, 10),  Int3Tuple(1, 3, 11),  Int3Tuple(1, 3, 12),  Int3Tuple(1, 3, 13),
-    Int3Tuple(1, 4, 6),  Int3Tuple(1, 4, 7),  Int3Tuple(1, 4, 8),  Int3Tuple(1, 4, 9),  Int3Tuple(1, 4, 10),  Int3Tuple(1, 4, 11),  Int3Tuple(1, 4, 12),  Int3Tuple(1, 4, 13),
-    Int3Tuple(1, 5, 6),  Int3Tuple(1, 5, 7),  Int3Tuple(1, 5, 8),  Int3Tuple(1, 5, 9),  Int3Tuple(1, 5, 10),  Int3Tuple(1, 5, 11),  Int3Tuple(1, 5, 12),  Int3Tuple(1, 5, 13),
-    Int3Tuple(1, 6, 8),  Int3Tuple(1, 6, 9),  Int3Tuple(1, 6, 10),  Int3Tuple(1, 6, 11),  Int3Tuple(1, 6, 12),  Int3Tuple(1, 6, 13),
-    Int3Tuple(1, 7, 8),  Int3Tuple(1, 7, 9),  Int3Tuple(1, 7, 10),  Int3Tuple(1, 7, 11),  Int3Tuple(1, 7, 12),  Int3Tuple(1, 7, 13),
-    Int3Tuple(1, 8, 10),  Int3Tuple(1, 8, 11),  Int3Tuple(1, 8, 12),  Int3Tuple(1, 8, 13),
-    Int3Tuple(1, 9, 10),  Int3Tuple(1, 9, 11),  Int3Tuple(1, 9, 12),  Int3Tuple(1, 9, 13),
-    Int3Tuple(1, 10, 12),  Int3Tuple(1, 10, 13),
-    Int3Tuple(1, 11, 12),  Int3Tuple(1, 11, 13),
-    Int3Tuple(2, 4, 6),  Int3Tuple(2, 4, 7),  Int3Tuple(2, 4, 8),  Int3Tuple(2, 4, 9),  Int3Tuple(2, 4, 10),  Int3Tuple(2, 4, 11),  Int3Tuple(2, 4, 12),  Int3Tuple(2, 4, 13),
-    Int3Tuple(2, 5, 6),  Int3Tuple(2, 5, 7),  Int3Tuple(2, 5, 8),  Int3Tuple(2, 5, 9),  Int3Tuple(2, 5, 10),  Int3Tuple(2, 5, 11),  Int3Tuple(2, 5, 12),  Int3Tuple(2, 5, 13),
-    Int3Tuple(2, 6, 8),  Int3Tuple(2, 6, 9),  Int3Tuple(2, 6, 10),  Int3Tuple(2, 6, 11),  Int3Tuple(2, 6, 12),  Int3Tuple(2, 6, 13),
-    Int3Tuple(2, 7, 8),  Int3Tuple(2, 7, 9),  Int3Tuple(2, 7, 10),  Int3Tuple(2, 7, 11),  Int3Tuple(2, 7, 12),  Int3Tuple(2, 7, 13),
-    Int3Tuple(2, 8, 10),  Int3Tuple(2, 8, 11),  Int3Tuple(2, 8, 12),  Int3Tuple(2, 8, 13),
-    Int3Tuple(2, 9, 10),  Int3Tuple(2, 9, 11),  Int3Tuple(2, 9, 12),  Int3Tuple(2, 9, 13),
-    Int3Tuple(2, 10, 12),  Int3Tuple(2, 10, 13),
-    Int3Tuple(2, 11, 12),  Int3Tuple(2, 11, 13),
-    Int3Tuple(3, 4, 6),  Int3Tuple(3, 4, 7),  Int3Tuple(3, 4, 8),  Int3Tuple(3, 4, 9),  Int3Tuple(3, 4, 10),  Int3Tuple(3, 4, 11),  Int3Tuple(3, 4, 12),  Int3Tuple(3, 4, 13),
-    Int3Tuple(3, 5, 6),  Int3Tuple(3, 5, 7),  Int3Tuple(3, 5, 8),  Int3Tuple(3, 5, 9),  Int3Tuple(3, 5, 10),  Int3Tuple(3, 5, 11),  Int3Tuple(3, 5, 12),  Int3Tuple(3, 5, 13),
-    Int3Tuple(3, 6, 8),  Int3Tuple(3, 6, 9),  Int3Tuple(3, 6, 10),  Int3Tuple(3, 6, 11),  Int3Tuple(3, 6, 12),  Int3Tuple(3, 6, 13),
-    Int3Tuple(3, 7, 8),  Int3Tuple(3, 7, 9),  Int3Tuple(3, 7, 10),  Int3Tuple(3, 7, 11),  Int3Tuple(3, 7, 12),  Int3Tuple(3, 7, 13),
-    Int3Tuple(3, 8, 10),  Int3Tuple(3, 8, 11),  Int3Tuple(3, 8, 12),  Int3Tuple(3, 8, 13),
-    Int3Tuple(3, 9, 10),  Int3Tuple(3, 9, 11),  Int3Tuple(3, 9, 12),  Int3Tuple(3, 9, 13),
-    Int3Tuple(3, 10, 12),  Int3Tuple(3, 10, 13),
-    Int3Tuple(3, 11, 12),  Int3Tuple(3, 11, 13),
-    Int3Tuple(4, 6, 8),  Int3Tuple(4, 6, 9),  Int3Tuple(4, 6, 10),  Int3Tuple(4, 6, 11),  Int3Tuple(4, 6, 12),  Int3Tuple(4, 6, 13),
-    Int3Tuple(4, 7, 8),  Int3Tuple(4, 7, 9),  Int3Tuple(4, 7, 10),  Int3Tuple(4, 7, 11),  Int3Tuple(4, 7, 12),  Int3Tuple(4, 7, 13),
-    Int3Tuple(4, 8, 10),  Int3Tuple(4, 8, 11),  Int3Tuple(4, 8, 12),  Int3Tuple(4, 8, 13),
-    Int3Tuple(4, 9, 10),  Int3Tuple(4, 9, 11),  Int3Tuple(4, 9, 12),  Int3Tuple(4, 9, 13),
-    Int3Tuple(4, 10, 12),  Int3Tuple(4, 10, 13),
-    Int3Tuple(4, 11, 12),  Int3Tuple(4, 11, 13),
-    Int3Tuple(5, 6, 8),  Int3Tuple(5, 6, 9),  Int3Tuple(5, 6, 10),  Int3Tuple(5, 6, 11),  Int3Tuple(5, 6, 12),  Int3Tuple(5, 6, 13),
-    Int3Tuple(5, 7, 8),  Int3Tuple(5, 7, 9),  Int3Tuple(5, 7, 10),  Int3Tuple(5, 7, 11),  Int3Tuple(5, 7, 12),  Int3Tuple(5, 7, 13),
-    Int3Tuple(5, 8, 10),  Int3Tuple(5, 8, 11),  Int3Tuple(5, 8, 12),  Int3Tuple(5, 8, 13),
-    Int3Tuple(5, 9, 10),  Int3Tuple(5, 9, 11),  Int3Tuple(5, 9, 12),  Int3Tuple(5, 9, 13),
-    Int3Tuple(5, 10, 12),  Int3Tuple(5, 10, 13),
-    Int3Tuple(5, 11, 12),  Int3Tuple(5, 11, 13),
-    Int3Tuple(6, 8, 10),  Int3Tuple(6, 8, 11),  Int3Tuple(6, 8, 12),  Int3Tuple(6, 8, 13),
-    Int3Tuple(6, 9, 10),  Int3Tuple(6, 9, 11),  Int3Tuple(6, 9, 12),  Int3Tuple(6, 9, 13),
-    Int3Tuple(6, 10, 12),  Int3Tuple(6, 10, 13),
-    Int3Tuple(6, 11, 12),  Int3Tuple(6, 11, 13),
-    Int3Tuple(7, 8, 10),  Int3Tuple(7, 8, 11),  Int3Tuple(7, 8, 12),  Int3Tuple(7, 8, 13),
-    Int3Tuple(7, 9, 10),  Int3Tuple(7, 9, 11),  Int3Tuple(7, 9, 12),  Int3Tuple(7, 9, 13),
-    Int3Tuple(7, 10, 12),  Int3Tuple(7, 10, 13),
-    Int3Tuple(7, 11, 12),  Int3Tuple(7, 11, 13),
-    Int3Tuple(8, 10, 12),  Int3Tuple(8, 10, 13),
-    Int3Tuple(8, 11, 12),  Int3Tuple(8, 11, 13),
-    Int3Tuple(9, 10, 12),  Int3Tuple(9, 10, 13),
-    Int3Tuple(9, 11, 12),  Int3Tuple(9, 11, 13)
+    Int3Tuple(0, 2, 4),   Int3Tuple(0, 2, 5),   Int3Tuple(0, 2, 6),   Int3Tuple(0, 2, 7),   Int3Tuple(0, 2, 8),
+    Int3Tuple(0, 2, 9),   Int3Tuple(0, 2, 10),  Int3Tuple(0, 2, 11),  Int3Tuple(0, 2, 12),  Int3Tuple(0, 2, 13),
+    Int3Tuple(0, 3, 4),   Int3Tuple(0, 3, 5),   Int3Tuple(0, 3, 6),   Int3Tuple(0, 3, 7),   Int3Tuple(0, 3, 8),
+    Int3Tuple(0, 3, 9),   Int3Tuple(0, 3, 10),  Int3Tuple(0, 3, 11),  Int3Tuple(0, 3, 12),  Int3Tuple(0, 3, 13),
+    Int3Tuple(0, 4, 6),   Int3Tuple(0, 4, 7),   Int3Tuple(0, 4, 8),   Int3Tuple(0, 4, 9),   Int3Tuple(0, 4, 10),
+    Int3Tuple(0, 4, 11),  Int3Tuple(0, 4, 12),  Int3Tuple(0, 4, 13),  Int3Tuple(0, 5, 6),   Int3Tuple(0, 5, 7),
+    Int3Tuple(0, 5, 8),   Int3Tuple(0, 5, 9),   Int3Tuple(0, 5, 10),  Int3Tuple(0, 5, 11),  Int3Tuple(0, 5, 12),
+    Int3Tuple(0, 5, 13),  Int3Tuple(0, 6, 8),   Int3Tuple(0, 6, 9),   Int3Tuple(0, 6, 10),  Int3Tuple(0, 6, 11),
+    Int3Tuple(0, 6, 12),  Int3Tuple(0, 6, 13),  Int3Tuple(0, 7, 8),   Int3Tuple(0, 7, 9),   Int3Tuple(0, 7, 10),
+    Int3Tuple(0, 7, 11),  Int3Tuple(0, 7, 12),  Int3Tuple(0, 7, 13),  Int3Tuple(0, 8, 10),  Int3Tuple(0, 8, 11),
+    Int3Tuple(0, 8, 12),  Int3Tuple(0, 8, 13),  Int3Tuple(0, 9, 10),  Int3Tuple(0, 9, 11),  Int3Tuple(0, 9, 12),
+    Int3Tuple(0, 9, 13),  Int3Tuple(0, 10, 12), Int3Tuple(0, 10, 13), Int3Tuple(0, 11, 12), Int3Tuple(0, 11, 13),
+    Int3Tuple(1, 2, 4),   Int3Tuple(1, 2, 5),   Int3Tuple(1, 2, 6),   Int3Tuple(1, 2, 7),   Int3Tuple(1, 2, 8),
+    Int3Tuple(1, 2, 9),   Int3Tuple(1, 2, 10),  Int3Tuple(1, 2, 11),  Int3Tuple(1, 2, 12),  Int3Tuple(1, 2, 13),
+    Int3Tuple(1, 3, 4),   Int3Tuple(1, 3, 5),   Int3Tuple(1, 3, 6),   Int3Tuple(1, 3, 7),   Int3Tuple(1, 3, 8),
+    Int3Tuple(1, 3, 9),   Int3Tuple(1, 3, 10),  Int3Tuple(1, 3, 11),  Int3Tuple(1, 3, 12),  Int3Tuple(1, 3, 13),
+    Int3Tuple(1, 4, 6),   Int3Tuple(1, 4, 7),   Int3Tuple(1, 4, 8),   Int3Tuple(1, 4, 9),   Int3Tuple(1, 4, 10),
+    Int3Tuple(1, 4, 11),  Int3Tuple(1, 4, 12),  Int3Tuple(1, 4, 13),  Int3Tuple(1, 5, 6),   Int3Tuple(1, 5, 7),
+    Int3Tuple(1, 5, 8),   Int3Tuple(1, 5, 9),   Int3Tuple(1, 5, 10),  Int3Tuple(1, 5, 11),  Int3Tuple(1, 5, 12),
+    Int3Tuple(1, 5, 13),  Int3Tuple(1, 6, 8),   Int3Tuple(1, 6, 9),   Int3Tuple(1, 6, 10),  Int3Tuple(1, 6, 11),
+    Int3Tuple(1, 6, 12),  Int3Tuple(1, 6, 13),  Int3Tuple(1, 7, 8),   Int3Tuple(1, 7, 9),   Int3Tuple(1, 7, 10),
+    Int3Tuple(1, 7, 11),  Int3Tuple(1, 7, 12),  Int3Tuple(1, 7, 13),  Int3Tuple(1, 8, 10),  Int3Tuple(1, 8, 11),
+    Int3Tuple(1, 8, 12),  Int3Tuple(1, 8, 13),  Int3Tuple(1, 9, 10),  Int3Tuple(1, 9, 11),  Int3Tuple(1, 9, 12),
+    Int3Tuple(1, 9, 13),  Int3Tuple(1, 10, 12), Int3Tuple(1, 10, 13), Int3Tuple(1, 11, 12), Int3Tuple(1, 11, 13),
+    Int3Tuple(2, 4, 6),   Int3Tuple(2, 4, 7),   Int3Tuple(2, 4, 8),   Int3Tuple(2, 4, 9),   Int3Tuple(2, 4, 10),
+    Int3Tuple(2, 4, 11),  Int3Tuple(2, 4, 12),  Int3Tuple(2, 4, 13),  Int3Tuple(2, 5, 6),   Int3Tuple(2, 5, 7),
+    Int3Tuple(2, 5, 8),   Int3Tuple(2, 5, 9),   Int3Tuple(2, 5, 10),  Int3Tuple(2, 5, 11),  Int3Tuple(2, 5, 12),
+    Int3Tuple(2, 5, 13),  Int3Tuple(2, 6, 8),   Int3Tuple(2, 6, 9),   Int3Tuple(2, 6, 10),  Int3Tuple(2, 6, 11),
+    Int3Tuple(2, 6, 12),  Int3Tuple(2, 6, 13),  Int3Tuple(2, 7, 8),   Int3Tuple(2, 7, 9),   Int3Tuple(2, 7, 10),
+    Int3Tuple(2, 7, 11),  Int3Tuple(2, 7, 12),  Int3Tuple(2, 7, 13),  Int3Tuple(2, 8, 10),  Int3Tuple(2, 8, 11),
+    Int3Tuple(2, 8, 12),  Int3Tuple(2, 8, 13),  Int3Tuple(2, 9, 10),  Int3Tuple(2, 9, 11),  Int3Tuple(2, 9, 12),
+    Int3Tuple(2, 9, 13),  Int3Tuple(2, 10, 12), Int3Tuple(2, 10, 13), Int3Tuple(2, 11, 12), Int3Tuple(2, 11, 13),
+    Int3Tuple(3, 4, 6),   Int3Tuple(3, 4, 7),   Int3Tuple(3, 4, 8),   Int3Tuple(3, 4, 9),   Int3Tuple(3, 4, 10),
+    Int3Tuple(3, 4, 11),  Int3Tuple(3, 4, 12),  Int3Tuple(3, 4, 13),  Int3Tuple(3, 5, 6),   Int3Tuple(3, 5, 7),
+    Int3Tuple(3, 5, 8),   Int3Tuple(3, 5, 9),   Int3Tuple(3, 5, 10),  Int3Tuple(3, 5, 11),  Int3Tuple(3, 5, 12),
+    Int3Tuple(3, 5, 13),  Int3Tuple(3, 6, 8),   Int3Tuple(3, 6, 9),   Int3Tuple(3, 6, 10),  Int3Tuple(3, 6, 11),
+    Int3Tuple(3, 6, 12),  Int3Tuple(3, 6, 13),  Int3Tuple(3, 7, 8),   Int3Tuple(3, 7, 9),   Int3Tuple(3, 7, 10),
+    Int3Tuple(3, 7, 11),  Int3Tuple(3, 7, 12),  Int3Tuple(3, 7, 13),  Int3Tuple(3, 8, 10),  Int3Tuple(3, 8, 11),
+    Int3Tuple(3, 8, 12),  Int3Tuple(3, 8, 13),  Int3Tuple(3, 9, 10),  Int3Tuple(3, 9, 11),  Int3Tuple(3, 9, 12),
+    Int3Tuple(3, 9, 13),  Int3Tuple(3, 10, 12), Int3Tuple(3, 10, 13), Int3Tuple(3, 11, 12), Int3Tuple(3, 11, 13),
+    Int3Tuple(4, 6, 8),   Int3Tuple(4, 6, 9),   Int3Tuple(4, 6, 10),  Int3Tuple(4, 6, 11),  Int3Tuple(4, 6, 12),
+    Int3Tuple(4, 6, 13),  Int3Tuple(4, 7, 8),   Int3Tuple(4, 7, 9),   Int3Tuple(4, 7, 10),  Int3Tuple(4, 7, 11),
+    Int3Tuple(4, 7, 12),  Int3Tuple(4, 7, 13),  Int3Tuple(4, 8, 10),  Int3Tuple(4, 8, 11),  Int3Tuple(4, 8, 12),
+    Int3Tuple(4, 8, 13),  Int3Tuple(4, 9, 10),  Int3Tuple(4, 9, 11),  Int3Tuple(4, 9, 12),  Int3Tuple(4, 9, 13),
+    Int3Tuple(4, 10, 12), Int3Tuple(4, 10, 13), Int3Tuple(4, 11, 12), Int3Tuple(4, 11, 13), Int3Tuple(5, 6, 8),
+    Int3Tuple(5, 6, 9),   Int3Tuple(5, 6, 10),  Int3Tuple(5, 6, 11),  Int3Tuple(5, 6, 12),  Int3Tuple(5, 6, 13),
+    Int3Tuple(5, 7, 8),   Int3Tuple(5, 7, 9),   Int3Tuple(5, 7, 10),  Int3Tuple(5, 7, 11),  Int3Tuple(5, 7, 12),
+    Int3Tuple(5, 7, 13),  Int3Tuple(5, 8, 10),  Int3Tuple(5, 8, 11),  Int3Tuple(5, 8, 12),  Int3Tuple(5, 8, 13),
+    Int3Tuple(5, 9, 10),  Int3Tuple(5, 9, 11),  Int3Tuple(5, 9, 12),  Int3Tuple(5, 9, 13),  Int3Tuple(5, 10, 12),
+    Int3Tuple(5, 10, 13), Int3Tuple(5, 11, 12), Int3Tuple(5, 11, 13), Int3Tuple(6, 8, 10),  Int3Tuple(6, 8, 11),
+    Int3Tuple(6, 8, 12),  Int3Tuple(6, 8, 13),  Int3Tuple(6, 9, 10),  Int3Tuple(6, 9, 11),  Int3Tuple(6, 9, 12),
+    Int3Tuple(6, 9, 13),  Int3Tuple(6, 10, 12), Int3Tuple(6, 10, 13), Int3Tuple(6, 11, 12), Int3Tuple(6, 11, 13),
+    Int3Tuple(7, 8, 10),  Int3Tuple(7, 8, 11),  Int3Tuple(7, 8, 12),  Int3Tuple(7, 8, 13),  Int3Tuple(7, 9, 10),
+    Int3Tuple(7, 9, 11),  Int3Tuple(7, 9, 12),  Int3Tuple(7, 9, 13),  Int3Tuple(7, 10, 12), Int3Tuple(7, 10, 13),
+    Int3Tuple(7, 11, 12), Int3Tuple(7, 11, 13), Int3Tuple(8, 10, 12), Int3Tuple(8, 10, 13), Int3Tuple(8, 11, 12),
+    Int3Tuple(8, 11, 13), Int3Tuple(9, 10, 12), Int3Tuple(9, 10, 13), Int3Tuple(9, 11, 12), Int3Tuple(9, 11, 13)
 };
 
 void generateBoundryLinesForDop14(const std::vector<float>& dots, const glm::vec3& center, std::vector<glm::vec3>& linesOut) {
@@ -1684,7 +1700,8 @@ bool computeRealQuadraticRoots(float a, float b, float c, glm::vec2& roots) {
     return true;
 }
 
-// The following functions provide an analytical solution to a quartic equation, adapted from the solution here: https://github.com/sasamil/Quartic
+// The following functions provide an analytical solution to a quartic equation, adapted from the solution here:
+// https://github.com/sasamil/Quartic
 unsigned int solveP3(float* x, float a, float b, float c) {
     float a2 = a * a;
     float q = (a2 - 3.0f * b) / 9.0f;
@@ -1724,7 +1741,7 @@ unsigned int solveP3(float* x, float a, float b, float c) {
 
 bool solve_quartic(float a, float b, float c, float d, glm::vec4& roots) {
     float a3 = -b;
-    float b3 = a * c - 4.0f *d;
+    float b3 = a * c - 4.0f * d;
     float c3 = -a * a * d - c * c + 4.0f * b * d;
 
     float px3[3];

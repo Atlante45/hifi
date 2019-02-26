@@ -14,10 +14,9 @@
 #include <NumericalConstants.h>
 #include <StreamUtils.h>
 
+#include <glm/simd/matrix.h>
 #include <test-utils/QTestExtensions.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/simd/matrix.h>
-
 
 QTEST_MAIN(GLMHelpersTests)
 
@@ -57,7 +56,6 @@ void GLMHelpersTests::testEulerDecomposition() {
 }
 
 static void testQuatCompression(glm::quat testQuat) {
-
     float MAX_COMPONENT_ERROR = 4.3e-5f;
 
     glm::quat q;
@@ -117,7 +115,6 @@ void GLMHelpersTests::testSimd() {
     b1 = b * a;
     glm_mat4u_mul(a, b, a2);
     glm_mat4u_mul(b, a, b2);
-
 
     {
         QElapsedTimer timer;
@@ -203,7 +200,7 @@ void GLMHelpersTests::testGenerateBasisVectors() {
         // primary is along x
         // secondary is linear combination of x and y
         // tertiary is unknown
-        glm::vec3 u  = 1.23f * x;
+        glm::vec3 u = 1.23f * x;
         glm::vec3 v = 2.34f * x + 3.45f * y;
         glm::vec3 w;
 
@@ -221,7 +218,8 @@ void GLMHelpersTests::roundPerf() {
     std::vector<glm::vec3> vecs;
     vecs.reserve(NUM_VECS);
     for (int i = 0; i < NUM_VECS; i++) {
-        vecs.emplace_back(randFloatInRange(-MAX_VEC, MAX_VEC), randFloatInRange(-MAX_VEC, MAX_VEC), randFloatInRange(-MAX_VEC, MAX_VEC));
+        vecs.emplace_back(randFloatInRange(-MAX_VEC, MAX_VEC), randFloatInRange(-MAX_VEC, MAX_VEC),
+                          randFloatInRange(-MAX_VEC, MAX_VEC));
     }
     std::vector<glm::vec3> vecs2 = vecs;
     std::vector<glm::vec3> originalVecs = vecs;
@@ -242,7 +240,8 @@ void GLMHelpersTests::roundPerf() {
     for (int i = 0; i < vecs.size(); i++) {
         identical &= vecs[i] == vecs2[i];
         if (vecs[i] != vecs2[i]) {
-            qDebug() << "glm: " << vecs[i].x << vecs[i].y << vecs[i].z << ", manual: " << vecs2[i].x << vecs2[i].y << vecs2[i].z;
+            qDebug() << "glm: " << vecs[i].x << vecs[i].y << vecs[i].z << ", manual: " << vecs2[i].x << vecs2[i].y
+                     << vecs2[i].z;
             qDebug() << "original: " << originalVecs[i].x << originalVecs[i].y << originalVecs[i].z;
             break;
         }

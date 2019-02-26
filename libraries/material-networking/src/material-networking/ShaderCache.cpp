@@ -7,8 +7,8 @@
 //
 #include "ShaderCache.h"
 
-NetworkShader::NetworkShader(const QUrl& url) :
-    Resource(url) {}
+NetworkShader::NetworkShader(const QUrl& url) : Resource(url) {
+}
 
 void NetworkShader::downloadFinished(const QByteArray& data) {
     _source = QString::fromUtf8(data);

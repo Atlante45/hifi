@@ -9,13 +9,11 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #include <QJsonObject>
-#include <QString>
 #include <QNetworkRequest>
+#include <QString>
 
 #include "DependencyManager.h"
-
 
 class ResourceRequestObserver : public QObject, public Dependency {
     Q_OBJECT

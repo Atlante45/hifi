@@ -9,7 +9,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef hifi_KeyLightPropertyGroup_h
 #define hifi_KeyLightPropertyGroup_h
 
@@ -33,8 +32,8 @@ class ReadBitstreamToTreeParams;
  * @property {Color} color=255,255,255 - The color of the light.
  * @property {number} intensity=1 - The intensity of the light.
  * @property {Vec3} direction=0,-1,0 - The direction the light is shining.
- * @property {boolean} castShadows=false - If <code>true</code> then shadows are cast. Shadows are cast by avatars, plus 
- *     {@link Entities.EntityType|Model} and {@link Entities.EntityType|Shape} entities that have their 
+ * @property {boolean} castShadows=false - If <code>true</code> then shadows are cast. Shadows are cast by avatars, plus
+ *     {@link Entities.EntityType|Model} and {@link Entities.EntityType|Shape} entities that have their
  *     <code>{@link Entities.EntityProperties|canCastShadow}</code> property set to <code>true</code>.
  */
 class KeyLightPropertyGroup : public PropertyGroup {
@@ -50,15 +49,12 @@ public:
     virtual void debugDump() const override;
     virtual void listChangedProperties(QList<QString>& out) override;
 
-    virtual bool appendToEditPacket(OctreePacketData* packetData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
-                                    OctreeElement::AppendState& appendState) const override;
+    virtual bool appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+                                    EntityPropertyFlags& propertyFlags, EntityPropertyFlags& propertiesDidntFit,
+                                    int& propertyCount, OctreeElement::AppendState& appendState) const override;
 
-    virtual bool decodeFromEditPacket(EntityPropertyFlags& propertyFlags,
-                                      const unsigned char*& dataAt, int& processedBytes) override;
+    virtual bool decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt,
+                                      int& processedBytes) override;
     virtual void markAllChanged() override;
     virtual EntityPropertyFlags getChangedProperties() const override;
 
@@ -73,16 +69,13 @@ public:
 
     virtual void appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                     EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
+                                    EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                    EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                                     OctreeElement::AppendState& appendState) const override;
 
     virtual int readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) override;
+                                                 ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                 bool overwriteLocalData, bool& somethingChanged) override;
 
     static const glm::u8vec3 DEFAULT_KEYLIGHT_COLOR;
     static const float DEFAULT_KEYLIGHT_INTENSITY;

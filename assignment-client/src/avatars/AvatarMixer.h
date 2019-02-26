@@ -15,9 +15,9 @@
 #ifndef hifi_AvatarMixer_h
 #define hifi_AvatarMixer_h
 
-#include <set>
-#include <shared/RateCounter.h>
 #include <PortableHighResolutionClock.h>
+#include <shared/RateCounter.h>
+#include <set>
 
 #include <ThreadedAssignment.h>
 #include "AvatarMixerClientData.h"
@@ -31,8 +31,7 @@ public:
     AvatarMixer(ReceivedMessage& message);
 
     static bool shouldReplicateTo(const Node& from, const Node& to) {
-        return to.getType() == NodeType::DownstreamAvatarMixer &&
-               to.getPublicSocket() != from.getPublicSocket() &&
+        return to.getType() == NodeType::DownstreamAvatarMixer && to.getPublicSocket() != from.getPublicSocket() &&
                to.getLocalSocket() != from.getLocalSocket();
     }
 
@@ -92,14 +91,10 @@ private:
 
     // Pair of basename + uniquifying integer suffix.
     struct SessionDisplayName {
-        explicit SessionDisplayName(QString baseName = QString(), int suffix = 0) :
-            _baseName(baseName),
-            _suffix(suffix) { }
+        explicit SessionDisplayName(QString baseName = QString(), int suffix = 0) : _baseName(baseName), _suffix(suffix) {}
         // Does lexicographic ordering:
         bool operator<(const SessionDisplayName& rhs) const;
-        bool operator==(const SessionDisplayName& rhs) const {
-            return _baseName == rhs._baseName && _suffix == rhs._suffix;
-        }
+        bool operator==(const SessionDisplayName& rhs) const { return _baseName == rhs._baseName && _suffix == rhs._suffix; }
 
         QString _baseName;
         int _suffix;
@@ -108,7 +103,9 @@ private:
 
     std::set<SessionDisplayName> _sessionDisplayNames;
 
-    quint64 _displayNameManagementElapsedTime { 0 }; // total time spent in broadcastAvatarData/display name management... since last stats window
+    quint64 _displayNameManagementElapsedTime {
+        0
+    }; // total time spent in broadcastAvatarData/display name management... since last stats window
     quint64 _ignoreCalculationElapsedTime { 0 };
     quint64 _avatarDataPackingElapsedTime { 0 };
     quint64 _packetSendingElapsedTime { 0 };

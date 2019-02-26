@@ -25,4 +25,3 @@ private:
 };
 
 #endif // hifi_FingerprintUtils_h
-

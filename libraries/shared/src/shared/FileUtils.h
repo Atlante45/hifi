@@ -15,7 +15,6 @@
 #include <QString>
 #include <QtCore/QFileSelector>
 class FileUtils {
-
 public:
     static const QStringList& getFileSelectors();
     static QString selectFile(const QString& fileName);

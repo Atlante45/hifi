@@ -15,7 +15,8 @@
 class OffscreenQmlSurface;
 class PointerEvent;
 
-namespace render { namespace entities {
+namespace render {
+namespace entities {
 
 class WebEntityRenderer : public TypedEntityRenderer<WebEntityItem> {
     Q_OBJECT
@@ -33,15 +34,24 @@ public:
     static const QString QML;
     static const char* URL_PROPERTY;
 
-    static void setAcquireWebSurfaceOperator(std::function<void(const QString&, bool, QSharedPointer<OffscreenQmlSurface>&, bool&)> acquireWebSurfaceOperator) { _acquireWebSurfaceOperator = acquireWebSurfaceOperator; }
-    static void acquireWebSurface(const QString& url, bool htmlContent, QSharedPointer<OffscreenQmlSurface>& webSurface, bool& cachedWebSurface) {
+    static void setAcquireWebSurfaceOperator(
+        std::function<void(const QString&, bool, QSharedPointer<OffscreenQmlSurface>&, bool&)> acquireWebSurfaceOperator) {
+        _acquireWebSurfaceOperator = acquireWebSurfaceOperator;
+    }
+    static void acquireWebSurface(const QString& url, bool htmlContent, QSharedPointer<OffscreenQmlSurface>& webSurface,
+                                  bool& cachedWebSurface) {
         if (_acquireWebSurfaceOperator) {
             _acquireWebSurfaceOperator(url, htmlContent, webSurface, cachedWebSurface);
         }
     }
 
-    static void setReleaseWebSurfaceOperator(std::function<void(QSharedPointer<OffscreenQmlSurface>&, bool&, std::vector<QMetaObject::Connection>&)> releaseWebSurfaceOperator) { _releaseWebSurfaceOperator = releaseWebSurfaceOperator; }
-    static void releaseWebSurface(QSharedPointer<OffscreenQmlSurface>& webSurface, bool& cachedWebSurface, std::vector<QMetaObject::Connection>& connections) {
+    static void setReleaseWebSurfaceOperator(
+        std::function<void(QSharedPointer<OffscreenQmlSurface>&, bool&, std::vector<QMetaObject::Connection>&)>
+            releaseWebSurfaceOperator) {
+        _releaseWebSurfaceOperator = releaseWebSurfaceOperator;
+    }
+    static void releaseWebSurface(QSharedPointer<OffscreenQmlSurface>& webSurface, bool& cachedWebSurface,
+                                  std::vector<QMetaObject::Connection>& connections) {
         if (_releaseWebSurfaceOperator) {
             _releaseWebSurfaceOperator(webSurface, cachedWebSurface, connections);
         }
@@ -53,7 +63,8 @@ public:
 protected:
     virtual bool needsRenderUpdate() const override;
     virtual bool needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const override;
-    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) override;
+    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                const TypedEntityPointer& entity) override;
     virtual void doRender(RenderArgs* args) override;
     virtual bool isTransparent() const override;
     Item::Bound getBound() override;
@@ -70,12 +81,8 @@ private:
     void destroyWebSurface();
     glm::vec2 getWindowSize(const TypedEntityPointer& entity) const;
 
-    int _geometryId{ 0 };
-    enum class ContentType {
-        NoContent,
-        HtmlContent,
-        QmlContent
-    };
+    int _geometryId { 0 };
+    enum class ContentType { NoContent, HtmlContent, QmlContent };
     static ContentType getContentType(const QString& urlString);
     ContentType _contentType { ContentType::NoContent };
 
@@ -102,7 +109,8 @@ private:
     std::vector<QMetaObject::Connection> _connections;
 
     static std::function<void(QString, bool, QSharedPointer<OffscreenQmlSurface>&, bool&)> _acquireWebSurfaceOperator;
-    static std::function<void(QSharedPointer<OffscreenQmlSurface>&, bool&, std::vector<QMetaObject::Connection>&)> _releaseWebSurfaceOperator;
+    static std::function<void(QSharedPointer<OffscreenQmlSurface>&, bool&, std::vector<QMetaObject::Connection>&)>
+        _releaseWebSurfaceOperator;
 
 public slots:
     void emitScriptEvent(const QVariant& scriptMessage);
@@ -112,6 +120,7 @@ signals:
     void webEventReceived(const QVariant& message);
 };
 
-} }
+} // namespace entities
+} // namespace render
 
 #endif // hifi_RenderableWebEntityItem_h

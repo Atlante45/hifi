@@ -17,19 +17,18 @@
 #include <QtScript/QScriptValue>
 
 #include <DependencyManager.h>
-#include <hfm/HFM.h>
 #include <ResourceCache.h>
+#include <hfm/HFM.h>
 
 class Animation;
 
 using AnimationPointer = QSharedPointer<Animation>;
 
-class AnimationCache : public ResourceCache, public Dependency  {
+class AnimationCache : public ResourceCache, public Dependency {
     Q_OBJECT
     SINGLETON_DEPENDENCY
 
 public:
-
     Q_INVOKABLE AnimationPointer getAnimation(const QString& url) { return getAnimation(QUrl(url)); }
     Q_INVOKABLE AnimationPointer getAnimation(const QUrl& url);
 
@@ -39,8 +38,7 @@ protected:
 
 private:
     explicit AnimationCache(QObject* parent = NULL);
-    virtual ~AnimationCache() { }
-
+    virtual ~AnimationCache() {}
 };
 
 Q_DECLARE_METATYPE(AnimationPointer)
@@ -62,7 +60,6 @@ class Animation : public Resource {
     Q_OBJECT
 
 public:
-
     Animation(const Animation& other) : Resource(other), _hfmModel(other._hfmModel) {}
     Animation(const QUrl& url) : Resource(url) {}
 
@@ -77,7 +74,7 @@ public:
      * @returns {string[]}
      */
     Q_INVOKABLE QStringList getJointNames() const;
-    
+
     /**jsdoc
      * @function AnimationObject.getFrames
      * @returns {FBXAnimationFrame[]}
@@ -85,7 +82,7 @@ public:
     Q_INVOKABLE QVector<HFMAnimationFrame> getFrames() const;
 
     const QVector<HFMAnimationFrame>& getFramesReference() const;
-    
+
 protected:
     virtual void downloadFinished(const QByteArray& data) override;
 
@@ -94,7 +91,6 @@ protected slots:
     void animationParseError(int error, QString str);
 
 private:
-    
     HFMModel::Pointer _hfmModel;
 };
 
@@ -114,6 +110,5 @@ private:
     QUrl _url;
     QByteArray _data;
 };
-
 
 #endif // hifi_AnimationCache_h

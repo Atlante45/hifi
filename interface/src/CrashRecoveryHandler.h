@@ -15,16 +15,11 @@
 #include <QString>
 
 class CrashRecoveryHandler {
-
 public:
     static bool checkForResetSettings(bool wasLikelyCrash, bool suppressPrompt = false);
 
 private:
-    enum Action {
-        DELETE_INTERFACE_INI,
-        RETAIN_IMPORTANT_INFO,
-        DO_NOTHING
-    };
+    enum Action { DELETE_INTERFACE_INI, RETAIN_IMPORTANT_INFO, DO_NOTHING };
 
     static Action promptUserForAction(bool showCrashMessage);
     static void handleCrash(Action action);

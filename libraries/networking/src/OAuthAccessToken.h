@@ -12,9 +12,9 @@
 #ifndef hifi_OAuthAccessToken_h
 #define hifi_OAuthAccessToken_h
 
-#include <QtCore/QObject>
 #include <QtCore/QDateTime>
 #include <QtCore/QJsonObject>
+#include <QtCore/QObject>
 
 class OAuthAccessToken : public QObject {
     Q_OBJECT
@@ -23,18 +23,19 @@ public:
     OAuthAccessToken(const QJsonObject& jsonObject);
     OAuthAccessToken(const OAuthAccessToken& otherToken);
     OAuthAccessToken& operator=(const OAuthAccessToken& otherToken);
-    
+
     QByteArray authorizationHeaderValue() const { return QString("Bearer %1").arg(token).toUtf8(); }
-     
+
     bool isExpired() const { return expiryTimestamp != -1 && expiryTimestamp <= QDateTime::currentMSecsSinceEpoch(); }
-    
+
     QString token;
     QString refreshToken;
     qlonglong expiryTimestamp;
     QString tokenType;
-    
-    friend QDataStream& operator<<(QDataStream &out, const OAuthAccessToken& token);
-    friend QDataStream& operator>>(QDataStream &in, OAuthAccessToken& token);
+
+    friend QDataStream& operator<<(QDataStream& out, const OAuthAccessToken& token);
+    friend QDataStream& operator>>(QDataStream& in, OAuthAccessToken& token);
+
 private:
     void swap(OAuthAccessToken& otherToken);
 };

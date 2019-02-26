@@ -12,17 +12,17 @@
 #ifndef hifi_AssetsBackupHandler_h
 #define hifi_AssetsBackupHandler_h
 
-#include <set>
 #include <map>
+#include <set>
 
-#include <QObject>
-#include <QTimer>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QObject>
+#include <QTimer>
 
 #include <AssetUtils.h>
-#include <ReceivedMessage.h>
 #include <PortableHighResolutionClock.h>
+#include <ReceivedMessage.h>
 
 #include "BackupHandler.h"
 
@@ -58,8 +58,7 @@ private:
     void downloadNextMissingFile();
     bool writeAssetFile(const AssetUtils::AssetHash& hash, const QByteArray& data);
 
-    void computeServerStateDifference(const AssetUtils::Mappings& currentMappings,
-                                      const AssetUtils::Mappings& newMappings);
+    void computeServerStateDifference(const AssetUtils::Mappings& currentMappings, const AssetUtils::Mappings& newMappings);
     void restoreAllAssets();
     void restoreNextAsset();
     void updateMappings();
@@ -73,7 +72,9 @@ private:
 
     struct AssetServerBackup {
         AssetServerBackup(const QString& pName, AssetUtils::Mappings pMappings, bool pCorruptedBackup) :
-            name(pName), mappings(pMappings), corruptedBackup(pCorruptedBackup) {}
+            name(pName),
+            mappings(pMappings),
+            corruptedBackup(pCorruptedBackup) {}
 
         QString name;
         AssetUtils::Mappings mappings;

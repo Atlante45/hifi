@@ -15,18 +15,17 @@
 #include <QEventLoop>
 #include <QThread>
 
-#include <GLMHelpers.h>
 #include <DependencyManager.h>
+#include <GLMHelpers.h>
 
 #include <ResourceManager.h>
 
-#include "impl/MappingBuilderProxy.h"
-#include "Logging.h"
 #include "InputDevice.h"
 #include "InputRecorder.h"
+#include "Logging.h"
+#include "impl/MappingBuilderProxy.h"
 
-
-static QRegularExpression SANITIZE_NAME_EXPRESSION{ "[\\(\\)\\.\\s]" };
+static QRegularExpression SANITIZE_NAME_EXPRESSION { "[\\(\\)\\.\\s]" };
 
 static QVariantMap createDeviceMap(const controller::InputDevice::Pointer device) {
     auto userInputMapper = DependencyManager::get<controller::UserInputMapper>();
@@ -35,8 +34,8 @@ static QVariantMap createDeviceMap(const controller::InputDevice::Pointer device
         const auto& input = inputMapping.first;
         const auto inputName = QString(inputMapping.second).remove(SANITIZE_NAME_EXPRESSION);
 #ifdef DEBUG
-        qCDebug(controllers) << "\tInput " << input.getChannel() << (int)input.getType()
-            << QString::number(input.getID(), 16) << ": " << inputName;
+        qCDebug(controllers) << "\tInput " << input.getChannel() << (int)input.getType() << QString::number(input.getID(), 16)
+                             << ": " << inputName;
 #endif
         deviceMap.insert(inputName, input.getID());
     }
@@ -77,160 +76,159 @@ controller::ScriptingInterface::ScriptingInterface() {
 
 namespace controller {
 
-    QObject* ScriptingInterface::newMapping(const QString& mappingName) {
-        auto userInputMapper = DependencyManager::get<UserInputMapper>();
-        return new MappingBuilderProxy(*userInputMapper, userInputMapper->newMapping(mappingName));
-    }
+QObject* ScriptingInterface::newMapping(const QString& mappingName) {
+    auto userInputMapper = DependencyManager::get<UserInputMapper>();
+    return new MappingBuilderProxy(*userInputMapper, userInputMapper->newMapping(mappingName));
+}
 
-    void ScriptingInterface::enableMapping(const QString& mappingName, bool enable) {
-        auto userInputMapper = DependencyManager::get<UserInputMapper>();
-        userInputMapper->enableMapping(mappingName, enable);
-    }
+void ScriptingInterface::enableMapping(const QString& mappingName, bool enable) {
+    auto userInputMapper = DependencyManager::get<UserInputMapper>();
+    userInputMapper->enableMapping(mappingName, enable);
+}
 
-    float ScriptingInterface::getValue(const int& source) const {
-        auto userInputMapper = DependencyManager::get<UserInputMapper>();
-        return userInputMapper->getValue(Input((uint32_t)source)).value;
-    }
+float ScriptingInterface::getValue(const int& source) const {
+    auto userInputMapper = DependencyManager::get<UserInputMapper>();
+    return userInputMapper->getValue(Input((uint32_t)source)).value;
+}
 
-    float ScriptingInterface::getAxisValue(int source) const {
-        auto userInputMapper = DependencyManager::get<UserInputMapper>();
-        return userInputMapper->getValue(Input((uint32_t)source)).value;
-    }
+float ScriptingInterface::getAxisValue(int source) const {
+    auto userInputMapper = DependencyManager::get<UserInputMapper>();
+    return userInputMapper->getValue(Input((uint32_t)source)).value;
+}
 
-    Pose ScriptingInterface::getPoseValue(const int& source) const {
-        auto userInputMapper = DependencyManager::get<UserInputMapper>();
-        return userInputMapper->getPose(Input((uint32_t)source));
-    }
-    
-    QVector<Action> ScriptingInterface::getAllActions() {
-        return DependencyManager::get<UserInputMapper>()->getAllActions();
-    }
+Pose ScriptingInterface::getPoseValue(const int& source) const {
+    auto userInputMapper = DependencyManager::get<UserInputMapper>();
+    return userInputMapper->getPose(Input((uint32_t)source));
+}
 
-    QString ScriptingInterface::getDeviceName(unsigned int device) {
-        return DependencyManager::get<UserInputMapper>()->getDeviceName((unsigned short)device);
-    }
+QVector<Action> ScriptingInterface::getAllActions() {
+    return DependencyManager::get<UserInputMapper>()->getAllActions();
+}
 
-    QVector<Input::NamedPair> ScriptingInterface::getAvailableInputs(unsigned int device) {
-        return DependencyManager::get<UserInputMapper>()->getAvailableInputs((unsigned short)device);
-    }
+QString ScriptingInterface::getDeviceName(unsigned int device) {
+    return DependencyManager::get<UserInputMapper>()->getDeviceName((unsigned short)device);
+}
 
-    int ScriptingInterface::findDevice(QString name) {
-        return DependencyManager::get<UserInputMapper>()->findDevice(name);
-    }
+QVector<Input::NamedPair> ScriptingInterface::getAvailableInputs(unsigned int device) {
+    return DependencyManager::get<UserInputMapper>()->getAvailableInputs((unsigned short)device);
+}
 
-    QVector<QString> ScriptingInterface::getDeviceNames() {
-        return DependencyManager::get<UserInputMapper>()->getDeviceNames();
-    }
+int ScriptingInterface::findDevice(QString name) {
+    return DependencyManager::get<UserInputMapper>()->findDevice(name);
+}
 
-    float ScriptingInterface::getActionValue(int action) {
-        return DependencyManager::get<UserInputMapper>()->getActionState(Action(action));
-    }
+QVector<QString> ScriptingInterface::getDeviceNames() {
+    return DependencyManager::get<UserInputMapper>()->getDeviceNames();
+}
 
-    int ScriptingInterface::findAction(QString actionName) {
-        return DependencyManager::get<UserInputMapper>()->findAction(actionName);
-    }
+float ScriptingInterface::getActionValue(int action) {
+    return DependencyManager::get<UserInputMapper>()->getActionState(Action(action));
+}
 
-    QVector<QString> ScriptingInterface::getActionNames() const {
-        return DependencyManager::get<UserInputMapper>()->getActionNames();
-    }
+int ScriptingInterface::findAction(QString actionName) {
+    return DependencyManager::get<UserInputMapper>()->findAction(actionName);
+}
 
-    bool ScriptingInterface::triggerHapticPulse(float strength, float duration, controller::Hand hand) const {
-        return DependencyManager::get<UserInputMapper>()->triggerHapticPulse(strength, duration, hand);
-    }
+QVector<QString> ScriptingInterface::getActionNames() const {
+    return DependencyManager::get<UserInputMapper>()->getActionNames();
+}
 
-    bool ScriptingInterface::triggerShortHapticPulse(float strength, controller::Hand hand) const {
-        const float SHORT_HAPTIC_DURATION_MS = 250.0f;
-        return DependencyManager::get<UserInputMapper>()->triggerHapticPulse(strength, SHORT_HAPTIC_DURATION_MS, hand);
-    }
+bool ScriptingInterface::triggerHapticPulse(float strength, float duration, controller::Hand hand) const {
+    return DependencyManager::get<UserInputMapper>()->triggerHapticPulse(strength, duration, hand);
+}
 
-    void ScriptingInterface::startInputRecording() {
-        InputRecorder* inputRecorder = InputRecorder::getInstance();
-        inputRecorder->startRecording();
-    }
+bool ScriptingInterface::triggerShortHapticPulse(float strength, controller::Hand hand) const {
+    const float SHORT_HAPTIC_DURATION_MS = 250.0f;
+    return DependencyManager::get<UserInputMapper>()->triggerHapticPulse(strength, SHORT_HAPTIC_DURATION_MS, hand);
+}
 
-    void ScriptingInterface::stopInputRecording() {
-        InputRecorder* inputRecorder = InputRecorder::getInstance();
-        inputRecorder->stopRecording();
-    }
+void ScriptingInterface::startInputRecording() {
+    InputRecorder* inputRecorder = InputRecorder::getInstance();
+    inputRecorder->startRecording();
+}
 
-    void ScriptingInterface::startInputPlayback() {
-        InputRecorder* inputRecorder = InputRecorder::getInstance();
-        inputRecorder->startPlayback();
-    }
+void ScriptingInterface::stopInputRecording() {
+    InputRecorder* inputRecorder = InputRecorder::getInstance();
+    inputRecorder->stopRecording();
+}
 
-    void ScriptingInterface::stopInputPlayback() {
-        InputRecorder* inputRecorder = InputRecorder::getInstance();
-        inputRecorder->stopPlayback();
-    }
+void ScriptingInterface::startInputPlayback() {
+    InputRecorder* inputRecorder = InputRecorder::getInstance();
+    inputRecorder->startPlayback();
+}
 
-    void ScriptingInterface::saveInputRecording() {
-        InputRecorder* inputRecorder = InputRecorder::getInstance();
-        inputRecorder->saveRecording();
-    }
-    
-    void ScriptingInterface::loadInputRecording(const QString& file) {
-        InputRecorder* inputRecorder = InputRecorder::getInstance();
-        inputRecorder->loadRecording(file);
-    }
+void ScriptingInterface::stopInputPlayback() {
+    InputRecorder* inputRecorder = InputRecorder::getInstance();
+    inputRecorder->stopPlayback();
+}
 
-    QString ScriptingInterface::getInputRecorderSaveDirectory() {
-        InputRecorder* inputRecorder = InputRecorder::getInstance();
-        return inputRecorder->getSaveDirectory();
-    }
+void ScriptingInterface::saveInputRecording() {
+    InputRecorder* inputRecorder = InputRecorder::getInstance();
+    inputRecorder->saveRecording();
+}
 
-    QStringList ScriptingInterface::getRunningInputDeviceNames() {
-        QMutexLocker locker(&_runningDevicesMutex);
-        return _runningInputDeviceNames;
-    }
+void ScriptingInterface::loadInputRecording(const QString& file) {
+    InputRecorder* inputRecorder = InputRecorder::getInstance();
+    inputRecorder->loadRecording(file);
+}
 
-    void ScriptingInterface::updateRunningInputDevices(const QString& deviceName, bool isRunning, const QStringList& runningDevices) {
-        QMutexLocker locker(&_runningDevicesMutex);
-        _runningInputDeviceNames = runningDevices;
-        emit inputDeviceRunningChanged(deviceName, isRunning);
-    }
+QString ScriptingInterface::getInputRecorderSaveDirectory() {
+    InputRecorder* inputRecorder = InputRecorder::getInstance();
+    return inputRecorder->getSaveDirectory();
+}
 
-    bool ScriptingInterface::triggerHapticPulseOnDevice(unsigned int device, float strength, float duration, controller::Hand hand) const {
-        return DependencyManager::get<UserInputMapper>()->triggerHapticPulseOnDevice(device, strength, duration, hand);
-    }
+QStringList ScriptingInterface::getRunningInputDeviceNames() {
+    QMutexLocker locker(&_runningDevicesMutex);
+    return _runningInputDeviceNames;
+}
 
-    bool ScriptingInterface::triggerShortHapticPulseOnDevice(unsigned int device, float strength, controller::Hand hand) const {
-        const float SHORT_HAPTIC_DURATION_MS = 250.0f;
-        return DependencyManager::get<UserInputMapper>()->triggerHapticPulseOnDevice(device, strength, SHORT_HAPTIC_DURATION_MS, hand);
-    }
+void ScriptingInterface::updateRunningInputDevices(const QString& deviceName, bool isRunning,
+                                                   const QStringList& runningDevices) {
+    QMutexLocker locker(&_runningDevicesMutex);
+    _runningInputDeviceNames = runningDevices;
+    emit inputDeviceRunningChanged(deviceName, isRunning);
+}
 
-    void ScriptingInterface::updateMaps() {
-        QVariantMap newHardware;
-        auto userInputMapper = DependencyManager::get<controller::UserInputMapper>();
-        const auto& devices = userInputMapper->getDevices();
-        for (const auto& deviceMapping : devices) {
-            auto deviceID = deviceMapping.first;
-            if (deviceID != userInputMapper->getStandardDeviceID()) {
-                auto device = deviceMapping.second;
-                auto deviceName = QString(device->getName()).remove(SANITIZE_NAME_EXPRESSION);
-                qCDebug(controllers) << "Device" << deviceMapping.first << ":" << deviceName;
-                if (newHardware.contains(deviceName)) {
-                    continue;
-                }
+bool ScriptingInterface::triggerHapticPulseOnDevice(unsigned int device, float strength, float duration,
+                                                    controller::Hand hand) const {
+    return DependencyManager::get<UserInputMapper>()->triggerHapticPulseOnDevice(device, strength, duration, hand);
+}
 
-                // Expose the IDs to JS
-                newHardware.insert(deviceName, createDeviceMap(device));
+bool ScriptingInterface::triggerShortHapticPulseOnDevice(unsigned int device, float strength, controller::Hand hand) const {
+    const float SHORT_HAPTIC_DURATION_MS = 250.0f;
+    return DependencyManager::get<UserInputMapper>()->triggerHapticPulseOnDevice(device, strength, SHORT_HAPTIC_DURATION_MS,
+                                                                                 hand);
+}
+
+void ScriptingInterface::updateMaps() {
+    QVariantMap newHardware;
+    auto userInputMapper = DependencyManager::get<controller::UserInputMapper>();
+    const auto& devices = userInputMapper->getDevices();
+    for (const auto& deviceMapping : devices) {
+        auto deviceID = deviceMapping.first;
+        if (deviceID != userInputMapper->getStandardDeviceID()) {
+            auto device = deviceMapping.second;
+            auto deviceName = QString(device->getName()).remove(SANITIZE_NAME_EXPRESSION);
+            qCDebug(controllers) << "Device" << deviceMapping.first << ":" << deviceName;
+            if (newHardware.contains(deviceName)) {
+                continue;
             }
+
+            // Expose the IDs to JS
+            newHardware.insert(deviceName, createDeviceMap(device));
         }
-        _hardware = newHardware;
     }
+    _hardware = newHardware;
+}
 
+QObject* ScriptingInterface::parseMapping(const QString& json) {
+    auto userInputMapper = DependencyManager::get<UserInputMapper>();
+    auto mapping = userInputMapper->parseMapping(json);
+    return new MappingBuilderProxy(*userInputMapper, mapping);
+}
 
-    QObject* ScriptingInterface::parseMapping(const QString& json) {
-        auto userInputMapper = DependencyManager::get<UserInputMapper>();
-        auto mapping = userInputMapper->parseMapping(json);
-        return new MappingBuilderProxy(*userInputMapper, mapping);
-    }
+QObject* ScriptingInterface::loadMapping(const QString& jsonUrl) {
+    return nullptr;
+}
 
-    QObject* ScriptingInterface::loadMapping(const QString& jsonUrl) {
-        return nullptr;
-    }
-
-
-} // namespace controllers
-
-
+} // namespace controller

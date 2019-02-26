@@ -10,27 +10,27 @@
 #ifndef hifi_Controllers_Route_h
 #define hifi_Controllers_Route_h
 
+#include "Conditional.h"
 #include "Endpoint.h"
 #include "Filter.h"
-#include "Conditional.h"
 
 namespace controller {
-    /*
-    * encapsulates a source, destination and filters to apply
-    */
-    class Route {
-    public:
-        Endpoint::Pointer source;
-        Endpoint::Pointer destination;
-        Conditional::Pointer conditional;
-        Filter::List filters;
-        QString json;
-        bool debug { false };
-        bool peek { false };
+/*
+ * encapsulates a source, destination and filters to apply
+ */
+class Route {
+public:
+    Endpoint::Pointer source;
+    Endpoint::Pointer destination;
+    Conditional::Pointer conditional;
+    Filter::List filters;
+    QString json;
+    bool debug { false };
+    bool peek { false };
 
-        using Pointer = std::shared_ptr<Route>;
-        using List = std::list<Pointer>;
-    };
-}
+    using Pointer = std::shared_ptr<Route>;
+    using List = std::list<Pointer>;
+};
+} // namespace controller
 
 #endif

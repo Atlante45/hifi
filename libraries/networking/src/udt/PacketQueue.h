@@ -13,18 +13,18 @@
 #define hifi_PacketQueue_h
 
 #include <list>
-#include <vector>
 #include <memory>
 #include <mutex>
+#include <vector>
 
 #include "Packet.h"
 
 namespace udt {
-    
+
 class PacketList;
-    
+
 using MessageNumber = uint32_t;
-    
+
 class PacketQueue {
     using Mutex = std::recursive_mutex;
     using LockGuard = std::lock_guard<Mutex>;
@@ -33,24 +33,24 @@ class PacketQueue {
     using RawChannel = std::list<PacketPointer>;
     using Channel = std::unique_ptr<RawChannel>;
     using Channels = std::list<Channel>;
-    
+
 public:
     PacketQueue(MessageNumber messageNumber = 0);
     void queuePacket(PacketPointer packet);
     void queuePacketList(PacketListPointer packetList);
-    
+
     bool isEmpty() const;
     PacketPointer takePacket();
-    
+
     Mutex& getLock() { return _packetsLock; }
 
     MessageNumber getCurrentMessageNumber() const { return _currentMessageNumber; }
-    
+
 private:
     MessageNumber getNextMessageNumber();
 
     MessageNumber _currentMessageNumber { 0 };
-    
+
     mutable Mutex _packetsLock; // Protects the packets to be sent.
     Channels _channels; // One channel per packet list + Main channel
 
@@ -58,7 +58,6 @@ private:
     unsigned int _channelsVisitedCount { 0 };
 };
 
-}
-
+} // namespace udt
 
 #endif // hifi_PacketQueue_h

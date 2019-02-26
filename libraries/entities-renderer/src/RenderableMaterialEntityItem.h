@@ -17,11 +17,13 @@
 
 class NetworkMaterial;
 
-namespace render { namespace entities { 
+namespace render {
+namespace entities {
 
 class MaterialEntityRenderer : public TypedEntityRenderer<MaterialEntityItem> {
     using Parent = TypedEntityRenderer<MaterialEntityItem>;
     using Pointer = std::shared_ptr<MaterialEntityRenderer>;
+
 public:
     MaterialEntityRenderer(const EntityItemPointer& entity) : Parent(entity) {}
     ~MaterialEntityRenderer() { deleteMaterial(_parentID, _parentMaterialName); }
@@ -63,8 +65,8 @@ private:
     NetworkMaterialResource::ParsedMaterials _parsedMaterials;
     std::shared_ptr<NetworkMaterial> _appliedMaterial;
     std::string _currentMaterialName;
-
 };
 
-} } 
+} // namespace entities
+} // namespace render
 #endif // hifi_RenderableMaterialEntityItem_h

@@ -7,45 +7,45 @@
 //
 #include "OffscreenQmlSurface.h"
 
-#include <unordered_set>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <gl/Config.h>
 
-#include <QtGui/QOpenGLContext>
-#include <QtGui/QOpenGLFunctions_4_1_Core>
-#include <QtWidgets/QWidget>
-#include <QtQml/QtQml>
-#include <QtQml/QQmlEngine>
-#include <QtQml/QQmlComponent>
-#include <QtQml/QQmlFileSelector>
-#include <QtQuick/QQuickItem>
-#include <QtQuick/QQuickWindow>
-#include <QtQuick/QQuickRenderControl>
-#include <QtCore/QThread>
-#include <QtCore/QMutex>
-#include <QtCore/QWaitCondition>
-#include <QtMultimedia/QMediaService>
-#include <QtMultimedia/QAudioOutputSelectorControl>
-#include <QtMultimedia/QMediaPlayer>
-#include <QtGui/QInputMethodEvent>
-#include <shared/NsightHelpers.h>
-#include <shared/GlobalAppProperties.h>
-#include <shared/QtHelpers.h>
-#include <PerfStat.h>
-#include <DependencyManager.h>
-#include <NumericalConstants.h>
-#include <Finally.h>
-#include <PathUtils.h>
 #include <AbstractUriHandler.h>
 #include <AccountManager.h>
-#include <NetworkAccessManager.h>
-#include <GLMHelpers.h>
 #include <AudioClient.h>
+#include <DependencyManager.h>
+#include <Finally.h>
+#include <GLMHelpers.h>
+#include <NetworkAccessManager.h>
+#include <NumericalConstants.h>
+#include <PathUtils.h>
+#include <PerfStat.h>
+#include <shared/GlobalAppProperties.h>
+#include <shared/NsightHelpers.h>
+#include <shared/QtHelpers.h>
+#include <QtCore/QMutex>
+#include <QtCore/QThread>
+#include <QtCore/QWaitCondition>
+#include <QtGui/QInputMethodEvent>
+#include <QtGui/QOpenGLContext>
+#include <QtGui/QOpenGLFunctions_4_1_Core>
+#include <QtMultimedia/QAudioOutputSelectorControl>
+#include <QtMultimedia/QMediaPlayer>
+#include <QtMultimedia/QMediaService>
+#include <QtQml/QQmlComponent>
+#include <QtQml/QQmlEngine>
+#include <QtQml/QQmlFileSelector>
+#include <QtQml/QtQml>
+#include <QtQuick/QQuickItem>
+#include <QtQuick/QQuickRenderControl>
+#include <QtQuick/QQuickWindow>
+#include <QtWidgets/QWidget>
 
-#include <gl/OffscreenGLCanvas.h>
-#include <gl/GLHelpers.h>
 #include <gl/Context.h>
+#include <gl/GLHelpers.h>
+#include <gl/OffscreenGLCanvas.h>
 #include <shared/ReadWriteLockable.h>
 
 #include "SecurityImageProvider.h"
@@ -54,11 +54,13 @@
 #include "types/HFWebEngineProfile.h"
 #include "types/SoundEffect.h"
 
+#include "Logging.h"
 #include "TabletScriptingInterface.h"
 #include "ToolbarScriptingInterface.h"
-#include "Logging.h"
 
-namespace hifi { namespace qml { namespace offscreen {
+namespace hifi {
+namespace qml {
+namespace offscreen {
 
 class OffscreenQmlWhitelist : public Dependency, private ReadWriteLockable {
     SINGLETON_DEPENDENCY
@@ -103,7 +105,7 @@ class AudioHandler : public QObject, QRunnable {
 public:
     AudioHandler(OffscreenQmlSurface* surface, const QString& deviceName, QObject* parent = nullptr);
 
-    virtual ~AudioHandler() { }
+    virtual ~AudioHandler() {}
 
     void run() override;
 
@@ -132,8 +134,7 @@ class QmlNetworkAccessManagerFactory : public QQmlNetworkAccessManagerFactory {
 public:
     class QmlNetworkAccessManager : public NetworkAccessManager {
     public:
-        QmlNetworkAccessManager(QObject* parent)
-            : NetworkAccessManager(parent){};
+        QmlNetworkAccessManager(QObject* parent) : NetworkAccessManager(parent) {};
     };
     QNetworkAccessManager* create(QObject* parent) override { return new QmlNetworkAccessManager(parent); }
 };
@@ -158,9 +159,7 @@ class EventBridgeWrapper : public QObject {
     Q_PROPERTY(QObject* eventBridge READ getEventBridge CONSTANT);
 
 public:
-    EventBridgeWrapper(QObject* eventBridge, QObject* parent = nullptr)
-        : QObject(parent)
-        , _eventBridge(eventBridge) {}
+    EventBridgeWrapper(QObject* eventBridge, QObject* parent = nullptr) : QObject(parent), _eventBridge(eventBridge) {}
 
     QObject* getEventBridge() { return _eventBridge; }
 
@@ -168,12 +167,13 @@ private:
     QObject* _eventBridge;
 };
 
-}}}  // namespace hifi::qml::offscreen
+} // namespace offscreen
+} // namespace qml
+} // namespace hifi
 
 using namespace hifi::qml::offscreen;
 
-AudioHandler::AudioHandler(OffscreenQmlSurface* surface, const QString& deviceName, QObject* parent)
-    : QObject(parent) {
+AudioHandler::AudioHandler(OffscreenQmlSurface* surface, const QString& deviceName, QObject* parent) : QObject(parent) {
     setAutoDelete(true);
     _newTargetDevice = deviceName;
     auto rootItem = surface->getRootItem();
@@ -197,8 +197,8 @@ void AudioHandler::run() {
         if (nullptr == svc) {
             continue;
         }
-        QAudioOutputSelectorControl* out =
-            qobject_cast<QAudioOutputSelectorControl*>(svc->requestControl(QAudioOutputSelectorControl_iid));
+        QAudioOutputSelectorControl* out = qobject_cast<QAudioOutputSelectorControl*>(
+            svc->requestControl(QAudioOutputSelectorControl_iid));
         if (nullptr == out) {
             continue;
         }
@@ -245,7 +245,7 @@ void OffscreenQmlSurface::initializeEngine(QQmlEngine* engine) {
     fileSelector->setExtraSelectors(FileUtils::getFileSelectors());
 
     static std::once_flag once;
-    std::call_once(once, [] { 
+    std::call_once(once, [] {
         qRegisterMetaType<TabletProxy*>();
         qRegisterMetaType<TabletButtonProxy*>();
         qmlRegisterType<SoundEffect>("Hifi", 1, 0, "SoundEffect");
@@ -275,8 +275,8 @@ void OffscreenQmlSurface::initializeEngine(QQmlEngine* engine) {
     rootContext->setContextProperty("Paths", DependencyManager::get<PathUtils>().data());
     rootContext->setContextProperty("Tablet", DependencyManager::get<TabletScriptingInterface>().data());
     rootContext->setContextProperty("Toolbars", DependencyManager::get<ToolbarScriptingInterface>().data());
-    TabletProxy* tablet =
-        DependencyManager::get<TabletScriptingInterface>()->getTablet("com.highfidelity.interface.tablet.system");
+    TabletProxy* tablet = DependencyManager::get<TabletScriptingInterface>()->getTablet(
+        "com.highfidelity.interface.tablet.system");
     engine->setObjectOwnership(tablet, QQmlEngine::CppOwnership);
 }
 
@@ -302,7 +302,6 @@ void OffscreenQmlSurface::onRootContextCreated(QQmlContext* qmlContext) {
     {
         PROFILE_RANGE(startup, "HFWebEngineProfile");
         HFWebEngineProfile::registerWithContext(qmlContext);
-
     }
 #endif
 }
@@ -329,18 +328,19 @@ void OffscreenQmlSurface::onItemCreated(QQmlContext* qmlContext, QQuickItem* new
         // Find a way to flag older scripts using this mechanism and wanr that this is deprecated
         qmlContext->setContextProperty("eventBridgeWrapper", new EventBridgeWrapper(eventBridge, qmlContext));
     }
-
 }
 
 void OffscreenQmlSurface::onRootCreated() {
     getSurfaceContext()->setContextProperty("offscreenWindow", QVariant::fromValue(getWindow()));
 
     // Connect with the audio client and listen for audio device changes
-    connect(DependencyManager::get<AudioClient>().data(), &AudioClient::deviceChanged, this, [this](QAudio::Mode mode, const QAudioDeviceInfo& device) {
-        if (mode == QAudio::Mode::AudioOutput) {
-            QMetaObject::invokeMethod(this, "changeAudioOutputDevice", Qt::QueuedConnection, Q_ARG(QString, device.deviceName()));
-        }
-    });
+    connect(DependencyManager::get<AudioClient>().data(), &AudioClient::deviceChanged, this,
+            [this](QAudio::Mode mode, const QAudioDeviceInfo& device) {
+                if (mode == QAudio::Mode::AudioOutput) {
+                    QMetaObject::invokeMethod(this, "changeAudioOutputDevice", Qt::QueuedConnection,
+                                              Q_ARG(QString, device.deviceName()));
+                }
+            });
 
 #if !defined(Q_OS_ANDROID)
     // Setup the update of the QML media components with the current audio output device
@@ -446,7 +446,8 @@ void OffscreenQmlSurface::hoverEndEvent(const PointerEvent& event, class QTouchD
     // - the event told us to
     // - we aren't pressing with this ID
     if (event.sendMoveOnHoverLeave() || !_activeTouchPoints[event.getID()].pressed) {
-        // QML onReleased is only triggered if a click has happened first.  We need to send this "fake" mouse move event to properly trigger an onExited.
+        // QML onReleased is only triggered if a click has happened first.  We need to send this "fake" mouse move event to
+        // properly trigger an onExited.
         PointerEvent endMoveEvent(PointerEvent::Move, event.getID());
         // If we aren't pressing, we want to release this TouchPoint
         handlePointerEvent(endMoveEvent, device, !_activeTouchPoints[event.getID()].pressed);
@@ -478,8 +479,8 @@ bool OffscreenQmlSurface::handlePointerEvent(const PointerEvent& event, class QT
     // - this was a hover end event and the mouse wasn't pressed
     // - this was a release event and we aren't still hovering
     auto touchPoint = _activeTouchPoints.find(event.getID());
-    bool removeTouchPoint =
-        release || (touchPoint != _activeTouchPoints.end() && !touchPoint->second.hovering && state == Qt::TouchPointReleased);
+    bool removeTouchPoint = release || (touchPoint != _activeTouchPoints.end() && !touchPoint->second.hovering &&
+                                        state == Qt::TouchPointReleased);
     QEvent::Type touchType = QEvent::TouchUpdate;
     if (_activeTouchPoints.empty()) {
         // If the first active touch point is being created, send a begin
@@ -540,8 +541,8 @@ bool OffscreenQmlSurface::handlePointerEvent(const PointerEvent& event, class QT
     if (event.getType() == PointerEvent::Move) {
         QMouseEvent mouseEvent(QEvent::MouseMove, windowPoint, windowPoint, windowPoint, button, buttons,
                                event.getKeyboardModifiers());
-        // TODO - this line necessary for the QML Tooltop to work (which is not currently being used), but it causes interface to crash on launch on a fresh install
-        // need to investigate into why this crash is happening.
+        // TODO - this line necessary for the QML Tooltop to work (which is not currently being used), but it causes interface
+        // to crash on launch on a fresh install need to investigate into why this crash is happening.
         //_qmlContext->setContextProperty("lastMousePosition", windowPoint);
         mouseEvent.ignore();
         if (QCoreApplication::sendEvent(getWindow(), &mouseEvent)) {
@@ -594,7 +595,7 @@ void OffscreenQmlSurface::onFocusObjectChanged(QObject* object) {
     if (_currentFocusItem && !raiseKeyboard) {
         setKeyboardRaised(_currentFocusItem, false);
     }
-    setKeyboardRaised(item, raiseKeyboard);  // Always set focus so that alphabetic / numeric setting is updated.
+    setKeyboardRaised(item, raiseKeyboard); // Always set focus so that alphabetic / numeric setting is updated.
 
     _currentFocusItem = item;
     connect(_currentFocusItem, &QObject::destroyed, this, &OffscreenQmlSurface::focusDestroyed);
@@ -637,7 +638,7 @@ void OffscreenQmlSurface::synthesizeKeyPress(QString key, QObject* targetOverrid
         QString keyString = key;
         if (equals(utf8Key, SHIFT_ARROW) || equals(utf8Key, NUMERIC_SHIFT_ARROW) ||
             equals(utf8Key, (uint8_t*)PUNCTUATION_STRING) || equals(utf8Key, (uint8_t*)ALPHABET_STRING)) {
-            return;  // ignore
+            return; // ignore
         } else if (equals(utf8Key, COLLAPSE_KEYBOARD)) {
             lowerKeyboard();
             return;
@@ -768,7 +769,7 @@ void OffscreenQmlSurface::forceHtmlAudioOutputDeviceUpdate() {
 #if !defined(Q_OS_ANDROID)
     if (_currentAudioOutputDevice.size() > 0) {
         QMetaObject::invokeMethod(this, "changeAudioOutputDevice", Qt::QueuedConnection,
-            Q_ARG(QString, _currentAudioOutputDevice), Q_ARG(bool, true));
+                                  Q_ARG(QString, _currentAudioOutputDevice), Q_ARG(bool, true));
     }
 #endif
 }

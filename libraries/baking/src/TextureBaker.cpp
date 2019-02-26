@@ -16,11 +16,11 @@
 #include <QtCore/QFile>
 #include <QtNetwork/QNetworkReply>
 
-#include <image/Image.h>
-#include <ktx/KTX.h>
 #include <NetworkAccessManager.h>
 #include <SharedUtil.h>
 #include <TextureMeta.h>
+#include <image/Image.h>
+#include <ktx/KTX.h>
 
 #include <OwningBuffer.h>
 
@@ -32,16 +32,15 @@ const QString BAKED_META_TEXTURE_SUFFIX = ".texmeta.json";
 
 bool TextureBaker::_compressionEnabled = true;
 
-TextureBaker::TextureBaker(const QUrl& textureURL, image::TextureUsage::Type textureType,
-                           const QDir& outputDirectory, const QString& metaTexturePathPrefix,
-                           const QString& baseFilename, const QByteArray& textureContent) :
+TextureBaker::TextureBaker(const QUrl& textureURL, image::TextureUsage::Type textureType, const QDir& outputDirectory,
+                           const QString& metaTexturePathPrefix, const QString& baseFilename,
+                           const QByteArray& textureContent) :
     _textureURL(textureURL),
     _originalTexture(textureContent),
     _textureType(textureType),
     _baseFilename(baseFilename),
     _outputDirectory(outputDirectory),
-    _metaTexturePathPrefix(metaTexturePathPrefix)
-{
+    _metaTexturePathPrefix(metaTexturePathPrefix) {
     if (baseFilename.isEmpty()) {
         // figure out the baked texture filename
         auto originalFilename = textureURL.fileName();
@@ -149,14 +148,12 @@ void TextureBaker::processTexture() {
 
     // Compressed KTX
     if (_compressionEnabled) {
-        constexpr std::array<gpu::BackendTarget, 2> BACKEND_TARGETS {{
-            gpu::BackendTarget::GL45,
-            gpu::BackendTarget::GLES32
-        }};
+        constexpr std::array<gpu::BackendTarget, 2> BACKEND_TARGETS { { gpu::BackendTarget::GL45,
+                                                                        gpu::BackendTarget::GLES32 } };
         for (auto target : BACKEND_TARGETS) {
             auto processedTexture = image::processImage(buffer, _textureURL.toString().toStdString(), image::ColorChannel::NONE,
-                                                        ABSOLUTE_MAX_TEXTURE_NUM_PIXELS, _textureType, true,
-                                                        target, _abortProcessing);
+                                                        ABSOLUTE_MAX_TEXTURE_NUM_PIXELS, _textureType, true, target,
+                                                        _abortProcessing);
             if (!processedTexture) {
                 handleError("Could not process texture " + _textureURL.toString());
                 return;
@@ -197,8 +194,9 @@ void TextureBaker::processTexture() {
     // Uncompressed KTX
     if (_textureType == image::TextureUsage::Type::CUBE_TEXTURE) {
         buffer->reset();
-        auto processedTexture = image::processImage(std::move(buffer), _textureURL.toString().toStdString(), image::ColorChannel::NONE,
-                                                    ABSOLUTE_MAX_TEXTURE_NUM_PIXELS, _textureType, false, gpu::BackendTarget::GL45, _abortProcessing);
+        auto processedTexture = image::processImage(std::move(buffer), _textureURL.toString().toStdString(),
+                                                    image::ColorChannel::NONE, ABSOLUTE_MAX_TEXTURE_NUM_PIXELS, _textureType,
+                                                    false, gpu::BackendTarget::GL45, _abortProcessing);
         if (!processedTexture) {
             handleError("Could not process texture " + _textureURL.toString());
             return;

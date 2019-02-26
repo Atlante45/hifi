@@ -9,7 +9,6 @@
 #ifndef hifi_gpu_Sysmem_h
 #define hifi_gpu_Sysmem_h
 
-
 #include "Forward.h"
 
 namespace gpu {
@@ -39,7 +38,7 @@ public:
     // Assign data bytes and size (allocate for size, then copy bytes if exists)
     Size setData(Size size, const Byte* bytes);
 
-    // Update Sub data, 
+    // Update Sub data,
     // doesn't allocate and only copy size * bytes at the offset location
     // only if all fits in the existing allocated buffer
     Size setSubData(Size offset, Size size, const Byte* bytes);
@@ -54,8 +53,14 @@ public:
     const Byte* readData() const { return _data; }
     Byte* editData() { return _data; }
 
-    template< typename T > const T* read() const { return reinterpret_cast< T* > (_data); }
-    template< typename T > T* edit() { return reinterpret_cast< T* > (_data); }
+    template<typename T>
+    const T* read() const {
+        return reinterpret_cast<T*>(_data);
+    }
+    template<typename T>
+    T* edit() {
+        return reinterpret_cast<T*>(_data);
+    }
 
     // Access the current version of the sysmem, used to compare if copies are in sync
     Stamp getStamp() const { return _stamp; }
@@ -66,11 +71,11 @@ public:
     bool isAvailable() const { return (_data != 0); }
 
 private:
-    Stamp _stamp{ 0 };
-    Size  _size{ 0 };
-    Byte* _data{ nullptr };
+    Stamp _stamp { 0 };
+    Size _size { 0 };
+    Byte* _data { nullptr };
 }; // Sysmem
 
-}
+} // namespace gpu
 
 #endif

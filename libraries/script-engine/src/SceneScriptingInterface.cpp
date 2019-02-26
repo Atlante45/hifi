@@ -85,7 +85,6 @@ void SceneScripting::KeyLight::setAmbientMap(const gpu::TexturePointer& map) {
     _skyStage->setSunAmbientMap(map);
 }
 
-
 glm::vec3 SceneScripting::KeyLight::getDirection() const {
     return _skyStage->getSunDirection();
 }
@@ -120,16 +119,16 @@ void SceneScripting::Stage::setBackgroundMode(const QString& mode) {
 
 QString SceneScripting::Stage::getBackgroundMode() const {
     switch (_skyStage->getBackgroundMode()) {
-    case graphics::SunSkyStage::NO_BACKGROUND:
-        return QString("inherit");
-    case graphics::SunSkyStage::SKY_BOX:
-        return QString("skybox");
-    default:
-        return QString("inherit");
+        case graphics::SunSkyStage::NO_BACKGROUND:
+            return QString("inherit");
+        case graphics::SunSkyStage::SKY_BOX:
+            return QString("skybox");
+        default:
+            return QString("inherit");
     };
 }
 
-SceneScriptingInterface::SceneScriptingInterface() : _stage{ new SceneScripting::Stage{ _skyStage } } {
+SceneScriptingInterface::SceneScriptingInterface() : _stage { new SceneScripting::Stage { _skyStage } } {
     // Let's make sure the sunSkyStage is using a proceduralSkybox
     _skyStage->setSkybox(graphics::SkyboxPointer(new ProceduralSkybox()));
 }

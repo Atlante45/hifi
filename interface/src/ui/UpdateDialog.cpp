@@ -17,16 +17,13 @@
 
 HIFI_QML_DEF(UpdateDialog)
 
-UpdateDialog::UpdateDialog(QQuickItem* parent) :
-    OffscreenQmlDialog(parent)
-{
+UpdateDialog::UpdateDialog(QQuickItem* parent) : OffscreenQmlDialog(parent) {
     auto applicationUpdater = DependencyManager::get<AutoUpdater>();
     if (applicationUpdater) {
-
         auto buildData = applicationUpdater.data()->getBuildData();
         ApplicationVersion latestVersion = buildData.lastKey();
-        _updateAvailableDetails = "v" + latestVersion.versionString + " released on "
-            + QString(buildData[latestVersion]["releaseTime"]).replace("  ", " ");
+        _updateAvailableDetails = "v" + latestVersion.versionString + " released on " +
+                                  QString(buildData[latestVersion]["releaseTime"]).replace("  ", " ");
 
         _releaseNotes = "";
 
@@ -44,8 +41,6 @@ UpdateDialog::UpdateDialog(QQuickItem* parent) :
                 break;
             }
         }
-
-
     }
 }
 

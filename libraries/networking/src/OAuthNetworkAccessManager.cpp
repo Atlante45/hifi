@@ -26,22 +26,21 @@ OAuthNetworkAccessManager* OAuthNetworkAccessManager::getInstance() {
     if (!oauthNetworkAccessManagers.hasLocalData()) {
         oauthNetworkAccessManagers.setLocalData(new OAuthNetworkAccessManager());
     }
-    
+
     return oauthNetworkAccessManagers.localData();
 }
 
 QNetworkReply* OAuthNetworkAccessManager::createRequest(QNetworkAccessManager::Operation op, const QNetworkRequest& req,
                                                         QIODevice* outgoingData) {
     auto accountManager = DependencyManager::get<AccountManager>();
-    
-    if (accountManager->hasValidAccessToken()
-        && req.url().host() == NetworkingConstants::METAVERSE_SERVER_URL().host()) {
+
+    if (accountManager->hasValidAccessToken() && req.url().host() == NetworkingConstants::METAVERSE_SERVER_URL().host()) {
         QNetworkRequest authenticatedRequest(req);
         authenticatedRequest.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
         authenticatedRequest.setHeader(QNetworkRequest::UserAgentHeader, HIGH_FIDELITY_USER_AGENT);
         authenticatedRequest.setRawHeader(ACCESS_TOKEN_AUTHORIZATION_HEADER,
                                           accountManager->getAccountInfo().getAccessToken().authorizationHeaderValue());
-        
+
         return QNetworkAccessManager::createRequest(op, authenticatedRequest, outgoingData);
     } else {
         return QNetworkAccessManager::createRequest(op, req, outgoingData);

@@ -9,16 +9,15 @@
 #include <mutex>
 
 #include <QtCore/QObject>
-#include <QtCore/QtPlugin>
 #include <QtCore/QStringList>
+#include <QtCore/QtPlugin>
 
-#include <plugins/RuntimePlugin.h>
 #include <plugins/DisplayPlugin.h>
+#include <plugins/RuntimePlugin.h>
 
 #include "OculusLegacyDisplayPlugin.h"
 
-class OculusProvider : public QObject, public DisplayProvider
-{
+class OculusProvider : public QObject, public DisplayProvider {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID DisplayProvider_iid FILE "oculus.json")
     Q_INTERFACES(DisplayProvider)
@@ -38,9 +37,7 @@ public:
         return _displayPlugins;
     }
 
-    virtual void destroyDisplayPlugins() override {
-        _displayPlugins.clear();
-    }
+    virtual void destroyDisplayPlugins() override { _displayPlugins.clear(); }
 
 private:
     DisplayPluginList _displayPlugins;

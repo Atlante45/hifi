@@ -9,13 +9,13 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-#include "GL45Backend.h"
-#include <mutex>
 #include <algorithm>
 #include <condition_variable>
-#include <unordered_set>
-#include <unordered_map>
 #include <glm/gtx/component_wise.hpp>
+#include <mutex>
+#include <unordered_map>
+#include <unordered_set>
+#include "GL45Backend.h"
 
 #include <QtCore/QDebug>
 
@@ -24,9 +24,8 @@
 #include <gpu/TextureTable.h>
 #include <gpu/gl/GLTexelFormat.h>
 
-static const QString FORCE_MOBILE_TEXTURES_STRING{ "HIFI_FORCE_MOBILE_TEXTURES" };
+static const QString FORCE_MOBILE_TEXTURES_STRING { "HIFI_FORCE_MOBILE_TEXTURES" };
 static bool FORCE_MOBILE_TEXTURES = QProcessEnvironment::systemEnvironment().contains(FORCE_MOBILE_TEXTURES_STRING);
-
 
 using namespace gpu;
 using namespace gpu::gl;
@@ -88,7 +87,7 @@ GLTexture* GL45Backend::syncGPUObject(const TexturePointer& texturePointer) {
 
 #if !FORCE_STRICT_TEXTURE
             case TextureUsageType::RESOURCE: {
-                auto& transferEngine  = _textureManagement._transferEngine;
+                auto& transferEngine = _textureManagement._transferEngine;
                 if (transferEngine->allowCreate()) {
 #if ENABLE_SPARSE_TEXTURE
                     if (isTextureManagementSparseEnabled() && GL45Texture::isSparseEligible(texture)) {
@@ -96,7 +95,7 @@ GLTexture* GL45Backend::syncGPUObject(const TexturePointer& texturePointer) {
                     } else {
                         object = new GL45ResourceTexture(shared_from_this(), texture);
                     }
-#else 
+#else
                     object = new GL45ResourceTexture(shared_from_this(), texture);
 #endif
                     transferEngine->addMemoryManagedTexture(texturePointer);
@@ -113,9 +112,8 @@ GLTexture* GL45Backend::syncGPUObject(const TexturePointer& texturePointer) {
                 Q_UNREACHABLE();
         }
     } else {
-
         if (texture.getUsageType() == TextureUsageType::RESOURCE) {
-            auto varTex = static_cast<GL45VariableAllocationTexture*> (object);
+            auto varTex = static_cast<GL45VariableAllocationTexture*>(object);
 
             if (varTex->_minAllocatedMip > 0) {
                 auto minAvailableMip = texture.minAvailableMipLevel();
@@ -136,7 +134,8 @@ void GL45Backend::initTextureManagementStage() {
 
     // But now let s refine the behavior based on vendor
     std::string vendor { (const char*)glGetString(GL_VENDOR) };
-    if ((vendor.find("AMD") != std::string::npos) || (vendor.find("ATI") != std::string::npos) || (vendor.find("INTEL") != std::string::npos)) {
+    if ((vendor.find("AMD") != std::string::npos) || (vendor.find("ATI") != std::string::npos) ||
+        (vendor.find("INTEL") != std::string::npos)) {
         qCDebug(gpugllogging) << "GPU is sparse capable but force it off, vendor = " << vendor.c_str();
         _textureManagement._sparseCapable = false;
     } else {
@@ -145,7 +144,6 @@ void GL45Backend::initTextureManagementStage() {
 }
 
 using GL45Texture = GL45Backend::GL45Texture;
-
 
 class GLSamplerCache {
 public:
@@ -171,7 +169,8 @@ public:
             glSamplerParameterfv(result, GL_TEXTURE_BORDER_COLOR, (const float*)&sampler.getBorderColor());
 
             glSamplerParameterf(result, GL_TEXTURE_MIN_LOD, sampler.getMinMip());
-            glSamplerParameterf(result, GL_TEXTURE_MAX_LOD, (sampler.getMaxMip() == Sampler::MAX_MIP_LEVEL ? 1000.f : sampler.getMaxMip()));
+            glSamplerParameterf(result, GL_TEXTURE_MAX_LOD,
+                                (sampler.getMaxMip() == Sampler::MAX_MIP_LEVEL ? 1000.f : sampler.getMaxMip()));
             _samplerCache[sampler] = result;
             return result;
         }
@@ -189,7 +188,6 @@ private:
 
 static GLSamplerCache SAMPLER_CACHE;
 
-
 Sampler GL45Texture::getInvalidSampler() {
     static Sampler INVALID_SAMPLER;
     static std::once_flag once;
@@ -201,8 +199,8 @@ Sampler GL45Texture::getInvalidSampler() {
     return INVALID_SAMPLER;
 }
 
-GL45Texture::GL45Texture(const std::weak_ptr<GLBackend>& backend, const Texture& texture)
-    : GLTexture(backend, texture, allocate(texture)) {
+GL45Texture::GL45Texture(const std::weak_ptr<GLBackend>& backend, const Texture& texture) :
+    GLTexture(backend, texture, allocate(texture)) {
 }
 
 GLuint GL45Texture::allocate(const Texture& texture) {
@@ -220,7 +218,9 @@ void GL45Texture::generateMips() const {
     (void)CHECK_GL_ERROR();
 }
 
-Size GL45Texture::copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset, GLenum internalFormat, GLenum format, GLenum type, Size sourceSize, const void* sourcePointer) const {
+Size GL45Texture::copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset,
+                                              GLenum internalFormat, GLenum format, GLenum type, Size sourceSize,
+                                              const void* sourcePointer) const {
     Size amountCopied = sourceSize;
     if (GL_TEXTURE_2D == _target) {
         switch (internalFormat) {
@@ -325,12 +325,11 @@ const GL45Texture::Bindless& GL45Texture::getBindless() const {
 }
 #endif
 
-
 void GL45Texture::syncSampler() const {
     const Sampler& sampler = _gpuObject.getSampler();
     if (_cachedSampler == sampler) {
         return;
-    } 
+    }
 
     _cachedSampler = sampler;
 
@@ -338,7 +337,7 @@ void GL45Texture::syncSampler() const {
     if (isBindless()) {
         recreateBindless();
         return;
-    } 
+    }
 #endif
 
     const auto& fm = FILTER_MODES[sampler.getFilter()];
@@ -360,14 +359,17 @@ void GL45Texture::syncSampler() const {
     glTextureParameterfv(_id, GL_TEXTURE_BORDER_COLOR, (const float*)&sampler.getBorderColor());
 
     glTextureParameterf(_id, GL_TEXTURE_MIN_LOD, sampler.getMinMip());
-    glTextureParameterf(_id, GL_TEXTURE_MAX_LOD, (sampler.getMaxMip() == Sampler::MAX_MIP_LEVEL ? 1000.f : sampler.getMaxMip()));
+    glTextureParameterf(_id, GL_TEXTURE_MAX_LOD,
+                        (sampler.getMaxMip() == Sampler::MAX_MIP_LEVEL ? 1000.f : sampler.getMaxMip()));
 }
 
 // Fixed allocation textures, used for strict resources & framebuffer attachments
 
 using GL45FixedAllocationTexture = GL45Backend::GL45FixedAllocationTexture;
 
-GL45FixedAllocationTexture::GL45FixedAllocationTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture) : GL45Texture(backend, texture), _size(texture.evalTotalSize()) {
+GL45FixedAllocationTexture::GL45FixedAllocationTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture) :
+    GL45Texture(backend, texture),
+    _size(texture.evalTotalSize()) {
     allocateStorage();
     syncSampler();
 }
@@ -382,7 +384,6 @@ void GL45FixedAllocationTexture::allocateStorage() const {
     const auto numSlices = _gpuObject.getNumSlices();
     const auto numSamples = _gpuObject.getNumSamples();
 
-
     if (!_gpuObject.isMultisample()) {
         if (!_gpuObject.isArray()) {
             glTextureStorage2D(_id, mips, texelFormat.internalFormat, dimensions.x, dimensions.y);
@@ -392,9 +393,9 @@ void GL45FixedAllocationTexture::allocateStorage() const {
     } else {
         if (!_gpuObject.isArray()) {
             glTextureStorage2DMultisample(_id, numSamples, texelFormat.internalFormat, dimensions.x, dimensions.y, GL_FALSE);
-        }
-        else {
-            glTextureStorage3DMultisample(_id, numSamples, texelFormat.internalFormat, dimensions.x, dimensions.y, numSlices, GL_FALSE);
+        } else {
+            glTextureStorage3DMultisample(_id, numSamples, texelFormat.internalFormat, dimensions.x, dimensions.y, numSlices,
+                                          GL_FALSE);
         }
     }
 
@@ -406,13 +407,15 @@ void GL45FixedAllocationTexture::syncSampler() const {
     Parent::syncSampler();
     const Sampler& sampler = _gpuObject.getSampler();
     glTextureParameterf(_id, GL_TEXTURE_MIN_LOD, (float)sampler.getMinMip());
-    glTextureParameterf(_id, GL_TEXTURE_MAX_LOD, (sampler.getMaxMip() == Sampler::MAX_MIP_LEVEL ? 1000.f : sampler.getMaxMip()));
+    glTextureParameterf(_id, GL_TEXTURE_MAX_LOD,
+                        (sampler.getMaxMip() == Sampler::MAX_MIP_LEVEL ? 1000.f : sampler.getMaxMip()));
 }
 
 // Renderbuffer attachment textures
 using GL45AttachmentTexture = GL45Backend::GL45AttachmentTexture;
 
-GL45AttachmentTexture::GL45AttachmentTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture) : GL45FixedAllocationTexture(backend, texture) {
+GL45AttachmentTexture::GL45AttachmentTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture) :
+    GL45FixedAllocationTexture(backend, texture) {
     Backend::textureFramebufferCount.increment();
     Backend::textureFramebufferGPUMemSize.update(0, size());
 }
@@ -425,7 +428,8 @@ GL45AttachmentTexture::~GL45AttachmentTexture() {
 // Strict resource textures
 using GL45StrictResourceTexture = GL45Backend::GL45StrictResourceTexture;
 
-GL45StrictResourceTexture::GL45StrictResourceTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture) : GL45FixedAllocationTexture(backend, texture) {
+GL45StrictResourceTexture::GL45StrictResourceTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture) :
+    GL45FixedAllocationTexture(backend, texture) {
     Backend::textureResidentCount.increment();
     Backend::textureResidentGPUMemSize.update(0, size());
 
@@ -460,8 +464,8 @@ GLuint GL45TextureTable::allocate() {
     return result;
 }
 
-GL45TextureTable::GL45TextureTable(const std::weak_ptr<GLBackend>& backend, const TextureTable& textureTable)
-    : Parent(backend, textureTable, allocate()){
+GL45TextureTable::GL45TextureTable(const std::weak_ptr<GLBackend>& backend, const TextureTable& textureTable) :
+    Parent(backend, textureTable, allocate()) {
     Backend::setGPUObject(textureTable, this);
     // FIXME include these in overall buffer storage reporting
     glNamedBufferStorage(_id, sizeof(uvec4) * TextureTable::COUNT, nullptr, GL_DYNAMIC_STORAGE_BIT);
@@ -492,7 +496,7 @@ GL45TextureTable* GL45Backend::syncGPUObject(const TextureTablePointer& textureT
     // Find the target handles
     auto defaultTextures = gpu::TextureTable::getDefault()->getTextures();
     auto textures = textureTable.getTextures();
-    GL45TextureTable::BindlessArray handles{};
+    GL45TextureTable::BindlessArray handles {};
     for (size_t i = 0; i < textures.size(); ++i) {
         auto texture = textures[i];
         if (!texture) {

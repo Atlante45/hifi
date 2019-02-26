@@ -12,18 +12,13 @@
 #ifndef hifi_OBJSerializer_h
 #define hifi_OBJSerializer_h
 
-#include <QtNetwork/QNetworkReply>
 #include <hfm/HFMSerializer.h>
+#include <QtNetwork/QNetworkReply>
 
 class OBJTokenizer {
 public:
     OBJTokenizer(QIODevice* device);
-    enum SpecialToken {
-        NO_TOKEN = -1,
-        NO_PUSHBACKED_TOKEN = -1,
-        DATUM_TOKEN = 0x100,
-        COMMENT_TOKEN = 0x101
-    };
+    enum SpecialToken { NO_TOKEN = -1, NO_PUSHBACKED_TOKEN = -1, DATUM_TOKEN = 0x100, COMMENT_TOKEN = 0x101 };
     int nextToken(bool allowSpaceChar = false);
     const QByteArray& getDatum() const { return _datum; }
     bool isNextTokenFloat();
@@ -55,8 +50,10 @@ public:
     bool add(const QByteArray& vertexIndex, const QByteArray& textureIndex, const QByteArray& normalIndex,
              const QVector<glm::vec3>& vertices, const QVector<glm::vec3>& vertexColors);
     // Return a set of one or more OBJFaces from this one, in which each is just a triangle.
-    // Even though HFMMeshPart can handle quads, it would be messy to try to keep track of mixed-size faces, so we treat everything as triangles.
+    // Even though HFMMeshPart can handle quads, it would be messy to try to keep track of mixed-size faces, so we treat
+    // everything as triangles.
     QVector<OBJFace> triangulate();
+
 private:
     void addFrom(const OBJFace* face, int index);
 };
@@ -64,8 +61,7 @@ private:
 class OBJMaterialTextureOptions {
 public:
     float bumpMultiplier { 1.0f };
-}
-;
+};
 // Materials and references to material names can come in any order, and different mesh parts can refer to the same material.
 // Therefore it would get pretty hacky to try to use HFMMeshPart to store these as we traverse the files.
 class OBJMaterial {
@@ -85,15 +81,21 @@ public:
     int illuminationModel;
     bool used { false };
     bool userSpecifiesUV { false };
-    OBJMaterial() : shininess(0.0f), opacity(1.0f), diffuseColor(0.9f), specularColor(0.9f), emissiveColor(0.0f), illuminationModel(-1) {}
+    OBJMaterial() :
+        shininess(0.0f),
+        opacity(1.0f),
+        diffuseColor(0.9f),
+        specularColor(0.9f),
+        emissiveColor(0.0f),
+        illuminationModel(-1) {}
 };
 
-class OBJSerializer: public QObject, public HFMSerializer { // QObject so we can make network requests.
+class OBJSerializer : public QObject, public HFMSerializer { // QObject so we can make network requests.
     Q_OBJECT
 public:
     MediaType getMediaType() const override;
     std::unique_ptr<hfm::Serializer::Factory> getFactory() const override;
-    
+
     typedef QVector<OBJFace> FaceGroup;
     QVector<glm::vec3> vertices;
     QVector<glm::vec3> vertexColors;
@@ -102,23 +104,25 @@ public:
     QVector<FaceGroup> faceGroups;
     QString currentMaterialName;
     QHash<QString, OBJMaterial> materials;
-    
+
     HFMModel::Pointer read(const QByteArray& data, const QVariantHash& mapping, const QUrl& url = QUrl()) override;
 
 private:
     QUrl _url;
 
     QHash<QByteArray, bool> librariesSeen;
-    bool parseOBJGroup(OBJTokenizer& tokenizer, const QVariantHash& mapping, HFMModel& hfmModel,
-                       float& scaleGuess, bool combineParts);
+    bool parseOBJGroup(OBJTokenizer& tokenizer, const QVariantHash& mapping, HFMModel& hfmModel, float& scaleGuess,
+                       bool combineParts);
     void parseMaterialLibrary(QIODevice* device);
     void parseTextureLine(const QByteArray& textureLine, QByteArray& filename, OBJMaterialTextureOptions& textureOptions);
-    bool isValidTexture(const QByteArray &filename); // true if the file exists. TODO?: check content-type header and that it is a supported format.
+    bool isValidTexture(const QByteArray& filename); // true if the file exists. TODO?: check content-type header and that it is
+                                                     // a supported format.
 
     int _partCounter { 0 };
 };
 
-// What are these utilities doing here? One is used by fbx loading code in VHACD Utils, and the other a general debugging utility.
+// What are these utilities doing here? One is used by fbx loading code in VHACD Utils, and the other a general debugging
+// utility.
 void setMeshPartDefaults(HFMMeshPart& meshPart, QString materialID);
 void hfmDebugDump(const HFMModel& hfmModel);
 

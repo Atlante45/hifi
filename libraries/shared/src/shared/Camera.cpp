@@ -37,13 +37,13 @@
  *     <tr>
  *       <td><strong>Mirror</strong></td>
  *       <td><code>"mirror"</code></td>
- *       <td>The camera is positioned such that you are looking directly at your avatar. The camera moves and rotates with your 
+ *       <td>The camera is positioned such that you are looking directly at your avatar. The camera moves and rotates with your
  *       avatar.</td>
  *     </tr>
  *     <tr>
  *       <td><strong>Independent</strong></td>
  *       <td><code>"independent"</code></td>
- *       <td>The camera's position and orientation don't change with your avatar movement. Instead, they can be set via 
+ *       <td>The camera's position and orientation don't change with your avatar movement. Instead, they can be set via
  *       scripting.</td>
  *     </tr>
  *     <tr>
@@ -86,9 +86,9 @@ QString modeToString(CameraMode mode) {
     return "unknown";
 }
 
-Camera::Camera() : 
-    _projection(glm::perspective(glm::radians(DEFAULT_FIELD_OF_VIEW_DEGREES), 16.0f/9.0f, DEFAULT_NEAR_CLIP, DEFAULT_FAR_CLIP))
-{
+Camera::Camera() :
+    _projection(
+        glm::perspective(glm::radians(DEFAULT_FIELD_OF_VIEW_DEGREES), 16.0f / 9.0f, DEFAULT_NEAR_CLIP, DEFAULT_FAR_CLIP)) {
 }
 
 void Camera::update() {

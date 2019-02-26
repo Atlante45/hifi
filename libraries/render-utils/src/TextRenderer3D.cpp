@@ -15,9 +15,9 @@
 #include <gpu/Shader.h>
 
 #include <QBuffer>
+#include <QFile>
 #include <QImage>
 #include <QStringList>
-#include <QFile>
 
 #include <shaders/Shaders.h>
 #include "text/Font.h"
@@ -30,13 +30,13 @@
 
 const float TextRenderer3D::DEFAULT_POINT_SIZE = 12;
 
-TextRenderer3D* TextRenderer3D::getInstance(const char* family, float pointSize,
-    bool bold, bool italic, EffectType effect, int effectThickness) {
+TextRenderer3D* TextRenderer3D::getInstance(const char* family, float pointSize, bool bold, bool italic, EffectType effect,
+                                            int effectThickness) {
     return new TextRenderer3D(family, pointSize, false, italic, effect, effectThickness);
 }
 
-TextRenderer3D::TextRenderer3D(const char* family, float pointSize, int weight, bool italic,
-        EffectType effect, int effectThickness) :
+TextRenderer3D::TextRenderer3D(const char* family, float pointSize, int weight, bool italic, EffectType effect,
+                               int effectThickness) :
     _effectType(effect),
     _effectThickness(effectThickness),
     _font(Font::load(family)) {
@@ -67,11 +67,10 @@ float TextRenderer3D::getFontSize() const {
 }
 
 void TextRenderer3D::draw(gpu::Batch& batch, float x, float y, const QString& str, const glm::vec4& color,
-                         const glm::vec2& bounds) {
+                          const glm::vec2& bounds) {
     // The font does all the OpenGL work
     if (_font) {
         _color = color;
         _font->drawString(batch, _drawInfo, str, _color, _effectType, { x, y }, bounds);
     }
 }
-

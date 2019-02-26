@@ -10,8 +10,8 @@
 #define hifi__OculusMobileControllerManager
 
 #include <QObject>
-#include <unordered_set>
 #include <map>
+#include <unordered_set>
 
 #include <GLMHelpers.h>
 
@@ -19,7 +19,7 @@
 #include <plugins/InputPlugin.h>
 
 class OculusMobileControllerManager : public InputPlugin {
-Q_OBJECT
+    Q_OBJECT
 public:
     // Plugin functions
     bool isSupported() const override;

@@ -18,11 +18,10 @@ namespace controller {
 
 class ScriptEndpoint : public Endpoint {
     Q_OBJECT;
+
 public:
     using Endpoint::apply;
-    ScriptEndpoint(const QScriptValue& callable)
-        : Endpoint(Input::INVALID_INPUT), _callable(callable) {
-    }
+    ScriptEndpoint(const QScriptValue& callable) : Endpoint(Input::INVALID_INPUT), _callable(callable) {}
 
     virtual AxisValue peek() const override;
     virtual void apply(AxisValue newValue, const Pointer& source) override;
@@ -38,6 +37,7 @@ protected:
 
     Q_INVOKABLE void updatePose();
     Q_INVOKABLE virtual void internalApply(const Pose& newValue, int sourceID);
+
 private:
     QScriptValue _callable;
     float _lastValueRead { 0.0f };
@@ -48,6 +48,6 @@ private:
     Pose _lastPoseWritten;
 };
 
-}
+} // namespace controller
 
 #endif

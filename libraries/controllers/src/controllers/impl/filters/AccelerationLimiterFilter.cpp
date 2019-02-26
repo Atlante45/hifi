@@ -6,16 +6,15 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #include "AccelerationLimiterFilter.h"
 
-#include <QtCore/QJsonObject>
-#include <QtCore/QJsonArray>
-#include "../../UserInputMapper.h"
-#include "../../Input.h"
 #include <DependencyManager.h>
-#include <QDebug>
 #include <StreamUtils.h>
+#include <QDebug>
+#include <QtCore/QJsonArray>
+#include <QtCore/QJsonObject>
+#include "../../Input.h"
+#include "../../UserInputMapper.h"
 
 static const QString JSON_ROTATION_ACCELERATION_LIMIT = QStringLiteral("rotationAccelerationLimit");
 static const QString JSON_TRANSLATION_ACCELERATION_LIMIT = QStringLiteral("translationAccelerationLimit");
@@ -24,23 +23,23 @@ static const QString JSON_ROTATION_SNAP_THRESHOLD = QStringLiteral("rotationSnap
 
 static glm::vec3 angularVelFromDeltaRot(const glm::quat& deltaQ, float dt) {
     // Measure the angular velocity of a delta rotation quaternion by using quaternion logarithm.
-    // The logarithm of a unit quternion returns the axis of rotation with a length of one half the angle of rotation in the imaginary part.
-    // The real part will be 0.  Then we multiply it by 2 / dt. turning it into the angular velocity, (except for the extra w = 0 part).
+    // The logarithm of a unit quternion returns the axis of rotation with a length of one half the angle of rotation in the
+    // imaginary part. The real part will be 0.  Then we multiply it by 2 / dt. turning it into the angular velocity, (except
+    // for the extra w = 0 part).
     glm::quat omegaQ((2.0f / dt) * glm::log(deltaQ));
     return glm::vec3(omegaQ.x, omegaQ.y, omegaQ.z);
 }
 
 static glm::quat deltaRotFromAngularVel(const glm::vec3& omega, float dt) {
     // Convert angular velocity into a delta quaternion by using quaternion exponent.
-    // The exponent of quaternion will return a delta rotation around the axis of the imaginary part, by twice the angle as determined by the length of that imaginary part.
-    // It is the inverse of the logarithm step in angularVelFromDeltaRot
+    // The exponent of quaternion will return a delta rotation around the axis of the imaginary part, by twice the angle as
+    // determined by the length of that imaginary part. It is the inverse of the logarithm step in angularVelFromDeltaRot
     glm::quat omegaQ(0.0f, omega.x, omega.y, omega.z);
     return glm::exp((dt / 2.0f) * omegaQ);
 }
 
-static glm::vec3 filterTranslation(const glm::vec3& x0, const glm::vec3& x1, const glm::vec3& x2, const glm::vec3& x3,
-                                   float dt, float accLimit, float snapThreshold) {
-
+static glm::vec3 filterTranslation(const glm::vec3& x0, const glm::vec3& x1, const glm::vec3& x2, const glm::vec3& x3, float dt,
+                                   float accLimit, float snapThreshold) {
     // measure the linear velocities of this step and the previoius step
     glm::vec3 v1 = (x3 - x1) / (2.0f * dt);
     glm::vec3 v0 = (x2 - x0) / (2.0f * dt);
@@ -60,7 +59,8 @@ static glm::vec3 filterTranslation(const glm::vec3& x0, const glm::vec3& x1, con
         //    `newA = a * (aLimit / aLen)`
         // 2) Computing new `v1`
         //    `v1 = newA * dt + v0`
-        // We combine the scalars from step 1 and step 2 into a single term to avoid having to do multiple scalar-vec3 multiplies.
+        // We combine the scalars from step 1 and step 2 into a single term to avoid having to do multiple scalar-vec3
+        // multiplies.
         v1 = a * ((accLimit * dt) / aLen) + v0;
 
         // apply limited v1 to compute filtered x3
@@ -73,7 +73,6 @@ static glm::vec3 filterTranslation(const glm::vec3& x0, const glm::vec3& x1, con
 
 static glm::quat filterRotation(const glm::quat& q0In, const glm::quat& q1In, const glm::quat& q2In, const glm::quat& q3In,
                                 float dt, float accLimit, float snapThreshold) {
-
     // ensure quaternions have the same polarity
     glm::quat q0 = q0In;
     glm::quat q1 = glm::dot(q0In, q1In) < 0.0f ? -q1In : q1In;
@@ -103,90 +102,87 @@ static glm::quat filterRotation(const glm::quat& q0In, const glm::quat& q1In, co
 
 namespace controller {
 
-    Pose AccelerationLimiterFilter::apply(Pose value) const {
+Pose AccelerationLimiterFilter::apply(Pose value) const {
+    if (value.isValid()) {
+        // to perform filtering in sensor space, we need to compute the transformations.
+        auto userInputMapper = DependencyManager::get<UserInputMapper>();
+        const InputCalibrationData calibrationData = userInputMapper->getInputCalibrationData();
+        glm::mat4 sensorToAvatarMat = glm::inverse(calibrationData.avatarMat) * calibrationData.sensorToWorldMat;
+        glm::mat4 avatarToSensorMat = glm::inverse(calibrationData.sensorToWorldMat) * calibrationData.avatarMat;
 
-        if (value.isValid()) {
+        // transform pose into sensor space.
+        Pose sensorValue = value.transform(avatarToSensorMat);
 
-            // to perform filtering in sensor space, we need to compute the transformations.
-            auto userInputMapper = DependencyManager::get<UserInputMapper>();
-            const InputCalibrationData calibrationData = userInputMapper->getInputCalibrationData();
-            glm::mat4 sensorToAvatarMat = glm::inverse(calibrationData.avatarMat) * calibrationData.sensorToWorldMat;
-            glm::mat4 avatarToSensorMat = glm::inverse(calibrationData.sensorToWorldMat) * calibrationData.avatarMat;
+        if (_prevValid) {
+            const float DELTA_TIME = 0.01111111f;
 
-            // transform pose into sensor space.
-            Pose sensorValue = value.transform(avatarToSensorMat);
+            glm::vec3 unfilteredTranslation = sensorValue.translation;
+            sensorValue.translation = filterTranslation(_prevPos[0], _prevPos[1], _prevPos[2], sensorValue.translation,
+                                                        DELTA_TIME, _translationAccelerationLimit, _translationSnapThreshold);
+            glm::quat unfilteredRot = sensorValue.rotation;
+            sensorValue.rotation = filterRotation(_prevRot[0], _prevRot[1], _prevRot[2], sensorValue.rotation, DELTA_TIME,
+                                                  _rotationAccelerationLimit, _rotationSnapThreshold);
 
-            if (_prevValid) {
+            // remember previous values.
+            _prevPos[0] = _prevPos[1];
+            _prevPos[1] = _prevPos[2];
+            _prevPos[2] = sensorValue.translation;
+            _prevRot[0] = _prevRot[1];
+            _prevRot[1] = _prevRot[2];
+            _prevRot[2] = sensorValue.rotation;
 
-                const float DELTA_TIME = 0.01111111f;
+            _unfilteredPrevPos[0] = _unfilteredPrevPos[1];
+            _unfilteredPrevPos[1] = _unfilteredPrevPos[2];
+            _unfilteredPrevPos[2] = unfilteredTranslation;
+            _unfilteredPrevRot[0] = _unfilteredPrevRot[1];
+            _unfilteredPrevRot[1] = _unfilteredPrevRot[2];
+            _unfilteredPrevRot[2] = unfilteredRot;
 
-                glm::vec3 unfilteredTranslation = sensorValue.translation;
-                sensorValue.translation = filterTranslation(_prevPos[0], _prevPos[1], _prevPos[2], sensorValue.translation,
-                                                            DELTA_TIME, _translationAccelerationLimit, _translationSnapThreshold);
-                glm::quat unfilteredRot = sensorValue.rotation;
-                sensorValue.rotation = filterRotation(_prevRot[0], _prevRot[1], _prevRot[2], sensorValue.rotation,
-                                                      DELTA_TIME, _rotationAccelerationLimit, _rotationSnapThreshold);
-
-                // remember previous values.
-                _prevPos[0] = _prevPos[1];
-                _prevPos[1] = _prevPos[2];
-                _prevPos[2] = sensorValue.translation;
-                _prevRot[0] = _prevRot[1];
-                _prevRot[1] = _prevRot[2];
-                _prevRot[2] = sensorValue.rotation;
-
-                _unfilteredPrevPos[0] = _unfilteredPrevPos[1];
-                _unfilteredPrevPos[1] = _unfilteredPrevPos[2];
-                _unfilteredPrevPos[2] = unfilteredTranslation;
-                _unfilteredPrevRot[0] = _unfilteredPrevRot[1];
-                _unfilteredPrevRot[1] = _unfilteredPrevRot[2];
-                _unfilteredPrevRot[2] = unfilteredRot;
-
-                // transform back into avatar space
-                return sensorValue.transform(sensorToAvatarMat);
-            } else {
-                // initialize previous values with the current sample.
-                _prevPos[0] = sensorValue.translation;
-                _prevPos[1] = sensorValue.translation;
-                _prevPos[2] = sensorValue.translation;
-                _prevRot[0] = sensorValue.rotation;
-                _prevRot[1] = sensorValue.rotation;
-                _prevRot[2] = sensorValue.rotation;
-
-                _unfilteredPrevPos[0] = sensorValue.translation;
-                _unfilteredPrevPos[1] = sensorValue.translation;
-                _unfilteredPrevPos[2] = sensorValue.translation;
-                _unfilteredPrevRot[0] = sensorValue.rotation;
-                _unfilteredPrevRot[1] = sensorValue.rotation;
-                _unfilteredPrevRot[2] = sensorValue.rotation;
-
-                _prevValid = true;
-
-                // no previous value to smooth with, so return value unchanged
-                return value;
-            }
+            // transform back into avatar space
+            return sensorValue.transform(sensorToAvatarMat);
         } else {
-            // mark previous poses as invalid.
-            _prevValid = false;
+            // initialize previous values with the current sample.
+            _prevPos[0] = sensorValue.translation;
+            _prevPos[1] = sensorValue.translation;
+            _prevPos[2] = sensorValue.translation;
+            _prevRot[0] = sensorValue.rotation;
+            _prevRot[1] = sensorValue.rotation;
+            _prevRot[2] = sensorValue.rotation;
 
-            // return invalid value unchanged
+            _unfilteredPrevPos[0] = sensorValue.translation;
+            _unfilteredPrevPos[1] = sensorValue.translation;
+            _unfilteredPrevPos[2] = sensorValue.translation;
+            _unfilteredPrevRot[0] = sensorValue.rotation;
+            _unfilteredPrevRot[1] = sensorValue.rotation;
+            _unfilteredPrevRot[2] = sensorValue.rotation;
+
+            _prevValid = true;
+
+            // no previous value to smooth with, so return value unchanged
             return value;
         }
-    }
+    } else {
+        // mark previous poses as invalid.
+        _prevValid = false;
 
-    bool AccelerationLimiterFilter::parseParameters(const QJsonValue& parameters) {
-        if (parameters.isObject()) {
-            auto obj = parameters.toObject();
-            if (obj.contains(JSON_ROTATION_ACCELERATION_LIMIT) && obj.contains(JSON_TRANSLATION_ACCELERATION_LIMIT) &&
-                obj.contains(JSON_ROTATION_SNAP_THRESHOLD) && obj.contains(JSON_TRANSLATION_SNAP_THRESHOLD)) {
-                _rotationAccelerationLimit = (float)obj[JSON_ROTATION_ACCELERATION_LIMIT].toDouble();
-                _translationAccelerationLimit = (float)obj[JSON_TRANSLATION_ACCELERATION_LIMIT].toDouble();
-                _rotationSnapThreshold = (float)obj[JSON_ROTATION_SNAP_THRESHOLD].toDouble();
-                _translationSnapThreshold = (float)obj[JSON_TRANSLATION_SNAP_THRESHOLD].toDouble();
-                return true;
-            }
-        }
-        return false;
+        // return invalid value unchanged
+        return value;
     }
-
 }
+
+bool AccelerationLimiterFilter::parseParameters(const QJsonValue& parameters) {
+    if (parameters.isObject()) {
+        auto obj = parameters.toObject();
+        if (obj.contains(JSON_ROTATION_ACCELERATION_LIMIT) && obj.contains(JSON_TRANSLATION_ACCELERATION_LIMIT) &&
+            obj.contains(JSON_ROTATION_SNAP_THRESHOLD) && obj.contains(JSON_TRANSLATION_SNAP_THRESHOLD)) {
+            _rotationAccelerationLimit = (float)obj[JSON_ROTATION_ACCELERATION_LIMIT].toDouble();
+            _translationAccelerationLimit = (float)obj[JSON_TRANSLATION_ACCELERATION_LIMIT].toDouble();
+            _rotationSnapThreshold = (float)obj[JSON_ROTATION_SNAP_THRESHOLD].toDouble();
+            _translationSnapThreshold = (float)obj[JSON_TRANSLATION_SNAP_THRESHOLD].toDouble();
+            return true;
+        }
+    }
+    return false;
+}
+
+} // namespace controller

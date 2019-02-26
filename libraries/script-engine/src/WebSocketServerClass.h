@@ -46,7 +46,6 @@ private slots:
 
 signals:
     void newConnection(WebSocketClass* client);
-
 };
 
 #endif // hifi_WebSocketServerClass_h

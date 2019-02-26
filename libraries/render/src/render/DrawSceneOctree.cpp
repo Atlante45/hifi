@@ -11,8 +11,8 @@
 
 #include "DrawSceneOctree.h"
 
-#include <algorithm>
 #include <assert.h>
+#include <algorithm>
 
 #include <OctreeUtils.h>
 #include <PerfStat.h>
@@ -32,7 +32,7 @@ const gpu::PipelinePointer DrawSceneOctree::getDrawCellBoundsPipeline() {
         state->setDepthTest(true, false, gpu::LESS_EQUAL);
 
         // Blend on transparent
-        state->setBlendFunction(true,  gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA);
+        state->setBlendFunction(true, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA);
 
         // Good to go add the brand new pipeline
         _drawCellBoundsPipeline = gpu::Pipeline::create(program, state);
@@ -62,14 +62,14 @@ void DrawSceneOctree::configure(const Config& config) {
     _showEmptyCells = config.showEmptyCells;
 }
 
-
 void DrawSceneOctree::run(const RenderContextPointer& renderContext, const ItemSpatialTree::ItemSelection& inSelection) {
     assert(renderContext->args);
     assert(renderContext->args->hasViewFrustum());
     RenderArgs* args = renderContext->args;
     auto& scene = renderContext->_scene;
 
-    std::static_pointer_cast<Config>(renderContext->jobConfig)->numAllocatedCells = (int)scene->getSpatialTree().getNumAllocatedCells();
+    std::static_pointer_cast<Config>(renderContext->jobConfig)->numAllocatedCells = (int)scene->getSpatialTree()
+                                                                                        .getNumAllocatedCells();
     std::static_pointer_cast<Config>(renderContext->jobConfig)->numFreeCells = (int)scene->getSpatialTree().getNumFreeCells();
 
     gpu::doInBatch("DrawSceneOctree::run", args->_context, [&](gpu::Batch& batch) {
@@ -123,7 +123,8 @@ void DrawSceneOctree::run(const RenderContextPointer& renderContext, const ItemS
             float angle = glm::degrees(getPerspectiveAccuracyAngle(args->_sizeScale, args->_boundaryLevelAdjust));
             Transform crosshairModel;
             crosshairModel.setTranslation(glm::vec3(0.0, 0.0, -1000.0));
-            crosshairModel.setScale(1000.0f * tanf(glm::radians(angle))); // Scaling at the actual tan of the lod angle => Multiplied by TWO
+            crosshairModel.setScale(
+                1000.0f * tanf(glm::radians(angle))); // Scaling at the actual tan of the lod angle => Multiplied by TWO
             batch.resetViewTransform();
             batch.setModelTransform(crosshairModel);
             batch.setPipeline(getDrawLODReticlePipeline());
@@ -155,7 +156,6 @@ void DrawItemSelection::configure(const Config& config) {
     _showPartialItems = config.showPartialItems;
     _showPartialSubcellItems = config.showPartialSubcellItems;
 }
-
 
 void DrawItemSelection::run(const RenderContextPointer& renderContext, const ItemSpatialTree::ItemSelection& inSelection) {
     assert(renderContext->args);
@@ -201,9 +201,9 @@ void DrawItemSelection::run(const RenderContextPointer& renderContext, const Ite
             }
 
             if (itemBounds.size() > 0) {
-                buffer->setData(itemBounds.size() * sizeof(render::ItemBound), (const gpu::Byte*) itemBounds.data());
+                buffer->setData(itemBounds.size() * sizeof(render::ItemBound), (const gpu::Byte*)itemBounds.data());
                 batch.setResourceBuffer(0, buffer);
-                batch.draw(gpu::LINES, (gpu::uint32) itemBounds.size() * 24, 0);
+                batch.draw(gpu::LINES, (gpu::uint32)itemBounds.size() * 24, 0);
             }
         };
 

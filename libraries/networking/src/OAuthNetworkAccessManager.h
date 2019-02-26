@@ -17,8 +17,9 @@
 class OAuthNetworkAccessManager : public NetworkAccessManager {
 public:
     static OAuthNetworkAccessManager* getInstance();
+
 protected:
-    OAuthNetworkAccessManager(QObject* parent = Q_NULLPTR) : NetworkAccessManager(parent) { }
+    OAuthNetworkAccessManager(QObject* parent = Q_NULLPTR) : NetworkAccessManager(parent) {}
     virtual QNetworkReply* createRequest(Operation op, const QNetworkRequest& req, QIODevice* outgoingData = 0) override;
 };
 

@@ -16,8 +16,8 @@
 #include <gpu/gl/GLBackend.h>
 #include <gpu/gl/GLTexture.h>
 
-
-namespace gpu { namespace gles {
+namespace gpu {
+namespace gles {
 
 using namespace gpu::gl;
 
@@ -41,7 +41,7 @@ public:
     }
 
     bool supportedTextureFormat(const gpu::Element& format) override;
-    
+
     static const std::string GLES_VERSION;
     const std::string& getVersion() const override { return GLES_VERSION; }
 
@@ -50,10 +50,12 @@ public:
         friend class GLESBackend;
         friend class GLESFramebuffer;
         GLuint allocate(const Texture& texture);
+
     protected:
         GLESTexture(const std::weak_ptr<GLBackend>& backend, const Texture& buffer);
         void generateMips() const override;
-        Size copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset, GLenum internalFormat, GLenum format, GLenum type, Size sourceSize, const void* sourcePointer) const override;
+        Size copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset, GLenum internalFormat,
+                                         GLenum format, GLenum type, Size sourceSize, const void* sourcePointer) const override;
         void syncSampler() const override;
 
         void withPreservedTexture(std::function<void()> f) const;
@@ -81,6 +83,7 @@ public:
     class GLESAttachmentTexture : public GLESFixedAllocationTexture {
         using Parent = GLESFixedAllocationTexture;
         friend class GLESBackend;
+
     protected:
         GLESAttachmentTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture);
         ~GLESAttachmentTexture();
@@ -89,6 +92,7 @@ public:
     class GLESStrictResourceTexture : public GLESFixedAllocationTexture {
         using Parent = GLESFixedAllocationTexture;
         friend class GLESBackend;
+
     protected:
         GLESStrictResourceTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture);
         ~GLESStrictResourceTexture();
@@ -98,7 +102,6 @@ public:
         using Parent = GLESTexture;
         friend class GLESBackend;
         using PromoteLambda = std::function<void()>;
-
 
     protected:
         GLESVariableAllocationTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture);
@@ -110,10 +113,12 @@ public:
         size_t demote() override;
         void populateTransferQueue(TransferJob::Queue& queue) override;
 
-        Size copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset, GLenum internalFormat, GLenum format, GLenum type, Size sourceSize, const void* sourcePointer) const override;
+        Size copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset, GLenum internalFormat,
+                                         GLenum format, GLenum type, Size sourceSize, const void* sourcePointer) const override;
         Size copyMipsFromTexture();
 
-        void copyTextureMipsInGPUMem(GLuint srcId, GLuint destId, uint16_t srcMipOffset, uint16_t destMipOffset, uint16_t populatedMips) override;
+        void copyTextureMipsInGPUMem(GLuint srcId, GLuint destId, uint16_t srcMipOffset, uint16_t destMipOffset,
+                                     uint16_t populatedMips) override;
 
         Size size() const override { return _size; }
     };
@@ -121,13 +126,13 @@ public:
     class GLESResourceTexture : public GLESVariableAllocationTexture {
         using Parent = GLESVariableAllocationTexture;
         friend class GLESBackend;
+
     protected:
         GLESResourceTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture);
         ~GLESResourceTexture();
     };
 
 protected:
-
     void draw(GLenum mode, uint32 numVertices, uint32 startVertex) override;
 
     GLuint getFramebufferID(const FramebufferPointer& framebuffer) override;
@@ -166,13 +171,13 @@ protected:
 
     // Output stage
     void do_blit(const Batch& batch, size_t paramOffset) override;
-    
+
     shader::Dialect getShaderDialect() const override { return shader::Dialect::glsl310es; }
 };
 
-} }
+} // namespace gles
+} // namespace gpu
 
 Q_DECLARE_LOGGING_CATEGORY(gpugleslogging)
-
 
 #endif

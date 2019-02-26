@@ -42,20 +42,23 @@ protected:
 
 class DrawLayered3DConfig : public render::Job::Config {
     Q_OBJECT
-        Q_PROPERTY(int numDrawn READ getNumDrawn NOTIFY numDrawnChanged)
-        Q_PROPERTY(int maxDrawn MEMBER maxDrawn NOTIFY dirty)
+    Q_PROPERTY(int numDrawn READ getNumDrawn NOTIFY numDrawnChanged)
+    Q_PROPERTY(int maxDrawn MEMBER maxDrawn NOTIFY dirty)
 public:
     int getNumDrawn() { return numDrawn; }
-    void setNumDrawn(int num) { numDrawn = num; emit numDrawnChanged(); }
+    void setNumDrawn(int num) {
+        numDrawn = num;
+        emit numDrawnChanged();
+    }
 
-    int maxDrawn{ -1 };
+    int maxDrawn { -1 };
 
 signals:
     void numDrawnChanged();
     void dirty();
 
 protected:
-    int numDrawn{ 0 };
+    int numDrawn { 0 };
 };
 
 class DrawLayered3D {
@@ -79,7 +82,7 @@ class CompositeHUD {
 public:
     // IF specified the input Framebuffer is actively set by the batch of this job before calling the HUDOperator.
     // If not, the current Framebuffer is left unchanged.
-    //using Inputs = gpu::FramebufferPointer;
+    // using Inputs = gpu::FramebufferPointer;
     using JobModel = render::Job::ModelI<CompositeHUD, gpu::FramebufferPointer>;
 
     void run(const render::RenderContextPointer& renderContext, const gpu::FramebufferPointer& inputs);
@@ -91,7 +94,6 @@ public:
 
     void run(const render::RenderContextPointer& renderContext, const gpu::FramebufferPointer& srcFramebuffer);
 };
-
 
 class ResolveFramebuffer {
 public:
@@ -109,14 +111,13 @@ public:
     using JobModel = render::Job::ModelIO<ResolveNewFramebuffer, Inputs, Outputs>;
 
     void run(const render::RenderContextPointer& renderContext, const Inputs& source, Outputs& dest);
+
 private:
     gpu::FramebufferPointer _outputFramebuffer;
 };
 
-
 class ExtractFrustums {
 public:
-
     enum Frustum {
         SHADOW_CASCADE0_FRUSTUM = 0,
         SHADOW_CASCADE1_FRUSTUM,

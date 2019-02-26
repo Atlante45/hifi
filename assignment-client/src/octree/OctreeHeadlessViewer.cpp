@@ -41,9 +41,7 @@ void OctreeHeadlessViewer::queryOctree() {
     }
 }
 
-
 int OctreeHeadlessViewer::parseOctreeStats(QSharedPointer<ReceivedMessage> message, SharedNodePointer sourceNode) {
-
     OctreeSceneStats temp;
     int statsMessageLength = temp.unpackFromPacket(*message);
 
@@ -52,7 +50,6 @@ int OctreeHeadlessViewer::parseOctreeStats(QSharedPointer<ReceivedMessage> messa
     return statsMessageLength;
 }
 
-void OctreeHeadlessViewer::trackIncomingOctreePacket(const QByteArray& packet,
-                                const SharedNodePointer& sendingNode, bool wasStatsPacket) {
-
+void OctreeHeadlessViewer::trackIncomingOctreePacket(const QByteArray& packet, const SharedNodePointer& sendingNode,
+                                                     bool wasStatsPacket) {
 }

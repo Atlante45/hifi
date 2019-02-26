@@ -8,15 +8,15 @@
 
 #include "JSONHelpers.h"
 
-#include <QtCore/QJsonValue>
-#include <QtCore/QJsonObject>
 #include <QtCore/QJsonArray>
+#include <QtCore/QJsonObject>
+#include <QtCore/QJsonValue>
 
 #include <QtCore/qmetaobject.h>
 
 #include "../RegisteredMetaTypes.h"
 
-template <typename T> 
+template<typename T>
 QJsonValue glmToJson(const T& t) {
     QJsonArray result;
     for (auto i = 0; i < t.length(); ++i) {
@@ -25,7 +25,7 @@ QJsonValue glmToJson(const T& t) {
     return result;
 }
 
-template <typename T> 
+template<typename T>
 T glmFromJson(const QJsonValue& json) {
     T result;
     if (json.isArray()) {
@@ -83,7 +83,7 @@ QJsonValue toJsonValueHelper(const QVariant& variant, int type) {
 }
 
 QJsonValue toJsonValue(const QObject& o) {
-    QJsonObject json{};
+    QJsonObject json {};
 
     // Add all properties, see http://doc.qt.io/qt-5/qmetaobject.html#propertyCount
     const auto& meta = o.metaObject();

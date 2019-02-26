@@ -18,8 +18,8 @@
 
 #include <QThread>
 
-#include <TBBHelpers.h>
 #include <NodeList.h>
+#include <TBBHelpers.h>
 
 #include "AvatarMixerSlave.h"
 
@@ -33,7 +33,8 @@ class AvatarMixerSlaveThread : public QThread, public AvatarMixerSlave {
 
 public:
     AvatarMixerSlaveThread(AvatarMixerSlavePool& pool, SlaveSharedData* slaveSharedData) :
-        AvatarMixerSlave(slaveSharedData), _pool(pool) {};
+        AvatarMixerSlave(slaveSharedData),
+        _pool(pool) {};
 
     void run() override final;
 
@@ -61,13 +62,15 @@ public:
     using ConstIter = NodeList::const_iterator;
 
     AvatarMixerSlavePool(SlaveSharedData* slaveSharedData, int numThreads = QThread::idealThreadCount()) :
-        _slaveSharedData(slaveSharedData) { setNumThreads(numThreads); }
+        _slaveSharedData(slaveSharedData) {
+        setNumThreads(numThreads);
+    }
     ~AvatarMixerSlavePool() { resize(0); }
 
     // Jobs the slave pool can do...
     void processIncomingPackets(ConstIter begin, ConstIter end);
-    void broadcastAvatarData(ConstIter begin, ConstIter end, 
-                    p_high_resolution_clock::time_point lastFrameTimestamp, float maxKbpsPerNode, float throttlingRatio);
+    void broadcastAvatarData(ConstIter begin, ConstIter end, p_high_resolution_clock::time_point lastFrameTimestamp,
+                             float maxKbpsPerNode, float throttlingRatio);
 
     // iterate over all slaves
     void each(std::function<void(AvatarMixerSlave& slave)> functor);

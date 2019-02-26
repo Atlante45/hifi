@@ -12,9 +12,9 @@
 #ifndef WEBBROWSERSUGGESTIONSENGINE_H
 #define WEBBROWSERSUGGESTIONSENGINE_H
 
-#include <qpair.h>
 #include <qimage.h>
 #include <qmap.h>
+#include <qpair.h>
 
 #include <qnetworkaccessmanager.h>
 #include <qstring.h>
@@ -36,11 +36,11 @@ signals:
     void suggestions(const QStringList& suggestions);
 
 private slots:
-    void suggestionsFinished(QNetworkReply *reply);
+    void suggestionsFinished(QNetworkReply* reply);
+
 private:
     QNetworkReply* _suggestionsReply;
     QNetworkAccessManager* _currentNAM;
 };
 
 #endif // WEBBROWSERSUGGESTIONSENGINE_H
-

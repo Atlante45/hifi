@@ -28,9 +28,7 @@ static bool timeElapsed = false;
 static bool hasTimerExtension() {
     static std::once_flag once;
     static bool result = false;
-    std::call_once(once, [&] {
-        result = glGetQueryObjectui64vEXT != nullptr;
-    });
+    std::call_once(once, [&] { result = glGetQueryObjectui64vEXT != nullptr; });
     return result;
 }
 #endif
@@ -48,7 +46,7 @@ void GLBackend::do_beginQuery(const Batch& batch, size_t paramOffset) {
         if (hasTimerExtension()) {
             glQueryCounterEXT(glquery->_beginqo, GL_TIMESTAMP_EXT);
         }
-#else 
+#else
         if (timeElapsed) {
             if (_queryStage._rangeQueryDepth <= MAX_RANGE_QUERY_DEPTH) {
                 glBeginQuery(GL_TIME_ELAPSED, glquery->_endqo);
@@ -71,7 +69,7 @@ void GLBackend::do_endQuery(const Batch& batch, size_t paramOffset) {
         if (hasTimerExtension()) {
             glQueryCounterEXT(glquery->_endqo, GL_TIMESTAMP_EXT);
         }
-#else 
+#else
         if (timeElapsed) {
             if (_queryStage._rangeQueryDepth <= MAX_RANGE_QUERY_DEPTH) {
                 glEndQuery(GL_TIME_ELAPSED);
@@ -82,7 +80,8 @@ void GLBackend::do_endQuery(const Batch& batch, size_t paramOffset) {
 #endif
 
         --_queryStage._rangeQueryDepth;
-        auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - glquery->_batchElapsedTimeBegin);
+        auto duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() -
+                                                                                glquery->_batchElapsedTimeBegin);
         glquery->_batchElapsedTime = duration_ns.count();
 
         PROFILE_RANGE_END(render_gpu_gl_detail, glquery->_profileRangeId);
@@ -112,7 +111,7 @@ void GLBackend::do_getQuery(const Batch& batch, size_t paramOffset) {
             } else {
                 query->triggerReturnHandler(0, glquery->_batchElapsedTime);
             }
-#else 
+#else
             glGetQueryObjectui64v(glquery->_endqo, GL_QUERY_RESULT_AVAILABLE, &glquery->_result);
             if (glquery->_result == GL_TRUE) {
                 if (timeElapsed) {

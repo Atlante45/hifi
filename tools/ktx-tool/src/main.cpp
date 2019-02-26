@@ -1,48 +1,44 @@
-#include <unordered_map>
-#include <memory>
 #include <cstdio>
+#include <memory>
+#include <unordered_map>
 
 #include <string>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <QtGlobal>
-#include <QtCore/QTime>
-#include <QtCore/QTimer>
 #include <QtCore/QDir>
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QFile>
 #include <QtCore/QLoggingCategory>
+#include <QtCore/QTime>
+#include <QtCore/QTimer>
+#include <QtGlobal>
 
 #include <QtCore/QResource>
 
-#include <QtGui/QResizeEvent>
-#include <QtGui/QWindow>
 #include <QtGui/QGuiApplication>
 #include <QtGui/QImage>
+#include <QtGui/QResizeEvent>
+#include <QtGui/QWindow>
 
 #include <gl/Config.h>
 
-#include <gpu/Context.h>
 #include <gpu/Batch.h>
+#include <gpu/Context.h>
 #include <gpu/Stream.h>
 
 #include <GLMHelpers.h>
-#include <PathUtils.h>
 #include <NumericalConstants.h>
-#include <PerfStat.h>
 #include <PathUtils.h>
+#include <PerfStat.h>
 #include <ViewFrustum.h>
 
-#include <gpu/Pipeline.h>
 #include <gpu/Context.h>
+#include <gpu/Pipeline.h>
 #include <gpu/Texture.h>
 
 #include <ktx/KTX.h>
-
-
-
 
 void stripKtxKeyValues(const std::string& sourceFile, const std::string& destFile) {
     auto sourceStorage = std::make_shared<storage::FileStorage>(sourceFile.c_str());
@@ -54,13 +50,12 @@ void stripKtxKeyValues(const std::string& sourceFile, const std::string& destFil
 }
 
 #if DEV_BUILD
-const QDir SOURCE_FOLDER{ PathUtils::projectRootPath() + "/interface/resources/meshes/mannequin" };
-const QDir DEST_FOLDER{ PathUtils::projectRootPath() + "/interface/resources/meshes/mannequin/+gles" };
+const QDir SOURCE_FOLDER { PathUtils::projectRootPath() + "/interface/resources/meshes/mannequin" };
+const QDir DEST_FOLDER { PathUtils::projectRootPath() + "/interface/resources/meshes/mannequin/+gles" };
 #else
-const QDir SOURCE_FOLDER{ PathUtils::resourcesPath() + "/interface/resources/meshes/mannequin" };
-const QDir DEST_FOLDER{ PathUtils::resourcesPath() + "/interface/resources/meshes/mannequin/+gles" };
+const QDir SOURCE_FOLDER { PathUtils::resourcesPath() + "/interface/resources/meshes/mannequin" };
+const QDir DEST_FOLDER { PathUtils::resourcesPath() + "/interface/resources/meshes/mannequin/+gles" };
 #endif
-
 
 void messageHandler(QtMsgType type, const QMessageLogContext& context, const QString& message) {
 #ifdef Q_OS_WIN
@@ -89,7 +84,6 @@ void processKtxFile(const QFileInfo& inputFileInfo) {
         throw std::runtime_error("Unable to load texture using hifi::ktx");
     }
 
-
     auto outputKtx = ktx::KTX::create(uncomrpessedKtx->getHeader(), uncomrpessedKtx->_images, compressedKtx->_keyValues);
     auto outputStorage = outputKtx->getStorage();
 
@@ -97,7 +91,6 @@ void processKtxFile(const QFileInfo& inputFileInfo) {
 }
 
 void scanDir(const QDir& dir) {
-
     auto entries = dir.entryInfoList();
     for (const auto& entry : entries) {
         if (entry.isDir()) {

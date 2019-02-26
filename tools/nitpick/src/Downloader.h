@@ -11,26 +11,26 @@
 #ifndef hifi_downloader_h
 #define hifi_downloader_h
 
-#include <QObject>
-#include <QNetworkAccessManager>
-#include <QNetworkRequest>
-#include <QNetworkReply>
-#include <QUrl>
 #include <QDateTime>
+#include <QDebug>
 #include <QFile>
 #include <QFileInfo>
-#include <QDebug>
-
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QObject>
+#include <QUrl>
+
 #include <QByteArray>
 #include <QNetworkAccessManager>
-#include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QObject>
 
 class Downloader : public QObject {
-Q_OBJECT
+    Q_OBJECT
 public:
-    explicit Downloader(QUrl fileURL, QObject *parent = 0);
+    explicit Downloader(QUrl fileURL, QObject* parent = 0);
 
     QByteArray downloadedData() const;
 

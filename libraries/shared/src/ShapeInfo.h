@@ -12,9 +12,9 @@
 #ifndef hifi_ShapeInfo_h
 #define hifi_ShapeInfo_h
 
-#include <QVector>
 #include <QString>
 #include <QUrl>
+#include <QVector>
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
 
@@ -23,7 +23,6 @@ const float MIN_SHAPE_OFFSET = 0.001f; // offsets less than 1mm will be ignored
 // Bullet has a mesh generation util for convex shapes that we used to
 // trim convex hulls with many points down to only 42 points.
 const int MAX_HULL_POINTS = 42;
-
 
 const int32_t END_OF_MESH_PART = -1; // bogus vertex index at end of mesh part
 const int32_t END_OF_MESH = -2; // bogus vertex index at end of mesh
@@ -50,9 +49,7 @@ enum ShapeType {
 };
 
 class ShapeInfo {
-
 public:
-
     using PointList = QVector<glm::vec3>;
     using PointCollection = QVector<PointList>;
     using TriangleIndices = QVector<int32_t>;
@@ -64,13 +61,13 @@ public:
 
     void clear();
 
-    void setParams(ShapeType type, const glm::vec3& halfExtents, QString url="");
+    void setParams(ShapeType type, const glm::vec3& halfExtents, QString url = "");
     void setBox(const glm::vec3& halfExtents);
     void setSphere(float radius);
     void setPointCollection(const PointCollection& pointCollection);
     void setCapsuleY(float radius, float cylinderHalfHeight);
     void setMultiSphere(const std::vector<glm::vec3>& centers, const std::vector<float>& radiuses);
-    void setOffset(const glm::vec3& offset);    
+    void setOffset(const glm::vec3& offset);
 
     ShapeType getType() const { return _type; }
 
@@ -105,4 +102,3 @@ protected:
 };
 
 #endif // hifi_ShapeInfo_h
-

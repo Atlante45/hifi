@@ -17,10 +17,10 @@
 
 #include <RegisteredMetaTypes.h>
 
-#include <QString>
-#include <QVector>
 #include <QDateTime>
+#include <QString>
 #include <QTimer>
+#include <QVector>
 
 #include <mutex>
 #include <unordered_map>
@@ -35,7 +35,11 @@
 
 struct BackupItemInfo {
     BackupItemInfo(QString pId, QString pName, QString pAbsolutePath, QDateTime pCreatedAt, bool pIsManualBackup) :
-        id(pId), name(pName), absolutePath(pAbsolutePath), createdAt(pCreatedAt), isManualBackup(pIsManualBackup) { };
+        id(pId),
+        name(pName),
+        absolutePath(pAbsolutePath),
+        createdAt(pCreatedAt),
+        isManualBackup(pIsManualBackup) {};
 
     QString id;
     QString name;
@@ -45,11 +49,7 @@ struct BackupItemInfo {
 };
 
 struct ConsolidatedBackupInfo {
-    enum State {
-        CONSOLIDATING,
-        COMPLETE_WITH_ERROR,
-        COMPLETE_WITH_SUCCESS
-    };
+    enum State { CONSOLIDATING, COMPLETE_WITH_ERROR, COMPLETE_WITH_SUCCESS };
     State state;
     QString error;
     QString absoluteFilePath;
@@ -70,14 +70,13 @@ public:
 
     static const std::chrono::seconds DEFAULT_PERSIST_INTERVAL;
 
-    DomainContentBackupManager(const QString& rootBackupDirectory,
-                               const QVariantList& settings,
+    DomainContentBackupManager(const QString& rootBackupDirectory, const QVariantList& settings,
                                std::chrono::milliseconds persistInterval = DEFAULT_PERSIST_INTERVAL,
                                bool debugTimestampNow = false);
 
     std::vector<BackupItemInfo> getAllBackups();
     void addBackupHandler(BackupHandlerPointer handler);
-    void aboutToFinish();  /// call this to inform the persist thread that the owner is about to finish to support final persist
+    void aboutToFinish(); /// call this to inform the persist thread that the owner is about to finish to support final persist
     void replaceData(QByteArray data);
     ConsolidatedBackupInfo consolidateBackup(QString fileName);
 
@@ -126,10 +125,10 @@ private:
     std::unordered_map<QString, ConsolidatedBackupInfo> _consolidatedBackups;
 
     std::atomic<bool> _isRecovering { false };
-    QString _recoveryFilename { };
+    QString _recoveryFilename {};
 
     p_high_resolution_clock::time_point _lastCheck;
     std::vector<BackupRule> _backupRules;
 };
 
-#endif  // hifi_DomainContentBackupManager_h
+#endif // hifi_DomainContentBackupManager_h

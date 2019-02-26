@@ -17,7 +17,7 @@ struct Vertex {
 static const uint TEXTURE_OFFSET = offsetof(Vertex, texture);
 static const uint NORMAL_OFFSET = offsetof(Vertex, normal);
 static const uint POSITION_OFFSET = offsetof(Vertex, position);
-static const uint COLOR_OFFSET = offsetof(Vertex, color); 
+static const uint COLOR_OFFSET = offsetof(Vertex, color);
 static const gpu::Element POSITION_ELEMENT { gpu::VEC3, gpu::FLOAT, gpu::XYZ };
 static const gpu::Element TEXTURE_ELEMENT { gpu::VEC2, gpu::FLOAT, gpu::UV };
 static const gpu::Element NORMAL_ELEMENT { gpu::VEC3, gpu::FLOAT, gpu::XYZ };
@@ -29,7 +29,7 @@ FloorTextureTest::FloorTextureTest() {
     const int MINX = -1000;
     const int MAXX = 1000;
 
-    vertices.push_back({ 
+    vertices.push_back({
         vec4(MAXX, 0, MAXX, 1),
         vec4(MAXX, MAXX, 0, 0),
         vec4(0, 1, 0, 1),
@@ -59,9 +59,10 @@ FloorTextureTest::FloorTextureTest() {
 
     vertexBuffer->append(vertices);
     indexBuffer->append(std::vector<uint16_t>({ 0, 1, 2, 2, 3, 0 }));
-    texture = DependencyManager::get<TextureCache>()->getImageTexture("C:/Users/bdavis/Git/openvr/samples/bin/cube_texture.png");
-    //texture = DependencyManager::get<TextureCache>()->getImageTexture("H:/test.png");
-    //texture = DependencyManager::get<TextureCache>()->getImageTexture("H:/crate_blue.fbm/lambert8SG_Normal_OpenGL.png");
+    texture = DependencyManager::get<TextureCache>()->getImageTexture(
+        "C:/Users/bdavis/Git/openvr/samples/bin/cube_texture.png");
+    // texture = DependencyManager::get<TextureCache>()->getImageTexture("H:/test.png");
+    // texture = DependencyManager::get<TextureCache>()->getImageTexture("H:/crate_blue.fbm/lambert8SG_Normal_OpenGL.png");
     vertexFormat->setAttribute(gpu::Stream::POSITION, 0, POSITION_ELEMENT, POSITION_OFFSET);
     vertexFormat->setAttribute(gpu::Stream::TEXCOORD, 0, TEXTURE_ELEMENT, TEXTURE_OFFSET);
     vertexFormat->setAttribute(gpu::Stream::COLOR, 0, COLOR_ELEMENT, COLOR_OFFSET);

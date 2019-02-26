@@ -11,8 +11,8 @@
 
 #include "AssignmentClientMonitor.h"
 
-#include <memory>
 #include <signal.h>
+#include <memory>
 
 #include <QDir>
 #include <QStandardPaths>
@@ -21,10 +21,10 @@
 #include <LogHandler.h>
 #include <udt/PacketHeaders.h>
 
+#include <QtCore/QJsonDocument>
 #include "AssignmentClientApp.h"
 #include "AssignmentClientChildData.h"
 #include "SharedUtil.h"
-#include <QtCore/QJsonDocument>
 #ifdef _POSIX_SOURCE
 #include <sys/resource.h>
 #endif
@@ -41,7 +41,8 @@ AssignmentClientMonitor::AssignmentClientMonitor(const unsigned int numAssignmen
                                                  const unsigned int maxAssignmentClientForks,
                                                  Assignment::Type requestAssignmentType, QString assignmentPool,
                                                  quint16 listenPort, QUuid walletUUID, QString assignmentServerHostname,
-                                                 quint16 assignmentServerPort, quint16 httpStatusServerPort, QString logDirectory) :
+                                                 quint16 assignmentServerPort, quint16 httpStatusServerPort,
+                                                 QString logDirectory) :
     _httpManager(QHostAddress::LocalHost, httpStatusServerPort, "", this),
     _numAssignmentClientForks(numAssignmentClientForks),
     _minAssignmentClientForks(minAssignmentClientForks),
@@ -94,7 +95,7 @@ void AssignmentClientMonitor::simultaneousWaitOnChildren(int waitMsecs) {
     waitTimer.start();
 
     // loop as long as we still have processes around and we're inside the wait window
-    while(_childProcesses.size() > 0 && !waitTimer.hasExpired(waitMsecs)) {
+    while (_childProcesses.size() > 0 && !waitTimer.hasExpired(waitMsecs)) {
         // continue processing events so we can handle a process finishing up
         QCoreApplication::processEvents();
     }
@@ -186,7 +187,6 @@ void AssignmentClientMonitor::spawnChildClient() {
 
     QString nowString, stdoutFilenameTemp, stderrFilenameTemp, stdoutPathTemp, stderrPathTemp;
 
-
     if (_wantsChildFileLogging) {
         // Setup log files
         const QString DATETIME_FORMAT = "yyyyMMdd.hh.mm.ss.zzz";
@@ -218,7 +218,6 @@ void AssignmentClientMonitor::spawnChildClient() {
     QString stdoutPath, stderrPath;
 
     if (_wantsChildFileLogging) {
-
         // Update log path to use PID in filename
         auto stdoutFilename = QString("ac-%1_%2-stdout.txt").arg(nowString).arg(assignmentClient->processId());
         auto stderrFilename = QString("ac-%1_%2-stderr.txt").arg(nowString).arg(assignmentClient->processId());
@@ -238,7 +237,7 @@ void AssignmentClientMonitor::spawnChildClient() {
             stderrPath = stderrPathTemp;
             stderrFilename = stderrFilenameTemp;
         }
-        
+
         qDebug() << "Child stdout being written to: " << stdoutFilename;
         qDebug() << "Child stderr being written to: " << stderrFilename;
     }
@@ -246,10 +245,10 @@ void AssignmentClientMonitor::spawnChildClient() {
     if (assignmentClient->processId() > 0) {
         auto pid = assignmentClient->processId();
         // make sure we hear that this process has finished when it does
-        connect(assignmentClient, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
-                this, [this, pid](int exitCode, QProcess::ExitStatus exitStatus) {
+        connect(assignmentClient, static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this,
+                [this, pid](int exitCode, QProcess::ExitStatus exitStatus) {
                     childProcessFinished(pid, exitCode, exitStatus);
-            });
+                });
 
         qDebug() << "Spawned a child client with PID" << assignmentClient->processId();
 
@@ -267,7 +266,7 @@ void AssignmentClientMonitor::checkSpares() {
 
     nodeList->eachNode([&](const SharedNodePointer& node) {
         AssignmentClientChildData* childData = static_cast<AssignmentClientChildData*>(node->getLinkedData());
-        totalCount ++;
+        totalCount++;
         if (childData->getChildType() == Assignment::Type::AllTypes) {
             ++spareCount;
             aSpareId = node->getUUID();
@@ -310,15 +309,14 @@ void AssignmentClientMonitor::handleChildStatusPacket(QSharedPointer<ReceivedMes
     if (!matchingNode) {
         // The parent only expects to be talking with programs running on this same machine.
         if (senderSockAddr.getAddress() == QHostAddress::LocalHost ||
-                senderSockAddr.getAddress() == QHostAddress::LocalHostIPv6) {
-
+            senderSockAddr.getAddress() == QHostAddress::LocalHostIPv6) {
             if (!senderID.isNull()) {
                 // We don't have this node yet - we should add it
                 matchingNode = DependencyManager::get<LimitedNodeList>()->addOrUpdateNode(senderID, NodeType::Unassigned,
                                                                                           senderSockAddr, senderSockAddr);
 
-                auto newChildData = std::unique_ptr<AssignmentClientChildData>
-                    { new AssignmentClientChildData(Assignment::Type::AllTypes) };
+                auto newChildData = std::unique_ptr<AssignmentClientChildData> { new AssignmentClientChildData(
+                    Assignment::Type::AllTypes) };
                 matchingNode->setLinkedData(std::move(newChildData));
             } else {
                 // tell unknown assignment-client child to exit.
@@ -373,12 +371,10 @@ bool AssignmentClientMonitor::handleHTTPRequest(HTTPConnection* connection, cons
         connection->respond(HTTPConnection::StatusCode404);
     }
 
-
     return true;
 }
 
-void AssignmentClientMonitor::adjustOSResources(unsigned int numForks) const
-{
+void AssignmentClientMonitor::adjustOSResources(unsigned int numForks) const {
 #ifdef _POSIX_SOURCE
     // QProcess on Unix uses six (I think) descriptors, some temporarily, for each child proc.
     // Formula based on tests with a Ubuntu 16.04 VM.
@@ -390,12 +386,12 @@ void AssignmentClientMonitor::adjustOSResources(unsigned int numForks) const
             if (setrlimit(RLIMIT_NOFILE, &descLimits) == 0) {
                 qDebug() << "Resetting descriptor limit to" << requiredDescriptors;
             } else {
-                const char *const errorString = strerror(errno);
+                const char* const errorString = strerror(errno);
                 qDebug() << "Failed to reset descriptor limit to" << requiredDescriptors << ":" << errorString;
             }
         }
     } else {
-        const char *const errorString = strerror(errno);
+        const char* const errorString = strerror(errno);
         qDebug() << "Failed to read descriptor limit:" << errorString;
     }
 #endif

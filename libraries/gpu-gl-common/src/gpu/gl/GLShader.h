@@ -8,14 +8,14 @@
 #ifndef hifi_gpu_gl_GLShader_h
 #define hifi_gpu_gl_GLShader_h
 
-#include "GLShared.h"
 #include <gl/GLShaders.h>
+#include "GLShared.h"
 
-namespace gpu { namespace gl {
+namespace gpu {
+namespace gl {
 
 struct ShaderObject {
-    enum class BindingType
-    {
+    enum class BindingType {
         INPUT,
         OUTPUT,
         TEXTURE,
@@ -29,8 +29,8 @@ struct ShaderObject {
     using ReflectionMap = std::map<BindingType, LocationMap>;
     using UniformMap = std::unordered_map<GLuint, GLuint>;
 
-    GLuint glshader{ 0 };
-    GLuint glprogram{ 0 };
+    GLuint glshader { 0 };
+    GLuint glprogram { 0 };
 
     UniformMap uniformRemap;
 };
@@ -53,6 +53,7 @@ public:
     const std::weak_ptr<GLBackend> _backend;
 };
 
-}}  // namespace gpu::gl
+} // namespace gl
+} // namespace gpu
 
 #endif

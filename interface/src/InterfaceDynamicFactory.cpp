@@ -11,16 +11,16 @@
 
 #include "InterfaceDynamicFactory.h"
 
-#include <avatar/AvatarActionHold.h>
-#include <avatar/AvatarActionFarGrab.h>
+#include <LogHandler.h>
 #include <ObjectActionOffset.h>
 #include <ObjectActionTractor.h>
 #include <ObjectActionTravelOriented.h>
-#include <ObjectConstraintHinge.h>
-#include <ObjectConstraintSlider.h>
 #include <ObjectConstraintBallSocket.h>
 #include <ObjectConstraintConeTwist.h>
-#include <LogHandler.h>
+#include <ObjectConstraintHinge.h>
+#include <ObjectConstraintSlider.h>
+#include <avatar/AvatarActionFarGrab.h>
+#include <avatar/AvatarActionHold.h>
 
 EntityDynamicPointer interfaceDynamicFactory(EntityDynamicType type, const QUuid& id, EntityItemPointer ownerEntity) {
     switch (type) {
@@ -52,11 +52,8 @@ EntityDynamicPointer interfaceDynamicFactory(EntityDynamicType type, const QUuid
     return EntityDynamicPointer();
 }
 
-
-EntityDynamicPointer InterfaceDynamicFactory::factory(EntityDynamicType type,
-                                                    const QUuid& id,
-                                                    EntityItemPointer ownerEntity,
-                                                    QVariantMap arguments) {
+EntityDynamicPointer InterfaceDynamicFactory::factory(EntityDynamicType type, const QUuid& id, EntityItemPointer ownerEntity,
+                                                      QVariantMap arguments) {
     EntityDynamicPointer dynamic = interfaceDynamicFactory(type, id, ownerEntity);
     if (dynamic) {
         bool ok = dynamic->updateArguments(arguments);
@@ -69,7 +66,6 @@ EntityDynamicPointer InterfaceDynamicFactory::factory(EntityDynamicType type,
     }
     return nullptr;
 }
-
 
 EntityDynamicPointer InterfaceDynamicFactory::factoryBA(EntityItemPointer ownerEntity, QByteArray data) {
     QDataStream serializedArgumentStream(data);
@@ -85,7 +81,7 @@ EntityDynamicPointer InterfaceDynamicFactory::factoryBA(EntityItemPointer ownerE
         dynamic->deserialize(data);
         if (dynamic->lifetimeIsOver()) {
             HIFI_FDEBUG("InterfaceDynamicFactory::factoryBA lifetimeIsOver during dynamic creation --"
-                     << dynamic->getExpires() << "<" << usecTimestampNow());
+                        << dynamic->getExpires() << "<" << usecTimestampNow());
             return nullptr;
         }
     }

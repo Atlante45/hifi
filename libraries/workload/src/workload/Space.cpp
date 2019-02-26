@@ -13,8 +13,8 @@
 //
 
 #include "Space.h"
-#include <cstring>
 #include <algorithm>
+#include <cstring>
 
 #include <glm/gtx/quaternion.hpp>
 
@@ -28,7 +28,7 @@ void Space::processTransactionFrame(const Transaction& transaction) {
     // Here we should be able to check the value of last ProxyID allocated
     // and allocate new proxies accordingly
     ProxyID maxID = _IDAllocator.getNumAllocatedIndices();
-    if (maxID > (Index) _proxies.size()) {
+    if (maxID > (Index)_proxies.size()) {
         _proxies.resize(maxID + 100); // allocate the maxId and more
         _owners.resize(maxID + 100);
     }

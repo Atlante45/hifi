@@ -14,10 +14,11 @@
 
 using namespace gpu;
 using namespace gpu::gl;
-using namespace gpu::gles; 
+using namespace gpu::gles;
 
 class GLESQuery : public GLQuery {
     using Parent = GLQuery;
+
 public:
     static GLuint allocateQuery() {
         GLuint result;
@@ -25,8 +26,8 @@ public:
         return result;
     }
 
-    GLESQuery(const std::weak_ptr<GLBackend>& backend, const Query& query)
-        : Parent(backend, query, allocateQuery(), allocateQuery()) { }
+    GLESQuery(const std::weak_ptr<GLBackend>& backend, const Query& query) :
+        Parent(backend, query, allocateQuery(), allocateQuery()) {}
 };
 
 GLQuery* GLESBackend::syncGPUObject(const Query& query) {

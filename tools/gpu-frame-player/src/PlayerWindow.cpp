@@ -8,8 +8,8 @@
 
 #include "PlayerWindow.h"
 
-#include <QtGui/QResizeEvent>
 #include <QtGui/QImageReader>
+#include <QtGui/QResizeEvent>
 #include <QtGui/QScreen>
 #include <QtWidgets/QFileDialog>
 
@@ -36,7 +36,7 @@ PlayerWindow::PlayerWindow() {
 PlayerWindow::~PlayerWindow() {
 }
 
-bool PlayerWindow::eventFilter(QObject* obj, QEvent* event)  {
+bool PlayerWindow::eventFilter(QObject* obj, QEvent* event) {
     if (event->type() == QEvent::Close) {
         _renderThread.terminate();
     }
@@ -45,7 +45,7 @@ bool PlayerWindow::eventFilter(QObject* obj, QEvent* event)  {
 }
 
 void PlayerWindow::loadFrame() {
-    static const QString LAST_FILE_KEY{ "lastFile" };
+    static const QString LAST_FILE_KEY { "lastFile" };
     auto lastScene = _settings.value(LAST_FILE_KEY);
     QString openDir;
     if (lastScene.isValid()) {
@@ -72,27 +72,27 @@ void PlayerWindow::keyPressEvent(QKeyEvent* event) {
             return;
 
         case Qt::Key_W:
-            _renderThread.move(vec3{ 0, 0, -0.1f } * moveScale);
+            _renderThread.move(vec3 { 0, 0, -0.1f } * moveScale);
             return;
 
         case Qt::Key_S:
-            _renderThread.move(vec3{ 0, 0, 0.1f } * moveScale);
+            _renderThread.move(vec3 { 0, 0, 0.1f } * moveScale);
             return;
 
         case Qt::Key_A:
-            _renderThread.move(vec3{ -0.1f, 0, 0 } * moveScale);
+            _renderThread.move(vec3 { -0.1f, 0, 0 } * moveScale);
             return;
 
         case Qt::Key_D:
-            _renderThread.move(vec3{ 0.1f, 0, 0 } * moveScale);
+            _renderThread.move(vec3 { 0.1f, 0, 0 } * moveScale);
             return;
 
         case Qt::Key_E:
-            _renderThread.move(vec3{ 0, 0.1f, 0 } * moveScale);
+            _renderThread.move(vec3 { 0, 0.1f, 0 } * moveScale);
             return;
 
         case Qt::Key_F:
-            _renderThread.move(vec3{ 0, -0.1f, 0 } * moveScale);
+            _renderThread.move(vec3 { 0, -0.1f, 0 } * moveScale);
             return;
 
         default:
@@ -123,10 +123,10 @@ void PlayerWindow::loadFrame(const QString& path) {
     }
     if (frame->framebuffer) {
         const auto& fbo = *frame->framebuffer;
-        glm::uvec2 size{ fbo.getWidth(), fbo.getHeight() };
-        
+        glm::uvec2 size { fbo.getWidth(), fbo.getHeight() };
+
         auto screenSize = screen()->size();
-        static const glm::uvec2 maxSize{ screenSize.width() - 100, screenSize.height() - 100 };
+        static const glm::uvec2 maxSize { screenSize.width() - 100, screenSize.height() - 100 };
         while (glm::any(glm::greaterThan(size, maxSize))) {
             size /= 2;
         }

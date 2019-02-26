@@ -13,36 +13,35 @@
 #ifndef hifi_AvatarProject_h
 #define hifi_AvatarProject_h
 
-#include "MarketplaceItemUploader.h"
 #include "AvatarDoctor.h"
-#include "ProjectFile.h"
 #include "FST.h"
+#include "MarketplaceItemUploader.h"
+#include "ProjectFile.h"
 
-#include <QObject>
 #include <QDir>
-#include <QVariantHash>
+#include <QObject>
 #include <QStandardPaths>
+#include <QVariantHash>
 
 namespace AvatarProjectStatus {
-    Q_NAMESPACE
-    enum AvatarProjectStatus {
-        NONE,
-        SUCCESS,
-        ERROR_CREATE_PROJECT_NAME,
-        ERROR_CREATE_CREATING_DIRECTORIES,
-        ERROR_CREATE_FIND_MODEL,
-        ERROR_CREATE_OPEN_MODEL,
-        ERROR_CREATE_READ_MODEL,
-        ERROR_CREATE_WRITE_FST,
-        ERROR_OPEN_INVALID_FILE_TYPE,
-        ERROR_OPEN_PROJECT_FOLDER,
-        ERROR_OPEN_FIND_FST,
-        ERROR_OPEN_OPEN_FST,
-        ERROR_OPEN_FIND_MODEL
-    };
-    Q_ENUM_NS(AvatarProjectStatus)
-}
-
+Q_NAMESPACE
+enum AvatarProjectStatus {
+    NONE,
+    SUCCESS,
+    ERROR_CREATE_PROJECT_NAME,
+    ERROR_CREATE_CREATING_DIRECTORIES,
+    ERROR_CREATE_FIND_MODEL,
+    ERROR_CREATE_OPEN_MODEL,
+    ERROR_CREATE_READ_MODEL,
+    ERROR_CREATE_WRITE_FST,
+    ERROR_OPEN_INVALID_FILE_TYPE,
+    ERROR_OPEN_PROJECT_FOLDER,
+    ERROR_OPEN_FIND_FST,
+    ERROR_OPEN_OPEN_FST,
+    ERROR_OPEN_FIND_MODEL
+};
+Q_ENUM_NS(AvatarProjectStatus)
+} // namespace AvatarProjectStatus
 
 class AvatarProject : public QObject {
     Q_OBJECT
@@ -61,7 +60,6 @@ public:
     Q_INVOKABLE void openInInventory() const;
     Q_INVOKABLE QStringList getProjectFiles() const;
     Q_INVOKABLE AvatarDoctor* diagnose();
-
 
     Q_INVOKABLE QString getProjectName() const { return _fst->getName(); }
     Q_INVOKABLE void setProjectName(const QString& newProjectName) {
@@ -83,10 +81,8 @@ public:
      * returns the AvatarProject or a nullptr on failure.
      */
     static AvatarProject* openAvatarProject(const QString& path, AvatarProjectStatus::AvatarProjectStatus& status);
-    static AvatarProject* createAvatarProject(const QString& projectsFolder,
-                                              const QString& avatarProjectName,
-                                              const QString& avatarModelPath,
-                                              const QString& textureFolder,
+    static AvatarProject* createAvatarProject(const QString& projectsFolder, const QString& avatarProjectName,
+                                              const QString& avatarModelPath, const QString& textureFolder,
                                               AvatarProjectStatus::AvatarProjectStatus& status);
 
     static bool isValidNewProjectName(const QString& projectPath, const QString& projectName);
@@ -115,10 +111,10 @@ private:
     FST* _fst;
 
     QDir _directory;
-    QList<ProjectFilePath> _projectFiles{};
+    QList<ProjectFilePath> _projectFiles {};
     QString _projectPath;
 
     bool _hasErrors { false };
 };
 
-#endif  // hifi_AvatarProject_h
+#endif // hifi_AvatarProject_h

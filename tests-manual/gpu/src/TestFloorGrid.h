@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include <vector>
 #include <GLMHelpers.h>
 #include <Transform.h>
+#include <vector>
 
 #include <gpu/Resource.h>
 #include <gpu/Stream.h>
@@ -22,5 +22,3 @@ public:
     TestFloorGrid();
     void renderTest(size_t testId, RenderArgs* args) override;
 };
-
-

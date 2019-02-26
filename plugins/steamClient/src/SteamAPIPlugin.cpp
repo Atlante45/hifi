@@ -13,12 +13,12 @@
 
 #include <atomic>
 
+#include <QtGui/qevent.h>
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDebug>
 #include <QtCore/QMimeData>
 #include <QtCore/QString>
 #include <QtCore/QUrl>
-#include <QtGui/qevent.h>
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
@@ -34,7 +34,6 @@
 #pragma GCC diagnostic pop
 #endif
 
-
 static const Ticket INVALID_TICKET = Ticket();
 
 class SteamTicketRequests {
@@ -46,8 +45,8 @@ public:
     void stopRequest(HAuthTicket authTicket);
     void stopAll();
 
-    STEAM_CALLBACK(SteamTicketRequests, onGetAuthSessionTicketResponse,
-                   GetAuthSessionTicketResponse_t, _getAuthSessionTicketResponse);
+    STEAM_CALLBACK(SteamTicketRequests, onGetAuthSessionTicketResponse, GetAuthSessionTicketResponse_t,
+                   _getAuthSessionTicketResponse);
 
 private:
     struct PendingTicket {
@@ -60,8 +59,7 @@ private:
 };
 
 SteamTicketRequests::SteamTicketRequests() :
-    _getAuthSessionTicketResponse(this, &SteamTicketRequests::onGetAuthSessionTicketResponse)
-{
+    _getAuthSessionTicketResponse(this, &SteamTicketRequests::onGetAuthSessionTicketResponse) {
 }
 
 SteamTicketRequests::~SteamTicketRequests() {
@@ -80,7 +78,7 @@ HAuthTicket SteamTicketRequests::startRequest(TicketRequestCallback callback) {
         qWarning() << "Auth session ticket is invalid.";
         callback(INVALID_TICKET);
     } else {
-        PendingTicket pendingTicket{ authTicket, QByteArray(ticket, ticketSize).toHex(), callback };
+        PendingTicket pendingTicket { authTicket, QByteArray(ticket, ticketSize).toHex(), callback };
         _pendingTickets.push_back(pendingTicket);
     }
 
@@ -117,9 +115,7 @@ void SteamTicketRequests::onGetAuthSessionTicketResponse(GetAuthSessionTicketRes
         return pendingTicket.authTicket == authTicket;
     });
 
-
     if (it != _pendingTickets.end()) {
-
         if (pCallback->m_eResult == k_EResultOK) {
             qDebug() << "Got steam callback, auth session ticket is valid. Send it." << authTicket;
             it->callback(it->ticket);
@@ -134,7 +130,6 @@ void SteamTicketRequests::onGetAuthSessionTicketResponse(GetAuthSessionTicketRes
     }
 }
 
-
 const QString CONNECT_PREFIX = "--url \"";
 const QString CONNECT_SUFFIX = "\"";
 
@@ -142,17 +137,14 @@ class SteamCallbackManager {
 public:
     SteamCallbackManager();
 
-    STEAM_CALLBACK(SteamCallbackManager, onGameRichPresenceJoinRequested,
-                   GameRichPresenceJoinRequested_t, _gameRichPresenceJoinRequestedResponse);
+    STEAM_CALLBACK(SteamCallbackManager, onGameRichPresenceJoinRequested, GameRichPresenceJoinRequested_t,
+                   _gameRichPresenceJoinRequestedResponse);
 
-    STEAM_CALLBACK(SteamCallbackManager, onLobbyCreated,
-                   LobbyCreated_t, _lobbyCreatedResponse);
+    STEAM_CALLBACK(SteamCallbackManager, onLobbyCreated, LobbyCreated_t, _lobbyCreatedResponse);
 
-    STEAM_CALLBACK(SteamCallbackManager, onGameLobbyJoinRequested,
-                   GameLobbyJoinRequested_t, _gameLobbyJoinRequestedResponse);
+    STEAM_CALLBACK(SteamCallbackManager, onGameLobbyJoinRequested, GameLobbyJoinRequested_t, _gameLobbyJoinRequestedResponse);
 
-    STEAM_CALLBACK(SteamCallbackManager, onLobbyEnter,
-                   LobbyEnter_t, _lobbyEnterResponse);
+    STEAM_CALLBACK(SteamCallbackManager, onLobbyEnter, LobbyEnter_t, _lobbyEnterResponse);
 
     SteamTicketRequests& getTicketRequests() { return _steamTicketRequests; }
 
@@ -164,8 +156,7 @@ SteamCallbackManager::SteamCallbackManager() :
     _gameRichPresenceJoinRequestedResponse(this, &SteamCallbackManager::onGameRichPresenceJoinRequested),
     _lobbyCreatedResponse(this, &SteamCallbackManager::onLobbyCreated),
     _gameLobbyJoinRequestedResponse(this, &SteamCallbackManager::onGameLobbyJoinRequested),
-    _lobbyEnterResponse(this, &SteamCallbackManager::onLobbyEnter)
-{
+    _lobbyEnterResponse(this, &SteamCallbackManager::onLobbyEnter) {
 }
 
 void parseUrlAndGo(QString url) {
@@ -187,8 +178,6 @@ void SteamCallbackManager::onGameRichPresenceJoinRequested(GameRichPresenceJoinR
 
     parseUrlAndGo(url);
 }
-
-
 
 void SteamCallbackManager::onLobbyCreated(LobbyCreated_t* pCallback) {
     if (pCallback->m_eResult == k_EResultOK) {
@@ -221,10 +210,8 @@ void SteamCallbackManager::onLobbyEnter(LobbyEnter_t* pCallback) {
     }
 }
 
-
 static std::atomic_bool initialized { false };
 static SteamCallbackManager steamCallbackManager;
-
 
 bool SteamAPIPlugin::isRunning() {
     return initialized;
@@ -269,7 +256,6 @@ int SteamAPIPlugin::getSteamVRBuildID() {
     }
     return 0;
 }
-
 
 void SteamAPIPlugin::runCallbacks() {
     if (!initialized) {
@@ -324,7 +310,6 @@ void SteamAPIPlugin::openInviteOverlay() {
     static const int MAX_LOBBY_SIZE = 20;
     SteamMatchmaking()->CreateLobby(k_ELobbyTypePrivate, MAX_LOBBY_SIZE);
 }
-
 
 void SteamAPIPlugin::joinLobby(QString lobbyIdStr) {
     if (!initialized) {

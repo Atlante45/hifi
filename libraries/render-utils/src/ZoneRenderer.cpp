@@ -12,30 +12,30 @@
 
 #include <gpu/Context.h>
 
-#include <render/FilterTask.h>
-#include <render/DrawTask.h>
-#include <shaders/Shaders.h>
 #include <gpu/ShaderConstants.h>
 #include <graphics/ShaderConstants.h>
+#include <render/DrawTask.h>
+#include <render/FilterTask.h>
+#include <shaders/Shaders.h>
 
-#include "StencilMaskPass.h"
 #include "DeferredLightingEffect.h"
+#include "StencilMaskPass.h"
 
+#include "DeferredLightingEffect.h"
+#include "StencilMaskPass.h"
 #include "render-utils/ShaderConstants.h"
-#include "StencilMaskPass.h"
-#include "DeferredLightingEffect.h"
 
 #include "BloomStage.h"
 
 namespace ru {
-    using render_utils::slot::texture::Texture;
-    using render_utils::slot::buffer::Buffer;
-}
+using render_utils::slot::buffer::Buffer;
+using render_utils::slot::texture::Texture;
+} // namespace ru
 
 namespace gr {
-    using graphics::slot::texture::Texture;
-    using graphics::slot::buffer::Buffer;
-}
+using graphics::slot::buffer::Buffer;
+using graphics::slot::texture::Texture;
+} // namespace gr
 
 using namespace render;
 
@@ -149,7 +149,6 @@ void DebugZoneLighting::run(const render::RenderContextPointer& context, const I
     }
 
     gpu::doInBatch("DebugZoneLighting::run", args->_context, [=](gpu::Batch& batch) {
-
         batch.setViewportTransform(args->_viewport);
         auto viewFrustum = args->getViewFrustum();
         batch.setProjectionTransform(viewFrustum.getProjection());
@@ -160,7 +159,7 @@ void DebugZoneLighting::run(const render::RenderContextPointer& context, const I
         batch.setUniformBuffer(ru::Buffer::DeferredFrameTransform, deferredTransform->getFrameTransformBuffer());
 
         batch.setPipeline(getKeyLightPipeline());
-        auto numKeys = (int) keyLightStack.size();
+        auto numKeys = (int)keyLightStack.size();
         for (int i = numKeys - 1; i >= 0; i--) {
             model.setTranslation(glm::vec3(-4.0, -3.0 + (i * 1.0), -10.0 - (i * 3.0)));
             batch.setModelTransform(model);
@@ -171,7 +170,7 @@ void DebugZoneLighting::run(const render::RenderContextPointer& context, const I
         }
 
         batch.setPipeline(getAmbientPipeline());
-        auto numAmbients = (int) ambientLightStack.size();
+        auto numAmbients = (int)ambientLightStack.size();
         for (int i = numAmbients - 1; i >= 0; i--) {
             model.setTranslation(glm::vec3(0.0, -3.0 + (i * 1.0), -10.0 - (i * 3.0)));
             batch.setModelTransform(model);
@@ -185,7 +184,7 @@ void DebugZoneLighting::run(const render::RenderContextPointer& context, const I
         }
 
         batch.setPipeline(getBackgroundPipeline());
-        auto numBackgrounds = (int) skyboxStack.size();
+        auto numBackgrounds = (int)skyboxStack.size();
         for (int i = numBackgrounds - 1; i >= 0; i--) {
             model.setTranslation(glm::vec3(4.0, -3.0 + (i * 1.0), -10.0 - (i * 3.0)));
             batch.setModelTransform(model);
@@ -195,5 +194,5 @@ void DebugZoneLighting::run(const render::RenderContextPointer& context, const I
                 batch.draw(gpu::TRIANGLE_STRIP, 4);
             }
         }
-    }); 
+    });
 }

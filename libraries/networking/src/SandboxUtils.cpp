@@ -17,8 +17,8 @@
 #include <QProcess>
 
 #include <NumericalConstants.h>
-#include <SharedUtil.h>
 #include <RunningMarker.h>
+#include <SharedUtil.h>
 
 #include "NetworkAccessManager.h"
 #include "NetworkLogging.h"
@@ -85,4 +85,4 @@ void runLocalSandbox(QString contentPath, bool autoShutdown, bool noUpdater) {
     qCDebug(networking) << QProcess::startDetached(serverPath, args);
 }
 
-}
+} // namespace SandboxUtils

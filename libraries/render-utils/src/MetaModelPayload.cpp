@@ -12,7 +12,8 @@
 #include "AbstractViewStateInterface.h"
 #include "MeshPartPayload.h"
 
-void MetaModelPayload::setBlendedVertices(int blendNumber, const QVector<BlendshapeOffset>& blendshapeOffsets, const QVector<int>& blendedMeshSizes, const render::ItemIDs& subRenderItems) {
+void MetaModelPayload::setBlendedVertices(int blendNumber, const QVector<BlendshapeOffset>& blendshapeOffsets,
+                                          const QVector<int>& blendedMeshSizes, const render::ItemIDs& subRenderItems) {
     PROFILE_RANGE(render, __FUNCTION__);
     if (blendNumber < _appliedBlendNumber) {
         return;
@@ -37,9 +38,13 @@ void MetaModelPayload::setBlendedVertices(int blendNumber, const QVector<Blendsh
         const auto& buffer = _blendshapeBuffers.find(i);
         const auto blendShapeBufferSize = numVertices * sizeof(BlendshapeOffset);
         if (buffer == _blendshapeBuffers.end()) {
-            _blendshapeBuffers[i] = std::make_shared<gpu::Buffer>(blendShapeBufferSize, (gpu::Byte*) blendshapeOffsets.constData() + index * sizeof(BlendshapeOffset), blendShapeBufferSize);
+            _blendshapeBuffers[i] = std::make_shared<gpu::Buffer>(blendShapeBufferSize,
+                                                                  (gpu::Byte*)blendshapeOffsets.constData() +
+                                                                      index * sizeof(BlendshapeOffset),
+                                                                  blendShapeBufferSize);
         } else {
-            buffer->second->setData(blendShapeBufferSize, (gpu::Byte*) blendshapeOffsets.constData() + index * sizeof(BlendshapeOffset));
+            buffer->second->setData(blendShapeBufferSize,
+                                    (gpu::Byte*)blendshapeOffsets.constData() + index * sizeof(BlendshapeOffset));
         }
 
         index += numVertices;

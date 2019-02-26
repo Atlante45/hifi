@@ -13,13 +13,13 @@
 #define hifi_ArrayBufferClass_h
 
 #include <QScriptClass>
+#include <QtCore/QDateTime>
 #include <QtCore/QObject>
 #include <QtScript/QScriptClass>
 #include <QtScript/QScriptContext>
 #include <QtScript/QScriptEngine>
 #include <QtScript/QScriptString>
 #include <QtScript/QScriptValue>
-#include <QtCore/QDateTime>
 
 class ScriptEngine;
 
@@ -30,17 +30,12 @@ public:
     QScriptValue newInstance(qint32 size);
     QScriptValue newInstance(const QByteArray& ba);
 
-    QueryFlags queryProperty(const QScriptValue& object,
-                             const QScriptString& name,
-                             QueryFlags flags, uint* id) override;
-    QScriptValue property(const QScriptValue& object,
-                          const QScriptString& name, uint id) override;
-    QScriptValue::PropertyFlags propertyFlags(const QScriptValue& object,
-                                              const QScriptString& name, uint id) override;
+    QueryFlags queryProperty(const QScriptValue& object, const QScriptString& name, QueryFlags flags, uint* id) override;
+    QScriptValue property(const QScriptValue& object, const QScriptString& name, uint id) override;
+    QScriptValue::PropertyFlags propertyFlags(const QScriptValue& object, const QScriptString& name, uint id) override;
 
     QString name() const override;
     QScriptValue prototype() const override;
-
 
 private:
     static QScriptValue construct(QScriptContext* context, QScriptEngine* engine);
@@ -54,7 +49,6 @@ private:
     // JS Object attributes
     QScriptString _name;
     QScriptString _byteLength;
-
 };
 
 #endif // hifi_ArrayBufferClass_h

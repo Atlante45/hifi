@@ -30,8 +30,8 @@
 // passband ripple = +-0.1dB
 // stopband attn = -90dB (-15dB at Fs/2)
 //
-static const int PROTOTYPE_TAPS_LQ = 32;    // filter taps per phase
-static const int PROTOTYPE_PHASES_LQ = 32;  // oversampling factor
+static const int PROTOTYPE_TAPS_LQ = 32; // filter taps per phase
+static const int PROTOTYPE_PHASES_LQ = 32; // oversampling factor
 static const int PROTOTYPE_COEFS_LQ = PROTOTYPE_TAPS_LQ * PROTOTYPE_PHASES_LQ;
 
 // clang-format off

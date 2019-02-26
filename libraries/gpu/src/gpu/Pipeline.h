@@ -11,18 +11,18 @@
 #ifndef hifi_gpu_Pipeline_h
 #define hifi_gpu_Pipeline_h
 
-#include "Resource.h"
 #include <memory>
 #include <set>
+#include "Resource.h"
 
 #include "Shader.h"
 #include "State.h"
- 
+
 namespace gpu {
 
 class Pipeline {
 public:
-    using Pointer = std::shared_ptr< Pipeline >;
+    using Pointer = std::shared_ptr<Pipeline>;
 
     static Pointer create(const ShaderPointer& program, const StatePointer& state);
     ~Pipeline();
@@ -32,7 +32,7 @@ public:
     const StatePointer& getState() const { return _state; }
 
     const GPUObjectPointer gpuObject {};
-    
+
 protected:
     ShaderPointer _program;
     StatePointer _state;
@@ -41,9 +41,8 @@ protected:
 };
 
 typedef Pipeline::Pointer PipelinePointer;
-typedef std::vector< PipelinePointer > Pipelines;
+typedef std::vector<PipelinePointer> Pipelines;
 
-};
-
+}; // namespace gpu
 
 #endif

@@ -12,13 +12,13 @@
 #ifndef hifi_AbstractAudioInterface_h
 #define hifi_AbstractAudioInterface_h
 
-#include <QtCore/QObject>
 #include <QtMultimedia/qaudiooutput.h>
+#include <QtCore/QObject>
 
 #include <udt/PacketHeaders.h>
 
-#include "AudioInjectorOptions.h"
 #include "AudioInjector.h"
+#include "AudioInjectorOptions.h"
 #include "AudioSolo.h"
 
 class AudioInjector;

@@ -24,12 +24,13 @@ public:
     static void restrictContext(QQmlContext* context);
     static bool isRestricted(QQmlContext* context);
     QQmlContext* getContext() const { return _context; }
-protected:
 
+protected:
     class RequestInterceptor : public QWebEngineUrlRequestInterceptor {
     public:
         RequestInterceptor(ContextAwareProfile* parent) : QWebEngineUrlRequestInterceptor(parent), _profile(parent) {}
         QQmlContext* getContext() const { return _profile->getContext(); }
+
     protected:
         ContextAwareProfile* _profile;
     };

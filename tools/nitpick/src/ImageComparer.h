@@ -10,8 +10,8 @@
 #ifndef hifi_ImageComparer_h
 #define hifi_ImageComparer_h
 
-#include <QtCore/QString>
 #include <QImage>
+#include <QtCore/QString>
 
 class ImageComparer {
 public:

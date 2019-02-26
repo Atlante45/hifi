@@ -26,13 +26,14 @@ ImageEntityRenderer::~ImageEntityRenderer() {
 }
 
 bool ImageEntityRenderer::isTransparent() const {
-    return Parent::isTransparent() || (_textureIsLoaded && _texture->getGPUTexture() && _texture->getGPUTexture()->getUsage().isAlpha()) || _alpha < 1.0f || _pulseProperties.getAlphaMode() != PulseMode::NONE;
+    return Parent::isTransparent() ||
+           (_textureIsLoaded && _texture->getGPUTexture() && _texture->getGPUTexture()->getUsage().isAlpha()) ||
+           _alpha < 1.0f || _pulseProperties.getAlphaMode() != PulseMode::NONE;
 }
 
 bool ImageEntityRenderer::needsRenderUpdate() const {
-    bool textureLoadedChanged = resultWithReadLock<bool>([&] {
-        return (!_textureIsLoaded && _texture && _texture->isLoaded());
-    });
+    bool textureLoadedChanged = resultWithReadLock<bool>(
+        [&] { return (!_textureIsLoaded && _texture && _texture->isLoaded()); });
 
     if (textureLoadedChanged) {
         return true;
@@ -81,7 +82,8 @@ bool ImageEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityPoin
     return needsUpdate;
 }
 
-void ImageEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) {
+void ImageEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                         const TypedEntityPointer& entity) {
     withWriteLock([&] {
         auto imageURL = entity->getImageURL();
         if (_imageURL != imageURL) {
@@ -170,7 +172,8 @@ void ImageEntityRenderer::doRender(RenderArgs* args) {
     Q_ASSERT(args->_batch);
     gpu::Batch* batch = args->_batch;
 
-    transform.setRotation(EntityItem::getBillboardRotation(transform.getTranslation(), transform.getRotation(), _billboardMode, args->getViewFrustum().getPosition()));
+    transform.setRotation(EntityItem::getBillboardRotation(transform.getTranslation(), transform.getRotation(), _billboardMode,
+                                                           args->getViewFrustum().getPosition()));
     transform.postScale(dimensions);
 
     batch->setModelTransform(transform);
@@ -208,10 +211,8 @@ void ImageEntityRenderer::doRender(RenderArgs* args) {
     glm::vec2 texCoordBottomRight((fromImage.x() + fromImage.width() - 0.5f) / imageWidth,
                                   (fromImage.y() + fromImage.height() - 0.5f) / imageHeight);
 
-    DependencyManager::get<GeometryCache>()->renderQuad(
-        *batch, topLeft, bottomRight, texCoordTopLeft, texCoordBottomRight,
-        color, _geometryId
-    );
+    DependencyManager::get<GeometryCache>()->renderQuad(*batch, topLeft, bottomRight, texCoordTopLeft, texCoordBottomRight,
+                                                        color, _geometryId);
 
     batch->setResourceTexture(0, nullptr);
 }

@@ -12,8 +12,8 @@
 #include "UserActivityLogger.h"
 
 #include <QEventLoop>
-#include <QJsonDocument>
 #include <QHttpMultiPart>
+#include <QJsonDocument>
 #include <QTimer>
 
 #include <DependencyManager.h>
@@ -58,7 +58,7 @@ void UserActivityLogger::logAction(QString action, QJsonObject details, JSONCall
     if (!details.isEmpty()) {
         QHttpPart detailsPart;
         detailsPart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data;"
-                              " name=\"action_details\"");
+                                                                         " name=\"action_details\"");
         detailsPart.setBody(QJsonDocument(details).toJson(QJsonDocument::Compact));
         multipart->append(detailsPart);
     }
@@ -69,10 +69,8 @@ void UserActivityLogger::logAction(QString action, QJsonObject details, JSONCall
         params.errorCallbackMethod = "requestError";
     }
 
-    accountManager->sendRequest(USER_ACTIVITY_URL,
-                               AccountManagerAuth::Optional,
-                               QNetworkAccessManager::PostOperation,
-                               params, NULL, multipart);
+    accountManager->sendRequest(USER_ACTIVITY_URL, AccountManagerAuth::Optional, QNetworkAccessManager::PostOperation, params,
+                                NULL, multipart);
 }
 
 void UserActivityLogger::requestError(QNetworkReply* errorReply) {
@@ -134,13 +132,8 @@ void UserActivityLogger::changedDomain(QString domainURL) {
 }
 
 void UserActivityLogger::connectedDevice(QString typeOfDevice, QString deviceName) {
-    static QStringList DEVICE_BLACKLIST = {
-        "Desktop",
-        "NullDisplayPlugin",
-        "3D TV - Side by Side Stereo",
-        "3D TV - Interleaved",
-        "Keyboard/Mouse"
-    };
+    static QStringList DEVICE_BLACKLIST = { "Desktop", "NullDisplayPlugin", "3D TV - Side by Side Stereo",
+                                            "3D TV - Interleaved", "Keyboard/Mouse" };
 
     if (DEVICE_BLACKLIST.contains(deviceName) || deviceName.isEmpty()) {
         return;
@@ -155,7 +148,6 @@ void UserActivityLogger::connectedDevice(QString typeOfDevice, QString deviceNam
     actionDetails.insert(DEVICE_NAME, deviceName);
 
     logAction(ACTION_NAME, actionDetails);
-
 }
 
 void UserActivityLogger::loadedScript(QString scriptName) {
@@ -166,7 +158,6 @@ void UserActivityLogger::loadedScript(QString scriptName) {
     actionDetails.insert(SCRIPT_NAME, scriptName);
 
     logAction(ACTION_NAME, actionDetails);
-
 }
 
 void UserActivityLogger::wentTo(AddressManager::LookupTrigger lookupTrigger, QString destinationType, QString destinationName) {
@@ -191,7 +182,6 @@ void UserActivityLogger::wentTo(AddressManager::LookupTrigger lookupTrigger, QSt
         default:
             return;
     }
-
 
     const QString ACTION_NAME = "went_to";
     QJsonObject actionDetails;

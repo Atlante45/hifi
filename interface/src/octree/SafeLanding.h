@@ -17,8 +17,8 @@
 #include <QtCore/QObject>
 #include <QtCore/QSharedPointer>
 
-#include "EntityItem.h"
 #include "EntityDynamicInterface.h"
+#include "EntityItem.h"
 
 class EntityTreeRenderer;
 class EntityItemID;
@@ -27,7 +27,7 @@ class SafeLanding : public QObject {
 public:
     void startEntitySequence(QSharedPointer<EntityTreeRenderer> entityTreeRenderer);
     void stopEntitySequence();
-    void setCompletionSequenceNumbers(int first, int last);  // 'last' exclusive.
+    void setCompletionSequenceNumbers(int first, int last); // 'last' exclusive.
     void noteReceivedsequenceNumber(int sequenceNumber);
     bool isLoadSequenceComplete();
     float loadingProgressPercentage();
@@ -68,4 +68,4 @@ private:
     static const int SEQUENCE_MODULO;
 };
 
-#endif  // hifi_SafeLanding_h
+#endif // hifi_SafeLanding_h

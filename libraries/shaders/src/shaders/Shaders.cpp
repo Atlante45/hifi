@@ -13,13 +13,13 @@
 #include <sstream>
 #include <unordered_map>
 
-#include <QtCore/QFileInfo>
 #include <QtCore/QFile>
+#include <QtCore/QFileInfo>
 
 #include <nlohmann/json.hpp>
 
-#include <shared/FileUtils.h>
 #include <gl/GLHelpers.h>
+#include <shared/FileUtils.h>
 
 // Can't use the Q_INIT_RESOURCE macro inside a namespace on Mac,
 // so this is done out of line
@@ -35,16 +35,16 @@ namespace shader {
 static const Dialect DEFAULT_DIALECT = Dialect::glsl310es;
 
 const std::vector<Dialect>& allDialects() {
-    static const std::vector<Dialect> ALL_DIALECTS{ { Dialect::glsl310es } };
+    static const std::vector<Dialect> ALL_DIALECTS { { Dialect::glsl310es } };
     return ALL_DIALECTS;
 }
-    
-#elif defined(Q_OS_MAC) 
+
+#elif defined(Q_OS_MAC)
 
 static const Dialect DEFAULT_DIALECT = Dialect::glsl410;
 
 const std::vector<Dialect>& allDialects() {
-    static const std::vector<Dialect> ALL_DIALECTS{ Dialect::glsl410 };
+    static const std::vector<Dialect> ALL_DIALECTS { Dialect::glsl410 };
     return ALL_DIALECTS;
 }
 
@@ -52,14 +52,14 @@ const std::vector<Dialect>& allDialects() {
 
 static const Dialect DEFAULT_DIALECT = Dialect::glsl450;
 
-const std::vector<Dialect> & allDialects() {
-    static const std::vector<Dialect> ALL_DIALECTS{ { Dialect::glsl450, Dialect::glsl410 } };
+const std::vector<Dialect>& allDialects() {
+    static const std::vector<Dialect> ALL_DIALECTS { { Dialect::glsl450, Dialect::glsl410 } };
     return ALL_DIALECTS;
 }
 #endif
 
 const std::vector<Variant>& allVariants() {
-    static const std::vector<Variant> ALL_VARIANTS{ { Variant::Mono, Variant::Stereo } };
+    static const std::vector<Variant> ALL_VARIANTS { { Variant::Mono, Variant::Stereo } };
     return ALL_VARIANTS;
 }
 
@@ -68,15 +68,19 @@ const std::string& dialectPath(Dialect dialect) {
     static const std::string e410Path { "/410/" };
     static const std::string e450Path { "/450/" };
     switch (dialect) {
-#if defined(USE_GLES) 
-        case Dialect::glsl310es: return e310esPath;
+#if defined(USE_GLES)
+        case Dialect::glsl310es:
+            return e310esPath;
 #else
 #if !defined(Q_OS_MAC)
-        case Dialect::glsl450: return e450Path;
+        case Dialect::glsl450:
+            return e450Path;
 #endif
-        case Dialect::glsl410: return e410Path;
+        case Dialect::glsl410:
+            return e410Path;
 #endif
-        default: break;
+        default:
+            break;
     }
     throw std::runtime_error("Invalid dialect");
 }
@@ -167,8 +171,8 @@ bool Source::doReplacement(String& source) const {
     for (const auto& entry : replacements) {
         const auto& key = entry.first;
         // First try search for a block to replace
-        // Blocks are required because oftentimes we need a stub function 
-        // in the original source code to allow it to compile.  As such we 
+        // Blocks are required because oftentimes we need a stub function
+        // in the original source code to allow it to compile.  As such we
         // need to replace the stub with our own code rather than just inject
         // some code.
         const auto beginMarker = key + "_BEGIN";
@@ -213,7 +217,6 @@ const DialectVariantSource& Source::getDialectVariantSource(Dialect dialect, Var
     return variantEntry->second;
 }
 
-
 String Source::getSource(Dialect dialect, Variant variant) const {
     String result;
     const auto& variantSource = getDialectVariantSource(dialect, variant);
@@ -241,20 +244,20 @@ const Reflection& Source::getReflection(Dialect dialect, Variant variant) const 
     return variantSource.reflection;
 }
 
-static const std::string NAME_KEY{ "name" };
-static const std::string INPUTS_KEY{ "inputs" };
-static const std::string OUTPUTS_KEY{ "outputs" };
-static const std::string UBOS_KEY{ "ubos" };
-static const std::string SSBOS_KEY{ "ssbos" };
+static const std::string NAME_KEY { "name" };
+static const std::string INPUTS_KEY { "inputs" };
+static const std::string OUTPUTS_KEY { "outputs" };
+static const std::string UBOS_KEY { "ubos" };
+static const std::string SSBOS_KEY { "ssbos" };
 
-static const std::string TEXTURES_KEY{ "textures" };
-static const std::string LOCATION_KEY{ "location" };
-static const std::string BINDING_KEY{ "binding" };
-static const std::string TYPE_KEY{ "type" };
+static const std::string TEXTURES_KEY { "textures" };
+static const std::string LOCATION_KEY { "location" };
+static const std::string BINDING_KEY { "binding" };
+static const std::string TYPE_KEY { "type" };
 
 std::unordered_set<std::string> populateBufferTextureSet(const nlohmann::json& input) {
     std::unordered_set<std::string> result;
-    static const std::string SAMPLER_BUFFER{ "samplerBuffer" };
+    static const std::string SAMPLER_BUFFER { "samplerBuffer" };
     auto arraySize = input.size();
     for (size_t i = 0; i < arraySize; ++i) {
         auto entry = input[i];
@@ -306,16 +309,14 @@ void Reflection::parse(const std::string& jsonString) {
             if (!resourceBuffers.empty()) {
                 throw std::runtime_error("Input shader has both SSBOs and texture buffers defined");
             }
-            for (const auto& bufferTexture : bufferTextures){
+            for (const auto& bufferTexture : bufferTextures) {
                 resourceBuffers[bufferTexture] = textures[bufferTexture];
                 textures.erase(bufferTexture);
             }
         }
     }
     updateValid();
-
 }
-
 
 static void mergeMap(Reflection::LocationMap& output, const Reflection::LocationMap& input) {
     for (const auto& entry : input) {
@@ -354,7 +355,6 @@ void Reflection::updateValid() {
     updateValidSet(validUniforms, uniforms);
 }
 
-
 std::vector<std::string> Reflection::getNames(const LocationMap& locations) {
     std::vector<std::string> result;
     result.reserve(locations.size());
@@ -364,6 +364,4 @@ std::vector<std::string> Reflection::getNames(const LocationMap& locations) {
     return result;
 }
 
-
-}  // namespace shader
-
+} // namespace shader

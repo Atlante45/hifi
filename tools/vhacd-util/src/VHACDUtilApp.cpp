@@ -16,12 +16,11 @@
 #include <Trace.h>
 #include <VHACD.h>
 
-#include "VHACDUtil.h"
 #include "PathUtils.h"
+#include "VHACDUtil.h"
 
 using namespace std;
 using namespace VHACD;
-
 
 QString formatFloat(double n) {
     // limit precision to 6, but don't output trailing zeros.
@@ -34,7 +33,6 @@ QString formatFloat(double n) {
     }
     return s;
 }
-
 
 bool VHACDUtilApp::writeOBJ(QString outFileName, HFMModel& hfmModel, bool outputCentimeters, int whichMeshPart) {
     QFile file(outFileName);
@@ -58,8 +56,8 @@ bool VHACDUtilApp::writeOBJ(QString outFileName, HFMModel& hfmModel, bool output
 
     foreach (const HFMMesh& mesh, hfmModel.meshes) {
         bool verticesHaveBeenOutput = false;
-        foreach (const HFMMeshPart &meshPart, mesh.parts) {
-            if (whichMeshPart >= 0 && nth != (unsigned int) whichMeshPart) {
+        foreach (const HFMMeshPart& meshPart, mesh.parts) {
+            if (whichMeshPart >= 0 && nth != (unsigned int)whichMeshPart) {
                 nth++;
                 continue;
             }
@@ -79,9 +77,9 @@ bool VHACDUtilApp::writeOBJ(QString outFileName, HFMModel& hfmModel, bool output
             int triangleCount = meshPart.triangleIndices.size() / 3;
             for (int i = 0; i < triangleCount; i++) {
                 out << "f ";
-                out << vertexIndexOffset + meshPart.triangleIndices[i*3] + 1 << " ";
-                out << vertexIndexOffset + meshPart.triangleIndices[i*3+1] + 1  << " ";
-                out << vertexIndexOffset + meshPart.triangleIndices[i*3+2] + 1  << "\n";
+                out << vertexIndexOffset + meshPart.triangleIndices[i * 3] + 1 << " ";
+                out << vertexIndexOffset + meshPart.triangleIndices[i * 3 + 1] + 1 << " ";
+                out << vertexIndexOffset + meshPart.triangleIndices[i * 3 + 2] + 1 << "\n";
             }
             out << "\n";
         }
@@ -94,12 +92,7 @@ bool VHACDUtilApp::writeOBJ(QString outFileName, HFMModel& hfmModel, bool output
     return true;
 }
 
-
-
-
-VHACDUtilApp::VHACDUtilApp(int argc, char* argv[]) :
-    QCoreApplication(argc, argv)
-{
+VHACDUtilApp::VHACDUtilApp(int argc, char* argv[]) : QCoreApplication(argc, argv) {
     vhacd::VHACDUtil vUtil;
 
     DependencyManager::set<tracing::Tracer>();
@@ -138,54 +131,70 @@ VHACDUtilApp::VHACDUtilApp(int argc, char* argv[]) :
     const QCommandLineOption maximumMeshSizeOption("x", "maximum mesh (diagonal) size to consider", "0");
     parser.addOption(maximumMeshSizeOption);
 
-    const QCommandLineOption vHacdResolutionOption("resolution", "Maximum number of voxels generated during the "
-                                                   "voxelization stage (range=10,000-16,000,000)", "100000");
+    const QCommandLineOption vHacdResolutionOption("resolution",
+                                                   "Maximum number of voxels generated during the "
+                                                   "voxelization stage (range=10,000-16,000,000)",
+                                                   "100000");
     parser.addOption(vHacdResolutionOption);
 
-    const QCommandLineOption vHacdDepthOption("depth", "Maximum number of clipping stages. During each split stage, parts "
+    const QCommandLineOption vHacdDepthOption("depth",
+                                              "Maximum number of clipping stages. During each split stage, parts "
                                               "with a concavity higher than the user defined threshold are clipped "
-                                              "according the \"best\" clipping plane (range=1-32)", "20");
+                                              "according the \"best\" clipping plane (range=1-32)",
+                                              "20");
     parser.addOption(vHacdDepthOption);
 
-
-    const QCommandLineOption vHacdAlphaOption("alpha", "Controls the bias toward clipping along symmetry "
-                                              "planes (range=0.0-1.0)", "0.05");
+    const QCommandLineOption vHacdAlphaOption("alpha",
+                                              "Controls the bias toward clipping along symmetry "
+                                              "planes (range=0.0-1.0)",
+                                              "0.05");
     parser.addOption(vHacdAlphaOption);
 
-    const QCommandLineOption vHacdBetaOption("beta", "Controls the bias toward clipping along revolution "
-                                             "axes (range=0.0-1.0)", "0.05");
+    const QCommandLineOption vHacdBetaOption("beta",
+                                             "Controls the bias toward clipping along revolution "
+                                             "axes (range=0.0-1.0)",
+                                             "0.05");
     parser.addOption(vHacdBetaOption);
 
-    const QCommandLineOption vHacdGammaOption("gamma", "Controls the maximum allowed concavity during the "
-                                              "merge stage (range=0.0-1.0)", "0.00125");
+    const QCommandLineOption vHacdGammaOption("gamma",
+                                              "Controls the maximum allowed concavity during the "
+                                              "merge stage (range=0.0-1.0)",
+                                              "0.00125");
     parser.addOption(vHacdGammaOption);
 
-    const QCommandLineOption vHacdDeltaOption("delta", "Controls the bias toward maximaxing local "
-                                              "concavity (range=0.0-1.0)", "0.05");
+    const QCommandLineOption vHacdDeltaOption("delta",
+                                              "Controls the bias toward maximaxing local "
+                                              "concavity (range=0.0-1.0)",
+                                              "0.05");
     parser.addOption(vHacdDeltaOption);
 
     const QCommandLineOption vHacdConcavityOption("concavity", "Maximum allowed concavity (range=0.0-1.0)", "0.0025");
     parser.addOption(vHacdConcavityOption);
 
-    const QCommandLineOption vHacdPlanedownsamplingOption("planedownsampling", "Controls the granularity of the search for"
-                                                          " the \"best\" clipping plane (range=1-16)", "4");
+    const QCommandLineOption vHacdPlanedownsamplingOption("planedownsampling",
+                                                          "Controls the granularity of the search for"
+                                                          " the \"best\" clipping plane (range=1-16)",
+                                                          "4");
     parser.addOption(vHacdPlanedownsamplingOption);
 
-    const QCommandLineOption vHacdConvexhulldownsamplingOption("convexhulldownsampling", "Controls the precision of the "
+    const QCommandLineOption vHacdConvexhulldownsamplingOption("convexhulldownsampling",
+                                                               "Controls the precision of the "
                                                                "convex-hull generation process during the clipping "
-                                                               "plane selection stage (range=1-16)", "4");
+                                                               "plane selection stage (range=1-16)",
+                                                               "4");
     parser.addOption(vHacdConvexhulldownsamplingOption);
 
     // pca
     // mode
 
-    const QCommandLineOption vHacdMaxVerticesPerCHOption("maxvertices", "Controls the maximum number of triangles per "
-                                                         "convex-hull (range=4-1024)", "64");
+    const QCommandLineOption vHacdMaxVerticesPerCHOption("maxvertices",
+                                                         "Controls the maximum number of triangles per "
+                                                         "convex-hull (range=4-1024)",
+                                                         "64");
     parser.addOption(vHacdMaxVerticesPerCHOption);
 
     // minVolumePerCH
     // convexhullApproximation
-
 
     if (!parser.parse(QCoreApplication::arguments())) {
         qCritical() << parser.errorText() << endl;
@@ -206,7 +215,6 @@ VHACDUtilApp::VHACDUtilApp(int argc, char* argv[]) :
     bool generateHulls = parser.isSet(generateHullsOption);
     bool splitModel = parser.isSet(splitOption);
 
-
     QString inputFilename;
     if (parser.isSet(inputFilenameOption)) {
         inputFilename = parser.value(inputFilenameOption);
@@ -216,7 +224,6 @@ VHACDUtilApp::VHACDUtilApp(int argc, char* argv[]) :
     if (parser.isSet(outputFilenameOption)) {
         outputFilename = parser.value(outputFilenameOption);
     }
-
 
     if (inputFilename == "") {
         cerr << "input filename is required.";
@@ -299,7 +306,7 @@ VHACDUtilApp::VHACDUtilApp(int argc, char* argv[]) :
     // load the mesh
     HFMModel fbx;
     auto begin = std::chrono::high_resolution_clock::now();
-    if (!vUtil.loadFBX(inputFilename, fbx)){
+    if (!vUtil.loadFBX(inputFilename, fbx)) {
         _returnCode = VHACD_RETURN_CODE_FAILURE_TO_READ;
         return;
     }
@@ -312,11 +319,11 @@ VHACDUtilApp::VHACDUtilApp(int argc, char* argv[]) :
     }
 
     if (splitModel) {
-        QVector<QString> infileExtensions = {"fbx", "obj"};
+        QVector<QString> infileExtensions = { "fbx", "obj" };
         QString baseFileName = fileNameWithoutExtension(outputFilename, infileExtensions);
         int count = 0;
         foreach (const HFMMesh& mesh, fbx.meshes) {
-            foreach (const HFMMeshPart &meshPart, mesh.parts) {
+            foreach (const HFMMeshPart& meshPart, mesh.parts) {
                 QString outputFileName = baseFileName + "-" + QString::number(count) + ".obj";
                 writeOBJ(outputFileName, fbx, outputCentimeters, count);
                 count++;
@@ -329,9 +336,9 @@ VHACDUtilApp::VHACDUtilApp(int argc, char* argv[]) :
         VHACD::IVHACD::Parameters params;
         vhacd::ProgressCallback progressCallback;
 
-        //set parameters for V-HACD
+        // set parameters for V-HACD
         if (verbose) {
-            params.m_callback = &progressCallback; //progress callback
+            params.m_callback = &progressCallback; // progress callback
         } else {
             params.m_callback = nullptr;
         }
@@ -352,7 +359,7 @@ VHACDUtilApp::VHACDUtilApp(int argc, char* argv[]) :
         params.m_convexhullApproximation = true; // true
         params.m_oclAcceleration = true; // true
 
-        //perform vhacd computation
+        // perform vhacd computation
         if (verbose) {
             qDebug() << "running V-HACD algorithm ...";
         }
@@ -379,7 +386,7 @@ VHACDUtilApp::VHACDUtilApp(int argc, char* argv[]) :
         int totalTriangles = 0;
         foreach (const HFMMesh& mesh, result.meshes) {
             totalVertices += mesh.vertices.size();
-            foreach (const HFMMeshPart &meshPart, mesh.parts) {
+            foreach (const HFMMeshPart& meshPart, mesh.parts) {
                 totalTriangles += meshPart.triangleIndices.size() / 3;
                 // each quad was made into two triangles
                 totalTriangles += 2 * meshPart.quadIndices.size() / 4;
@@ -403,14 +410,10 @@ VHACDUtilApp::VHACDUtilApp(int argc, char* argv[]) :
 
         // count the mesh-parts
         unsigned int meshCount = 0;
-        foreach (const HFMMesh& mesh, fbx.meshes) {
-            meshCount += mesh.parts.size();
-        }
+        foreach (const HFMMesh& mesh, fbx.meshes) { meshCount += mesh.parts.size(); }
 
         result.modelTransform = glm::mat4(); // Identity matrix
-        foreach (const HFMMesh& mesh, fbx.meshes) {
-            vUtil.fattenMesh(mesh, fbx.offset, result);
-        }
+        foreach (const HFMMesh& mesh, fbx.meshes) { vUtil.fattenMesh(mesh, fbx.offset, result); }
 
         newFbx.meshes.append(result);
         writeOBJ(outputFilename, newFbx, outputCentimeters);

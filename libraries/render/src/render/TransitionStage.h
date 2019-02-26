@@ -11,58 +11,56 @@
 #ifndef hifi_render_TransitionStage_h
 #define hifi_render_TransitionStage_h
 
-#include "Stage.h"
-#include "IndexedContainer.h"
 #include "Engine.h"
+#include "IndexedContainer.h"
+#include "Stage.h"
 #include "Transition.h"
 
 namespace render {
 
-    // Transition stage to set up Transition-related effects
-    class TransitionStage : public render::Stage {
-    public:
+// Transition stage to set up Transition-related effects
+class TransitionStage : public render::Stage {
+public:
+    static const std::string& getName() { return _name; }
 
-        static const std::string& getName() { return _name; }
+    using Index = indexed_container::Index;
+    static const Index INVALID_INDEX;
+    using TransitionIdList = indexed_container::Indices;
 
-        using Index = indexed_container::Index;
-        static const Index INVALID_INDEX;
-        using TransitionIdList = indexed_container::Indices;
+    static bool isIndexInvalid(Index index) { return index == INVALID_INDEX; }
 
-        static bool isIndexInvalid(Index index) { return index == INVALID_INDEX; }
+    bool checkTransitionId(Index index) const { return _transitions.checkIndex(index); }
 
-        bool checkTransitionId(Index index) const { return _transitions.checkIndex(index); }
+    const Transition& getTransition(Index TransitionId) const { return _transitions.get(TransitionId); }
 
-        const Transition& getTransition(Index TransitionId) const { return _transitions.get(TransitionId); }
+    Transition& editTransition(Index TransitionId) { return _transitions.edit(TransitionId); }
 
-        Transition& editTransition(Index TransitionId) { return _transitions.edit(TransitionId); }
+    Index addTransition(ItemID itemId, Transition::Type type, ItemID boundId);
+    void removeTransition(Index index);
 
-        Index addTransition(ItemID itemId, Transition::Type type, ItemID boundId);
-        void removeTransition(Index index);
+    TransitionIdList::iterator begin() { return _activeTransitionIds.begin(); }
+    TransitionIdList::iterator end() { return _activeTransitionIds.end(); }
 
-        TransitionIdList::iterator begin() { return _activeTransitionIds.begin(); }
-        TransitionIdList::iterator end() { return _activeTransitionIds.end(); }
+private:
+    using Transitions = indexed_container::IndexedVector<Transition>;
 
-    private:
+    static std::string _name;
 
-        using Transitions = indexed_container::IndexedVector<Transition>;
+    Transitions _transitions;
+    TransitionIdList _activeTransitionIds;
+};
+using TransitionStagePointer = std::shared_ptr<TransitionStage>;
 
-        static std::string _name;
+class TransitionStageSetup {
+public:
+    using JobModel = render::Job::Model<TransitionStageSetup>;
 
-        Transitions _transitions;
-        TransitionIdList _activeTransitionIds;
-    };
-    using TransitionStagePointer = std::shared_ptr<TransitionStage>;
+    TransitionStageSetup();
+    void run(const RenderContextPointer& renderContext);
 
-    class TransitionStageSetup {
-    public:
-        using JobModel = render::Job::Model<TransitionStageSetup>;
+protected:
+};
 
-        TransitionStageSetup();
-        void run(const RenderContextPointer& renderContext);
-
-    protected:
-    };
-
-}
+} // namespace render
 
 #endif // hifi_render_TransitionStage_h

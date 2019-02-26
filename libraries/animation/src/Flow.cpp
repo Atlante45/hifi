@@ -9,12 +9,14 @@
 //
 
 #include "Flow.h"
-#include "Rig.h"
 #include "AnimSkeleton.h"
+#include "Rig.h"
 
-const std::map<QString, FlowPhysicsSettings> PRESET_FLOW_DATA = { { "hair", FlowPhysicsSettings() },
-{ "skirt", FlowPhysicsSettings(true, 1.0f, DEFAULT_GRAVITY, 0.65f, 0.8f, 0.45f, 0.01f) },
-{ "breast", FlowPhysicsSettings(true, 1.0f, DEFAULT_GRAVITY, 0.65f, 0.8f, 0.45f, 0.01f) } };
+const std::map<QString, FlowPhysicsSettings> PRESET_FLOW_DATA = {
+    { "hair", FlowPhysicsSettings() },
+    { "skirt", FlowPhysicsSettings(true, 1.0f, DEFAULT_GRAVITY, 0.65f, 0.8f, 0.45f, 0.01f) },
+    { "breast", FlowPhysicsSettings(true, 1.0f, DEFAULT_GRAVITY, 0.65f, 0.8f, 0.45f, 0.01f) }
+};
 
 const std::map<QString, FlowCollisionSettings> PRESET_COLLISION_DATA = {
     { "Spine2", FlowCollisionSettings(QUuid(), FlowCollisionType::CollisionSphere, glm::vec3(0.0f, 0.2f, 0.0f), 0.14f) },
@@ -42,7 +44,9 @@ FlowCollisionResult FlowCollisionSphere::computeSphereCollision(const glm::vec3&
     return result;
 }
 
-FlowCollisionResult FlowCollisionSphere::checkSegmentCollision(const glm::vec3& point1, const glm::vec3& point2, const FlowCollisionResult& collisionResult1, const FlowCollisionResult& collisionResult2) {
+FlowCollisionResult FlowCollisionSphere::checkSegmentCollision(const glm::vec3& point1, const glm::vec3& point2,
+                                                               const FlowCollisionResult& collisionResult1,
+                                                               const FlowCollisionResult& collisionResult2) {
     FlowCollisionResult result;
     auto segment = point2 - point1;
     auto segmentLength = glm::length(segment);
@@ -63,7 +67,8 @@ FlowCollisionResult FlowCollisionSphere::checkSegmentCollision(const glm::vec3& 
     return result;
 }
 
-void FlowCollisionSystem::addCollisionSphere(int jointIndex, const FlowCollisionSettings& settings, const glm::vec3& position, bool isSelfCollision, bool isTouch) {
+void FlowCollisionSystem::addCollisionSphere(int jointIndex, const FlowCollisionSettings& settings, const glm::vec3& position,
+                                             bool isSelfCollision, bool isTouch) {
     auto collision = FlowCollisionSphere(jointIndex, settings, isTouch);
     collision.setPosition(position);
     if (isSelfCollision) {
@@ -71,7 +76,6 @@ void FlowCollisionSystem::addCollisionSphere(int jointIndex, const FlowCollision
     } else {
         _othersCollisions.push_back(collision);
     }
-
 };
 void FlowCollisionSystem::resetCollisions() {
     _allCollisions.clear();
@@ -112,10 +116,10 @@ std::vector<FlowCollisionResult> FlowCollisionSystem::checkFlowThreadCollisions(
     std::vector<std::vector<FlowCollisionResult>> FlowThreadResults;
     FlowThreadResults.resize(flowThread->_joints.size());
     for (size_t j = 0; j < _allCollisions.size(); j++) {
-        FlowCollisionSphere &sphere = _allCollisions[j];
+        FlowCollisionSphere& sphere = _allCollisions[j];
         FlowCollisionResult rootCollision = sphere.computeSphereCollision(flowThread->_positions[0], flowThread->_radius);
         std::vector<FlowCollisionResult> collisionData = { rootCollision };
-        bool tooFar = rootCollision._distance >(flowThread->_length + rootCollision._radius);
+        bool tooFar = rootCollision._distance > (flowThread->_length + rootCollision._radius);
         FlowCollisionResult nextCollision;
         if (!tooFar) {
             if (sphere._isTouch) {
@@ -130,7 +134,8 @@ std::vector<FlowCollisionResult> FlowCollisionSystem::checkFlowThreadCollisions(
                     } else if (nextCollision._offset > 0.0f) {
                         FlowThreadResults[i].push_back(nextCollision);
                     } else {
-                        FlowCollisionResult segmentCollision = _allCollisions[j].checkSegmentCollision(flowThread->_positions[i - 1], flowThread->_positions[i], prevCollision, nextCollision);
+                        FlowCollisionResult segmentCollision = _allCollisions[j].checkSegmentCollision(
+                            flowThread->_positions[i - 1], flowThread->_positions[i], prevCollision, nextCollision);
                         if (segmentCollision._offset > 0) {
                             FlowThreadResults[i - 1].push_back(segmentCollision);
                             FlowThreadResults[i].push_back(segmentCollision);
@@ -159,15 +164,16 @@ std::vector<FlowCollisionResult> FlowCollisionSystem::checkFlowThreadCollisions(
 };
 
 FlowCollisionSettings FlowCollisionSystem::getCollisionSettingsByJoint(int jointIndex) {
-    for (auto &collision : _selfCollisions) {
+    for (auto& collision : _selfCollisions) {
         if (collision._jointIndex == jointIndex) {
-            return FlowCollisionSettings(collision._entityID, FlowCollisionType::CollisionSphere, collision._initialOffset, collision._initialRadius);
+            return FlowCollisionSettings(collision._entityID, FlowCollisionType::CollisionSphere, collision._initialOffset,
+                                         collision._initialRadius);
         }
     }
     return FlowCollisionSettings();
 }
 void FlowCollisionSystem::setCollisionSettingsByJoint(int jointIndex, const FlowCollisionSettings& settings) {
-    for (auto &collision : _selfCollisions) {
+    for (auto& collision : _selfCollisions) {
         if (collision._jointIndex == jointIndex) {
             collision._initialRadius = settings._radius;
             collision._initialOffset = settings._offset;
@@ -180,7 +186,8 @@ void FlowCollisionSystem::prepareCollisions() {
     _allCollisions.clear();
     _allCollisions.resize(_selfCollisions.size() + _othersCollisions.size());
     std::copy(_selfCollisions.begin(), _selfCollisions.begin() + _selfCollisions.size(), _allCollisions.begin());
-    std::copy(_othersCollisions.begin(), _othersCollisions.begin() + _othersCollisions.size(), _allCollisions.begin() + _selfCollisions.size());
+    std::copy(_othersCollisions.begin(), _othersCollisions.begin() + _othersCollisions.size(),
+              _allCollisions.begin() + _selfCollisions.size());
     _othersCollisions.clear();
 }
 
@@ -201,20 +208,20 @@ void FlowNode::update(float deltaTime, const glm::vec3& accelerationOffset) {
         float invertedTimeRatio = timeRatio > 0.0f ? 1.0f / timeRatio : 1.0f;
         auto deltaVelocity = _previousVelocity - _currentVelocity;
         auto centrifugeVector = glm::length(deltaVelocity) != 0.0f ? glm::normalize(deltaVelocity) : glm::vec3();
-        _acceleration = _acceleration + centrifugeVector * _settings._inertia * glm::length(_currentVelocity) * invertedTimeRatio;
+        _acceleration = _acceleration +
+                        centrifugeVector * _settings._inertia * glm::length(_currentVelocity) * invertedTimeRatio;
 
         // Add offset
         _acceleration += accelerationOffset;
         float accelerationFactor = powf(_settings._delta, 2.0f) * timeRatio;
         glm::vec3 deltaAcceleration = _acceleration * accelerationFactor;
-        // Calculate new position        
+        // Calculate new position
         _currentPosition = _currentPosition + (_currentVelocity * _settings._damping) + deltaAcceleration;
     } else {
         _acceleration = glm::vec3(0.0f);
         _currentVelocity = glm::vec3(0.0f);
     }
 };
-
 
 void FlowNode::solve(const glm::vec3& constrainPoint, float maxDistance, const FlowCollisionResult& collision) {
     solveConstraints(constrainPoint, maxDistance);
@@ -238,7 +245,8 @@ void FlowNode::solveCollisions(const FlowCollisionResult& collision) {
     }
 };
 
-FlowJoint::FlowJoint(int jointIndex, int parentIndex, int childIndex, const QString& name, const QString& group, const FlowPhysicsSettings& settings) {
+FlowJoint::FlowJoint(int jointIndex, int parentIndex, int childIndex, const QString& name, const QString& group,
+                     const FlowPhysicsSettings& settings) {
     _index = jointIndex;
     _name = name;
     _group = group;
@@ -247,7 +255,8 @@ FlowJoint::FlowJoint(int jointIndex, int parentIndex, int childIndex, const QStr
     FlowNode(glm::vec3(), settings);
 };
 
-void FlowJoint::setInitialData(const glm::vec3& initialPosition, const glm::vec3& initialTranslation, const glm::quat& initialRotation, const glm::vec3& parentPosition) {
+void FlowJoint::setInitialData(const glm::vec3& initialPosition, const glm::vec3& initialTranslation,
+                               const glm::quat& initialRotation, const glm::vec3& parentPosition) {
     _initialPosition = initialPosition;
     _previousPosition = initialPosition;
     _currentPosition = initialPosition;
@@ -259,7 +268,9 @@ void FlowJoint::setInitialData(const glm::vec3& initialPosition, const glm::vec3
     _initialLength = _length = glm::length(_initialPosition - parentPosition);
 }
 
-void FlowJoint::setUpdatedData(const glm::vec3& updatedPosition, const glm::vec3& updatedTranslation, const glm::quat& updatedRotation, const glm::vec3& parentPosition, const glm::quat& parentWorldRotation) {
+void FlowJoint::setUpdatedData(const glm::vec3& updatedPosition, const glm::vec3& updatedTranslation,
+                               const glm::quat& updatedRotation, const glm::vec3& parentPosition,
+                               const glm::quat& parentWorldRotation) {
     _updatedPosition = updatedPosition;
     _updatedRotation = updatedRotation;
     _updatedTranslation = updatedTranslation;
@@ -353,18 +364,20 @@ void FlowThread::computeRecovery() {
     glm::quat parentRotation = parentJoint._parentWorldRotation * parentJoint._initialRotation;
     for (size_t i = 1; i < _joints.size(); i++) {
         auto joint = _jointsPointer->at(_joints[i]);
-        _jointsPointer->at(_joints[i])._recoveryPosition = joint._recoveryPosition = parentJoint._recoveryPosition + (parentRotation * (joint._initialTranslation * 0.01f));
+        _jointsPointer->at(_joints[i])._recoveryPosition = joint._recoveryPosition = parentJoint._recoveryPosition +
+                                                                                     (parentRotation *
+                                                                                      (joint._initialTranslation * 0.01f));
         parentJoint = joint;
     }
 };
 
 void FlowThread::update(float deltaTime) {
     _positions.clear();
-    auto &firstJoint = _jointsPointer->at(_joints[0]);
+    auto& firstJoint = _jointsPointer->at(_joints[0]);
     _radius = firstJoint._settings._radius;
     computeRecovery();
     for (size_t i = 0; i < _joints.size(); i++) {
-        auto &joint = _jointsPointer->at(_joints[i]);
+        auto& joint = _jointsPointer->at(_joints[i]);
         joint.update(deltaTime);
         _positions.push_back(joint._currentPosition);
     }
@@ -386,7 +399,6 @@ void FlowThread::solve(FlowCollisionSystem& collisionSystem) {
 };
 
 void FlowThread::computeJointRotations() {
-
     auto pos0 = _rootFramePositions[0];
     auto pos1 = _rootFramePositions[1];
 
@@ -401,11 +413,12 @@ void FlowThread::computeJointRotations() {
     auto delta = rotationBetween(vec0, vec1);
 
     joint0._currentRotation = _jointsPointer->at(_joints[0])._currentRotation = delta * joint0._initialRotation;
-    
+
     for (size_t i = 1; i < _joints.size() - 1; i++) {
         auto nextJoint = _jointsPointer->at(_joints[i + 1]);
         for (size_t j = i; j < _joints.size(); j++) {
-            _rootFramePositions[j] = glm::inverse(joint0._currentRotation) * _rootFramePositions[j] - (joint0._initialTranslation * 0.01f);
+            _rootFramePositions[j] = glm::inverse(joint0._currentRotation) * _rootFramePositions[j] -
+                                     (joint0._initialTranslation * 0.01f);
         }
         pos0 = _rootFramePositions[i];
         pos1 = _rootFramePositions[i + 1];
@@ -420,19 +433,18 @@ void FlowThread::computeJointRotations() {
         joint0 = joint1;
         joint1 = nextJoint;
     }
-    
 }
 
 void FlowThread::setScale(float scale, bool initScale) {
     for (size_t i = 0; i < _joints.size(); i++) {
-        auto &joint = _jointsPointer->at(_joints[i]);
+        auto& joint = _jointsPointer->at(_joints[i]);
         joint.setScale(scale, initScale);
     }
     resetLength();
 }
 
 FlowThread& FlowThread::operator=(const FlowThread& otherFlowThread) {
-    for (int jointIndex: otherFlowThread._joints) {
+    for (int jointIndex : otherFlowThread._joints) {
         auto& joint = otherFlowThread._jointsPointer->at(jointIndex);
         auto& myJoint = _jointsPointer->at(jointIndex);
         myJoint._acceleration = joint._acceleration;
@@ -454,8 +466,8 @@ FlowThread& FlowThread::operator=(const FlowThread& otherFlowThread) {
     return *this;
 }
 
-void Flow::calculateConstraints(const std::shared_ptr<AnimSkeleton>& skeleton, 
-                                AnimPoseVec& relativePoses, AnimPoseVec& absolutePoses) {
+void Flow::calculateConstraints(const std::shared_ptr<AnimSkeleton>& skeleton, AnimPoseVec& relativePoses,
+                                AnimPoseVec& absolutePoses) {
     cleanUp();
     if (!skeleton) {
         return;
@@ -505,7 +517,7 @@ void Flow::calculateConstraints(const std::shared_ptr<AnimSkeleton>& skeleton,
                 } else {
                     jointSettings = DEFAULT_JOINT_SETTINGS;
                 }
-                if (_flowJointData.find(i) ==  _flowJointData.end()) {
+                if (_flowJointData.find(i) == _flowJointData.end()) {
                     auto flowJoint = FlowJoint(i, parentIndex, -1, name, group, jointSettings);
                     _flowJointData.insert(std::pair<int, FlowJoint>(i, flowJoint));
                 }
@@ -517,21 +529,22 @@ void Flow::calculateConstraints(const std::shared_ptr<AnimSkeleton>& skeleton,
         }
     }
 
-    for (auto &jointData : _flowJointData) {
+    for (auto& jointData : _flowJointData) {
         int jointIndex = jointData.first;
         glm::vec3 jointPosition, parentPosition, jointTranslation;
         glm::quat jointRotation;
         getJointPositionInWorldFrame(absolutePoses, jointIndex, jointPosition, _entityPosition, _entityRotation);
         getJointTranslation(relativePoses, jointIndex, jointTranslation);
         getJointRotation(relativePoses, jointIndex, jointRotation);
-        getJointPositionInWorldFrame(absolutePoses, jointData.second.getParentIndex(), parentPosition, _entityPosition, _entityRotation);
+        getJointPositionInWorldFrame(absolutePoses, jointData.second.getParentIndex(), parentPosition, _entityPosition,
+                                     _entityRotation);
 
         jointData.second.setInitialData(jointPosition, jointTranslation, jointRotation, parentPosition);
     }
 
     std::vector<int> roots;
 
-    for (auto &joint :_flowJointData) {
+    for (auto& joint : _flowJointData) {
         if (_flowJointData.find(joint.second.getParentIndex()) == _flowJointData.end()) {
             joint.second.setAnchored(true);
             roots.push_back(joint.first);
@@ -546,15 +559,16 @@ void Flow::calculateConstraints(const std::shared_ptr<AnimSkeleton>& skeleton,
         if (thread._joints.size() > 0) {
             if (thread._joints.size() == 1) {
                 int jointIndex = roots[i];
-                auto &joint = _flowJointData[jointIndex];
-                auto &jointPosition = joint.getUpdatedPosition();
+                auto& joint = _flowJointData[jointIndex];
+                auto& jointPosition = joint.getUpdatedPosition();
                 auto newSettings = joint.getSettings();
                 extraIndex = extraIndex > -1 ? extraIndex + 1 : skeleton->getNumJoints();
                 joint.setChildIndex(extraIndex);
                 auto newJoint = FlowJoint(extraIndex, jointIndex, -1, joint.getName(), joint.getGroup(), newSettings);
                 newJoint.toHelperJoint(jointPosition, HELPER_JOINT_LENGTH);
                 glm::vec3 translation = glm::vec3(0.0f, HELPER_JOINT_LENGTH, 0.0f);
-                newJoint.setInitialData(jointPosition + translation, 100.0f * translation , Quaternions::IDENTITY, jointPosition);
+                newJoint.setInitialData(jointPosition + translation, 100.0f * translation, Quaternions::IDENTITY,
+                                        jointPosition);
                 _flowJointData.insert(std::pair<int, FlowJoint>(extraIndex, newJoint));
                 FlowThread newThread = FlowThread(jointIndex, &_flowJointData);
                 if (newThread._joints.size() > 1) {
@@ -565,7 +579,7 @@ void Flow::calculateConstraints(const std::shared_ptr<AnimSkeleton>& skeleton,
             }
         }
     }
-    
+
     if (_jointThreads.size() == 0) {
         onCleanup();
     }
@@ -587,7 +601,7 @@ void Flow::cleanUp() {
     _initialized = false;
     _isScaleSet = false;
     onCleanup();
- }
+}
 
 void Flow::setTransform(float scale, const glm::vec3& position, const glm::quat& rotation) {
     _scale = scale;
@@ -604,10 +618,10 @@ void Flow::setScale(float scale) {
         _lastScale = _scale;
         _isScaleSet = true;
     }
-    
 }
 
-void Flow::update(float deltaTime, AnimPoseVec& relativePoses, AnimPoseVec& absolutePoses, const std::vector<bool>& overrideFlags) {
+void Flow::update(float deltaTime, AnimPoseVec& relativePoses, AnimPoseVec& absolutePoses,
+                  const std::vector<bool>& overrideFlags) {
     if (_initialized && _active) {
         uint64_t startTime = usecTimestampNow();
         uint64_t updateExpiry = startTime + MAX_UPDATE_FLOW_TIME_BUDGET;
@@ -616,7 +630,7 @@ void Flow::update(float deltaTime, AnimPoseVec& relativePoses, AnimPoseVec& abso
         }
         for (size_t i = 0; i < _jointThreads.size(); i++) {
             size_t index = _invertThreadLoop ? _jointThreads.size() - 1 - i : i;
-            auto &thread = _jointThreads[index];
+            auto& thread = _jointThreads[index];
             thread.update(deltaTime);
             thread.solve(_collisionSystem);
             if (!updateRootFramePositions(absolutePoses, index)) {
@@ -631,24 +645,24 @@ void Flow::update(float deltaTime, AnimPoseVec& relativePoses, AnimPoseVec& abso
         setJoints(relativePoses, overrideFlags);
         updateJoints(relativePoses, absolutePoses);
         _invertThreadLoop = !_invertThreadLoop;
-    }    
+    }
 }
 
 void Flow::updateAbsolutePoses(const AnimPoseVec& relativePoses, AnimPoseVec& absolutePoses) {
-    for (auto &joint : _flowJointData) {
+    for (auto& joint : _flowJointData) {
         int index = joint.second.getIndex();
         int parentIndex = joint.second.getParentIndex();
-        if (index >= 0 && index < (int)relativePoses.size() &&
-            parentIndex >= 0 && parentIndex < (int)absolutePoses.size()) {
+        if (index >= 0 && index < (int)relativePoses.size() && parentIndex >= 0 && parentIndex < (int)absolutePoses.size()) {
             absolutePoses[index] = absolutePoses[parentIndex] * relativePoses[index];
         }
     }
 }
 
-bool Flow::worldToJointPoint(const AnimPoseVec& absolutePoses, const glm::vec3& position, const int jointIndex, glm::vec3& jointSpacePosition) const {
+bool Flow::worldToJointPoint(const AnimPoseVec& absolutePoses, const glm::vec3& position, const int jointIndex,
+                             glm::vec3& jointSpacePosition) const {
     glm::vec3 jointPos;
     glm::quat jointRot;
-    if (getJointPositionInWorldFrame(absolutePoses, jointIndex, jointPos, _entityPosition, _entityRotation) && 
+    if (getJointPositionInWorldFrame(absolutePoses, jointIndex, jointPos, _entityPosition, _entityRotation) &&
         getJointRotationInWorldFrame(absolutePoses, jointIndex, jointRot, _entityRotation)) {
         glm::vec3 modelOffset = position - jointPos;
         jointSpacePosition = glm::inverse(jointRot) * modelOffset;
@@ -658,7 +672,7 @@ bool Flow::worldToJointPoint(const AnimPoseVec& absolutePoses, const glm::vec3& 
 }
 
 bool Flow::updateRootFramePositions(const AnimPoseVec& absolutePoses, size_t threadIndex) {
-    auto &joints = _jointThreads[threadIndex]._joints;
+    auto& joints = _jointThreads[threadIndex]._joints;
     int rootIndex = _flowJointData[joints[0]].getParentIndex();
     _jointThreads[threadIndex]._rootFramePositions.clear();
     for (size_t j = 0; j < joints.size(); j++) {
@@ -674,7 +688,7 @@ bool Flow::updateRootFramePositions(const AnimPoseVec& absolutePoses, size_t thr
 
 void Flow::updateJoints(AnimPoseVec& relativePoses, AnimPoseVec& absolutePoses) {
     updateAbsolutePoses(relativePoses, absolutePoses);
-    for (auto &jointData : _flowJointData) {
+    for (auto& jointData : _flowJointData) {
         int jointIndex = jointData.first;
         glm::vec3 jointPosition, parentPosition, jointTranslation;
         glm::quat jointRotation, parentWorldRotation;
@@ -687,14 +701,16 @@ void Flow::updateJoints(AnimPoseVec& relativePoses, AnimPoseVec& absolutePoses) 
             jointTranslation = jointData.second.getCurrentTranslation();
             jointRotation = jointData.second.getCurrentRotation();
         }
-        getJointPositionInWorldFrame(absolutePoses, jointData.second.getParentIndex(), parentPosition, _entityPosition, _entityRotation);
+        getJointPositionInWorldFrame(absolutePoses, jointData.second.getParentIndex(), parentPosition, _entityPosition,
+                                     _entityRotation);
         getJointRotationInWorldFrame(absolutePoses, jointData.second.getParentIndex(), parentWorldRotation, _entityRotation);
         jointData.second.setUpdatedData(jointPosition, jointTranslation, jointRotation, parentPosition, parentWorldRotation);
     }
-    auto &selfCollisions = _collisionSystem.getSelfCollisions();
-    for (auto &collision : selfCollisions) {
+    auto& selfCollisions = _collisionSystem.getSelfCollisions();
+    for (auto& collision : selfCollisions) {
         glm::quat jointRotation;
-        getJointPositionInWorldFrame(absolutePoses, collision._jointIndex, collision._position, _entityPosition, _entityRotation);
+        getJointPositionInWorldFrame(absolutePoses, collision._jointIndex, collision._position, _entityPosition,
+                                     _entityRotation);
         getJointRotationInWorldFrame(absolutePoses, collision._jointIndex, jointRotation, _entityRotation);
         glm::vec3 worldOffset = jointRotation * collision._offset;
         collision._position = collision._position + worldOffset;
@@ -703,13 +719,13 @@ void Flow::updateJoints(AnimPoseVec& relativePoses, AnimPoseVec& absolutePoses) 
 }
 
 void Flow::setJoints(AnimPoseVec& relativePoses, const std::vector<bool>& overrideFlags) {
-    for (auto &thread : _jointThreads) {
-        auto &joints = thread._joints;
+    for (auto& thread : _jointThreads) {
+        auto& joints = thread._joints;
         for (int jointIndex : joints) {
-            auto &joint = _flowJointData[jointIndex];
+            auto& joint = _flowJointData[jointIndex];
             if (jointIndex >= 0 && jointIndex < (int)relativePoses.size() && !overrideFlags[jointIndex]) {
                 relativePoses[jointIndex].rot() = joint.getCurrentRotation();
-            }            
+            }
         }
     }
 }
@@ -722,14 +738,15 @@ void Flow::setOthersCollision(const QUuid& otherId, int jointIndex, const glm::v
 }
 
 void Flow::setPhysicsSettingsForGroup(const QString& group, const FlowPhysicsSettings& settings) {
-    for (auto &joint : _flowJointData) {
+    for (auto& joint : _flowJointData) {
         if (joint.second.getGroup().toUpper() == group.toUpper()) {
             joint.second.setSettings(settings);
         }
     }
 }
 
-bool Flow::getJointPositionInWorldFrame(const AnimPoseVec& absolutePoses, int jointIndex, glm::vec3& position, glm::vec3 translation, glm::quat rotation) const {
+bool Flow::getJointPositionInWorldFrame(const AnimPoseVec& absolutePoses, int jointIndex, glm::vec3& position,
+                                        glm::vec3 translation, glm::quat rotation) const {
     if (jointIndex >= 0 && jointIndex < (int)absolutePoses.size()) {
         glm::vec3 poseSetTrans = absolutePoses[jointIndex].trans();
         position = (rotation * poseSetTrans) + translation;
@@ -742,7 +759,8 @@ bool Flow::getJointPositionInWorldFrame(const AnimPoseVec& absolutePoses, int jo
     return false;
 }
 
-bool Flow::getJointRotationInWorldFrame(const AnimPoseVec& absolutePoses, int jointIndex, glm::quat& result, const glm::quat& rotation) const {
+bool Flow::getJointRotationInWorldFrame(const AnimPoseVec& absolutePoses, int jointIndex, glm::quat& result,
+                                        const glm::quat& rotation) const {
     if (jointIndex >= 0 && jointIndex < (int)absolutePoses.size()) {
         result = rotation * absolutePoses[jointIndex].rot();
         return true;
@@ -773,7 +791,7 @@ Flow& Flow::operator=(const Flow& otherFlow) {
     _active = otherFlow.getActive();
     _scale = otherFlow.getScale();
     _isScaleSet = true;
-    auto &threads = otherFlow.getThreads();
+    auto& threads = otherFlow.getThreads();
     if (threads.size() == _jointThreads.size()) {
         for (size_t i = 0; i < _jointThreads.size(); i++) {
             _jointThreads[i] = threads[i];

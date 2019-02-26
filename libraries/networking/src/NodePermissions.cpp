@@ -11,11 +11,9 @@
 
 #include "NodePermissions.h"
 
-#include <QtCore/QtGlobal>
 #include <QDataStream>
 #include <QtCore/QDebug>
-
-
+#include <QtCore/QtGlobal>
 
 size_t std::hash<NodePermissionsKey>::operator()(const NodePermissionsKey& key) const {
     size_t result = qHash(key.first);
@@ -31,17 +29,15 @@ size_t std::hash<NodePermissionsKey>::operator()(const NodePermissionsKey& key) 
     return result;
 }
 
-
 NodePermissionsKey NodePermissions::standardNameLocalhost = NodePermissionsKey("localhost", 0);
 NodePermissionsKey NodePermissions::standardNameLoggedIn = NodePermissionsKey("logged-in", 0);
 NodePermissionsKey NodePermissions::standardNameAnonymous = NodePermissionsKey("anonymous", 0);
 NodePermissionsKey NodePermissions::standardNameFriends = NodePermissionsKey("friends", 0);
 
-QStringList NodePermissions::standardNames = QList<QString>()
-    << NodePermissions::standardNameLocalhost.first
-    << NodePermissions::standardNameLoggedIn.first
-    << NodePermissions::standardNameAnonymous.first
-    << NodePermissions::standardNameFriends.first;
+QStringList NodePermissions::standardNames = QList<QString>() << NodePermissions::standardNameLocalhost.first
+                                                              << NodePermissions::standardNameLoggedIn.first
+                                                              << NodePermissions::standardNameAnonymous.first
+                                                              << NodePermissions::standardNameFriends.first;
 
 NodePermissions::NodePermissions(QMap<QString, QVariant> perms) {
     _id = perms["permissions_id"].toString().toLower();
@@ -63,8 +59,8 @@ NodePermissions::NodePermissions(QMap<QString, QVariant> perms) {
     permissions |= perms["id_can_rez_certified"].toBool() ? Permission::canRezPermanentCertifiedEntities : Permission::none;
     permissions |= perms["id_can_rez_tmp_certified"].toBool() ? Permission::canRezTemporaryCertifiedEntities : Permission::none;
     permissions |= perms["id_can_write_to_asset_server"].toBool() ? Permission::canWriteToAssetServer : Permission::none;
-    permissions |= perms["id_can_connect_past_max_capacity"].toBool() ?
-        Permission::canConnectPastMaxCapacity : Permission::none;
+    permissions |= perms["id_can_connect_past_max_capacity"].toBool() ? Permission::canConnectPastMaxCapacity
+                                                                      : Permission::none;
     permissions |= perms["id_can_kick"].toBool() ? Permission::canKick : Permission::none;
     permissions |= perms["id_can_replace_content"].toBool() ? Permission::canReplaceDomainContent : Permission::none;
 }
@@ -134,8 +130,8 @@ QDataStream& operator>>(QDataStream& in, NodePermissions& perms) {
 
 QDebug operator<<(QDebug debug, const NodePermissions& perms) {
     debug.nospace() << "[permissions: " << perms.getID() << "/" << perms.getVerifiedUserName() << " -- ";
-    debug.nospace() << "rank=" << perms.getRankID()
-                    << ", groupID=" << perms.getGroupID() << "/" << (perms.isGroup() ? "y" : "n");
+    debug.nospace() << "rank=" << perms.getRankID() << ", groupID=" << perms.getGroupID() << "/"
+                    << (perms.isGroup() ? "y" : "n");
     if (perms.can(NodePermissions::Permission::canConnectToDomain)) {
         debug << " connect";
     }

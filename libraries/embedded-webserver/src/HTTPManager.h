@@ -16,8 +16,8 @@
 #ifndef hifi_HTTPManager_h
 #define hifi_HTTPManager_h
 
-#include <QtNetwork/QTcpServer>
 #include <QtCore/QTimer>
+#include <QtNetwork/QTcpServer>
 
 class HTTPConnection;
 class HTTPSConnection;
@@ -30,25 +30,26 @@ public:
 
 /// Handles HTTP connections
 class HTTPManager : public QTcpServer, public HTTPRequestHandler {
-   Q_OBJECT
+    Q_OBJECT
 public:
     /// Initializes the manager.
-    HTTPManager(const QHostAddress& listenAddress, quint16 port, const QString& documentRoot, HTTPRequestHandler* requestHandler = nullptr);
-    
+    HTTPManager(const QHostAddress& listenAddress, quint16 port, const QString& documentRoot,
+                HTTPRequestHandler* requestHandler = nullptr);
+
     bool handleHTTPRequest(HTTPConnection* connection, const QUrl& url, bool skipSubHandler = false) override;
 
 private slots:
     void isTcpServerListening();
     void queuedExit(QString errorMessage);
-    
+
 private:
     bool bindSocket();
-    
+
 protected:
     /// Accepts all pending connections
     virtual void incomingConnection(qintptr socketDescriptor) override;
     virtual bool requestHandledByRequestHandler(HTTPConnection* connection, const QUrl& url);
-    
+
     QHostAddress _listenAddress;
     QString _documentRoot;
     HTTPRequestHandler* _requestHandler;

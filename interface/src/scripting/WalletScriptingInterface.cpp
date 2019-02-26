@@ -17,8 +17,8 @@ CheckoutProxy::CheckoutProxy(QObject* qmlObject, QObject* parent) : QmlWrapper(q
 }
 
 WalletScriptingInterface::WalletScriptingInterface() {
-    connect(DependencyManager::get<AccountManager>().data(),
-        &AccountManager::limitedCommerceChanged, this, &WalletScriptingInterface::limitedCommerceChanged);
+    connect(DependencyManager::get<AccountManager>().data(), &AccountManager::limitedCommerceChanged, this,
+            &WalletScriptingInterface::limitedCommerceChanged);
 }
 
 void WalletScriptingInterface::refreshWalletStatus() {
@@ -33,8 +33,8 @@ void WalletScriptingInterface::setWalletStatus(const uint& status) {
 
 void WalletScriptingInterface::proveAvatarEntityOwnershipVerification(const QUuid& entityID) {
     QSharedPointer<ContextOverlayInterface> contextOverlayInterface = DependencyManager::get<ContextOverlayInterface>();
-    EntityItemProperties entityProperties = DependencyManager::get<EntityScriptingInterface>()->getEntityProperties(entityID,
-        contextOverlayInterface->getEntityPropertyFlags());
+    EntityItemProperties entityProperties = DependencyManager::get<EntityScriptingInterface>()->getEntityProperties(
+        entityID, contextOverlayInterface->getEntityPropertyFlags());
     if (entityProperties.getEntityHostType() == entity::HostType::AVATAR) {
         if (!entityID.isNull() && entityProperties.getCertificateID().length() > 0) {
             contextOverlayInterface->requestOwnershipVerification(entityID);

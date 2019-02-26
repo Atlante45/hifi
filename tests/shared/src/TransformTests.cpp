@@ -14,13 +14,13 @@
 
 #include <SharedLogging.h>
 
+#include <StreamUtils.h>
+#include <Transform.h>
 #include <test-utils/QTestExtensions.h>
 #include <QtCore/QDebug>
-#include <Transform.h>
-#include <StreamUtils.h>
 #include <glm/glm.hpp>
 
-//using namespace glm;
+// using namespace glm;
 
 const vec3 xAxis(1.0f, 0.0f, 0.0f);
 const vec3 yAxis(0.0f, 1.0f, 0.0f);
@@ -32,20 +32,14 @@ QTEST_MAIN(TransformTests)
 const float TEST_EPSILON = 0.001f;
 
 void TransformTests::getMatrix() {
-
     const vec3 t(0.0f, 0.0f, 10.0f);
 
     // create a matrix that is composed of a PI/2 rotation followed by a small z translation
-    const mat4 m(vec4(rot90 * xAxis, 0.0f),
-                 vec4(rot90 * yAxis, 0.0f),
-                 vec4(rot90 * zAxis, 0.0f),
-                 vec4(vec4(t, 1.0f)));
+    const mat4 m(vec4(rot90 * xAxis, 0.0f), vec4(rot90 * yAxis, 0.0f), vec4(rot90 * zAxis, 0.0f), vec4(vec4(t, 1.0f)));
 
     // postScale by a mirror about the x axis.
-    const mat4 mirrorX(vec4(-1.0f, 0.0f, 0.0f, 0.0f),
-                       vec4( 0.0f, 1.0f, 0.0f, 0.0f),
-                       vec4( 0.0f, 0.0f, 1.0f, 0.0f),
-                       vec4( 0.0f, 0.0f, 0.0f, 1.0f));
+    const mat4 mirrorX(vec4(-1.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 1.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 1.0f, 0.0f),
+                       vec4(0.0f, 0.0f, 0.0f, 1.0f));
     const mat4 result_a = m * mirrorX;
 
     Transform xform;
@@ -59,20 +53,14 @@ void TransformTests::getMatrix() {
 }
 
 void TransformTests::getInverseMatrix() {
-
     const vec3 t(0.0f, 0.0f, 10.0f);
 
     // create a matrix that is composed of a PI/2 rotation followed by a small z translation
-    const mat4 m(vec4(rot90 * xAxis, 0.0f),
-                 vec4(rot90 * yAxis, 0.0f),
-                 vec4(rot90 * zAxis, 0.0f),
-                 vec4(vec4(t, 1.0f)));
+    const mat4 m(vec4(rot90 * xAxis, 0.0f), vec4(rot90 * yAxis, 0.0f), vec4(rot90 * zAxis, 0.0f), vec4(vec4(t, 1.0f)));
 
     // mirror about the x axis.
-    const mat4 mirrorX(vec4(-1.0f, 0.0f, 0.0f, 0.0f),
-                       vec4( 0.0f, 1.0f, 0.0f, 0.0f),
-                       vec4( 0.0f, 0.0f, 1.0f, 0.0f),
-                       vec4( 0.0f, 0.0f, 0.0f, 1.0f));
+    const mat4 mirrorX(vec4(-1.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 1.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 1.0f, 0.0f),
+                       vec4(0.0f, 0.0f, 0.0f, 1.0f));
     const mat4 result_a = glm::inverse(m * mirrorX);
 
     Transform xform;

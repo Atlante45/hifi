@@ -6,7 +6,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-// Note, `gl::Context is split into two files because a single file cannot include both the GLAD headers 
+// Note, `gl::Context is split into two files because a single file cannot include both the GLAD headers
 // and the QOpenGLContext definition headers
 
 #include "Context.h"
@@ -44,7 +44,6 @@ void Context::createWrapperContext() {
 }
 #endif
 
-
 void Context::moveToThread(QThread* thread) {
     if (_qglContext) {
         _qglContext->moveToThread(thread);
@@ -69,19 +68,17 @@ void Context::debugMessageHandler(const QOpenGLDebugMessage& debugMessage) {
     }
 }
 
-void Context::setupDebugLogging(QOpenGLContext *context) {
-    QOpenGLDebugLogger *logger = new QOpenGLDebugLogger(context);
-    QObject::connect(logger, &QOpenGLDebugLogger::messageLogged, context, [](const QOpenGLDebugMessage& message){
-        Context::debugMessageHandler(message);
-    });
+void Context::setupDebugLogging(QOpenGLContext* context) {
+    QOpenGLDebugLogger* logger = new QOpenGLDebugLogger(context);
+    QObject::connect(logger, &QOpenGLDebugLogger::messageLogged, context,
+                     [](const QOpenGLDebugMessage& message) { Context::debugMessageHandler(message); });
     if (logger->initialize()) {
         logger->enableMessages();
         logger->startLogging(QOpenGLDebugLogger::SynchronousLogging);
     } else {
-        qCWarning(glLogging) <<  "OpenGL context does not support debugging";
+        qCWarning(glLogging) << "OpenGL context does not support debugging";
     }
 }
-
 
 #if !defined(GL_CUSTOM_CONTEXT)
 bool Context::makeCurrent() {
@@ -102,7 +99,7 @@ void Context::doneCurrent() {
 }
 #endif
 
-Q_GUI_EXPORT QOpenGLContext *qt_gl_global_share_context();
+Q_GUI_EXPORT QOpenGLContext* qt_gl_global_share_context();
 const QSurfaceFormat& getDefaultOpenGLSurfaceFormat();
 
 void Context::qtCreate(QOpenGLContext* shareContext) {

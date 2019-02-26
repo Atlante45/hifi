@@ -35,7 +35,7 @@ private:
     Q_INVOKABLE void buildQmlElement(const QUrl& url);
 
 protected:
-    QQuickItem* _qmlElement{ nullptr };
+    QQuickItem* _qmlElement { nullptr };
 };
 
 #endif // hifi_QmlOverlay_h

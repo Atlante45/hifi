@@ -15,11 +15,11 @@
 #include <memory>
 #include <vector>
 
-#include <QtScript/QScriptEngine>
-#include <QtCore/QObject>
-#include <QtCore/QUrl>
-#include <QtCore/QTimer>
 #include <QUuid>
+#include <QtCore/QObject>
+#include <QtCore/QTimer>
+#include <QtCore/QUrl>
+#include <QtScript/QScriptEngine>
 
 #include <EntityEditPacketSender.h>
 #include <EntityTree.h>
@@ -30,8 +30,8 @@
 
 #include "AudioGate.h"
 #include "MixedAudioStream.h"
-#include "entities/EntityTreeHeadlessViewer.h"
 #include "avatars/ScriptableAvatar.h"
+#include "entities/EntityTreeHeadlessViewer.h"
 
 class Agent : public ThreadedAssignment {
     Q_OBJECT

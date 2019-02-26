@@ -14,8 +14,8 @@
 #ifndef hifi_OctreePersistThread_h
 #define hifi_OctreePersistThread_h
 
-#include <QString>
 #include <GenericThread.h>
+#include <QString>
 #include "Octree.h"
 
 class OctreePersistThread : public QObject {
@@ -32,10 +32,8 @@ public:
 
     static const std::chrono::seconds DEFAULT_PERSIST_INTERVAL;
 
-    OctreePersistThread(OctreePointer tree,
-                        const QString& filename,
-                        std::chrono::milliseconds persistInterval = DEFAULT_PERSIST_INTERVAL,
-                        bool debugTimestampNow = false,
+    OctreePersistThread(OctreePointer tree, const QString& filename,
+                        std::chrono::milliseconds persistInterval = DEFAULT_PERSIST_INTERVAL, bool debugTimestampNow = false,
                         QString persistAsFileType = "json.gz");
 
     bool isInitialLoadComplete() const { return _initialLoadComplete; }

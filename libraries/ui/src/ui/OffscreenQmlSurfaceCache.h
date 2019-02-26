@@ -26,7 +26,8 @@ public:
     QSharedPointer<OffscreenQmlSurface> acquire(const QString& rootSource);
     void release(const QString& rootSource, const QSharedPointer<OffscreenQmlSurface>& surface);
     void reserve(const QString& rootSource, int count = 1);
-    void setOnRootContextCreated(const std::function<void(const QString& rootSource, QQmlContext* rootContext)> & onRootContextCreated);
+    void setOnRootContextCreated(
+        const std::function<void(const QString& rootSource, QQmlContext* rootContext)>& onRootContextCreated);
 
 private:
     QSharedPointer<OffscreenQmlSurface> buildSurface(const QString& rootSource);

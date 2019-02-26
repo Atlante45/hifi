@@ -23,7 +23,7 @@ void CalculateBlendshapeNormalsTask::run(const baker::BakeContextPointer& contex
         const auto& mesh = meshes[i];
         const auto& blendshapes = blendshapesPerMesh[i];
         normalsPerBlendshapePerMeshOut.emplace_back();
-        auto& normalsPerBlendshapeOut = normalsPerBlendshapePerMeshOut[normalsPerBlendshapePerMeshOut.size()-1];
+        auto& normalsPerBlendshapeOut = normalsPerBlendshapePerMeshOut[normalsPerBlendshapePerMeshOut.size() - 1];
 
         normalsPerBlendshapeOut.reserve(blendshapes.size());
         for (size_t j = 0; j < blendshapes.size(); j++) {
@@ -43,27 +43,28 @@ void CalculateBlendshapeNormalsTask::run(const baker::BakeContextPointer& contex
                 }
 
                 normalsPerBlendshapeOut.emplace_back();
-                auto& normals = normalsPerBlendshapeOut[normalsPerBlendshapeOut.size()-1];
+                auto& normals = normalsPerBlendshapeOut[normalsPerBlendshapeOut.size() - 1];
                 normals.resize(mesh.vertices.size());
                 baker::calculateNormals(mesh,
-                    [&reverseIndices, &blendshape, &normals](int normalIndex) /* NormalAccessor */ {
-                        const auto lookupIndex = reverseIndices[normalIndex];
-                        if (lookupIndex < blendshape.vertices.size()) {
-                            return &normals[lookupIndex];
-                        } else {
-                            // Index isn't in the blendshape. Request that the normal not be calculated.
-                            return (glm::vec3*)nullptr;
-                        }
-                    },
-                    [&mesh, &reverseIndices, &blendshape](int vertexIndex, glm::vec3& outVertex) /* VertexSetter */ {
-                        const auto lookupIndex = reverseIndices[vertexIndex];
-                        if (lookupIndex < blendshape.vertices.size()) {
-                            outVertex = blendshape.vertices[lookupIndex];
-                        } else {
-                            // Index isn't in the blendshape, so return vertex from mesh
-                            outVertex = mesh.vertices[lookupIndex];
-                        }
-                    });
+                                        [&reverseIndices, &blendshape, &normals](int normalIndex) /* NormalAccessor */ {
+                                            const auto lookupIndex = reverseIndices[normalIndex];
+                                            if (lookupIndex < blendshape.vertices.size()) {
+                                                return &normals[lookupIndex];
+                                            } else {
+                                                // Index isn't in the blendshape. Request that the normal not be calculated.
+                                                return (glm::vec3*)nullptr;
+                                            }
+                                        },
+                                        [&mesh, &reverseIndices, &blendshape](int vertexIndex,
+                                                                              glm::vec3& outVertex) /* VertexSetter */ {
+                                            const auto lookupIndex = reverseIndices[vertexIndex];
+                                            if (lookupIndex < blendshape.vertices.size()) {
+                                                outVertex = blendshape.vertices[lookupIndex];
+                                            } else {
+                                                // Index isn't in the blendshape, so return vertex from mesh
+                                                outVertex = mesh.vertices[lookupIndex];
+                                            }
+                                        });
             }
         }
     }

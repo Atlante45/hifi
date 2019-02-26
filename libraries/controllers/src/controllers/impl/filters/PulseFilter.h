@@ -14,9 +14,9 @@
 
 namespace controller {
 
-
 class PulseFilter : public Filter {
     REGISTER_FILTER_CLASS(PulseFilter);
+
 public:
     PulseFilter() = default;
     PulseFilter(float interval) : _interval(interval) {}
@@ -34,6 +34,6 @@ private:
     float _interval { 1.0f };
 };
 
-}
+} // namespace controller
 
 #endif

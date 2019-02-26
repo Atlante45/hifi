@@ -9,23 +9,19 @@
 //
 
 #include "AnimBlendLinear.h"
-#include "GLMHelpers.h"
-#include "AnimationLogging.h"
-#include "AnimUtil.h"
 #include "AnimClip.h"
+#include "AnimUtil.h"
+#include "AnimationLogging.h"
+#include "GLMHelpers.h"
 
-AnimBlendLinear::AnimBlendLinear(const QString& id, float alpha) :
-    AnimNode(AnimNode::Type::BlendLinear, id),
-    _alpha(alpha) {
-
+AnimBlendLinear::AnimBlendLinear(const QString& id, float alpha) : AnimNode(AnimNode::Type::BlendLinear, id), _alpha(alpha) {
 }
 
 AnimBlendLinear::~AnimBlendLinear() {
-
 }
 
-const AnimPoseVec& AnimBlendLinear::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) {
-
+const AnimPoseVec& AnimBlendLinear::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                             AnimVariantMap& triggersOut) {
     _alpha = animVars.lookup(_alphaVar, _alpha);
     float parentDebugAlpha = context.getDebugAlpha(_id);
 
@@ -48,12 +44,15 @@ const AnimPoseVec& AnimBlendLinear::evaluate(const AnimVariantMap& animVars, con
         float weight2 = 0.0f;
         if (prevPoseIndex == nextPoseIndex) {
             weight2 = 1.0f;
-            context.setDebugAlpha(_children[nextPoseIndex]->getID(), weight2 * parentDebugAlpha, _children[nextPoseIndex]->getType());
+            context.setDebugAlpha(_children[nextPoseIndex]->getID(), weight2 * parentDebugAlpha,
+                                  _children[nextPoseIndex]->getType());
         } else {
             weight2 = alpha;
             weight1 = 1.0f - weight2;
-            context.setDebugAlpha(_children[prevPoseIndex]->getID(), weight1 * parentDebugAlpha, _children[prevPoseIndex]->getType());
-            context.setDebugAlpha(_children[nextPoseIndex]->getID(), weight2 * parentDebugAlpha, _children[nextPoseIndex]->getType());
+            context.setDebugAlpha(_children[prevPoseIndex]->getID(), weight1 * parentDebugAlpha,
+                                  _children[prevPoseIndex]->getType());
+            context.setDebugAlpha(_children[nextPoseIndex]->getID(), weight2 * parentDebugAlpha,
+                                  _children[nextPoseIndex]->getType());
         }
     }
     processOutputJoints(triggersOut);
@@ -66,8 +65,9 @@ const AnimPoseVec& AnimBlendLinear::getPosesInternal() const {
     return _poses;
 }
 
-void AnimBlendLinear::evaluateAndBlendChildren(const AnimVariantMap& animVars, const AnimContext& context, AnimVariantMap& triggersOut, float alpha,
-                                               size_t prevPoseIndex, size_t nextPoseIndex, float dt) {
+void AnimBlendLinear::evaluateAndBlendChildren(const AnimVariantMap& animVars, const AnimContext& context,
+                                               AnimVariantMap& triggersOut, float alpha, size_t prevPoseIndex,
+                                               size_t nextPoseIndex, float dt) {
     if (prevPoseIndex == nextPoseIndex) {
         // this can happen if alpha is on an integer boundary
         _poses = _children[prevPoseIndex]->evaluate(animVars, context, dt, triggersOut);

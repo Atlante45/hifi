@@ -16,16 +16,15 @@
 #include <QtCore/QJsonDocument>
 #include <QtNetwork/QNetworkReply>
 
-#include <ThreadHelpers.h>
 #include <AccountManager.h>
 #include <NetworkAccessManager.h>
-#include <NetworkingConstants.h>
 #include <NetworkLogging.h>
-#include <UserActivityLogger.h>
+#include <NetworkingConstants.h>
+#include <ThreadHelpers.h>
 #include <UUID.h>
+#include <UserActivityLogger.h>
 
 QNetworkRequest createNetworkRequest() {
-
     QNetworkRequest request;
 
     QUrl requestURL = NetworkingConstants::METAVERSE_SERVER_URL();
@@ -84,12 +83,10 @@ void CloseEventSender::handleQuitEventFinished() {
 
 bool CloseEventSender::hasTimedOutQuitEvent() {
     const int CLOSURE_EVENT_TIMEOUT_MS = 5000;
-    return _quitEventStartTimestamp != 0
-        && QDateTime::currentMSecsSinceEpoch() - _quitEventStartTimestamp > CLOSURE_EVENT_TIMEOUT_MS;
+    return _quitEventStartTimestamp != 0 &&
+           QDateTime::currentMSecsSinceEpoch() - _quitEventStartTimestamp > CLOSURE_EVENT_TIMEOUT_MS;
 }
 
 void CloseEventSender::startThread() {
-    moveToNewNamedThread(this, "CloseEvent Logger Thread", [this] { 
-        sendQuitEventAsync(); 
-    });
+    moveToNewNamedThread(this, "CloseEvent Logger Thread", [this] { sendQuitEventAsync(); });
 }

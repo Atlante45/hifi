@@ -29,7 +29,7 @@ const int NUM_FRUSTUM_PLANES = 6;
 
 const float DEFAULT_CENTER_SPHERE_RADIUS = 3.0f;
 const float DEFAULT_FIELD_OF_VIEW_DEGREES = 45.0f;
-const float DEFAULT_ASPECT_RATIO = 16.0f/9.0f;
+const float DEFAULT_ASPECT_RATIO = 16.0f / 9.0f;
 const float DEFAULT_NEAR_CLIP = 0.08f;
 const float DEFAULT_FAR_CLIP = 16384.0f;
 
@@ -47,7 +47,7 @@ public:
     const glm::vec3& getRight() const { return _right; }
 
     // setters for lens attributes
-    void setProjection(const glm::mat4 & projection);
+    void setProjection(const glm::mat4& projection);
     void setProjection(float cameraFov, float cameraAspectRatio, float cameraNearClip, float cameraFarClip);
     void setFocalLength(float focalLength) { _focalLength = focalLength; }
     bool isPerspective() const;
@@ -65,13 +65,16 @@ public:
 
     class Corners {
     public:
-        Corners(glm::vec3&& topLeft, glm::vec3&& topRight, glm::vec3&& bottomLeft, glm::vec3&& bottomRight)
-            : topLeft{ topLeft }, topRight{ topRight }, bottomLeft{ bottomLeft }, bottomRight{ bottomRight } {}
+        Corners(glm::vec3&& topLeft, glm::vec3&& topRight, glm::vec3&& bottomLeft, glm::vec3&& bottomRight) :
+            topLeft { topLeft },
+            topRight { topRight },
+            bottomLeft { bottomLeft },
+            bottomRight { bottomRight } {}
         glm::vec3 topLeft;
         glm::vec3 topRight;
         glm::vec3 bottomLeft;
         glm::vec3 bottomRight;
-    // Get the corners depth units from frustum position, along frustum orientation
+        // Get the corners depth units from frustum position, along frustum orientation
     };
     const Corners getCorners(const float depth) const;
 
@@ -86,7 +89,7 @@ public:
     const glm::vec3& getNearBottomRight() const { return _cornersWorld[BOTTOM_RIGHT_NEAR]; }
 
     // get/set for central spherek attribute
-    void  setCenterRadius(float radius) { _centerSphereRadius = radius; }
+    void setCenterRadius(float radius) { _centerSphereRadius = radius; }
     float getCenterRadius() const { return _centerSphereRadius; }
 
     void tesselateSides(Triangle triangles[8]) const;
@@ -175,16 +178,15 @@ private:
     float _nearClip { DEFAULT_NEAR_CLIP };
     float _farClip { DEFAULT_FAR_CLIP };
 
-    const char* debugPlaneName (int plane) const;
+    const char* debugPlaneName(int plane) const;
 
     // Used to project points
     glm::mat4 _ourModelViewProjectionMatrix;
-    
-    template <typename TBOX>
+
+    template<typename TBOX>
     CubeProjectedPolygon computeProjectedPolygon(const TBOX& box) const;
 
     static void tesselateSides(const glm::vec3 points[8], Triangle triangles[8]);
-
 };
 using ViewFrustumPointer = std::shared_ptr<ViewFrustum>;
 using ViewFrustums = std::vector<ViewFrustum>;

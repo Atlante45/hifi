@@ -17,9 +17,9 @@ namespace ovr {
 
 struct GLContext {
     using Pointer = std::shared_ptr<GLContext>;
-    EGLSurface surface{ EGL_NO_SURFACE };
-    EGLContext context{ EGL_NO_CONTEXT };
-    EGLDisplay display{ EGL_NO_DISPLAY };
+    EGLSurface surface { EGL_NO_SURFACE };
+    EGLContext context { EGL_NO_CONTEXT };
+    EGLDisplay display { EGL_NO_DISPLAY };
 
     ~GLContext();
     static EGLConfig findConfig(EGLDisplay display);
@@ -31,7 +31,8 @@ struct GLContext {
     static void initModule();
 };
 
-}
+} // namespace ovr
 
-
-#define CHECK_GL_ERROR() if(false) {}
+#define CHECK_GL_ERROR()                                                                                                       \
+    if (false) {                                                                                                               \
+    }

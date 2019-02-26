@@ -11,16 +11,16 @@
 
 #include "InfoView.h"
 
-#include <SettingHandle.h>
 #include <PathUtils.h>
-#include <QXmlQuery>
+#include <SettingHandle.h>
 #include <QDir>
-const QUrl InfoView::QML{ "InfoView.qml" };
-const QString InfoView::NAME{ "InfoView" };
+#include <QXmlQuery>
+const QUrl InfoView::QML { "InfoView.qml" };
+const QString InfoView::NAME { "InfoView" };
 
 Setting::Handle<QString> infoVersion("info-version", QString());
 
-static bool registered{ false };
+static bool registered { false };
 
 InfoView::InfoView(QQuickItem* parent) : QQuickItem(parent) {
     registerType();
@@ -67,7 +67,7 @@ void InfoView::show(const QString& path, bool firstOrChangedOnly, QString urlQue
     }
     auto offscreenUi = DependencyManager::get<OffscreenUi>();
     QString infoViewName(NAME + "_" + path);
-    offscreenUi->show(QML, NAME + "_" + path, [=](QQmlContext* context, QObject* newObject){
+    offscreenUi->show(QML, NAME + "_" + path, [=](QQmlContext* context, QObject* newObject) {
         QQuickItem* item = dynamic_cast<QQuickItem*>(newObject);
         item->setWidth(1024);
         item->setHeight(720);

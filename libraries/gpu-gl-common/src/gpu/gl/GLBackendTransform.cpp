@@ -30,7 +30,7 @@ void GLBackend::do_setProjectionTransform(const Batch& batch, size_t paramOffset
 
 void GLBackend::do_setProjectionJitter(const Batch& batch, size_t paramOffset) {
     _transform._projectionJitter.x = batch._params[paramOffset]._float;
-    _transform._projectionJitter.y = batch._params[paramOffset+1]._float;
+    _transform._projectionJitter.y = batch._params[paramOffset + 1]._float;
     _transform._invalidProj = true;
 }
 
@@ -62,12 +62,11 @@ void GLBackend::do_setViewportTransform(const Batch& batch, size_t paramOffset) 
 }
 
 void GLBackend::do_setDepthRangeTransform(const Batch& batch, size_t paramOffset) {
-
     Vec2 depthRange(batch._params[paramOffset + 1]._float, batch._params[paramOffset + 0]._float);
 
     if ((depthRange.x != _transform._depthRange.x) || (depthRange.y != _transform._depthRange.y)) {
         _transform._depthRange = depthRange;
-        
+
         glDepthRangef(depthRange.x, depthRange.y);
     }
 }
@@ -84,7 +83,7 @@ void GLBackend::syncTransformStateCache() {
     _transform._invalidProj = true;
     _transform._invalidView = true;
 
-    glGetIntegerv(GL_VIEWPORT, (GLint*) &_transform._viewport);
+    glGetIntegerv(GL_VIEWPORT, (GLint*)&_transform._viewport);
 
     glGetFloatv(GL_DEPTH_RANGE, (GLfloat*)&_transform._depthRange);
 
@@ -123,15 +122,16 @@ void GLBackend::TransformStageState::preUpdate(size_t commandIndex, const Stereo
 
     if (_invalidView || _invalidProj || _invalidViewport) {
         size_t offset = _cameraUboSize * _cameras.size();
-		Vec2 finalJitter = _projectionJitter / Vec2(framebufferSize);
+        Vec2 finalJitter = _projectionJitter / Vec2(framebufferSize);
         _cameraOffsets.push_back(TransformStageState::Pair(commandIndex, offset));
 
         if (stereo.isStereo()) {
 #ifdef GPU_STEREO_CAMERA_BUFFER
-        _cameras.push_back(CameraBufferElement(_camera.getEyeCamera(0, stereo, _view, finalJitter), _camera.getEyeCamera(1, stereo, _view, finalJitter)));
+            _cameras.push_back(CameraBufferElement(_camera.getEyeCamera(0, stereo, _view, finalJitter),
+                                                   _camera.getEyeCamera(1, stereo, _view, finalJitter)));
 #else
-        _cameras.push_back((_camera.getEyeCamera(0, stereo, _view, finalJitter)));
-        _cameras.push_back((_camera.getEyeCamera(1, stereo, _view, finalJitter)));
+            _cameras.push_back((_camera.getEyeCamera(0, stereo, _view, finalJitter)));
+            _cameras.push_back((_camera.getEyeCamera(1, stereo, _view, finalJitter)));
 #endif
         } else {
 #ifdef GPU_STEREO_CAMERA_BUFFER
@@ -157,7 +157,7 @@ void GLBackend::TransformStageState::update(size_t commandIndex, const StereoSta
     if (offset != INVALID_OFFSET) {
 #ifdef GPU_STEREO_CAMERA_BUFFER
         bindCurrentCamera(0);
-#else 
+#else
         if (!stereo.isStereo()) {
             bindCurrentCamera(0);
         }
@@ -168,8 +168,11 @@ void GLBackend::TransformStageState::update(size_t commandIndex, const StereoSta
 
 void GLBackend::TransformStageState::bindCurrentCamera(int eye) const {
     if (_currentCameraOffset != INVALID_OFFSET) {
-        static_assert(slot::buffer::Buffer::CameraTransform >= MAX_NUM_UNIFORM_BUFFERS, "TransformCamera may overlap pipeline uniform buffer slots. Invalidate uniform buffer slot cache for safety (call _uniform._buffers[TRANSFORM_CAMERA_SLOT].reset()).");
-        glBindBufferRange(GL_UNIFORM_BUFFER, slot::buffer::Buffer::CameraTransform, _cameraBuffer, _currentCameraOffset + eye * _cameraUboSize, sizeof(CameraBufferElement));
+        static_assert(slot::buffer::Buffer::CameraTransform >= MAX_NUM_UNIFORM_BUFFERS,
+                      "TransformCamera may overlap pipeline uniform buffer slots. Invalidate uniform buffer slot cache for "
+                      "safety (call _uniform._buffers[TRANSFORM_CAMERA_SLOT].reset()).");
+        glBindBufferRange(GL_UNIFORM_BUFFER, slot::buffer::Buffer::CameraTransform, _cameraBuffer,
+                          _currentCameraOffset + eye * _cameraUboSize, sizeof(CameraBufferElement));
     }
 }
 

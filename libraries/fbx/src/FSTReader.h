@@ -33,14 +33,7 @@ static const QString JOINT_NAME_MAPPING_FIELD = "jointMap";
 
 class FSTReader {
 public:
-
-    enum ModelType {
-        ENTITY_MODEL,
-        HEAD_MODEL,
-        BODY_ONLY_MODEL,
-        HEAD_AND_BODY_MODEL,
-        ATTACHMENT_MODEL
-    };
+    enum ModelType { ENTITY_MODEL, HEAD_MODEL, BODY_ONLY_MODEL, HEAD_AND_BODY_MODEL, ATTACHMENT_MODEL };
 
     /// Reads an FST mapping from the supplied data.
     static QVariantHash readMapping(const QByteArray& data);
@@ -48,7 +41,7 @@ public:
     /// Writes an FST mapping to a byte array.
     static QByteArray writeMapping(const QVariantHash& mapping);
 
-    /// Predicts the type of model by examining the mapping 
+    /// Predicts the type of model by examining the mapping
     static ModelType predictModelType(const QVariantHash& mapping);
 
     static QVector<QString> getScripts(const QUrl& fstUrl, const QVariantHash& mapping = QVariantHash());

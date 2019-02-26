@@ -10,17 +10,12 @@
 //
 
 #include "AvatarDoctor.h"
-#include <model-networking/ModelCache.h>
 #include <AvatarConstants.h>
 #include <ResourceManager.h>
+#include <model-networking/ModelCache.h>
 
-
-AvatarDoctor::AvatarDoctor(QUrl avatarFSTFileUrl) :
-    _avatarFSTFileUrl(avatarFSTFileUrl) {
-
-    connect(this, &AvatarDoctor::complete, this, [this](QVariantList errors) {
-        _isDiagnosing = false;
-    });
+AvatarDoctor::AvatarDoctor(QUrl avatarFSTFileUrl) : _avatarFSTFileUrl(avatarFSTFileUrl) {
+    connect(this, &AvatarDoctor::complete, this, [this](QVariantList errors) { _isDiagnosing = false; });
 }
 
 void AvatarDoctor::startDiagnosing() {
@@ -29,7 +24,7 @@ void AvatarDoctor::startDiagnosing() {
         return;
     }
     _isDiagnosing = true;
-    
+
     _errors.clear();
 
     _externalTextureCount = 0;
@@ -62,7 +57,7 @@ void AvatarDoctor::startDiagnosing() {
             if (avatarModel.joints.length() > 256) {
                 _errors.push_back({ "Avatar has over 256 bones", DEFAULT_URL });
             }
-            // Avatar does not have Hips bone mapped	
+            // Avatar does not have Hips bone mapped
             if (!avatarModel.getJointNames().contains("Hips")) {
                 _errors.push_back({ "Hips are not mapped", DEFAULT_URL });
             }
@@ -77,7 +72,7 @@ void AvatarDoctor::startDiagnosing() {
         // SCALE
         const float RECOMMENDED_MIN_HEIGHT = DEFAULT_AVATAR_HEIGHT * 0.25f;
         const float RECOMMENDED_MAX_HEIGHT = DEFAULT_AVATAR_HEIGHT * 1.5f;
-        
+
         const float avatarHeight = avatarModel.bindExtents.largestDimension();
         if (avatarHeight < RECOMMENDED_MIN_HEIGHT) {
             _errors.push_back({ "Avatar is possibly too small.", DEFAULT_URL });
@@ -86,15 +81,15 @@ void AvatarDoctor::startDiagnosing() {
         }
 
         // TEXTURES
-        QStringList externalTextures{};
-        QSet<QString> textureNames{};
+        QStringList externalTextures {};
+        QSet<QString> textureNames {};
         auto addTextureToList = [&externalTextures](hfm::Texture texture) mutable {
             if (!texture.filename.isEmpty() && texture.content.isEmpty() && !externalTextures.contains(texture.name)) {
                 externalTextures << texture.name;
             }
         };
-        
-        foreach(const HFMMaterial material, avatarModel.materials) {
+
+        foreach (const HFMMaterial material, avatarModel.materials) {
             addTextureToList(material.normalTexture);
             addTextureToList(material.albedoTexture);
             addTextureToList(material.opacityTexture);
@@ -112,7 +107,7 @@ void AvatarDoctor::startDiagnosing() {
             // Check External Textures:
             auto modelTexturesURLs = model->getTextures();
             _externalTextureCount = externalTextures.length();
-            foreach(const QString textureKey, externalTextures) {
+            foreach (const QString textureKey, externalTextures) {
                 if (!modelTexturesURLs.contains(textureKey)) {
                     _missingTextureCount++;
                     _checkedTextureCount++;
@@ -122,21 +117,22 @@ void AvatarDoctor::startDiagnosing() {
                 const QUrl textureURL = modelTexturesURLs[textureKey].toUrl();
 
                 auto textureResource = DependencyManager::get<TextureCache>()->getTexture(textureURL);
-                auto checkTextureLoadingComplete = [this, DEFAULT_URL] () mutable {
+                auto checkTextureLoadingComplete = [this, DEFAULT_URL]() mutable {
                     qDebug() << "checkTextureLoadingComplete" << _checkedTextureCount << "/" << _externalTextureCount;
 
                     if (_checkedTextureCount == _externalTextureCount) {
                         if (_missingTextureCount > 0) {
-                            _errors.push_back({ tr("Missing %n texture(s).","", _missingTextureCount), DEFAULT_URL });
+                            _errors.push_back({ tr("Missing %n texture(s).", "", _missingTextureCount), DEFAULT_URL });
                         }
                         if (_unsupportedTextureCount > 0) {
-                            _errors.push_back({ tr("%n unsupported texture(s) found.", "", _unsupportedTextureCount), DEFAULT_URL });
+                            _errors.push_back(
+                                { tr("%n unsupported texture(s) found.", "", _unsupportedTextureCount), DEFAULT_URL });
                         }
                         emit complete(getErrors());
                     }
                 };
 
-                auto textureLoaded = [this, textureResource, checkTextureLoadingComplete] (bool success) mutable {
+                auto textureLoaded = [this, textureResource, checkTextureLoadingComplete](bool success) mutable {
                     if (!success) {
                         auto normalizedURL = DependencyManager::get<ResourceManager>()->normalizeURL(textureResource->getURL());
                         if (normalizedURL.isLocalFile()) {
@@ -181,7 +177,7 @@ void AvatarDoctor::startDiagnosing() {
     } else {
         _errors.push_back({ "Model file cannot be opened", DEFAULT_URL });
         emit complete(getErrors());
-    }    
+    }
 }
 
 QVariantList AvatarDoctor::getErrors() const {

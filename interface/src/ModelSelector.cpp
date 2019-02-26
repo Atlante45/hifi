@@ -11,8 +11,8 @@
 
 #include "ModelSelector.h"
 
-#include <QDialogButtonBox>
 #include <QComboBox>
+#include <QDialogButtonBox>
 #include <QFileDialog>
 #include <QFormLayout>
 #include <QPushButton>
@@ -23,14 +23,14 @@ static const QString ENTITY_MODEL_STRING = "Entity Model";
 
 ModelSelector::ModelSelector() {
     QFormLayout* form = new QFormLayout(this);
-    
+
     setWindowTitle("Select Model");
     setLayout(form);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     _browseButton = new QPushButton("Browse", this);
     connect(_browseButton, &QPushButton::clicked, this, &ModelSelector::browse);
     form->addRow("Model File:", _browseButton);
-    
+
     QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     connect(buttons, &QDialogButtonBox::accepted, this, &ModelSelector::accept);
     connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -51,11 +51,10 @@ void ModelSelector::accept() {
 void ModelSelector::browse() {
     static Setting::Handle<QString> lastModelBrowseLocation("LastModelBrowseLocation",
                                                             QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
-    QString filename = QFileDialog::getOpenFileName(NULL, "Select your model file ...",
-                                                    lastModelBrowseLocation.get(),
+    QString filename = QFileDialog::getOpenFileName(NULL, "Select your model file ...", lastModelBrowseLocation.get(),
                                                     "Model files (*.fst *.fbx)");
     QFileInfo fileInfo(filename);
-    
+
     if (fileInfo.isFile() && fileInfo.completeSuffix().contains(QRegExp("fst|fbx|FST|FBX"))) {
         _modelFile = fileInfo;
         _browseButton->setText(fileInfo.fileName());

@@ -15,7 +15,7 @@ QString simpleWordWrap(const QString& input, int maxCharactersPerLine) {
     QStringList words = input.split(QRegExp("\\s+"));
     QString output;
     QString currentLine;
-    foreach(const auto& word, words) {
+    foreach (const auto& word, words) {
         auto newLength = currentLine.length() + word.length() + 1;
 
         // if this next word would fit, include it

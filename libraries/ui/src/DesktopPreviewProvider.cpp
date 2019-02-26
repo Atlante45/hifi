@@ -15,16 +15,18 @@ QSharedPointer<DesktopPreviewProvider> DesktopPreviewProvider::getInstance() {
 }
 
 QImage DesktopPreviewProvider::getPreviewDisabledImage(bool vsyncEnabled) const {
-
     auto imageIndex = vsyncEnabled ? VSYNC : m_previewDisabledReason;
     assert(imageIndex >= 0 && imageIndex <= VSYNC);
 
-    return !m_previewDisabled[imageIndex].isNull() ? m_previewDisabled[imageIndex] : loadPreviewImage(m_previewDisabled[imageIndex], PathUtils::resourcesPath() + imagePaths[imageIndex]);
+    return !m_previewDisabled[imageIndex].isNull()
+               ? m_previewDisabled[imageIndex]
+               : loadPreviewImage(m_previewDisabled[imageIndex], PathUtils::resourcesPath() + imagePaths[imageIndex]);
 }
 
 void DesktopPreviewProvider::setPreviewDisabledReason(PreviewDisabledReasons reason) {
     if (reason == VSYNC) {
-        qDebug() << "Preview disabled reason can't be forced to " << QMetaEnum::fromType<DesktopPreviewProvider::PreviewDisabledReasons>().valueToKey(reason);
+        qDebug() << "Preview disabled reason can't be forced to "
+                 << QMetaEnum::fromType<DesktopPreviewProvider::PreviewDisabledReasons>().valueToKey(reason);
         return; // Not settable via this interface, as VSYNC is controlled by HMD plugin..
     }
 
@@ -35,7 +37,8 @@ void DesktopPreviewProvider::setPreviewDisabledReason(const QString& reasonStrin
     PreviewDisabledReasons reason = USER;
     bool ok = false;
 
-    reason = (PreviewDisabledReasons) QMetaEnum::fromType<DesktopPreviewProvider::PreviewDisabledReasons>().keyToValue(reasonString.toLatin1().data(), &ok);
+    reason = (PreviewDisabledReasons)QMetaEnum::fromType<DesktopPreviewProvider::PreviewDisabledReasons>().keyToValue(
+        reasonString.toLatin1().data(), &ok);
     if (ok) {
         setPreviewDisabledReason(reason);
     }

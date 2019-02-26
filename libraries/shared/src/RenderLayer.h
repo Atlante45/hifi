@@ -19,18 +19,15 @@
  *   </thead>
  *   <tbody>
  *     <tr><td><code>world</code></td><td>The entity will be drawn in the world with everything else.</td></tr>
- *     <tr><td><code>front</code></td><td>The entity will be drawn on top of the world layer, but behind the HUD sphere.</td></tr>
- *     <tr><td><code>hud</code></td><td>The entity will be drawn on top of other layers and the HUD sphere.</td></tr>
+ *     <tr><td><code>front</code></td><td>The entity will be drawn on top of the world layer, but behind the HUD
+ * sphere.</td></tr> <tr><td><code>hud</code></td><td>The entity will be drawn on top of other layers and the HUD
+ * sphere.</td></tr>
  *   </tbody>
  * </table>
  * @typedef {string} RenderLayer
  */
 
-enum class RenderLayer {
-    WORLD = 0,
-    FRONT,
-    HUD
-};
+enum class RenderLayer { WORLD = 0, FRONT, HUD };
 
 class RenderLayerHelpers {
 public:
@@ -38,4 +35,3 @@ public:
 };
 
 #endif // hifi_RenderLayer_h
-

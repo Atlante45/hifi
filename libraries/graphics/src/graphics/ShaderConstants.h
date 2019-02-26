@@ -34,7 +34,8 @@
 
 // <!
 
-namespace graphics { namespace slot {
+namespace graphics {
+namespace slot {
 
 namespace buffer {
 enum Buffer {
@@ -52,7 +53,7 @@ enum Texture {
     MaterialAlbedo = GRAPHICS_TEXTURE_MATERIAL_ALBEDO,
     MaterialNormal = GRAPHICS_TEXTURE_MATERIAL_NORMAL,
     MaterialMetallic = GRAPHICS_TEXTURE_MATERIAL_METALLIC,
-    MaterialEmissiveLightmap = GRAPHICS_TEXTURE_MATERIAL_EMISSIVE_LIGHTMAP, 
+    MaterialEmissiveLightmap = GRAPHICS_TEXTURE_MATERIAL_EMISSIVE_LIGHTMAP,
     MaterialRoughness = GRAPHICS_TEXTURE_MATERIAL_ROUGHNESS,
     MaterialOcclusion = GRAPHICS_TEXTURE_MATERIAL_OCCLUSION,
     MaterialScattering = GRAPHICS_TEXTURE_MATERIAL_SCATTERING,
@@ -60,7 +61,8 @@ enum Texture {
 };
 } // namespace texture
 
-} } // namespace graphics::slot
+} // namespace slot
+} // namespace graphics
 
 // !>
 // Hack Comment

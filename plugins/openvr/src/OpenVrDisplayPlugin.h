@@ -13,10 +13,10 @@
 
 #include <display-plugins/hmd/HmdDisplayPlugin.h>
 
-const float TARGET_RATE_OpenVr = 90.0f;  // FIXME: get from sdk tracked device property? This number is vive-only.
+const float TARGET_RATE_OpenVr = 90.0f; // FIXME: get from sdk tracked device property? This number is vive-only.
 
 namespace gl {
-    class OffscreenContext;
+class OffscreenContext;
 }
 class OpenVrSubmitThread;
 class OffscreenGLCanvas;
@@ -25,15 +25,16 @@ static const size_t COMPOSITING_BUFFER_SIZE = 3;
 struct CompositeInfo {
     using Queue = std::queue<CompositeInfo>;
     using Array = std::array<CompositeInfo, COMPOSITING_BUFFER_SIZE>;
-    
+
     gpu::TexturePointer texture;
     uint32_t textureID { 0 };
     glm::mat4 pose;
-    void* fence{ 0 };
+    void* fence { 0 };
 };
 
 class OpenVrDisplayPlugin : public HmdDisplayPlugin {
     using Parent = HmdDisplayPlugin;
+
 public:
     bool isSupported() const override;
     const QString getName() const override;
@@ -79,7 +80,7 @@ protected:
 
 private:
     vr::IVRSystem* _system { nullptr };
-    std::atomic<uint32_t> _keyboardSupressionCount{ 0 };
+    std::atomic<uint32_t> _keyboardSupressionCount { 0 };
 
     vr::HmdMatrix34_t _lastGoodHMDPose;
     mat4 _sensorResetMat;

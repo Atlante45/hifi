@@ -24,40 +24,40 @@
 
 #include <QtWidgets/QApplication>
 
-#include <ThreadHelpers.h>
 #include <AbstractScriptingServicesInterface.h>
+#include <AbstractUriHandler.h>
 #include <AbstractViewStateInterface.h>
 #include <EntityEditPacketSender.h>
 #include <EntityTreeRenderer.h>
 #include <FileScriptingInterface.h>
-#include <input-plugins/KeyboardMouseDevice.h>
-#include <input-plugins/TouchscreenDevice.h>
-#include <input-plugins/TouchscreenVirtualPadDevice.h>
 #include <OctreeQuery.h>
 #include <PhysicalEntitySimulation.h>
 #include <PhysicsEngine.h>
-#include <plugins/Forward.h>
-#include <ui-plugins/PluginContainer.h>
 #include <ScriptEngine.h>
 #include <ShapeManager.h>
 #include <SimpleMovingAverage.h>
 #include <StDev.h>
-#include <ViewFrustum.h>
-#include <AbstractUriHandler.h>
-#include <shared/RateCounter.h>
+#include <ThreadHelpers.h>
 #include <ThreadSafeValueCache.h>
+#include <ViewFrustum.h>
+#include <input-plugins/KeyboardMouseDevice.h>
+#include <input-plugins/TouchscreenDevice.h>
+#include <input-plugins/TouchscreenVirtualPadDevice.h>
+#include <plugins/Forward.h>
 #include <shared/ConicalViewFrustum.h>
 #include <shared/FileLogger.h>
+#include <shared/RateCounter.h>
+#include <ui-plugins/PluginContainer.h>
 
 #include <RunningMarker.h>
 
-#include "avatar/MyAvatar.h"
-#include "FancyCamera.h"
 #include "ConnectionMonitor.h"
 #include "CursorManager.h"
-#include "gpu/Context.h"
+#include "FancyCamera.h"
 #include "LoginStateManager.h"
 #include "Menu.h"
+#include "avatar/MyAvatar.h"
+#include "gpu/Context.h"
 #include "octree/OctreePacketProcessor.h"
 #include "render/Engine.h"
 #include "scripting/ControllerScriptingInterface.h"
@@ -70,11 +70,11 @@
 #include "ui/OverlayConductor.h"
 #include "ui/overlays/Overlays.h"
 
-#include "workload/GameWorkload.h"
 #include "graphics/GraphicsEngine.h"
+#include "workload/GameWorkload.h"
 
-#include <graphics/Skybox.h>
 #include <ModelScriptingInterface.h>
+#include <graphics/Skybox.h>
 
 #include "Sound.h"
 
@@ -86,14 +86,14 @@ class CompositorHelper;
 class AudioInjector;
 
 namespace controller {
-    class StateController;
+class StateController;
 }
 
 #ifdef Q_OS_WIN
-static const UINT UWM_IDENTIFY_INSTANCES =
-    RegisterWindowMessage("UWM_IDENTIFY_INSTANCES_{8AB82783-B74A-4258-955B-8188C22AA0D6}_" + qgetenv("USERNAME"));
-static const UINT UWM_SHOW_APPLICATION =
-    RegisterWindowMessage("UWM_SHOW_APPLICATION_{71123FD6-3DA8-4DC1-9C27-8A12A6250CBA}_" + qgetenv("USERNAME"));
+static const UINT UWM_IDENTIFY_INSTANCES = RegisterWindowMessage(
+    "UWM_IDENTIFY_INSTANCES_{8AB82783-B74A-4258-955B-8188C22AA0D6}_" + qgetenv("USERNAME"));
+static const UINT UWM_SHOW_APPLICATION = RegisterWindowMessage("UWM_SHOW_APPLICATION_{71123FD6-3DA8-4DC1-9C27-8A12A6250CBA}_" +
+                                                               qgetenv("USERNAME"));
 #endif
 
 static const QString RUNNING_MARKER_FILENAME = "Interface.running";
@@ -106,12 +106,12 @@ class Application;
 #endif
 #define qApp (static_cast<Application*>(QCoreApplication::instance()))
 
-class Application : public QApplication,
-                    public AbstractViewStateInterface,
-                    public AbstractScriptingServicesInterface,
-                    public AbstractUriHandler,
-                    public PluginContainer
-{
+class Application :
+    public QApplication,
+    public AbstractViewStateInterface,
+    public AbstractScriptingServicesInterface,
+    public AbstractUriHandler,
+    public PluginContainer {
     Q_OBJECT
 
     // TODO? Get rid of those
@@ -226,7 +226,7 @@ public:
     void setPreferStylusOverLaser(bool value);
 
     // FIXME: Remove setting completely or make available through JavaScript API?
-    //bool getPreferAvatarFingerOverStylus() { return _preferAvatarFingerOverStylusSetting.get(); }
+    // bool getPreferAvatarFingerOverStylus() { return _preferAvatarFingerOverStylusSetting.get(); }
     bool getPreferAvatarFingerOverStylus() { return false; }
     void setPreferAvatarFingerOverStylus(bool value);
 
@@ -236,7 +236,9 @@ public:
     float getSettingConstrainToolbarPosition() { return _constrainToolbarPosition.get(); }
     void setSettingConstrainToolbarPosition(bool setting);
 
-    Q_INVOKABLE void setMinimumGPUTextureMemStabilityCount(int stabilityCount) { _minimumGPUTextureMemSizeStabilityCount = stabilityCount; }
+    Q_INVOKABLE void setMinimumGPUTextureMemStabilityCount(int stabilityCount) {
+        _minimumGPUTextureMemSizeStabilityCount = stabilityCount;
+    }
 
     NodeToOctreeSceneStats* getOcteeSceneStats() { return &_octreeServerSceneStats; }
 
@@ -280,9 +282,8 @@ public:
     int getMaxOctreePacketsPerSecond() const;
 
     render::ScenePointer getMain3DScene() override { return _graphicsEngine.getRenderScene(); }
-    render::EnginePointer getRenderEngine() override { return  _graphicsEngine.getRenderEngine(); }
+    render::EnginePointer getRenderEngine() override { return _graphicsEngine.getRenderEngine(); }
     gpu::ContextPointer getGPUContext() const { return _graphicsEngine.getGPUContext(); }
-
 
     const GameWorkload& getGameWorkload() const { return _gameWorkload; }
 
@@ -294,9 +295,7 @@ public:
 
     void takeSnapshot(bool notify, bool includeAnimated = false, float aspectRatio = 0.0f, const QString& filename = QString());
     void takeSecondaryCameraSnapshot(const bool& notify, const QString& filename = QString());
-    void takeSecondaryCamera360Snapshot(const glm::vec3& cameraPosition,
-                                        const bool& cubemapOutputFormat,
-                                        const bool& notify,
+    void takeSecondaryCamera360Snapshot(const glm::vec3& cameraPosition, const bool& cubemapOutputFormat, const bool& notify,
                                         const QString& filename = QString());
 
     void shareSnapshot(const QString& filename, const QUrl& href = QUrl(""));
@@ -307,7 +306,10 @@ public:
     QVector<QUuid> getTabletIDs() const;
 
     void setAvatarOverrideUrl(const QUrl& url, bool save);
-    void clearAvatarOverrideUrl() { _avatarOverrideUrl = QUrl(); _saveAvatarOverrideUrl = false; }
+    void clearAvatarOverrideUrl() {
+        _avatarOverrideUrl = QUrl();
+        _saveAvatarOverrideUrl = false;
+    }
     QUrl getAvatarOverrideUrl() { return _avatarOverrideUrl; }
     bool getSaveAvatarOverrideUrl() { return _saveAvatarOverrideUrl; }
     void saveNextPhysicsStats(QString filename);
@@ -441,7 +443,7 @@ public slots:
 
     void setKeyboardFocusHighlight(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& dimensions);
 
-    QUuid getKeyboardFocusEntity() const;  // thread-safe
+    QUuid getKeyboardFocusEntity() const; // thread-safe
     void setKeyboardFocusEntity(const QUuid& id);
 
     void addAssetToWorldMessageClose();
@@ -639,14 +641,16 @@ private:
 
     OctreeQuery _octreeQuery { true }; // NodeData derived class for querying octee cells from octree servers
 
-    std::shared_ptr<controller::StateController> _applicationStateDevice; // Default ApplicationDevice reflecting the state of different properties of the session
-    std::shared_ptr<KeyboardMouseDevice> _keyboardMouseDevice;   // Default input device, the good old keyboard mouse and maybe touchpad
-    std::shared_ptr<TouchscreenDevice> _touchscreenDevice;   // the good old touchscreen
+    std::shared_ptr<controller::StateController>
+        _applicationStateDevice; // Default ApplicationDevice reflecting the state of different properties of the session
+    std::shared_ptr<KeyboardMouseDevice>
+        _keyboardMouseDevice; // Default input device, the good old keyboard mouse and maybe touchpad
+    std::shared_ptr<TouchscreenDevice> _touchscreenDevice; // the good old touchscreen
     std::shared_ptr<TouchscreenVirtualPadDevice> _touchscreenVirtualPadDevice;
-    SimpleMovingAverage _avatarSimsPerSecond {10};
-    int _avatarSimsPerSecondReport {0};
-    quint64 _lastAvatarSimsPerSecondUpdate {0};
-    FancyCamera _myCamera;                            // My view onto the world
+    SimpleMovingAverage _avatarSimsPerSecond { 10 };
+    int _avatarSimsPerSecondReport { 0 };
+    quint64 _lastAvatarSimsPerSecondUpdate { 0 };
+    FancyCamera _myCamera; // My view onto the world
 
     Setting::Handle<QString> _previousScriptLocation;
     Setting::Handle<float> _fieldOfView;
@@ -678,7 +682,7 @@ private:
     float _idleLoopMeasuredJitter;
 
     NodeToOctreeSceneStats _octreeServerSceneStats;
-    ControllerScriptingInterface* _controllerScriptingInterface{ nullptr };
+    ControllerScriptingInterface* _controllerScriptingInterface { nullptr };
     QPointer<LogDialog> _logDialog;
     QPointer<EntityScriptServerLogDialog> _entityScriptServerLogDialog;
     QDir _defaultScriptsLocation;
@@ -692,18 +696,18 @@ private:
 
     ConditionalGuard _settingsGuard;
 
-    GLCanvas* _glWidget{ nullptr };
+    GLCanvas* _glWidget { nullptr };
 
-    typedef bool (Application::* AcceptURLMethod)(const QString &);
+    typedef bool (Application::*AcceptURLMethod)(const QString&);
     static const std::vector<std::pair<QString, Application::AcceptURLMethod>> _acceptedExtensions;
 
     glm::uvec2 _renderResolution;
 
     int _maxOctreePPS = DEFAULT_MAX_OCTREE_PPS;
-    bool _interstitialModeEnabled{ false };
+    bool _interstitialModeEnabled { false };
 
     bool _loginDialogPoppedUp = false;
-    bool _developerMenuVisible{ false };
+    bool _developerMenuVisible { false };
     QString _previousAvatarSkeletonModel;
     float _previousAvatarTargetScale;
     CameraMode _previousCameraMode;
@@ -716,7 +720,6 @@ private:
 
     GraphicsEngine _graphicsEngine;
     void updateRenderArgs(float deltaTime);
-
 
     Overlays _overlays;
     ApplicationOverlay _applicationOverlay;
@@ -743,7 +746,7 @@ private:
 
     void checkChangeCursor();
     mutable QMutex _changeCursorLock { QMutex::Recursive };
-    Qt::CursorShape _desiredCursor{ Qt::BlankCursor };
+    Qt::CursorShape _desiredCursor { Qt::BlankCursor };
     bool _cursorNeedsChanging { false };
 
     std::map<void*, std::function<void()>> _postUpdateLambdas;
@@ -769,9 +772,9 @@ private:
     void addAssetToWorldInfoDone(QString modelName);
     void addAssetToWorldError(QString modelName, QString errorText);
 
-    QQuickItem* _addAssetToWorldMessageBox{ nullptr };
-    QStringList _addAssetToWorldInfoKeys;  // Model name
-    QStringList _addAssetToWorldInfoMessages;  // Info message
+    QQuickItem* _addAssetToWorldMessageBox { nullptr };
+    QStringList _addAssetToWorldInfoKeys; // Model name
+    QStringList _addAssetToWorldInfoMessages; // Info message
     QTimer _addAssetToWorldInfoTimer;
     QTimer _addAssetToWorldErrorTimer;
     mutable QTimer _entityServerConnectionTimer;

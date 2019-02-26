@@ -30,7 +30,7 @@ public:
     virtual QByteArray serialize() const override;
     virtual void deserialize(QByteArray serializedArguments) override;
 
- private:
+private:
     static const uint16_t offsetVersion;
     glm::vec3 _pointToOffsetFrom;
     float _linearDistance;

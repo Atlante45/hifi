@@ -11,10 +11,10 @@
 
 #include "EntityItemProperties.h"
 
+#include <openssl/ecdsa.h>
 #include <openssl/err.h>
 #include <openssl/pem.h>
 #include <openssl/x509.h>
-#include <openssl/ecdsa.h>
 
 #include <QDebug>
 #include <QHash>
@@ -23,11 +23,11 @@
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
 
-#include <NetworkAccessManager.h>
 #include <ByteCountCoding.h>
-#include <GLMHelpers.h>
-#include <RegisteredMetaTypes.h>
 #include <Extents.h>
+#include <GLMHelpers.h>
+#include <NetworkAccessManager.h>
+#include <RegisteredMetaTypes.h>
 #include <VariantMapToScriptValue.h>
 
 #include "EntitiesLogging.h"
@@ -56,9 +56,7 @@ EntityItemProperties::EntityItemProperties(EntityPropertyFlags desiredProperties
     _defaultSettings(true),
     _naturalDimensions(1.0f, 1.0f, 1.0f),
     _naturalPosition(0.0f, 0.0f, 0.0f),
-    _desiredProperties(desiredProperties)
-{
-
+    _desiredProperties(desiredProperties) {
 }
 
 void EntityItemProperties::calculateNaturalPosition(const vec3& min, const vec3& max) {
@@ -226,9 +224,8 @@ QString EntityItemProperties::getBloomModeAsString() const {
 }
 
 std::array<ComponentPair, COMPONENT_MODE_ITEM_COUNT>::const_iterator EntityItemProperties::findComponent(const QString& mode) {
-    return std::find_if(COMPONENT_MODES.begin(), COMPONENT_MODES.end(), [&](const ComponentPair& pair) { 
-        return (pair.second == mode);
-    });
+    return std::find_if(COMPONENT_MODES.begin(), COMPONENT_MODES.end(),
+                        [&](const ComponentPair& pair) { return (pair.second == mode); });
 }
 
 void EntityItemProperties::setHazeModeFromString(const QString& hazeMode) {
@@ -687,34 +684,35 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
 }
 
 /**jsdoc
- * Different entity types have different properties: some common to all entities (listed below) and some specific to each 
- * {@link Entities.EntityType|EntityType} (linked to below). The properties are accessed as an object of property names and 
+ * Different entity types have different properties: some common to all entities (listed below) and some specific to each
+ * {@link Entities.EntityType|EntityType} (linked to below). The properties are accessed as an object of property names and
  * values.
  *
  * @typedef {object} Entities.EntityProperties
  * @property {Uuid} id - The ID of the entity. <em>Read-only.</em>
  * @property {string} name="" - A name for the entity. Need not be unique.
- * @property {Entities.EntityType} type - The entity type. You cannot change the type of an entity after it's created. (Though 
- *     its value may switch among <code>"Box"</code>, <code>"Shape"</code>, and <code>"Sphere"</code> depending on changes to 
+ * @property {Entities.EntityType} type - The entity type. You cannot change the type of an entity after it's created. (Though
+ *     its value may switch among <code>"Box"</code>, <code>"Shape"</code>, and <code>"Sphere"</code> depending on changes to
  *     the <code>shape</code> property set for entities of these types.) <em>Read-only.</em>
- * @property {EntityHostType} entityHostType="domain" - How this entity will behave, including if and how it is sent to other people.
- *     The value can only be set at entity creation by using the <code>entityHostType</code> parameter in
+ * @property {EntityHostType} entityHostType="domain" - How this entity will behave, including if and how it is sent to other
+ * people. The value can only be set at entity creation by using the <code>entityHostType</code> parameter in
  *     {@link Entities.addEntity}.  Read-only.
- * @property {boolean} avatarEntity=false - If <code>true</code> then the entity is an avatar entity;  An avatar entity follows you to each domain you visit,
- *     rendering at the same world coordinates unless it's parented to your avatar. <em>Value cannot be changed after the entity is created.</em><br />
- *     The value can only be set at entity creation by using the <code>entityHostType</code> parameter in 
+ * @property {boolean} avatarEntity=false - If <code>true</code> then the entity is an avatar entity;  An avatar entity follows
+ * you to each domain you visit, rendering at the same world coordinates unless it's parented to your avatar. <em>Value cannot
+ * be changed after the entity is created.</em><br /> The value can only be set at entity creation by using the
+ * <code>entityHostType</code> parameter in
  *     {@link Entities.addEntity}.  <code>clientOnly</code> is an alias.  Read-only.
- * @property {boolean} localEntity=false - If <code>true</code> then the entity is a local entity;  Local entities only render for you and are not sent over the wire.
- *     <em>Value cannot be changed after the entity is created.</em><br />
- *     The value can only be set at entity creation by using the <code>entityHostType</code> parameter in
+ * @property {boolean} localEntity=false - If <code>true</code> then the entity is a local entity;  Local entities only render
+ * for you and are not sent over the wire. <em>Value cannot be changed after the entity is created.</em><br /> The value can
+ * only be set at entity creation by using the <code>entityHostType</code> parameter in
  *     {@link Entities.addEntity}.  Read-only.
- * @property {Uuid} owningAvatarID=Uuid.NULL - The session ID of the owning avatar if <code>avatarEntity</code> is 
+ * @property {Uuid} owningAvatarID=Uuid.NULL - The session ID of the owning avatar if <code>avatarEntity</code> is
  *     <code>true</code>, otherwise {@link Uuid|Uuid.NULL}. <em>Read-only.</em>
  *
  * @property {string} created - The UTC date and time that the entity was created, in ISO 8601 format as
  *     <code>yyyy-MM-ddTHH:mm:ssZ</code>. <em>Read-only.</em>
  * @property {number} age - The age of the entity in seconds since it was created. <em>Read-only.</em>
- * @property {string} ageAsText - The age of the entity since it was created, formatted as <code>h hours m minutes s 
+ * @property {string} ageAsText - The age of the entity since it was created, formatted as <code>h hours m minutes s
  *     seconds</code>.
  * @property {number} lifetime=-1 - How long an entity lives for, in seconds, before being automatically deleted. A value of
  *     <code>-1</code> means that the entity lives for ever.
@@ -723,125 +721,128 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  * @property {Uuid} lastEditedBy - The session ID of the avatar or agent that most recently created or edited the entity.
  *     <em>Read-only.</em>
  *
- * @property {boolean} locked=false - Whether or not the entity can be edited or deleted. If <code>true</code> then the 
+ * @property {boolean} locked=false - Whether or not the entity can be edited or deleted. If <code>true</code> then the
  *     entity's properties other than <code>locked</code> cannot be changed, and the entity cannot be deleted.
  * @property {boolean} visible=true - Whether or not the entity is rendered. If <code>true</code> then the entity is rendered.
- * @property {boolean} canCastShadow=true - Whether or not the entity can cast a shadow. Currently applicable only to 
- *     {@link Entities.EntityType|Model} and {@link Entities.EntityType|Shape} entities. Shadows are cast if inside a 
- *     {@link Entities.EntityType|Zone} entity with <code>castShadows</code> enabled in its 
+ * @property {boolean} canCastShadow=true - Whether or not the entity can cast a shadow. Currently applicable only to
+ *     {@link Entities.EntityType|Model} and {@link Entities.EntityType|Shape} entities. Shadows are cast if inside a
+ *     {@link Entities.EntityType|Zone} entity with <code>castShadows</code> enabled in its
  *     {@link Entities.EntityProperties-Zone|keyLight} property.
- * @property {boolean} isVisibleInSecondaryCamera=true - Whether or not the entity is rendered in the secondary camera. If <code>true</code> then the entity is rendered.
+ * @property {boolean} isVisibleInSecondaryCamera=true - Whether or not the entity is rendered in the secondary camera. If
+ * <code>true</code> then the entity is rendered.
  * @property {RenderLayer} renderLayer="world" - In which layer this entity renders.
  * @property {PrimitiveMode} primitiveMode="solid" - How this entity's geometry is rendered.
  * @property {boolean} ignorePickIntersection=false - If <code>true</code>, picks ignore the entity.
  *
  * @property {Vec3} position=0,0,0 - The position of the entity.
  * @property {Quat} rotation=0,0,0,1 - The orientation of the entity with respect to world coordinates.
- * @property {Vec3} registrationPoint=0.5,0.5,0.5 - The point in the entity that is set to the entity's position and is rotated 
+ * @property {Vec3} registrationPoint=0.5,0.5,0.5 - The point in the entity that is set to the entity's position and is rotated
  *      about, {@link Vec3(0)|Vec3.ZERO} &ndash; {@link Vec3(0)|Vec3.ONE}. A value of {@link Vec3(0)|Vec3.ZERO} is the entity's
  *      minimum x, y, z corner; a value of {@link Vec3(0)|Vec3.ONE} is the entity's maximum x, y, z corner.
  *
  * @property {Vec3} naturalPosition=0,0,0 - The center of the entity's unscaled mesh model if it has one, otherwise
  *     {@link Vec3(0)|Vec3.ZERO}. <em>Read-only.</em>
- * @property {Vec3} naturalDimensions - The dimensions of the entity's unscaled mesh model if it has one, otherwise 
+ * @property {Vec3} naturalDimensions - The dimensions of the entity's unscaled mesh model if it has one, otherwise
  *     {@link Vec3(0)|Vec3.ONE}. <em>Read-only.</em>
  *
  * @property {Vec3} velocity=0,0,0 - The linear velocity of the entity in m/s with respect to world coordinates.
- * @property {number} damping=0.39347 - How much to slow down the linear velocity of an entity over time, <code>0.0</code> 
- *     &ndash; <code>1.0</code>. A higher damping value slows down the entity more quickly. The default value is for an 
- *     exponential decay timescale of 2.0s, where it takes 2.0s for the movement to slow to <code>1/e = 0.368</code> of its 
+ * @property {number} damping=0.39347 - How much to slow down the linear velocity of an entity over time, <code>0.0</code>
+ *     &ndash; <code>1.0</code>. A higher damping value slows down the entity more quickly. The default value is for an
+ *     exponential decay timescale of 2.0s, where it takes 2.0s for the movement to slow to <code>1/e = 0.368</code> of its
  *     initial value.
  * @property {Vec3} angularVelocity=0,0,0 - The angular velocity of the entity in rad/s with respect to its axes, about its
  *     registration point.
- * @property {number} angularDamping=0.39347 - How much to slow down the angular velocity of an entity over time, 
- *     <code>0.0</code> &ndash; <code>1.0</code>. A higher damping value slows down the entity more quickly. The default value 
- *     is for an exponential decay timescale of 2.0s, where it takes 2.0s for the movement to slow to <code>1/e = 0.368</code> 
+ * @property {number} angularDamping=0.39347 - How much to slow down the angular velocity of an entity over time,
+ *     <code>0.0</code> &ndash; <code>1.0</code>. A higher damping value slows down the entity more quickly. The default value
+ *     is for an exponential decay timescale of 2.0s, where it takes 2.0s for the movement to slow to <code>1/e = 0.368</code>
  *     of its initial value.
  *
- * @property {Vec3} gravity=0,0,0 - The acceleration due to gravity in m/s<sup>2</sup> that the entity should move with, in 
- *     world coordinates. Set to <code>{ x: 0, y: -9.8, z: 0 }</code> to simulate Earth's gravity. Gravity is applied to an 
- *     entity's motion only if its <code>dynamic</code> property is <code>true</code>. If changing an entity's 
- *     <code>gravity</code> from {@link Vec3(0)|Vec3.ZERO}, you need to give it a small <code>velocity</code> in order to kick 
+ * @property {Vec3} gravity=0,0,0 - The acceleration due to gravity in m/s<sup>2</sup> that the entity should move with, in
+ *     world coordinates. Set to <code>{ x: 0, y: -9.8, z: 0 }</code> to simulate Earth's gravity. Gravity is applied to an
+ *     entity's motion only if its <code>dynamic</code> property is <code>true</code>. If changing an entity's
+ *     <code>gravity</code> from {@link Vec3(0)|Vec3.ZERO}, you need to give it a small <code>velocity</code> in order to kick
  *     off physics simulation.
  *     The <code>gravity</code> value is applied in addition to the <code>acceleration</code> value.
- * @property {Vec3} acceleration=0,0,0 - A general acceleration in m/s<sup>2</sup> that the entity should move with, in world 
- *     coordinates. The acceleration is applied to an entity's motion only if its <code>dynamic</code> property is 
- *     <code>true</code>. If changing an entity's <code>acceleration</code> from {@link Vec3(0)|Vec3.ZERO}, you need to give it 
+ * @property {Vec3} acceleration=0,0,0 - A general acceleration in m/s<sup>2</sup> that the entity should move with, in world
+ *     coordinates. The acceleration is applied to an entity's motion only if its <code>dynamic</code> property is
+ *     <code>true</code>. If changing an entity's <code>acceleration</code> from {@link Vec3(0)|Vec3.ZERO}, you need to give it
  *     a small <code>velocity</code> in order to kick off physics simulation.
  *     The <code>acceleration</code> value is applied in addition to the <code>gravity</code> value.
- * @property {number} restitution=0.5 - The "bounciness" of an entity when it collides, <code>0.0</code> &ndash; 
+ * @property {number} restitution=0.5 - The "bounciness" of an entity when it collides, <code>0.0</code> &ndash;
  *     <code>0.99</code>. The higher the value, the more bouncy.
- * @property {number} friction=0.5 - How much to slow down an entity when it's moving against another, <code>0.0</code> &ndash; 
- *     <code>10.0</code>. The higher the value, the more quickly it slows down. Examples: <code>0.1</code> for ice, 
+ * @property {number} friction=0.5 - How much to slow down an entity when it's moving against another, <code>0.0</code> &ndash;
+ *     <code>10.0</code>. The higher the value, the more quickly it slows down. Examples: <code>0.1</code> for ice,
  *     <code>0.9</code> for sandpaper.
- * @property {number} density=1000 - The density of the entity in kg/m<sup>3</sup>, <code>100</code> for balsa wood &ndash; 
- *     <code>10000</code> for silver. The density is used in conjunction with the entity's bounding box volume to work out its 
+ * @property {number} density=1000 - The density of the entity in kg/m<sup>3</sup>, <code>100</code> for balsa wood &ndash;
+ *     <code>10000</code> for silver. The density is used in conjunction with the entity's bounding box volume to work out its
  *     mass in the application of physics.
  *
- * @property {boolean} collisionless=false - Whether or not the entity should collide with items per its 
- *     <code>collisionMask<code> property. If <code>true</code> then the entity does not collide. A synonym is <code>ignoreForCollisions</code>.
+ * @property {boolean} collisionless=false - Whether or not the entity should collide with items per its
+ *     <code>collisionMask<code> property. If <code>true</code> then the entity does not collide. A synonym is
+ * <code>ignoreForCollisions</code>.
  * @property {Entities.CollisionMask} collisionMask=31 - What types of items the entity should collide with.
  * @property {string} collidesWith="static,dynamic,kinematic,myAvatar,otherAvatar," - Synonym for <code>collisionMask</code>,
  *     in text format.
  * @property {string} collisionSoundURL="" - The sound to play when the entity experiences a collision. Valid file formats are
  *     as per the {@link SoundCache} object.
- * @property {boolean} dynamic=false - Whether or not the entity should be affected by collisions. If <code>true</code> then 
+ * @property {boolean} dynamic=false - Whether or not the entity should be affected by collisions. If <code>true</code> then
  *     the entity's movement is affected by collisions. A synonym is <code>collisionsWillMove</code>.
  *
  * @property {string} href="" - A "hifi://" metaverse address that a user is taken to when they click on the entity.
  * @property {string} description="" - A description of the <code>href</code> property value.
  *
- * @property {string} userData="" - Used to store extra data about the entity in JSON format. WARNING: Other apps such as the 
- *     Create app can also use this property, so make sure you handle data stored by other apps &mdash; edit only your bit and 
- *     leave the rest of the data intact. You can use <code>JSON.parse()</code> to parse the string into a JavaScript object 
- *     which you can manipulate the properties of, and use <code>JSON.stringify()</code> to convert the object into a string to 
+ * @property {string} userData="" - Used to store extra data about the entity in JSON format. WARNING: Other apps such as the
+ *     Create app can also use this property, so make sure you handle data stored by other apps &mdash; edit only your bit and
+ *     leave the rest of the data intact. You can use <code>JSON.parse()</code> to parse the string into a JavaScript object
+ *     which you can manipulate the properties of, and use <code>JSON.stringify()</code> to convert the object into a string to
  *     put in the property.
  *
  * @property {string} script="" - The URL of the client entity script, if any, that is attached to the entity.
- * @property {number} scriptTimestamp=0 - Intended to be used to indicate when the client entity script was loaded. Should be 
- *     an integer number of milliseconds since midnight GMT on January 1, 1970 (e.g., as supplied by <code>Date.now()</code>. 
- *     If you update the property's value, the <code>script</code> is re-downloaded and reloaded. This is how the "reload" 
+ * @property {number} scriptTimestamp=0 - Intended to be used to indicate when the client entity script was loaded. Should be
+ *     an integer number of milliseconds since midnight GMT on January 1, 1970 (e.g., as supplied by <code>Date.now()</code>.
+ *     If you update the property's value, the <code>script</code> is re-downloaded and reloaded. This is how the "reload"
  *     button beside the "script URL" field in properties tab of the Create app works.
  * @property {string} serverScripts="" - The URL of the server entity script, if any, that is attached to the entity.
  *
- * @property {Uuid} parentID=Uuid.NULL - The ID of the entity or avatar that this entity is parented to. {@link Uuid|Uuid.NULL} 
+ * @property {Uuid} parentID=Uuid.NULL - The ID of the entity or avatar that this entity is parented to. {@link Uuid|Uuid.NULL}
  *     if the entity is not parented.
- * @property {number} parentJointIndex=65535 - The joint of the entity or avatar that this entity is parented to. Use 
+ * @property {number} parentJointIndex=65535 - The joint of the entity or avatar that this entity is parented to. Use
  *     <code>65535</code> or <code>-1</code> to parent to the entity or avatar's position and orientation rather than a joint.
- * @property {Vec3} localPosition=0,0,0 - The position of the entity relative to its parent if the entity is parented, 
- *     otherwise the same value as <code>position</code>. If the entity is parented to an avatar and is an <code>avatarEntity</code> 
- *     so that it scales with the avatar, this value remains the original local position value while the avatar scale changes.
- * @property {Quat} localRotation=0,0,0,1 - The rotation of the entity relative to its parent if the entity is parented, 
+ * @property {Vec3} localPosition=0,0,0 - The position of the entity relative to its parent if the entity is parented,
+ *     otherwise the same value as <code>position</code>. If the entity is parented to an avatar and is an
+ * <code>avatarEntity</code> so that it scales with the avatar, this value remains the original local position value while the
+ * avatar scale changes.
+ * @property {Quat} localRotation=0,0,0,1 - The rotation of the entity relative to its parent if the entity is parented,
  *     otherwise the same value as <code>rotation</code>.
- * @property {Vec3} localVelocity=0,0,0 - The velocity of the entity relative to its parent if the entity is parented, 
+ * @property {Vec3} localVelocity=0,0,0 - The velocity of the entity relative to its parent if the entity is parented,
  *     otherwise the same value as <code>velocity</code>.
- * @property {Vec3} localAngularVelocity=0,0,0 - The angular velocity of the entity relative to its parent if the entity is 
+ * @property {Vec3} localAngularVelocity=0,0,0 - The angular velocity of the entity relative to its parent if the entity is
  *     parented, otherwise the same value as <code>position</code>.
  * @property {Vec3} localDimensions - The dimensions of the entity. If the entity is parented to an avatar and is an
- *     <code>avatarEntity</code> so that it scales with the avatar, this value remains the original dimensions value while the 
+ *     <code>avatarEntity</code> so that it scales with the avatar, this value remains the original dimensions value while the
  *     avatar scale changes.
  *
- * @property {Entities.BoundingBox} boundingBox - The axis-aligned bounding box that tightly encloses the entity. 
+ * @property {Entities.BoundingBox} boundingBox - The axis-aligned bounding box that tightly encloses the entity.
  *     <em>Read-only.</em>
- * @property {AACube} queryAACube - The axis-aligned cube that determines where the entity lives in the entity server's octree. 
- *     The cube may be considerably larger than the entity in some situations, e.g., when the entity is grabbed by an avatar: 
- *     the position of the entity is determined through avatar mixer updates and so the AA cube is expanded in order to reduce 
+ * @property {AACube} queryAACube - The axis-aligned cube that determines where the entity lives in the entity server's octree.
+ *     The cube may be considerably larger than the entity in some situations, e.g., when the entity is grabbed by an avatar:
+ *     the position of the entity is determined through avatar mixer updates and so the AA cube is expanded in order to reduce
  *     unnecessary entity server updates. Scripts should not change this property's value.
  *
  * @property {string} actionData="" - Base-64 encoded compressed dump of the actions associated with the entity. This property
  *     is typically not used in scripts directly; rather, functions that manipulate an entity's actions update it.
- *     The size of this property increases with the number of actions. Because this property value has to fit within a High 
- *     Fidelity datagram packet there is a limit to the number of actions that an entity can have, and edits which would result 
+ *     The size of this property increases with the number of actions. Because this property value has to fit within a High
+ *     Fidelity datagram packet there is a limit to the number of actions that an entity can have, and edits which would result
  *     in overflow are rejected. <em>Read-only.</em>
- * @property {Entities.RenderInfo} renderInfo - Information on the cost of rendering the entity. Currently information is only 
+ * @property {Entities.RenderInfo} renderInfo - Information on the cost of rendering the entity. Currently information is only
  *     provided for <code>Model</code> entities. <em>Read-only.</em>
  *
  * @property {boolean} cloneable=false - If <code>true</code> then the entity can be cloned via {@link Entities.cloneEntity}.
  * @property {number} cloneLifetime=300 - The entity lifetime for clones created from this entity.
  * @property {number} cloneLimit=0 - The total number of clones of this entity that can exist in the domain at any given time.
- * @property {boolean} cloneDynamic=false - If <code>true</code> then clones created from this entity will have their 
+ * @property {boolean} cloneDynamic=false - If <code>true</code> then clones created from this entity will have their
  *     <code>dynamic</code> property set to <code>true</code>.
- * @property {boolean} cloneAvatarEntity=false - If <code>true</code> then clones created from this entity will be created as 
+ * @property {boolean} cloneAvatarEntity=false - If <code>true</code> then clones created from this entity will be created as
  *     avatar entities: their <code>avatarEntity</code> property will be set to <code>true</code>.
  * @property {Uuid} cloneOriginID - The ID of the entity that this entity was cloned from.
  *
@@ -852,11 +853,11 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  * @property {string} itemCategories="" - Certifiable category of the Marketplace item.
  * @property {string} itemArtist="" - Certifiable  artist that created the Marketplace item.
  * @property {string} itemLicense="" - Certifiable license URL for the Marketplace item.
- * @property {number} limitedRun=4294967295 - Certifiable maximum integer number of editions (copies) of the Marketplace item 
+ * @property {number} limitedRun=4294967295 - Certifiable maximum integer number of editions (copies) of the Marketplace item
  *     allowed to be sold.
- * @property {number} editionNumber=0 - Certifiable integer edition (copy) number or the Marketplace item. Each copy sold in 
+ * @property {number} editionNumber=0 - Certifiable integer edition (copy) number or the Marketplace item. Each copy sold in
  *     the Marketplace is numbered sequentially, starting at 1.
- * @property {number} entityInstanceNumber=0 - Certifiable integer instance number for identical entities in a Marketplace 
+ * @property {number} entityInstanceNumber=0 - Certifiable integer instance number for identical entities in a Marketplace
  *     item. A Marketplace item may have identical parts. If so, then each is numbered sequentially with an instance number.
  * @property {string} marketplaceID="" - Certifiable UUID for the Marketplace item, as used in the URL of the item's download
  *     and its Marketplace Web page.
@@ -885,8 +886,8 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
 /**jsdoc
  * The <code>"Box"</code> {@link Entities.EntityType|EntityType} is the same as the <code>"Shape"</code>
  * {@link Entities.EntityType|EntityType} except that its <code>shape</code> value is always set to <code>"Cube"</code>
- * when the entity is created. If its <code>shape</code> property value is subsequently changed then the entity's 
- * <code>type</code> will be reported as <code>"Sphere"</code> if the <code>shape</code> is set to <code>"Sphere"</code>, 
+ * when the entity is created. If its <code>shape</code> property value is subsequently changed then the entity's
+ * <code>type</code> will be reported as <code>"Sphere"</code> if the <code>shape</code> is set to <code>"Sphere"</code>,
  * otherwise it will be reported as <code>"Shape"</code>.
  * @typedef {object} Entities.EntityProperties-Box
  */
@@ -895,7 +896,7 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  * The <code>"Light"</code> {@link Entities.EntityType|EntityType} adds local lighting effects.
  * It has properties in addition to the common {@link Entities.EntityProperties|EntityProperties}.
  * @typedef {object} Entities.EntityProperties-Light
- * @property {Vec3} dimensions=0.1,0.1,0.1 - The dimensions of the entity. Entity surface outside these dimensions are not lit 
+ * @property {Vec3} dimensions=0.1,0.1,0.1 - The dimensions of the entity. Entity surface outside these dimensions are not lit
  *     by the light.
  * @property {Color} color=255,255,255 - The color of the light emitted.
  * @property {number} intensity=1 - The brightness of the light.
@@ -951,37 +952,38 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  * It has properties in addition to the common {@link Entities.EntityProperties|EntityProperties}.<br />
  * To apply a material to an entity, set the material entity's <code>parentID</code> property to the entity ID.
  * To apply a material to an avatar, set the material entity's <code>parentID</code> property to the avatar's session UUID.
- * To apply a material to your avatar such that it persists across domains and log-ins, create the material as an avatar entity 
+ * To apply a material to your avatar such that it persists across domains and log-ins, create the material as an avatar entity
  * by setting the <code>entityHostType</code> parameter in {@link Entities.addEntity} to <code>"avatar"</code>.
  * Material entities render as non-scalable spheres if they don't have their parent set.
  * @typedef {object} Entities.EntityProperties-Material
- * @property {string} materialURL="" - URL to a {@link MaterialResource}. If you append <code>?name</code> to the URL, the 
+ * @property {string} materialURL="" - URL to a {@link MaterialResource}. If you append <code>?name</code> to the URL, the
  *     material with that name in the {@link MaterialResource} will be applied to the entity. <br />
- *     Alternatively, set the property value to <code>"materialData"</code> to use the <code>materialData</code> property  
+ *     Alternatively, set the property value to <code>"materialData"</code> to use the <code>materialData</code> property
  *     for the {@link MaterialResource} values.
- * @property {number} priority=0 - The priority for applying the material to its parent. Only the highest priority material is 
- *     applied, with materials of the same priority randomly assigned. Materials that come with the model have a priority of 
+ * @property {number} priority=0 - The priority for applying the material to its parent. Only the highest priority material is
+ *     applied, with materials of the same priority randomly assigned. Materials that come with the model have a priority of
  *     <code>0</code>.
  * @property {string} parentMaterialName="0" - Selects the mesh part or parts within the parent to which to apply the material.
  *     If in the format <code>"mat::string"</code>, all mesh parts with material name <code>"string"</code> are replaced.
- *     Otherwise the property value is parsed as an unsigned integer, specifying the mesh part index to modify.  If <code>"all"</code>,
- *     all mesh parts will be replaced.  If an array (starts with <code>"["</code> and ends with <code>"]"</code>), the string will be
- *     split at each <code>","</code> and each element will be parsed as either a number or a string if it starts with
- *     <code>"mat::"</code>.  In other words, <code>"[0,1,mat::string,mat::string2]"</code> will replace mesh parts 0 and 1, and any
- *     mesh parts with material <code>"string"</code> or <code>"string2"</code>.  Do not put spaces around the commas.  Invalid values
- *     are parsed to <code>0</code>.
- * @property {string} materialMappingMode="uv" - How the material is mapped to the entity. Either <code>"uv"</code> or 
- *     <code>"projected"</code>. In "uv" mode, the material will be evaluated within the UV space of the mesh it is applied to.  In
- *     "projected" mode, the 3D transform of the Material Entity will be used to evaluate the texture coordinates for the material.
- * @property {Vec2} materialMappingPos=0,0 - Offset position in UV-space of the top left of the material, range 
+ *     Otherwise the property value is parsed as an unsigned integer, specifying the mesh part index to modify.  If
+ * <code>"all"</code>, all mesh parts will be replaced.  If an array (starts with <code>"["</code> and ends with
+ * <code>"]"</code>), the string will be split at each <code>","</code> and each element will be parsed as either a number or a
+ * string if it starts with <code>"mat::"</code>.  In other words, <code>"[0,1,mat::string,mat::string2]"</code> will replace
+ * mesh parts 0 and 1, and any mesh parts with material <code>"string"</code> or <code>"string2"</code>.  Do not put spaces
+ * around the commas.  Invalid values are parsed to <code>0</code>.
+ * @property {string} materialMappingMode="uv" - How the material is mapped to the entity. Either <code>"uv"</code> or
+ *     <code>"projected"</code>. In "uv" mode, the material will be evaluated within the UV space of the mesh it is applied to.
+ * In "projected" mode, the 3D transform of the Material Entity will be used to evaluate the texture coordinates for the
+ * material.
+ * @property {Vec2} materialMappingPos=0,0 - Offset position in UV-space of the top left of the material, range
  *     <code>{ x: 0, y: 0 }</code> &ndash; <code>{ x: 1, y: 1 }</code>.
  * @property {Vec2} materialMappingScale=1,1 - How much to scale the material within the parent's UV-space.
  * @property {number} materialMappingRot=0 - How much to rotate the material within the parent's UV-space, in degrees.
- * @property {string} materialData="" - Used to store {@link MaterialResource} data as a JSON string. You can use 
- *     <code>JSON.parse()</code> to parse the string into a JavaScript object which you can manipulate the properties of, and 
+ * @property {string} materialData="" - Used to store {@link MaterialResource} data as a JSON string. You can use
+ *     <code>JSON.parse()</code> to parse the string into a JavaScript object which you can manipulate the properties of, and
  *     use <code>JSON.stringify()</code> to convert the object into a string to put in the property.
- * @property {boolean} materialRepeat=true - If true, the material will repeat.  If false, fragments outside of texCoord 0 - 1 will be discarded.
- *     Works in both "uv" and "projected" modes.
+ * @property {boolean} materialRepeat=true - If true, the material will repeat.  If false, fragments outside of texCoord 0 - 1
+ * will be discarded. Works in both "uv" and "projected" modes.
  * @example <caption>Color a sphere using a Material entity.</caption>
  * var entityID = Entities.addEntity({
  *     type: "Sphere",
@@ -1010,19 +1012,19 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  * The <code>"Model"</code> {@link Entities.EntityType|EntityType} displays an FBX or OBJ model.
  * It has properties in addition to the common {@link Entities.EntityProperties|EntityProperties}.
  * @typedef {object} Entities.EntityProperties-Model
- * @property {Vec3} dimensions=0.1,0.1,0.1 - The dimensions of the entity. When adding an entity, if no <code>dimensions</code> 
- *     value is specified then the model is automatically sized to its 
+ * @property {Vec3} dimensions=0.1,0.1,0.1 - The dimensions of the entity. When adding an entity, if no <code>dimensions</code>
+ *     value is specified then the model is automatically sized to its
  *     <code>{@link Entities.EntityProperties|naturalDimensions}</code>.
  * @property {Vec3} modelScale - The scale factor applied to the model's dimensions.  Deprecated.
  * @property {Color} color=255,255,255 - <em>Currently not used.</em>
  * @property {string} modelURL="" - The URL of the FBX of OBJ model. Baked FBX models' URLs end in ".baked.fbx".<br />
  * @property {string} textures="" - A JSON string of texture name, URL pairs used when rendering the model in place of the
- *     model's original textures. Use a texture name from the <code>originalTextures</code> property to override that texture. 
- *     Only the texture names and URLs to be overridden need be specified; original textures are used where there are no 
- *     overrides. You can use <code>JSON.stringify()</code> to convert a JavaScript object of name, URL pairs into a JSON 
+ *     model's original textures. Use a texture name from the <code>originalTextures</code> property to override that texture.
+ *     Only the texture names and URLs to be overridden need be specified; original textures are used where there are no
+ *     overrides. You can use <code>JSON.stringify()</code> to convert a JavaScript object of name, URL pairs into a JSON
  *     string.
- * @property {string} originalTextures="{}" - A JSON string of texture name, URL pairs used in the model. The property value is 
- *     filled in after the entity has finished rezzing (i.e., textures have loaded). You can use <code>JSON.parse()</code> to 
+ * @property {string} originalTextures="{}" - A JSON string of texture name, URL pairs used in the model. The property value is
+ *     filled in after the entity has finished rezzing (i.e., textures have loaded). You can use <code>JSON.parse()</code> to
  *     parse the JSON string into a JavaScript object of name, URL pairs. <em>Read-only.</em>
  *
  * @property {ShapeType} shapeType="none" - The shape of the collision hull used if collisions are enabled.
@@ -1031,25 +1033,25 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  *
  * @property {Entities.AnimationProperties} animation - An animation to play on the model.
  *
- * @property {Quat[]} jointRotations=[] - Joint rotations applied to the model; <code>[]</code> if none are applied or the 
- *     model hasn't loaded. The array indexes are per {@link Entities.getJointIndex|getJointIndex}. Rotations are relative to 
+ * @property {Quat[]} jointRotations=[] - Joint rotations applied to the model; <code>[]</code> if none are applied or the
+ *     model hasn't loaded. The array indexes are per {@link Entities.getJointIndex|getJointIndex}. Rotations are relative to
  *     each joint's parent.<br />
  *     Joint rotations can be set by {@link Entities.setLocalJointRotation|setLocalJointRotation} and similar functions, or by
- *     setting the value of this property. If you set a joint rotation using this property you also need to set the 
+ *     setting the value of this property. If you set a joint rotation using this property you also need to set the
  *     corresponding <code>jointRotationsSet</code> value to <code>true</code>.
- * @property {boolean[]} jointRotationsSet=[] - <code>true</code> values for joints that have had rotations applied, 
- *     <code>false</code> otherwise; <code>[]</code> if none are applied or the model hasn't loaded. The array indexes are per 
+ * @property {boolean[]} jointRotationsSet=[] - <code>true</code> values for joints that have had rotations applied,
+ *     <code>false</code> otherwise; <code>[]</code> if none are applied or the model hasn't loaded. The array indexes are per
  *     {@link Entities.getJointIndex|getJointIndex}.
- * @property {Vec3[]} jointTranslations=[] - Joint translations applied to the model; <code>[]</code> if none are applied or 
- *     the model hasn't loaded. The array indexes are per {@link Entities.getJointIndex|getJointIndex}. Rotations are relative 
+ * @property {Vec3[]} jointTranslations=[] - Joint translations applied to the model; <code>[]</code> if none are applied or
+ *     the model hasn't loaded. The array indexes are per {@link Entities.getJointIndex|getJointIndex}. Rotations are relative
  *     to each joint's parent.<br />
- *     Joint translations can be set by {@link Entities.setLocalJointTranslation|setLocalJointTranslation} and similar 
- *     functions, or by setting the value of this property. If you set a joint translation using this property you also need to 
+ *     Joint translations can be set by {@link Entities.setLocalJointTranslation|setLocalJointTranslation} and similar
+ *     functions, or by setting the value of this property. If you set a joint translation using this property you also need to
  *     set the corresponding <code>jointTranslationsSet</code> value to <code>true</code>.
- * @property {boolean[]} jointTranslationsSet=[] - <code>true</code> values for joints that have had translations applied, 
- *     <code>false</code> otherwise; <code>[]</code> if none are applied or the model hasn't loaded. The array indexes are per 
+ * @property {boolean[]} jointTranslationsSet=[] - <code>true</code> values for joints that have had translations applied,
+ *     <code>false</code> otherwise; <code>[]</code> if none are applied or the model hasn't loaded. The array indexes are per
  *     {@link Entities.getJointIndex|getJointIndex}.
- * @property {boolean} relayParentJoints=false - If <code>true</code> and the entity is parented to an avatar, then the 
+ * @property {boolean} relayParentJoints=false - If <code>true</code> and the entity is parented to an avatar, then the
  *     avatar's joint rotations are applied to the entity's joints.
  * @property {boolean} groupCulled=false - If <code>true</code>, the mesh parts of the model are LOD culled as a group.
  *     If <code>false</code>, separate mesh parts will be LOD culled individually.
@@ -1066,20 +1068,20 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  */
 
 /**jsdoc
- * The <code>"ParticleEffect"</code> {@link Entities.EntityType|EntityType} displays a particle system that can be used to 
+ * The <code>"ParticleEffect"</code> {@link Entities.EntityType|EntityType} displays a particle system that can be used to
  * simulate things such as fire, smoke, snow, magic spells, etc. The particles emanate from an ellipsoid or part thereof.
  * It has properties in addition to the common {@link Entities.EntityProperties|EntityProperties}.
  * @typedef {object} Entities.EntityProperties-ParticleEffect
 
  * @property {boolean} isEmitting=true - If <code>true</code> then particles are emitted.
- * @property {number} maxParticles=1000 - The maximum number of particles to render at one time. Older particles are deleted if 
+ * @property {number} maxParticles=1000 - The maximum number of particles to render at one time. Older particles are deleted if
  *     necessary when new ones are created.
  * @property {number} lifespan=3s - How long, in seconds, each particle lives.
  * @property {number} emitRate=15 - The number of particles per second to emit.
  * @property {number} emitSpeed=5 - The speed, in m/s, that each particle is emitted at.
- * @property {number} speedSpread=1 - The spread in speeds at which particles are emitted at. If <code>emitSpeed == 5</code> 
+ * @property {number} speedSpread=1 - The spread in speeds at which particles are emitted at. If <code>emitSpeed == 5</code>
  *     and <code>speedSpread == 1</code>, particles will be emitted with speeds in the range 4m/s &ndash; 6m/s.
- * @property {Vec3} emitAcceleration=0,-9.8,0 - The acceleration that is applied to each particle during its lifetime. The 
+ * @property {Vec3} emitAcceleration=0,-9.8,0 - The acceleration that is applied to each particle during its lifetime. The
  *     default is Earth's gravity value.
  * @property {Vec3} accelerationSpread=0,0,0 - The spread in accelerations that each particle is given. If
  *     <code>emitAccelerations == {x: 0, y: -9.8, z: 0}</code> and <code>accelerationSpread ==
@@ -1091,22 +1093,22 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  *     otherwise they stay with the entity's dimensions.
  *
  * @property {Quat} emitOrientation=-0.707,0,0,0.707 - The orientation of particle emission relative to the entity's axes. By
- *     default, particles emit along the entity's local z-axis, and <code>azimuthStart</code> and <code>azimuthFinish</code> 
- *     are relative to the entity's local x-axis. The default value is a rotation of -90 degrees about the local x-axis, i.e., 
+ *     default, particles emit along the entity's local z-axis, and <code>azimuthStart</code> and <code>azimuthFinish</code>
+ *     are relative to the entity's local x-axis. The default value is a rotation of -90 degrees about the local x-axis, i.e.,
  *     the particles emit vertically.
  * @property {Vec3} emitDimensions=0,0,0 - The dimensions of the ellipsoid from which particles are emitted.
  * @property {number} emitRadiusStart=1 - The starting radius within the ellipsoid at which particles start being emitted;
  *     range <code>0.0</code> &ndash; <code>1.0</code> for the ellipsoid center to the ellipsoid surface, respectively.
- *     Particles are emitted from the portion of the ellipsoid that lies between <code>emitRadiusStart</code> and the 
+ *     Particles are emitted from the portion of the ellipsoid that lies between <code>emitRadiusStart</code> and the
  *     ellipsoid's surface.
- * @property {number} polarStart=0 - The angle in radians from the entity's local z-axis at which particles start being emitted 
- *     within the ellipsoid; range <code>0</code> &ndash; <code>Math.PI</code>. Particles are emitted from the portion of the 
+ * @property {number} polarStart=0 - The angle in radians from the entity's local z-axis at which particles start being emitted
+ *     within the ellipsoid; range <code>0</code> &ndash; <code>Math.PI</code>. Particles are emitted from the portion of the
  *     ellipsoid that lies between <code>polarStart<code> and <code>polarFinish</code>.
- * @property {number} polarFinish=0 - The angle in radians from the entity's local z-axis at which particles stop being emitted 
- *     within the ellipsoid; range <code>0</code> &ndash; <code>Math.PI</code>. Particles are emitted from the portion of the 
+ * @property {number} polarFinish=0 - The angle in radians from the entity's local z-axis at which particles stop being emitted
+ *     within the ellipsoid; range <code>0</code> &ndash; <code>Math.PI</code>. Particles are emitted from the portion of the
  *     ellipsoid that lies between <code>polarStart<code> and <code>polarFinish</code>.
- * @property {number} azimuthStart=-Math.PI - The angle in radians from the entity's local x-axis about the entity's local 
- *     z-axis at which particles start being emitted; range <code>-Math.PI</code> &ndash; <code>Math.PI</code>. Particles are 
+ * @property {number} azimuthStart=-Math.PI - The angle in radians from the entity's local x-axis about the entity's local
+ *     z-axis at which particles start being emitted; range <code>-Math.PI</code> &ndash; <code>Math.PI</code>. Particles are
  *     emitted from the portion of the ellipsoid that lies between <code>azimuthStart<code> and <code>azimuthFinish</code>.
  * @property {number} azimuthFinish=Math.PI - The angle in radians from the entity's local x-axis about the entity's local
  *     z-axis at which particles stop being emitted; range <code>-Math.PI</code> &ndash; <code>Math.PI</code>. Particles are
@@ -1120,16 +1122,17 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  * @property {number} radiusFinish=NaN - The radius of each particle at the end of its life. If <code>NaN</code>, the
  *     <code>particleRadius</code> value is used.
  * @property {number} radiusSpread=0 - The spread in radius that each particle is given. If <code>particleRadius == 0.5</code>
- *     and <code>radiusSpread == 0.25</code>, each particle will have a radius in the range <code>0.25</code> &ndash; 
+ *     and <code>radiusSpread == 0.25</code>, each particle will have a radius in the range <code>0.25</code> &ndash;
  *     <code>0.75</code>.
  * @property {Color} color=255,255,255 - The color of each particle at the middle of its life.
- * @property {ColorFloat} colorStart={} - The color of each particle at the start of its life. If any of the component values are
+ * @property {ColorFloat} colorStart={} - The color of each particle at the start of its life. If any of the component values
+ are
  *     undefined, the <code>color</code> value is used.
  * @property {ColorFloat} colorFinish={} - The color of each particle at the end of its life. If any of the component values are
  *     undefined, the <code>color</code> value is used.
  * @property {Color} colorSpread=0,0,0 - The spread in color that each particle is given. If
  *     <code>color == {red: 100, green: 100, blue: 100}</code> and <code>colorSpread ==
- *     {red: 10, green: 25, blue: 50}</code>, each particle will have a color in the range 
+ *     {red: 10, green: 25, blue: 50}</code>, each particle will have a color in the range
  *     <code>{red: 90, green: 75, blue: 50}</code> &ndash; <code>{red: 110, green: 125, blue: 150}</code>.
  * @property {number} alpha=1 - The alpha of each particle at the middle of its life.
  * @property {number} alphaStart=NaN - The alpha of each particle at the start of its life. If <code>NaN</code>, the
@@ -1137,16 +1140,22 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  * @property {number} alphaFinish=NaN - The alpha of each particle at the end of its life. If <code>NaN</code>, the
  *     <code>alpha</code> value is used.
  * @property {number} alphaSpread=0 - The spread in alpha that each particle is given. If <code>alpha == 0.5</code>
- *     and <code>alphaSpread == 0.25</code>, each particle will have an alpha in the range <code>0.25</code> &ndash; 
+ *     and <code>alphaSpread == 0.25</code>, each particle will have an alpha in the range <code>0.25</code> &ndash;
  *     <code>0.75</code>.
- * @property {number} particleSpin=0 - The spin of each particle at the middle of its life. In the range <code>-2*PI</code> &ndash; <code>2*PI</code>.
- * @property {number} spinStart=NaN - The spin of each particle at the start of its life. In the range <code>-2*PI</code> &ndash; <code>2*PI</code>.
+ * @property {number} particleSpin=0 - The spin of each particle at the middle of its life. In the range <code>-2*PI</code>
+ &ndash; <code>2*PI</code>.
+ * @property {number} spinStart=NaN - The spin of each particle at the start of its life. In the range <code>-2*PI</code>
+ &ndash; <code>2*PI</code>.
  *     If <code>NaN</code>, the <code>particleSpin</code> value is used.
- * @property {number} spinFinish=NaN - The spin of each particle at the end of its life. In the range <code>-2*PI</code> &ndash; <code>2*PI</code>.
+ * @property {number} spinFinish=NaN - The spin of each particle at the end of its life. In the range <code>-2*PI</code> &ndash;
+ <code>2*PI</code>.
  *     If <code>NaN</code>, the <code>particleSpin</code> value is used.
- * @property {number} spinSpread=0 - The spread in spin that each particle is given. In the range <code>0</code> &ndash; <code>2*PI</code>.  If <code>particleSpin == PI</code>
- *     and <code>spinSpread == PI/2</code>, each particle will have a spin in the range <code>PI/2</code> &ndash; <code>3*PI/2</code>.
- * @property {boolean} rotateWithEntity=false - Whether or not the particles' spin will rotate with the entity.  If false, when <code>particleSpin == 0</code>, the particles will point
+ * @property {number} spinSpread=0 - The spread in spin that each particle is given. In the range <code>0</code> &ndash;
+ <code>2*PI</code>.  If <code>particleSpin == PI</code>
+ *     and <code>spinSpread == PI/2</code>, each particle will have a spin in the range <code>PI/2</code> &ndash;
+ <code>3*PI/2</code>.
+ * @property {boolean} rotateWithEntity=false - Whether or not the particles' spin will rotate with the entity.  If false, when
+ <code>particleSpin == 0</code>, the particles will point
  * up in the world.  If true, they will point towards the entity's up vector, based on its orientation.
  * @property {Entities.Pulse} pulse - The pulse-related properties.  Deprecated.
  *
@@ -1171,24 +1180,24 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  */
 
 /**jsdoc
- * The <code>"PolyLine"</code> {@link Entities.EntityType|EntityType} draws textured, straight lines between a sequence of 
+ * The <code>"PolyLine"</code> {@link Entities.EntityType|EntityType} draws textured, straight lines between a sequence of
  * points.
  * It has properties in addition to the common {@link Entities.EntityProperties|EntityProperties}.
  * @typedef {object} Entities.EntityProperties-PolyLine
- * @property {Vec3} dimensions=1,1,1 - The dimensions of the entity, i.e., the size of the bounding box that contains the 
+ * @property {Vec3} dimensions=1,1,1 - The dimensions of the entity, i.e., the size of the bounding box that contains the
  *     lines drawn.
  * @property {Vec3[]} linePoints=[] - The sequence of points to draw lines between. The values are relative to the entity's
  *     position. A maximum of 70 points can be specified. Must be specified in order for the entity to render.
- * @property {Vec3[]} normals=[] - The normal vectors for the line's surface at the <code>linePoints</code>. The values are 
+ * @property {Vec3[]} normals=[] - The normal vectors for the line's surface at the <code>linePoints</code>. The values are
  *     relative to the entity's orientation. Must be specified in order for the entity to render.
- * @property {number[]} strokeWidths=[] - The widths, in m, of the line at the <code>linePoints</code>. Must be specified in 
+ * @property {number[]} strokeWidths=[] - The widths, in m, of the line at the <code>linePoints</code>. Must be specified in
  *     order for the entity to render.
- * @property {Vec3[]} strokeColors=[] - The base colors of each point, which are multiplied with the color of the texture, going from 0-1.
- *     If strokeColors.length < the number of points, <code>color</code> is used for the remaining points.
+ * @property {Vec3[]} strokeColors=[] - The base colors of each point, which are multiplied with the color of the texture, going
+ * from 0-1. If strokeColors.length < the number of points, <code>color</code> is used for the remaining points.
  * @property {Color} color=255,255,255 - Used as the color for each point if <code>strokeColors</code> is too short.
  * @property {string} textures="" - The URL of a JPG or PNG texture to use for the lines. If you want transparency, use PNG
  *     format.
- * @property {boolean} isUVModeStretch=true - If <code>true</code>, the texture is stretched to fill the whole line, otherwise 
+ * @property {boolean} isUVModeStretch=true - If <code>true</code>, the texture is stretched to fill the whole line, otherwise
  *     the texture repeats along the line.
  * @property {bool} glow=false - If <code>true</code>, the alpha of the strokes will drop off farther from the center.
  * @property {bool} faceCamera=false - If <code>true</code>, each line segment will rotate to face the camera.
@@ -1216,7 +1225,7 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  */
 
 /**jsdoc
- * The <code>"PolyVox"</code> {@link Entities.EntityType|EntityType} displays a set of textured voxels. 
+ * The <code>"PolyVox"</code> {@link Entities.EntityType|EntityType} displays a set of textured voxels.
  * It has properties in addition to the common {@link Entities.EntityProperties|EntityProperties}.
  * If you have two or more neighboring PolyVox entities of the same size abutting each other, you can display them as joined by
  * configuring their <code>voxelSurfaceStyle</code> and neighbor ID properties.<br />
@@ -1224,35 +1233,35 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  * <a href="http://www.volumesoffun.com/polyvox-documentation/">library documentation</a> may be useful to read.
  * @typedef {object} Entities.EntityProperties-PolyVox
  * @property {Vec3} dimensions=0.1,0.1,0.1 - The dimensions of the entity.
- * @property {Vec3} voxelVolumeSize=32,32,32 - Integer number of voxels along each axis of the entity, in the range 
- *     <code>1,1,1</code> to <code>128,128,128</code>. The dimensions of each voxel is 
+ * @property {Vec3} voxelVolumeSize=32,32,32 - Integer number of voxels along each axis of the entity, in the range
+ *     <code>1,1,1</code> to <code>128,128,128</code>. The dimensions of each voxel is
  *     <code>dimensions / voxelVolumesize</code>.
- * @property {string} voxelData="ABAAEAAQAAAAHgAAEAB42u3BAQ0AAADCoPdPbQ8HFAAAAPBuEAAAAQ==" - Base-64 encoded compressed dump of 
- *     the PolyVox data. This property is typically not used in scripts directly; rather, functions that manipulate a PolyVox 
+ * @property {string} voxelData="ABAAEAAQAAAAHgAAEAB42u3BAQ0AAADCoPdPbQ8HFAAAAPBuEAAAAQ==" - Base-64 encoded compressed dump of
+ *     the PolyVox data. This property is typically not used in scripts directly; rather, functions that manipulate a PolyVox
  *     entity update it.<br />
- *     The size of this property increases with the size and complexity of the PolyVox entity, with the size depending on how 
- *     the particular entity's voxels compress. Because this property value has to fit within a High Fidelity datagram packet 
- *     there is a limit to the size and complexity of a PolyVox entity, and edits which would result in an overflow are 
+ *     The size of this property increases with the size and complexity of the PolyVox entity, with the size depending on how
+ *     the particular entity's voxels compress. Because this property value has to fit within a High Fidelity datagram packet
+ *     there is a limit to the size and complexity of a PolyVox entity, and edits which would result in an overflow are
  *     rejected.
- * @property {Entities.PolyVoxSurfaceStyle} voxelSurfaceStyle=2 - The style of rendering the voxels' surface and how 
+ * @property {Entities.PolyVoxSurfaceStyle} voxelSurfaceStyle=2 - The style of rendering the voxels' surface and how
  *     neighboring PolyVox entities are joined.
  * @property {string} xTextureURL="" - URL of the texture to map to surfaces perpendicular to the entity's local x-axis. JPG or
  *     PNG format. If no texture is specified the surfaces display white.
- * @property {string} yTextureURL="" - URL of the texture to map to surfaces perpendicular to the entity's local y-axis. JPG or 
+ * @property {string} yTextureURL="" - URL of the texture to map to surfaces perpendicular to the entity's local y-axis. JPG or
  *     PNG format. If no texture is specified the surfaces display white.
- * @property {string} zTextureURL="" - URL of the texture to map to surfaces perpendicular to the entity's local z-axis. JPG or 
+ * @property {string} zTextureURL="" - URL of the texture to map to surfaces perpendicular to the entity's local z-axis. JPG or
  *     PNG format. If no texture is specified the surfaces display white.
- * @property {Uuid} xNNeighborID=Uuid.NULL - ID of the neighboring PolyVox entity in the entity's -ve local x-axis direction, 
+ * @property {Uuid} xNNeighborID=Uuid.NULL - ID of the neighboring PolyVox entity in the entity's -ve local x-axis direction,
  *     if you want them joined. Set to {@link Uuid|Uuid.NULL} if there is none or you don't want to join them.
- * @property {Uuid} yNNeighborID=Uuid.NULL - ID of the neighboring PolyVox entity in the entity's -ve local y-axis direction, 
+ * @property {Uuid} yNNeighborID=Uuid.NULL - ID of the neighboring PolyVox entity in the entity's -ve local y-axis direction,
  *     if you want them joined. Set to {@link Uuid|Uuid.NULL} if there is none or you don't want to join them.
- * @property {Uuid} zNNeighborID=Uuid.NULL - ID of the neighboring PolyVox entity in the entity's -ve local z-axis direction, 
+ * @property {Uuid} zNNeighborID=Uuid.NULL - ID of the neighboring PolyVox entity in the entity's -ve local z-axis direction,
  *     if you want them joined. Set to {@link Uuid|Uuid.NULL} if there is none or you don't want to join them.
- * @property {Uuid} xPNeighborID=Uuid.NULL - ID of the neighboring PolyVox entity in the entity's +ve local x-axis direction, 
+ * @property {Uuid} xPNeighborID=Uuid.NULL - ID of the neighboring PolyVox entity in the entity's +ve local x-axis direction,
  *     if you want them joined. Set to {@link Uuid|Uuid.NULL} if there is none or you don't want to join them.
- * @property {Uuid} yPNeighborID=Uuid.NULL - ID of the neighboring PolyVox entity in the entity's +ve local y-axis direction, 
+ * @property {Uuid} yPNeighborID=Uuid.NULL - ID of the neighboring PolyVox entity in the entity's +ve local y-axis direction,
  *     if you want them joined. Set to {@link Uuid|Uuid.NULL} if there is none or you don't want to join them.
- * @property {Uuid} zPNeighborID=Uuid.NULL - ID of the neighboring PolyVox entity in the entity's +ve local z-axis direction, 
+ * @property {Uuid} zPNeighborID=Uuid.NULL - ID of the neighboring PolyVox entity in the entity's +ve local z-axis direction,
  *     if you want them joined. Set to {@link Uuid|Uuid.NULL} if there is none or you don't want to join them.
  * @example <caption>Create a textured PolyVox sphere.</caption>
  * var position = Vec3.sum(MyAvatar.position, Vec3.multiplyQbyV(MyAvatar.orientation, { x: 0, y: 0.5, z: -8 }));
@@ -1291,8 +1300,8 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
 /**jsdoc
  * The <code>"Sphere"</code> {@link Entities.EntityType|EntityType} is the same as the <code>"Shape"</code>
  * {@link Entities.EntityType|EntityType} except that its <code>shape</code> value is always set to <code>"Sphere"</code>
- * when the entity is created. If its <code>shape</code> property value is subsequently changed then the entity's 
- * <code>type</code> will be reported as <code>"Box"</code> if the <code>shape</code> is set to <code>"Cube"</code>, 
+ * when the entity is created. If its <code>shape</code> property value is subsequently changed then the entity's
+ * <code>type</code> will be reported as <code>"Box"</code> if the <code>shape</code> is set to <code>"Cube"</code>,
  * otherwise it will be reported as <code>"Shape"</code>.
  * @typedef {object} Entities.EntityProperties-Sphere
  */
@@ -1309,10 +1318,12 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  * @property {number} textAlpha=1.0 - The text alpha.
  * @property {Color} backgroundColor=0,0,0 - The color of the background rectangle.
  * @property {number} backgroundAlpha=1.0 - The background alpha.
- * @property {BillboardMode} billboardMode="none" - If <code>"none"</code>, the entity is not billboarded.  If <code>"yaw"</code>, the entity will be
- *     oriented to follow your camera around the y-axis.  If <code>"full"</code> the entity will be oriented to face your camera.  The following deprecated
- *     behavior is also supported: you can also set <code>"faceCamera"</code> to <code>true</code> to set <code>billboardMode</code> to "yaw", and you can set
- *     <code>"isFacingAvatar"</code> to <code>true</code> to set <code>billboardMode</code> to "full".  Setting either to <code>false</code> sets the mode to "none"
+ * @property {BillboardMode} billboardMode="none" - If <code>"none"</code>, the entity is not billboarded.  If
+ * <code>"yaw"</code>, the entity will be oriented to follow your camera around the y-axis.  If <code>"full"</code> the entity
+ * will be oriented to face your camera.  The following deprecated behavior is also supported: you can also set
+ * <code>"faceCamera"</code> to <code>true</code> to set <code>billboardMode</code> to "yaw", and you can set
+ *     <code>"isFacingAvatar"</code> to <code>true</code> to set <code>billboardMode</code> to "full".  Setting either to
+ * <code>false</code> sets the mode to "none"
  * @property {number} leftMargin=0.0 - The left margin, in meters.
  * @property {number} rightMargin=0.0 - The right margin, in meters.
  * @property {number} topMargin=0.0 - The top margin, in meters.
@@ -1331,28 +1342,31 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  */
 
 /**jsdoc
- * The <code>"Web"</code> {@link Entities.EntityType|EntityType} displays a browsable Web page. Each user views their own copy 
- * of the Web page: if one user navigates to another page on the entity, other users do not see the change; if a video is being 
+ * The <code>"Web"</code> {@link Entities.EntityType|EntityType} displays a browsable Web page. Each user views their own copy
+ * of the Web page: if one user navigates to another page on the entity, other users do not see the change; if a video is being
  * played, users don't see it in sync.
  * The entity has properties in addition to the common {@link Entities.EntityProperties|EntityProperties}.
  * @typedef {object} Entities.EntityProperties-Web
  * @property {Vec3} dimensions=0.1,0.1,0.01 - The dimensions of the entity.
  * @property {Color} color=255,255,255 - The color of the web surface.
  * @property {number} alpha=1 - The alpha of the web surface.
- * @property {BillboardMode} billboardMode="none" - If <code>"none"</code>, the entity is not billboarded.  If <code>"yaw"</code>, the entity will be
- *     oriented to follow your camera around the y-axis.  If <code>"full"</code> the entity will be oriented to face your camera.  The following deprecated
- *     behavior is also supported: you can also set <code>"faceCamera"</code> to <code>true</code> to set <code>billboardMode</code> to "yaw", and you can set
- *     <code>"isFacingAvatar"</code> to <code>true</code> to set <code>billboardMode</code> to "full".  Setting either to <code>false</code> sets the mode to "none"
- * @property {string} sourceUrl="" - The URL of the Web page to display. This value does not change as you or others navigate 
+ * @property {BillboardMode} billboardMode="none" - If <code>"none"</code>, the entity is not billboarded.  If
+ * <code>"yaw"</code>, the entity will be oriented to follow your camera around the y-axis.  If <code>"full"</code> the entity
+ * will be oriented to face your camera.  The following deprecated behavior is also supported: you can also set
+ * <code>"faceCamera"</code> to <code>true</code> to set <code>billboardMode</code> to "yaw", and you can set
+ *     <code>"isFacingAvatar"</code> to <code>true</code> to set <code>billboardMode</code> to "full".  Setting either to
+ * <code>false</code> sets the mode to "none"
+ * @property {string} sourceUrl="" - The URL of the Web page to display. This value does not change as you or others navigate
  *     on the Web entity.
- * @property {number} dpi=30 - The resolution to display the page at, in dots per inch. If you convert this to dots per meter 
- *     (multiply by 1 / 0.0254 = 39.3701) then multiply <code>dimensions.x</code> and <code>dimensions.y</code> by that value 
+ * @property {number} dpi=30 - The resolution to display the page at, in dots per inch. If you convert this to dots per meter
+ *     (multiply by 1 / 0.0254 = 39.3701) then multiply <code>dimensions.x</code> and <code>dimensions.y</code> by that value
  *     you get the resolution in pixels.
  * @property {string} scriptURL="" - The URL of a JavaScript file to inject into the Web page.
  * @property {number} maxFPS=10 - The maximum update rate for the Web content, in frames/second.
  * @property {WebInputMode} inputMode="touch" - The user input mode to use.
  * @property {Entities.Pulse} pulse - The pulse-related properties.  Deprecated.
- * @property {boolean} showKeyboardFocusHighlight - Whether or not to show the keyboard focus highlight when this entity has focus.
+ * @property {boolean} showKeyboardFocusHighlight - Whether or not to show the keyboard focus highlight when this entity has
+ * focus.
  * @example <caption>Create a Web entity displaying at 1920 x 1080 resolution.</caption>
  * var METERS_TO_INCHES = 39.3701;
  * var entity = Entities.addEntity({
@@ -1375,28 +1389,28 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  * Avatar interaction events such as {@link Entities.enterEntity} are also often used with a Zone entity.
  * It has properties in addition to the common {@link Entities.EntityProperties|EntityProperties}.
  * @typedef {object} Entities.EntityProperties-Zone
- * @property {Vec3} dimensions=0.1,0.1,0.1 - The size of the volume in which the zone's lighting effects and avatar permissions 
+ * @property {Vec3} dimensions=0.1,0.1,0.1 - The size of the volume in which the zone's lighting effects and avatar permissions
  *     have effect.
  *
- * @property {ShapeType} shapeType="box" - The shape of the volume in which the zone's lighting effects and avatar 
- *     permissions have effect. Reverts to the default value if set to <code>"none"</code>, or set to <code>"compound"</code> 
+ * @property {ShapeType} shapeType="box" - The shape of the volume in which the zone's lighting effects and avatar
+ *     permissions have effect. Reverts to the default value if set to <code>"none"</code>, or set to <code>"compound"</code>
  *     and <code>compoundShapeURL</code> is <code>""</code>.
-  * @property {string} compoundShapeURL="" - The model file to use for the compound shape if <code>shapeType</code> is 
+  * @property {string} compoundShapeURL="" - The model file to use for the compound shape if <code>shapeType</code> is
  *     <code>"compound"</code>.
  *
  * @property {string} keyLightMode="inherit" - Configures the key light in the zone. Possible values:<br />
  *     <code>"inherit"</code>: The key light from any enclosing zone continues into this zone.<br />
- *     <code>"disabled"</code>: The key light from any enclosing zone and the key light of this zone are disabled in this 
+ *     <code>"disabled"</code>: The key light from any enclosing zone and the key light of this zone are disabled in this
  *         zone.<br />
- *     <code>"enabled"</code>: The key light properties of this zone are enabled, overriding the key light of from any 
+ *     <code>"enabled"</code>: The key light properties of this zone are enabled, overriding the key light of from any
  *         enclosing zone.
  * @property {Entities.KeyLight} keyLight - The key light properties of the zone.
  *
  * @property {string} ambientLightMode="inherit" - Configures the ambient light in the zone. Possible values:<br />
  *     <code>"inherit"</code>: The ambient light from any enclosing zone continues into this zone.<br />
- *     <code>"disabled"</code>: The ambient light from any enclosing zone and the ambient light of this zone are disabled in 
+ *     <code>"disabled"</code>: The ambient light from any enclosing zone and the ambient light of this zone are disabled in
  *         this zone.<br />
- *     <code>"enabled"</code>: The ambient light properties of this zone are enabled, overriding the ambient light from any 
+ *     <code>"enabled"</code>: The ambient light properties of this zone are enabled, overriding the ambient light from any
  *         enclosing zone.
  * @property {Entities.AmbientLight} ambientLight - The ambient light properties of the zone.
  *
@@ -1420,11 +1434,12 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  *
  * @property {boolean} flyingAllowed=true - If <code>true</code> then visitors can fly in the zone; otherwise they cannot.
  *     Only works on domain entities.
- * @property {boolean} ghostingAllowed=true - If <code>true</code> then visitors with avatar collisions turned off will not 
- *     collide with content in the zone; otherwise visitors will always collide with content in the zone.  Only works on domain entities.
- 
- * @property {string} filterURL="" - The URL of a JavaScript file that filters changes to properties of entities within the 
- *     zone. It is periodically executed for each entity in the zone. It can, for example, be used to not allow changes to 
+ * @property {boolean} ghostingAllowed=true - If <code>true</code> then visitors with avatar collisions turned off will not
+ *     collide with content in the zone; otherwise visitors will always collide with content in the zone.  Only works on domain
+ entities.
+
+ * @property {string} filterURL="" - The URL of a JavaScript file that filters changes to properties of entities within the
+ *     zone. It is periodically executed for each entity in the zone. It can, for example, be used to not allow changes to
  *     certain properties.<br />
  * <pre>
  * function filter(properties) {
@@ -1455,12 +1470,14 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  * @property {string} imageURL="" - The URL of the image to use.
  * @property {boolean} emissive=false - Whether or not the image should be emissive (unlit).
  * @property {boolean} keepAspectRatio=true - Whether or not the image should maintain its aspect ratio.
- * @property {BillboardMode} billboardMode="none" - If <code>"none"</code>, the entity is not billboarded.  If <code>"yaw"</code>, the entity will be
- *     oriented to follow your camera around the y-axis.  If <code>"full"</code> the entity will be oriented to face your camera.  The following deprecated
- *     behavior is also supported: you can also set <code>"faceCamera"</code> to <code>true</code> to set <code>billboardMode</code> to "yaw", and you can set
- *     <code>"isFacingAvatar"</code> to <code>true</code> to set <code>billboardMode</code> to "full".  Setting either to <code>false</code> sets the mode to "none"
- * @property {Rect} subImage={ x: 0, y: 0, width: -1, height: -1 } - The portion of the image to display. If width or height are -1, defaults to
- *     the full image in that dimension.
+ * @property {BillboardMode} billboardMode="none" - If <code>"none"</code>, the entity is not billboarded.  If
+ * <code>"yaw"</code>, the entity will be oriented to follow your camera around the y-axis.  If <code>"full"</code> the entity
+ * will be oriented to face your camera.  The following deprecated behavior is also supported: you can also set
+ * <code>"faceCamera"</code> to <code>true</code> to set <code>billboardMode</code> to "yaw", and you can set
+ *     <code>"isFacingAvatar"</code> to <code>true</code> to set <code>billboardMode</code> to "full".  Setting either to
+ * <code>false</code> sets the mode to "none"
+ * @property {Rect} subImage={ x: 0, y: 0, width: -1, height: -1 } - The portion of the image to display. If width or height are
+ * -1, defaults to the full image in that dimension.
  * @property {Color} color=255,255,255 - The color of the image.
  * @property {number} alpha=1 - The alpha of the image.
  * @property {Entities.Pulse} pulse - The pulse-related properties.  Deprecated.
@@ -1509,12 +1526,12 @@ EntityPropertyFlags EntityItemProperties::getChangedProperties() const {
  */
 
 QScriptValue EntityItemProperties::copyToScriptValue(QScriptEngine* engine, bool skipDefaults, bool allowUnknownCreateTime,
-    bool strictSemantics, EntityPsuedoPropertyFlags psueudoPropertyFlags) const {
-
-    // If strictSemantics is true and skipDefaults is false, then all and only those properties are copied for which the property flag
-    // is included in _desiredProperties, or is one of the specially enumerated ALWAYS properties below.
-    // (There may be exceptions, but if so, they are bugs.)
-    // In all other cases, you are welcome to inspect the code and try to figure out what was intended. I wish you luck. -HRS 1/18/17
+                                                     bool strictSemantics,
+                                                     EntityPsuedoPropertyFlags psueudoPropertyFlags) const {
+    // If strictSemantics is true and skipDefaults is false, then all and only those properties are copied for which the
+    // property flag is included in _desiredProperties, or is one of the specially enumerated ALWAYS properties below. (There
+    // may be exceptions, but if so, they are bugs.) In all other cases, you are welcome to inspect the code and try to figure
+    // out what was intended. I wish you luck. -HRS 1/18/17
     QScriptValue properties = engine->newObject();
     EntityItemProperties defaultEntityProperties;
 
@@ -1538,7 +1555,8 @@ QScriptValue EntityItemProperties::copyToScriptValue(QScriptEngine* engine, bool
             COPY_PROPERTY_TO_QSCRIPTVALUE_GETTER_NO_SKIP(age, getAge()); // gettable, but not settable
         }
         if (!psuedoPropertyFlagsActive || psueudoPropertyFlags.test(EntityPsuedoPropertyFlag::AgeAsText)) {
-            COPY_PROPERTY_TO_QSCRIPTVALUE_GETTER_NO_SKIP(ageAsText, formatSecondsElapsed(getAge())); // gettable, but not settable
+            COPY_PROPERTY_TO_QSCRIPTVALUE_GETTER_NO_SKIP(ageAsText,
+                                                         formatSecondsElapsed(getAge())); // gettable, but not settable
         }
     }
     if (!psuedoPropertyFlagsActive || psueudoPropertyFlags.test(EntityPsuedoPropertyFlag::LastEdited)) {
@@ -1550,7 +1568,7 @@ QScriptValue EntityItemProperties::copyToScriptValue(QScriptEngine* engine, bool
     }
 
     // Core properties
-    //COPY_PROPERTY_TO_QSCRIPTVALUE(PROP_SIMULATION_OWNER, simulationOwner); // not exposed yet
+    // COPY_PROPERTY_TO_QSCRIPTVALUE(PROP_SIMULATION_OWNER, simulationOwner); // not exposed yet
     COPY_PROPERTY_TO_QSCRIPTVALUE(PROP_VISIBLE, visible);
     COPY_PROPERTY_TO_QSCRIPTVALUE(PROP_NAME, name);
     COPY_PROPERTY_TO_QSCRIPTVALUE(PROP_LOCKED, locked);
@@ -1587,7 +1605,8 @@ QScriptValue EntityItemProperties::copyToScriptValue(QScriptEngine* engine, bool
     COPY_PROPERTY_TO_QSCRIPTVALUE(PROP_FRICTION, friction);
     COPY_PROPERTY_TO_QSCRIPTVALUE(PROP_LIFETIME, lifetime);
     COPY_PROPERTY_TO_QSCRIPTVALUE(PROP_COLLISIONLESS, collisionless);
-    COPY_PROXY_PROPERTY_TO_QSCRIPTVALUE_GETTER(PROP_COLLISIONLESS, collisionless, ignoreForCollisions, getCollisionless()); // legacy support
+    COPY_PROXY_PROPERTY_TO_QSCRIPTVALUE_GETTER(PROP_COLLISIONLESS, collisionless, ignoreForCollisions,
+                                               getCollisionless()); // legacy support
     COPY_PROPERTY_TO_QSCRIPTVALUE(PROP_COLLISION_MASK, collisionMask);
     COPY_PROXY_PROPERTY_TO_QSCRIPTVALUE_GETTER(PROP_COLLISION_MASK, collisionMask, collidesWith, getCollisionMaskAsString());
     COPY_PROPERTY_TO_QSCRIPTVALUE(PROP_DYNAMIC, dynamic);
@@ -1843,8 +1862,9 @@ QScriptValue EntityItemProperties::copyToScriptValue(QScriptEngine* engine, bool
         COPY_PROPERTY_TO_QSCRIPTVALUE(PROP_SUB_IMAGE, subImage);
 
         // Handle conversions to old 'textures' property from "imageURL"
-        if (((!psuedoPropertyFlagsButDesiredEmpty && _desiredProperties.isEmpty()) || _desiredProperties.getHasProperty(PROP_IMAGE_URL)) &&
-                (!skipDefaults || defaultEntityProperties._imageURL != _imageURL)) {
+        if (((!psuedoPropertyFlagsButDesiredEmpty && _desiredProperties.isEmpty()) ||
+             _desiredProperties.getHasProperty(PROP_IMAGE_URL)) &&
+            (!skipDefaults || defaultEntityProperties._imageURL != _imageURL)) {
             QScriptValue textures = engine->newObject();
             textures.setProperty("tex.picture", _imageURL);
             properties.setProperty("textures", textures);
@@ -1878,7 +1898,6 @@ QScriptValue EntityItemProperties::copyToScriptValue(QScriptEngine* engine, bool
      */
     if (!skipDefaults && !strictSemantics &&
         (!psuedoPropertyFlagsActive || psueudoPropertyFlags.test(EntityPsuedoPropertyFlag::BoundingBox))) {
-
         AABox aaBox = getAABox();
         QScriptValue boundingBox = engine->newObject();
         QScriptValue bottomRightNear = vec3ToScriptValue(engine, aaBox.getCorner());
@@ -1893,18 +1912,18 @@ QScriptValue EntityItemProperties::copyToScriptValue(QScriptEngine* engine, bool
     }
 
     QString textureNamesStr = QJsonDocument::fromVariant(_textureNames).toJson();
-    if (!skipDefaults && !strictSemantics && (!psuedoPropertyFlagsActive || psueudoPropertyFlags.test(EntityPsuedoPropertyFlag::OriginalTextures))) {
+    if (!skipDefaults && !strictSemantics &&
+        (!psuedoPropertyFlagsActive || psueudoPropertyFlags.test(EntityPsuedoPropertyFlag::OriginalTextures))) {
         COPY_PROPERTY_TO_QSCRIPTVALUE_GETTER_NO_SKIP(originalTextures, textureNamesStr); // gettable, but not settable
     }
 
     // Rendering info
     if (!skipDefaults && !strictSemantics &&
         (!psuedoPropertyFlagsActive || psueudoPropertyFlags.test(EntityPsuedoPropertyFlag::RenderInfo))) {
-
         QScriptValue renderInfo = engine->newObject();
 
         /**jsdoc
-         * Information on how an entity is rendered. Properties are only filled in for <code>Model</code> entities; other 
+         * Information on how an entity is rendered. Properties are only filled in for <code>Model</code> entities; other
          * entity types have an empty object, <code>{}</code>.
          * @typedef {object} Entities.RenderInfo
          * @property {number} verticesCount - The number of vertices in the entity.
@@ -1915,14 +1934,18 @@ QScriptValue EntityItemProperties::copyToScriptValue(QScriptEngine* engine, bool
          */
         // currently only supported by models
         if (_type == EntityTypes::Model) {
-            renderInfo.setProperty("verticesCount", (int)getRenderInfoVertexCount()); // FIXME - theoretically the number of vertex could be > max int
-            renderInfo.setProperty("texturesSize", (int)getRenderInfoTextureSize()); // FIXME - theoretically the size of textures could be > max int
+            renderInfo.setProperty(
+                "verticesCount",
+                (int)getRenderInfoVertexCount()); // FIXME - theoretically the number of vertex could be > max int
+            renderInfo.setProperty(
+                "texturesSize",
+                (int)getRenderInfoTextureSize()); // FIXME - theoretically the size of textures could be > max int
             renderInfo.setProperty("hasTransparent", getRenderInfoHasTransparent());
             renderInfo.setProperty("drawCalls", getRenderInfoDrawCalls());
             renderInfo.setProperty("texturesCount", getRenderInfoTextureCount());
         }
 
-        COPY_PROPERTY_TO_QSCRIPTVALUE_GETTER_NO_SKIP(renderInfo, renderInfo);  // Gettable but not settable
+        COPY_PROPERTY_TO_QSCRIPTVALUE_GETTER_NO_SKIP(renderInfo, renderInfo); // Gettable but not settable
     }
 
     if (!psuedoPropertyFlagsActive || psueudoPropertyFlags.test(EntityPsuedoPropertyFlag::ClientOnly)) {
@@ -1935,7 +1958,8 @@ QScriptValue EntityItemProperties::copyToScriptValue(QScriptEngine* engine, bool
         properties.setProperty("localEntity", convertScriptValue(engine, getEntityHostType() == entity::HostType::LOCAL));
     }
 
-    if (_type != EntityTypes::PolyLine && (!psuedoPropertyFlagsActive || psueudoPropertyFlags.test(EntityPsuedoPropertyFlag::FaceCamera))) {
+    if (_type != EntityTypes::PolyLine &&
+        (!psuedoPropertyFlagsActive || psueudoPropertyFlags.test(EntityPsuedoPropertyFlag::FaceCamera))) {
         properties.setProperty("faceCamera", convertScriptValue(engine, getBillboardMode() == BillboardMode::YAW));
     }
     if (!psuedoPropertyFlagsActive || psueudoPropertyFlags.test(EntityPsuedoPropertyFlag::IsFacingAvatar)) {
@@ -2239,7 +2263,6 @@ void EntityItemProperties::copyFromJSONString(QScriptEngine& scriptEngine, const
     copyFromScriptValue(propertiesScriptValue, honorReadOnly);
 }
 
-
 void EntityItemProperties::merge(const EntityItemProperties& other) {
     // Core
     COPY_PROPERTY_IF_CHANGED(simulationOwner);
@@ -2475,11 +2498,11 @@ QScriptValue EntityItemNonDefaultPropertiesToScriptValue(QScriptEngine* engine, 
     return properties.copyToScriptValue(engine, true);
 }
 
-void EntityItemPropertiesFromScriptValueIgnoreReadOnly(const QScriptValue &object, EntityItemProperties& properties) {
+void EntityItemPropertiesFromScriptValueIgnoreReadOnly(const QScriptValue& object, EntityItemProperties& properties) {
     properties.copyFromScriptValue(object, false);
 }
 
-void EntityItemPropertiesFromScriptValueHonorReadOnly(const QScriptValue &object, EntityItemProperties& properties) {
+void EntityItemPropertiesFromScriptValueHonorReadOnly(const QScriptValue& object, EntityItemProperties& properties) {
     properties.copyFromScriptValue(object, true);
 }
 
@@ -2490,7 +2513,6 @@ QScriptValue EntityPropertyFlagsToScriptValue(QScriptEngine* engine, const Entit
 void EntityPropertyFlagsFromScriptValue(const QScriptValue& object, EntityPropertyFlags& flags) {
     EntityItemProperties::entityPropertyFlagsFromScriptValue(object, flags);
 }
-
 
 QScriptValue EntityItemProperties::entityPropertyFlagsToScriptValue(QScriptEngine* engine, const EntityPropertyFlags& flags) {
     QScriptValue result = engine->newObject();
@@ -2503,8 +2525,7 @@ void EntityItemProperties::entityPropertyFlagsFromScriptValue(const QScriptValue
         if (getPropertyInfo(object.toString(), propertyInfo)) {
             flags << propertyInfo.propertyEnum;
         }
-    }
-    else if (object.isArray()) {
+    } else if (object.isArray()) {
         quint32 length = object.property("length").toInt32();
         for (quint32 i = 0; i < length; i++) {
             QString propertyName = object.property(i).toString();
@@ -2520,7 +2541,6 @@ static QHash<QString, EntityPropertyInfo> _propertyInfos;
 static QHash<EntityPropertyList, QString> _enumsToPropertyStrings;
 
 bool EntityItemProperties::getPropertyInfo(const QString& propertyName, EntityPropertyInfo& propertyInfo) {
-
     static std::once_flag initMap;
 
     std::call_once(initMap, []() {
@@ -2535,7 +2555,7 @@ bool EntityItemProperties::getPropertyInfo(const QString& propertyName, EntityPr
         ADD_PROPERTY_TO_MAP(PROP_POSITION, Position, position, vec3);
         ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_DIMENSIONS, Dimensions, dimensions, vec3, ENTITY_ITEM_MIN_DIMENSION, FLT_MAX);
         ADD_PROPERTY_TO_MAP(PROP_ROTATION, Rotation, rotation, quat);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_REGISTRATION_POINT, RegistrationPoint, registrationPoint, vec3, 
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_REGISTRATION_POINT, RegistrationPoint, registrationPoint, vec3,
                                        ENTITY_ITEM_MIN_REGISTRATION_POINT, ENTITY_ITEM_MAX_REGISTRATION_POINT);
         ADD_PROPERTY_TO_MAP(PROP_CREATED, Created, created, quint64);
         ADD_PROPERTY_TO_MAP(PROP_LAST_EDITED_BY, LastEditedBy, lastEditedBy, QUuid);
@@ -2556,37 +2576,35 @@ bool EntityItemProperties::getPropertyInfo(const QString& propertyName, EntityPr
             ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_TRIGGERABLE, Grab, grab, Triggerable, triggerable);
             ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_EQUIPPABLE, Grab, grab, Equippable, equippable);
             ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_DELEGATE_TO_PARENT, Grab, grab, GrabDelegateToParent, grabDelegateToParent);
-            ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET, Grab, grab,
-                                      EquippableLeftPosition, equippableLeftPosition);
-            ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET, Grab, grab,
-                                      EquippableLeftRotation, equippableLeftRotation);
-            ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET, Grab, grab,
-                                      EquippableRightPosition, equippableRightPosition);
-            ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET, Grab, grab,
-                                      EquippableRightRotation, equippableRightRotation);
-            ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_EQUIPPABLE_INDICATOR_URL, Grab, grab,
-                                      EquippableIndicatorURL, equippableIndicatorURL);
-            ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE, Grab, grab,
-                                      EquippableIndicatorScale, equippableIndicatorScale);
-            ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET, Grab, grab,
-                                      EquippableIndicatorOffset, equippableIndicatorOffset);
+            ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET, Grab, grab, EquippableLeftPosition,
+                                      equippableLeftPosition);
+            ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET, Grab, grab, EquippableLeftRotation,
+                                      equippableLeftRotation);
+            ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET, Grab, grab, EquippableRightPosition,
+                                      equippableRightPosition);
+            ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET, Grab, grab, EquippableRightRotation,
+                                      equippableRightRotation);
+            ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_EQUIPPABLE_INDICATOR_URL, Grab, grab, EquippableIndicatorURL,
+                                      equippableIndicatorURL);
+            ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE, Grab, grab, EquippableIndicatorScale,
+                                      equippableIndicatorScale);
+            ADD_GROUP_PROPERTY_TO_MAP(PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET, Grab, grab, EquippableIndicatorOffset,
+                                      equippableIndicatorOffset);
         }
 
         // Physics
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_DENSITY, Density, density, float, 
-                                       ENTITY_ITEM_MIN_DENSITY, ENTITY_ITEM_MAX_DENSITY);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_DENSITY, Density, density, float, ENTITY_ITEM_MIN_DENSITY, ENTITY_ITEM_MAX_DENSITY);
         ADD_PROPERTY_TO_MAP(PROP_VELOCITY, Velocity, velocity, vec3);
         ADD_PROPERTY_TO_MAP(PROP_ANGULAR_VELOCITY, AngularVelocity, angularVelocity, vec3);
         ADD_PROPERTY_TO_MAP(PROP_GRAVITY, Gravity, gravity, vec3);
         ADD_PROPERTY_TO_MAP(PROP_ACCELERATION, Acceleration, acceleration, vec3);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_DAMPING, Damping, damping, float, 
-                                       ENTITY_ITEM_MIN_DAMPING, ENTITY_ITEM_MAX_DAMPING);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_ANGULAR_DAMPING, AngularDamping, angularDamping, float, 
-                                       ENTITY_ITEM_MIN_DAMPING, ENTITY_ITEM_MAX_DAMPING);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_RESTITUTION, Restitution, restitution, float, 
-                                       ENTITY_ITEM_MIN_RESTITUTION, ENTITY_ITEM_MAX_RESTITUTION);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_FRICTION, Friction, friction, float, 
-                                       ENTITY_ITEM_MIN_FRICTION, ENTITY_ITEM_MAX_FRICTION);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_DAMPING, Damping, damping, float, ENTITY_ITEM_MIN_DAMPING, ENTITY_ITEM_MAX_DAMPING);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_ANGULAR_DAMPING, AngularDamping, angularDamping, float, ENTITY_ITEM_MIN_DAMPING,
+                                       ENTITY_ITEM_MAX_DAMPING);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_RESTITUTION, Restitution, restitution, float, ENTITY_ITEM_MIN_RESTITUTION,
+                                       ENTITY_ITEM_MAX_RESTITUTION);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_FRICTION, Friction, friction, float, ENTITY_ITEM_MIN_FRICTION,
+                                       ENTITY_ITEM_MAX_FRICTION);
         ADD_PROPERTY_TO_MAP(PROP_LIFETIME, Lifetime, lifetime, float);
         ADD_PROPERTY_TO_MAP(PROP_COLLISIONLESS, Collisionless, collisionless, bool);
         ADD_PROPERTY_TO_MAP(PROP_COLLISIONLESS, unused, ignoreForCollisions, unused); // legacy support
@@ -2628,8 +2646,8 @@ bool EntityItemProperties::getPropertyInfo(const QString& propertyName, EntityPr
         ADD_PROPERTY_TO_MAP(PROP_LOCAL_ROTATION, LocalRotation, localRotation, quat);
         ADD_PROPERTY_TO_MAP(PROP_LOCAL_VELOCITY, LocalVelocity, localVelocity, vec3);
         ADD_PROPERTY_TO_MAP(PROP_LOCAL_ANGULAR_VELOCITY, LocalAngularVelocity, localAngularVelocity, vec3);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_LOCAL_DIMENSIONS, LocalDimensions, localDimensions, vec3, 
-                                       ENTITY_ITEM_MIN_DIMENSION, FLT_MAX);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_LOCAL_DIMENSIONS, LocalDimensions, localDimensions, vec3, ENTITY_ITEM_MIN_DIMENSION,
+                                       FLT_MAX);
 
         // Common
         ADD_PROPERTY_TO_MAP(PROP_SHAPE_TYPE, ShapeType, shapeType, ShapeType);
@@ -2647,60 +2665,60 @@ bool EntityItemProperties::getPropertyInfo(const QString& propertyName, EntityPr
         ADD_PROPERTY_TO_MAP(PROP_BILLBOARD_MODE, BillboardMode, billboardMode, BillboardMode);
 
         // Particles
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_MAX_PARTICLES, MaxParticles, maxParticles, quint32, 
-                                       particle::MINIMUM_MAX_PARTICLES, particle::MAXIMUM_MAX_PARTICLES);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_LIFESPAN, Lifespan, lifespan, float, 
-                                       particle::MINIMUM_LIFESPAN, particle::MAXIMUM_LIFESPAN);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_MAX_PARTICLES, MaxParticles, maxParticles, quint32, particle::MINIMUM_MAX_PARTICLES,
+                                       particle::MAXIMUM_MAX_PARTICLES);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_LIFESPAN, Lifespan, lifespan, float, particle::MINIMUM_LIFESPAN,
+                                       particle::MAXIMUM_LIFESPAN);
         ADD_PROPERTY_TO_MAP(PROP_EMITTING_PARTICLES, IsEmitting, isEmitting, bool);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_EMIT_RATE, EmitRate, emitRate, float, 
-                                       particle::MINIMUM_EMIT_RATE, particle::MAXIMUM_EMIT_RATE);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_EMIT_SPEED, EmitSpeed, emitSpeed, vec3, 
-                                       particle::MINIMUM_EMIT_SPEED, particle::MAXIMUM_EMIT_SPEED);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_SPEED_SPREAD, SpeedSpread, speedSpread, vec3, 
-                                       particle::MINIMUM_EMIT_SPEED, particle::MAXIMUM_EMIT_SPEED);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_EMIT_RATE, EmitRate, emitRate, float, particle::MINIMUM_EMIT_RATE,
+                                       particle::MAXIMUM_EMIT_RATE);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_EMIT_SPEED, EmitSpeed, emitSpeed, vec3, particle::MINIMUM_EMIT_SPEED,
+                                       particle::MAXIMUM_EMIT_SPEED);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_SPEED_SPREAD, SpeedSpread, speedSpread, vec3, particle::MINIMUM_EMIT_SPEED,
+                                       particle::MAXIMUM_EMIT_SPEED);
         ADD_PROPERTY_TO_MAP(PROP_EMIT_ORIENTATION, EmitOrientation, emitOrientation, quat);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_EMIT_DIMENSIONS, EmitDimensions, emitDimensions, vec3, 
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_EMIT_DIMENSIONS, EmitDimensions, emitDimensions, vec3,
                                        particle::MINIMUM_EMIT_DIMENSION, particle::MAXIMUM_EMIT_DIMENSION);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_EMIT_RADIUS_START, EmitRadiusStart, emitRadiusStart, float, 
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_EMIT_RADIUS_START, EmitRadiusStart, emitRadiusStart, float,
                                        particle::MINIMUM_EMIT_RADIUS_START, particle::MAXIMUM_EMIT_RADIUS_START);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_POLAR_START, EmitPolarStart, polarStart, float, 
-                                       particle::MINIMUM_POLAR, particle::MAXIMUM_POLAR);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_POLAR_FINISH, EmitPolarFinish, polarFinish, float, 
-                                       particle::MINIMUM_POLAR, particle::MAXIMUM_POLAR);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_AZIMUTH_START, EmitAzimuthStart, azimuthStart, float, 
-                                       particle::MINIMUM_AZIMUTH, particle::MAXIMUM_AZIMUTH);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_AZIMUTH_FINISH, EmitAzimuthFinish, azimuthFinish, float, 
-                                       particle::MINIMUM_AZIMUTH, particle::MAXIMUM_AZIMUTH);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_EMIT_ACCELERATION, EmitAcceleration, emitAcceleration, vec3, 
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_POLAR_START, EmitPolarStart, polarStart, float, particle::MINIMUM_POLAR,
+                                       particle::MAXIMUM_POLAR);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_POLAR_FINISH, EmitPolarFinish, polarFinish, float, particle::MINIMUM_POLAR,
+                                       particle::MAXIMUM_POLAR);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_AZIMUTH_START, EmitAzimuthStart, azimuthStart, float, particle::MINIMUM_AZIMUTH,
+                                       particle::MAXIMUM_AZIMUTH);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_AZIMUTH_FINISH, EmitAzimuthFinish, azimuthFinish, float, particle::MINIMUM_AZIMUTH,
+                                       particle::MAXIMUM_AZIMUTH);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_EMIT_ACCELERATION, EmitAcceleration, emitAcceleration, vec3,
                                        particle::MINIMUM_EMIT_ACCELERATION, particle::MAXIMUM_EMIT_ACCELERATION);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_ACCELERATION_SPREAD, AccelerationSpread, accelerationSpread, vec3, 
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_ACCELERATION_SPREAD, AccelerationSpread, accelerationSpread, vec3,
                                        particle::MINIMUM_ACCELERATION_SPREAD, particle::MAXIMUM_ACCELERATION_SPREAD);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_PARTICLE_RADIUS, ParticleRadius, particleRadius, float, 
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_PARTICLE_RADIUS, ParticleRadius, particleRadius, float,
                                        particle::MINIMUM_PARTICLE_RADIUS, particle::MAXIMUM_PARTICLE_RADIUS);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_RADIUS_SPREAD, RadiusSpread, radiusSpread, float, 
-                                       particle::MINIMUM_PARTICLE_RADIUS, particle::MAXIMUM_PARTICLE_RADIUS);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_RADIUS_START, RadiusStart, radiusStart, float, 
-                                       particle::MINIMUM_PARTICLE_RADIUS, particle::MAXIMUM_PARTICLE_RADIUS);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_RADIUS_FINISH, RadiusFinish, radiusFinish, float, 
-                                       particle::MINIMUM_PARTICLE_RADIUS, particle::MAXIMUM_PARTICLE_RADIUS);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_RADIUS_SPREAD, RadiusSpread, radiusSpread, float, particle::MINIMUM_PARTICLE_RADIUS,
+                                       particle::MAXIMUM_PARTICLE_RADIUS);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_RADIUS_START, RadiusStart, radiusStart, float, particle::MINIMUM_PARTICLE_RADIUS,
+                                       particle::MAXIMUM_PARTICLE_RADIUS);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_RADIUS_FINISH, RadiusFinish, radiusFinish, float, particle::MINIMUM_PARTICLE_RADIUS,
+                                       particle::MAXIMUM_PARTICLE_RADIUS);
         ADD_PROPERTY_TO_MAP(PROP_COLOR_SPREAD, ColorSpread, colorSpread, u8vec3Color);
         ADD_PROPERTY_TO_MAP(PROP_COLOR_START, ColorStart, colorStart, vec3Color);
         ADD_PROPERTY_TO_MAP(PROP_COLOR_FINISH, ColorFinish, colorFinish, vec3Color);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_ALPHA_SPREAD, AlphaSpread, alphaSpread, float, 
-                                       particle::MINIMUM_ALPHA, particle::MAXIMUM_ALPHA);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_ALPHA_START, AlphaStart, alphaStart, float, 
-                                       particle::MINIMUM_ALPHA, particle::MAXIMUM_ALPHA);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_ALPHA_FINISH, AlphaFinish, alphaFinish, float, 
-                                       particle::MINIMUM_ALPHA, particle::MAXIMUM_ALPHA);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_ALPHA_SPREAD, AlphaSpread, alphaSpread, float, particle::MINIMUM_ALPHA,
+                                       particle::MAXIMUM_ALPHA);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_ALPHA_START, AlphaStart, alphaStart, float, particle::MINIMUM_ALPHA,
+                                       particle::MAXIMUM_ALPHA);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_ALPHA_FINISH, AlphaFinish, alphaFinish, float, particle::MINIMUM_ALPHA,
+                                       particle::MAXIMUM_ALPHA);
         ADD_PROPERTY_TO_MAP(PROP_EMITTER_SHOULD_TRAIL, EmitterShouldTrail, emitterShouldTrail, bool);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_PARTICLE_SPIN, ParticleSpin, particleSpin, float, 
-                                       particle::MINIMUM_PARTICLE_SPIN, particle::MAXIMUM_PARTICLE_SPIN);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_SPIN_SPREAD, SpinSpread, spinSpread, float, 
-                                       particle::MINIMUM_PARTICLE_SPIN, particle::MAXIMUM_PARTICLE_SPIN);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_SPIN_START, SpinStart, spinStart, float, 
-                                       particle::MINIMUM_PARTICLE_SPIN, particle::MAXIMUM_PARTICLE_SPIN);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_SPIN_FINISH, SpinFinish, spinFinish, float, 
-                                       particle::MINIMUM_PARTICLE_SPIN, particle::MAXIMUM_PARTICLE_SPIN);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_PARTICLE_SPIN, ParticleSpin, particleSpin, float, particle::MINIMUM_PARTICLE_SPIN,
+                                       particle::MAXIMUM_PARTICLE_SPIN);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_SPIN_SPREAD, SpinSpread, spinSpread, float, particle::MINIMUM_PARTICLE_SPIN,
+                                       particle::MAXIMUM_PARTICLE_SPIN);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_SPIN_START, SpinStart, spinStart, float, particle::MINIMUM_PARTICLE_SPIN,
+                                       particle::MAXIMUM_PARTICLE_SPIN);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_SPIN_FINISH, SpinFinish, spinFinish, float, particle::MINIMUM_PARTICLE_SPIN,
+                                       particle::MAXIMUM_PARTICLE_SPIN);
         ADD_PROPERTY_TO_MAP(PROP_PARTICLE_ROTATE_WITH_ENTITY, RotateWithEntity, rotateWithEntity, float);
 
         // Model
@@ -2714,7 +2732,8 @@ bool EntityItemProperties::getPropertyInfo(const QString& propertyName, EntityPr
         ADD_PROPERTY_TO_MAP(PROP_GROUP_CULLED, GroupCulled, groupCulled, bool);
         { // Animation
             ADD_GROUP_PROPERTY_TO_MAP(PROP_ANIMATION_URL, Animation, animation, URL, url);
-            ADD_GROUP_PROPERTY_TO_MAP(PROP_ANIMATION_ALLOW_TRANSLATION, Animation, animation, AllowTranslation, allowTranslation);
+            ADD_GROUP_PROPERTY_TO_MAP(PROP_ANIMATION_ALLOW_TRANSLATION, Animation, animation, AllowTranslation,
+                                      allowTranslation);
             ADD_GROUP_PROPERTY_TO_MAP(PROP_ANIMATION_FPS, Animation, animation, FPS, fps);
             ADD_GROUP_PROPERTY_TO_MAP(PROP_ANIMATION_FRAME_INDEX, Animation, animation, CurrentFrame, currentFrame);
             ADD_GROUP_PROPERTY_TO_MAP(PROP_ANIMATION_PLAYING, Animation, animation, Running, running);
@@ -2728,8 +2747,8 @@ bool EntityItemProperties::getPropertyInfo(const QString& propertyName, EntityPr
         ADD_PROPERTY_TO_MAP(PROP_IS_SPOTLIGHT, IsSpotlight, isSpotlight, bool);
         ADD_PROPERTY_TO_MAP(PROP_INTENSITY, Intensity, intensity, float);
         ADD_PROPERTY_TO_MAP(PROP_EXPONENT, Exponent, exponent, float);
-        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_CUTOFF, Cutoff, cutoff, float, 
-                                       LightEntityItem::MIN_CUTOFF, LightEntityItem::MAX_CUTOFF);
+        ADD_PROPERTY_TO_MAP_WITH_RANGE(PROP_CUTOFF, Cutoff, cutoff, float, LightEntityItem::MIN_CUTOFF,
+                                       LightEntityItem::MAX_CUTOFF);
         ADD_PROPERTY_TO_MAP(PROP_FALLOFF_RADIUS, FalloffRadius, falloffRadius, float);
 
         // Text
@@ -2849,23 +2868,34 @@ bool EntityItemProperties::getPropertyInfo(const QString& propertyName, EntityPr
         // Gizmo
         ADD_PROPERTY_TO_MAP(PROP_GIZMO_TYPE, GizmoType, gizmoType, GizmoType);
         { // RingGizmo
-            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_START_ANGLE, Ring, ring, StartAngle, startAngle, RingGizmoPropertyGroup::MIN_ANGLE, RingGizmoPropertyGroup::MAX_ANGLE);
-            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_END_ANGLE, Ring, ring, EndAngle, endAngle, RingGizmoPropertyGroup::MIN_ANGLE, RingGizmoPropertyGroup::MAX_ANGLE);
-            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_INNER_RADIUS, Ring, ring, InnerRadius, innerRadius, RingGizmoPropertyGroup::MIN_RADIUS, RingGizmoPropertyGroup::MAX_RADIUS);
+            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_START_ANGLE, Ring, ring, StartAngle, startAngle,
+                                                 RingGizmoPropertyGroup::MIN_ANGLE, RingGizmoPropertyGroup::MAX_ANGLE);
+            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_END_ANGLE, Ring, ring, EndAngle, endAngle,
+                                                 RingGizmoPropertyGroup::MIN_ANGLE, RingGizmoPropertyGroup::MAX_ANGLE);
+            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_INNER_RADIUS, Ring, ring, InnerRadius, innerRadius,
+                                                 RingGizmoPropertyGroup::MIN_RADIUS, RingGizmoPropertyGroup::MAX_RADIUS);
 
             ADD_GROUP_PROPERTY_TO_MAP(PROP_INNER_START_COLOR, Ring, ring, InnerStartColor, innerStartColor);
             ADD_GROUP_PROPERTY_TO_MAP(PROP_INNER_END_COLOR, Ring, ring, InnerEndColor, innerEndColor);
             ADD_GROUP_PROPERTY_TO_MAP(PROP_OUTER_START_COLOR, Ring, ring, OuterStartColor, outerStartColor);
             ADD_GROUP_PROPERTY_TO_MAP(PROP_OUTER_END_COLOR, Ring, ring, OuterEndColor, outerEndColor);
 
-            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_INNER_START_ALPHA, Ring, ring, InnerStartAlpha, innerStartAlpha, RingGizmoPropertyGroup::MIN_ALPHA, RingGizmoPropertyGroup::MAX_ALPHA);
-            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_INNER_END_ALPHA, Ring, ring, InnerEndAlpha, innerEndAlpha, RingGizmoPropertyGroup::MIN_ALPHA, RingGizmoPropertyGroup::MAX_ALPHA);
-            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_OUTER_START_ALPHA, Ring, ring, OuterStartAlpha, outerStartAlpha, RingGizmoPropertyGroup::MIN_ALPHA, RingGizmoPropertyGroup::MAX_ALPHA);
-            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_OUTER_END_ALPHA, Ring, ring, OuterEndAlpha, outerEndAlpha, RingGizmoPropertyGroup::MIN_ALPHA, RingGizmoPropertyGroup::MAX_ALPHA);
+            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_INNER_START_ALPHA, Ring, ring, InnerStartAlpha, innerStartAlpha,
+                                                 RingGizmoPropertyGroup::MIN_ALPHA, RingGizmoPropertyGroup::MAX_ALPHA);
+            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_INNER_END_ALPHA, Ring, ring, InnerEndAlpha, innerEndAlpha,
+                                                 RingGizmoPropertyGroup::MIN_ALPHA, RingGizmoPropertyGroup::MAX_ALPHA);
+            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_OUTER_START_ALPHA, Ring, ring, OuterStartAlpha, outerStartAlpha,
+                                                 RingGizmoPropertyGroup::MIN_ALPHA, RingGizmoPropertyGroup::MAX_ALPHA);
+            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_OUTER_END_ALPHA, Ring, ring, OuterEndAlpha, outerEndAlpha,
+                                                 RingGizmoPropertyGroup::MIN_ALPHA, RingGizmoPropertyGroup::MAX_ALPHA);
 
             ADD_GROUP_PROPERTY_TO_MAP(PROP_HAS_TICK_MARKS, Ring, ring, HasTickMarks, hasTickMarks);
-            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_MAJOR_TICK_MARKS_ANGLE, Ring, ring, MajorTickMarksAngle, majorTickMarksAngle, RingGizmoPropertyGroup::MIN_ANGLE, RingGizmoPropertyGroup::MAX_ANGLE);
-            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_MINOR_TICK_MARKS_ANGLE, Ring, ring, MinorTickMarksAngle, minorTickMarksAngle, RingGizmoPropertyGroup::MIN_ANGLE, RingGizmoPropertyGroup::MAX_ANGLE);
+            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_MAJOR_TICK_MARKS_ANGLE, Ring, ring, MajorTickMarksAngle,
+                                                 majorTickMarksAngle, RingGizmoPropertyGroup::MIN_ANGLE,
+                                                 RingGizmoPropertyGroup::MAX_ANGLE);
+            ADD_GROUP_PROPERTY_TO_MAP_WITH_RANGE(PROP_MINOR_TICK_MARKS_ANGLE, Ring, ring, MinorTickMarksAngle,
+                                                 minorTickMarksAngle, RingGizmoPropertyGroup::MIN_ANGLE,
+                                                 RingGizmoPropertyGroup::MAX_ANGLE);
             ADD_GROUP_PROPERTY_TO_MAP(PROP_MAJOR_TICK_MARKS_LENGTH, Ring, ring, MajorTickMarksLength, majorTickMarksLength);
             ADD_GROUP_PROPERTY_TO_MAP(PROP_MINOR_TICK_MARKS_LENGTH, Ring, ring, MinorTickMarksLength, minorTickMarksLength);
             ADD_GROUP_PROPERTY_TO_MAP(PROP_MAJOR_TICK_MARKS_COLOR, Ring, ring, MajorTickMarksColor, majorTickMarksColor);
@@ -2911,9 +2941,11 @@ void EntityPropertyInfoFromScriptValue(const QScriptValue& object, EntityPropert
 //
 // TODO: Implement support for script and visible properties.
 //
-OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketType command, EntityItemID id, const EntityItemProperties& properties,
-                QByteArray& buffer, EntityPropertyFlags requestedProperties, EntityPropertyFlags& didntFitProperties) {
-
+OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketType command, EntityItemID id,
+                                                                        const EntityItemProperties& properties,
+                                                                        QByteArray& buffer,
+                                                                        EntityPropertyFlags requestedProperties,
+                                                                        EntityPropertyFlags& didntFitProperties) {
     OctreePacketData ourDataPacket(false, buffer.size()); // create a packetData object to add out packet details too.
     OctreePacketData* packetData = &ourDataPacket; // we want a pointer to this so we can use our APPEND_ENTITY_PROPERTY macro
 
@@ -2935,7 +2967,6 @@ OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketTy
 
     // assuming we have room to fit our octalCode, proceed...
     if (success) {
-
         // Now add our edit content details...
 
         // id
@@ -2983,8 +3014,8 @@ OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketTy
         bool successPropertyFlagsFits = packetData->appendRawData(encodedPropertyFlags);
         int propertyCount = 0;
 
-        bool headerFits = successIDFits && successTypeFits && successLastEditedFits &&
-            successLastUpdatedFits && successPropertyFlagsFits;
+        bool headerFits = successIDFits && successTypeFits && successLastEditedFits && successLastUpdatedFits &&
+                          successPropertyFlagsFits;
 
         int startOfEntityItemData = packetData->getUncompressedByteOffset();
 
@@ -2995,7 +3026,6 @@ OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketTy
             // These items would go here once supported....
             //      PROP_PAGED_PROPERTY,
             //      PROP_CUSTOM_PROPERTIES_INCLUDED,
-
 
             APPEND_ENTITY_PROPERTY(PROP_SIMULATION_OWNER, properties._simulationOwner.toByteArray());
             APPEND_ENTITY_PROPERTY(PROP_VISIBLE, properties.getVisible());
@@ -3010,19 +3040,21 @@ OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketTy
             APPEND_ENTITY_PROPERTY(PROP_REGISTRATION_POINT, properties.getRegistrationPoint());
             APPEND_ENTITY_PROPERTY(PROP_CREATED, properties.getCreated());
             APPEND_ENTITY_PROPERTY(PROP_LAST_EDITED_BY, properties.getLastEditedBy());
-            // APPEND_ENTITY_PROPERTY(PROP_ENTITY_HOST_TYPE, (uint32_t)properties.getEntityHostType());              // not sent over the wire
-            // APPEND_ENTITY_PROPERTY(PROP_OWNING_AVATAR_ID, properties.getOwningAvatarID());                        // not sent over the wire
+            // APPEND_ENTITY_PROPERTY(PROP_ENTITY_HOST_TYPE, (uint32_t)properties.getEntityHostType());              // not sent
+            // over the wire APPEND_ENTITY_PROPERTY(PROP_OWNING_AVATAR_ID, properties.getOwningAvatarID()); // not sent over the
+            // wire
             APPEND_ENTITY_PROPERTY(PROP_PARENT_ID, properties.getParentID());
             APPEND_ENTITY_PROPERTY(PROP_PARENT_JOINT_INDEX, properties.getParentJointIndex());
             APPEND_ENTITY_PROPERTY(PROP_QUERY_AA_CUBE, properties.getQueryAACube());
             APPEND_ENTITY_PROPERTY(PROP_CAN_CAST_SHADOW, properties.getCanCastShadow());
-            // APPEND_ENTITY_PROPERTY(PROP_VISIBLE_IN_SECONDARY_CAMERA, properties.getIsVisibleInSecondaryCamera()); // not sent over the wire
+            // APPEND_ENTITY_PROPERTY(PROP_VISIBLE_IN_SECONDARY_CAMERA, properties.getIsVisibleInSecondaryCamera()); // not sent
+            // over the wire
             APPEND_ENTITY_PROPERTY(PROP_RENDER_LAYER, (uint32_t)properties.getRenderLayer());
             APPEND_ENTITY_PROPERTY(PROP_PRIMITIVE_MODE, (uint32_t)properties.getPrimitiveMode());
             APPEND_ENTITY_PROPERTY(PROP_IGNORE_PICK_INTERSECTION, properties.getIgnorePickIntersection());
             _staticGrab.setProperties(properties);
-            _staticGrab.appendToEditPacket(packetData, requestedProperties, propertyFlags,
-                                           propertiesDidntFit, propertyCount, appendState);
+            _staticGrab.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit, propertyCount,
+                                           appendState);
 
             // Physics
             APPEND_ENTITY_PROPERTY(PROP_DENSITY, properties.getDensity());
@@ -3072,8 +3104,8 @@ OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketTy
                 APPEND_ENTITY_PROPERTY(PROP_COLOR, properties.getColor());
                 APPEND_ENTITY_PROPERTY(PROP_ALPHA, properties.getAlpha());
                 _staticPulse.setProperties(properties);
-                _staticPulse.appendToEditPacket(packetData, requestedProperties, propertyFlags,
-                    propertiesDidntFit, propertyCount, appendState);
+                _staticPulse.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit,
+                                                propertyCount, appendState);
                 APPEND_ENTITY_PROPERTY(PROP_TEXTURES, properties.getTextures());
 
                 APPEND_ENTITY_PROPERTY(PROP_MAX_PARTICLES, properties.getMaxParticles());
@@ -3132,7 +3164,8 @@ OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketTy
                 APPEND_ENTITY_PROPERTY(PROP_GROUP_CULLED, properties.getGroupCulled());
 
                 _staticAnimation.setProperties(properties);
-                _staticAnimation.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                _staticAnimation.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit,
+                                                    propertyCount, appendState);
             }
 
             if (properties.getType() == EntityTypes::Light) {
@@ -3146,8 +3179,8 @@ OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketTy
 
             if (properties.getType() == EntityTypes::Text) {
                 _staticPulse.setProperties(properties);
-                _staticPulse.appendToEditPacket(packetData, requestedProperties, propertyFlags,
-                    propertiesDidntFit, propertyCount, appendState);
+                _staticPulse.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit,
+                                                propertyCount, appendState);
                 APPEND_ENTITY_PROPERTY(PROP_BILLBOARD_MODE, (uint32_t)properties.getBillboardMode());
 
                 APPEND_ENTITY_PROPERTY(PROP_TEXT, properties.getText());
@@ -3167,19 +3200,24 @@ OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketTy
                 APPEND_ENTITY_PROPERTY(PROP_COMPOUND_SHAPE_URL, properties.getCompoundShapeURL());
 
                 _staticKeyLight.setProperties(properties);
-                _staticKeyLight.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                _staticKeyLight.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit,
+                                                   propertyCount, appendState);
 
                 _staticAmbientLight.setProperties(properties);
-                _staticAmbientLight.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                _staticAmbientLight.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit,
+                                                       propertyCount, appendState);
 
                 _staticSkybox.setProperties(properties);
-                _staticSkybox.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                _staticSkybox.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit,
+                                                 propertyCount, appendState);
 
                 _staticHaze.setProperties(properties);
-                _staticHaze.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                _staticHaze.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit,
+                                               propertyCount, appendState);
 
                 _staticBloom.setProperties(properties);
-                _staticBloom.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                _staticBloom.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit,
+                                                propertyCount, appendState);
 
                 APPEND_ENTITY_PROPERTY(PROP_FLYING_ALLOWED, properties.getFlyingAllowed());
                 APPEND_ENTITY_PROPERTY(PROP_GHOSTING_ALLOWED, properties.getGhostingAllowed());
@@ -3211,8 +3249,8 @@ OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketTy
                 APPEND_ENTITY_PROPERTY(PROP_COLOR, properties.getColor());
                 APPEND_ENTITY_PROPERTY(PROP_ALPHA, properties.getAlpha());
                 _staticPulse.setProperties(properties);
-                _staticPulse.appendToEditPacket(packetData, requestedProperties, propertyFlags,
-                    propertiesDidntFit, propertyCount, appendState);
+                _staticPulse.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit,
+                                                propertyCount, appendState);
                 APPEND_ENTITY_PROPERTY(PROP_BILLBOARD_MODE, (uint32_t)properties.getBillboardMode());
 
                 APPEND_ENTITY_PROPERTY(PROP_SOURCE_URL, properties.getSourceUrl());
@@ -3244,14 +3282,13 @@ OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketTy
 
             // NOTE: Spheres and Boxes are just special cases of Shape, and they need to include their PROP_SHAPE
             // when encoding/decoding edits because otherwise they can't polymorph to other shape types
-            if (properties.getType() == EntityTypes::Shape ||
-                properties.getType() == EntityTypes::Box ||
+            if (properties.getType() == EntityTypes::Shape || properties.getType() == EntityTypes::Box ||
                 properties.getType() == EntityTypes::Sphere) {
                 APPEND_ENTITY_PROPERTY(PROP_COLOR, properties.getColor());
                 APPEND_ENTITY_PROPERTY(PROP_ALPHA, properties.getAlpha());
                 _staticPulse.setProperties(properties);
-                _staticPulse.appendToEditPacket(packetData, requestedProperties, propertyFlags,
-                    propertiesDidntFit, propertyCount, appendState);
+                _staticPulse.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit,
+                                                propertyCount, appendState);
                 APPEND_ENTITY_PROPERTY(PROP_SHAPE, properties.getShape());
             }
 
@@ -3273,8 +3310,8 @@ OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketTy
                 APPEND_ENTITY_PROPERTY(PROP_COLOR, properties.getColor());
                 APPEND_ENTITY_PROPERTY(PROP_ALPHA, properties.getAlpha());
                 _staticPulse.setProperties(properties);
-                _staticPulse.appendToEditPacket(packetData, requestedProperties, propertyFlags,
-                    propertiesDidntFit, propertyCount, appendState);
+                _staticPulse.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit,
+                                                propertyCount, appendState);
                 APPEND_ENTITY_PROPERTY(PROP_BILLBOARD_MODE, (uint32_t)properties.getBillboardMode());
 
                 APPEND_ENTITY_PROPERTY(PROP_IMAGE_URL, properties.getImageURL());
@@ -3288,8 +3325,8 @@ OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketTy
                 APPEND_ENTITY_PROPERTY(PROP_COLOR, properties.getColor());
                 APPEND_ENTITY_PROPERTY(PROP_ALPHA, properties.getAlpha());
                 _staticPulse.setProperties(properties);
-                _staticPulse.appendToEditPacket(packetData, requestedProperties, propertyFlags,
-                    propertiesDidntFit, propertyCount, appendState);
+                _staticPulse.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit,
+                                                propertyCount, appendState);
 
                 APPEND_ENTITY_PROPERTY(PROP_GRID_FOLLOW_CAMERA, properties.getFollowCamera());
                 APPEND_ENTITY_PROPERTY(PROP_MAJOR_GRID_EVERY, properties.getMajorGridEvery());
@@ -3299,8 +3336,8 @@ OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketTy
             if (properties.getType() == EntityTypes::Gizmo) {
                 APPEND_ENTITY_PROPERTY(PROP_GIZMO_TYPE, (uint32_t)properties.getGizmoType());
                 _staticRing.setProperties(properties);
-                _staticRing.appendToEditPacket(packetData, requestedProperties, propertyFlags,
-                    propertiesDidntFit, propertyCount, appendState);
+                _staticRing.appendToEditPacket(packetData, requestedProperties, propertyFlags, propertiesDidntFit,
+                                               propertyCount, appendState);
             }
         }
 
@@ -3316,7 +3353,8 @@ OctreeElement::AppendState EntityItemProperties::encodeEntityEditPacket(PacketTy
             if (newPropertyFlagsLength < oldPropertyFlagsLength) {
                 int oldSize = packetData->getUncompressedSize();
 
-                const unsigned char* modelItemData = packetData->getUncompressedData(propertyFlagsOffset + oldPropertyFlagsLength);
+                const unsigned char* modelItemData = packetData->getUncompressedData(propertyFlagsOffset +
+                                                                                     oldPropertyFlagsLength);
                 int modelItemDataLength = endOfEntityItemData - startOfEntityItemData;
                 int newEntityItemDataStart = propertyFlagsOffset + newPropertyFlagsLength;
                 packetData->updatePriorBytes(newEntityItemDataStart, modelItemData, modelItemDataLength);
@@ -3386,7 +3424,6 @@ QByteArray EntityItemProperties::packStrokeColors(const QVector<vec3>& strokeCol
 
     // add size of the array
     packedStrokeColors[0] = ((uint8_t)strokeColorsSize);
-
 
     for (int i = 0; i < strokeColorsSize; i++) {
         // add the color to the QByteArray
@@ -3467,8 +3504,8 @@ bool EntityItemProperties::decodeEntityEditPacket(const unsigned char* data, int
     processedBytes += encodedUpdateDelta.size();
 
     // TODO: Do we need this lastUpdated?? We don't seem to use it.
-    //quint64 updateDelta = updateDeltaCoder;
-    //quint64 lastUpdated = lastEdited + updateDelta; // don't adjust for clock skew since we already did that for lastEdited
+    // quint64 updateDelta = updateDeltaCoder;
+    // quint64 lastUpdated = lastEdited + updateDelta; // don't adjust for clock skew since we already did that for lastEdited
 
     // Property Flags...
     QByteArray encodedPropertyFlags((const char*)dataAt, (bytesToRead - processedBytes));
@@ -3489,13 +3526,15 @@ bool EntityItemProperties::decodeEntityEditPacket(const unsigned char* data, int
     READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_REGISTRATION_POINT, vec3, setRegistrationPoint);
     READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_CREATED, quint64, setCreated);
     READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_LAST_EDITED_BY, QUuid, setLastEditedBy);
-    // READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_ENTITY_HOST_TYPE, entity::HostType, setEntityHostType);            // not sent over the wire
-    // READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_OWNING_AVATAR_ID, QUuid, setOwningAvatarID);                       // not sent over the wire
+    // READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_ENTITY_HOST_TYPE, entity::HostType, setEntityHostType);            // not sent
+    // over the wire READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_OWNING_AVATAR_ID, QUuid, setOwningAvatarID); // not sent over the
+    // wire
     READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_PARENT_ID, QUuid, setParentID);
     READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_PARENT_JOINT_INDEX, quint16, setParentJointIndex);
     READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_QUERY_AA_CUBE, AACube, setQueryAACube);
     READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_CAN_CAST_SHADOW, bool, setCanCastShadow);
-    // READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_VISIBLE_IN_SECONDARY_CAMERA, bool, setIsVisibleInSecondaryCamera); // not sent over the wire
+    // READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_VISIBLE_IN_SECONDARY_CAMERA, bool, setIsVisibleInSecondaryCamera); // not sent
+    // over the wire
     READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_RENDER_LAYER, RenderLayer, setRenderLayer);
     READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_PRIMITIVE_MODE, PrimitiveMode, setPrimitiveMode);
     READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_IGNORE_PICK_INTERSECTION, bool, setIgnorePickIntersection);
@@ -3706,8 +3745,7 @@ bool EntityItemProperties::decodeEntityEditPacket(const unsigned char* data, int
 
     // NOTE: Spheres and Boxes are just special cases of Shape, and they need to include their PROP_SHAPE
     // when encoding/decoding edits because otherwise they can't polymorph to other shape types
-    if (properties.getType() == EntityTypes::Shape ||
-        properties.getType() == EntityTypes::Box ||
+    if (properties.getType() == EntityTypes::Shape || properties.getType() == EntityTypes::Box ||
         properties.getType() == EntityTypes::Sphere) {
         READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_COLOR, u8vec3Color, setColor);
         READ_ENTITY_PROPERTY_TO_PROPERTIES(PROP_ALPHA, float, setAlpha);
@@ -3795,7 +3833,6 @@ QVector<vec3> EntityItemProperties::unpackStrokeColors(const QByteArray& strokeC
     if ((int)strokeColors[0] == strokeColors.size() / 3) {
         int j = 0;
         for (int i = 1; i < strokeColors.size();) {
-
             float r = (uint8_t)strokeColors[i++] / 255.0f;
             float g = (uint8_t)strokeColors[i++] / 255.0f;
             float b = (uint8_t)strokeColors[i++] / 255.0f;
@@ -3803,7 +3840,7 @@ QVector<vec3> EntityItemProperties::unpackStrokeColors(const QByteArray& strokeC
         }
     } else {
         qCDebug(entities) << "WARNING - Expected received size for stroke colors does not match. Expected: "
-            << (int)strokeColors[0] << " Received: " << (strokeColors.size() / 3);
+                          << (int)strokeColors[0] << " Received: " << (strokeColors.size() / 3);
     }
 
     return unpackedStrokeColors;
@@ -3813,7 +3850,6 @@ QVector<vec3> EntityItemProperties::unpackStrokeColors(const QByteArray& strokeC
 // header it does not include the send times and sequence number because that is handled by the
 // edit packet sender...
 bool EntityItemProperties::encodeEraseEntityMessage(const EntityItemID& entityItemID, QByteArray& buffer) {
-
     char* copyAt = buffer.data();
     uint16_t numberOfIds = 1; // only one entity ID in this message
 
@@ -3836,7 +3872,8 @@ bool EntityItemProperties::encodeEraseEntityMessage(const EntityItemID& entityIt
     return true;
 }
 
-bool EntityItemProperties::encodeCloneEntityMessage(const EntityItemID& entityIDToClone, const EntityItemID& newEntityID, QByteArray& buffer) {
+bool EntityItemProperties::encodeCloneEntityMessage(const EntityItemID& entityIDToClone, const EntityItemID& newEntityID,
+                                                    QByteArray& buffer) {
     char* copyAt = buffer.data();
     int outputLength = 0;
 
@@ -3857,14 +3894,16 @@ bool EntityItemProperties::encodeCloneEntityMessage(const EntityItemID& entityID
     return true;
 }
 
-bool EntityItemProperties::decodeCloneEntityMessage(const QByteArray& buffer, int& processedBytes, EntityItemID& entityIDToClone, EntityItemID& newEntityID) {
+bool EntityItemProperties::decodeCloneEntityMessage(const QByteArray& buffer, int& processedBytes,
+                                                    EntityItemID& entityIDToClone, EntityItemID& newEntityID) {
     const unsigned char* packetData = (const unsigned char*)buffer.constData();
     const unsigned char* dataAt = packetData;
     size_t packetLength = buffer.size();
     processedBytes = 0;
 
     if (NUM_BYTES_RFC4122_UUID * 2 > packetLength) {
-        qCDebug(entities) << "EntityItemProperties::processEraseMessageDetails().... bailing because not enough bytes in buffer";
+        qCDebug(entities)
+            << "EntityItemProperties::processEraseMessageDetails().... bailing because not enough bytes in buffer";
         return false; // bail to prevent buffer overflow
     }
 
@@ -4101,7 +4140,6 @@ void EntityItemProperties::markAllChanged() {
 
 // The minimum bounding box for the entity.
 AABox EntityItemProperties::getAABox() const {
-
     // _position represents the position of the registration point.
     vec3 registrationRemainder = vec3(1.0f) - _registrationPoint;
 
@@ -4117,11 +4155,8 @@ AABox EntityItemProperties::getAABox() const {
 }
 
 bool EntityItemProperties::hasTransformOrVelocityChanges() const {
-    return _positionChanged || _localPositionChanged
-        || _rotationChanged || _localRotationChanged
-        || _velocityChanged || _localVelocityChanged
-        || _angularVelocityChanged || _localAngularVelocityChanged
-        || _accelerationChanged;
+    return _positionChanged || _localPositionChanged || _rotationChanged || _localRotationChanged || _velocityChanged ||
+           _localVelocityChanged || _angularVelocityChanged || _localAngularVelocityChanged || _accelerationChanged;
 }
 
 void EntityItemProperties::clearTransformOrVelocityChanges() {
@@ -4137,19 +4172,15 @@ void EntityItemProperties::clearTransformOrVelocityChanges() {
 }
 
 bool EntityItemProperties::hasMiscPhysicsChanges() const {
-    return _gravityChanged || _dimensionsChanged || _densityChanged || _frictionChanged
-        || _restitutionChanged || _dampingChanged || _angularDampingChanged || _registrationPointChanged ||
-        _compoundShapeURLChanged || _dynamicChanged || _collisionlessChanged || _collisionMaskChanged;
+    return _gravityChanged || _dimensionsChanged || _densityChanged || _frictionChanged || _restitutionChanged ||
+           _dampingChanged || _angularDampingChanged || _registrationPointChanged || _compoundShapeURLChanged ||
+           _dynamicChanged || _collisionlessChanged || _collisionMaskChanged;
 }
 
 bool EntityItemProperties::hasSimulationRestrictedChanges() const {
-    return _positionChanged || _localPositionChanged
-        || _rotationChanged || _localRotationChanged
-        || _velocityChanged || _localVelocityChanged
-        || _localDimensionsChanged || _dimensionsChanged
-        || _angularVelocityChanged || _localAngularVelocityChanged
-        || _accelerationChanged
-        || _parentIDChanged || _parentJointIndexChanged;
+    return _positionChanged || _localPositionChanged || _rotationChanged || _localRotationChanged || _velocityChanged ||
+           _localVelocityChanged || _localDimensionsChanged || _dimensionsChanged || _angularVelocityChanged ||
+           _localAngularVelocityChanged || _accelerationChanged || _parentIDChanged || _parentJointIndexChanged;
 }
 
 void EntityItemProperties::copySimulationRestrictedProperties(const EntityItemPointer& entity) {
@@ -4216,10 +4247,8 @@ uint8_t EntityItemProperties::computeSimulationBidPriority() const {
     if (_parentIDChanged || _parentJointIndexChanged) {
         // we need higher simulation ownership priority to chang parenting info
         priority = SCRIPT_GRAB_SIMULATION_PRIORITY;
-    } else if (_positionChanged || _localPositionChanged
-            || _rotationChanged || _localRotationChanged
-            || _velocityChanged || _localVelocityChanged
-            || _angularVelocityChanged || _localAngularVelocityChanged) {
+    } else if (_positionChanged || _localPositionChanged || _rotationChanged || _localRotationChanged || _velocityChanged ||
+               _localVelocityChanged || _angularVelocityChanged || _localAngularVelocityChanged) {
         priority = SCRIPT_POKE_SIMULATION_PRIORITY;
     }
     return priority;
@@ -4786,8 +4815,7 @@ QList<QString> EntityItemProperties::listChangedProperties() {
 }
 
 bool EntityItemProperties::transformChanged() const {
-    return positionChanged() || rotationChanged() ||
-        localPositionChanged() || localRotationChanged();
+    return positionChanged() || rotationChanged() || localPositionChanged() || localRotationChanged();
 }
 
 bool EntityItemProperties::getScalesWithParent() const {
@@ -4806,10 +4834,8 @@ bool EntityItemProperties::getScalesWithParent() const {
 }
 
 bool EntityItemProperties::parentRelatedPropertyChanged() const {
-    return positionChanged() || rotationChanged() ||
-        localPositionChanged() || localRotationChanged() ||
-        localDimensionsChanged() ||
-        parentIDChanged() || parentJointIndexChanged();
+    return positionChanged() || rotationChanged() || localPositionChanged() || localRotationChanged() ||
+           localDimensionsChanged() || parentIDChanged() || parentJointIndexChanged();
 }
 
 bool EntityItemProperties::queryAACubeRelatedPropertyChanged() const {
@@ -4819,21 +4845,25 @@ bool EntityItemProperties::queryAACubeRelatedPropertyChanged() const {
 bool EntityItemProperties::grabbingRelatedPropertyChanged() const {
     const GrabPropertyGroup& grabProperties = getGrab();
     return grabProperties.triggerableChanged() || grabProperties.grabbableChanged() ||
-        grabProperties.grabFollowsControllerChanged() || grabProperties.grabKinematicChanged() ||
-        grabProperties.equippableChanged() || grabProperties.equippableLeftPositionChanged() ||
-        grabProperties.equippableRightPositionChanged() || grabProperties.equippableLeftRotationChanged() ||
-        grabProperties.equippableRightRotationChanged() || grabProperties.equippableIndicatorURLChanged() ||
-        grabProperties.equippableIndicatorScaleChanged() || grabProperties.equippableIndicatorOffsetChanged();
+           grabProperties.grabFollowsControllerChanged() || grabProperties.grabKinematicChanged() ||
+           grabProperties.equippableChanged() || grabProperties.equippableLeftPositionChanged() ||
+           grabProperties.equippableRightPositionChanged() || grabProperties.equippableLeftRotationChanged() ||
+           grabProperties.equippableRightRotationChanged() || grabProperties.equippableIndicatorURLChanged() ||
+           grabProperties.equippableIndicatorScaleChanged() || grabProperties.equippableIndicatorOffsetChanged();
 }
 
 // Checking Certifiable Properties
-#define ADD_STRING_PROPERTY(n, N) if (!get##N().isEmpty()) json[#n] = get##N()
+#define ADD_STRING_PROPERTY(n, N)                                                                                              \
+    if (!get##N().isEmpty())                                                                                                   \
+    json[#n] = get##N()
 #define ADD_ENUM_PROPERTY(n, N) json[#n] = get##N##AsString()
-#define ADD_INT_PROPERTY(n, N) if (get##N() != 0) json[#n] = (get##N() == (quint32) -1) ? -1.0 : ((double) get##N())
+#define ADD_INT_PROPERTY(n, N)                                                                                                 \
+    if (get##N() != 0)                                                                                                         \
+    json[#n] = (get##N() == (quint32)-1) ? -1.0 : ((double)get##N())
 QByteArray EntityItemProperties::getStaticCertificateJSON() const {
     // Produce a compact json of every non-default static certificate property, with the property names in alphabetical order.
-    // The static certificate properties include all an only those properties that cannot be changed without altering the identity
-    // of the entity as reviewed during the certification submission.
+    // The static certificate properties include all an only those properties that cannot be changed without altering the
+    // identity of the entity as reviewed during the certification submission.
 
     QJsonObject json;
 
@@ -4868,10 +4898,10 @@ QByteArray EntityItemProperties::getStaticCertificateHash() const {
     return QCryptographicHash::hash(getStaticCertificateJSON(), QCryptographicHash::Sha256);
 }
 
-// FIXME: This is largely copied from EntityItemProperties::verifyStaticCertificateProperties, which should be refactored to use this.
-// I also don't like the nested-if style, but for this step I'm deliberately preserving the similarity.
-bool EntityItemProperties::verifySignature(const QString& publicKey, const QByteArray& digestByteArray, const QByteArray& signatureByteArray) {
-
+// FIXME: This is largely copied from EntityItemProperties::verifyStaticCertificateProperties, which should be refactored to use
+// this. I also don't like the nested-if style, but for this step I'm deliberately preserving the similarity.
+bool EntityItemProperties::verifySignature(const QString& publicKey, const QByteArray& digestByteArray,
+                                           const QByteArray& signatureByteArray) {
     if (digestByteArray.isEmpty()) {
         return false;
     }
@@ -4880,7 +4910,7 @@ bool EntityItemProperties::verifySignature(const QString& publicKey, const QByte
     auto key = keyByteArray.constData();
     int keyLength = publicKey.length();
 
-    BIO *bio = BIO_new_mem_buf((void*)key, keyLength);
+    BIO* bio = BIO_new_mem_buf((void*)key, keyLength);
     EVP_PKEY* evp_key = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL);
     if (evp_key) {
         EC_KEY* ec = EVP_PKEY_get1_EC_KEY(evp_key);
@@ -4895,18 +4925,13 @@ bool EntityItemProperties::verifySignature(const QString& publicKey, const QByte
             // ECSDA verification prototype: note that type is currently ignored
             // int ECDSA_verify(int type, const unsigned char *dgst, int dgstlen,
             // const unsigned char *sig, int siglen, EC_KEY *eckey);
-            int answer = ECDSA_verify(0,
-                digest,
-                digestLength,
-                signature,
-                signatureLength,
-                ec);
+            int answer = ECDSA_verify(0, digest, digestLength, signature, signatureLength, ec);
             long error = ERR_get_error();
             if (error != 0 || answer == -1) {
                 qCWarning(entities) << "ERROR while verifying signature!"
-                    << "\nKey:" << publicKey << "\nutf8 Key Length:" << keyLength
-                    << "\nDigest:" << digest << "\nDigest Length:" << digestLength
-                    << "\nSignature:" << signature << "\nSignature Length:" << signatureLength;
+                                    << "\nKey:" << publicKey << "\nutf8 Key Length:" << keyLength << "\nDigest:" << digest
+                                    << "\nDigest Length:" << digestLength << "\nSignature:" << signature
+                                    << "\nSignature Length:" << signatureLength;
                 while (error != 0) {
                     const char* error_str = ERR_error_string(error, NULL);
                     qCWarning(entities) << "EC error:" << error_str;
@@ -4947,7 +4972,8 @@ bool EntityItemProperties::verifySignature(const QString& publicKey, const QByte
 bool EntityItemProperties::verifyStaticCertificateProperties() {
     // True IFF a non-empty certificateID matches the static certificate json.
     // I.e., if we can verify that the certificateID was produced by High Fidelity signing the static certificate hash.
-    return verifySignature(EntityItem::_marketplacePublicKey, getStaticCertificateHash(), QByteArray::fromBase64(getCertificateID().toUtf8()));
+    return verifySignature(EntityItem::_marketplacePublicKey, getStaticCertificateHash(),
+                           QByteArray::fromBase64(getCertificateID().toUtf8()));
 }
 
 void EntityItemProperties::convertToCloneProperties(const EntityItemID& entityIDToClone) {
@@ -4973,11 +4999,13 @@ void EntityItemProperties::convertToCloneProperties(const EntityItemID& entityID
     setCloneAvatarEntity(ENTITY_ITEM_DEFAULT_CLONE_AVATAR_ENTITY);
 }
 
-bool EntityItemProperties::blobToProperties(QScriptEngine& scriptEngine, const QByteArray& blob, EntityItemProperties& properties) {
+bool EntityItemProperties::blobToProperties(QScriptEngine& scriptEngine, const QByteArray& blob,
+                                            EntityItemProperties& properties) {
     // DANGER: this method is NOT efficient.
     // begin recipe for converting unfortunately-formatted-binary-blob to EntityItemProperties
     QJsonDocument jsonProperties = QJsonDocument::fromBinaryData(blob);
-    if (jsonProperties.isEmpty() || jsonProperties.isNull() || !jsonProperties.isObject() || jsonProperties.object().isEmpty()) {
+    if (jsonProperties.isEmpty() || jsonProperties.isNull() || !jsonProperties.isObject() ||
+        jsonProperties.object().isEmpty()) {
         qCDebug(entities) << "bad avatarEntityData json" << QString(blob.toHex());
         return false;
     }
@@ -4989,7 +5017,8 @@ bool EntityItemProperties::blobToProperties(QScriptEngine& scriptEngine, const Q
     return true;
 }
 
-void EntityItemProperties::propertiesToBlob(QScriptEngine& scriptEngine, const QUuid& myAvatarID, const EntityItemProperties& properties, QByteArray& blob) {
+void EntityItemProperties::propertiesToBlob(QScriptEngine& scriptEngine, const QUuid& myAvatarID,
+                                            const EntityItemProperties& properties, QByteArray& blob) {
     // DANGER: this method is NOT efficient.
     // begin recipe for extracting unfortunately-formatted-binary-blob from EntityItem
     QScriptValue scriptValue = EntityItemNonDefaultPropertiesToScriptValue(&scriptEngine, properties);

@@ -16,23 +16,23 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/component_wise.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 // Bring the most commonly used GLM types into the default namespace
 using glm::ivec2;
 using glm::ivec3;
 using glm::ivec4;
-using glm::uvec2;
-using glm::u8vec3;
-using glm::uvec3;
-using glm::uvec4;
 using glm::mat3;
 using glm::mat4;
+using glm::quat;
+using glm::u8vec3;
+using glm::uvec2;
+using glm::uvec3;
+using glm::uvec4;
 using glm::vec2;
 using glm::vec3;
 using glm::vec4;
-using glm::quat;
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
@@ -40,8 +40,8 @@ using glm::quat;
 #endif
 
 #include <QtCore/QByteArray>
-#include <QtGui/QMatrix4x4>
 #include <QtGui/QColor>
+#include <QtGui/QMatrix4x4>
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
@@ -50,9 +50,9 @@ using glm::quat;
 #include "SharedUtil.h"
 
 // this is where the coordinate system is represented
-const glm::vec3 IDENTITY_RIGHT = glm::vec3( 1.0f, 0.0f, 0.0f);
-const glm::vec3 IDENTITY_UP    = glm::vec3( 0.0f, 1.0f, 0.0f);
-const glm::vec3 IDENTITY_FORWARD = glm::vec3( 0.0f, 0.0f,-1.0f);
+const glm::vec3 IDENTITY_RIGHT = glm::vec3(1.0f, 0.0f, 0.0f);
+const glm::vec3 IDENTITY_UP = glm::vec3(0.0f, 1.0f, 0.0f);
+const glm::vec3 IDENTITY_FORWARD = glm::vec3(0.0f, 0.0f, -1.0f);
 
 glm::quat safeMix(const glm::quat& q1, const glm::quat& q2, float alpha);
 
@@ -65,7 +65,7 @@ public:
 };
 
 class Quaternions {
- public:
+public:
     static const quat IDENTITY;
     static const quat X_180;
     static const quat Y_180;
@@ -180,24 +180,24 @@ vec4 toGlm(const QColor& color);
 ivec4 toGlm(const QRect& rect);
 vec4 toGlm(const glm::u8vec3& color, float alpha);
 
-QSize fromGlm(const glm::ivec2 & v);
-QMatrix4x4 fromGlm(const glm::mat4 & m);
+QSize fromGlm(const glm::ivec2& v);
+QMatrix4x4 fromGlm(const glm::mat4& m);
 
-QRectF glmToRect(const glm::vec2 & pos, const glm::vec2 & size);
+QRectF glmToRect(const glm::vec2& pos, const glm::vec2& size);
 
-template <typename T>
+template<typename T>
 float aspect(const T& t) {
     return (float)t.x / (float)t.y;
 }
 
 // Take values in an arbitrary range [0, size] and convert them to the range [0, 1]
-template <typename T>
+template<typename T>
 T toUnitScale(const T& value, const T& size) {
     return value / size;
 }
 
 // Take values in an arbitrary range [0, size] and convert them to the range [0, 1]
-template <typename T>
+template<typename T>
 T toNormalizedDeviceScale(const T& value, const T& size) {
     vec2 result = toUnitScale(value, size);
     result *= 2.0f;
@@ -246,8 +246,8 @@ glm::vec3 transformVectorFull(const glm::mat4& m, const glm::vec3& v);
 // The uAxis, vAxis & wAxis will form an orthognal basis.
 // The primary axis will be the uAxis.
 // The vAxis will be as close as possible to to the secondary axis.
-void generateBasisVectors(const glm::vec3& primaryAxis, const glm::vec3& secondaryAxis,
-                          glm::vec3& uAxisOut, glm::vec3& vAxisOut, glm::vec3& wAxisOut);
+void generateBasisVectors(const glm::vec3& primaryAxis, const glm::vec3& secondaryAxis, glm::vec3& uAxisOut,
+                          glm::vec3& vAxisOut, glm::vec3& wAxisOut);
 
 // assumes z-forward and y-up
 glm::vec2 getFacingDir2D(const glm::quat& rot);
@@ -255,9 +255,15 @@ glm::vec2 getFacingDir2D(const glm::quat& rot);
 // assumes z-forward and y-up
 glm::vec2 getFacingDir2D(const glm::mat4& m);
 
-inline bool isNaN(const glm::vec3& value) { return isNaN(value.x) || isNaN(value.y) || isNaN(value.z); }
-inline bool isNaN(const glm::quat& value) { return isNaN(value.w) || isNaN(value.x) || isNaN(value.y) || isNaN(value.z); }
-inline bool isNaN(const glm::mat3& value) { return isNaN(value * glm::vec3(1.0f)); }
+inline bool isNaN(const glm::vec3& value) {
+    return isNaN(value.x) || isNaN(value.y) || isNaN(value.z);
+}
+inline bool isNaN(const glm::quat& value) {
+    return isNaN(value.w) || isNaN(value.x) || isNaN(value.y) || isNaN(value.z);
+}
+inline bool isNaN(const glm::mat3& value) {
+    return isNaN(value * glm::vec3(1.0f));
+}
 
 glm::mat4 orthoInverse(const glm::mat4& m);
 
@@ -270,7 +276,6 @@ bool isNonUniformScale(const glm::vec3& scale);
 // Safe replacement of glm_mat4_mul() for unaligned arguments instead of __m128
 //
 inline void glm_mat4u_mul(const glm::mat4& m1, const glm::mat4& m2, glm::mat4& r) {
-
 #if GLM_ARCH & GLM_ARCH_SSE2_BIT
     __m128 u0 = _mm_loadu_ps((float*)&m1[0][0]);
     __m128 u1 = _mm_loadu_ps((float*)&m1[1][0]);
@@ -282,28 +287,28 @@ inline void glm_mat4u_mul(const glm::mat4& m1, const glm::mat4& m2, glm::mat4& r
     __m128 v2 = _mm_loadu_ps((float*)&m2[2][0]);
     __m128 v3 = _mm_loadu_ps((float*)&m2[3][0]);
 
-    __m128 t0 = _mm_mul_ps(_mm_shuffle_ps(v0, v0, _MM_SHUFFLE(0,0,0,0)), u0);
-    __m128 t1 = _mm_mul_ps(_mm_shuffle_ps(v0, v0, _MM_SHUFFLE(1,1,1,1)), u1);
-    __m128 t2 = _mm_mul_ps(_mm_shuffle_ps(v0, v0, _MM_SHUFFLE(2,2,2,2)), u2);
-    __m128 t3 = _mm_mul_ps(_mm_shuffle_ps(v0, v0, _MM_SHUFFLE(3,3,3,3)), u3);
+    __m128 t0 = _mm_mul_ps(_mm_shuffle_ps(v0, v0, _MM_SHUFFLE(0, 0, 0, 0)), u0);
+    __m128 t1 = _mm_mul_ps(_mm_shuffle_ps(v0, v0, _MM_SHUFFLE(1, 1, 1, 1)), u1);
+    __m128 t2 = _mm_mul_ps(_mm_shuffle_ps(v0, v0, _MM_SHUFFLE(2, 2, 2, 2)), u2);
+    __m128 t3 = _mm_mul_ps(_mm_shuffle_ps(v0, v0, _MM_SHUFFLE(3, 3, 3, 3)), u3);
     v0 = _mm_add_ps(_mm_add_ps(t0, t1), _mm_add_ps(t2, t3));
 
-    t0 = _mm_mul_ps(_mm_shuffle_ps(v1, v1, _MM_SHUFFLE(0,0,0,0)), u0);
-    t1 = _mm_mul_ps(_mm_shuffle_ps(v1, v1, _MM_SHUFFLE(1,1,1,1)), u1);
-    t2 = _mm_mul_ps(_mm_shuffle_ps(v1, v1, _MM_SHUFFLE(2,2,2,2)), u2);
-    t3 = _mm_mul_ps(_mm_shuffle_ps(v1, v1, _MM_SHUFFLE(3,3,3,3)), u3);
+    t0 = _mm_mul_ps(_mm_shuffle_ps(v1, v1, _MM_SHUFFLE(0, 0, 0, 0)), u0);
+    t1 = _mm_mul_ps(_mm_shuffle_ps(v1, v1, _MM_SHUFFLE(1, 1, 1, 1)), u1);
+    t2 = _mm_mul_ps(_mm_shuffle_ps(v1, v1, _MM_SHUFFLE(2, 2, 2, 2)), u2);
+    t3 = _mm_mul_ps(_mm_shuffle_ps(v1, v1, _MM_SHUFFLE(3, 3, 3, 3)), u3);
     v1 = _mm_add_ps(_mm_add_ps(t0, t1), _mm_add_ps(t2, t3));
 
-    t0 = _mm_mul_ps(_mm_shuffle_ps(v2, v2, _MM_SHUFFLE(0,0,0,0)), u0);
-    t1 = _mm_mul_ps(_mm_shuffle_ps(v2, v2, _MM_SHUFFLE(1,1,1,1)), u1);
-    t2 = _mm_mul_ps(_mm_shuffle_ps(v2, v2, _MM_SHUFFLE(2,2,2,2)), u2);
-    t3 = _mm_mul_ps(_mm_shuffle_ps(v2, v2, _MM_SHUFFLE(3,3,3,3)), u3);
+    t0 = _mm_mul_ps(_mm_shuffle_ps(v2, v2, _MM_SHUFFLE(0, 0, 0, 0)), u0);
+    t1 = _mm_mul_ps(_mm_shuffle_ps(v2, v2, _MM_SHUFFLE(1, 1, 1, 1)), u1);
+    t2 = _mm_mul_ps(_mm_shuffle_ps(v2, v2, _MM_SHUFFLE(2, 2, 2, 2)), u2);
+    t3 = _mm_mul_ps(_mm_shuffle_ps(v2, v2, _MM_SHUFFLE(3, 3, 3, 3)), u3);
     v2 = _mm_add_ps(_mm_add_ps(t0, t1), _mm_add_ps(t2, t3));
 
-    t0 = _mm_mul_ps(_mm_shuffle_ps(v3, v3, _MM_SHUFFLE(0,0,0,0)), u0);
-    t1 = _mm_mul_ps(_mm_shuffle_ps(v3, v3, _MM_SHUFFLE(1,1,1,1)), u1);
-    t2 = _mm_mul_ps(_mm_shuffle_ps(v3, v3, _MM_SHUFFLE(2,2,2,2)), u2);
-    t3 = _mm_mul_ps(_mm_shuffle_ps(v3, v3, _MM_SHUFFLE(3,3,3,3)), u3);
+    t0 = _mm_mul_ps(_mm_shuffle_ps(v3, v3, _MM_SHUFFLE(0, 0, 0, 0)), u0);
+    t1 = _mm_mul_ps(_mm_shuffle_ps(v3, v3, _MM_SHUFFLE(1, 1, 1, 1)), u1);
+    t2 = _mm_mul_ps(_mm_shuffle_ps(v3, v3, _MM_SHUFFLE(2, 2, 2, 2)), u2);
+    t3 = _mm_mul_ps(_mm_shuffle_ps(v3, v3, _MM_SHUFFLE(3, 3, 3, 3)), u3);
     v3 = _mm_add_ps(_mm_add_ps(t0, t1), _mm_add_ps(t2, t3));
 
     _mm_storeu_ps((float*)&r[0][0], v0);
@@ -322,7 +327,10 @@ inline int fastLrintf(float x) {
 #else
     // return lrintf(x);
     static_assert(std::numeric_limits<double>::is_iec559, "Requires IEEE-754 double precision format");
-    union { double d; int64_t i; } bits = { (double)x };
+    union {
+        double d;
+        int64_t i;
+    } bits = { (double)x };
     bits.d += (3ULL << 51);
     return (int)bits.i;
 #endif

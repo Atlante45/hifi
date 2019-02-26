@@ -17,68 +17,68 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/component_wise.hpp>
 
-#include <QtScript/QScriptEngine>
-#include <QtCore/QObject>
-#include <QVector>
-#include <QString>
 #include <QDateTime>
+#include <QString>
+#include <QVector>
+#include <QtCore/QObject>
+#include <QtScript/QScriptEngine>
 
 #include <AACube.h>
-#include <NumericalConstants.h>
-#include <PropertyFlags.h>
-#include <OctreeConstants.h>
-#include <ShapeInfo.h>
 #include <ColorUtils.h>
+#include <NumericalConstants.h>
+#include <OctreeConstants.h>
+#include <PropertyFlags.h>
+#include <ShapeInfo.h>
 
 #include "EntityItemID.h"
 #include "EntityItemPropertiesDefaults.h"
 #include "EntityItemPropertiesMacros.h"
-#include "EntityTypes.h"
 #include "EntityPropertyFlags.h"
 #include "EntityPsuedoPropertyFlags.h"
+#include "EntityTypes.h"
 #include "SimulationOwner.h"
 
+#include "GizmoEntityItem.h"
+#include "GridEntityItem.h"
+#include "LightEntityItem.h"
+#include "LineEntityItem.h"
+#include "ParticleEffectEntityItem.h"
+#include "PolyVoxEntityItem.h"
 #include "TextEntityItem.h"
 #include "WebEntityItem.h"
-#include "ParticleEffectEntityItem.h"
-#include "LineEntityItem.h"
-#include "PolyVoxEntityItem.h"
-#include "GridEntityItem.h"
-#include "GizmoEntityItem.h"
-#include "LightEntityItem.h"
 #include "ZoneEntityItem.h"
 
 #include "AnimationPropertyGroup.h"
-#include "SkyboxPropertyGroup.h"
-#include "HazePropertyGroup.h"
 #include "BloomPropertyGroup.h"
+#include "HazePropertyGroup.h"
 #include "PulsePropertyGroup.h"
 #include "RingGizmoPropertyGroup.h"
+#include "SkyboxPropertyGroup.h"
 
-#include "MaterialMappingMode.h"
 #include "BillboardMode.h"
-#include "RenderLayer.h"
-#include "PrimitiveMode.h"
-#include "WebInputMode.h"
 #include "GizmoType.h"
+#include "MaterialMappingMode.h"
+#include "PrimitiveMode.h"
+#include "RenderLayer.h"
+#include "WebInputMode.h"
 
 const quint64 UNKNOWN_CREATED_TIME = 0;
 
 using ComponentPair = std::pair<const ComponentMode, const QString>;
-const std::array<ComponentPair, COMPONENT_MODE_ITEM_COUNT> COMPONENT_MODES = { {
-    ComponentPair { COMPONENT_MODE_INHERIT, { "inherit" } },
-    ComponentPair { COMPONENT_MODE_DISABLED, { "disabled" } },
-    ComponentPair { COMPONENT_MODE_ENABLED, { "enabled" } }
-} };
+const std::array<ComponentPair, COMPONENT_MODE_ITEM_COUNT> COMPONENT_MODES = {
+    { ComponentPair { COMPONENT_MODE_INHERIT, { "inherit" } }, ComponentPair { COMPONENT_MODE_DISABLED, { "disabled" } },
+      ComponentPair { COMPONENT_MODE_ENABLED, { "enabled" } } }
+};
 
 using vec3Color = glm::vec3;
 using u8vec3Color = glm::u8vec3;
 
 struct EntityPropertyInfo {
-    EntityPropertyInfo(EntityPropertyList propEnum) :
-        propertyEnum(propEnum) {}
+    EntityPropertyInfo(EntityPropertyList propEnum) : propertyEnum(propEnum) {}
     EntityPropertyInfo(EntityPropertyList propEnum, QVariant min, QVariant max) :
-        propertyEnum(propEnum), minimum(min), maximum(max) {}
+        propertyEnum(propEnum),
+        minimum(min),
+        maximum(max) {}
     EntityPropertyInfo() = default;
     EntityPropertyList propertyEnum;
     QVariant minimum;
@@ -88,7 +88,7 @@ struct EntityPropertyInfo {
 /// A collection of properties of an entity item used in the scripting API. Translates between the actual properties of an
 /// entity and a JavaScript style hash/QScriptValue storing a set of properties. Used in scripting to set/get the complete
 /// set of entity item properties via JavaScript hashes/QScriptValues
-/// all units for SI units (meter, second, radian, etc) 
+/// all units for SI units (meter, second, radian, etc)
 class EntityItemProperties {
     // TODO: consider removing these friend relationship and use public methods
     friend class EntityItem;
@@ -108,9 +108,11 @@ class EntityItemProperties {
     friend class LightEntityItem;
     friend class ZoneEntityItem;
     friend class MaterialEntityItem;
+
 public:
     static bool blobToProperties(QScriptEngine& scriptEngine, const QByteArray& blob, EntityItemProperties& properties);
-    static void propertiesToBlob(QScriptEngine& scriptEngine, const QUuid& myAvatarID, const EntityItemProperties& properties, QByteArray& blob);
+    static void propertiesToBlob(QScriptEngine& scriptEngine, const QUuid& myAvatarID, const EntityItemProperties& properties,
+                                 QByteArray& blob);
 
     EntityItemProperties(EntityPropertyFlags desiredProperties = EntityPropertyFlags());
     virtual ~EntityItemProperties() = default;
@@ -121,7 +123,8 @@ public:
     void setType(EntityTypes::EntityType type) { _type = type; }
 
     virtual QScriptValue copyToScriptValue(QScriptEngine* engine, bool skipDefaults, bool allowUnknownCreateTime = false,
-        bool strictSemantics = false, EntityPsuedoPropertyFlags psueudoPropertyFlags = EntityPsuedoPropertyFlags()) const;
+                                           bool strictSemantics = false,
+                                           EntityPsuedoPropertyFlags psueudoPropertyFlags = EntityPsuedoPropertyFlags()) const;
     virtual void copyFromScriptValue(const QScriptValue& object, bool honorReadOnly);
     void copyFromJSONString(QScriptEngine& scriptEngine, const QString& jsonString);
 
@@ -133,7 +136,9 @@ public:
     // editing related features supported by all entities
     quint64 getLastEdited() const { return _lastEdited; }
     float getEditedAgo() const /// Elapsed seconds since this entity was last edited
-        { return (float)(usecTimestampNow() - getLastEdited()) / (float)USECS_PER_SECOND; }
+    {
+        return (float)(usecTimestampNow() - getLastEdited()) / (float)USECS_PER_SECOND;
+    }
 
     EntityPropertyFlags getChangedProperties() const;
 
@@ -148,7 +153,7 @@ public:
     void debugDump() const;
     void setLastEdited(quint64 usecTime);
     EntityPropertyFlags getDesiredProperties() { return _desiredProperties; }
-    void setDesiredProperties(EntityPropertyFlags properties) {  _desiredProperties = properties; }
+    void setDesiredProperties(EntityPropertyFlags properties) { _desiredProperties = properties; }
 
     bool constructFromBuffer(const unsigned char* data, int dataLength);
 
@@ -170,7 +175,8 @@ public:
     DEFINE_PROPERTY_REF_WITH_SETTER(PROP_POSITION, Position, position, glm::vec3, ENTITY_ITEM_ZERO_VEC3);
     DEFINE_PROPERTY_REF(PROP_DIMENSIONS, Dimensions, dimensions, glm::vec3, ENTITY_ITEM_DEFAULT_DIMENSIONS);
     DEFINE_PROPERTY_REF(PROP_ROTATION, Rotation, rotation, glm::quat, ENTITY_ITEM_DEFAULT_ROTATION);
-    DEFINE_PROPERTY_REF(PROP_REGISTRATION_POINT, RegistrationPoint, registrationPoint, glm::vec3, ENTITY_ITEM_DEFAULT_REGISTRATION_POINT);
+    DEFINE_PROPERTY_REF(PROP_REGISTRATION_POINT, RegistrationPoint, registrationPoint, glm::vec3,
+                        ENTITY_ITEM_DEFAULT_REGISTRATION_POINT);
     DEFINE_PROPERTY(PROP_CREATED, Created, created, quint64, UNKNOWN_CREATED_TIME);
     DEFINE_PROPERTY_REF(PROP_LAST_EDITED_BY, LastEditedBy, lastEditedBy, QUuid, ENTITY_ITEM_DEFAULT_LAST_EDITED_BY);
     DEFINE_PROPERTY_REF_ENUM(PROP_ENTITY_HOST_TYPE, EntityHostType, entityHostType, entity::HostType, entity::HostType::DOMAIN);
@@ -179,7 +185,8 @@ public:
     DEFINE_PROPERTY_REF(PROP_PARENT_JOINT_INDEX, ParentJointIndex, parentJointIndex, quint16, -1);
     DEFINE_PROPERTY_REF(PROP_QUERY_AA_CUBE, QueryAACube, queryAACube, AACube, AACube());
     DEFINE_PROPERTY(PROP_CAN_CAST_SHADOW, CanCastShadow, canCastShadow, bool, ENTITY_ITEM_DEFAULT_CAN_CAST_SHADOW);
-    DEFINE_PROPERTY(PROP_VISIBLE_IN_SECONDARY_CAMERA, IsVisibleInSecondaryCamera, isVisibleInSecondaryCamera, bool, ENTITY_ITEM_DEFAULT_VISIBLE_IN_SECONDARY_CAMERA);
+    DEFINE_PROPERTY(PROP_VISIBLE_IN_SECONDARY_CAMERA, IsVisibleInSecondaryCamera, isVisibleInSecondaryCamera, bool,
+                    ENTITY_ITEM_DEFAULT_VISIBLE_IN_SECONDARY_CAMERA);
     DEFINE_PROPERTY_REF_ENUM(PROP_RENDER_LAYER, RenderLayer, renderLayer, RenderLayer, RenderLayer::WORLD);
     DEFINE_PROPERTY_REF_ENUM(PROP_PRIMITIVE_MODE, PrimitiveMode, primitiveMode, PrimitiveMode, PrimitiveMode::SOLID);
     DEFINE_PROPERTY(PROP_IGNORE_PICK_INTERSECTION, IgnorePickIntersection, ignorePickIntersection, bool, false);
@@ -188,7 +195,8 @@ public:
     // Physics
     DEFINE_PROPERTY(PROP_DENSITY, Density, density, float, ENTITY_ITEM_DEFAULT_DENSITY);
     DEFINE_PROPERTY_REF(PROP_VELOCITY, Velocity, velocity, glm::vec3, ENTITY_ITEM_DEFAULT_VELOCITY);
-    DEFINE_PROPERTY_REF(PROP_ANGULAR_VELOCITY, AngularVelocity, angularVelocity, glm::vec3, ENTITY_ITEM_DEFAULT_ANGULAR_VELOCITY);
+    DEFINE_PROPERTY_REF(PROP_ANGULAR_VELOCITY, AngularVelocity, angularVelocity, glm::vec3,
+                        ENTITY_ITEM_DEFAULT_ANGULAR_VELOCITY);
     DEFINE_PROPERTY_REF(PROP_GRAVITY, Gravity, gravity, glm::vec3, ENTITY_ITEM_DEFAULT_GRAVITY);
     DEFINE_PROPERTY_REF(PROP_ACCELERATION, Acceleration, acceleration, glm::vec3, ENTITY_ITEM_DEFAULT_ACCELERATION);
     DEFINE_PROPERTY(PROP_DAMPING, Damping, damping, float, ENTITY_ITEM_DEFAULT_DAMPING);
@@ -199,7 +207,8 @@ public:
     DEFINE_PROPERTY(PROP_COLLISIONLESS, Collisionless, collisionless, bool, ENTITY_ITEM_DEFAULT_COLLISIONLESS);
     DEFINE_PROPERTY(PROP_COLLISION_MASK, CollisionMask, collisionMask, uint16_t, ENTITY_COLLISION_MASK_DEFAULT);
     DEFINE_PROPERTY(PROP_DYNAMIC, Dynamic, dynamic, bool, ENTITY_ITEM_DEFAULT_DYNAMIC);
-    DEFINE_PROPERTY_REF(PROP_COLLISION_SOUND_URL, CollisionSoundURL, collisionSoundURL, QString, ENTITY_ITEM_DEFAULT_COLLISION_SOUND_URL);
+    DEFINE_PROPERTY_REF(PROP_COLLISION_SOUND_URL, CollisionSoundURL, collisionSoundURL, QString,
+                        ENTITY_ITEM_DEFAULT_COLLISION_SOUND_URL);
     DEFINE_PROPERTY_REF(PROP_ACTION_DATA, ActionData, actionData, QByteArray, QByteArray());
 
     // Cloning
@@ -207,7 +216,8 @@ public:
     DEFINE_PROPERTY(PROP_CLONE_LIFETIME, CloneLifetime, cloneLifetime, float, ENTITY_ITEM_DEFAULT_CLONE_LIFETIME);
     DEFINE_PROPERTY(PROP_CLONE_LIMIT, CloneLimit, cloneLimit, float, ENTITY_ITEM_DEFAULT_CLONE_LIMIT);
     DEFINE_PROPERTY(PROP_CLONE_DYNAMIC, CloneDynamic, cloneDynamic, bool, ENTITY_ITEM_DEFAULT_CLONE_DYNAMIC);
-    DEFINE_PROPERTY(PROP_CLONE_AVATAR_ENTITY, CloneAvatarEntity, cloneAvatarEntity, bool, ENTITY_ITEM_DEFAULT_CLONE_AVATAR_ENTITY);
+    DEFINE_PROPERTY(PROP_CLONE_AVATAR_ENTITY, CloneAvatarEntity, cloneAvatarEntity, bool,
+                    ENTITY_ITEM_DEFAULT_CLONE_AVATAR_ENTITY);
     DEFINE_PROPERTY_REF(PROP_CLONE_ORIGIN_ID, CloneOriginID, cloneOriginID, QUuid, ENTITY_ITEM_DEFAULT_CLONE_ORIGIN_ID);
 
     // Scripts
@@ -224,15 +234,18 @@ public:
     DEFINE_PROPERTY_REF(PROP_LIMITED_RUN, LimitedRun, limitedRun, quint32, ENTITY_ITEM_DEFAULT_LIMITED_RUN);
     DEFINE_PROPERTY_REF(PROP_MARKETPLACE_ID, MarketplaceID, marketplaceID, QString, ENTITY_ITEM_DEFAULT_MARKETPLACE_ID);
     DEFINE_PROPERTY_REF(PROP_EDITION_NUMBER, EditionNumber, editionNumber, quint32, ENTITY_ITEM_DEFAULT_EDITION_NUMBER);
-    DEFINE_PROPERTY_REF(PROP_ENTITY_INSTANCE_NUMBER, EntityInstanceNumber, entityInstanceNumber, quint32, ENTITY_ITEM_DEFAULT_ENTITY_INSTANCE_NUMBER);
+    DEFINE_PROPERTY_REF(PROP_ENTITY_INSTANCE_NUMBER, EntityInstanceNumber, entityInstanceNumber, quint32,
+                        ENTITY_ITEM_DEFAULT_ENTITY_INSTANCE_NUMBER);
     DEFINE_PROPERTY_REF(PROP_CERTIFICATE_ID, CertificateID, certificateID, QString, ENTITY_ITEM_DEFAULT_CERTIFICATE_ID);
-    DEFINE_PROPERTY_REF(PROP_STATIC_CERTIFICATE_VERSION, StaticCertificateVersion, staticCertificateVersion, quint32, ENTITY_ITEM_DEFAULT_STATIC_CERTIFICATE_VERSION);
+    DEFINE_PROPERTY_REF(PROP_STATIC_CERTIFICATE_VERSION, StaticCertificateVersion, staticCertificateVersion, quint32,
+                        ENTITY_ITEM_DEFAULT_STATIC_CERTIFICATE_VERSION);
 
     // these are used when bouncing location data into and out of scripts
     DEFINE_PROPERTY_REF(PROP_LOCAL_POSITION, LocalPosition, localPosition, glm::vec3, ENTITY_ITEM_ZERO_VEC3);
     DEFINE_PROPERTY_REF(PROP_LOCAL_ROTATION, LocalRotation, localRotation, quat, ENTITY_ITEM_DEFAULT_ROTATION);
     DEFINE_PROPERTY_REF(PROP_LOCAL_VELOCITY, LocalVelocity, localVelocity, glm::vec3, ENTITY_ITEM_ZERO_VEC3);
-    DEFINE_PROPERTY_REF(PROP_LOCAL_ANGULAR_VELOCITY, LocalAngularVelocity, localAngularVelocity, glm::vec3, ENTITY_ITEM_ZERO_VEC3);
+    DEFINE_PROPERTY_REF(PROP_LOCAL_ANGULAR_VELOCITY, LocalAngularVelocity, localAngularVelocity, glm::vec3,
+                        ENTITY_ITEM_ZERO_VEC3);
     DEFINE_PROPERTY_REF(PROP_LOCAL_DIMENSIONS, LocalDimensions, localDimensions, glm::vec3, ENTITY_ITEM_ZERO_VEC3);
 
     // Common
@@ -258,8 +271,10 @@ public:
     DEFINE_PROPERTY(PROP_POLAR_FINISH, PolarFinish, polarFinish, float, particle::DEFAULT_POLAR_FINISH);
     DEFINE_PROPERTY(PROP_AZIMUTH_START, AzimuthStart, azimuthStart, float, particle::DEFAULT_AZIMUTH_START);
     DEFINE_PROPERTY(PROP_AZIMUTH_FINISH, AzimuthFinish, azimuthFinish, float, particle::DEFAULT_AZIMUTH_FINISH);
-    DEFINE_PROPERTY_REF(PROP_EMIT_ACCELERATION, EmitAcceleration, emitAcceleration, glm::vec3, particle::DEFAULT_EMIT_ACCELERATION);
-    DEFINE_PROPERTY_REF(PROP_ACCELERATION_SPREAD, AccelerationSpread, accelerationSpread, glm::vec3, particle::DEFAULT_ACCELERATION_SPREAD);
+    DEFINE_PROPERTY_REF(PROP_EMIT_ACCELERATION, EmitAcceleration, emitAcceleration, glm::vec3,
+                        particle::DEFAULT_EMIT_ACCELERATION);
+    DEFINE_PROPERTY_REF(PROP_ACCELERATION_SPREAD, AccelerationSpread, accelerationSpread, glm::vec3,
+                        particle::DEFAULT_ACCELERATION_SPREAD);
     DEFINE_PROPERTY(PROP_PARTICLE_RADIUS, ParticleRadius, particleRadius, float, particle::DEFAULT_PARTICLE_RADIUS);
     DEFINE_PROPERTY(PROP_RADIUS_SPREAD, RadiusSpread, radiusSpread, float, particle::DEFAULT_RADIUS_SPREAD);
     DEFINE_PROPERTY(PROP_RADIUS_START, RadiusStart, radiusStart, float, particle::DEFAULT_RADIUS_START);
@@ -270,21 +285,26 @@ public:
     DEFINE_PROPERTY(PROP_ALPHA_SPREAD, AlphaSpread, alphaSpread, float, particle::DEFAULT_ALPHA_SPREAD);
     DEFINE_PROPERTY(PROP_ALPHA_START, AlphaStart, alphaStart, float, particle::DEFAULT_ALPHA_START);
     DEFINE_PROPERTY(PROP_ALPHA_FINISH, AlphaFinish, alphaFinish, float, particle::DEFAULT_ALPHA_FINISH);
-    DEFINE_PROPERTY(PROP_EMITTER_SHOULD_TRAIL, EmitterShouldTrail, emitterShouldTrail, bool, particle::DEFAULT_EMITTER_SHOULD_TRAIL);
+    DEFINE_PROPERTY(PROP_EMITTER_SHOULD_TRAIL, EmitterShouldTrail, emitterShouldTrail, bool,
+                    particle::DEFAULT_EMITTER_SHOULD_TRAIL);
     DEFINE_PROPERTY(PROP_PARTICLE_SPIN, ParticleSpin, particleSpin, float, particle::DEFAULT_PARTICLE_SPIN);
     DEFINE_PROPERTY(PROP_SPIN_SPREAD, SpinSpread, spinSpread, float, particle::DEFAULT_SPIN_SPREAD);
     DEFINE_PROPERTY(PROP_SPIN_START, SpinStart, spinStart, float, particle::DEFAULT_SPIN_START);
     DEFINE_PROPERTY(PROP_SPIN_FINISH, SpinFinish, spinFinish, float, particle::DEFAULT_SPIN_FINISH);
-    DEFINE_PROPERTY(PROP_PARTICLE_ROTATE_WITH_ENTITY, RotateWithEntity, rotateWithEntity, bool, particle::DEFAULT_ROTATE_WITH_ENTITY);
+    DEFINE_PROPERTY(PROP_PARTICLE_ROTATE_WITH_ENTITY, RotateWithEntity, rotateWithEntity, bool,
+                    particle::DEFAULT_ROTATE_WITH_ENTITY);
 
     // Model
     DEFINE_PROPERTY_REF(PROP_MODEL_URL, ModelURL, modelURL, QString, "");
     DEFINE_PROPERTY_REF(PROP_MODEL_SCALE, ModelScale, modelScale, glm::vec3, glm::vec3(1.0f));
     DEFINE_PROPERTY_REF(PROP_JOINT_ROTATIONS_SET, JointRotationsSet, jointRotationsSet, QVector<bool>, QVector<bool>());
     DEFINE_PROPERTY_REF(PROP_JOINT_ROTATIONS, JointRotations, jointRotations, QVector<glm::quat>, QVector<glm::quat>());
-    DEFINE_PROPERTY_REF(PROP_JOINT_TRANSLATIONS_SET, JointTranslationsSet, jointTranslationsSet, QVector<bool>, QVector<bool>());
-    DEFINE_PROPERTY_REF(PROP_JOINT_TRANSLATIONS, JointTranslations, jointTranslations, QVector<glm::vec3>, ENTITY_ITEM_DEFAULT_EMPTY_VEC3_QVEC);
-    DEFINE_PROPERTY(PROP_RELAY_PARENT_JOINTS, RelayParentJoints, relayParentJoints, bool, ENTITY_ITEM_DEFAULT_RELAY_PARENT_JOINTS);
+    DEFINE_PROPERTY_REF(PROP_JOINT_TRANSLATIONS_SET, JointTranslationsSet, jointTranslationsSet, QVector<bool>,
+                        QVector<bool>());
+    DEFINE_PROPERTY_REF(PROP_JOINT_TRANSLATIONS, JointTranslations, jointTranslations, QVector<glm::vec3>,
+                        ENTITY_ITEM_DEFAULT_EMPTY_VEC3_QVEC);
+    DEFINE_PROPERTY(PROP_RELAY_PARENT_JOINTS, RelayParentJoints, relayParentJoints, bool,
+                    ENTITY_ITEM_DEFAULT_RELAY_PARENT_JOINTS);
     DEFINE_PROPERTY_REF(PROP_GROUP_CULLED, GroupCulled, groupCulled, bool, false);
     DEFINE_PROPERTY_GROUP(Animation, animation, AnimationPropertyGroup);
 
@@ -300,7 +320,8 @@ public:
     DEFINE_PROPERTY(PROP_LINE_HEIGHT, LineHeight, lineHeight, float, TextEntityItem::DEFAULT_LINE_HEIGHT);
     DEFINE_PROPERTY_REF(PROP_TEXT_COLOR, TextColor, textColor, u8vec3Color, TextEntityItem::DEFAULT_TEXT_COLOR);
     DEFINE_PROPERTY_REF(PROP_TEXT_ALPHA, TextAlpha, textAlpha, float, TextEntityItem::DEFAULT_TEXT_ALPHA);
-    DEFINE_PROPERTY_REF(PROP_BACKGROUND_COLOR, BackgroundColor, backgroundColor, u8vec3Color, TextEntityItem::DEFAULT_BACKGROUND_COLOR);
+    DEFINE_PROPERTY_REF(PROP_BACKGROUND_COLOR, BackgroundColor, backgroundColor, u8vec3Color,
+                        TextEntityItem::DEFAULT_BACKGROUND_COLOR);
     DEFINE_PROPERTY_REF(PROP_BACKGROUND_ALPHA, BackgroundAlpha, backgroundAlpha, float, TextEntityItem::DEFAULT_TEXT_ALPHA);
     DEFINE_PROPERTY_REF(PROP_LEFT_MARGIN, LeftMargin, leftMargin, float, TextEntityItem::DEFAULT_MARGIN);
     DEFINE_PROPERTY_REF(PROP_RIGHT_MARGIN, RightMargin, rightMargin, float, TextEntityItem::DEFAULT_MARGIN);
@@ -318,14 +339,17 @@ public:
     DEFINE_PROPERTY(PROP_FILTER_URL, FilterURL, filterURL, QString, ZoneEntityItem::DEFAULT_FILTER_URL);
     DEFINE_PROPERTY_REF_ENUM(PROP_KEY_LIGHT_MODE, KeyLightMode, keyLightMode, uint32_t, (uint32_t)COMPONENT_MODE_INHERIT);
     DEFINE_PROPERTY_REF_ENUM(PROP_SKYBOX_MODE, SkyboxMode, skyboxMode, uint32_t, (uint32_t)COMPONENT_MODE_INHERIT);
-    DEFINE_PROPERTY_REF_ENUM(PROP_AMBIENT_LIGHT_MODE, AmbientLightMode, ambientLightMode, uint32_t, (uint32_t)COMPONENT_MODE_INHERIT);
+    DEFINE_PROPERTY_REF_ENUM(PROP_AMBIENT_LIGHT_MODE, AmbientLightMode, ambientLightMode, uint32_t,
+                             (uint32_t)COMPONENT_MODE_INHERIT);
     DEFINE_PROPERTY_REF_ENUM(PROP_HAZE_MODE, HazeMode, hazeMode, uint32_t, (uint32_t)COMPONENT_MODE_INHERIT);
     DEFINE_PROPERTY_REF_ENUM(PROP_BLOOM_MODE, BloomMode, bloomMode, uint32_t, (uint32_t)COMPONENT_MODE_INHERIT);
 
     // Polyvox
-    DEFINE_PROPERTY_REF(PROP_VOXEL_VOLUME_SIZE, VoxelVolumeSize, voxelVolumeSize, glm::vec3, PolyVoxEntityItem::DEFAULT_VOXEL_VOLUME_SIZE);
+    DEFINE_PROPERTY_REF(PROP_VOXEL_VOLUME_SIZE, VoxelVolumeSize, voxelVolumeSize, glm::vec3,
+                        PolyVoxEntityItem::DEFAULT_VOXEL_VOLUME_SIZE);
     DEFINE_PROPERTY_REF(PROP_VOXEL_DATA, VoxelData, voxelData, QByteArray, PolyVoxEntityItem::DEFAULT_VOXEL_DATA);
-    DEFINE_PROPERTY_REF(PROP_VOXEL_SURFACE_STYLE, VoxelSurfaceStyle, voxelSurfaceStyle, uint16_t, PolyVoxEntityItem::DEFAULT_VOXEL_SURFACE_STYLE);
+    DEFINE_PROPERTY_REF(PROP_VOXEL_SURFACE_STYLE, VoxelSurfaceStyle, voxelSurfaceStyle, uint16_t,
+                        PolyVoxEntityItem::DEFAULT_VOXEL_SURFACE_STYLE);
     DEFINE_PROPERTY_REF(PROP_X_TEXTURE_URL, XTextureURL, xTextureURL, QString, "");
     DEFINE_PROPERTY_REF(PROP_Y_TEXTURE_URL, YTextureURL, yTextureURL, QString, "");
     DEFINE_PROPERTY_REF(PROP_Z_TEXTURE_URL, ZTextureURL, zTextureURL, QString, "");
@@ -396,37 +420,47 @@ public:
     bool containsPositionChange() const { return _positionChanged; }
     bool containsDimensionsChange() const { return _dimensionsChanged; }
 
-    static OctreeElement::AppendState encodeEntityEditPacket(PacketType command, EntityItemID id, const EntityItemProperties& properties,
-                                       QByteArray& buffer, EntityPropertyFlags requestedProperties, EntityPropertyFlags& didntFitProperties);
+    static OctreeElement::AppendState encodeEntityEditPacket(PacketType command, EntityItemID id,
+                                                             const EntityItemProperties& properties, QByteArray& buffer,
+                                                             EntityPropertyFlags requestedProperties,
+                                                             EntityPropertyFlags& didntFitProperties);
 
     static bool encodeEraseEntityMessage(const EntityItemID& entityItemID, QByteArray& buffer);
-    static bool encodeCloneEntityMessage(const EntityItemID& entityIDToClone, const EntityItemID& newEntityID, QByteArray& buffer);
-    static bool decodeCloneEntityMessage(const QByteArray& buffer, int& processedBytes, EntityItemID& entityIDToClone, EntityItemID& newEntityID);
+    static bool encodeCloneEntityMessage(const EntityItemID& entityIDToClone, const EntityItemID& newEntityID,
+                                         QByteArray& buffer);
+    static bool decodeCloneEntityMessage(const QByteArray& buffer, int& processedBytes, EntityItemID& entityIDToClone,
+                                         EntityItemID& newEntityID);
 
-    static bool decodeEntityEditPacket(const unsigned char* data, int bytesToRead, int& processedBytes,
-                                       EntityItemID& entityID, EntityItemProperties& properties);
+    static bool decodeEntityEditPacket(const unsigned char* data, int bytesToRead, int& processedBytes, EntityItemID& entityID,
+                                       EntityItemProperties& properties);
 
-    void clearID() { _id = UNKNOWN_ENTITY_ID; _idSet = false; }
+    void clearID() {
+        _id = UNKNOWN_ENTITY_ID;
+        _idSet = false;
+    }
     void markAllChanged();
 
     const glm::vec3& getNaturalDimensions() const { return _naturalDimensions; }
     void setNaturalDimensions(const glm::vec3& value) { _naturalDimensions = value; }
-    
+
     const glm::vec3& getNaturalPosition() const { return _naturalPosition; }
     void calculateNaturalPosition(const glm::vec3& min, const glm::vec3& max);
-    
+
     const QVariantMap& getTextureNames() const { return _textureNames; }
     void setTextureNames(const QVariantMap& value) { _textureNames = value; }
 
-    QString getSimulatorIDAsString() const { return _simulationOwner.getID().toString().mid(1,36).toUpper(); }
+    QString getSimulatorIDAsString() const { return _simulationOwner.getID().toString().mid(1, 36).toUpper(); }
 
     void setVoxelDataDirty() { _voxelDataChanged = true; }
 
-    void setLinePointsDirty() {_linePointsChanged = true; }
+    void setLinePointsDirty() { _linePointsChanged = true; }
 
     void setQueryAACubeDirty() { _queryAACubeChanged = true; }
 
-    void setLocationDirty() { _positionChanged = true; _rotationChanged = true; }
+    void setLocationDirty() {
+        _positionChanged = true;
+        _rotationChanged = true;
+    }
 
     bool hasTransformOrVelocityChanges() const;
     void clearTransformOrVelocityChanges();
@@ -449,8 +483,14 @@ public:
     bool getDimensionsInitialized() const { return _dimensionsInitialized; }
     void setDimensionsInitialized(bool dimensionsInitialized) { _dimensionsInitialized = dimensionsInitialized; }
 
-    void setJointRotationsDirty() { _jointRotationsSetChanged = true; _jointRotationsChanged = true; }
-    void setJointTranslationsDirty() { _jointTranslationsSetChanged = true; _jointTranslationsChanged = true; }
+    void setJointRotationsDirty() {
+        _jointRotationsSetChanged = true;
+        _jointRotationsChanged = true;
+    }
+    void setJointTranslationsDirty() {
+        _jointTranslationsSetChanged = true;
+        _jointTranslationsChanged = true;
+    }
 
     // render info related items
     size_t getRenderInfoVertexCount() const { return _renderInfoVertexCount; }
@@ -527,8 +567,10 @@ QScriptValue EntityPropertyInfoToScriptValue(QScriptEngine* engine, const Entity
 void EntityPropertyInfoFromScriptValue(const QScriptValue& object, EntityPropertyInfo& propertyInfo);
 
 // define these inline here so the macros work
-inline void EntityItemProperties::setPosition(const glm::vec3& value)
-                    { _position = glm::clamp(value, (float)-HALF_TREE_SCALE, (float)HALF_TREE_SCALE); _positionChanged = true; }
+inline void EntityItemProperties::setPosition(const glm::vec3& value) {
+    _position = glm::clamp(value, (float)-HALF_TREE_SCALE, (float)HALF_TREE_SCALE);
+    _positionChanged = true;
+}
 
 inline void EntityItemProperties::setOwningAvatarID(const QUuid& id) {
     _owningAvatarID = id;
@@ -543,13 +585,15 @@ inline void EntityItemProperties::setOwningAvatarID(const QUuid& id) {
 QDebug& operator<<(QDebug& dbg, const EntityPropertyFlags& f);
 
 inline QDebug operator<<(QDebug debug, const EntityItemProperties& properties) {
-    debug << "EntityItemProperties[" << "\n";
+    debug << "EntityItemProperties["
+          << "\n";
 
     debug << "    _type:" << properties.getType() << "\n";
 
     // TODO: figure out why position and animationSettings don't seem to like the macro approach
     if (properties.containsPositionChange()) {
-        debug << "  position:" << properties.getPosition() << "in meters" << "\n";
+        debug << "  position:" << properties.getPosition() << "in meters"
+              << "\n";
     }
 
     DEBUG_PROPERTY_IF_CHANGED(debug, properties, Dimensions, dimensions, "in meters");
@@ -656,7 +700,10 @@ inline QDebug operator<<(QDebug debug, const EntityItemProperties& properties) {
     DEBUG_PROPERTY_IF_CHANGED(debug, properties, Href, href, "");
     DEBUG_PROPERTY_IF_CHANGED(debug, properties, Description, description, "");
     if (properties.actionDataChanged()) {
-        debug << " " << "actionData" << ":" << properties.getActionData().toHex() << "" << "\n";
+        debug << " "
+              << "actionData"
+              << ":" << properties.getActionData().toHex() << ""
+              << "\n";
     }
     DEBUG_PROPERTY_IF_CHANGED(debug, properties, XTextureURL, xTextureURL, "");
     DEBUG_PROPERTY_IF_CHANGED(debug, properties, YTextureURL, yTextureURL, "");

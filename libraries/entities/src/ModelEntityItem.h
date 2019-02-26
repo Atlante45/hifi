@@ -12,11 +12,10 @@
 #ifndef hifi_ModelEntityItem_h
 #define hifi_ModelEntityItem_h
 
-#include "EntityItem.h"
 #include <JointData.h>
 #include <ThreadSafeValueCache.h>
 #include "AnimationPropertyGroup.h"
-
+#include "EntityItem.h"
 
 class ModelEntityItem : public EntityItem {
 public:
@@ -26,26 +25,22 @@ public:
 
     ALLOW_INSTANTIATION // This class can be instantiated
 
-    // methods for getting/setting all properties of an entity
-    virtual EntityItemProperties getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const override;
+        // methods for getting/setting all properties of an entity
+        virtual EntityItemProperties
+        getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const override;
     virtual bool setProperties(const EntityItemProperties& properties) override;
 
     virtual EntityPropertyFlags getEntityProperties(EncodeBitstreamParams& params) const override;
 
     virtual void appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                     EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
+                                    EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                    EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                                     OctreeElement::AppendState& appendState) const override;
 
-
     virtual int readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) override;
-
+                                                 ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                 bool overwriteLocalData, bool& somethingChanged) override;
 
     virtual void update(const quint64& now) override;
     bool needsToCallUpdate() const override { return isAnimatingSomething(); }
@@ -86,7 +81,7 @@ public:
 
     void setAnimationCurrentFrame(float value);
     void setAnimationIsPlaying(bool value);
-    void setAnimationFPS(float value); 
+    void setAnimationFPS(float value);
 
     void setAnimationAllowTranslation(bool value);
     bool getAnimationAllowTranslation() const;
@@ -147,7 +142,7 @@ protected:
     ReadWriteLockable _modelScaleLock;
 
     bool _jointRotationsExplicitlySet { false }; // were the joints set as a property or just side effect of animations
-    bool _jointTranslationsExplicitlySet{ false }; // were the joints set as a property or just side effect of animations
+    bool _jointTranslationsExplicitlySet { false }; // were the joints set as a property or just side effect of animations
 
     struct ModelJointData {
         EntityJointData joint;
@@ -156,7 +151,7 @@ protected:
     };
 
     QVector<ModelJointData> _localJointData;
-    int _lastKnownCurrentFrame{-1};
+    int _lastKnownCurrentFrame { -1 };
 
     glm::u8vec3 _color;
     QString _modelURL;
@@ -172,8 +167,8 @@ protected:
     ShapeType _shapeType = SHAPE_TYPE_NONE;
 
 private:
-    uint64_t _lastAnimated{ 0 };
-    float _currentFrame{ -1.0f };
+    uint64_t _lastAnimated { 0 };
+    float _currentFrame { -1.0f };
 };
 
 #endif // hifi_ModelEntityItem_h

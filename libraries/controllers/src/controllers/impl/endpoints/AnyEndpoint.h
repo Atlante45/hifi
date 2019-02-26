@@ -16,6 +16,7 @@ namespace controller {
 
 class AnyEndpoint : public Endpoint {
     friend class UserInputMapper;
+
 public:
     using Endpoint::apply;
     AnyEndpoint(Endpoint::List children);
@@ -29,6 +30,6 @@ private:
     Endpoint::List _children;
 };
 
-}
+} // namespace controller
 
 #endif

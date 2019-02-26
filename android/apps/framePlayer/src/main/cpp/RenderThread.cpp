@@ -40,11 +40,10 @@ void RenderThread::setup() {
     _gpuContext->endFrame();
     makeCurrent();
 
-
     glGenFramebuffers(1, &_uiFbo);
     glGenTextures(1, &_externalTexture);
     glBindTexture(GL_TEXTURE_2D, _externalTexture);
-    static const glm::u8vec4 color{ 0 };
+    static const glm::u8vec4 color { 0 };
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &color);
 
     glClearColor(0, 1, 1, 1);
@@ -85,17 +84,17 @@ void RenderThread::shutdown() {
 void RenderThread::renderFrame() {
     auto windowSize = _window->geometry().size();
     uvec2 readFboSize;
-    uint32_t readFbo{ 0 };
+    uint32_t readFbo { 0 };
 
     if (_activeFrame) {
-        const auto &frame = _activeFrame;
+        const auto& frame = _activeFrame;
         _backend->recycle();
         _backend->syncCache();
         _gpuContext->enableStereo(frame->stereoState._enable);
         if (frame && !frame->batches.empty()) {
             _gpuContext->executeFrame(frame);
         }
-        auto &glBackend = static_cast<gpu::gl::GLBackend&>(*_backend);
+        auto& glBackend = static_cast<gpu::gl::GLBackend&>(*_backend);
         readFbo = glBackend.getFramebufferID(frame->framebuffer);
         readFboSize = frame->framebuffer->getSize();
         CHECK_GL_ERROR();
@@ -125,10 +124,8 @@ void RenderThread::renderFrame() {
     if (readFbo) {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         glBindFramebuffer(GL_READ_FRAMEBUFFER, readFbo);
-        glBlitFramebuffer(
-            0, 0, readFboSize.x, readFboSize.y,
-            0, 0, windowSize.width(), windowSize.height(),
-            GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        glBlitFramebuffer(0, 0, readFboSize.x, readFboSize.y, 0, 0, windowSize.width(), windowSize.height(),
+                          GL_COLOR_BUFFER_BIT, GL_NEAREST);
         glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     } else {
         glClearColor(1, 0, 0, 1);

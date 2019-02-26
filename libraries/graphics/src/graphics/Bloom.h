@@ -14,28 +14,28 @@
 #include <memory>
 
 namespace graphics {
-    class Bloom {
-    public:
-        // Initial values
-        static const float INITIAL_BLOOM_INTENSITY;
-        static const float INITIAL_BLOOM_THRESHOLD;
-        static const float INITIAL_BLOOM_SIZE;
+class Bloom {
+public:
+    // Initial values
+    static const float INITIAL_BLOOM_INTENSITY;
+    static const float INITIAL_BLOOM_THRESHOLD;
+    static const float INITIAL_BLOOM_SIZE;
 
-        Bloom() {}
+    Bloom() {}
 
-        void setBloomIntensity(const float bloomIntensity) { _bloomIntensity = bloomIntensity; }
-        void setBloomThreshold(const float bloomThreshold) { _bloomThreshold = bloomThreshold; }
-        void setBloomSize(const float bloomSize) { _bloomSize = bloomSize; }
+    void setBloomIntensity(const float bloomIntensity) { _bloomIntensity = bloomIntensity; }
+    void setBloomThreshold(const float bloomThreshold) { _bloomThreshold = bloomThreshold; }
+    void setBloomSize(const float bloomSize) { _bloomSize = bloomSize; }
 
-        float getBloomIntensity() { return _bloomIntensity; }
-        float getBloomThreshold() { return _bloomThreshold; }
-        float getBloomSize() { return _bloomSize; }
+    float getBloomIntensity() { return _bloomIntensity; }
+    float getBloomThreshold() { return _bloomThreshold; }
+    float getBloomSize() { return _bloomSize; }
 
-    private:
-        float _bloomIntensity { INITIAL_BLOOM_INTENSITY };
-        float _bloomThreshold {INITIAL_BLOOM_THRESHOLD };
-        float _bloomSize { INITIAL_BLOOM_SIZE };
-    };
-    using BloomPointer = std::shared_ptr<Bloom>;
-}
+private:
+    float _bloomIntensity { INITIAL_BLOOM_INTENSITY };
+    float _bloomThreshold { INITIAL_BLOOM_THRESHOLD };
+    float _bloomSize { INITIAL_BLOOM_SIZE };
+};
+using BloomPointer = std::shared_ptr<Bloom>;
+} // namespace graphics
 #endif // hifi_model_Bloom_h

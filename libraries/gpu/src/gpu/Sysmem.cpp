@@ -13,7 +13,7 @@
 using namespace gpu;
 
 Size Sysmem::allocateMemory(Byte** dataAllocated, Size size) {
-    if ( !dataAllocated ) { 
+    if (!dataAllocated) {
         qWarning() << "Buffer::Sysmem::allocateMemory() : Must have a valid dataAllocated pointer.";
         return NOT_ALLOCATED;
     }
@@ -26,7 +26,8 @@ Size Sysmem::allocateMemory(Byte** dataAllocated, Size size) {
         (*dataAllocated) = new (std::nothrow) Byte[newSize];
         // Failed?
         if (!(*dataAllocated)) {
-            qWarning() << "Buffer::Sysmem::allocate() : Can't allocate a system memory buffer of " << newSize << "bytes. Fails to create the buffer Sysmem.";
+            qWarning() << "Buffer::Sysmem::allocate() : Can't allocate a system memory buffer of " << newSize
+                       << "bytes. Fails to create the buffer Sysmem.";
             return NOT_ALLOCATED;
         }
     }
@@ -41,7 +42,8 @@ void Sysmem::deallocateMemory(Byte* dataAllocated, Size size) {
     }
 }
 
-Sysmem::Sysmem() {}
+Sysmem::Sysmem() {
+}
 
 Sysmem::Sysmem(Size size, const Byte* bytes) {
     if (size > 0 && bytes) {
@@ -62,7 +64,7 @@ Sysmem& Sysmem::operator=(const Sysmem& sysmem) {
 }
 
 Sysmem::~Sysmem() {
-    deallocateMemory( _data, _size );
+    deallocateMemory(_data, _size);
     _data = nullptr;
     _size = 0;
 }
@@ -101,8 +103,8 @@ Size Sysmem::resize(Size size) {
             newSize = allocated;
             // Restore back data from old buffer in the new one
             if (_data) {
-                Size copySize = ((newSize < _size)? newSize: _size);
-                memcpy( newData, _data, copySize);
+                Size copySize = ((newSize < _size) ? newSize : _size);
+                memcpy(newData, _data, copySize);
             }
         }
         // Reallocation was successful, can delete previous data
@@ -114,18 +116,18 @@ Size Sysmem::resize(Size size) {
     return _size;
 }
 
-Size Sysmem::setData( Size size, const Byte* bytes ) {
+Size Sysmem::setData(Size size, const Byte* bytes) {
     if (allocate(size) == size) {
         if (size && bytes) {
-            memcpy( _data, bytes, _size );
+            memcpy(_data, bytes, _size);
         }
     }
     return _size;
 }
 
-Size Sysmem::setSubData( Size offset, Size size, const Byte* bytes) {
+Size Sysmem::setSubData(Size offset, Size size, const Byte* bytes) {
     if (_data && size && ((offset + size) <= getSize()) && bytes) {
-        memcpy( _data + offset, bytes, size );
+        memcpy(_data + offset, bytes, size);
         return size;
     }
     return 0;
@@ -141,4 +143,3 @@ Size Sysmem::append(Size size, const Byte* bytes) {
     }
     return 0;
 }
-

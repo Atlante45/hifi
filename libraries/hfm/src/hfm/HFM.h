@@ -82,18 +82,18 @@ public:
 
     // http://download.autodesk.com/us/fbx/20112/FBX_SDK_HELP/SDKRef/a00209.html
 
-    glm::vec3 translation;   // T
-    glm::mat4 preTransform;  // Roff * Rp
-    glm::quat preRotation;   // Rpre
-    glm::quat rotation;      // R
-    glm::quat postRotation;  // Rpost
+    glm::vec3 translation; // T
+    glm::mat4 preTransform; // Roff * Rp
+    glm::quat preRotation; // Rpre
+    glm::quat rotation; // R
+    glm::quat postRotation; // Rpost
     glm::mat4 postTransform; // Rp-1 * Soff * Sp * S * Sp-1
 
     // World = ParentWorld * T * (Roff * Rp) * Rpre * R * Rpost * (Rp-1 * Soff * Sp * S * Sp-1)
 
     glm::mat4 transform;
-    glm::vec3 rotationMin;  // radians
-    glm::vec3 rotationMax;  // radians
+    glm::vec3 rotationMin; // radians
+    glm::vec3 rotationMax; // radians
     glm::quat inverseDefaultRotation;
     glm::quat inverseBindRotation;
     glm::mat4 bindTransform;
@@ -108,11 +108,9 @@ public:
     glm::vec3 geometricScaling;
 };
 
-
 /// A single binding to a joint.
 class Cluster {
 public:
-
     int jointIndex;
     glm::mat4 inverseBindMatrix;
     Transform inverseBindTransform;
@@ -121,7 +119,6 @@ public:
 /// A texture map.
 class Texture {
 public:
-
     QString id;
     QString name;
     QByteArray filename;
@@ -133,7 +130,7 @@ public:
     int texcoordSet;
     QString texcoordSetName;
 
-    bool isBumpmap{ false };
+    bool isBumpmap { false };
 
     bool isNull() const { return name.isEmpty() && filename.isEmpty() && content.isEmpty(); }
 };
@@ -141,7 +138,6 @@ public:
 /// A single part of a mesh (with the same material).
 class MeshPart {
 public:
-
     QVector<int> quadIndices; // original indices from the FBX mesh
     QVector<int> quadTrianglesIndices; // original indices from the FBX mesh of the quad converted as triangles
     QVector<int> triangleIndices; // original indices from the FBX mesh
@@ -152,32 +148,32 @@ public:
 class Material {
 public:
     Material() {};
-    Material(const glm::vec3& diffuseColor, const glm::vec3& specularColor, const glm::vec3& emissiveColor,
-         float shininess, float opacity) :
+    Material(const glm::vec3& diffuseColor, const glm::vec3& specularColor, const glm::vec3& emissiveColor, float shininess,
+             float opacity) :
         diffuseColor(diffuseColor),
         specularColor(specularColor),
         emissiveColor(emissiveColor),
         shininess(shininess),
-        opacity(opacity)  {}
+        opacity(opacity) {}
 
     void getTextureNames(QSet<QString>& textureList) const;
     void setMaxNumPixelsPerTexture(int maxNumPixels);
 
-    glm::vec3 diffuseColor{ 1.0f };
-    float diffuseFactor{ 1.0f };
-    glm::vec3 specularColor{ 0.02f };
-    float specularFactor{ 1.0f };
+    glm::vec3 diffuseColor { 1.0f };
+    float diffuseFactor { 1.0f };
+    glm::vec3 specularColor { 0.02f };
+    float specularFactor { 1.0f };
 
-    glm::vec3 emissiveColor{ 0.0f };
-    float emissiveFactor{ 0.0f };
+    glm::vec3 emissiveColor { 0.0f };
+    float emissiveFactor { 0.0f };
 
-    float shininess{ 23.0f };
-    float opacity{ 1.0f };
+    float shininess { 23.0f };
+    float opacity { 1.0f };
 
-    float metallic{ 0.0f };
-    float roughness{ 1.0f };
-    float emissiveIntensity{ 1.0f };
-    float ambientFactor{ 1.0f };
+    float metallic { 0.0f };
+    float roughness { 1.0f };
+    float emissiveIntensity { 1.0f };
+    float ambientFactor { 1.0f };
 
     float bumpMultiplier { 1.0f }; // TODO: to be implemented
 
@@ -197,19 +193,18 @@ public:
     Texture occlusionTexture;
     Texture scatteringTexture;
     Texture lightmapTexture;
-    glm::vec2 lightmapParams{ 0.0f, 1.0f };
+    glm::vec2 lightmapParams { 0.0f, 1.0f };
 
-
-    bool isPBSMaterial{ false };
+    bool isPBSMaterial { false };
     // THe use XXXMap are not really used to drive which map are going or not, debug only
-    bool useNormalMap{ false };
-    bool useAlbedoMap{ false };
-    bool useOpacityMap{ false };
-    bool useRoughnessMap{ false };
-    bool useSpecularMap{ false };
-    bool useMetallicMap{ false };
-    bool useEmissiveMap{ false };
-    bool useOcclusionMap{ false };
+    bool useNormalMap { false };
+    bool useAlbedoMap { false };
+    bool useOpacityMap { false };
+    bool useRoughnessMap { false };
+    bool useSpecularMap { false };
+    bool useMetallicMap { false };
+    bool useEmissiveMap { false };
+    bool useOcclusionMap { false };
 
     bool needTangentSpace() const;
 };
@@ -217,7 +212,6 @@ public:
 /// A single mesh (with optional blendshapes).
 class Mesh {
 public:
-
     QVector<MeshPart> parts;
 
     QVector<glm::vec3> vertices;
@@ -264,13 +258,7 @@ public:
     float fogValue;
     glm::vec3 color;
 
-    Light() :
-        name(),
-        transform(),
-        intensity(1.0f),
-        fogValue(0.0f),
-        color(1.0f)
-    {}
+    Light() : name(), transform(), intensity(1.0f), fogValue(0.0f), color(1.0f) {}
 };
 
 /// The runtime model format.
@@ -321,14 +309,14 @@ public:
     QMap<int, glm::quat> jointRotationOffsets;
 };
 
-};
+}; // namespace hfm
 
 class ExtractedMesh {
 public:
     hfm::Mesh mesh;
     QMultiHash<int, int> newIndices;
-    QVector<QHash<int, int> > blendshapeIndexMaps;
-    QVector<QPair<int, int> > partMaterialTextures;
+    QVector<QHash<int, int>> blendshapeIndexMaps;
+    QVector<QPair<int, int>> partMaterialTextures;
     QHash<QString, size_t> texcoordSetMap;
 };
 

@@ -12,8 +12,8 @@
 
 #include <mutex>
 
-#include <QtCore/QObject>
 #include <QtCore/QElapsedTimer>
+#include <QtCore/QObject>
 
 #include <DependencyManager.h>
 
@@ -61,6 +61,6 @@ private:
     bool _recording { false };
 };
 
-}
+} // namespace recording
 
 #endif

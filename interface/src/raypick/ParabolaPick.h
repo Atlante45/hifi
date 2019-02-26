@@ -8,8 +8,8 @@
 #ifndef hifi_ParabolaPick_h
 #define hifi_ParabolaPick_h
 
-#include <RegisteredMetaTypes.h>
 #include <Pick.h>
+#include <RegisteredMetaTypes.h>
 
 class EntityItemID;
 
@@ -17,10 +17,18 @@ class ParabolaPickResult : public PickResult {
 public:
     ParabolaPickResult() {}
     ParabolaPickResult(const QVariantMap& pickVariant) : PickResult(pickVariant) {}
-    ParabolaPickResult(const IntersectionType type, const QUuid& objectID, float distance, float parabolicDistance, const glm::vec3& intersection, const PickParabola& parabola,
+    ParabolaPickResult(const IntersectionType type, const QUuid& objectID, float distance, float parabolicDistance,
+                       const glm::vec3& intersection, const PickParabola& parabola,
                        const glm::vec3& surfaceNormal = glm::vec3(NAN), const QVariantMap& extraInfo = QVariantMap()) :
-        PickResult(parabola.toVariantMap()), extraInfo(extraInfo), objectID(objectID), intersection(intersection), surfaceNormal(surfaceNormal), type(type), distance(distance), parabolicDistance(parabolicDistance), intersects(type != NONE) {
-    }
+        PickResult(parabola.toVariantMap()),
+        extraInfo(extraInfo),
+        objectID(objectID),
+        intersection(intersection),
+        surfaceNormal(surfaceNormal),
+        type(type),
+        distance(distance),
+        parabolicDistance(parabolicDistance),
+        intersects(type != NONE) {}
 
     ParabolaPickResult(const ParabolaPickResult& parabolaPickResult) : PickResult(parabolaPickResult.pickVariant) {
         type = parabolaPickResult.type;
@@ -67,17 +75,19 @@ public:
             return std::make_shared<ParabolaPickResult>(*this);
         }
     }
-
 };
 
 class ParabolaPick : public Pick<PickParabola> {
-
 public:
-    ParabolaPick(const glm::vec3& position, const glm::vec3& direction, float speed, const glm::vec3& acceleration, bool rotateAccelerationWithAvatar, bool rotateAccelerationWithParent, bool scaleWithParent, const PickFilter& filter, float maxDistance, bool enabled);
+    ParabolaPick(const glm::vec3& position, const glm::vec3& direction, float speed, const glm::vec3& acceleration,
+                 bool rotateAccelerationWithAvatar, bool rotateAccelerationWithParent, bool scaleWithParent,
+                 const PickFilter& filter, float maxDistance, bool enabled);
 
     PickParabola getMathematicalPick() const override;
 
-    PickResultPointer getDefaultResult(const QVariantMap& pickVariant) const override { return std::make_shared<ParabolaPickResult>(pickVariant); }
+    PickResultPointer getDefaultResult(const QVariantMap& pickVariant) const override {
+        return std::make_shared<ParabolaPickResult>(pickVariant);
+    }
     PickResultPointer getEntityIntersection(const PickParabola& pick) override;
     PickResultPointer getAvatarIntersection(const PickParabola& pick) override;
     PickResultPointer getHUDIntersection(const PickParabola& pick) override;

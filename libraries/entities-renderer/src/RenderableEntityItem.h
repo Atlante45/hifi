@@ -12,28 +12,35 @@
 #ifndef hifi_RenderableEntityItem_h
 #define hifi_RenderableEntityItem_h
 
-#include <render/Scene.h>
 #include <EntityItem.h>
+#include <RenderHifi.h>
 #include <Sound.h>
+#include <graphics-scripting/Forward.h>
+#include <render/Scene.h>
 #include "AbstractViewStateInterface.h"
 #include "EntitiesRendererLogging.h"
-#include <graphics-scripting/Forward.h>
-#include <RenderHifi.h>
 #include "EntityTreeRenderer.h"
 
 class EntityTreeRenderer;
 
-namespace render { namespace entities {
+namespace render {
+namespace entities {
 
 // Base class for all renderable entities
-class EntityRenderer : public QObject, public std::enable_shared_from_this<EntityRenderer>, public PayloadProxyInterface, protected ReadWriteLockable, public scriptable::ModelProvider {
+class EntityRenderer :
+    public QObject,
+    public std::enable_shared_from_this<EntityRenderer>,
+    public PayloadProxyInterface,
+    protected ReadWriteLockable,
+    public scriptable::ModelProvider {
     Q_OBJECT
 
     using Pointer = std::shared_ptr<EntityRenderer>;
 
 public:
     static void initEntityRenderers();
-    static Pointer addToScene(EntityTreeRenderer& renderer, const EntityItemPointer& entity, const ScenePointer& scene, Transaction& transaction);
+    static Pointer addToScene(EntityTreeRenderer& renderer, const EntityItemPointer& entity, const ScenePointer& scene,
+                              Transaction& transaction);
 
     // Allow classes to override this to interact with the user
     virtual bool wantsHandControllerPointerEvents() const { return false; }
@@ -46,7 +53,7 @@ public:
     const SharedSoundPointer& getCollisionSound() { return _collisionSound; }
     void setCollisionSound(const SharedSoundPointer& sound) { _collisionSound = sound; }
 
-    // Handlers for rendering events... executed on the main thread, only called by EntityTreeRenderer, 
+    // Handlers for rendering events... executed on the main thread, only called by EntityTreeRenderer,
     // cannot be overridden or accessed by subclasses
     virtual void updateInScene(const ScenePointer& scene, Transaction& transaction) final;
     virtual bool addToScene(const ScenePointer& scene, Transaction& transaction) final;
@@ -85,15 +92,16 @@ protected:
     // Returns true if the item in question needs to have updateInScene called because of changes in the entity
     virtual bool needsRenderUpdateFromEntity(const EntityItemPointer& entity) const;
 
-    // Will be called on the main thread from updateInScene.  This can be used to fetch things like 
+    // Will be called on the main thread from updateInScene.  This can be used to fetch things like
     // network textures or model geometry from resource caches
-    virtual void doRenderUpdateSynchronous(const ScenePointer& scene, Transaction& transaction, const EntityItemPointer& entity);
+    virtual void doRenderUpdateSynchronous(const ScenePointer& scene, Transaction& transaction,
+                                           const EntityItemPointer& entity);
 
-    // Will be called by the lambda posted to the scene in updateInScene.  
+    // Will be called by the lambda posted to the scene in updateInScene.
     // This function will execute on the rendering thread, so you cannot use network caches to fetch
     // data in this method if using multi-threaded rendering
-    
-    virtual void doRenderUpdateAsynchronous(const EntityItemPointer& entity) { }
+
+    virtual void doRenderUpdateAsynchronous(const EntityItemPointer& entity) {}
 
     // Called by the `render` method after `needsRenderUpdate`
     virtual void doRender(RenderArgs* args) = 0;
@@ -106,13 +114,11 @@ protected:
     virtual void setIsVisibleInSecondaryCamera(bool value) { _isVisibleInSecondaryCamera = value; }
     virtual void setRenderLayer(RenderLayer value) { _renderLayer = value; }
     virtual void setPrimitiveMode(PrimitiveMode value) { _primitiveMode = value; }
-    
-    template <typename F, typename T>
+
+    template<typename F, typename T>
     T withReadLockResult(const std::function<T()>& f) {
         T result;
-        withReadLock([&] {
-            result = f();
-        });
+        withReadLock([&] { result = f(); });
         return result;
     }
 
@@ -121,8 +127,9 @@ signals:
 
 protected:
     template<typename T>
-    std::shared_ptr<T> asTypedEntity() { return std::static_pointer_cast<T>(_entity); }
-        
+    std::shared_ptr<T> asTypedEntity() {
+        return std::static_pointer_cast<T>(_entity);
+    }
 
     static void makeStatusGetters(const EntityItemPointer& entity, Item::Status::Getters& statusGetters);
     const Transform& getModelTransform() const;
@@ -130,9 +137,9 @@ protected:
     Item::Bound _bound;
     SharedSoundPointer _collisionSound;
     QUuid _changeHandlerId;
-    ItemID _renderItemID{ Item::INVALID_ITEM_ID };
-    uint64_t _fadeStartTime{ usecTimestampNow() };
-    uint64_t _updateTime{ usecTimestampNow() }; // used when sorting/throttling render updates
+    ItemID _renderItemID { Item::INVALID_ITEM_ID };
+    uint64_t _fadeStartTime { usecTimestampNow() };
+    uint64_t _updateTime { usecTimestampNow() }; // used when sorting/throttling render updates
     bool _isFading { EntityTreeRenderer::getEntitiesShouldFadeFunction()() };
     bool _prevIsTransparent { false };
     bool _visible { false };
@@ -144,7 +151,7 @@ protected:
     bool _moving { false };
     bool _needsRenderUpdate { false };
     // Only touched on the rendering thread
-    bool _renderUpdateQueued{ false };
+    bool _renderUpdateQueued { false };
     Transform _renderTransform;
 
     std::unordered_map<std::string, graphics::MultiMaterial> _materials;
@@ -153,17 +160,17 @@ protected:
     quint64 _created;
 
 private:
-    // The base class relies on comparing the model transform to the entity transform in order 
+    // The base class relies on comparing the model transform to the entity transform in order
     // to trigger an update, so the member must not be visible to derived classes as a modifiable
     // transform
     Transform _modelTransform;
     // The rendering code only gets access to the entity in very specific circumstances
-    // i.e. to see if the rendering code needs to update because of a change in state of the 
+    // i.e. to see if the rendering code needs to update because of a change in state of the
     // entity.  This forces all the rendering code itself to be independent of the entity
     const EntityItemPointer _entity;
 };
 
-template <typename T>
+template<typename T>
 class TypedEntityRenderer : public EntityRenderer {
     using Parent = EntityRenderer;
 
@@ -192,7 +199,8 @@ protected:
         return needsRenderUpdateFromTypedEntity(_typedEntity);
     }
 
-    virtual void doRenderUpdateSynchronous(const ScenePointer& scene, Transaction& transaction, const EntityItemPointer& entity) override final {
+    virtual void doRenderUpdateSynchronous(const ScenePointer& scene, Transaction& transaction,
+                                           const EntityItemPointer& entity) override final {
         Parent::doRenderUpdateSynchronous(scene, transaction, entity);
         doRenderUpdateSynchronousTyped(scene, transaction, _typedEntity);
     }
@@ -203,15 +211,17 @@ protected:
     }
 
     virtual bool needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const { return false; }
-    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) { }
-    virtual void doRenderUpdateAsynchronousTyped(const TypedEntityPointer& entity) { }
-    virtual void onAddToSceneTyped(const TypedEntityPointer& entity) { }
-    virtual void onRemoveFromSceneTyped(const TypedEntityPointer& entity) { }
+    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                const TypedEntityPointer& entity) {}
+    virtual void doRenderUpdateAsynchronousTyped(const TypedEntityPointer& entity) {}
+    virtual void onAddToSceneTyped(const TypedEntityPointer& entity) {}
+    virtual void onRemoveFromSceneTyped(const TypedEntityPointer& entity) {}
 
 private:
     const TypedEntityPointer _typedEntity;
 };
 
-} } // namespace render::entities
+} // namespace entities
+} // namespace render
 
 #endif // hifi_RenderableEntityItem_h

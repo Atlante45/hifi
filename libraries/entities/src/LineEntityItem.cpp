@@ -29,15 +29,14 @@ EntityItemPointer LineEntityItem::factory(const EntityItemID& entityID, const En
     return entity;
 }
 
-LineEntityItem::LineEntityItem(const EntityItemID& entityItemID) :
-    EntityItem(entityItemID)
-{
+LineEntityItem::LineEntityItem(const EntityItemID& entityItemID) : EntityItem(entityItemID) {
     _type = EntityTypes::Line;
 }
 
-EntityItemProperties LineEntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
-    
-    EntityItemProperties properties = EntityItem::getProperties(desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
+EntityItemProperties LineEntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                                   bool allowEmptyDesiredProperties) const {
+    EntityItemProperties properties = EntityItem::getProperties(
+        desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
 
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(color, getColor);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(linePoints, getLinePoints);
@@ -57,8 +56,8 @@ bool LineEntityItem::setProperties(const EntityItemProperties& properties) {
         if (wantDebug) {
             uint64_t now = usecTimestampNow();
             int elapsed = now - getLastEdited();
-            qCDebug(entities) << "LineEntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                "now=" << now << " getLastEdited()=" << getLastEdited();
+            qCDebug(entities) << "LineEntityItem::setProperties() AFTER update... edited AGO=" << elapsed << "now=" << now
+                              << " getLastEdited()=" << getLastEdited();
         }
         setLastEdited(properties._lastEdited);
     }
@@ -71,7 +70,8 @@ bool LineEntityItem::appendPoint(const glm::vec3& point) {
         return false;
     }
     glm::vec3 halfBox = getScaledDimensions() * 0.5f;
-    if ( (point.x < - halfBox.x || point.x > halfBox.x) || (point.y < -halfBox.y || point.y > halfBox.y) || (point.z < - halfBox.z || point.z > halfBox.z) ) {
+    if ((point.x < -halfBox.x || point.x > halfBox.x) || (point.y < -halfBox.y || point.y > halfBox.y) ||
+        (point.z < -halfBox.z || point.z > halfBox.z)) {
         qCDebug(entities) << "Point is outside entity's bounding box";
         return false;
     }
@@ -89,7 +89,8 @@ bool LineEntityItem::setLinePoints(const QVector<glm::vec3>& points) {
     glm::vec3 halfBox = getScaledDimensions() * 0.5f;
     for (int i = 0; i < points.size(); i++) {
         glm::vec3 point = points.at(i);
-        if ( (point.x < - halfBox.x || point.x > halfBox.x) || (point.y < -halfBox.y || point.y > halfBox.y) || (point.z < - halfBox.z || point.z > halfBox.z) ) {
+        if ((point.x < -halfBox.x || point.x > halfBox.x) || (point.y < -halfBox.y || point.y > halfBox.y) ||
+            (point.z < -halfBox.z || point.z > halfBox.z)) {
             qCDebug(entities) << "Point is outside entity's bounding box";
             return false;
         }
@@ -103,10 +104,8 @@ bool LineEntityItem::setLinePoints(const QVector<glm::vec3>& points) {
 }
 
 int LineEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                     ReadBitstreamToTreeParams& args,
-                                                     EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                     bool& somethingChanged) {
-
+                                                     ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                     bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 
@@ -116,7 +115,6 @@ int LineEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, 
     return bytesRead;
 }
 
-
 EntityPropertyFlags LineEntityItem::getEntityProperties(EncodeBitstreamParams& params) const {
     EntityPropertyFlags requestedProperties = EntityItem::getEntityProperties(params);
     requestedProperties += PROP_COLOR;
@@ -124,14 +122,11 @@ EntityPropertyFlags LineEntityItem::getEntityProperties(EncodeBitstreamParams& p
     return requestedProperties;
 }
 
-void LineEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params, 
+void LineEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                         EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
-                                        EntityPropertyFlags& requestedProperties,
-                                        EntityPropertyFlags& propertyFlags,
-                                        EntityPropertyFlags& propertiesDidntFit,
-                                        int& propertyCount, 
-                                        OctreeElement::AppendState& appendState) const { 
-
+                                        EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                        EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                        OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_COLOR, getColor());
@@ -148,27 +143,19 @@ void LineEntityItem::debugDump() const {
 }
 
 glm::u8vec3 LineEntityItem::getColor() const {
-    return resultWithReadLock<glm::u8vec3>([&] {
-        return _color;
-    });
+    return resultWithReadLock<glm::u8vec3>([&] { return _color; });
 }
 
 void LineEntityItem::setColor(const glm::u8vec3& value) {
-    withWriteLock([&] {
-        _color = value;
-    });
+    withWriteLock([&] { _color = value; });
 }
 
-QVector<glm::vec3> LineEntityItem::getLinePoints() const { 
+QVector<glm::vec3> LineEntityItem::getLinePoints() const {
     QVector<glm::vec3> result;
-    withReadLock([&] {
-        result = _points;
-    });
+    withReadLock([&] { result = _points; });
     return result;
 }
 
-void LineEntityItem::resetPointsChanged() { 
-    withWriteLock([&] {
-        _pointsChanged = false;
-    });
+void LineEntityItem::resetPointsChanged() {
+    withWriteLock([&] { _pointsChanged = false; });
 }

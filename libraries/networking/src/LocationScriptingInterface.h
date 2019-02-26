@@ -21,6 +21,7 @@ public:
 
     static QScriptValue locationGetter(QScriptContext* context, QScriptEngine* engine);
     static QScriptValue locationSetter(QScriptContext* context, QScriptEngine* engine);
+
 private:
     LocationScriptingInterface() {};
 };

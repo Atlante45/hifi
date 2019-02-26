@@ -11,9 +11,9 @@
 #ifndef hifi_AnimSkeleton
 #define hifi_AnimSkeleton
 
-#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <vector>
 
 #include <FBXSerializer.h>
 #include "AnimPose.h"
@@ -43,9 +43,7 @@ public:
     // get post transform which might include FBX offset transformations
     const AnimPose& getPostRotationPose(int jointIndex) const;
 
-    int getParentIndex(int jointIndex) const {
-        return _parentIndices[jointIndex];
-    }
+    int getParentIndex(int jointIndex) const { return _parentIndices[jointIndex]; }
 
     std::vector<int> getChildrenOfJoint(int jointIndex) const;
 
@@ -66,7 +64,9 @@ public:
     void dump(const AnimPoseVec& poses) const;
 
     std::vector<int> lookUpJointIndices(const std::vector<QString>& jointNames) const;
-    const HFMCluster getClusterBindMatricesOriginalValues(const int meshIndex, const int clusterIndex) const { return _clusterBindMatrixOriginalValues[meshIndex][clusterIndex]; }
+    const HFMCluster getClusterBindMatricesOriginalValues(const int meshIndex, const int clusterIndex) const {
+        return _clusterBindMatrixOriginalValues[meshIndex][clusterIndex];
+    }
 
 protected:
     void buildSkeletonFromJoints(const std::vector<HFMJoint>& joints, const QMap<int, glm::quat> jointOffsets);

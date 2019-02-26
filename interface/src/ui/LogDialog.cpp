@@ -12,10 +12,10 @@
 #include "LogDialog.h"
 
 #include <QCheckBox>
-#include <QPushButton>
 #include <QComboBox>
-#include <QPlainTextEdit>
 #include <QLabel>
+#include <QPlainTextEdit>
+#include <QPushButton>
 
 #include <shared/AbstractLoggerInterface.h>
 
@@ -42,7 +42,9 @@ const QString FATAL_TEXT = "[FATAL]";
 const QString SUPPRESS_TEXT = "[SUPPRESS]";
 const QString UNKNOWN_TEXT = "[UNKNOWN]";
 
-LogDialog::LogDialog(QWidget* parent, AbstractLoggerInterface* logger) : BaseLogDialog(parent), _windowGeometry("logDialogGeometry", QRect()) {
+LogDialog::LogDialog(QWidget* parent, AbstractLoggerInterface* logger) :
+    BaseLogDialog(parent),
+    _windowGeometry("logDialogGeometry", QRect()) {
     _logger = logger;
     setWindowTitle("Log");
 
@@ -144,7 +146,8 @@ LogDialog::LogDialog(QWidget* parent, AbstractLoggerInterface* logger) : BaseLog
     _filterDropdown->addItem("hifi.shared");
     _filterDropdown->addItem("hifi.ui");
     _filterDropdown->addItem("qml");
-    connect(_filterDropdown, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &LogDialog::handleFilterDropdownChanged);
+    connect(_filterDropdown, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+            &LogDialog::handleFilterDropdownChanged);
 
     _leftPad += COMBOBOX_WIDTH + MARGIN_LEFT + MARGIN_LEFT;
     _messageCount = new QLabel("", this);
@@ -152,7 +155,7 @@ LogDialog::LogDialog(QWidget* parent, AbstractLoggerInterface* logger) : BaseLog
     _messageCount->show();
 
     _keepOnTopBox = new QCheckBox(" Keep window on top", this);
-    bool isOnTop = qApp-> getLogWindowOnTopSetting();
+    bool isOnTop = qApp->getLogWindowOnTopSetting();
     _keepOnTopBox->setCheckState(isOnTop ? Qt::Checked : Qt::Unchecked);
 #ifdef Q_OS_WIN
     connect(_keepOnTopBox, &QCheckBox::stateChanged, qApp, &Application::recreateLogWindow);
@@ -184,27 +187,17 @@ LogDialog::LogDialog(QWidget* parent, AbstractLoggerInterface* logger) : BaseLog
 
 void LogDialog::resizeEvent(QResizeEvent* event) {
     BaseLogDialog::resizeEvent(event);
-    _revealLogButton->setGeometry(width() - ELEMENT_MARGIN - REVEAL_BUTTON_WIDTH,
-        ELEMENT_MARGIN,
-        REVEAL_BUTTON_WIDTH,
-        ELEMENT_HEIGHT);
-    _allLogsButton->setGeometry(width() - ELEMENT_MARGIN - ALL_LOGS_BUTTON_WIDTH,
-        THIRD_ROW,
-        ALL_LOGS_BUTTON_WIDTH,
-        ELEMENT_HEIGHT);
+    _revealLogButton->setGeometry(width() - ELEMENT_MARGIN - REVEAL_BUTTON_WIDTH, ELEMENT_MARGIN, REVEAL_BUTTON_WIDTH,
+                                  ELEMENT_HEIGHT);
+    _allLogsButton->setGeometry(width() - ELEMENT_MARGIN - ALL_LOGS_BUTTON_WIDTH, THIRD_ROW, ALL_LOGS_BUTTON_WIDTH,
+                                ELEMENT_HEIGHT);
     _extraDebuggingBox->setGeometry(width() - ELEMENT_MARGIN - COMBOBOX_WIDTH - ELEMENT_MARGIN - ALL_LOGS_BUTTON_WIDTH,
-        THIRD_ROW,
-        COMBOBOX_WIDTH,
-        ELEMENT_HEIGHT);
+                                    THIRD_ROW, COMBOBOX_WIDTH, ELEMENT_HEIGHT);
 
-     _keepOnTopBox->setGeometry(width() - ELEMENT_MARGIN - COMBOBOX_WIDTH - ELEMENT_MARGIN - ALL_LOGS_BUTTON_WIDTH - ELEMENT_MARGIN - COMBOBOX_WIDTH - ELEMENT_MARGIN,
-        THIRD_ROW,
-        COMBOBOX_WIDTH,
-        ELEMENT_HEIGHT);
-    _messageCount->setGeometry(_leftPad,
-        THIRD_ROW,
-        COMBOBOX_WIDTH,
-        ELEMENT_HEIGHT);
+    _keepOnTopBox->setGeometry(width() - ELEMENT_MARGIN - COMBOBOX_WIDTH - ELEMENT_MARGIN - ALL_LOGS_BUTTON_WIDTH -
+                                   ELEMENT_MARGIN - COMBOBOX_WIDTH - ELEMENT_MARGIN,
+                               THIRD_ROW, COMBOBOX_WIDTH, ELEMENT_HEIGHT);
+    _messageCount->setGeometry(_leftPad, THIRD_ROW, COMBOBOX_WIDTH, ELEMENT_HEIGHT);
 }
 
 void LogDialog::closeEvent(QCloseEvent* event) {
@@ -308,8 +301,7 @@ QString LogDialog::getCurrentLog() {
 }
 
 void LogDialog::appendLogLine(QString logLine) {
-    if (logLine.contains(_searchTerm, Qt::CaseInsensitive) &&
-        logLine.contains(_filterSelection, Qt::CaseSensitive)) {
+    if (logLine.contains(_searchTerm, Qt::CaseInsensitive) && logLine.contains(_filterSelection, Qt::CaseSensitive)) {
         int indexToBold = _logTextBox->document()->characterCount();
         _highlighter->setBold(indexToBold);
 
@@ -324,7 +316,7 @@ void LogDialog::appendLogLine(QString logLine) {
                 _logTextBox->appendPlainText(logLine.trimmed());
                 _count++;
                 updateMessageCount();
-            } 
+            }
         } else if (logLine.contains(CRITICAL_TEXT, Qt::CaseSensitive)) {
             if (_logger->criticalPrint()) {
                 _logTextBox->appendPlainText(logLine.trimmed());
@@ -374,8 +366,7 @@ void LogDialog::updateMessageCount() {
     _countLabel = QString::number(_count);
     if (_count != 1) {
         _countLabel.append("  log messages");
-    }
-    else {
+    } else {
         _countLabel.append("  log message");
     }
     _messageCount->setText(_countLabel);

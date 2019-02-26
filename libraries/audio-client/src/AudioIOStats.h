@@ -17,24 +17,25 @@
 #include <QObject>
 
 #include <AudioStreamStats.h>
-#include <Node.h>
 #include <NLPacket.h>
+#include <Node.h>
 
 class MixedProcessedAudioStream;
 
-#define AUDIO_PROPERTY(TYPE, NAME) \
-    Q_PROPERTY(TYPE NAME READ NAME NOTIFY NAME##Changed) \
-    public: \
-        TYPE NAME() const { return _##NAME; } \
-        void NAME(TYPE value) { \
-            if (_##NAME != value) { \
-                _##NAME = value; \
-                emit NAME##Changed(value); \
-            } \
-        } \
-    Q_SIGNAL void NAME##Changed(TYPE value); \
-    private: \
-        TYPE _##NAME{ (TYPE)0 };
+#define AUDIO_PROPERTY(TYPE, NAME)                                                                                             \
+    Q_PROPERTY(TYPE NAME READ NAME NOTIFY NAME##Changed)                                                                       \
+public:                                                                                                                        \
+    TYPE NAME() const { return _##NAME; }                                                                                      \
+    void NAME(TYPE value) {                                                                                                    \
+        if (_##NAME != value) {                                                                                                \
+            _##NAME = value;                                                                                                   \
+            emit NAME##Changed(value);                                                                                         \
+        }                                                                                                                      \
+    }                                                                                                                          \
+    Q_SIGNAL void NAME##Changed(TYPE value);                                                                                   \
+                                                                                                                               \
+private:                                                                                                                       \
+    TYPE _##NAME { (TYPE)0 };
 
 class AudioStreamStatsInterface : public QObject {
     Q_OBJECT
@@ -67,112 +68,112 @@ class AudioStreamStatsInterface : public QObject {
     /**jsdoc
      * @function AudioStats.AudioStreamStats.lossRateChanged
      * @param {number} lossRate
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(float, lossRate)
 
     /**jsdoc
      * @function AudioStats.AudioStreamStats.lossCountChanged
      * @param {number} lossCount
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(float, lossCount)
 
     /**jsdoc
      * @function AudioStats.AudioStreamStats.lossRateWindowChanged
      * @param {number} lossRateWindow
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(float, lossRateWindow)
 
     /**jsdoc
      * @function AudioStats.AudioStreamStats.lossCountWindowChanged
      * @param {number} lossCountWindow
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(float, lossCountWindow)
 
     /**jsdoc
      * @function AudioStats.AudioStreamStats.framesDesiredChanged
      * @param {number} framesDesired
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(int, framesDesired)
 
     /**jsdoc
      * @function AudioStats.AudioStreamStats.framesAvailableChanged
      * @param {number} framesAvailable
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(int, framesAvailable)
 
     /**jsdoc
      * @function AudioStats.AudioStreamStats.framesAvailableAvgChanged
      * @param {number} framesAvailableAvg
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(int, framesAvailableAvg)
 
     /**jsdoc
      * @function AudioStats.AudioStreamStats.unplayedMsMaxChanged
      * @param {number} unplayedMsMax
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(float, unplayedMsMax)
 
     /**jsdoc
      * @function AudioStats.AudioStreamStats.starveCountChanged
      * @param {number} starveCount
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(int, starveCount)
 
     /**jsdoc
      * @function AudioStats.AudioStreamStats.lastStarveDurationCountChanged
      * @param {number} lastStarveDurationCount
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(int, lastStarveDurationCount)
 
     /**jsdoc
      * @function AudioStats.AudioStreamStats.dropCountChanged
      * @param {number} dropCount
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(int, dropCount)
 
     /**jsdoc
      * @function AudioStats.AudioStreamStats.overflowCountChanged
      * @param {number} overflowCount
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(int, overflowCount)
 
     /**jsdoc
      * @function AudioStats.AudioStreamStats.timegapMsMaxChanged
      * @param {number} timegapMsMax
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(quint64, timegapMsMax)
 
     /**jsdoc
      * @function AudioStats.AudioStreamStats.timegapMsAvgChanged
      * @param {number} timegapMsAvg
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(quint64, timegapMsAvg)
 
     /**jsdoc
      * @function AudioStats.AudioStreamStats.timegapMsMaxWindowChanged
      * @param {number} timegapMsMaxWindow
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(quint64, timegapMsMaxWindow)
 
     /**jsdoc
      * @function AudioStats.AudioStreamStats.timegapMsAvgWindowChanged
      * @param {number} timegapMsAvgWindow
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(quint64, timegapMsAvgWindow)
 
@@ -210,58 +211,56 @@ class AudioStatsInterface : public QObject {
     /**jsdoc
      * @function AudioStats.pingMsChanged
      * @param {number} pingMs
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(float, pingMs);
-
 
     /**jsdoc
      * @function AudioStats.inputReadMsMaxChanged
      * @param {number} inputReadMsMax
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(float, inputReadMsMax);
 
     /**jsdoc
      * @function AudioStats.inputUnplayedMsMaxChanged
      * @param {number} inputUnplayedMsMax
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(float, inputUnplayedMsMax);
 
     /**jsdoc
      * @function AudioStats.outputUnplayedMsMaxChanged
      * @param {number} outputUnplayedMsMax
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(float, outputUnplayedMsMax);
-
 
     /**jsdoc
      * @function AudioStats.sentTimegapMsMaxChanged
      * @param {number} sentTimegapMsMax
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(quint64, sentTimegapMsMax);
 
     /**jsdoc
      * @function AudioStats.sentTimegapMsAvgChanged
      * @param {number} sentTimegapMsAvg
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(quint64, sentTimegapMsAvg);
 
     /**jsdoc
      * @function AudioStats.sentTimegapMsMaxWindowChanged
      * @param {number} sentTimegapMsMaxWindow
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(quint64, sentTimegapMsMaxWindow);
 
     /**jsdoc
      * @function AudioStats.sentTimegapMsAvgWindowChanged
      * @param {number} sentTimegapMsAvgWindow
-     * @returns {Signal} 
+     * @returns {Signal}
      */
     AUDIO_PROPERTY(quint64, sentTimegapMsAvgWindow);
 
@@ -276,12 +275,16 @@ public:
     AudioStreamStatsInterface* getClientStream() const { return _client; }
     QObject* getInjectorStreams() const { return _injectors; }
 
-    void updateLocalBuffers(const MovingMinMaxAvg<float>& inputMsRead,
-                            const MovingMinMaxAvg<float>& inputMsUnplayed,
-                            const MovingMinMaxAvg<float>& outputMsUnplayed,
-                            const MovingMinMaxAvg<quint64>& timegaps);
-    void updateMixerStream(const AudioStreamStats& stats) { _mixer->updateStream(stats); emit mixerStreamChanged(); }
-    void updateClientStream(const AudioStreamStats& stats) { _client->updateStream(stats); emit clientStreamChanged(); }
+    void updateLocalBuffers(const MovingMinMaxAvg<float>& inputMsRead, const MovingMinMaxAvg<float>& inputMsUnplayed,
+                            const MovingMinMaxAvg<float>& outputMsUnplayed, const MovingMinMaxAvg<quint64>& timegaps);
+    void updateMixerStream(const AudioStreamStats& stats) {
+        _mixer->updateStream(stats);
+        emit mixerStreamChanged();
+    }
+    void updateClientStream(const AudioStreamStats& stats) {
+        _client->updateStream(stats);
+        emit clientStreamChanged();
+    }
     void updateInjectorStreams(const QHash<QUuid, AudioStreamStats>& stats);
 
 signals:

@@ -9,32 +9,30 @@
 
 #ifndef DISABLE_QML
 
+#include <QtGui/qevent.h>
 #include <QtCore/QObject>
 #include <QtCore/QThread>
-#include <QtGui/qevent.h>
 
 #include <GLMHelpers.h>
 #include <gl/OffscreenGLCanvas.h>
 
-namespace hifi { namespace qml { namespace impl {
+namespace hifi {
+namespace qml {
+namespace impl {
 
 class SharedObject;
 
 class OffscreenEvent : public QEvent {
 public:
-    enum Type {
-        Initialize = QEvent::User + 1,
-        Render,
-        Quit
-    };
+    enum Type { Initialize = QEvent::User + 1, Render, Quit };
 
     OffscreenEvent(Type type) : QEvent(static_cast<QEvent::Type>(type)) {}
 };
 
 /* The render event handler lives on the QML rendering thread for a given surface
- * (each surface has a dedicated rendering thread) and handles events of type 
- * OffscreenEvent to do one time initialization or destruction, and to actually 
- * perform the render.  
+ * (each surface has a dedicated rendering thread) and handles events of type
+ * OffscreenEvent to do one time initialization or destruction, and to actually
+ * perform the render.
  */
 class RenderEventHandler : public QObject {
 public:
@@ -51,12 +49,14 @@ private:
     OffscreenGLCanvas _canvas;
     QSize _currentSize;
 
-    uint32_t _fbo{ 0 };
-    uint32_t _depthStencil{ 0 };
+    uint32_t _fbo { 0 };
+    uint32_t _depthStencil { 0 };
 
     bool _initialized { false };
 };
 
-}}}  // namespace hifi::qml::impl
+} // namespace impl
+} // namespace qml
+} // namespace hifi
 
 #endif

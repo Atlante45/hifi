@@ -11,18 +11,18 @@
 
 #include "FBXSerializer.h"
 
-#include <iostream>
 #include <QtCore/QBuffer>
 #include <QtCore/QDataStream>
+#include <QtCore/QDebug>
+#include <QtCore/QFileInfo>
 #include <QtCore/QIODevice>
 #include <QtCore/QStringList>
 #include <QtCore/QTextStream>
-#include <QtCore/QDebug>
 #include <QtCore/QtEndian>
-#include <QtCore/QFileInfo>
+#include <iostream>
 
-#include <shared/NsightHelpers.h>
 #include <hfm/ModelFormatLogging.h>
+#include <shared/NsightHelpers.h>
 
 template<class T>
 int streamSize() {
@@ -177,7 +177,7 @@ FBXNode parseBinaryFBXNode(QDataStream& in, int& position, bool has64BitPosition
 
     // FBX 2016 and beyond uses 64bit positions in the node headers, pre-2016 used 32bit values
     // our code generally doesn't care about the size that much, so we will use 64bit values
-    // from here on out, but if the file is an older format we read the stream into temp 32bit 
+    // from here on out, but if the file is an older format we read the stream into temp 32bit
     // values and then assign to our actual 64bit values.
     if (has64BitPositions) {
         in >> endOffset;
@@ -224,14 +224,9 @@ FBXNode parseBinaryFBXNode(QDataStream& in, int& position, bool has64BitPosition
 
 class Tokenizer {
 public:
+    Tokenizer(QIODevice* device) : _device(device), _pushedBackToken(-1) {}
 
-    Tokenizer(QIODevice* device) : _device(device), _pushedBackToken(-1) { }
-
-    enum SpecialToken {
-        NO_TOKEN = -1,
-        NO_PUSHBACKED_TOKEN = -1,
-        DATUM_TOKEN = 0x100
-    };
+    enum SpecialToken { NO_TOKEN = -1, NO_PUSHBACKED_TOKEN = -1, DATUM_TOKEN = 0x100 };
 
     int nextToken();
     const QByteArray& getDatum() const { return _datum; }
@@ -240,7 +235,6 @@ public:
     void ungetChar(char ch) { _device->ungetChar(ch); }
 
 private:
-
     QIODevice* _device;
     QByteArray _datum;
     int _pushedBackToken;
@@ -329,8 +323,8 @@ FBXNode parseTextFBXNode(Tokenizer& tokenizer) {
             if ((token = tokenizer.nextToken()) == ':') {
                 tokenizer.ungetChar(':');
                 tokenizer.pushBackToken(Tokenizer::DATUM_TOKEN);
-                return node;    
-                
+                return node;
+
             } else {
                 tokenizer.pushBackToken(token);
                 node.properties.append(datum);
@@ -397,15 +391,14 @@ FBXNode FBXSerializer::parseFBX(QIODevice* device) {
     return top;
 }
 
-
 glm::vec3 FBXSerializer::getVec3(const QVariantList& properties, int index) {
     return glm::vec3(properties.at(index).value<double>(), properties.at(index + 1).value<double>(),
-        properties.at(index + 2).value<double>());
+                     properties.at(index + 2).value<double>());
 }
 
 QVector<glm::vec4> FBXSerializer::createVec4Vector(const QVector<double>& doubleVector) {
     QVector<glm::vec4> values;
-    for (const double* it = doubleVector.constData(), *end = it + ((doubleVector.size() / 4) * 4); it != end; ) {
+    for (const double *it = doubleVector.constData(), *end = it + ((doubleVector.size() / 4) * 4); it != end;) {
         float x = *it++;
         float y = *it++;
         float z = *it++;
@@ -415,10 +408,9 @@ QVector<glm::vec4> FBXSerializer::createVec4Vector(const QVector<double>& double
     return values;
 }
 
-
 QVector<glm::vec4> FBXSerializer::createVec4VectorRGBA(const QVector<double>& doubleVector, glm::vec4& average) {
     QVector<glm::vec4> values;
-    for (const double* it = doubleVector.constData(), *end = it + ((doubleVector.size() / 4) * 4); it != end; ) {
+    for (const double *it = doubleVector.constData(), *end = it + ((doubleVector.size() / 4) * 4); it != end;) {
         float x = *it++;
         float y = *it++;
         float z = *it++;
@@ -435,7 +427,7 @@ QVector<glm::vec4> FBXSerializer::createVec4VectorRGBA(const QVector<double>& do
 
 QVector<glm::vec3> FBXSerializer::createVec3Vector(const QVector<double>& doubleVector) {
     QVector<glm::vec3> values;
-    for (const double* it = doubleVector.constData(), *end = it + ((doubleVector.size() / 3) * 3); it != end; ) {
+    for (const double *it = doubleVector.constData(), *end = it + ((doubleVector.size() / 3) * 3); it != end;) {
         float x = *it++;
         float y = *it++;
         float z = *it++;
@@ -446,7 +438,7 @@ QVector<glm::vec3> FBXSerializer::createVec3Vector(const QVector<double>& double
 
 QVector<glm::vec2> FBXSerializer::createVec2Vector(const QVector<double>& doubleVector) {
     QVector<glm::vec2> values;
-    for (const double* it = doubleVector.constData(), *end = it + ((doubleVector.size() / 2) * 2); it != end; ) {
+    for (const double *it = doubleVector.constData(), *end = it + ((doubleVector.size() / 2) * 2); it != end;) {
         float s = *it++;
         float t = *it++;
         values.append(glm::vec2(s, -t));
@@ -455,10 +447,10 @@ QVector<glm::vec2> FBXSerializer::createVec2Vector(const QVector<double>& double
 }
 
 glm::mat4 FBXSerializer::createMat4(const QVector<double>& doubleVector) {
-    return glm::mat4(doubleVector.at(0), doubleVector.at(1), doubleVector.at(2), doubleVector.at(3),
-        doubleVector.at(4), doubleVector.at(5), doubleVector.at(6), doubleVector.at(7),
-        doubleVector.at(8), doubleVector.at(9), doubleVector.at(10), doubleVector.at(11),
-        doubleVector.at(12), doubleVector.at(13), doubleVector.at(14), doubleVector.at(15));
+    return glm::mat4(doubleVector.at(0), doubleVector.at(1), doubleVector.at(2), doubleVector.at(3), doubleVector.at(4),
+                     doubleVector.at(5), doubleVector.at(6), doubleVector.at(7), doubleVector.at(8), doubleVector.at(9),
+                     doubleVector.at(10), doubleVector.at(11), doubleVector.at(12), doubleVector.at(13), doubleVector.at(14),
+                     doubleVector.at(15));
 }
 
 QVector<int> FBXSerializer::getIntVector(const FBXNode& node) {
@@ -470,7 +462,7 @@ QVector<int> FBXSerializer::getIntVector(const FBXNode& node) {
     if (node.properties.isEmpty()) {
         return QVector<int>();
     }
-    QVector<int> vector = node.properties.at(0).value<QVector<int> >();
+    QVector<int> vector = node.properties.at(0).value<QVector<int>>();
     if (!vector.isEmpty()) {
         return vector;
     }
@@ -489,7 +481,7 @@ QVector<float> FBXSerializer::getFloatVector(const FBXNode& node) {
     if (node.properties.isEmpty()) {
         return QVector<float>();
     }
-    QVector<float> vector = node.properties.at(0).value<QVector<float> >();
+    QVector<float> vector = node.properties.at(0).value<QVector<float>>();
     if (!vector.isEmpty()) {
         return vector;
     }
@@ -508,7 +500,7 @@ QVector<double> FBXSerializer::getDoubleVector(const FBXNode& node) {
     if (node.properties.isEmpty()) {
         return QVector<double>();
     }
-    QVector<double> vector = node.properties.at(0).value<QVector<double> >();
+    QVector<double> vector = node.properties.at(0).value<QVector<double>>();
     if (!vector.isEmpty()) {
         return vector;
     }
@@ -517,4 +509,3 @@ QVector<double> FBXSerializer::getDoubleVector(const FBXNode& node) {
     }
     return vector;
 }
-

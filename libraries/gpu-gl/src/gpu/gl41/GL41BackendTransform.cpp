@@ -30,7 +30,8 @@ void GL41Backend::transferTransformState(const Batch& batch) const {
     if (!_transform._cameras.empty()) {
         bufferData.resize(_transform._cameraUboSize * _transform._cameras.size());
         for (size_t i = 0; i < _transform._cameras.size(); ++i) {
-            memcpy(bufferData.data() + (_transform._cameraUboSize * i), &_transform._cameras[i], sizeof(TransformStageState::CameraBufferElement));
+            memcpy(bufferData.data() + (_transform._cameraUboSize * i), &_transform._cameras[i],
+                   sizeof(TransformStageState::CameraBufferElement));
         }
         glBindBuffer(GL_UNIFORM_BUFFER, _transform._cameraBuffer);
         glBufferData(GL_UNIFORM_BUFFER, bufferData.size(), bufferData.data(), GL_DYNAMIC_DRAW);
@@ -39,7 +40,8 @@ void GL41Backend::transferTransformState(const Batch& batch) const {
 
     if (!batch._objects.empty()) {
         glBindBuffer(GL_TEXTURE_BUFFER, _transform._objectBuffer);
-        glBufferData(GL_TEXTURE_BUFFER, batch._objects.size() * sizeof(Batch::TransformObject), batch._objects.data(), GL_DYNAMIC_DRAW);
+        glBufferData(GL_TEXTURE_BUFFER, batch._objects.size() * sizeof(Batch::TransformObject), batch._objects.data(),
+                     GL_DYNAMIC_DRAW);
         glBindBuffer(GL_TEXTURE_BUFFER, 0);
     }
 
@@ -58,7 +60,7 @@ void GL41Backend::transferTransformState(const Batch& batch) const {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    glActiveTexture(GL_TEXTURE0 +  slot::texture::ObjectTransforms);
+    glActiveTexture(GL_TEXTURE0 + slot::texture::ObjectTransforms);
     glBindTexture(GL_TEXTURE_BUFFER, _transform._objectBufferTexture);
     if (!batch._objects.empty()) {
         glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, _transform._objectBuffer);
@@ -69,7 +71,6 @@ void GL41Backend::transferTransformState(const Batch& batch) const {
     // Make sure the current Camera offset is unknown before render Draw
     _transform._currentCameraOffset = INVALID_OFFSET;
 }
-
 
 void GL41Backend::updateTransform(const Batch& batch) {
     _transform.update(_commandIndex, _stereo);
@@ -93,7 +94,8 @@ void GL41Backend::updateTransform(const Batch& batch) {
             _transform._enabledDrawcallInfoBuffer = true;
         }
         glBindBuffer(GL_ARRAY_BUFFER, _transform._drawCallInfoBuffer);
-        glVertexAttribIPointer(gpu::Stream::DRAW_CALL_INFO, 2, GL_UNSIGNED_SHORT, 0, _transform._drawCallInfoOffsets[batch._currentNamedCall]);
+        glVertexAttribIPointer(gpu::Stream::DRAW_CALL_INFO, 2, GL_UNSIGNED_SHORT, 0,
+                               _transform._drawCallInfoOffsets[batch._currentNamedCall]);
     }
 
     (void)CHECK_GL_ERROR();

@@ -23,12 +23,12 @@
 //
 // See AssetScriptingInterface.cpp for some examples of using to simplify chained async results.
 
+#include <QDebug>
 #include <QtCore/QObject>
 #include <QtCore/QThread>
 #include <QtCore/QVariantMap>
-#include <QDebug>
-#include "ReadWriteLockable.h"
 #include <memory>
+#include "ReadWriteLockable.h"
 
 class MiniPromise : public QObject, public std::enable_shared_from_this<MiniPromise>, public ReadWriteLockable {
     Q_OBJECT
@@ -50,17 +50,16 @@ public:
 
     ~MiniPromise() {
         if (getStateString() == "pending") {
-            qWarning() << "MiniPromise::~MiniPromise -- destroying pending promise:" << objectName() << _error << _result << "handlers:" << getPendingHandlerCount();
+            qWarning() << "MiniPromise::~MiniPromise -- destroying pending promise:" << objectName() << _error << _result
+                       << "handlers:" << getPendingHandlerCount();
         }
     }
     Promise self() { return shared_from_this(); }
 
     Q_INVOKABLE void executeOnPromiseThread(std::function<void()> function, MiniPromise::Promise root = nullptr) {
         if (QThread::currentThread() != thread()) {
-            QMetaObject::invokeMethod(
-                this, "executeOnPromiseThread", Qt::QueuedConnection,
-                Q_ARG(std::function<void()>, function),
-                Q_ARG(MiniPromise::Promise, self()));
+            QMetaObject::invokeMethod(this, "executeOnPromiseThread", Qt::QueuedConnection,
+                                      Q_ARG(std::function<void()>, function), Q_ARG(MiniPromise::Promise, self()));
         } else {
             function();
         }
@@ -69,7 +68,7 @@ public:
     // result aggregation helpers -- eg: deferred->defaults(interimResultMap)->ready(...)
     // copy values from the input map, but only for keys that don't already exist
     Promise mixin(const QVariantMap& source) {
-        withWriteLock([&]{
+        withWriteLock([&] {
             for (const auto& key : source.keys()) {
                 if (!_result.contains(key)) {
                     _result[key] = source[key];
@@ -80,7 +79,7 @@ public:
     }
     // copy values from the input map, replacing any existing keys
     Promise assignResult(const QVariantMap& source) {
-        withWriteLock([&]{
+        withWriteLock([&] {
             for (const auto& key : source.keys()) {
                 _result[key] = source[key];
             }
@@ -92,49 +91,33 @@ public:
     Promise ready(HandlerFunction always) { return finally(always); }
     Promise finally(HandlerFunction always) {
         if (!_rejected && !_resolved) {
-            withWriteLock([&]{
-                _onfinally << always;
-            });
+            withWriteLock([&] { _onfinally << always; });
         } else {
-            executeOnPromiseThread([&]{
-                always(getError(), getResult());
-            });
+            executeOnPromiseThread([&] { always(getError(), getResult()); });
         }
         return self();
     }
     Promise fail(ErrorFunction errorOnly) {
-        return fail([errorOnly](QString error, QVariantMap result) {
-            errorOnly(error);
-        });
+        return fail([errorOnly](QString error, QVariantMap result) { errorOnly(error); });
     }
 
     Promise fail(HandlerFunction failFunc) {
         if (!_rejected) {
-            withWriteLock([&]{
-                _onreject << failFunc;
-            });
+            withWriteLock([&] { _onreject << failFunc; });
         } else {
-            executeOnPromiseThread([&]{
-                failFunc(getError(), getResult());
-            });
+            executeOnPromiseThread([&] { failFunc(getError(), getResult()); });
         }
         return self();
     }
 
     Promise then(SuccessFunction successOnly) {
-        return then([successOnly](QString error, QVariantMap result) {
-            successOnly(result);
-        });
+        return then([successOnly](QString error, QVariantMap result) { successOnly(result); });
     }
     Promise then(HandlerFunction successFunc) {
         if (!_resolved) {
-            withWriteLock([&]{
-                _onresolve << successFunc;
-            });
+            withWriteLock([&] { _onresolve << successFunc; });
         } else {
-            executeOnPromiseThread([&]{
-                successFunc(getError(), getResult());
-            });
+            executeOnPromiseThread([&] { successFunc(getError(), getResult()); });
         }
         return self();
     }
@@ -150,25 +133,17 @@ public:
         return self();
     }
 
-
     // helper functions for forwarding results on to a next Promise
     Promise ready(Promise next) { return finally(next); }
     Promise finally(Promise next) {
-        return finally([next](QString error, QVariantMap result) {
-            next->handle(error, result);
-        });
+        return finally([next](QString error, QVariantMap result) { next->handle(error, result); });
     }
     Promise fail(Promise next) {
-        return fail([next](QString error, QVariantMap result) {
-            next->reject(error, result);
-        });
+        return fail([next](QString error, QVariantMap result) { next->reject(error, result); });
     }
     Promise then(Promise next) {
-        return then([next](QString error, QVariantMap result) {
-            next->resolve(error, result);
-        });
+        return then([next](QString error, QVariantMap result) { next->resolve(error, result); });
     }
-
 
     // trigger methods
     // handle() automatically resolves or rejects the promise (based on whether an error value occurred)
@@ -181,18 +156,16 @@ public:
         return self();
     }
 
-    Promise resolve(QVariantMap result) {
-        return resolve(QString(), result);
-    }
+    Promise resolve(QVariantMap result) { return resolve(QString(), result); }
     Promise resolve(QString error, const QVariantMap& result) {
         setState(true, error, result);
 
-        executeOnPromiseThread([&]{
-            const QString localError{ getError() };
-            const QVariantMap localResult{ getResult() };
+        executeOnPromiseThread([&] {
+            const QString localError { getError() };
+            const QVariantMap localResult { getResult() };
             HandlerFunctions resolveHandlers;
             HandlerFunctions finallyHandlers;
-            withReadLock([&]{
+            withReadLock([&] {
                 resolveHandlers = _onresolve;
                 finallyHandlers = _onfinally;
             });
@@ -206,18 +179,16 @@ public:
         return self();
     }
 
-    Promise reject(QString error) {
-        return reject(error, QVariantMap());
-    }
+    Promise reject(QString error) { return reject(error, QVariantMap()); }
     Promise reject(QString error, const QVariantMap& result) {
         setState(false, error, result);
 
-        executeOnPromiseThread([&]{
-            const QString localError{ getError() };
-            const QVariantMap localResult{ getResult() };
+        executeOnPromiseThread([&] {
+            const QString localError { getError() };
+            const QVariantMap localResult { getResult() };
             HandlerFunctions rejectHandlers;
             HandlerFunctions finallyHandlers;
-            withReadLock([&]{
+            withReadLock([&] {
                 rejectHandlers = _onreject;
                 finallyHandlers = _onfinally;
             });
@@ -232,7 +203,6 @@ public:
     }
 
 private:
-
     Promise setState(bool resolved, QString error, const QVariantMap& result) {
         if (resolved) {
             _resolved = true;
@@ -244,24 +214,25 @@ private:
         return self();
     }
 
-    void setError(const QString error) { withWriteLock([&]{ _error = error; }); }
-    QString getError() const { return resultWithReadLock<QString>([this]() -> QString { return _error; }); }
-    QVariantMap getResult() const { return resultWithReadLock<QVariantMap>([this]() -> QVariantMap { return _result; }); }
+    void setError(const QString error) {
+        withWriteLock([&] { _error = error; });
+    }
+    QString getError() const {
+        return resultWithReadLock<QString>([this]() -> QString { return _error; });
+    }
+    QVariantMap getResult() const {
+        return resultWithReadLock<QVariantMap>([this]() -> QVariantMap { return _result; });
+    }
     int getPendingHandlerCount() const {
-        return resultWithReadLock<int>([this]() -> int {
-            return _onresolve.size() + _onreject.size() + _onfinally.size();
-        });
+        return resultWithReadLock<int>([this]() -> int { return _onresolve.size() + _onreject.size() + _onfinally.size(); });
     }
     QString getStateString() const {
-        return _rejected ? "rejected" :
-            _resolved ? "resolved" :
-            getPendingHandlerCount() ? "pending" :
-            "unknown";
+        return _rejected ? "rejected" : _resolved ? "resolved" : getPendingHandlerCount() ? "pending" : "unknown";
     }
     QString _error;
     QVariantMap _result;
-    std::atomic<bool> _rejected{false};
-    std::atomic<bool> _resolved{false};
+    std::atomic<bool> _rejected { false };
+    std::atomic<bool> _resolved { false };
     HandlerFunctions _onresolve;
     HandlerFunctions _onreject;
     HandlerFunctions _onfinally;

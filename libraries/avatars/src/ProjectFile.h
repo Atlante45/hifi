@@ -5,6 +5,7 @@
 
 class ProjectFilePath {
     Q_GADGET;
+
 public:
     QString absolutePath;
     QString relativePath;

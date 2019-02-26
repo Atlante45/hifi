@@ -25,9 +25,7 @@ class AWSInterface : public QObject {
 public:
     explicit AWSInterface(QObject* parent = 0);
 
-    void createWebPageFromResults(const QString& testResults,
-                                  const QString& workingDirectory,
-                                  QCheckBox* updateAWSCheckBox,
+    void createWebPageFromResults(const QString& testResults, const QString& workingDirectory, QCheckBox* updateAWSCheckBox,
                                   QLineEdit* urlLineEdit);
 
     void extractTestFailuresFromZippedFolder(const QString& folderName);
@@ -55,18 +53,18 @@ private:
     QString _htmlSuccessesFolder;
     QString _htmlFilename;
 
-    const QString FAILURES_FOLDER{ "failures" };
-    const QString SUCCESSES_FOLDER{ "successes" };
-    const QString HTML_FILENAME{ "TestResults.html" };
+    const QString FAILURES_FOLDER { "failures" };
+    const QString SUCCESSES_FOLDER { "successes" };
+    const QString HTML_FILENAME { "TestResults.html" };
 
     BusyWindow _busyWindow;
 
     PythonInterface* _pythonInterface;
     QString _pythonCommand;
 
-    QString AWS_BUCKET{ "hifi-qa" };
+    QString AWS_BUCKET { "hifi-qa" };
 
     QLineEdit* _urlLineEdit;
 };
 
-#endif  // hifi_AWSInterface_h
+#endif // hifi_AWSInterface_h

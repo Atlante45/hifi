@@ -27,14 +27,14 @@ void ImageEntityItem::setUnscaledDimensions(const glm::vec3& value) {
     EntityItem::setUnscaledDimensions(glm::vec3(value.x, value.y, IMAGE_ENTITY_ITEM_FIXED_DEPTH));
 }
 
-EntityItemProperties ImageEntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
-    EntityItemProperties properties = EntityItem::getProperties(desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
+EntityItemProperties ImageEntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                                    bool allowEmptyDesiredProperties) const {
+    EntityItemProperties properties = EntityItem::getProperties(
+        desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
 
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(color, getColor);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(alpha, getAlpha);
-    withReadLock([&] {
-        _pulseProperties.getProperties(properties);
-    });
+    withReadLock([&] { _pulseProperties.getProperties(properties); });
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(billboardMode, getBillboardMode);
 
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(imageURL, getImageURL);
@@ -66,8 +66,8 @@ bool ImageEntityItem::setProperties(const EntityItemProperties& properties) {
         if (wantDebug) {
             uint64_t now = usecTimestampNow();
             int elapsed = now - getLastEdited();
-            qCDebug(entities) << "ImageEntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                    "now=" << now << " getLastEdited()=" << getLastEdited();
+            qCDebug(entities) << "ImageEntityItem::setProperties() AFTER update... edited AGO=" << elapsed << "now=" << now
+                              << " getLastEdited()=" << getLastEdited();
         }
         setLastEdited(properties.getLastEdited());
     }
@@ -75,10 +75,8 @@ bool ImageEntityItem::setProperties(const EntityItemProperties& properties) {
 }
 
 int ImageEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) {
-
+                                                      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                      bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 
@@ -86,8 +84,8 @@ int ImageEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data,
     READ_ENTITY_PROPERTY(PROP_ALPHA, float, setAlpha);
     withWriteLock([&] {
         int bytesFromPulse = _pulseProperties.readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
-            propertyFlags, overwriteLocalData,
-            somethingChanged);
+                                                                               propertyFlags, overwriteLocalData,
+                                                                               somethingChanged);
         bytesRead += bytesFromPulse;
         dataAt += bytesFromPulse;
     });
@@ -118,20 +116,17 @@ EntityPropertyFlags ImageEntityItem::getEntityProperties(EncodeBitstreamParams& 
 }
 
 void ImageEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
-                                    EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
-                                    OctreeElement::AppendState& appendState) const {
-
+                                         EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
+                                         EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                         EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                         OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_COLOR, getColor());
     APPEND_ENTITY_PROPERTY(PROP_ALPHA, getAlpha());
     withReadLock([&] {
         _pulseProperties.appendSubclassData(packetData, params, entityTreeElementExtraEncodeData, requestedProperties,
-            propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                                            propertyFlags, propertiesDidntFit, propertyCount, appendState);
     });
     APPEND_ENTITY_PROPERTY(PROP_BILLBOARD_MODE, (uint32_t)getBillboardMode());
 
@@ -152,14 +147,16 @@ glm::vec3 ImageEntityItem::getRaycastDimensions() const {
 }
 
 bool ImageEntityItem::findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                                                   OctreeElementPointer& element,
-                                                   float& distance, BoxFace& face, glm::vec3& surfaceNormal,
-                                                   QVariantMap& extraInfo, bool precisionPicking) const {
+                                                  OctreeElementPointer& element, float& distance, BoxFace& face,
+                                                  glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                                  bool precisionPicking) const {
     glm::vec3 dimensions = getScaledDimensions();
     glm::vec2 xyDimensions(dimensions.x, dimensions.y);
     glm::quat rotation = getWorldOrientation();
-    glm::vec3 position = getWorldPosition() + rotation * (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint()));
-    rotation = EntityItem::getBillboardRotation(position, rotation, _billboardMode, EntityItem::getPrimaryViewFrustumPosition());
+    glm::vec3 position = getWorldPosition() +
+                         rotation * (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint()));
+    rotation = EntityItem::getBillboardRotation(position, rotation, _billboardMode,
+                                                EntityItem::getPrimaryViewFrustumPosition());
 
     if (findRayRectangleIntersection(origin, direction, rotation, position, xyDimensions, distance)) {
         glm::vec3 forward = rotation * Vectors::FRONT;
@@ -175,14 +172,15 @@ bool ImageEntityItem::findDetailedRayIntersection(const glm::vec3& origin, const
     return false;
 }
 
-bool ImageEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                                       OctreeElementPointer& element, float& parabolicDistance,
-                                                       BoxFace& face, glm::vec3& surfaceNormal,
+bool ImageEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
+                                                       const glm::vec3& acceleration, OctreeElementPointer& element,
+                                                       float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
                                                        QVariantMap& extraInfo, bool precisionPicking) const {
     glm::vec3 dimensions = getScaledDimensions();
     glm::vec2 xyDimensions(dimensions.x, dimensions.y);
     glm::quat rotation = getWorldOrientation();
-    glm::vec3 position = getWorldPosition() + rotation * (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint()));
+    glm::vec3 position = getWorldPosition() +
+                         rotation * (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint()));
 
     glm::quat inverseRot = glm::inverse(rotation);
     glm::vec3 localOrigin = inverseRot * (origin - position);
@@ -206,100 +204,70 @@ bool ImageEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, 
 
 QString ImageEntityItem::getImageURL() const {
     QString result;
-    withReadLock([&] {
-        result = _imageURL;
-    });
+    withReadLock([&] { result = _imageURL; });
     return result;
 }
 
 void ImageEntityItem::setImageURL(const QString& url) {
-    withWriteLock([&] {
-        _imageURL = url;
-    });
+    withWriteLock([&] { _imageURL = url; });
 }
 
 bool ImageEntityItem::getEmissive() const {
     bool result;
-    withReadLock([&] {
-        result = _emissive;
-    });
+    withReadLock([&] { result = _emissive; });
     return result;
 }
 
 void ImageEntityItem::setEmissive(bool emissive) {
-    withWriteLock([&] {
-        _emissive = emissive;
-    });
+    withWriteLock([&] { _emissive = emissive; });
 }
 
 bool ImageEntityItem::getKeepAspectRatio() const {
     bool result;
-    withReadLock([&] {
-        result = _keepAspectRatio;
-    });
+    withReadLock([&] { result = _keepAspectRatio; });
     return result;
 }
 
 void ImageEntityItem::setKeepAspectRatio(bool keepAspectRatio) {
-    withWriteLock([&] {
-        _keepAspectRatio = keepAspectRatio;
-    });
+    withWriteLock([&] { _keepAspectRatio = keepAspectRatio; });
 }
 
 BillboardMode ImageEntityItem::getBillboardMode() const {
     BillboardMode result;
-    withReadLock([&] {
-        result = _billboardMode;
-    });
+    withReadLock([&] { result = _billboardMode; });
     return result;
 }
 
 void ImageEntityItem::setBillboardMode(BillboardMode value) {
-    withWriteLock([&] {
-        _billboardMode = value;
-    });
+    withWriteLock([&] { _billboardMode = value; });
 }
 
 QRect ImageEntityItem::getSubImage() const {
     QRect result;
-    withReadLock([&] {
-        result = _subImage;
-    });
+    withReadLock([&] { result = _subImage; });
     return result;
 }
 
 void ImageEntityItem::setSubImage(const QRect& subImage) {
-    withWriteLock([&] {
-        _subImage = subImage;
-    });
+    withWriteLock([&] { _subImage = subImage; });
 }
 
 void ImageEntityItem::setColor(const glm::u8vec3& color) {
-    withWriteLock([&] {
-        _color = color;
-    });
+    withWriteLock([&] { _color = color; });
 }
 
 glm::u8vec3 ImageEntityItem::getColor() const {
-    return resultWithReadLock<glm::u8vec3>([&] {
-        return _color;
-    });
+    return resultWithReadLock<glm::u8vec3>([&] { return _color; });
 }
 
 void ImageEntityItem::setAlpha(float alpha) {
-    withWriteLock([&] {
-        _alpha = alpha;
-    });
+    withWriteLock([&] { _alpha = alpha; });
 }
 
 float ImageEntityItem::getAlpha() const {
-    return resultWithReadLock<float>([&] {
-        return _alpha;
-    });
+    return resultWithReadLock<float>([&] { return _alpha; });
 }
 
 PulsePropertyGroup ImageEntityItem::getPulseProperties() const {
-    return resultWithReadLock<PulsePropertyGroup>([&] {
-        return _pulseProperties;
-    });
+    return resultWithReadLock<PulsePropertyGroup>([&] { return _pulseProperties; });
 }

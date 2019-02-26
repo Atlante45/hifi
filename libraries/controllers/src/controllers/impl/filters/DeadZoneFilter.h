@@ -16,6 +16,7 @@ namespace controller {
 
 class DeadZoneFilter : public Filter {
     REGISTER_FILTER_CLASS(DeadZoneFilter);
+
 public:
     DeadZoneFilter(float min = 0.0) : _min(min) {};
 
@@ -24,11 +25,11 @@ public:
     virtual Pose apply(Pose value) const override { return value; }
 
     virtual bool parseParameters(const QJsonValue& parameters) override;
+
 protected:
     float _min = 0.0f;
 };
 
-
-}
+} // namespace controller
 
 #endif

@@ -14,8 +14,8 @@
 
 namespace controller {
 
-    Conditional::Pointer Conditional::parse(const QJsonValue& json) {
-        return Conditional::Pointer();
-    }
-
+Conditional::Pointer Conditional::parse(const QJsonValue& json) {
+    return Conditional::Pointer();
 }
+
+} // namespace controller

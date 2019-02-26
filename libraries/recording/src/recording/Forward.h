@@ -10,9 +10,9 @@
 #ifndef hifi_Recording_Forward_h
 #define hifi_Recording_Forward_h
 
-#include <memory>
-#include <list>
 #include <limits>
+#include <list>
+#include <memory>
 
 namespace recording {
 
@@ -40,6 +40,6 @@ class Deck;
 // An interface for recording a single clip
 class Recorder;
 
-}
+} // namespace recording
 
 #endif

@@ -38,7 +38,6 @@ protected:
 private:
     QTextCharFormat boldFormat;
     QTextCharFormat keywordFormat;
-
 };
 
 class BaseLogDialog : public QDialog {
@@ -59,10 +58,10 @@ private slots:
     void toggleSearchNext();
 
 protected:
-    int _leftPad{ 0 };
+    int _leftPad { 0 };
     QString _searchTerm;
-    QPlainTextEdit* _logTextBox{ nullptr };
-    Highlighter* _highlighter{ nullptr };
+    QPlainTextEdit* _logTextBox { nullptr };
+    Highlighter* _highlighter { nullptr };
 
     void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent* event) override;
@@ -70,14 +69,13 @@ protected:
     void clearSearch();
 
 private:
-    QPushButton* _searchButton{ nullptr };
-    QLineEdit* _searchTextBox{ nullptr };
-    QPushButton* _searchPrevButton{ nullptr };
-    QPushButton* _searchNextButton{ nullptr };
+    QPushButton* _searchButton { nullptr };
+    QLineEdit* _searchTextBox { nullptr };
+    QPushButton* _searchPrevButton { nullptr };
+    QPushButton* _searchNextButton { nullptr };
 
     void initControls();
     void showLogData();
 };
-
 
 #endif // hifi_BaseLogDialog_h

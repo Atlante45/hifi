@@ -15,7 +15,6 @@
 
 #include "PhysicsLogging.h"
 
-
 const uint16_t ObjectActionOffset::offsetVersion = 1;
 
 ObjectActionOffset::ObjectActionOffset(const QUuid& id, EntityItemPointer ownerEntity) :
@@ -24,19 +23,19 @@ ObjectActionOffset::ObjectActionOffset(const QUuid& id, EntityItemPointer ownerE
     _linearDistance(0.0f),
     _linearTimeScale(FLT_MAX),
     _positionalTargetSet(false) {
-    #if WANT_DEBUG
+#if WANT_DEBUG
     qCDebug(physics) << "ObjectActionOffset::ObjectActionOffset";
-    #endif
+#endif
 }
 
 ObjectActionOffset::~ObjectActionOffset() {
-    #if WANT_DEBUG
+#if WANT_DEBUG
     qCDebug(physics) << "ObjectActionOffset::~ObjectActionOffset";
-    #endif
+#endif
 }
 
 void ObjectActionOffset::updateActionWorker(btScalar deltaTimeStep) {
-    withTryReadLock([&]{
+    withTryReadLock([&] {
         auto ownerEntity = _ownerEntity.lock();
         if (!ownerEntity) {
             return;
@@ -54,13 +53,13 @@ void ObjectActionOffset::updateActionWorker(btScalar deltaTimeStep) {
             return;
         }
 
-        const float MAX_LINEAR_TIMESCALE = 600.0f;  // 10 minutes is a long time
+        const float MAX_LINEAR_TIMESCALE = 600.0f; // 10 minutes is a long time
         if (_positionalTargetSet && _linearTimeScale < MAX_LINEAR_TIMESCALE) {
             glm::vec3 objectPosition = bulletToGLM(rigidBody->getCenterOfMassPosition());
             glm::vec3 springAxis = objectPosition - _pointToOffsetFrom; // from anchor to object
             float distance = glm::length(springAxis);
             if (distance > FLT_EPSILON) {
-                springAxis /= distance;  // normalize springAxis
+                springAxis /= distance; // normalize springAxis
 
                 // compute (critically damped) target velocity of spring relaxation
                 glm::vec3 offset = (distance - _linearDistance) * springAxis;
@@ -81,7 +80,6 @@ void ObjectActionOffset::updateActionWorker(btScalar deltaTimeStep) {
     });
 }
 
-
 bool ObjectActionOffset::updateArguments(QVariantMap arguments) {
     glm::vec3 pointToOffsetFrom;
     float linearTimeScale;
@@ -90,37 +88,33 @@ bool ObjectActionOffset::updateArguments(QVariantMap arguments) {
     bool needUpdate = false;
     bool somethingChanged = ObjectDynamic::updateArguments(arguments);
 
-    withReadLock([&]{
+    withReadLock([&] {
         bool ok = true;
-        pointToOffsetFrom =
-            EntityDynamicInterface::extractVec3Argument("offset action", arguments, "pointToOffsetFrom", ok, true);
+        pointToOffsetFrom = EntityDynamicInterface::extractVec3Argument("offset action", arguments, "pointToOffsetFrom", ok,
+                                                                        true);
         if (!ok) {
             pointToOffsetFrom = _pointToOffsetFrom;
         }
 
         ok = true;
-        linearTimeScale =
-            EntityDynamicInterface::extractFloatArgument("offset action", arguments, "linearTimeScale", ok, false);
+        linearTimeScale = EntityDynamicInterface::extractFloatArgument("offset action", arguments, "linearTimeScale", ok,
+                                                                       false);
         if (!ok) {
             linearTimeScale = _linearTimeScale;
         }
 
         ok = true;
-        linearDistance =
-            EntityDynamicInterface::extractFloatArgument("offset action", arguments, "linearDistance", ok, false);
+        linearDistance = EntityDynamicInterface::extractFloatArgument("offset action", arguments, "linearDistance", ok, false);
         if (!ok) {
             linearDistance = _linearDistance;
         }
 
         // only change stuff if something actually changed
-        if (somethingChanged ||
-            _pointToOffsetFrom != pointToOffsetFrom ||
-            _linearTimeScale != linearTimeScale ||
+        if (somethingChanged || _pointToOffsetFrom != pointToOffsetFrom || _linearTimeScale != linearTimeScale ||
             _linearDistance != linearDistance) {
             needUpdate = true;
         }
     });
-
 
     if (needUpdate) {
         withWriteLock([&] {
@@ -143,7 +137,7 @@ bool ObjectActionOffset::updateArguments(QVariantMap arguments) {
 }
 
 /**jsdoc
- * The <code>"offset"</code> {@link Entities.ActionType|ActionType} moves an entity so that it is a set distance away from a 
+ * The <code>"offset"</code> {@link Entities.ActionType|ActionType} moves an entity so that it is a set distance away from a
  * target point.
  * It has arguments in addition to the common {@link Entities.ActionArguments|ActionArguments}.
  *
@@ -151,7 +145,7 @@ bool ObjectActionOffset::updateArguments(QVariantMap arguments) {
  * @property {Vec3} pointToOffsetFrom=0,0,0 - The target point to offset the entity from.
  * @property {number} linearDistance=0 - The distance away from the target point to position the entity.
  * @property {number} linearTimeScale=34e+38 - Controls how long it takes for the entity's position to catch up with the
- *     target offset. The value is the time for the action to catch up to 1/e = 0.368 of the target value, where the action 
+ *     target offset. The value is the time for the action to catch up to 1/e = 0.368 of the target value, where the action
  *     is applied using an exponential decay.
  */
 QVariantMap ObjectActionOffset::getArguments() {

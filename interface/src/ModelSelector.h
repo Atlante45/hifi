@@ -30,10 +30,10 @@ public:
 
     QFileInfo getFileInfo() const;
 
-    public slots:
+public slots:
     virtual void accept() override;
 
-    private slots:
+private slots:
     void browse();
 
 private:

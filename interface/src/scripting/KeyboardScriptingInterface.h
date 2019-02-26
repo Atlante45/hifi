@@ -26,7 +26,8 @@
  * @hifi-avatar
  *
  * @property {bool} raised - <code>true</code> If the keyboard is visible <code>false</code> otherwise
- * @property {bool} password - <code>true</code> Will show * instead of characters in the text display <code>false</code> otherwise
+ * @property {bool} password - <code>true</code> Will show * instead of characters in the text display <code>false</code>
+ * otherwise
  */
 
 class KeyboardScriptingInterface : public QObject, public Dependency {
@@ -47,6 +48,7 @@ public:
     Q_INVOKABLE void setLeftHandLaser(unsigned int leftHandLaser);
     Q_INVOKABLE void setRightHandLaser(unsigned int rightHandLaser);
     Q_INVOKABLE bool containsID(const QUuid& overlayID) const;
+
 private:
     bool getPreferMalletsOverLasers() const;
     bool isRaised() const;

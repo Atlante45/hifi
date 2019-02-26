@@ -11,15 +11,15 @@
 #include "TouchscreenVirtualPadDevice.h"
 #include "KeyboardMouseDevice.h"
 
-#include <QtGui/QTouchEvent>
 #include <QGestureEvent>
 #include <QGuiApplication>
-#include <QWindow>
 #include <QScreen>
+#include <QWindow>
+#include <QtGui/QTouchEvent>
 
-#include <controllers/UserInputMapper.h>
-#include <PathUtils.h>
 #include <NumericalConstants.h>
+#include <PathUtils.h>
+#include <controllers/UserInputMapper.h>
 #include "VirtualPadManager.h"
 
 #include <cmath>
@@ -48,7 +48,8 @@ void TouchscreenVirtualPadDevice::init() {
     auto& virtualPadManager = VirtualPad::Manager::instance();
 
     if (_fixedPosition) {
-        virtualPadManager.getLeftVirtualPad()->setShown(virtualPadManager.isEnabled() && !virtualPadManager.isHidden()); // Show whenever it's enabled
+        virtualPadManager.getLeftVirtualPad()->setShown(virtualPadManager.isEnabled() &&
+                                                        !virtualPadManager.isHidden()); // Show whenever it's enabled
     }
 
     KeyboardMouseDevice::enableTouch(false); // Touch for view controls is managed by this plugin
@@ -74,33 +75,38 @@ void TouchscreenVirtualPadDevice::resize() {
 }
 
 void TouchscreenVirtualPadDevice::setupControlsPositions(VirtualPad::Manager& virtualPadManager, bool force) {
-    if (_extraBottomMargin == virtualPadManager.extraBottomMargin() && !force) return; // Our only criteria to decide a center change is the bottom margin
+    if (_extraBottomMargin == virtualPadManager.extraBottomMargin() && !force)
+        return; // Our only criteria to decide a center change is the bottom margin
 
     QScreen* eventScreen = qApp->primaryScreen(); // do not call every time
     _extraBottomMargin = virtualPadManager.extraBottomMargin();
 
     // Movement stick
     float margin = _screenDPI * VirtualPad::Manager::BASE_MARGIN_PIXELS / VirtualPad::Manager::DPI;
-    _fixedCenterPosition = glm::vec2( _fixedRadius + margin, eventScreen->availableSize().height() - margin - _fixedRadius - _extraBottomMargin);
+    _fixedCenterPosition = glm::vec2(_fixedRadius + margin,
+                                     eventScreen->availableSize().height() - margin - _fixedRadius - _extraBottomMargin);
     _moveRefTouchPoint = _fixedCenterPosition;
     virtualPadManager.getLeftVirtualPad()->setFirstTouch(_moveRefTouchPoint);
 
     // Jump button
     float btnPixelSize = _screenDPI * VirtualPad::Manager::BTN_FULL_PIXELS / VirtualPad::Manager::DPI;
     float rightMargin = _screenDPI * VirtualPad::Manager::BTN_RIGHT_MARGIN_PIXELS / VirtualPad::Manager::DPI;
-    float bottomMargin = _screenDPI * VirtualPad::Manager::BTN_BOTTOM_MARGIN_PIXELS/ VirtualPad::Manager::DPI;
-    glm::vec2 jumpButtonPosition = glm::vec2( eventScreen->availableSize().width() - rightMargin - btnPixelSize, eventScreen->availableSize().height() - bottomMargin - _buttonRadius - _extraBottomMargin);
-    glm::vec2 rbButtonPosition = glm::vec2( eventScreen->availableSize().width() - rightMargin - btnPixelSize, eventScreen->availableSize().height() - 2 * bottomMargin - 3 * _buttonRadius - _extraBottomMargin);
+    float bottomMargin = _screenDPI * VirtualPad::Manager::BTN_BOTTOM_MARGIN_PIXELS / VirtualPad::Manager::DPI;
+    glm::vec2 jumpButtonPosition = glm::vec2(eventScreen->availableSize().width() - rightMargin - btnPixelSize,
+                                             eventScreen->availableSize().height() - bottomMargin - _buttonRadius -
+                                                 _extraBottomMargin);
+    glm::vec2 rbButtonPosition = glm::vec2(eventScreen->availableSize().width() - rightMargin - btnPixelSize,
+                                           eventScreen->availableSize().height() - 2 * bottomMargin - 3 * _buttonRadius -
+                                               _extraBottomMargin);
 
     // Avoid generating buttons in portrait mode
-    if ( eventScreen->availableSize().width() > eventScreen->availableSize().height() && _buttonsManager.buttonsCount() == 0) {
-        _buttonsManager.addButton(TouchscreenButton(JUMP, JUMP_BUTTON, _buttonRadius, jumpButtonPosition, _inputDevice ));
-        _buttonsManager.addButton(TouchscreenButton(RB, RB_BUTTON, _buttonRadius, rbButtonPosition, _inputDevice ));
+    if (eventScreen->availableSize().width() > eventScreen->availableSize().height() && _buttonsManager.buttonsCount() == 0) {
+        _buttonsManager.addButton(TouchscreenButton(JUMP, JUMP_BUTTON, _buttonRadius, jumpButtonPosition, _inputDevice));
+        _buttonsManager.addButton(TouchscreenButton(RB, RB_BUTTON, _buttonRadius, rbButtonPosition, _inputDevice));
 
         virtualPadManager.setButtonPosition(VirtualPad::Manager::Button::JUMP, jumpButtonPosition);
         virtualPadManager.setButtonPosition(VirtualPad::Manager::Button::HANDSHAKE, rbButtonPosition);
     }
-
 }
 
 float clip(float n, float lower, float upper) {
@@ -120,7 +126,7 @@ glm::vec2 TouchscreenVirtualPadDevice::clippedPointInCircle(float radius, glm::v
 
     // Second case, purely vertical (avoid division by zero)
     if (deltaX == 0.0f) {
-        return vec2(touchPoint.x, clip(touchPoint.y, origin.y-radius, origin.y+radius) );
+        return vec2(touchPoint.x, clip(touchPoint.y, origin.y - radius, origin.y + radius));
     }
 
     // Third case, calculate point in circumference
@@ -130,11 +136,11 @@ glm::vec2 TouchscreenVirtualPadDevice::clippedPointInCircle(float radius, glm::v
 
     // quadtratic coefs of circumference and line intersection
     float qa = powf(m, 2.0f) + 1.0f;
-    float qb = 2.0f * ( m * b - origin.x - origin.y * m);
+    float qb = 2.0f * (m * b - origin.x - origin.y * m);
     float qc = powf(origin.x, 2.0f) - powf(radius, 2.0f) + b * b - 2.0f * b * origin.y + powf(origin.y, 2.0f);
 
     float discr = qb * qb - 4.0f * qa * qc;
-    float discrSign = deltaX > 0.0f ? 1.0f : - 1.0f;
+    float discrSign = deltaX > 0.0f ? 1.0f : -1.0f;
 
     float finalX = (-qb + discrSign * sqrtf(discr)) / (2.0f * qa);
     float finalY = m * finalX + b;
@@ -151,17 +157,23 @@ void TouchscreenVirtualPadDevice::processInputDeviceForMove(VirtualPad::Manager&
     virtualPadManager.getLeftVirtualPad()->setFirstTouch(_moveRefTouchPoint);
     virtualPadManager.getLeftVirtualPad()->setCurrentTouch(clippedPoint);
     virtualPadManager.getLeftVirtualPad()->setBeingTouched(true);
-    virtualPadManager.getLeftVirtualPad()->setShown(true); // If touched, show in any mode (fixed joystick position or non-fixed)
+    virtualPadManager.getLeftVirtualPad()->setShown(
+        true); // If touched, show in any mode (fixed joystick position or non-fixed)
 }
 
 void TouchscreenVirtualPadDevice::processInputDeviceForView() {
     // We use average across how many times we've got touchUpdate events.
-    // Using the average instead of the full deltaX and deltaY, makes deltaTime in MyAvatar dont't accelerate rotation when there is a low touchUpdate rate (heavier domains).
-    // (Because it multiplies this input value by deltaTime (with a coefficient)).
-    _inputDevice->_axisStateMap[controller::RX].value = 
-        _viewTouchUpdateCount == 0 ? 0 : (_viewCurrentTouchPoint.x - _viewRefTouchPoint.x) / _viewTouchUpdateCount;
-    _inputDevice->_axisStateMap[controller::RY].value = 
-        _viewTouchUpdateCount == 0 ? 0 : (_viewCurrentTouchPoint.y - _viewRefTouchPoint.y) / _viewTouchUpdateCount;
+    // Using the average instead of the full deltaX and deltaY, makes deltaTime in MyAvatar dont't accelerate rotation when
+    // there is a low touchUpdate rate (heavier domains). (Because it multiplies this input value by deltaTime (with a
+    // coefficient)).
+    _inputDevice->_axisStateMap[controller::RX].value = _viewTouchUpdateCount == 0
+                                                            ? 0
+                                                            : (_viewCurrentTouchPoint.x - _viewRefTouchPoint.x) /
+                                                                  _viewTouchUpdateCount;
+    _inputDevice->_axisStateMap[controller::RY].value = _viewTouchUpdateCount == 0
+                                                            ? 0
+                                                            : (_viewCurrentTouchPoint.y - _viewRefTouchPoint.y) /
+                                                                  _viewTouchUpdateCount;
 
     // after use, save last touch point as ref
     _viewRefTouchPoint = _viewCurrentTouchPoint;
@@ -170,9 +182,7 @@ void TouchscreenVirtualPadDevice::processInputDeviceForView() {
 
 void TouchscreenVirtualPadDevice::pluginUpdate(float deltaTime, const controller::InputCalibrationData& inputCalibrationData) {
     auto userInputMapper = DependencyManager::get<controller::UserInputMapper>();
-    userInputMapper->withLock([&, this]() {
-        _inputDevice->update(deltaTime, inputCalibrationData);
-    });
+    userInputMapper->withLock([&, this]() { _inputDevice->update(deltaTime, inputCalibrationData); });
 
     auto& virtualPadManager = VirtualPad::Manager::instance();
     setupControlsPositions(virtualPadManager);
@@ -183,7 +193,8 @@ void TouchscreenVirtualPadDevice::pluginUpdate(float deltaTime, const controller
         virtualPadManager.getLeftVirtualPad()->setBeingTouched(false);
         if (_fixedPosition) {
             virtualPadManager.getLeftVirtualPad()->setCurrentTouch(_fixedCenterPosition); // reset to the center
-            virtualPadManager.getLeftVirtualPad()->setShown(virtualPadManager.isEnabled() && !virtualPadManager.isHidden()); // Show whenever it's enabled
+            virtualPadManager.getLeftVirtualPad()->setShown(virtualPadManager.isEnabled() &&
+                                                            !virtualPadManager.isHidden()); // Show whenever it's enabled
         } else {
             virtualPadManager.getLeftVirtualPad()->setShown(false);
         }
@@ -192,19 +203,18 @@ void TouchscreenVirtualPadDevice::pluginUpdate(float deltaTime, const controller
     if (_viewHasValidTouch) {
         processInputDeviceForView();
     }
-
 }
 
-void TouchscreenVirtualPadDevice::InputDevice::update(float deltaTime, const controller::InputCalibrationData& inputCalibrationData) {
+void TouchscreenVirtualPadDevice::InputDevice::update(float deltaTime,
+                                                      const controller::InputCalibrationData& inputCalibrationData) {
     _axisStateMap.clear();
 }
 
 bool TouchscreenVirtualPadDevice::InputDevice::triggerHapticPulse(float strength, float duration, controller::Hand hand) {
     auto& virtualPadManager = VirtualPad::Manager::instance();
-    virtualPadManager.requestHapticFeedback((int) duration);
+    virtualPadManager.requestHapticFeedback((int)duration);
     return true;
 }
-
 
 void TouchscreenVirtualPadDevice::InputDevice::focusOutEvent() {
 }
@@ -219,7 +229,7 @@ void TouchscreenVirtualPadDevice::debugPoints(const QTouchEvent* event, QString 
         points << thisPoint;
     }
     QScreen* eventScreen = event->window()->screen();
-    int midScreenX = eventScreen->availableSize().width()/2;
+    int midScreenX = eventScreen->availableSize().width() / 2;
     int lefties = 0;
     int righties = 0;
     vec2 currentPoint;
@@ -277,7 +287,6 @@ void TouchscreenVirtualPadDevice::processUnusedTouches(std::map<int, TouchType> 
             _unusedTouches[touchEntry.first] = touchEntry.second;
         }
     }
-
 }
 
 void TouchscreenVirtualPadDevice::touchUpdateEvent(const QTouchEvent* event) {
@@ -326,13 +335,13 @@ void TouchscreenVirtualPadDevice::touchUpdateEvent(const QTouchEvent* event) {
         }
 
         if (!moveTouchFound && idxMoveStartingPointCandidate == -1 && moveTouchBeginIsValid(thisPoint) &&
-                (!_unusedTouches.count(thisPointId) || _unusedTouches[thisPointId] == MOVE )) {
+            (!_unusedTouches.count(thisPointId) || _unusedTouches[thisPointId] == MOVE)) {
             idxMoveStartingPointCandidate = i;
             continue;
         }
 
         if (!viewTouchFound && idxViewStartingPointCandidate == -1 && viewTouchBeginIsValid(thisPoint) &&
-                (!_unusedTouches.count(thisPointId) || _unusedTouches[thisPointId] == VIEW )) {
+            (!_unusedTouches.count(thisPointId) || _unusedTouches[thisPointId] == VIEW)) {
             idxViewStartingPointCandidate = i;
             continue;
         }
@@ -343,12 +352,11 @@ void TouchscreenVirtualPadDevice::touchUpdateEvent(const QTouchEvent* event) {
 
         if (moveTouchBeginIsValid(thisPoint)) {
             unusedTouchesInEvent[thisPointId] = MOVE;
-        } else if (viewTouchBeginIsValid(thisPoint))  {
+        } else if (viewTouchBeginIsValid(thisPoint)) {
             unusedTouchesInEvent[thisPointId] = VIEW;
         } else {
             _buttonsManager.saveUnusedTouches(unusedTouchesInEvent, thisPoint, thisPointId);
         }
-
     }
 
     processUnusedTouches(unusedTouchesInEvent);
@@ -377,7 +385,6 @@ void TouchscreenVirtualPadDevice::touchUpdateEvent(const QTouchEvent* event) {
     }
 
     _buttonsManager.processBeginOrEnd(thisPoint, tPoints, _unusedTouches);
-
 }
 
 bool TouchscreenVirtualPadDevice::viewTouchBeginIsValid(glm::vec2 touchPoint) {
@@ -444,7 +451,7 @@ void TouchscreenVirtualPadDevice::viewTouchEnd() {
 
 void TouchscreenVirtualPadDevice::touchGestureEvent(const QGestureEvent* event) {
     auto& virtualPadManager = VirtualPad::Manager::instance();
-    if (!virtualPadManager.isEnabled()  && !virtualPadManager.isHidden()) {
+    if (!virtualPadManager.isEnabled() && !virtualPadManager.isHidden()) {
         return;
     }
     if (QGesture* gesture = event->gesture(Qt::PinchGesture)) {
@@ -453,24 +460,24 @@ void TouchscreenVirtualPadDevice::touchGestureEvent(const QGestureEvent* event) 
     }
 }
 
-controller::Input TouchscreenVirtualPadDevice::InputDevice::makeInput(TouchscreenVirtualPadDevice::TouchAxisChannel axis) const {
+controller::Input TouchscreenVirtualPadDevice::InputDevice::makeInput(
+    TouchscreenVirtualPadDevice::TouchAxisChannel axis) const {
     return controller::Input(_deviceID, axis, controller::ChannelType::AXIS);
 }
 
-controller::Input TouchscreenVirtualPadDevice::InputDevice::makeInput(TouchscreenVirtualPadDevice::TouchButtonChannel button) const {
+controller::Input TouchscreenVirtualPadDevice::InputDevice::makeInput(
+    TouchscreenVirtualPadDevice::TouchButtonChannel button) const {
     return controller::Input(_deviceID, button, controller::ChannelType::BUTTON);
 }
 
 controller::Input::NamedVector TouchscreenVirtualPadDevice::InputDevice::getAvailableInputs() const {
     using namespace controller;
-    QVector<Input::NamedPair> availableInputs{
-        Input::NamedPair(makeInput(TouchAxisChannel::LX), "LX"),
-        Input::NamedPair(makeInput(TouchAxisChannel::LY), "LY"),
-        Input::NamedPair(makeInput(TouchAxisChannel::RX), "RX"),
-        Input::NamedPair(makeInput(TouchAxisChannel::RY), "RY"),
-        Input::NamedPair(makeInput(TouchButtonChannel::JUMP), "JUMP_BUTTON_PRESS"),
-        Input::NamedPair(makeInput(TouchButtonChannel::RB), "RB")
-    };
+    QVector<Input::NamedPair> availableInputs { Input::NamedPair(makeInput(TouchAxisChannel::LX), "LX"),
+                                                Input::NamedPair(makeInput(TouchAxisChannel::LY), "LY"),
+                                                Input::NamedPair(makeInput(TouchAxisChannel::RX), "RX"),
+                                                Input::NamedPair(makeInput(TouchAxisChannel::RY), "RY"),
+                                                Input::NamedPair(makeInput(TouchButtonChannel::JUMP), "JUMP_BUTTON_PRESS"),
+                                                Input::NamedPair(makeInput(TouchButtonChannel::RB), "RB") };
     return availableInputs;
 }
 
@@ -479,16 +486,15 @@ QString TouchscreenVirtualPadDevice::InputDevice::getDefaultMappingConfig() cons
     return MAPPING_JSON;
 }
 
-TouchscreenVirtualPadDevice::TouchscreenButton::TouchscreenButton(
-        TouchscreenVirtualPadDevice::TouchButtonChannel channelIn,
-        TouchscreenVirtualPadDevice::TouchType touchTypeIn, float buttonRadiusIn,
-        glm::vec2 buttonPositionIn, std::shared_ptr<InputDevice> inputDeviceIn) :
+TouchscreenVirtualPadDevice::TouchscreenButton::TouchscreenButton(TouchscreenVirtualPadDevice::TouchButtonChannel channelIn,
+                                                                  TouchscreenVirtualPadDevice::TouchType touchTypeIn,
+                                                                  float buttonRadiusIn, glm::vec2 buttonPositionIn,
+                                                                  std::shared_ptr<InputDevice> inputDeviceIn) :
     buttonPosition(buttonPositionIn),
     buttonRadius(buttonRadiusIn),
     touchType(touchTypeIn),
     channel(channelIn),
-    _inputDevice(inputDeviceIn)
-{
+    _inputDevice(inputDeviceIn) {
 }
 
 void TouchscreenVirtualPadDevice::TouchscreenButton::touchBegin(glm::vec2 touchPoint) {
@@ -501,7 +507,6 @@ void TouchscreenVirtualPadDevice::TouchscreenButton::touchBegin(glm::vec2 touchP
 }
 
 void TouchscreenVirtualPadDevice::TouchscreenButton::touchUpdate(glm::vec2 touchPoint) {
-
 }
 
 void TouchscreenVirtualPadDevice::TouchscreenButton::touchEnd() {
@@ -521,25 +526,23 @@ void TouchscreenVirtualPadDevice::TouchscreenButton::resetEventValues() {
     _found = false;
 }
 
-TouchscreenVirtualPadDevice::TouchscreenButtonsManager::TouchscreenButtonsManager() {}
+TouchscreenVirtualPadDevice::TouchscreenButtonsManager::TouchscreenButtonsManager() {
+}
 
-void TouchscreenVirtualPadDevice::TouchscreenButtonsManager::addButton(
-        TouchscreenVirtualPadDevice::TouchscreenButton button) {
+void TouchscreenVirtualPadDevice::TouchscreenButtonsManager::addButton(TouchscreenVirtualPadDevice::TouchscreenButton button) {
     buttons.push_back(button);
 }
 
 void TouchscreenVirtualPadDevice::TouchscreenButtonsManager::resetEventValues() {
-    for(int i = 0; i < buttons.size(); i++) {
-        TouchscreenButton &button = buttons[i];
+    for (int i = 0; i < buttons.size(); i++) {
+        TouchscreenButton& button = buttons[i];
         button.resetEventValues();
     }
 }
 
-bool
-TouchscreenVirtualPadDevice::TouchscreenButtonsManager::processOngoingTouch(glm::vec2 thisPoint,
-                                                                            int thisPointId) {
-    for(int i = 0; i < buttons.size(); i++) {
-        TouchscreenButton &button = buttons[i];
+bool TouchscreenVirtualPadDevice::TouchscreenButtonsManager::processOngoingTouch(glm::vec2 thisPoint, int thisPointId) {
+    for (int i = 0; i < buttons.size(); i++) {
+        TouchscreenButton& button = buttons[i];
 
         if (!button._found && button.hasValidTouch && button.currentTouchId == thisPointId) {
             // valid if it's an ongoing touch
@@ -549,16 +552,14 @@ TouchscreenVirtualPadDevice::TouchscreenButtonsManager::processOngoingTouch(glm:
         }
     }
     return false;
-
 }
 
 bool TouchscreenVirtualPadDevice::TouchscreenButtonsManager::findStartingTouchPointCandidate(
-        glm::vec2 thisPoint, int thisPointId, int thisPointIdx, std::map<int, TouchType> &globalUnusedTouches) {
-
-    for(int i = 0; i < buttons.size(); i++) {
-        TouchscreenButton &button = buttons[i];
+    glm::vec2 thisPoint, int thisPointId, int thisPointIdx, std::map<int, TouchType>& globalUnusedTouches) {
+    for (int i = 0; i < buttons.size(); i++) {
+        TouchscreenButton& button = buttons[i];
         if (!button._found && button._candidatePointIdx == -1 && button.touchBeginIsValid(thisPoint)) {
-            if (!globalUnusedTouches.count(thisPointId) ) {
+            if (!globalUnusedTouches.count(thisPointId)) {
                 button._candidatePointIdx = thisPointIdx;
                 return true;
             } else if (globalUnusedTouches[thisPointId] == button.touchType) {
@@ -568,26 +569,24 @@ bool TouchscreenVirtualPadDevice::TouchscreenButtonsManager::findStartingTouchPo
         }
     }
     return false;
-
 }
 
 void TouchscreenVirtualPadDevice::TouchscreenButtonsManager::saveUnusedTouches(
-        std::map<int, TouchscreenVirtualPadDevice::TouchType> &unusedTouchesInEvent, glm::vec2 thisPoint,
-        int thisPointId) {
-    for(int i = 0; i < buttons.size(); i++) {
-        TouchscreenButton &button = buttons[i];
+    std::map<int, TouchscreenVirtualPadDevice::TouchType>& unusedTouchesInEvent, glm::vec2 thisPoint, int thisPointId) {
+    for (int i = 0; i < buttons.size(); i++) {
+        TouchscreenButton& button = buttons[i];
         if (button.touchBeginIsValid(thisPoint)) {
             unusedTouchesInEvent[thisPointId] = button.touchType;
             return;
         }
     }
-
 }
 
-void TouchscreenVirtualPadDevice::TouchscreenButtonsManager::processBeginOrEnd(
-        glm::vec2 thisPoint, const QList<QTouchEvent::TouchPoint> &tPoints, std::map<int, TouchType> globalUnusedTouches) {
-    for(int i = 0; i < buttons.size(); i++) {
-        TouchscreenButton &button = buttons[i];
+void TouchscreenVirtualPadDevice::TouchscreenButtonsManager::processBeginOrEnd(glm::vec2 thisPoint,
+                                                                               const QList<QTouchEvent::TouchPoint>& tPoints,
+                                                                               std::map<int, TouchType> globalUnusedTouches) {
+    for (int i = 0; i < buttons.size(); i++) {
+        TouchscreenButton& button = buttons[i];
         if (!button._found) {
             if (button._candidatePointIdx != -1) {
                 button.currentTouchId = tPoints[button._candidatePointIdx].id();
@@ -602,19 +601,18 @@ void TouchscreenVirtualPadDevice::TouchscreenButtonsManager::processBeginOrEnd(
             }
         }
     }
-
 }
 
 void TouchscreenVirtualPadDevice::TouchscreenButtonsManager::endTouchForAll() {
-    for(int i = 0; i < buttons.size(); i++) {
-        TouchscreenButton &button = buttons[i];
+    for (int i = 0; i < buttons.size(); i++) {
+        TouchscreenButton& button = buttons[i];
         button.touchEnd();
     }
 }
 
 bool TouchscreenVirtualPadDevice::TouchscreenButtonsManager::touchBeginInvalidForAllButtons(glm::vec2 touchPoint) {
-    for(int i = 0; i < buttons.size(); i++) {
-        TouchscreenButton &button = buttons[i];
+    for (int i = 0; i < buttons.size(); i++) {
+        TouchscreenButton& button = buttons[i];
         if (button.touchBeginIsValid(touchPoint)) {
             return false;
         }

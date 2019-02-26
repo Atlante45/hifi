@@ -13,9 +13,9 @@
 
 #include <iostream>
 
+#include <Extents.h>
 #include <ShapeManager.h>
 #include <StreamUtils.h>
-#include <Extents.h>
 
 QTEST_MAIN(ShapeManagerTests)
 
@@ -201,7 +201,7 @@ void ShapeManagerTests::addCompoundShape() {
     glm::vec3 offsetNormal(1.0f, 0.0f, 0.0f);
     Extents extents;
     for (int i = 0; i < numHulls; ++i) {
-        glm::vec3 offset = (float)(i - numHulls/2) * offsetNormal;
+        glm::vec3 offset = (float)(i - numHulls / 2) * offsetNormal;
         ShapeInfo::PointList pointList;
         float radius = (float)(i + 1);
         for (int j = 0; j < numHullPoints; ++j) {

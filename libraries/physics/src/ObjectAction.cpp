@@ -15,18 +15,16 @@
 
 #include "PhysicsLogging.h"
 
-
 ObjectAction::ObjectAction(EntityDynamicType type, const QUuid& id, EntityItemPointer ownerEntity) :
     btActionInterface(),
-    ObjectDynamic(type, id, ownerEntity)
-{
+    ObjectDynamic(type, id, ownerEntity) {
 }
 
 void ObjectAction::updateAction(btCollisionWorld* collisionWorld, btScalar deltaTimeStep) {
     quint64 expiresWhen = 0;
     EntityItemPointer ownerEntity = nullptr;
 
-    withReadLock([&]{
+    withReadLock([&] {
         ownerEntity = _ownerEntity.lock();
         expiresWhen = _expires;
     });
@@ -44,7 +42,7 @@ void ObjectAction::updateAction(btCollisionWorld* collisionWorld, btScalar delta
         quint64 now = usecTimestampNow();
         if (now > expiresWhen) {
             QUuid myID;
-            withWriteLock([&]{
+            withWriteLock([&] {
                 _active = false;
                 myID = getID();
             });

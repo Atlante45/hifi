@@ -11,18 +11,18 @@
 #include <mutex>
 
 #include <QtCore/QDebug>
-#include <QtCore/QTimer>
-#include <QtCore/QThread>
 #include <QtCore/QLoggingCategory>
 #include <QtCore/QProcessEnvironment>
+#include <QtCore/QThread>
+#include <QtCore/QTimer>
 #include <QtGui/QInputMethodEvent>
 #include <QtQuick/QQuickWindow>
 
+#include <NumericalConstants.h>
+#include <OffscreenUi.h>
 #include <PathUtils.h>
 #include <Windows.h>
-#include <OffscreenUi.h>
 #include <controllers/Pose.h>
-#include <NumericalConstants.h>
 #include <ui-plugins/PluginContainer.h>
 #include <ui/Menu.h>
 #include "../../interface/src/Menu.h"
@@ -76,10 +76,12 @@ std::string getOpenVrDeviceName() {
     std::string trackingSystemName = "";
     if (system) {
         uint32_t HmdTrackingIndex = 0;
-        uint32_t bufferLength = system->GetStringTrackedDeviceProperty(HmdTrackingIndex, vr::Prop_TrackingSystemName_String, NULL, 0, NULL);
+        uint32_t bufferLength = system->GetStringTrackedDeviceProperty(HmdTrackingIndex, vr::Prop_TrackingSystemName_String,
+                                                                       NULL, 0, NULL);
         if (bufferLength > 0) {
             char* stringBuffer = new char[bufferLength];
-            system->GetStringTrackedDeviceProperty(HmdTrackingIndex, vr::Prop_ManufacturerName_String, stringBuffer, bufferLength, NULL);
+            system->GetStringTrackedDeviceProperty(HmdTrackingIndex, vr::Prop_ManufacturerName_String, stringBuffer,
+                                                   bufferLength, NULL);
             trackingSystemName = stringBuffer;
             delete[] stringBuffer;
         }
@@ -97,7 +99,7 @@ QString getVrSettingString(const char* section, const char* setting) {
     QString result;
     static const uint32_t BUFFER_SIZE = 1024;
     static char BUFFER[BUFFER_SIZE];
-    vr::IVRSettings * vrSettings = vr::VRSettings();
+    vr::IVRSettings* vrSettings = vr::VRSettings();
     if (vrSettings) {
         vr::EVRSettingsError error = vr::VRSettingsError_None;
         vrSettings->GetString(vr::k_pch_audio_Section, vr::k_pch_audio_OnPlaybackDevice_String, BUFFER, BUFFER_SIZE, &error);
@@ -113,26 +115,26 @@ vr::IVRSystem* acquireOpenVrSystem() {
     if (hmdPresent) {
         Lock lock(mutex);
         if (!activeHmd) {
-            #if DEV_BUILD
-                qCDebug(displayplugins) << "OpenVR: No vr::IVRSystem instance active, building";
-            #endif
+#if DEV_BUILD
+            qCDebug(displayplugins) << "OpenVR: No vr::IVRSystem instance active, building";
+#endif
             vr::EVRInitError eError = vr::VRInitError_None;
             activeHmd = vr::VR_Init(&eError, vr::VRApplication_Scene);
 
-            #if DEV_BUILD
-                qCDebug(displayplugins) << "OpenVR display: HMD is " << activeHmd << " error is " << eError;
-            #endif
+#if DEV_BUILD
+            qCDebug(displayplugins) << "OpenVR display: HMD is " << activeHmd << " error is " << eError;
+#endif
         }
         if (activeHmd) {
-            #if DEV_BUILD
-                qCDebug(displayplugins) << "OpenVR: incrementing refcount";
-            #endif
+#if DEV_BUILD
+            qCDebug(displayplugins) << "OpenVR: incrementing refcount";
+#endif
             ++refCount;
         }
     } else {
-        #if DEV_BUILD
-            qCDebug(displayplugins) << "OpenVR: no hmd present";
-        #endif
+#if DEV_BUILD
+        qCDebug(displayplugins) << "OpenVR: no hmd present";
+#endif
     }
     return activeHmd;
 }
@@ -140,20 +142,20 @@ vr::IVRSystem* acquireOpenVrSystem() {
 void releaseOpenVrSystem() {
     if (activeHmd) {
         Lock lock(mutex);
-        #if DEV_BUILD
-            qCDebug(displayplugins) << "OpenVR: decrementing refcount";
-        #endif
+#if DEV_BUILD
+        qCDebug(displayplugins) << "OpenVR: decrementing refcount";
+#endif
         --refCount;
         if (0 == refCount) {
-            #if DEV_BUILD
-                qCDebug(displayplugins) << "OpenVR: zero refcount, deallocate VR system";
-            #endif
+#if DEV_BUILD
+            qCDebug(displayplugins) << "OpenVR: zero refcount, deallocate VR system";
+#endif
 
             // HACK: workaround openvr crash, call submit with an invalid texture, right before VR_Shutdown.
             const void* INVALID_GL_TEXTURE_HANDLE = (void*)(uintptr_t)-1;
-            vr::Texture_t vrTexture{ (void*)INVALID_GL_TEXTURE_HANDLE, vr::TextureType_OpenGL, vr::ColorSpace_Auto };
-            static vr::VRTextureBounds_t OPENVR_TEXTURE_BOUNDS_LEFT{ 0, 0, 0.5f, 1 };
-            static vr::VRTextureBounds_t OPENVR_TEXTURE_BOUNDS_RIGHT{ 0.5f, 0, 1, 1 };
+            vr::Texture_t vrTexture { (void*)INVALID_GL_TEXTURE_HANDLE, vr::TextureType_OpenGL, vr::ColorSpace_Auto };
+            static vr::VRTextureBounds_t OPENVR_TEXTURE_BOUNDS_LEFT { 0, 0, 0.5f, 1 };
+            static vr::VRTextureBounds_t OPENVR_TEXTURE_BOUNDS_RIGHT { 0.5f, 0, 1, 1 };
 
             auto compositor = vr::VRCompositor();
             if (compositor) {
@@ -188,9 +190,9 @@ void updateFromOpenVrKeyboardInput() {
     //// TODO modify the new text to match the possible input hints:
     //// ImhDigitsOnly  ImhFormattedNumbersOnly  ImhUppercaseOnly  ImhLowercaseOnly
     //// ImhDialableCharactersOnly ImhEmailCharactersOnly  ImhUrlCharactersOnly  ImhLatinOnly
-    //QInputMethodEvent event(_existingText, QList<QInputMethodEvent::Attribute>());
-    //event.setCommitString(newText, 0, _existingText.size());
-    //qApp->sendEvent(_keyboardFocusObject, &event);
+    // QInputMethodEvent event(_existingText, QList<QInputMethodEvent::Attribute>());
+    // event.setCommitString(newText, 0, _existingText.size());
+    // qApp->sendEvent(_keyboardFocusObject, &event);
 }
 
 void finishOpenVrKeyboardInput() {
@@ -198,7 +200,8 @@ void finishOpenVrKeyboardInput() {
     updateFromOpenVrKeyboardInput();
     // Simulate an enter press on the top level window to trigger the action
     if (0 == (_currentHints & Qt::ImhMultiLine)) {
-        qApp->sendEvent(offscreenUi->getWindow(), &QKeyEvent(QEvent::KeyPress, Qt::Key_Return, Qt::KeyboardModifiers(), QString("\n")));
+        qApp->sendEvent(offscreenUi->getWindow(),
+                        &QKeyEvent(QEvent::KeyPress, Qt::Key_Return, Qt::KeyboardModifiers(), QString("\n")));
         qApp->sendEvent(offscreenUi->getWindow(), &QKeyEvent(QEvent::KeyRelease, Qt::Key_Return, Qt::KeyboardModifiers()));
     }
 }
@@ -213,7 +216,6 @@ void enableOpenVrKeyboard(PluginContainer* container) {
     auto offscreenUi = DependencyManager::get<OffscreenUi>();
     _overlay = vr::VROverlay();
 
-
     auto menu = container->getPrimaryMenu();
     auto action = menu->getActionForOption(MenuOption::Overlays);
 
@@ -227,7 +229,6 @@ void enableOpenVrKeyboard(PluginContainer* container) {
     });
 }
 
-
 void disableOpenVrKeyboard() {
     if (disableSteamVrKeyboard) {
         return;
@@ -240,7 +241,6 @@ void disableOpenVrKeyboard() {
 bool isOpenVrKeyboardShown() {
     return _keyboardShown;
 }
-
 
 void handleOpenVrEvents() {
     if (!activeHmd) {
@@ -279,21 +279,22 @@ void handleOpenVrEvents() {
         }
         if (event.data.controller.button == vr::k_EButton_ProximitySensor) {
             vr::VRControllerState_t controllerState = vr::VRControllerState_t();
-            if (activeHmd->GetControllerState(vr::k_unTrackedDeviceIndex_Hmd, &controllerState, sizeof(vr::VRControllerState_t))) {
+            if (activeHmd->GetControllerState(vr::k_unTrackedDeviceIndex_Hmd, &controllerState,
+                                              sizeof(vr::VRControllerState_t))) {
                 ulong promitySensorFlag = (1UL << ((int)vr::k_EButton_ProximitySensor));
                 _headInHeadset = (controllerState.ulButtonPressed & promitySensorFlag) == promitySensorFlag;
             }
-
         }
 
-        #if DEV_BUILD
-            qDebug() << "OpenVR: Event " << activeHmd->GetEventTypeNameFromEnum((vr::EVREventType)event.eventType) << "(" << event.eventType << ")";
-        #endif
+#if DEV_BUILD
+        qDebug() << "OpenVR: Event " << activeHmd->GetEventTypeNameFromEnum((vr::EVREventType)event.eventType) << "("
+                 << event.eventType << ")";
+#endif
     }
-
 }
 
-controller::Pose openVrControllerPoseToHandPose(bool isLeftHand, const mat4& mat, const vec3& linearVelocity, const vec3& angularVelocity) {
+controller::Pose openVrControllerPoseToHandPose(bool isLeftHand, const mat4& mat, const vec3& linearVelocity,
+                                                const vec3& angularVelocity) {
     // When the sensor-to-world rotation is identity the coordinate axes look like this:
     //
     //                       user
@@ -393,7 +394,8 @@ void showMinSpecWarning() {
     }
 
     vr::VROverlayHandle_t minSpecFailedOverlay = 0;
-    if (vr::VROverlayError_None != vrOverlay->CreateOverlay(FAILED_MIN_SPEC_OVERLAY_NAME, FAILED_MIN_SPEC_OVERLAY_FRIENDLY_NAME, &minSpecFailedOverlay)) {
+    if (vr::VROverlayError_None !=
+        vrOverlay->CreateOverlay(FAILED_MIN_SPEC_OVERLAY_NAME, FAILED_MIN_SPEC_OVERLAY_FRIENDLY_NAME, &minSpecFailedOverlay)) {
         qFatal("Unable to create overlay");
     }
 
@@ -409,7 +411,8 @@ void showMinSpecWarning() {
     vrOverlay->ShowOverlay(minSpecFailedOverlay);
 
     QTimer* timer = new QTimer(&miniApp);
-    timer->setInterval(FAILED_MIN_SPEC_UPDATE_INTERVAL_MS); // Qt::CoarseTimer acceptable, we don't need this to be frame rate accurate
+    timer->setInterval(
+        FAILED_MIN_SPEC_UPDATE_INTERVAL_MS); // Qt::CoarseTimer acceptable, we don't need this to be frame rate accurate
     QObject::connect(timer, &QTimer::timeout, [&] {
         vr::TrackedDevicePose_t vrPoses[vr::k_unMaxTrackedDeviceCount];
         vrSystem->GetDeviceToAbsoluteTrackingPose(vr::TrackingUniverseSeated, 0, vrPoses, vr::k_unMaxTrackedDeviceCount);
@@ -436,14 +439,12 @@ void showMinSpecWarning() {
                     break;
             }
         }
-
     });
     timer->start();
 
     QTimer::singleShot(FAILED_MIN_SPEC_AUTO_QUIT_INTERVAL_MS, &miniApp, &QCoreApplication::quit);
     miniApp.exec();
 }
-
 
 bool checkMinSpecImpl() {
     // If OpenVR isn't supported, we have no min spec, so pass
@@ -478,7 +479,7 @@ bool checkMinSpecImpl() {
 }
 
 extern "C" {
-    __declspec(dllexport) int __stdcall CheckMinSpec() {
-        return checkMinSpecImpl() ? 1 : 0;
-    }
+__declspec(dllexport) int __stdcall CheckMinSpec() {
+    return checkMinSpecImpl() ? 1 : 0;
+}
 }

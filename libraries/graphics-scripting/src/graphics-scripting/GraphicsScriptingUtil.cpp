@@ -9,9 +9,9 @@
 
 #include <BaseScriptEngine.h>
 
-#include <graphics/BufferViewHelpers.h>
 #include <AABox.h>
 #include <Extents.h>
+#include <graphics/BufferViewHelpers.h>
 
 using buffer_helpers::glmVecToVariant;
 
@@ -29,7 +29,7 @@ QVariant toVariant(const glm::mat4& mat4) {
 };
 
 QVariant toVariant(const Extents& box) {
-    return QVariantMap{
+    return QVariantMap {
         { "center", glmVecToVariant(box.minimum + (box.size() / 2.0f)) },
         { "minimum", glmVecToVariant(box.minimum) },
         { "maximum", glmVecToVariant(box.maximum) },
@@ -38,25 +38,22 @@ QVariant toVariant(const Extents& box) {
 }
 
 QVariant toVariant(const AABox& box) {
-    return QVariantMap{
-        { "brn", glmVecToVariant(box.getCorner()) },
-        { "tfl", glmVecToVariant(box.calcTopFarLeft()) },
-        { "center", glmVecToVariant(box.calcCenter()) },
-        { "minimum", glmVecToVariant(box.getMinimumPoint()) },
-        { "maximum", glmVecToVariant(box.getMaximumPoint()) },
-        { "dimensions", glmVecToVariant(box.getDimensions()) },
+    return QVariantMap {
+        { "brn", glmVecToVariant(box.getCorner()) },           { "tfl", glmVecToVariant(box.calcTopFarLeft()) },
+        { "center", glmVecToVariant(box.calcCenter()) },       { "minimum", glmVecToVariant(box.getMinimumPoint()) },
+        { "maximum", glmVecToVariant(box.getMaximumPoint()) }, { "dimensions", glmVecToVariant(box.getDimensions()) },
     };
 }
 
 QVariant toVariant(const gpu::Element& element) {
-    return QVariantMap{
+    return QVariantMap {
         { "type", gpu::toString(element.getType()) },
         { "semantic", gpu::toString(element.getSemantic()) },
         { "dimension", gpu::toString(element.getDimension()) },
         { "scalarCount", element.getScalarCount() },
         { "byteSize", element.getSize() },
         { "BYTES_PER_ELEMENT", element.getSize() / element.getScalarCount() },
-     };
+    };
 }
 
 QScriptValue jsBindCallback(QScriptValue value) {
@@ -76,7 +73,7 @@ QScriptValue jsBindCallback(QScriptValue value) {
     // find position in the incoming JS Function.arguments array (so we can test for the two-argument case)
     for (int i = 0; context && i < length; i++) {
         if (context->argument(i).strictlyEquals(value)) {
-            method = context->argument(i+1);
+            method = context->argument(i + 1);
         }
     }
     if (method.isFunction() || method.isString()) {
@@ -89,10 +86,10 @@ QScriptValue jsBindCallback(QScriptValue value) {
 #ifdef SCRIPTABLE_MESH_DEBUG
     qCInfo(graphics_scripting) << "scope:" << scope.toQObject() << "method:" << method.toString();
 #endif
-    return ::makeScopedHandlerObject(scope,  method);
+    return ::makeScopedHandlerObject(scope, method);
 }
 
-template <typename T>
+template<typename T>
 T this_qobject_cast(QScriptEngine* engine) {
     auto context = engine ? engine->currentContext() : nullptr;
     return qscriptvalue_cast<T>(context ? context->thisObject() : QScriptValue::NullValue);
@@ -107,8 +104,9 @@ QString toDebugString(QObject* tmp) {
     //     .arg(qulonglong(tmp), 16, 16, QChar('0'))
     //     .arg(tmp && tmp->objectName().size() ? " name=" + tmp->objectName() : "");
 }
-template <typename T> QString toDebugString(std::shared_ptr<T> tmp) {
+template<typename T>
+QString toDebugString(std::shared_ptr<T> tmp) {
     return toDebugString(qobject_cast<QObject*>(tmp.get()));
 }
 
-}
+} // namespace scriptable

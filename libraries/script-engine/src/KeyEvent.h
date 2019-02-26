@@ -21,10 +21,10 @@ public:
     KeyEvent(const QKeyEvent& event);
     bool operator==(const KeyEvent& other) const;
     operator QKeySequence() const;
-    
+
     static QScriptValue toScriptValue(QScriptEngine* engine, const KeyEvent& event);
     static void fromScriptValue(const QScriptValue& object, KeyEvent& event);
-    
+
     int key;
     QString text;
     bool isShifted;

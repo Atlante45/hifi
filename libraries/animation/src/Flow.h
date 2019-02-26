@@ -11,13 +11,13 @@
 #ifndef hifi_Flow_h
 #define hifi_Flow_h
 
-#include <memory>
 #include <qstring.h>
+#include <quuid.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <vector>
 #include <map>
-#include <quuid.h>
+#include <memory>
+#include <vector>
 #include "AnimPose.h"
 
 class Rig;
@@ -31,7 +31,8 @@ const float HAPTIC_THRESHOLD = 40.0f;
 const QString FLOW_JOINT_PREFIX = "flow";
 const QString SIM_JOINT_PREFIX = "sim";
 
-const std::vector<QString> HAND_COLLISION_JOINTS = { "RightHandMiddle1", "RightHandThumb3", "LeftHandMiddle1", "LeftHandThumb3", "RightHandMiddle3", "LeftHandMiddle3" };
+const std::vector<QString> HAND_COLLISION_JOINTS = { "RightHandMiddle1", "RightHandThumb3",  "LeftHandMiddle1",
+                                                     "LeftHandThumb3",   "RightHandMiddle3", "LeftHandMiddle3" };
 
 const float HAND_COLLISION_RADIUS = 0.03f;
 const float HELPER_JOINT_LENGTH = 0.05f;
@@ -56,18 +57,16 @@ struct FlowPhysicsSettings {
         _delta = delta;
         _radius = radius;
     }
-    bool _active{ true };
-    float _stiffness{ DEFAULT_STIFFNESS };
-    float _gravity{ DEFAULT_GRAVITY };
-    float _damping{ DEFAULT_DAMPING };
-    float _inertia{ DEFAULT_INERTIA };
-    float _delta{ DEFAULT_DELTA };
-    float _radius{ DEFAULT_RADIUS };
+    bool _active { true };
+    float _stiffness { DEFAULT_STIFFNESS };
+    float _gravity { DEFAULT_GRAVITY };
+    float _damping { DEFAULT_DAMPING };
+    float _inertia { DEFAULT_INERTIA };
+    float _delta { DEFAULT_DELTA };
+    float _radius { DEFAULT_RADIUS };
 };
 
-enum FlowCollisionType {
-    CollisionSphere = 0
-};
+enum FlowCollisionType { CollisionSphere = 0 };
 
 struct FlowCollisionSettings {
     FlowCollisionSettings() {};
@@ -94,7 +93,7 @@ struct FlowJointInfo {
         _name = name;
     }
     int _index { -1 };
-    QString _name; 
+    QString _name;
     int _parentIndex { -1 };
     int _childIndex { -1 };
 };
@@ -114,7 +113,9 @@ public:
     FlowCollisionSphere(const int& jointIndex, const FlowCollisionSettings& settings, bool isTouch = false);
     void setPosition(const glm::vec3& position) { _position = position; }
     FlowCollisionResult computeSphereCollision(const glm::vec3& point, float radius) const;
-    FlowCollisionResult checkSegmentCollision(const glm::vec3& point1, const glm::vec3& point2, const FlowCollisionResult& collisionResult1, const FlowCollisionResult& collisionResult2);
+    FlowCollisionResult checkSegmentCollision(const glm::vec3& point1, const glm::vec3& point2,
+                                              const FlowCollisionResult& collisionResult1,
+                                              const FlowCollisionResult& collisionResult2);
 
     QUuid _entityID;
 
@@ -126,7 +127,7 @@ public:
     int _jointIndex { -1 };
     int collisionIndex { -1 };
     float _radius { 0.0f };
-    float _initialRadius{ 0.0f };
+    float _initialRadius { 0.0f };
 };
 
 class FlowThread;
@@ -134,7 +135,9 @@ class FlowThread;
 class FlowCollisionSystem {
 public:
     FlowCollisionSystem() {};
-    void addCollisionSphere(int jointIndex, const FlowCollisionSettings& settings, const glm::vec3& position = { 0.0f, 0.0f, 0.0f }, bool isSelfCollision = true, bool isTouch = false);
+    void addCollisionSphere(int jointIndex, const FlowCollisionSettings& settings,
+                            const glm::vec3& position = { 0.0f, 0.0f, 0.0f }, bool isSelfCollision = true,
+                            bool isTouch = false);
     FlowCollisionResult computeCollision(const std::vector<FlowCollisionResult> collisions);
 
     std::vector<FlowCollisionResult> checkFlowThreadCollisions(FlowThread* flowThread);
@@ -149,6 +152,7 @@ public:
     void setCollisionSettingsByJoint(int jointIndex, const FlowCollisionSettings& settings);
     void setActive(bool active) { _active = active; }
     bool getActive() const { return _active; }
+
 protected:
     std::vector<FlowCollisionSphere> _selfCollisions;
     std::vector<FlowCollisionSphere> _othersCollisions;
@@ -161,14 +165,13 @@ class FlowNode {
 public:
     FlowNode() {};
     FlowNode(const glm::vec3& initialPosition, FlowPhysicsSettings settings);
-    
+
     void update(float deltaTime, const glm::vec3& accelerationOffset);
     void solve(const glm::vec3& constrainPoint, float maxDistance, const FlowCollisionResult& collision);
     void solveConstraints(const glm::vec3& constrainPoint, float maxDistance);
-    void solveCollisions(const FlowCollisionResult& collision);    
+    void solveCollisions(const FlowCollisionResult& collision);
 
 protected:
-
     FlowPhysicsSettings _settings;
     glm::vec3 _initialPosition;
     glm::vec3 _previousPosition;
@@ -187,18 +190,21 @@ protected:
     bool _colliding { false };
     bool _active { true };
 
-    float _scale{ 1.0f };
+    float _scale { 1.0f };
 };
 
 class FlowJoint : public FlowNode {
 public:
     friend class FlowThread;
 
-    FlowJoint(): FlowNode() {};
-    FlowJoint(int jointIndex, int parentIndex, int childIndex, const QString& name, const QString& group, const FlowPhysicsSettings& settings);
+    FlowJoint() : FlowNode() {};
+    FlowJoint(int jointIndex, int parentIndex, int childIndex, const QString& name, const QString& group,
+              const FlowPhysicsSettings& settings);
     void toHelperJoint(const glm::vec3& initialPosition, float length);
-    void setInitialData(const glm::vec3& initialPosition, const glm::vec3& initialTranslation, const glm::quat& initialRotation, const glm::vec3& parentPosition);
-    void setUpdatedData(const glm::vec3& updatedPosition, const glm::vec3& updatedTranslation, const glm::quat& updatedRotation, const glm::vec3& parentPosition, const glm::quat& parentWorldRotation);
+    void setInitialData(const glm::vec3& initialPosition, const glm::vec3& initialTranslation, const glm::quat& initialRotation,
+                        const glm::vec3& parentPosition);
+    void setUpdatedData(const glm::vec3& updatedPosition, const glm::vec3& updatedTranslation, const glm::quat& updatedRotation,
+                        const glm::vec3& parentPosition, const glm::quat& parentWorldRotation);
     void setRecoveryPosition(const glm::vec3& recoveryPosition);
     void update(float deltaTime);
     void solve(const FlowCollisionResult& collision);
@@ -223,14 +229,13 @@ public:
     const glm::vec3& getInitialPosition() const { return _initialPosition; }
 
 protected:
-
-    int _index{ -1 };
-    int _parentIndex{ -1 };
-    int _childIndex{ -1 };
+    int _index { -1 };
+    int _parentIndex { -1 };
+    int _childIndex { -1 };
     QString _name;
     QString _group;
 
-    bool _isHelper{ false };
+    bool _isHelper { false };
 
     glm::vec3 _initialTranslation;
     glm::quat _initialRotation;
@@ -270,23 +275,25 @@ public:
 
     std::vector<int> _joints;
     std::vector<glm::vec3> _positions;
-    float _radius{ 0.0f };
-    float _length{ 0.0f };
+    float _radius { 0.0f };
+    float _length { 0.0f };
     std::map<int, FlowJoint>* _jointsPointer;
     std::vector<glm::vec3> _rootFramePositions;
 };
 
-class Flow : public QObject{
+class Flow : public QObject {
     Q_OBJECT
 public:
-    Flow() { }
+    Flow() {}
     Flow& operator=(const Flow& otherFlow);
     bool getActive() const { return _active; }
     void setActive(bool active) { _active = active; }
     bool isInitialized() const { return _initialized; }
     float getScale() const { return _scale; }
-    void calculateConstraints(const std::shared_ptr<AnimSkeleton>& skeleton, AnimPoseVec& relativePoses, AnimPoseVec& absolutePoses);
-    void update(float deltaTime, AnimPoseVec& relativePoses, AnimPoseVec& absolutePoses, const std::vector<bool>& overrideFlags);
+    void calculateConstraints(const std::shared_ptr<AnimSkeleton>& skeleton, AnimPoseVec& relativePoses,
+                              AnimPoseVec& absolutePoses);
+    void update(float deltaTime, AnimPoseVec& relativePoses, AnimPoseVec& absolutePoses,
+                const std::vector<bool>& overrideFlags);
     void setTransform(float scale, const glm::vec3& position, const glm::quat& rotation);
     const std::map<int, FlowJoint>& getJoints() const { return _flowJointData; }
     const std::vector<FlowThread>& getThreads() const { return _jointThreads; }
@@ -298,21 +305,24 @@ public:
 signals:
     void onCleanup();
 
-private:    
+private:
     void updateAbsolutePoses(const AnimPoseVec& relativePoses, AnimPoseVec& absolutePoses);
-    bool getJointPositionInWorldFrame(const AnimPoseVec& absolutePoses, int jointIndex, glm::vec3& position, glm::vec3 translation, glm::quat rotation) const;
-    bool getJointRotationInWorldFrame(const AnimPoseVec& absolutePoses, int jointIndex, glm::quat& result, const glm::quat& rotation) const;
+    bool getJointPositionInWorldFrame(const AnimPoseVec& absolutePoses, int jointIndex, glm::vec3& position,
+                                      glm::vec3 translation, glm::quat rotation) const;
+    bool getJointRotationInWorldFrame(const AnimPoseVec& absolutePoses, int jointIndex, glm::quat& result,
+                                      const glm::quat& rotation) const;
     bool getJointRotation(const AnimPoseVec& relativePoses, int jointIndex, glm::quat& rotation) const;
     bool getJointTranslation(const AnimPoseVec& relativePoses, int jointIndex, glm::vec3& translation) const;
-    bool worldToJointPoint(const AnimPoseVec& absolutePoses, const glm::vec3& position, const int jointIndex, glm::vec3& jointSpacePosition) const;
+    bool worldToJointPoint(const AnimPoseVec& absolutePoses, const glm::vec3& position, const int jointIndex,
+                           glm::vec3& jointSpacePosition) const;
 
     void setJoints(AnimPoseVec& relativePoses, const std::vector<bool>& overrideFlags);
     void updateJoints(AnimPoseVec& relativePoses, AnimPoseVec& absolutePoses);
     bool updateRootFramePositions(const AnimPoseVec& absolutePoses, size_t threadIndex);
     void setScale(float scale);
-    
+
     float _scale { 1.0f };
-    float _lastScale{ 1.0f };
+    float _lastScale { 1.0f };
     glm::vec3 _entityPosition;
     glm::quat _entityRotation;
     std::map<int, FlowJoint> _flowJointData;

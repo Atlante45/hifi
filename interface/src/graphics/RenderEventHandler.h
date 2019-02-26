@@ -10,9 +10,9 @@
 #ifndef hifi_RenderEventHandler_h
 #define hifi_RenderEventHandler_h
 
-#include <functional>
-#include <QEvent>
 #include <QElapsedTimer>
+#include <QEvent>
+#include <functional>
 #include "gl/OffscreenGLCanvas.h"
 
 enum ApplicationEvent {
@@ -28,9 +28,8 @@ class RenderEventHandler : public QObject {
     using Parent = QObject;
     Q_OBJECT
 public:
-
-    using CheckCall = std::function <bool()>;
-    using RenderCall = std::function <void()>;
+    using CheckCall = std::function<bool()>;
+    using RenderCall = std::function<void()>;
 
     CheckCall _checkCall;
     RenderCall _renderCall;
@@ -38,7 +37,7 @@ public:
     RenderEventHandler(CheckCall checkCall, RenderCall renderCall);
 
     QElapsedTimer _lastTimeRendered;
-    std::atomic<bool> _pendingRenderEvent{ true };
+    std::atomic<bool> _pendingRenderEvent { true };
 
     void resumeThread();
 

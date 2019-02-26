@@ -20,7 +20,6 @@
 #include <test-utils/GLMTestUtils.h>
 #include <test-utils/QTestExtensions.h>
 
-
 QTEST_MAIN(AACubeTests)
 
 void AACubeTests::ctorsAndSetters() {
@@ -163,7 +162,9 @@ void AACubeTests::rayVsParabolaPerformance() {
     std::vector<AACube> cubes;
     cubes.reserve(NUM_CUBES);
     for (int i = 0; i < NUM_CUBES; i++) {
-        cubes.emplace_back(glm::vec3(randFloatInRange(0.0f, MAX_POS), randFloatInRange(0.0f, MAX_POS), randFloatInRange(0.0f, MAX_POS)), MAX_SCALE);
+        cubes.emplace_back(glm::vec3(randFloatInRange(0.0f, MAX_POS), randFloatInRange(0.0f, MAX_POS),
+                                     randFloatInRange(0.0f, MAX_POS)),
+                           MAX_SCALE);
     }
 
     glm::vec3 origin(0.0f);
@@ -190,10 +191,11 @@ void AACubeTests::rayVsParabolaPerformance() {
     }
     auto parabolaTime = std::chrono::high_resolution_clock::now() - start;
 
-    qDebug() << "Ray vs. Parabola perfomance: rayHit%:" << numRayHits / ((float)NUM_CUBES) * 100.0f << ", rayTime:" << rayTime.count() <<
-        ", parabolaHit%:" << numParabolaHits / ((float)NUM_CUBES) * 100.0f << ", parabolaTime:" << parabolaTime.count() << ", parabolaTime/rayTime: " << (float)parabolaTime.count()/(float)rayTime.count();
+    qDebug() << "Ray vs. Parabola perfomance: rayHit%:" << numRayHits / ((float)NUM_CUBES) * 100.0f
+             << ", rayTime:" << rayTime.count() << ", parabolaHit%:" << numParabolaHits / ((float)NUM_CUBES) * 100.0f
+             << ", parabolaTime:" << parabolaTime.count()
+             << ", parabolaTime/rayTime: " << (float)parabolaTime.count() / (float)rayTime.count();
 }
 
 void AACubeTests::cleanupTestCase() {
-
 }

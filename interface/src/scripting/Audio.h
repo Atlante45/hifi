@@ -12,12 +12,12 @@
 #ifndef hifi_scripting_Audio_h
 #define hifi_scripting_Audio_h
 
-#include "AudioScriptingInterface.h"
+#include <shared/ReadWriteLockable.h>
 #include "AudioDevices.h"
 #include "AudioEffectOptions.h"
-#include "SettingHandle.h"
 #include "AudioFileWav.h"
-#include <shared/ReadWriteLockable.h>
+#include "AudioScriptingInterface.h"
+#include "SettingHandle.h"
 
 namespace scripting {
 
@@ -37,16 +37,16 @@ class Audio : public AudioScriptingInterface, protected ReadWriteLockable {
      * @hifi-assignment-client
      *
      * @property {boolean} muted - <code>true</code> if the audio input is muted, otherwise <code>false</code>.
-     * @property {boolean} noiseReduction - <code>true</code> if noise reduction is enabled, otherwise <code>false</code>. When 
-     *     enabled, the input audio signal is blocked (fully attenuated) when it falls below an adaptive threshold set just 
+     * @property {boolean} noiseReduction - <code>true</code> if noise reduction is enabled, otherwise <code>false</code>. When
+     *     enabled, the input audio signal is blocked (fully attenuated) when it falls below an adaptive threshold set just
      *     above the noise floor.
-     * @property {number} inputLevel - The loudness of the audio input, range <code>0.0</code> (no sound) &ndash; 
+     * @property {number} inputLevel - The loudness of the audio input, range <code>0.0</code> (no sound) &ndash;
      *     <code>1.0</code> (the onset of clipping). <em>Read-only.</em>
      * @property {boolean} clipping - <code>true</code> if the audio input is clipping, otherwise <code>false</code>.
-     * @property {number} inputVolume - Adjusts the volume of the input audio; range <code>0.0</code> &ndash; <code>1.0</code>. 
-     *     If set to a value, the resulting value depends on the input device: for example, the volume can't be changed on some 
+     * @property {number} inputVolume - Adjusts the volume of the input audio; range <code>0.0</code> &ndash; <code>1.0</code>.
+     *     If set to a value, the resulting value depends on the input device: for example, the volume can't be changed on some
      *     devices, and others might only support values of <code>0.0</code> and <code>1.0</code>.
-     * @property {boolean} isStereoInput - <code>true</code> if the input audio is being used in stereo, otherwise 
+     * @property {boolean} isStereoInput - <code>true</code> if the input audio is being used in stereo, otherwise
      *     <code>false</code>. Some devices do not support stereo, in which case the value is always <code>false</code>.
      * @property {string} context - The current context of the audio: either <code>"Desktop"</code> or <code>"HMD"</code>.
      *     <em>Read-only.</em>
@@ -85,7 +85,7 @@ public:
     /**jsdoc
      * @function Audio.setInputDevice
      * @param {object} device
-     * @param {boolean} isHMD 
+     * @param {boolean} isHMD
      * @deprecated This function is deprecated and will be removed.
      */
     Q_INVOKABLE void setInputDevice(const QAudioDeviceInfo& device, bool isHMD);
@@ -99,8 +99,8 @@ public:
     Q_INVOKABLE void setOutputDevice(const QAudioDeviceInfo& device, bool isHMD);
 
     /**jsdoc
-     * Enable or disable reverberation. Reverberation is done by the client, on the post-mix audio. The reverberation options 
-     * come from either the domain's audio zone if used &mdash; configured on the server &mdash; or as scripted by 
+     * Enable or disable reverberation. Reverberation is done by the client, on the post-mix audio. The reverberation options
+     * come from either the domain's audio zone if used &mdash; configured on the server &mdash; or as scripted by
      * {@link Audio.setReverbOptions|setReverbOptions}.
      * @function Audio.setReverb
      * @param {boolean} enable - <code>true</code> to enable reverberation, <code>false</code> to disable.
@@ -110,13 +110,13 @@ public:
      * var injectorOptions = {
      *     position: MyAvatar.position
      * };
-     * 
+     *
      * Script.setTimeout(function () {
      *     print("Reverb OFF");
      *     Audio.setReverb(false);
      *     injector = Audio.playSound(sound, injectorOptions);
      * }, 1000);
-     * 
+     *
      * Script.setTimeout(function () {
      *     var reverbOptions = new AudioEffectOptions();
      *     reverbOptions.roomSize = 100;
@@ -124,26 +124,26 @@ public:
      *     print("Reverb ON");
      *     Audio.setReverb(true);
      * }, 4000);
-     * 
+     *
      * Script.setTimeout(function () {
      *     print("Reverb OFF");
      *     Audio.setReverb(false);
      * }, 8000);     */
     Q_INVOKABLE void setReverb(bool enable);
-    
+
     /**jsdoc
      * Configure reverberation options. Use {@link Audio.setReverb|setReverb} to enable or disable reverberation.
      * @function Audio.setReverbOptions
      * @param {AudioEffectOptions} options - The reverberation options.
      */
     Q_INVOKABLE void setReverbOptions(const AudioEffectOptions* options);
-   
+
     /**jsdoc
      * Starts making an audio recording of the audio being played in-world (i.e., not local-only audio) to a file in WAV format.
      * @function Audio.startRecording
-     * @param {string} filename - The path and name of the file to make the recording in. Should have a <code>.wav</code> 
+     * @param {string} filename - The path and name of the file to make the recording in. Should have a <code>.wav</code>
      *     extension. The file is overwritten if it already exists.
-     * @returns {boolean} <code>true</code> if the specified file could be opened and audio recording has started, otherwise 
+     * @returns {boolean} <code>true</code> if the specified file could be opened and audio recording has started, otherwise
      *     <code>false</code>.
      * @example <caption>Make a 10 second audio recording.</caption>
      * var filename = File.getTempDir() + "/audio.wav";
@@ -152,13 +152,13 @@ public:
      *         Audio.stopRecording();
      *         print("Audio recording made in: " + filename);
      *     }, 10000);
-     * 
+     *
      * } else {
      *     print("Could not make an audio recording in: " + filename);
      * }
      */
     Q_INVOKABLE bool startRecording(const QString& filename);
-    
+
     /**jsdoc
      * Finish making an audio recording started with {@link Audio.startRecording|startRecording}.
      * @function Audio.stopRecording
@@ -192,7 +192,7 @@ signals:
      * });
      */
     void mutedChanged(bool isMuted);
-    
+
     /**jsdoc
      * Triggered when the audio input noise reduction is enabled or disabled.
      * @function Audio.noiseReductionChanged
@@ -204,9 +204,9 @@ signals:
     /**jsdoc
      * Triggered when the input audio volume changes.
      * @function Audio.inputVolumeChanged
-     * @param {number} volume - The requested volume to be applied to the audio input, range <code>0.0</code> &ndash; 
-     *     <code>1.0</code>. The resulting value of <code>Audio.inputVolume</code> depends on the capabilities of the device: 
-     *     for example, the volume can't be changed on some devices, and others might only support values of <code>0.0</code> 
+     * @param {number} volume - The requested volume to be applied to the audio input, range <code>0.0</code> &ndash;
+     *     <code>1.0</code>. The resulting value of <code>Audio.inputVolume</code> depends on the capabilities of the device:
+     *     for example, the volume can't be changed on some devices, and others might only support values of <code>0.0</code>
      *     and <code>1.0</code>.
      * @returns {Signal}
      */
@@ -215,7 +215,7 @@ signals:
     /**jsdoc
      * Triggered when the input audio level changes.
      * @function Audio.inputLevelChanged
-     * @param {number} level - The loudness of the input audio, range <code>0.0</code> (no sound) &ndash; <code>1.0</code> (the 
+     * @param {number} level - The loudness of the input audio, range <code>0.0</code> (no sound) &ndash; <code>1.0</code> (the
      *     onset of clipping).
      * @returns {Signal}
      */
@@ -256,17 +256,16 @@ protected:
     Audio();
 
 private:
-
     float _inputVolume { 1.0f };
     float _inputLevel { 0.0f };
     bool _isClipping { false };
     bool _isMuted { false };
-    bool _enableNoiseReduction { true };  // Match default value of AudioClient::_isNoiseGateEnabled.
+    bool _enableNoiseReduction { true }; // Match default value of AudioClient::_isNoiseGateEnabled.
     bool _contextIsHMD { false };
     AudioDevices* getDevices() { return &_devices; }
     AudioDevices _devices;
 };
 
-};
+}; // namespace scripting
 
 #endif // hifi_scripting_Audio_h

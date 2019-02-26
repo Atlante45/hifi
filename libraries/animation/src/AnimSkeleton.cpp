@@ -107,7 +107,8 @@ std::vector<int> AnimSkeleton::getChildrenOfJoint(int jointIndex) const {
     std::vector<int> result;
     if (jointIndex != -1) {
         for (int i = jointIndex + 1; i < (int)_parentIndices.size(); i++) {
-            if (_parentIndices[i] == jointIndex || (std::find(result.begin(), result.end(), _parentIndices[i]) != result.end())) {
+            if (_parentIndices[i] == jointIndex ||
+                (std::find(result.begin(), result.end(), _parentIndices[i]) != result.end())) {
                 result.push_back(i);
             }
         }
@@ -190,7 +191,6 @@ void AnimSkeleton::mirrorAbsolutePoses(AnimPoseVec& poses) const {
 }
 
 void AnimSkeleton::buildSkeletonFromJoints(const std::vector<HFMJoint>& joints, const QMap<int, glm::quat> jointOffsets) {
-
     _joints = joints;
 
     // build a seperate vector of parentIndices for cache coherency
@@ -211,7 +211,6 @@ void AnimSkeleton::buildSkeletonFromJoints(const std::vector<HFMJoint>& joints, 
 
     // iterate over HFMJoints and extract the bind pose information.
     for (int i = 0; i < _jointsSize; i++) {
-
         // build pre and post transforms
         glm::mat4 preRotationTransform = _joints[i].preTransform * glm::mat4_cast(_joints[i].preRotation);
         glm::mat4 postRotationTransform = glm::mat4_cast(_joints[i].postRotation) * _joints[i].postTransform;
@@ -219,7 +218,8 @@ void AnimSkeleton::buildSkeletonFromJoints(const std::vector<HFMJoint>& joints, 
         _relativePostRotationPoses.push_back(AnimPose(postRotationTransform));
 
         // build relative and absolute default poses
-        glm::mat4 relDefaultMat = glm::translate(_joints[i].translation) * preRotationTransform * glm::mat4_cast(_joints[i].rotation) * postRotationTransform;
+        glm::mat4 relDefaultMat = glm::translate(_joints[i].translation) * preRotationTransform *
+                                  glm::mat4_cast(_joints[i].rotation) * postRotationTransform;
         AnimPose relDefaultPose(relDefaultMat);
 
         int parentIndex = getParentIndex(i);
@@ -257,11 +257,10 @@ void AnimSkeleton::buildSkeletonFromJoints(const std::vector<HFMJoint>& joints, 
     _nonMirroredIndices.clear();
     _mirrorMap.reserve(_jointsSize);
     for (int i = 0; i < _jointsSize; i++) {
-        if (_joints[i].name != "Hips" && _joints[i].name != "Spine" &&
-            _joints[i].name != "Spine1" && _joints[i].name != "Spine2" &&
-            _joints[i].name != "Neck" && _joints[i].name != "Head" &&
-            !((_joints[i].name.startsWith("Left") || _joints[i].name.startsWith("Right")) &&
-              _joints[i].name != "LeftEye" && _joints[i].name != "RightEye")) {
+        if (_joints[i].name != "Hips" && _joints[i].name != "Spine" && _joints[i].name != "Spine1" &&
+            _joints[i].name != "Spine2" && _joints[i].name != "Neck" && _joints[i].name != "Head" &&
+            !((_joints[i].name.startsWith("Left") || _joints[i].name.startsWith("Right")) && _joints[i].name != "LeftEye" &&
+              _joints[i].name != "RightEye")) {
             // HACK: we don't want to mirror some joints so we remember their indices
             // so we can restore them after a future mirror operation
             _nonMirroredIndices.push_back(i);
@@ -300,7 +299,8 @@ void AnimSkeleton::dump(bool verbose) const {
             qCDebug(animation) << "            postRotation =" << _joints[i].postRotation;
             qCDebug(animation) << "            postTransform =" << _joints[i].postTransform;
             qCDebug(animation) << "            transform =" << _joints[i].transform;
-            qCDebug(animation) << "            rotationMin =" << _joints[i].rotationMin << ", rotationMax =" << _joints[i].rotationMax;
+            qCDebug(animation) << "            rotationMin =" << _joints[i].rotationMin
+                               << ", rotationMax =" << _joints[i].rotationMax;
             qCDebug(animation) << "            inverseDefaultRotation" << _joints[i].inverseDefaultRotation;
             qCDebug(animation) << "            inverseBindRotation" << _joints[i].inverseBindRotation;
             qCDebug(animation) << "            bindTransform" << _joints[i].bindTransform;
@@ -343,5 +343,3 @@ std::vector<int> AnimSkeleton::lookUpJointIndices(const std::vector<QString>& jo
     }
     return result;
 }
-
-

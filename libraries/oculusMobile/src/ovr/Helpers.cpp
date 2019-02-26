@@ -8,10 +8,10 @@
 
 #include "Helpers.h"
 
-#include <atomic>
-#include <algorithm>
-#include <android/log.h>
 #include <VrApi_Helpers.h>
+#include <android/log.h>
+#include <algorithm>
+#include <atomic>
 
 using namespace ovr;
 
@@ -23,7 +23,7 @@ void Fov::extend(const Fov& other) {
 
 void Fov::extract(const ovrMatrix4f& mat) {
     auto& fs = leftRightUpDown;
-    ovrMatrix4f_ExtractFov( &mat, fs, fs + 1, fs + 2, fs + 3);
+    ovrMatrix4f_ExtractFov(&mat, fs, fs + 1, fs + 2, fs + 3);
 }
 
 glm::mat4 Fov::withZ(float nearZ, float farZ) const {
@@ -35,4 +35,3 @@ glm::mat4 Fov::withZ(const glm::mat4& other) const {
     // FIXME
     return withZ(0.01f, 1000.0f);
 }
-

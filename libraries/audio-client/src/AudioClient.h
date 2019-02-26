@@ -14,56 +14,56 @@
 
 #include <fstream>
 #include <memory>
-#include <vector>
 #include <mutex>
 #include <queue>
+#include <vector>
 
-#include <QtCore/QtGlobal>
+#include <AbstractAudioInterface.h>
+#include <AudioEffectOptions.h>
+#include <AudioStreamStats.h>
 #include <QtCore/QByteArray>
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QObject>
 #include <QtCore/QVector>
+#include <QtCore/QtGlobal>
 #include <QtMultimedia/QAudio>
 #include <QtMultimedia/QAudioFormat>
 #include <QtMultimedia/QAudioInput>
-#include <AbstractAudioInterface.h>
-#include <AudioEffectOptions.h>
-#include <AudioStreamStats.h>
 
+#include <AudioConstants.h>
+#include <AudioGate.h>
+#include <AudioHRTF.h>
+#include <AudioInjector.h>
+#include <AudioLimiter.h>
+#include <AudioReverb.h>
+#include <AudioSRC.h>
 #include <DependencyManager.h>
 #include <HifiSockAddr.h>
-#include <NLPacket.h>
 #include <MixedProcessedAudioStream.h>
+#include <NLPacket.h>
 #include <RingBufferHistory.h>
 #include <SettingHandle.h>
 #include <Sound.h>
 #include <StDev.h>
-#include <AudioHRTF.h>
-#include <AudioSRC.h>
-#include <AudioInjector.h>
-#include <AudioReverb.h>
-#include <AudioLimiter.h>
-#include <AudioConstants.h>
-#include <AudioGate.h>
 
 #include <shared/RateCounter.h>
 
 #include <plugins/CodecPlugin.h>
 
-#include "AudioIOStats.h"
 #include "AudioFileWav.h"
+#include "AudioIOStats.h"
 
 #ifdef _WIN32
-#pragma warning( push )
-#pragma warning( disable : 4273 )
-#pragma warning( disable : 4305 )
+#pragma warning(push)
+#pragma warning(disable : 4273)
+#pragma warning(disable : 4305)
 #endif
 
 #ifdef _WIN32
-#pragma warning( pop )
+#pragma warning(pop)
 #endif
 
-#if defined (Q_OS_ANDROID)
+#if defined(Q_OS_ANDROID)
 #define VOICE_RECOGNITION "voicerecognition"
 #define VOICE_COMMUNICATION "voicecommunication"
 
@@ -83,6 +83,7 @@ class AudioClient : public AbstractAudioInterface, public Dependency {
     SINGLETON_DEPENDENCY
 
     using LocalInjectorsStream = AudioMixRingBuffer;
+
 public:
     static const int MIN_BUFFER_FRAMES;
     static const int MAX_BUFFER_FRAMES;
@@ -96,14 +97,21 @@ public:
     class AudioOutputIODevice : public QIODevice {
     public:
         AudioOutputIODevice(LocalInjectorsStream& localInjectorsStream, MixedProcessedAudioStream& receivedAudioStream,
-                AudioClient* audio) :
-            _localInjectorsStream(localInjectorsStream), _receivedAudioStream(receivedAudioStream),
-            _audio(audio), _unfulfilledReads(0) {}
+                            AudioClient* audio) :
+            _localInjectorsStream(localInjectorsStream),
+            _receivedAudioStream(receivedAudioStream),
+            _audio(audio),
+            _unfulfilledReads(0) {}
 
         void start() { open(QIODevice::ReadOnly | QIODevice::Unbuffered); }
-        qint64 readData(char * data, qint64 maxSize) override;
-        qint64 writeData(const char * data, qint64 maxSize) override { return 0; }
-        int getRecentUnfulfilledReads() { int unfulfilledReads = _unfulfilledReads; _unfulfilledReads = 0; return unfulfilledReads; }
+        qint64 readData(char* data, qint64 maxSize) override;
+        qint64 writeData(const char* data, qint64 maxSize) override { return 0; }
+        int getRecentUnfulfilledReads() {
+            int unfulfilledReads = _unfulfilledReads;
+            _unfulfilledReads = 0;
+            return unfulfilledReads;
+        }
+
     private:
         LocalInjectorsStream& _localInjectorsStream;
         MixedProcessedAudioStream& _receivedAudioStream;
@@ -151,7 +159,7 @@ public:
     void setIsPlayingBackRecording(bool isPlayingBackRecording) { _isPlayingBackRecording = isPlayingBackRecording; }
 
     Q_INVOKABLE void setAvatarBoundingBoxParameters(glm::vec3 corner, glm::vec3 scale);
-    
+
     bool outputLocalInjector(const AudioInjectorPointer& injector) override;
 
     QAudioDeviceInfo getActiveAudioDevice(QAudio::Mode mode) const;
@@ -315,9 +323,9 @@ private:
         std::queue<QSharedPointer<ReceivedMessage>> _queue;
         std::mutex _mutex;
 
-        int _index{ 0 };
-        int _threshold{ 1 };
-        bool _isSimulatingJitter{ false };
+        int _index { 0 };
+        int _threshold { 1 };
+        bool _isSimulatingJitter { false };
     };
 
     Gate _gate;
@@ -355,9 +363,9 @@ private:
 
     StDev _stdev;
     QElapsedTimer _timeSinceLastReceived;
-    float _lastRawInputLoudness;    // before mute/gate
+    float _lastRawInputLoudness; // before mute/gate
     float _lastSmoothedRawInputLoudness;
-    float _lastInputLoudness;       // after mute/gate
+    float _lastInputLoudness; // after mute/gate
     float _timeSinceLastClip;
     int _totalInputAudioSamples;
 
@@ -393,7 +401,7 @@ private:
     float* _localOutputMixBuffer { NULL };
     Mutex _localAudioMutex;
     AudioLimiter _audioLimiter;
-    
+
     // Adds Reverb
     void configureReverb();
     void updateReverbOptions();
@@ -451,7 +459,7 @@ private:
 #endif
 
     AudioSolo _solo;
-    
+
     Mutex _checkDevicesMutex;
     QTimer* _checkDevicesTimer { nullptr };
     Mutex _checkPeakValuesMutex;
@@ -459,6 +467,5 @@ private:
 
     bool _isRecording { false };
 };
-
 
 #endif // hifi_AudioClient_h

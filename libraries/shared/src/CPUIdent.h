@@ -20,17 +20,16 @@
 
 #include <QtCore/QtGlobal>
 
-#include <vector>
-#include <bitset>
 #include <array>
+#include <bitset>
 #include <string>
+#include <vector>
 
 #ifdef Q_OS_WIN
 
 #include <intrin.h>
 
-class CPUIdent
-{
+class CPUIdent {
     // forward declarations
     class CPUIdent_Internal;
 
@@ -106,11 +105,10 @@ public:
 private:
     static const CPUIdent_Internal CPU_Rep;
 
-    class CPUIdent_Internal
-    {
+    class CPUIdent_Internal {
     public:
-        CPUIdent_Internal()
-            : nIds_ { 0 },
+        CPUIdent_Internal() :
+            nIds_ { 0 },
             nExIds_ { 0 },
             isIntel_ { false },
             isAMD_ { false },
@@ -121,9 +119,8 @@ private:
             f_81_ECX_ { 0 },
             f_81_EDX_ { 0 },
             data_ {},
-            extdata_ {}
-        {
-            //int cpuInfo[4] = {-1};
+            extdata_ {} {
+            // int cpuInfo[4] = {-1};
             std::array<int, 4> cpui;
 
             // Calling __cpuid with 0x0 as the function_id argument
@@ -204,7 +201,6 @@ private:
         std::vector<std::array<int, 4>> data_;
         std::vector<std::array<int, 4>> extdata_;
     };
-
 };
 
 #endif

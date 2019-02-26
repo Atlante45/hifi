@@ -10,8 +10,8 @@
 #include <ViewFrustum.h>
 #include <controllers/Pose.h>
 #include <display-plugins/CompositorHelper.h>
-#include <gpu/Frame.h>
 #include <gl/Config.h>
+#include <gpu/Frame.h>
 #include <shared/GlobalAppProperties.h>
 
 #include "OculusHelpers.h"
@@ -64,12 +64,11 @@ bool OculusBaseDisplayPlugin::beginFrameRender(uint32_t frameIndex) {
 
         auto correctedPose = ovr::toControllerPose(hand, trackingState.HandPoses[hand]);
         static const glm::quat HAND_TO_LASER_ROTATION = glm::rotation(Vectors::UNIT_Z, Vectors::UNIT_NEG_Y);
-        handPoses[hand] = glm::translate(glm::mat4(), correctedPose.translation) * glm::mat4_cast(correctedPose.rotation * HAND_TO_LASER_ROTATION);
+        handPoses[hand] = glm::translate(glm::mat4(), correctedPose.translation) *
+                          glm::mat4_cast(correctedPose.rotation * HAND_TO_LASER_ROTATION);
     });
 
-    withNonPresentThreadLock([&] {
-        _frameInfos[frameIndex] = _currentRenderFrameInfo;
-    });
+    withNonPresentThreadLock([&] { _frameInfos[frameIndex] = _currentRenderFrameInfo; });
     return Parent::beginFrameRender(frameIndex);
 }
 
@@ -86,7 +85,8 @@ glm::mat4 OculusBaseDisplayPlugin::getEyeProjection(Eye eye, const glm::mat4& ba
         ovrEyeType ovrEye = (eye == Left) ? ovrEye_Left : ovrEye_Right;
         ovrFovPort fovPort = _hmdDesc.DefaultEyeFov[eye];
         ovrEyeRenderDesc& erd = ovr_GetRenderDesc(_session, ovrEye, fovPort);
-        ovrMatrix4f ovrPerspectiveProjection = ovrMatrix4f_Projection(erd.Fov, baseNearClip, baseFarClip, ovrProjection_ClipRangeOpenGL);
+        ovrMatrix4f ovrPerspectiveProjection = ovrMatrix4f_Projection(erd.Fov, baseNearClip, baseFarClip,
+                                                                      ovrProjection_ClipRangeOpenGL);
         return ovr::toGlm(ovrPerspectiveProjection);
     } else {
         return baseProjection;
@@ -132,8 +132,8 @@ bool OculusBaseDisplayPlugin::internalActivate() {
     ovr::for_each_eye([&](ovrEyeType eye) {
         _eyeFovs[eye] = _hmdDesc.DefaultEyeFov[eye];
         ovrEyeRenderDesc& erd = _eyeRenderDescs[eye] = ovr_GetRenderDesc(_session, eye, _eyeFovs[eye]);
-        ovrMatrix4f ovrPerspectiveProjection =
-            ovrMatrix4f_Projection(erd.Fov, DEFAULT_NEAR_CLIP, DEFAULT_FAR_CLIP, ovrProjection_ClipRangeOpenGL);
+        ovrMatrix4f ovrPerspectiveProjection = ovrMatrix4f_Projection(erd.Fov, DEFAULT_NEAR_CLIP, DEFAULT_FAR_CLIP,
+                                                                      ovrProjection_ClipRangeOpenGL);
         _eyeProjections[eye] = ovr::toGlm(ovrPerspectiveProjection);
         _eyeOffsets[eye] = ovr::toGlm(erd.HmdToEyePose);
         eyeSizes[eye] = ovr::toGlm(ovr_GetFovTextureSize(_session, eye, erd.Fov, 1.0f));
@@ -143,22 +143,21 @@ bool OculusBaseDisplayPlugin::internalActivate() {
 
     auto combinedFov = _eyeFovs[0];
     combinedFov.LeftTan = combinedFov.RightTan = std::max(combinedFov.LeftTan, combinedFov.RightTan);
-    _cullingProjection = ovr::toGlm(ovrMatrix4f_Projection(combinedFov, DEFAULT_NEAR_CLIP, DEFAULT_FAR_CLIP, ovrProjection_ClipRangeOpenGL));
+    _cullingProjection = ovr::toGlm(
+        ovrMatrix4f_Projection(combinedFov, DEFAULT_NEAR_CLIP, DEFAULT_FAR_CLIP, ovrProjection_ClipRangeOpenGL));
 
-    _renderTargetSize = uvec2(
-        eyeSizes[0].x + eyeSizes[1].x,
-        std::max(eyeSizes[0].y, eyeSizes[1].y));
+    _renderTargetSize = uvec2(eyeSizes[0].x + eyeSizes[1].x, std::max(eyeSizes[0].y, eyeSizes[1].y));
 
     memset(&_sceneLayer, 0, sizeof(ovrLayerEyeFov));
     _sceneLayer.Header.Type = ovrLayerType_EyeFov;
     _sceneLayer.Header.Flags = ovrLayerFlag_TextureOriginAtBottomLeft;
     ovr::for_each_eye([&](ovrEyeType eye) {
-        ovrFovPort & fov = _sceneLayer.Fov[eye] = _eyeRenderDescs[eye].Fov;
-        ovrSizei & size = _sceneLayer.Viewport[eye].Size = ovr_GetFovTextureSize(_session, eye, fov, 1.0f);
+        ovrFovPort& fov = _sceneLayer.Fov[eye] = _eyeRenderDescs[eye].Fov;
+        ovrSizei& size = _sceneLayer.Viewport[eye].Size = ovr_GetFovTextureSize(_session, eye, fov, 1.0f);
         _sceneLayer.Viewport[eye].Pos = { eye == ovrEye_Left ? 0 : size.w, 0 };
     });
 
-    // This must come after the initialization, so that the values calculated 
+    // This must come after the initialization, so that the values calculated
     // above are available during the customizeContext call (when not running
     // in threaded present mode)
     return Parent::internalActivate();

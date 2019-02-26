@@ -16,6 +16,5 @@ AnimContext::AnimContext(bool enableDebugDrawIKTargets, bool enableDebugDrawIKCo
     _enableDebugDrawIKConstraints(enableDebugDrawIKConstraints),
     _enableDebugDrawIKChains(enableDebugDrawIKChains),
     _geometryToRigMatrix(geometryToRigMatrix),
-    _rigToWorldMatrix(rigToWorldMatrix)
-{
+    _rigToWorldMatrix(rigToWorldMatrix) {
 }

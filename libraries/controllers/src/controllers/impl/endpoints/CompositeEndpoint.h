@@ -13,18 +13,17 @@
 #include "../Endpoint.h"
 
 namespace controller {
-    class CompositeEndpoint : public Endpoint, Endpoint::Pair {
-    public:
-        using Endpoint::apply;
-        CompositeEndpoint(Endpoint::Pointer first, Endpoint::Pointer second);
+class CompositeEndpoint : public Endpoint, Endpoint::Pair {
+public:
+    using Endpoint::apply;
+    CompositeEndpoint(Endpoint::Pointer first, Endpoint::Pointer second);
 
-        virtual AxisValue peek() const override;
-        virtual AxisValue value() override;
-        virtual void apply(AxisValue newValue, const Pointer& source) override;
-        virtual bool readable() const override;
+    virtual AxisValue peek() const override;
+    virtual AxisValue value() override;
+    virtual void apply(AxisValue newValue, const Pointer& source) override;
+    virtual bool readable() const override;
+};
 
-    };
-
-}
+} // namespace controller
 
 #endif

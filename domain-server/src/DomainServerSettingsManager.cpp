@@ -25,14 +25,14 @@
 
 #include <AccountManager.h>
 #include <Assignment.h>
-#include <HifiConfigVariantMap.h>
+#include <AvatarData.h> //for KillAvatarReason
+#include <FingerprintUtils.h>
 #include <HTTPConnection.h>
+#include <HifiConfigVariantMap.h>
 #include <NLPacketList.h>
 #include <NumericalConstants.h>
 #include <SettingHandle.h>
 #include <SettingHelpers.h>
-#include <AvatarData.h> //for KillAvatarReason
-#include <FingerprintUtils.h>
 
 #include "DomainServerNodeData.h"
 
@@ -78,14 +78,15 @@ DomainServerSettingsManager::DomainServerSettingsManager() {
         }
     }
 
-    static const QString MISSING_SETTINGS_DESC_MSG =
-        QString("Did not find settings description in JSON at %1 - Unable to continue. domain-server will quit.\n%2 at %3")
-        .arg(SETTINGS_DESCRIPTION_RELATIVE_PATH).arg(parseError.errorString()).arg(parseError.offset);
+    static const QString MISSING_SETTINGS_DESC_MSG = QString("Did not find settings description in JSON at %1 - Unable to "
+                                                             "continue. domain-server will quit.\n%2 at %3")
+                                                         .arg(SETTINGS_DESCRIPTION_RELATIVE_PATH)
+                                                         .arg(parseError.errorString())
+                                                         .arg(parseError.offset);
     static const int MISSING_SETTINGS_DESC_ERROR_CODE = 6;
 
     QMetaObject::invokeMethod(QCoreApplication::instance(), "queuedQuit", Qt::QueuedConnection,
-                              Q_ARG(QString, MISSING_SETTINGS_DESC_MSG),
-                              Q_ARG(int, MISSING_SETTINGS_DESC_ERROR_CODE));
+                              Q_ARG(QString, MISSING_SETTINGS_DESC_MSG), Q_ARG(int, MISSING_SETTINGS_DESC_ERROR_CODE));
 }
 
 void DomainServerSettingsManager::splitSettingsDescription() {
@@ -98,7 +99,7 @@ void DomainServerSettingsManager::splitSettingsDescription() {
     QJsonArray domainSettingsMenuGroups;
     QJsonArray contentSettingsMenuGroups;
 
-    foreach(const QJsonValue& group, _descriptionArray) {
+    foreach (const QJsonValue& group, _descriptionArray) {
         QJsonObject groupObject = group.toObject();
 
         static const QString HIDDEN_GROUP_KEY = "hidden";
@@ -107,11 +108,11 @@ void DomainServerSettingsManager::splitSettingsDescription() {
         QJsonArray domainSettingArray;
         QJsonArray contentSettingArray;
 
-        foreach(const QJsonValue& settingDescription, groupObject[DESCRIPTION_SETTINGS_KEY].toArray()) {
+        foreach (const QJsonValue& settingDescription, groupObject[DESCRIPTION_SETTINGS_KEY].toArray()) {
             QJsonObject settingDescriptionObject = settingDescription.toObject();
 
-            bool isContentSetting = settingDescriptionObject.contains(CONTENT_SETTING_FLAG_KEY)
-                && settingDescriptionObject[CONTENT_SETTING_FLAG_KEY].toBool();
+            bool isContentSetting = settingDescriptionObject.contains(CONTENT_SETTING_FLAG_KEY) &&
+                                    settingDescriptionObject[CONTENT_SETTING_FLAG_KEY].toBool();
 
             if (isContentSetting) {
                 // push the setting description to the pending content setting array
@@ -123,7 +124,6 @@ void DomainServerSettingsManager::splitSettingsDescription() {
         }
 
         if (!domainSettingArray.isEmpty() || !contentSettingArray.isEmpty()) {
-
             // we know for sure we'll have something to add to our settings menu groups
             // so setup that object for the group now, as long as the group isn't hidden alltogether
             QJsonObject settingsDropdownGroup;
@@ -232,9 +232,9 @@ void DomainServerSettingsManager::setupConfigMap(const QString& userConfigFilena
         const QString EDITORS_ARE_REZZERS_KEYPATH = "security.editors_are_rezzers";
         const QString EDITORS_CAN_REPLACE_CONTENT_KEYPATH = "security.editors_can_replace_content";
 
-        qDebug() << "Previous domain-server settings version was"
-            << QString::number(oldVersion, 'g', 8) << "and the new version is"
-            << QString::number(_descriptionVersion, 'g', 8) << "- checking if any re-mapping is required";
+        qDebug() << "Previous domain-server settings version was" << QString::number(oldVersion, 'g', 8)
+                 << "and the new version is" << QString::number(_descriptionVersion, 'g', 8)
+                 << "- checking if any re-mapping is required";
 
         // we have a version mismatch - for now handle custom behaviour here since there are not many remappings
         if (oldVersion < 1.0) {
@@ -243,12 +243,10 @@ void DomainServerSettingsManager::setupConfigMap(const QString& userConfigFilena
 
             QVariant* allowedUsers = _configMap.valueForKeyPath(ALLOWED_USERS_SETTINGS_KEYPATH);
 
-            if (allowedUsers
-                && allowedUsers->canConvert(QMetaType::QVariantList)
-                && reinterpret_cast<QVariantList*>(allowedUsers)->size() > 0) {
-
+            if (allowedUsers && allowedUsers->canConvert(QMetaType::QVariantList) &&
+                reinterpret_cast<QVariantList*>(allowedUsers)->size() > 0) {
                 qDebug() << "Forcing security.restricted_access to TRUE since there was an"
-                    << "existing list of allowed users.";
+                         << "existing list of allowed users.";
 
                 // In the pre-toggle system the user had a list of allowed users, so
                 // we need to set security.restricted_access to true
@@ -264,7 +262,8 @@ void DomainServerSettingsManager::setupConfigMap(const QString& userConfigFilena
             static const QString ENTITY_FILE_PATH_KEYPATH = ENTITY_SERVER_SETTINGS_KEY + ".persistFilePath";
 
             // this was prior to change of poorly named entitiesFileName to entitiesFilePath
-            QVariant* persistFileNameVariant = _configMap.valueForKeyPath(ENTITY_SERVER_SETTINGS_KEY + "." + ENTITY_FILE_NAME_KEY);
+            QVariant* persistFileNameVariant = _configMap.valueForKeyPath(ENTITY_SERVER_SETTINGS_KEY + "." +
+                                                                          ENTITY_FILE_NAME_KEY);
             if (persistFileNameVariant && persistFileNameVariant->canConvert(QMetaType::QString)) {
                 QString persistFileName = persistFileNameVariant->toString();
 
@@ -285,7 +284,6 @@ void DomainServerSettingsManager::setupConfigMap(const QString& userConfigFilena
                     *entityServerVariant = entityServerMap;
                 }
             }
-
         }
 
         if (oldVersion < 1.2) {
@@ -347,9 +345,8 @@ void DomainServerSettingsManager::setupConfigMap(const QString& userConfigFilena
                 _agentPermissions[editorKey]->set(NodePermissions::Permission::canAdjustLocks);
             }
 
-            std::list<std::unordered_map<NodePermissionsKey, NodePermissionsPointer>> permissionsSets{
-                _standardAgentPermissions.get(),
-                _agentPermissions.get()
+            std::list<std::unordered_map<NodePermissionsKey, NodePermissionsPointer>> permissionsSets {
+                _standardAgentPermissions.get(), _agentPermissions.get()
             };
             foreach (auto permissionsSet, permissionsSets) {
                 for (auto entry : permissionsSet) {
@@ -386,15 +383,18 @@ void DomainServerSettingsManager::setupConfigMap(const QString& userConfigFilena
         if (oldVersion < 1.8) {
             unpackPermissions();
             // This was prior to addition of domain content replacement, add that to localhost permissions by default
-            _standardAgentPermissions[NodePermissions::standardNameLocalhost]->set(NodePermissions::Permission::canReplaceDomainContent);
+            _standardAgentPermissions[NodePermissions::standardNameLocalhost]->set(
+                NodePermissions::Permission::canReplaceDomainContent);
             packPermissions();
         }
 
         if (oldVersion < 1.9) {
             unpackPermissions();
             // This was prior to addition of canRez(Tmp)Certified; add those to localhost permissions by default
-            _standardAgentPermissions[NodePermissions::standardNameLocalhost]->set(NodePermissions::Permission::canRezPermanentCertifiedEntities);
-            _standardAgentPermissions[NodePermissions::standardNameLocalhost]->set(NodePermissions::Permission::canRezTemporaryCertifiedEntities);
+            _standardAgentPermissions[NodePermissions::standardNameLocalhost]->set(
+                NodePermissions::Permission::canRezPermanentCertifiedEntities);
+            _standardAgentPermissions[NodePermissions::standardNameLocalhost]->set(
+                NodePermissions::Permission::canRezTemporaryCertifiedEntities);
             packPermissions();
         }
 
@@ -441,7 +441,6 @@ void DomainServerSettingsManager::setupConfigMap(const QString& userConfigFilena
             }
         }
 
-
         // write the current description version to our settings
         *versionVariant = _descriptionVersion;
 
@@ -452,8 +451,8 @@ void DomainServerSettingsManager::setupConfigMap(const QString& userConfigFilena
     unpackPermissions();
 }
 
-void DomainServerSettingsManager::initializeGroupPermissions(NodePermissionsMap& permissionsRows,
-                                                             QString groupName, NodePermissionsPointer perms) {
+void DomainServerSettingsManager::initializeGroupPermissions(NodePermissionsMap& permissionsRows, QString groupName,
+                                                             NodePermissionsPointer perms) {
     // this is called when someone has used the domain-settings webpage to add a group.  They type the group's name
     // and give it some permissions.  The domain-server asks api for the group's ranks and populates the map
     // with them.  Here, that initial user-entered row is removed and it's permissions are copied to all the ranks
@@ -477,9 +476,7 @@ void DomainServerSettingsManager::initializeGroupPermissions(NodePermissionsMap&
     }
 }
 
-void DomainServerSettingsManager::packPermissionsForMap(QString mapName,
-                                                        NodePermissionsMap& permissionsRows,
-                                                        QString keyPath) {
+void DomainServerSettingsManager::packPermissionsForMap(QString mapName, NodePermissionsMap& permissionsRows, QString keyPath) {
     // grab a write lock on the settings mutex since we're about to change the config map
     QWriteLocker locker(&_settingsLock);
 
@@ -566,10 +563,8 @@ void DomainServerSettingsManager::packPermissions() {
     persistToFile();
 }
 
-bool DomainServerSettingsManager::unpackPermissionsForKeypath(const QString& keyPath,
-                                                              NodePermissionsMap* mapPointer,
+bool DomainServerSettingsManager::unpackPermissionsForKeypath(const QString& keyPath, NodePermissionsMap* mapPointer,
                                                               std::function<void(NodePermissionsPointer)> customUnpacker) {
-
     mapPointer->clear();
 
     QVariant permissions = valueOrDefaultValueForKeyPath(keyPath);
@@ -606,7 +601,6 @@ bool DomainServerSettingsManager::unpackPermissionsForKeypath(const QString& key
     }
 
     return needPack;
-
 }
 
 void DomainServerSettingsManager::unpackPermissions() {
@@ -623,57 +617,52 @@ void DomainServerSettingsManager::unpackPermissions() {
 
     needPack |= unpackPermissionsForKeypath(AGENT_PERMISSIONS_KEYPATH, &_agentPermissions);
 
-    needPack |= unpackPermissionsForKeypath(IP_PERMISSIONS_KEYPATH, &_ipPermissions,
-        [&](NodePermissionsPointer perms){
-            // make sure that this permission row is for a valid IP address
-            if (QHostAddress(perms->getKey().first).isNull()) {
-                _ipPermissions.remove(perms->getKey());
+    needPack |= unpackPermissionsForKeypath(IP_PERMISSIONS_KEYPATH, &_ipPermissions, [&](NodePermissionsPointer perms) {
+        // make sure that this permission row is for a valid IP address
+        if (QHostAddress(perms->getKey().first).isNull()) {
+            _ipPermissions.remove(perms->getKey());
 
-                // we removed a row from the IP permissions, we'll need a re-pack
-                needPack = true;
-            }
+            // we removed a row from the IP permissions, we'll need a re-pack
+            needPack = true;
+        }
     });
 
-    needPack |= unpackPermissionsForKeypath(MAC_PERMISSIONS_KEYPATH, &_macPermissions,
-        [&](NodePermissionsPointer perms){
-            // make sure that this permission row is for a non-empty hardware
-            if (perms->getKey().first.isEmpty()) {
-                _macPermissions.remove(perms->getKey());
+    needPack |= unpackPermissionsForKeypath(MAC_PERMISSIONS_KEYPATH, &_macPermissions, [&](NodePermissionsPointer perms) {
+        // make sure that this permission row is for a non-empty hardware
+        if (perms->getKey().first.isEmpty()) {
+            _macPermissions.remove(perms->getKey());
 
-                // we removed a row from the MAC permissions, we'll need a re-pack
-                needPack = true;
-            }
+            // we removed a row from the MAC permissions, we'll need a re-pack
+            needPack = true;
+        }
     });
 
     needPack |= unpackPermissionsForKeypath(MACHINE_FINGERPRINT_PERMISSIONS_KEYPATH, &_machineFingerprintPermissions,
-        [&](NodePermissionsPointer perms){
-            // make sure that this permission row has valid machine fingerprint
-            if (QUuid(perms->getKey().first) == QUuid()) {
-                _machineFingerprintPermissions.remove(perms->getKey());
+                                            [&](NodePermissionsPointer perms) {
+                                                // make sure that this permission row has valid machine fingerprint
+                                                if (QUuid(perms->getKey().first) == QUuid()) {
+                                                    _machineFingerprintPermissions.remove(perms->getKey());
 
-                // we removed a row, so we'll need a re-pack
-                needPack = true;
-            }
+                                                    // we removed a row, so we'll need a re-pack
+                                                    needPack = true;
+                                                }
+                                            });
 
+    needPack |= unpackPermissionsForKeypath(GROUP_PERMISSIONS_KEYPATH, &_groupPermissions, [&](NodePermissionsPointer perms) {
+        if (perms->isGroup()) {
+            // the group-id was cached.  hook-up the uuid in the uuid->group hash
+            _groupPermissionsByUUID[GroupByUUIDKey(perms->getGroupID(),
+                                                   perms->getRankID())] = _groupPermissions[perms->getKey()];
+            needPack |= setGroupID(perms->getID(), perms->getGroupID());
+        }
     });
 
-
-    needPack |= unpackPermissionsForKeypath(GROUP_PERMISSIONS_KEYPATH, &_groupPermissions,
-        [&](NodePermissionsPointer perms){
-            if (perms->isGroup()) {
-                // the group-id was cached.  hook-up the uuid in the uuid->group hash
-                _groupPermissionsByUUID[GroupByUUIDKey(perms->getGroupID(), perms->getRankID())] = _groupPermissions[perms->getKey()];
-                needPack |= setGroupID(perms->getID(), perms->getGroupID());
-            }
-    });
-
-    needPack |= unpackPermissionsForKeypath(GROUP_FORBIDDENS_KEYPATH, &_groupForbiddens,
-        [&](NodePermissionsPointer perms) {
-            if (perms->isGroup()) {
-                // the group-id was cached.  hook-up the uuid in the uuid->group hash
-                _groupForbiddensByUUID[GroupByUUIDKey(perms->getGroupID(), perms->getRankID())] = _groupForbiddens[perms->getKey()];
-                needPack |= setGroupID(perms->getID(), perms->getGroupID());
-            }
+    needPack |= unpackPermissionsForKeypath(GROUP_FORBIDDENS_KEYPATH, &_groupForbiddens, [&](NodePermissionsPointer perms) {
+        if (perms->isGroup()) {
+            // the group-id was cached.  hook-up the uuid in the uuid->group hash
+            _groupForbiddensByUUID[GroupByUUIDKey(perms->getGroupID(), perms->getRankID())] = _groupForbiddens[perms->getKey()];
+            needPack |= setGroupID(perms->getID(), perms->getGroupID());
+        }
     });
 
     needPack |= ensurePermissionsForGroupRanks();
@@ -684,19 +673,15 @@ void DomainServerSettingsManager::unpackPermissions() {
 
 #ifdef WANT_DEBUG
     qDebug() << "--------------- permissions ---------------------";
-    std::array<NodePermissionsMap*, 7> permissionsSets {{
-        &_standardAgentPermissions, &_agentPermissions,
-        &_groupPermissions, &_groupForbiddens,
-        &_ipPermissions, &_macPermissions,
-        &_machineFingerprintPermissions
-    }};
+    std::array<NodePermissionsMap*, 7> permissionsSets { { &_standardAgentPermissions, &_agentPermissions, &_groupPermissions,
+                                                           &_groupForbiddens, &_ipPermissions, &_macPermissions,
+                                                           &_machineFingerprintPermissions } };
 
     foreach (auto permissionSet, permissionsSets) {
         auto& permissionKeyMap = permissionSet->get();
         auto it = permissionKeyMap.begin();
 
         while (it != permissionKeyMap.end()) {
-
             NodePermissionsPointer perms = it->second;
             if (perms->isGroup()) {
                 qDebug() << it->first << perms->getGroupID() << perms;
@@ -708,7 +693,6 @@ void DomainServerSettingsManager::unpackPermissions() {
         }
     }
 #endif
-
 }
 
 bool DomainServerSettingsManager::ensurePermissionsForGroupRanks() {
@@ -771,7 +755,8 @@ bool DomainServerSettingsManager::ensurePermissionsForGroupRanks() {
     return changed;
 }
 
-void DomainServerSettingsManager::processNodeKickRequestPacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer sendingNode) {
+void DomainServerSettingsManager::processNodeKickRequestPacket(QSharedPointer<ReceivedMessage> message,
+                                                               SharedNodePointer sendingNode) {
     // before we do any processing on this packet make sure it comes from a node that is allowed to kick
     if (sendingNode->getCanKick()) {
         // pull the UUID being kicked from the packet
@@ -820,7 +805,8 @@ void DomainServerSettingsManager::processNodeKickRequestPacket(QSharedPointer<Re
                         auto domainServerFingerprint = FingerprintUtils::getMachineFingerprint();
 
                         if (nodeData->getMachineFingerprint() == domainServerFingerprint) {
-                            qWarning() << "attempt to kick node running on same machine as domain server (by fingerprint), ignoring KickRequest";
+                            qWarning() << "attempt to kick node running on same machine as domain server (by fingerprint), "
+                                          "ignoring KickRequest";
                             return;
                         }
                         NodePermissionsKey machineFingerprintKey(nodeData->getMachineFingerprint().toString(), 0);
@@ -832,27 +818,25 @@ void DomainServerSettingsManager::processNodeKickRequestPacket(QSharedPointer<Re
                         auto fingerprintPermissions = _machineFingerprintPermissions[machineFingerprintKey];
 
                         // write them
-                        if (!hadFingerprintPermissions || fingerprintPermissions->can(NodePermissions::Permission::canConnectToDomain)) {
+                        if (!hadFingerprintPermissions ||
+                            fingerprintPermissions->can(NodePermissions::Permission::canConnectToDomain)) {
                             newPermissions = true;
                             fingerprintPermissions->clear(NodePermissions::Permission::canConnectToDomain);
                         }
                     } else {
                         // if no node data, all we can do is IP address
-                        auto& kickAddress = matchingNode->getActiveSocket()
-                            ? matchingNode->getActiveSocket()->getAddress()
-                            : matchingNode->getPublicSocket().getAddress();
+                        auto& kickAddress = matchingNode->getActiveSocket() ? matchingNode->getActiveSocket()->getAddress()
+                                                                            : matchingNode->getPublicSocket().getAddress();
 
                         // probably isLoopback covers it, as whenever I try to ban an agent on same machine as the domain-server
                         // it is always 127.0.0.1, but looking at the public and local addresses just to be sure
                         // TODO: soon we will have feedback (in the form of a message to the client) after we kick.  When we
                         // do, we will have a success flag, and perhaps a reason for failure.  For now, just don't do it.
                         if (kickAddress == limitedNodeList->getPublicSockAddr().getAddress() ||
-                            kickAddress == limitedNodeList->getLocalSockAddr().getAddress() ||
-                            kickAddress.isLoopback() ) {
+                            kickAddress == limitedNodeList->getLocalSockAddr().getAddress() || kickAddress.isLoopback()) {
                             qWarning() << "attempt to kick node running on same machine as domain server, ignoring KickRequest";
                             return;
                         }
-
 
                         NodePermissionsKey ipAddressKey(kickAddress.toString(), QUuid());
 
@@ -880,15 +864,15 @@ void DomainServerSettingsManager::processNodeKickRequestPacket(QSharedPointer<Re
 
                 if (newPermissions) {
                     qDebug() << "Removing connect permission for node" << uuidStringWithoutCurlyBraces(matchingNode->getUUID())
-                        << "after kick request from" << uuidStringWithoutCurlyBraces(sendingNode->getUUID());
+                             << "after kick request from" << uuidStringWithoutCurlyBraces(sendingNode->getUUID());
 
                     // we've changed permissions, time to store them to disk and emit our signal to say they have changed
                     packPermissions();
                 }
 
-                // we emit this no matter what -- though if this isn't a new permission probably 2 people are racing to kick and this
-                // person lost the race.  No matter, just be sure this is called as otherwise it takes like 10s for the person being banned
-                // to go away
+                // we emit this no matter what -- though if this isn't a new permission probably 2 people are racing to kick and
+                // this person lost the race.  No matter, just be sure this is called as otherwise it takes like 10s for the
+                // person being banned to go away
                 emit updateNodePermissions();
 
             } else {
@@ -901,12 +885,13 @@ void DomainServerSettingsManager::processNodeKickRequestPacket(QSharedPointer<Re
 
     } else {
         qWarning() << "Refusing to process a kick packet from node" << uuidStringWithoutCurlyBraces(sendingNode->getUUID())
-        << "that does not have kick permissions.";
+                   << "that does not have kick permissions.";
     }
 }
 
 // This function processes the "Get Username from ID" request.
-void DomainServerSettingsManager::processUsernameFromIDRequestPacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer sendingNode) {
+void DomainServerSettingsManager::processUsernameFromIDRequestPacket(QSharedPointer<ReceivedMessage> message,
+                                                                     SharedNodePointer sendingNode) {
     // From the packet, pull the UUID we're identifying
     QUuid nodeUUID = QUuid::fromRfc4122(message->readWithoutCopy(NUM_BYTES_RFC4122_UUID));
 
@@ -945,7 +930,8 @@ void DomainServerSettingsManager::processUsernameFromIDRequestPacket(QSharedPoin
             bool isAdmin = matchingNode->getCanKick();
             usernameFromIDReplyPacket->writePrimitive(isAdmin);
 
-            qDebug() << "Sending username" << verifiedUsername << "and machine fingerprint" << machineFingerprint << "associated with node" << nodeUUID << ". Node admin status: " << isAdmin;
+            qDebug() << "Sending username" << verifiedUsername << "and machine fingerprint" << machineFingerprint
+                     << "associated with node" << nodeUUID << ". Node admin status: " << isAdmin;
             // Ship it!
             limitedNodeList->sendPacket(std::move(usernameFromIDReplyPacket), *sendingNode);
         } else {
@@ -958,9 +944,7 @@ void DomainServerSettingsManager::processUsernameFromIDRequestPacket(QSharedPoin
 
 QStringList DomainServerSettingsManager::getAllNames() const {
     QStringList result;
-    foreach (auto key, _agentPermissions.keys()) {
-        result << key.first.toLower();
-    }
+    foreach (auto key, _agentPermissions.keys()) { result << key.first.toLower(); }
     return result;
 }
 
@@ -1077,11 +1061,11 @@ QVariant DomainServerSettingsManager::valueOrDefaultValueForKeyPath(const QStrin
         QString groupKey = keyPath.mid(0, dotIndex);
         QString settingKey = keyPath.mid(dotIndex + 1);
 
-        foreach(const QVariant& group, _descriptionArray.toVariantList()) {
+        foreach (const QVariant& group, _descriptionArray.toVariantList()) {
             QVariantMap groupMap = group.toMap();
 
             if (groupMap[DESCRIPTION_NAME_KEY].toString() == groupKey) {
-                foreach(const QVariant& setting, groupMap[DESCRIPTION_SETTINGS_KEY].toList()) {
+                foreach (const QVariant& setting, groupMap[DESCRIPTION_SETTINGS_KEY].toList()) {
                     QVariantMap settingMap = setting.toMap();
                     if (settingMap[DESCRIPTION_NAME_KEY].toString() == settingKey) {
                         return settingMap[SETTING_DEFAULT_KEY];
@@ -1096,7 +1080,7 @@ QVariant DomainServerSettingsManager::valueOrDefaultValueForKeyPath(const QStrin
     return QVariant();
 }
 
-bool DomainServerSettingsManager::handleAuthenticatedHTTPRequest(HTTPConnection *connection, const QUrl &url) {
+bool DomainServerSettingsManager::handleAuthenticatedHTTPRequest(HTTPConnection* connection, const QUrl& url) {
     if (connection->requestOperation() == QNetworkAccessManager::PostOperation) {
         static const QString SETTINGS_RESTORE_PATH = "/settings/restore";
 
@@ -1155,30 +1139,29 @@ bool DomainServerSettingsManager::handleAuthenticatedHTTPRequest(HTTPConnection 
 
             return true;
         }
-    }   else if (connection->requestOperation() == QNetworkAccessManager::GetOperation) {
+    } else if (connection->requestOperation() == QNetworkAccessManager::GetOperation) {
         static const QString SETTINGS_MENU_GROUPS_PATH = "/settings-menu-groups.json";
         static const QString SETTINGS_BACKUP_PATH = "/settings/backup.json";
 
         if (url.path() == SETTINGS_PATH_JSON || url.path() == CONTENT_SETTINGS_PATH_JSON) {
-
             // setup a JSON Object with descriptions and non-omitted settings
             const QString SETTINGS_RESPONSE_DESCRIPTION_KEY = "descriptions";
             const QString SETTINGS_RESPONSE_VALUE_KEY = "values";
 
             QJsonObject rootObject;
 
-            DomainSettingsInclusion domainSettingsInclusion = (url.path() == SETTINGS_PATH_JSON)
-                ? IncludeDomainSettings : NoDomainSettings;
+            DomainSettingsInclusion domainSettingsInclusion = (url.path() == SETTINGS_PATH_JSON) ? IncludeDomainSettings
+                                                                                                 : NoDomainSettings;
             ContentSettingsInclusion contentSettingsInclusion = (url.path() == CONTENT_SETTINGS_PATH_JSON)
-                ? IncludeContentSettings : NoContentSettings;
+                                                                    ? IncludeContentSettings
+                                                                    : NoContentSettings;
 
-            rootObject[SETTINGS_RESPONSE_DESCRIPTION_KEY] = (url.path() == SETTINGS_PATH_JSON)
-                ? _domainSettingsDescription : _contentSettingsDescription;
+            rootObject[SETTINGS_RESPONSE_DESCRIPTION_KEY] = (url.path() == SETTINGS_PATH_JSON) ? _domainSettingsDescription
+                                                                                               : _contentSettingsDescription;
 
             // grab a domain settings object for all types, filtered for the right class of settings
             // and exclude default values
-            rootObject[SETTINGS_RESPONSE_VALUE_KEY] = settingsResponseObjectForType("", Authenticated,
-                                                                                    domainSettingsInclusion,
+            rootObject[SETTINGS_RESPONSE_VALUE_KEY] = settingsResponseObjectForType("", Authenticated, domainSettingsInclusion,
                                                                                     contentSettingsInclusion,
                                                                                     IncludeDefaultSettings);
 
@@ -1215,12 +1198,11 @@ bool DomainServerSettingsManager::handleAuthenticatedHTTPRequest(HTTPConnection 
 }
 
 bool DomainServerSettingsManager::restoreSettingsFromObject(QJsonObject settingsToRestore, SettingsType settingsType) {
-
     // grab a write lock since we're about to change the settings map
     QWriteLocker locker(&_settingsLock);
 
-    QJsonArray* filteredDescriptionArray = settingsType == DomainSettings
-        ? &_domainSettingsDescription : &_contentSettingsDescription;
+    QJsonArray* filteredDescriptionArray = settingsType == DomainSettings ? &_domainSettingsDescription
+                                                                          : &_contentSettingsDescription;
 
     // grab a copy of the current config before restore, so that we can back out if something bad happens during
     QVariantMap preRestoreConfig = _configMap.getConfig();
@@ -1229,7 +1211,7 @@ bool DomainServerSettingsManager::restoreSettingsFromObject(QJsonObject settings
 
     // enumerate through the settings in the description
     // if we have one in the restore then use it, otherwise clear it from current settings
-    foreach(const QJsonValue& descriptionGroupValue, *filteredDescriptionArray) {
+    foreach (const QJsonValue& descriptionGroupValue, *filteredDescriptionArray) {
         QJsonObject descriptionGroupObject = descriptionGroupValue.toObject();
         QString groupKey = descriptionGroupObject[DESCRIPTION_NAME_KEY].toString();
         QJsonArray descriptionGroupSettings = descriptionGroupObject[DESCRIPTION_SETTINGS_KEY].toArray();
@@ -1263,14 +1245,13 @@ bool DomainServerSettingsManager::restoreSettingsFromObject(QJsonObject settings
             }
         }
 
-        foreach(const QJsonValue& descriptionSettingValue, descriptionGroupSettings) {
-
+        foreach (const QJsonValue& descriptionSettingValue, descriptionGroupSettings) {
             QJsonObject descriptionSettingObject = descriptionSettingValue.toObject();
 
             // we'll override this setting with the default or what is in the restore as long as
             // it isn't specifically excluded from backups
-            bool isBackedUpSetting = !descriptionSettingObject.contains(DESCRIPTION_BACKUP_FLAG_KEY)
-                || descriptionSettingObject[DESCRIPTION_BACKUP_FLAG_KEY].toBool();
+            bool isBackedUpSetting = !descriptionSettingObject.contains(DESCRIPTION_BACKUP_FLAG_KEY) ||
+                                     descriptionSettingObject[DESCRIPTION_BACKUP_FLAG_KEY].toBool();
 
             if (isBackedUpSetting) {
                 QString settingName = descriptionSettingObject[DESCRIPTION_NAME_KEY].toString();
@@ -1286,8 +1267,7 @@ bool DomainServerSettingsManager::restoreSettingsFromObject(QJsonObject settings
                 bool shouldCreateIfMissing = !restoreValue.isNull();
 
                 // get a QVariant pointer to this setting in our config map
-                QString fullSettingKey = !groupKey.isEmpty()
-                    ? groupKey + "." + settingName : settingName;
+                QString fullSettingKey = !groupKey.isEmpty() ? groupKey + "." + settingName : settingName;
 
                 QVariant* variantValue = _configMap.valueForKeyPath(fullSettingKey, shouldCreateIfMissing);
 
@@ -1369,23 +1349,22 @@ QJsonObject DomainServerSettingsManager::settingsResponseObjectForType(const QSt
         }
 
         // enumerate the groups in the potentially filtered object to find which settings to pass
-        foreach(const QJsonValue& groupValue, *filteredDescriptionArray) {
+        foreach (const QJsonValue& groupValue, *filteredDescriptionArray) {
             QJsonObject groupObject = groupValue.toObject();
             QString groupKey = groupObject[DESCRIPTION_NAME_KEY].toString();
             QJsonArray groupSettingsArray = groupObject[DESCRIPTION_SETTINGS_KEY].toArray();
 
             QJsonObject groupResponseObject;
 
-            foreach(const QJsonValue& settingValue, groupSettingsArray) {
-
+            foreach (const QJsonValue& settingValue, groupSettingsArray) {
                 const QString VALUE_HIDDEN_FLAG_KEY = "value-hidden";
 
                 QJsonObject settingObject = settingValue.toObject();
 
                 // consider this setting as long as it isn't hidden
                 // and either this isn't for a backup or it's a value included in backups
-                bool includedInBackups = !settingObject.contains(DESCRIPTION_BACKUP_FLAG_KEY)
-                    || settingObject[DESCRIPTION_BACKUP_FLAG_KEY].toBool();
+                bool includedInBackups = !settingObject.contains(DESCRIPTION_BACKUP_FLAG_KEY) ||
+                                         settingObject[DESCRIPTION_BACKUP_FLAG_KEY].toBool();
 
                 if (!settingObject[VALUE_HIDDEN_FLAG_KEY].toBool() && (settingsBackupFlag != ForBackup || includedInBackups)) {
                     QJsonArray affectedTypesArray = settingObject[AFFECTED_TYPES_JSON_KEY].toArray();
@@ -1393,15 +1372,14 @@ QJsonObject DomainServerSettingsManager::settingsResponseObjectForType(const QSt
                         affectedTypesArray = groupObject[AFFECTED_TYPES_JSON_KEY].toArray();
                     }
 
-                    if (affectedTypesArray.contains(queryType) ||
-                        (queryType.isNull() && authentication == Authenticated)) {
+                    if (affectedTypesArray.contains(queryType) || (queryType.isNull() && authentication == Authenticated)) {
                         QString settingName = settingObject[DESCRIPTION_NAME_KEY].toString();
 
                         // we need to check if the settings map has a value for this setting
                         QVariant variantValue;
 
                         if (!groupKey.isEmpty()) {
-                             QVariant settingsMapGroupValue = valueForKeyPath(groupKey);
+                            QVariant settingsMapGroupValue = valueForKeyPath(groupKey);
 
                             if (!settingsMapGroupValue.isNull()) {
                                 variantValue = settingsMapGroupValue.toMap().value(settingName);
@@ -1493,19 +1471,18 @@ void DomainServerSettingsManager::updateSetting(const QString& key, const QJsonV
         if (!possibleMap.canConvert(QMetaType::QVariantMap)) {
             // if this isn't a map then we need to make it one, otherwise we're about to crash
             qDebug() << "Value at" << key << "was not the expected QVariantMap while updating DS settings"
-                << "- removing existing value and making it a QVariantMap";
+                     << "- removing existing value and making it a QVariantMap";
             possibleMap = QVariantMap();
         }
 
         QVariantMap& thisMap = *reinterpret_cast<QVariantMap*>(possibleMap.data());
-        foreach(const QString childKey, newValue.toObject().keys()) {
-
+        foreach (const QString childKey, newValue.toObject().keys()) {
             QJsonObject childDescriptionObject = settingDescription;
 
             // is this the key? if so we have the description already
             if (key != settingDescription[DESCRIPTION_NAME_KEY].toString()) {
                 // otherwise find the description object for this childKey under columns
-                foreach(const QJsonValue& column, settingDescription[DESCRIPTION_COLUMNS_KEY].toArray()) {
+                foreach (const QJsonValue& column, settingDescription[DESCRIPTION_COLUMNS_KEY].toArray()) {
                     if (column.isObject()) {
                         QJsonObject thisDescription = column.toObject();
                         if (thisDescription[DESCRIPTION_NAME_KEY] == childKey) {
@@ -1542,7 +1519,7 @@ void DomainServerSettingsManager::updateSetting(const QString& key, const QJsonV
 
 QJsonObject DomainServerSettingsManager::settingDescriptionFromGroup(const QJsonObject& groupObject,
                                                                      const QString& settingName) {
-    foreach(const QJsonValue& settingValue, groupObject[DESCRIPTION_SETTINGS_KEY].toArray()) {
+    foreach (const QJsonValue& settingValue, groupObject[DESCRIPTION_SETTINGS_KEY].toArray()) {
         QJsonObject settingObject = settingValue.toObject();
         if (settingObject[DESCRIPTION_NAME_KEY].toString() == settingName) {
             return settingObject;
@@ -1554,7 +1531,6 @@ QJsonObject DomainServerSettingsManager::settingDescriptionFromGroup(const QJson
 
 bool DomainServerSettingsManager::recurseJSONObjectAndOverwriteSettings(const QJsonObject& postedObject,
                                                                         SettingsType settingsType) {
-
     // take a write lock since we're about to overwrite settings in the config map
     QWriteLocker locker(&_settingsLock);
 
@@ -1570,7 +1546,7 @@ bool DomainServerSettingsManager::recurseJSONObjectAndOverwriteSettings(const QJ
     auto& filteredDescriptionArray = settingsType == DomainSettings ? _domainSettingsDescription : _contentSettingsDescription;
 
     // Iterate on the setting groups
-    foreach(const QString& rootKey, postedObject.keys()) {
+    foreach (const QString& rootKey, postedObject.keys()) {
         const QJsonValue& rootValue = postedObject[rootKey];
 
         if (!settingsVariant.contains(rootKey)) {
@@ -1583,7 +1559,7 @@ bool DomainServerSettingsManager::recurseJSONObjectAndOverwriteSettings(const QJ
         QJsonObject groupDescriptionObject;
 
         // we need to check the description array to see if this is a root setting or a group setting
-        foreach(const QJsonValue& groupValue, filteredDescriptionArray) {
+        foreach (const QJsonValue& groupValue, filteredDescriptionArray) {
             if (groupValue.toObject()[DESCRIPTION_NAME_KEY] == rootKey) {
                 // we matched a group - keep this since we'll use it below to update the settings
                 groupDescriptionObject = groupValue.toObject();
@@ -1601,12 +1577,11 @@ bool DomainServerSettingsManager::recurseJSONObjectAndOverwriteSettings(const QJ
 
             QJsonObject matchingDescriptionObject;
 
-            foreach(const QJsonValue& groupValue, _descriptionArray) {
+            foreach (const QJsonValue& groupValue, _descriptionArray) {
                 // find groups with root values (they don't have a group name)
                 QJsonObject groupObject = groupValue.toObject();
 
                 if (!groupObject.contains(DESCRIPTION_NAME_KEY)) {
-
                     // this is a group with root values - check if our setting is in here
                     matchingDescriptionObject = settingDescriptionFromGroup(groupObject, rootKey);
 
@@ -1619,8 +1594,8 @@ bool DomainServerSettingsManager::recurseJSONObjectAndOverwriteSettings(const QJ
             if (!matchingDescriptionObject.isEmpty()) {
                 updateSetting(rootKey, rootValue, *thisMap, matchingDescriptionObject);
 
-                if (rootKey != SECURITY_ROOT_KEY && rootKey != BROADCASTING_KEY &&
-                    rootKey != SETTINGS_PATHS_KEY && rootKey != WIZARD_KEY) {
+                if (rootKey != SECURITY_ROOT_KEY && rootKey != BROADCASTING_KEY && rootKey != SETTINGS_PATHS_KEY &&
+                    rootKey != WIZARD_KEY) {
                     needRestart = true;
                 }
             } else {
@@ -1628,7 +1603,7 @@ bool DomainServerSettingsManager::recurseJSONObjectAndOverwriteSettings(const QJ
             }
         } else {
             // this is a group - iterate on the settings in the group
-            foreach(const QString& settingKey, rootValue.toObject().keys()) {
+            foreach (const QString& settingKey, rootValue.toObject().keys()) {
                 // make sure this particular setting exists and we have a description object for it
                 QJsonObject matchingDescriptionObject = settingDescriptionFromGroup(groupDescriptionObject, settingKey);
 
@@ -1637,14 +1612,14 @@ bool DomainServerSettingsManager::recurseJSONObjectAndOverwriteSettings(const QJ
                     const QJsonValue& settingValue = rootValue.toObject()[settingKey];
                     updateSetting(settingKey, settingValue, *thisMap, matchingDescriptionObject);
 
-                    if ((rootKey != SECURITY_ROOT_KEY && rootKey != BROADCASTING_KEY &&
-                         rootKey != DESCRIPTION_ROOT_KEY && rootKey != WIZARD_KEY) ||
+                    if ((rootKey != SECURITY_ROOT_KEY && rootKey != BROADCASTING_KEY && rootKey != DESCRIPTION_ROOT_KEY &&
+                         rootKey != WIZARD_KEY) ||
                         settingKey == AC_SUBNET_WHITELIST_KEY) {
                         needRestart = true;
                     }
                 } else {
-                    qDebug() << "Could not find description for setting" << settingKey << "in group" << rootKey <<
-                        "- cannot update setting.";
+                    qDebug() << "Could not find description for setting" << settingKey << "in group" << rootKey
+                             << "- cannot update setting.";
                 }
             }
         }
@@ -1665,16 +1640,14 @@ bool DomainServerSettingsManager::recurseJSONObjectAndOverwriteSettings(const QJ
 }
 
 // Compare two members of a permissions list
-bool permissionVariantLessThan(const QVariant &v1, const QVariant &v2) {
-    if (!v1.canConvert(QMetaType::QVariantMap) ||
-        !v2.canConvert(QMetaType::QVariantMap)) {
+bool permissionVariantLessThan(const QVariant& v1, const QVariant& v2) {
+    if (!v1.canConvert(QMetaType::QVariantMap) || !v2.canConvert(QMetaType::QVariantMap)) {
         return v1.toString() < v2.toString();
     }
     QVariantMap m1 = v1.toMap();
     QVariantMap m2 = v2.toMap();
 
-    if (!m1.contains("permissions_id") ||
-        !m2.contains("permissions_id")) {
+    if (!m1.contains("permissions_id") || !m2.contains("permissions_id")) {
         return v1.toString() < v2.toString();
     }
 
@@ -1759,7 +1732,6 @@ bool DomainServerSettingsManager::setGroupID(const QString& groupName, const QUu
     _groupIDs[groupName.toLower()] = groupID;
     _groupNames[groupID] = groupName;
 
-
     for (const auto& entry : _groupPermissions.get()) {
         auto& perms = entry.second;
         if (perms->getID().toLower() == groupName.toLower() && !perms->isGroup()) {
@@ -1799,9 +1771,7 @@ void DomainServerSettingsManager::apiRefreshGroupInformation() {
         apiGetGroupID(groupName);
     }
 
-    foreach (QUuid groupID, _groupNames.keys()) {
-        apiGetGroupRanks(groupID);
-    }
+    foreach (QUuid groupID, _groupNames.keys()) { apiGetGroupRanks(groupID); }
 
     changed |= ensurePermissionsForGroupRanks();
 
@@ -1819,8 +1789,7 @@ void DomainServerSettingsManager::apiGetGroupID(const QString& groupName) {
     callbackParams.errorCallbackMethod = "apiGetGroupIDErrorCallback";
 
     const QString GET_GROUP_ID_PATH = "api/v1/groups/names/%1";
-    DependencyManager::get<AccountManager>()->sendRequest(GET_GROUP_ID_PATH.arg(groupName),
-                                                          AccountManagerAuth::Required,
+    DependencyManager::get<AccountManager>()->sendRequest(GET_GROUP_ID_PATH.arg(groupName), AccountManagerAuth::Required,
                                                           QNetworkAccessManager::GetOperation, callbackParams);
 }
 
@@ -1885,9 +1854,9 @@ void DomainServerSettingsManager::apiGetGroupRanks(const QUuid& groupID) {
     callbackParams.errorCallbackMethod = "apiGetGroupRanksErrorCallback";
 
     const QString GET_GROUP_RANKS_PATH = "api/v1/groups/%1/ranks";
-    DependencyManager::get<AccountManager>()->sendRequest(GET_GROUP_RANKS_PATH.arg(groupID.toString().mid(1,36)),
-                                                          AccountManagerAuth::Required,
-                                                          QNetworkAccessManager::GetOperation, callbackParams);
+    DependencyManager::get<AccountManager>()->sendRequest(GET_GROUP_RANKS_PATH.arg(groupID.toString().mid(1, 36)),
+                                                          AccountManagerAuth::Required, QNetworkAccessManager::GetOperation,
+                                                          callbackParams);
 }
 
 void DomainServerSettingsManager::apiGetGroupRanksJSONCallback(QNetworkReply* requestReply) {
@@ -2025,14 +1994,10 @@ void DomainServerSettingsManager::debugDumpGroupsState() {
     }
 
     qDebug() << "_groupIDs:";
-    foreach (QString groupName, _groupIDs.keys()) {
-        qDebug() << "|  " << groupName << "==>" << _groupIDs[groupName.toLower()];
-    }
+    foreach (QString groupName, _groupIDs.keys()) { qDebug() << "|  " << groupName << "==>" << _groupIDs[groupName.toLower()]; }
 
     qDebug() << "_groupNames:";
-    foreach (QUuid groupID, _groupNames.keys()) {
-        qDebug() << "|  " << groupID << "==>" << _groupNames[groupID];
-    }
+    foreach (QUuid groupID, _groupNames.keys()) { qDebug() << "|  " << groupID << "==>" << _groupNames[groupID]; }
 
     qDebug() << "_groupRanks:";
     foreach (QUuid groupID, _groupRanks.keys()) {

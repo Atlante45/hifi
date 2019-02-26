@@ -9,9 +9,9 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 
 // #include <stdio.h>
-#include <iostream>
-#include <iomanip>
 #include <VHACD.h>
+#include <iomanip>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -22,8 +22,7 @@
 using namespace std;
 using namespace VHACD;
 
-
-int main(int argc, char * argv[]) {
+int main(int argc, char* argv[]) {
     setupHifiApplication("VHACD Util");
 
     VHACDUtilApp app(argc, argv);

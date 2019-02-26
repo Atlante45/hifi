@@ -41,7 +41,7 @@ qint32 DataViewPrototype::getInt8(qint32 byteOffset) {
     if (realOffset(byteOffset, sizeof(qint8))) {
         QDataStream stream(*thisArrayBuffer());
         stream.skipRawData(byteOffset);
-        
+
         qint8 result;
         stream >> result;
         return result;
@@ -54,7 +54,7 @@ quint32 DataViewPrototype::getUint8(qint32 byteOffset) {
     if (realOffset(byteOffset, sizeof(quint8))) {
         QDataStream stream(*thisArrayBuffer());
         stream.skipRawData(byteOffset);
-        
+
         quint8 result;
         stream >> result;
         return result;
@@ -68,7 +68,7 @@ qint32 DataViewPrototype::getInt16(qint32 byteOffset, bool littleEndian) {
         QDataStream stream(*thisArrayBuffer());
         stream.skipRawData(byteOffset);
         stream.setByteOrder((littleEndian) ? QDataStream::LittleEndian : QDataStream::BigEndian);
-        
+
         qint16 result;
         stream >> result;
         return result;
@@ -82,7 +82,7 @@ quint32 DataViewPrototype::getUint16(qint32 byteOffset, bool littleEndian) {
         QDataStream stream(*thisArrayBuffer());
         stream.skipRawData(byteOffset);
         stream.setByteOrder((littleEndian) ? QDataStream::LittleEndian : QDataStream::BigEndian);
-        
+
         quint16 result;
         stream >> result;
         return result;
@@ -96,7 +96,7 @@ qint32 DataViewPrototype::getInt32(qint32 byteOffset, bool littleEndian) {
         QDataStream stream(*thisArrayBuffer());
         stream.skipRawData(byteOffset);
         stream.setByteOrder((littleEndian) ? QDataStream::LittleEndian : QDataStream::BigEndian);
-        
+
         qint32 result;
         stream >> result;
         return result;
@@ -110,7 +110,7 @@ quint32 DataViewPrototype::getUint32(qint32 byteOffset, bool littleEndian) {
         QDataStream stream(*thisArrayBuffer());
         stream.skipRawData(byteOffset);
         stream.setByteOrder((littleEndian) ? QDataStream::LittleEndian : QDataStream::BigEndian);
-        
+
         quint32 result;
         stream >> result;
         return result;
@@ -125,13 +125,13 @@ QScriptValue DataViewPrototype::getFloat32(qint32 byteOffset, bool littleEndian)
         stream.skipRawData(byteOffset);
         stream.setByteOrder((littleEndian) ? QDataStream::LittleEndian : QDataStream::BigEndian);
         stream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-        
+
         float result;
         stream >> result;
         if (isNaN(result)) {
             return QScriptValue();
         }
-        
+
         return QScriptValue(result);
     }
     thisObject().engine()->evaluate("throw \"RangeError: byteOffset out of range\"");
@@ -144,13 +144,13 @@ QScriptValue DataViewPrototype::getFloat64(qint32 byteOffset, bool littleEndian)
         stream.skipRawData(byteOffset);
         stream.setByteOrder((littleEndian) ? QDataStream::LittleEndian : QDataStream::BigEndian);
         stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
-        
+
         double result;
         stream >> result;
         if (isNaN(result)) {
             return QScriptValue();
         }
-        
+
         return result;
     }
     thisObject().engine()->evaluate("throw \"RangeError: byteOffset out of range\"");
@@ -161,7 +161,7 @@ void DataViewPrototype::setInt8(qint32 byteOffset, qint32 value) {
     if (realOffset(byteOffset, sizeof(qint8))) {
         QDataStream stream(thisArrayBuffer(), QIODevice::ReadWrite);
         stream.skipRawData(byteOffset);
-        
+
         stream << (qint8)value;
     } else {
         thisObject().engine()->evaluate("throw \"RangeError: byteOffset out of range\"");
@@ -172,7 +172,7 @@ void DataViewPrototype::setUint8(qint32 byteOffset, quint32 value) {
     if (realOffset(byteOffset, sizeof(quint8))) {
         QDataStream stream(thisArrayBuffer(), QIODevice::ReadWrite);
         stream.skipRawData(byteOffset);
-        
+
         stream << (quint8)value;
     } else {
         thisObject().engine()->evaluate("throw \"RangeError: byteOffset out of range\"");
@@ -184,7 +184,7 @@ void DataViewPrototype::setInt16(qint32 byteOffset, qint32 value, bool littleEnd
         QDataStream stream(thisArrayBuffer(), QIODevice::ReadWrite);
         stream.skipRawData(byteOffset);
         stream.setByteOrder((littleEndian) ? QDataStream::LittleEndian : QDataStream::BigEndian);
-        
+
         stream << (qint16)value;
     } else {
         thisObject().engine()->evaluate("throw \"RangeError: byteOffset out of range\"");
@@ -196,7 +196,7 @@ void DataViewPrototype::setUint16(qint32 byteOffset, quint32 value, bool littleE
         QDataStream stream(thisArrayBuffer(), QIODevice::ReadWrite);
         stream.skipRawData(byteOffset);
         stream.setByteOrder((littleEndian) ? QDataStream::LittleEndian : QDataStream::BigEndian);
-        
+
         stream << (quint16)value;
     } else {
         thisObject().engine()->evaluate("throw \"RangeError: byteOffset out of range\"");
@@ -208,7 +208,7 @@ void DataViewPrototype::setInt32(qint32 byteOffset, qint32 value, bool littleEnd
         QDataStream stream(thisArrayBuffer(), QIODevice::ReadWrite);
         stream.skipRawData(byteOffset);
         stream.setByteOrder((littleEndian) ? QDataStream::LittleEndian : QDataStream::BigEndian);
-        
+
         stream << (qint32)value;
     } else {
         thisObject().engine()->evaluate("throw \"RangeError: byteOffset out of range\"");
@@ -220,7 +220,7 @@ void DataViewPrototype::setUint32(qint32 byteOffset, quint32 value, bool littleE
         QDataStream stream(thisArrayBuffer(), QIODevice::ReadWrite);
         stream.skipRawData(byteOffset);
         stream.setByteOrder((littleEndian) ? QDataStream::LittleEndian : QDataStream::BigEndian);
-        
+
         stream << (quint32)value;
     } else {
         thisObject().engine()->evaluate("throw \"RangeError: byteOffset out of range\"");
@@ -233,7 +233,7 @@ void DataViewPrototype::setFloat32(qint32 byteOffset, float value, bool littleEn
         stream.skipRawData(byteOffset);
         stream.setByteOrder((littleEndian) ? QDataStream::LittleEndian : QDataStream::BigEndian);
         stream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-        
+
         stream << value;
     } else {
         thisObject().engine()->evaluate("throw \"RangeError: byteOffset out of range\"");
@@ -246,11 +246,9 @@ void DataViewPrototype::setFloat64(qint32 byteOffset, double value, bool littleE
         stream.skipRawData(byteOffset);
         stream.setByteOrder((littleEndian) ? QDataStream::LittleEndian : QDataStream::BigEndian);
         stream.setFloatingPointPrecision(QDataStream::DoublePrecision);
-        
+
         stream << value;
     } else {
         thisObject().engine()->evaluate("throw \"RangeError: byteOffset out of range\"");
     }
 }
-
-

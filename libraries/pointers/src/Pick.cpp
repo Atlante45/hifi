@@ -16,15 +16,11 @@ PickQuery::PickQuery(const PickFilter& filter, const float maxDistance, const bo
 }
 
 void PickQuery::enable(bool enabled) {
-    withWriteLock([&] {
-        _enabled = enabled;
-    });
+    withWriteLock([&] { _enabled = enabled; });
 }
 
 PickFilter PickQuery::getFilter() const {
-    return resultWithReadLock<PickFilter>([&] {
-        return _filter;
-    });
+    return resultWithReadLock<PickFilter>([&] { return _filter; });
 }
 
 float PickQuery::getMaxDistance() const {
@@ -32,9 +28,7 @@ float PickQuery::getMaxDistance() const {
 }
 
 bool PickQuery::isEnabled() const {
-    return resultWithReadLock<bool>([&] {
-        return _enabled;
-    });
+    return resultWithReadLock<bool>([&] { return _enabled; });
 }
 
 void PickQuery::setPrecisionPicking(bool precisionPicking) {
@@ -45,33 +39,26 @@ void PickQuery::setPrecisionPicking(bool precisionPicking) {
 }
 
 void PickQuery::setPickResult(const PickResultPointer& pickResult) {
-    withWriteLock([&] {
-        _prevResult = pickResult;
-    });
+    withWriteLock([&] { _prevResult = pickResult; });
 }
 
 QVector<QUuid> PickQuery::getIgnoreItems() const {
-    return resultWithReadLock<QVector<QUuid>>([&] {
-        return _ignoreItems;
-    });
+    return resultWithReadLock<QVector<QUuid>>([&] { return _ignoreItems; });
 }
 
 QVector<QUuid> PickQuery::getIncludeItems() const {
-    return resultWithReadLock<QVector<QUuid>>([&] {
-        return _includeItems;
-    });
+    return resultWithReadLock<QVector<QUuid>>([&] { return _includeItems; });
 }
 
 PickResultPointer PickQuery::getPrevPickResult() const {
-    return resultWithReadLock<PickResultPointer>([&] {
-        return _prevResult;
-    });
+    return resultWithReadLock<PickResultPointer>([&] { return _prevResult; });
 }
 
 void PickQuery::setIgnoreItems(const QVector<QUuid>& ignoreItems) {
     withWriteLock([&] {
         _ignoreItems = ignoreItems;
-        // We sort these items here so the PickCacheOptimizer can catch cases where two picks have the same ignoreItems in a different order
+        // We sort these items here so the PickCacheOptimizer can catch cases where two picks have the same ignoreItems in a
+        // different order
         std::sort(_ignoreItems.begin(), _ignoreItems.end(), std::less<QUuid>());
     });
 }
@@ -79,7 +66,8 @@ void PickQuery::setIgnoreItems(const QVector<QUuid>& ignoreItems) {
 void PickQuery::setIncludeItems(const QVector<QUuid>& includeItems) {
     withWriteLock([&] {
         _includeItems = includeItems;
-        // We sort these items here so the PickCacheOptimizer can catch cases where two picks have the same includeItems in a different order
+        // We sort these items here so the PickCacheOptimizer can catch cases where two picks have the same includeItems in a
+        // different order
         std::sort(_includeItems.begin(), _includeItems.end(), std::less<QUuid>());
     });
 }

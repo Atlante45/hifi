@@ -32,20 +32,17 @@
 class AutoUpdater : public QObject, public Dependency {
     Q_OBJECT
     SINGLETON_DEPENDENCY
-    
+
 public:
     AutoUpdater();
 
-    enum class InstallerType {
-        CLIENT_ONLY = 0,
-        FULL
-    };
-    
+    enum class InstallerType { CLIENT_ONLY = 0, FULL };
+
     void checkForUpdate();
     const QMap<ApplicationVersion, QMap<QString, QString>>& getBuildData() { return _builds; }
     void openLatestUpdateURL();
-    void setInstallerType(InstallerType type) { _installerType = type;  }
-    void setInstallerCampaign(QString campaign) { _installerCampaign = campaign;  }
+    void setInstallerType(InstallerType type) { _installerType = type; }
+    void setInstallerCampaign(QString campaign) { _installerCampaign = campaign; }
 
     const ApplicationVersion& getCurrentVersion() const { return _currentVersion; }
 
@@ -61,14 +58,11 @@ private:
     QString _installerCampaign { "" };
 
     ApplicationVersion _currentVersion;
-    
+
     void getLatestVersionData();
     void downloadUpdateVersion(const QString& version);
-    void appendBuildData(const QString& versionNumber,
-                         const QString& downloadURL,
-                         const QString& releaseTime,
-                         const QString& releaseNotes,
-                         const QString& pullRequestNumber);
+    void appendBuildData(const QString& versionNumber, const QString& downloadURL, const QString& releaseTime,
+                         const QString& releaseNotes, const QString& pullRequestNumber);
 
 private slots:
     void parseLatestVersionData();

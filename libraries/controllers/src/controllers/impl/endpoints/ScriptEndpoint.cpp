@@ -68,13 +68,10 @@ void ScriptEndpoint::apply(AxisValue value, const Pointer& source) {
 
 void ScriptEndpoint::internalApply(float value, int sourceID) {
     if (QThread::currentThread() != thread()) {
-        QMetaObject::invokeMethod(this, "internalApply", Qt::QueuedConnection,
-            Q_ARG(float, value),
-            Q_ARG(int, sourceID));
+        QMetaObject::invokeMethod(this, "internalApply", Qt::QueuedConnection, Q_ARG(float, value), Q_ARG(int, sourceID));
         return;
     }
-    QScriptValue result = _callable.call(QScriptValue(),
-        QScriptValueList({ QScriptValue(value), QScriptValue(sourceID) }));
+    QScriptValue result = _callable.call(QScriptValue(), QScriptValueList({ QScriptValue(value), QScriptValue(sourceID) }));
     if (result.isError()) {
         // print JavaScript exception
         qCDebug(controllers).noquote() << formatException(result);
@@ -109,13 +106,12 @@ void ScriptEndpoint::apply(const Pose& newPose, const Pointer& source) {
 void ScriptEndpoint::internalApply(const Pose& newPose, int sourceID) {
     _lastPoseWritten = newPose;
     if (QThread::currentThread() != thread()) {
-        QMetaObject::invokeMethod(this, "internalApply", Qt::QueuedConnection,
-            Q_ARG(const Pose&, newPose),
-            Q_ARG(int, sourceID));
+        QMetaObject::invokeMethod(this, "internalApply", Qt::QueuedConnection, Q_ARG(const Pose&, newPose),
+                                  Q_ARG(int, sourceID));
         return;
     }
-    QScriptValue result = _callable.call(QScriptValue(),
-        QScriptValueList({ Pose::toScriptValue(_callable.engine(), newPose), QScriptValue(sourceID) }));
+    QScriptValue result = _callable.call(QScriptValue(), QScriptValueList({ Pose::toScriptValue(_callable.engine(), newPose),
+                                                                            QScriptValue(sourceID) }));
     if (result.isError()) {
         // print JavaScript exception
         qCDebug(controllers).noquote() << formatException(result);

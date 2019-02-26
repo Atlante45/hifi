@@ -15,9 +15,7 @@
 
 #include "ModesWidget.h"
 
-OvenMainWindow::OvenMainWindow(QWidget *parent, Qt::WindowFlags flags) :
-    QMainWindow(parent, flags)
-{
+OvenMainWindow::OvenMainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(parent, flags) {
     setWindowTitle("High Fidelity Oven");
 
     // give the window a fixed width that will never change

@@ -35,9 +35,7 @@ public:
     bool hasPacketsToProcess() const { return _packets.size() > 0; }
 
     /// Is a specified node still alive?
-    bool isAlive(const QUuid& nodeUUID) const {
-        return _nodePacketCounts.contains(nodeUUID);
-    }
+    bool isAlive(const QUuid& nodeUUID) const { return _nodePacketCounts.contains(nodeUUID); }
 
     /// Are there received packets waiting to be processed from a specified node
     bool hasPacketsToProcessFrom(const SharedNodePointer& sendingNode) const {
@@ -45,9 +43,7 @@ public:
     }
 
     /// Are there received packets waiting to be processed from a specified node
-    bool hasPacketsToProcessFrom(const QUuid& nodeUUID) const {
-        return _nodePacketCounts[nodeUUID] > 0;
-    }
+    bool hasPacketsToProcessFrom(const QUuid& nodeUUID) const { return _nodePacketCounts[nodeUUID] > 0; }
 
     /// How many received packets waiting are to be processed
     int packetsToProcessCount() const { return (int)_packets.size(); }
@@ -69,17 +65,18 @@ protected:
     /// Implements generic processing behavior for this thread.
     virtual bool process() override;
 
-    /// Determines the timeout of the wait when there are no packets to process. Default value is 100ms to allow for regular event processing.
+    /// Determines the timeout of the wait when there are no packets to process. Default value is 100ms to allow for regular
+    /// event processing.
     virtual uint32_t getMaxWait() const { return MAX_WAIT_TIME; }
 
     /// Override to do work before the packets processing loop. Default does nothing.
-    virtual void preProcess() { }
+    virtual void preProcess() {}
 
     /// Override to do work inside the packet processing loop after a packet is processed. Default does nothing.
-    virtual void midProcess() { }
+    virtual void midProcess() {}
 
     /// Override to do work after the packets processing loop.  Default does nothing.
-    virtual void postProcess() { }
+    virtual void postProcess() {}
 
 protected:
     std::list<NodeSharedReceivedMessagePair> _packets;

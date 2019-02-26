@@ -12,8 +12,8 @@
 #ifndef hifi_Grab_h
 #define hifi_Grab_h
 
-#include <QUuid>
 #include <QByteArray>
+#include <QUuid>
 #include "GLMHelpers.h"
 #include "StreamUtils.h"
 
@@ -100,6 +100,5 @@ protected:
     glm::quat _rotationalOffset; // relative to joint
     bool _released { false }; // released and scheduled for deletion
 };
-
 
 #endif // hifi_Grab_h

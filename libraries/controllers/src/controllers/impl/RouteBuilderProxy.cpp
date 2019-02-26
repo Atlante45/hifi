@@ -9,31 +9,31 @@
 
 #include <QtCore/QDebug>
 
-#include <QtCore/QJsonObject>
 #include <QtCore/QJsonArray>
+#include <QtCore/QJsonObject>
 
 #include <GLMHelpers.h>
 
-#include "MappingBuilderProxy.h"
-#include "../ScriptingInterface.h"
 #include "../Logging.h"
+#include "../ScriptingInterface.h"
+#include "MappingBuilderProxy.h"
 
+#include "conditionals/AndConditional.h"
 #include "filters/ClampFilter.h"
 #include "filters/ConstrainToIntegerFilter.h"
 #include "filters/ConstrainToPositiveIntegerFilter.h"
 #include "filters/DeadZoneFilter.h"
+#include "filters/ExponentialSmoothingFilter.h"
 #include "filters/HysteresisFilter.h"
 #include "filters/InvertFilter.h"
-#include "filters/NotFilter.h"
-#include "filters/PulseFilter.h"
-#include "filters/ScaleFilter.h"
-#include "filters/TranslateFilter.h"
-#include "filters/TransformFilter.h"
-#include "filters/PostTransformFilter.h"
-#include "filters/RotateFilter.h"
 #include "filters/LowVelocityFilter.h"
-#include "filters/ExponentialSmoothingFilter.h"
-#include "conditionals/AndConditional.h"
+#include "filters/NotFilter.h"
+#include "filters/PostTransformFilter.h"
+#include "filters/PulseFilter.h"
+#include "filters/RotateFilter.h"
+#include "filters/ScaleFilter.h"
+#include "filters/TransformFilter.h"
+#include "filters/TranslateFilter.h"
 
 using namespace controller;
 
@@ -163,4 +163,3 @@ QObject* RouteBuilderProxy::logicalNot() {
 void RouteBuilderProxy::addFilter(Filter::Pointer filter) {
     _route->filters.push_back(filter);
 }
-

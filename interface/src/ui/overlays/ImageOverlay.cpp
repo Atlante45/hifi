@@ -12,18 +12,17 @@
 
 #include <DependencyManager.h>
 #include <GeometryCache.h>
-#include <gpu/Context.h>
 #include <RegisteredMetaTypes.h>
-
+#include <gpu/Context.h>
 
 QString const ImageOverlay::TYPE = "image";
 QUrl const ImageOverlay::URL(QString("hifi/overlays/ImageOverlay.qml"));
 
-ImageOverlay::ImageOverlay() 
-    : QmlOverlay(URL) { }
+ImageOverlay::ImageOverlay() : QmlOverlay(URL) {
+}
 
-ImageOverlay::ImageOverlay(const ImageOverlay* imageOverlay) :
-    QmlOverlay(URL, imageOverlay) { }
+ImageOverlay::ImageOverlay(const ImageOverlay* imageOverlay) : QmlOverlay(URL, imageOverlay) {
+}
 
 ImageOverlay* ImageOverlay::createClone() const {
     return new ImageOverlay(this);

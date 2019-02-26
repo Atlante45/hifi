@@ -17,12 +17,12 @@
 #include <GLMHelpers.h>
 
 void PhysicsDebugDraw::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {
-    DebugDraw::getInstance().drawRay(bulletToGLM(from), bulletToGLM(to), glm::vec4(color.getX(), color.getY(), color.getZ(), 1.0f));
+    DebugDraw::getInstance().drawRay(bulletToGLM(from), bulletToGLM(to),
+                                     glm::vec4(color.getX(), color.getY(), color.getZ(), 1.0f));
 }
 
-void PhysicsDebugDraw::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance,
-                                        int lifeTime, const btVector3& color) {
-
+void PhysicsDebugDraw::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime,
+                                        const btVector3& color) {
     glm::vec3 normal, tangent, biNormal;
     generateBasisVectors(bulletToGLM(normalOnB), Vectors::UNIT_X, normal, tangent, biNormal);
     btVector3 u = glmToBullet(normal);

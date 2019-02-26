@@ -16,11 +16,11 @@
 
 #include "OffscreenUi.h"
 
-
 std::mutex QmlFragmentClass::_mutex;
 std::map<QString, QScriptValue> QmlFragmentClass::_fragments;
 
-QmlFragmentClass::QmlFragmentClass(bool restricted, QString id) : QmlWindowClass(restricted), qml(id) { }
+QmlFragmentClass::QmlFragmentClass(bool restricted, QString id) : QmlWindowClass(restricted), qml(id) {
+}
 
 // Method called by Qt scripts to create a new bottom menu bar in Android
 QScriptValue QmlFragmentClass::internal_constructor(QScriptContext* context, QScriptEngine* engine, bool restricted) {
@@ -31,7 +31,7 @@ QScriptValue QmlFragmentClass::internal_constructor(QScriptContext* context, QSc
         // look up tabletId in the map.
         auto iter = _fragments.find(qml.toString());
         if (iter != _fragments.end()) {
-            //qDebug() << "[QML-ANDROID] QmlFragmentClass menu already exists";
+            // qDebug() << "[QML-ANDROID] QmlFragmentClass menu already exists";
             return iter->second;
         }
     } else {
@@ -67,18 +67,18 @@ QObject* QmlFragmentClass::addButton(const QVariant& properties) {
 #ifndef DISABLE_QML
     QVariant resultVar;
     Qt::ConnectionType connectionType = Qt::AutoConnection;
-    
+
     if (QThread::currentThread() != _qmlWindow->thread()) {
         connectionType = Qt::BlockingQueuedConnection;
     }
-    bool hasResult = QMetaObject::invokeMethod(_qmlWindow, "addButton", connectionType,
-                                               Q_RETURN_ARG(QVariant, resultVar), Q_ARG(QVariant, properties));
+    bool hasResult = QMetaObject::invokeMethod(_qmlWindow, "addButton", connectionType, Q_RETURN_ARG(QVariant, resultVar),
+                                               Q_ARG(QVariant, properties));
     if (!hasResult) {
         qWarning() << "QmlFragmentClass addButton has no result";
         return NULL;
     }
 
-    QObject* qmlButton = qvariant_cast<QObject *>(resultVar);
+    QObject* qmlButton = qvariant_cast<QObject*>(resultVar);
     if (!qmlButton) {
         qWarning() << "QmlFragmentClass addButton result not a QObject";
         return NULL;

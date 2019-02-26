@@ -16,6 +16,7 @@ namespace controller {
 
 class HysteresisFilter : public Filter {
     REGISTER_FILTER_CLASS(HysteresisFilter);
+
 public:
     HysteresisFilter(float min = 0.25, float max = 0.75);
     virtual AxisValue apply(AxisValue value) const override;
@@ -23,12 +24,13 @@ public:
     virtual Pose apply(Pose value) const override { return value; }
 
     virtual bool parseParameters(const QJsonValue& parameters) override;
+
 protected:
     float _min;
     float _max;
     mutable bool _signaled { false };
 };
 
-}
+} // namespace controller
 
 #endif

@@ -11,23 +11,22 @@
 #include "LightClusters.h"
 
 #include <gpu/Context.h>
-#include <shaders/Shaders.h>
 #include <graphics/ShaderConstants.h>
+#include <shaders/Shaders.h>
 
 #include "RenderUtilsLogging.h"
-#include "render-utils/ShaderConstants.h"
 #include "StencilMaskPass.h"
-
+#include "render-utils/ShaderConstants.h"
 
 namespace ru {
-    using render_utils::slot::texture::Texture;
-    using render_utils::slot::buffer::Buffer;
-}
+using render_utils::slot::buffer::Buffer;
+using render_utils::slot::texture::Texture;
+} // namespace ru
 
 namespace gr {
-    using graphics::slot::texture::Texture;
-    using graphics::slot::buffer::Buffer;
-}
+using graphics::slot::buffer::Buffer;
+using graphics::slot::texture::Texture;
+} // namespace gr
 
 FrustumGrid::FrustumGrid(const FrustumGrid& source) :
     frustumNear(source.frustumNear),
@@ -38,8 +37,8 @@ FrustumGrid::FrustumGrid(const FrustumGrid& source) :
     spare(source.spare),
     eyeToGridProj(source.eyeToGridProj),
     worldToEyeMat(source.worldToEyeMat),
-    eyeToWorldMat(source.eyeToWorldMat)
-{}
+    eyeToWorldMat(source.eyeToWorldMat) {
+}
 
 void FrustumGrid::generateGridPlanes(Planes& xPlanes, Planes& yPlanes, Planes& zPlanes) {
     xPlanes.resize(dims.x + 1);
@@ -49,23 +48,22 @@ void FrustumGrid::generateGridPlanes(Planes& xPlanes, Planes& yPlanes, Planes& z
     float centerY = float(dims.y) * 0.5f;
     float centerX = float(dims.x) * 0.5f;
 
-    for (int z = 0; z < (int) zPlanes.size(); z++) {
+    for (int z = 0; z < (int)zPlanes.size(); z++) {
         ivec3 pos(0, 0, z);
         zPlanes[z] = glm::vec4(0.0f, 0.0f, 1.0f, -frustumGrid_clusterPosToEye(pos, vec3(0.0)).z);
     }
 
-    for (int x = 0; x < (int) xPlanes.size(); x++) {
+    for (int x = 0; x < (int)xPlanes.size(); x++) {
         auto slicePos = frustumGrid_clusterPosToEye(glm::vec3((float)x, centerY, 0.0));
         auto sliceDir = glm::normalize(slicePos);
         xPlanes[x] = glm::vec4(sliceDir.z, 0.0, -sliceDir.x, 0.0);
     }
 
-    for (int y = 0; y < (int) yPlanes.size(); y++) {
+    for (int y = 0; y < (int)yPlanes.size(); y++) {
         auto slicePos = frustumGrid_clusterPosToEye(glm::vec3(centerX, (float)y, 0.0));
         auto sliceDir = glm::normalize(slicePos);
         yPlanes[y] = glm::vec4(0.0, sliceDir.z, -sliceDir.y, 0.0);
     }
-
 }
 
 #include "DeferredLightingEffect.h"
@@ -75,24 +73,22 @@ const glm::uvec4 LightClusters::MAX_GRID_DIMENSIONS { 16, 16, 16, 16384 };
 const glm::uvec4 LightClusters::MAX_GRID_DIMENSIONS { 32, 32, 31, 16384 };
 #endif
 
-
 LightClusters::LightClusters() :
     _lightIndicesBuffer(std::make_shared<gpu::Buffer>()),
-    _clusterGridBuffer(/*std::make_shared<gpu::Buffer>(), */gpu::Element::INDEX_INT32),
-    _clusterContentBuffer(/*std::make_shared<gpu::Buffer>(), */gpu::Element::INDEX_INT32) {
+    _clusterGridBuffer(/*std::make_shared<gpu::Buffer>(), */ gpu::Element::INDEX_INT32),
+    _clusterContentBuffer(/*std::make_shared<gpu::Buffer>(), */ gpu::Element::INDEX_INT32) {
 }
 
 void LightClusters::setDimensions(glm::uvec3 gridDims, uint32_t listBudget) {
     ivec3 configDimensions;
     auto gridBudget = MAX_GRID_DIMENSIONS.w;
-    configDimensions.x = std::max(1, (int) std::min(MAX_GRID_DIMENSIONS.x, gridDims.x));
-    configDimensions.y = std::max(1, (int) std::min(MAX_GRID_DIMENSIONS.y, gridDims.y));
-    configDimensions.z = std::max(1, (int) std::min(MAX_GRID_DIMENSIONS.z, gridDims.z));
+    configDimensions.x = std::max(1, (int)std::min(MAX_GRID_DIMENSIONS.x, gridDims.x));
+    configDimensions.y = std::max(1, (int)std::min(MAX_GRID_DIMENSIONS.y, gridDims.y));
+    configDimensions.z = std::max(1, (int)std::min(MAX_GRID_DIMENSIONS.z, gridDims.z));
 
     auto sliceCost = configDimensions.x * configDimensions.y;
     auto maxNumSlices = (int)(gridBudget / sliceCost) - 1;
     configDimensions.z = std::min(maxNumSlices, configDimensions.z);
-
 
     // Grab the frustumGridBuffer and force it updated
     const auto& constFrustumGrid = _frustumGridBuffer.get();
@@ -116,17 +112,18 @@ uint32_t LightClusters::getNumClusters() const {
     return theFrustumGrid.frustumGrid_numClusters();
 }
 
- void LightClusters::updateClusterResource() {
+void LightClusters::updateClusterResource() {
     if (!_clusterResourcesInvalid) {
         return;
     }
     _clusterResourcesInvalid = false;
     auto numClusters = getNumClusters();
-    if (numClusters != (uint32_t) _clusterGrid.size()) {
+    if (numClusters != (uint32_t)_clusterGrid.size()) {
         _clusterGrid.clear();
         _clusterGrid.resize(numClusters, EMPTY_CLUSTER);
         _clusterGridBuffer._size = (numClusters * sizeof(uint32_t));
-        _clusterGridBuffer._buffer = std::make_shared<gpu::Buffer>(_clusterGridBuffer._size, (gpu::Byte*) _clusterGrid.data(), _clusterGridBuffer._size);
+        _clusterGridBuffer._buffer = std::make_shared<gpu::Buffer>(_clusterGridBuffer._size, (gpu::Byte*)_clusterGrid.data(),
+                                                                   _clusterGridBuffer._size);
     }
 
     // Since LightIndex is 2bytes, we can fit 2 in a uint32
@@ -135,11 +132,13 @@ uint32_t LightClusters::getNumClusters() const {
         configListBudget *= 2;
     }
 
-    if (configListBudget != (uint32_t) _clusterContent.size()) {
+    if (configListBudget != (uint32_t)_clusterContent.size()) {
         _clusterContent.clear();
         _clusterContent.resize(configListBudget, INVALID_LIGHT);
         _clusterContentBuffer._size = (configListBudget * sizeof(LightIndex));
-        _clusterContentBuffer._buffer = std::make_shared<gpu::Buffer>(_clusterContentBuffer._size, (gpu::Byte*) _clusterContent.data(), _clusterContentBuffer._size);
+        _clusterContentBuffer._buffer = std::make_shared<gpu::Buffer>(_clusterContentBuffer._size,
+                                                                      (gpu::Byte*)_clusterContent.data(),
+                                                                      _clusterContentBuffer._size);
     }
 }
 
@@ -172,11 +171,9 @@ void LightClusters::updateFrustum(const ViewFrustum& frustum) {
 
 void LightClusters::updateLightStage(const LightStagePointer& lightStage) {
     _lightStage = lightStage;
-    
-  }
+}
 
 void LightClusters::updateLightFrame(const LightStage::FramePointer& lightFrame, bool points, bool spots) {
-
     // start fresh
     _visibleLightIndices.clear();
 
@@ -192,15 +189,18 @@ void LightClusters::updateLightFrame(const LightStage::FramePointer& lightFrame,
     _visibleLightIndices[0] = 0;
 
     if (points && !srcPointLights.empty()) {
-        memcpy(_visibleLightIndices.data() + (_visibleLightIndices[0] + 1), srcPointLights.data(), srcPointLights.size() * sizeof(int));
+        memcpy(_visibleLightIndices.data() + (_visibleLightIndices[0] + 1), srcPointLights.data(),
+               srcPointLights.size() * sizeof(int));
         _visibleLightIndices[0] += (int)srcPointLights.size();
     }
     if (spots && !srcSpotLights.empty()) {
-        memcpy(_visibleLightIndices.data() + (_visibleLightIndices[0] + 1), srcSpotLights.data(), srcSpotLights.size() * sizeof(int));
+        memcpy(_visibleLightIndices.data() + (_visibleLightIndices[0] + 1), srcSpotLights.data(),
+               srcSpotLights.size() * sizeof(int));
         _visibleLightIndices[0] += (int)srcSpotLights.size();
     }
 
-    _lightIndicesBuffer._buffer->setData(_visibleLightIndices.size() * sizeof(int), (const gpu::Byte*) _visibleLightIndices.data());
+    _lightIndicesBuffer._buffer->setData(_visibleLightIndices.size() * sizeof(int),
+                                         (const gpu::Byte*)_visibleLightIndices.data());
     _lightIndicesBuffer._size = _visibleLightIndices.size() * sizeof(int);
 }
 
@@ -212,16 +212,17 @@ bool reduceSphereToPlane(const glm::vec4& sphere, const glm::vec4& plane, glm::v
     float distance = distanceToPlane(glm::vec3(sphere), plane);
 
     if (std::abs(distance) <= sphere.w) {
-        reducedSphere = glm::vec4(sphere.x - distance * plane.x, sphere.y - distance * plane.y, sphere.z - distance * plane.z, sqrt(sphere.w * sphere.w - distance * distance));
+        reducedSphere = glm::vec4(sphere.x - distance * plane.x, sphere.y - distance * plane.y, sphere.z - distance * plane.z,
+                                  sqrt(sphere.w * sphere.w - distance * distance));
         return true;
     }
 
     return false;
 }
 
-
-uint32_t scanLightVolumeBoxSlice(FrustumGrid& grid, const FrustumGrid::Planes planes[3], int zSlice, int yMin, int yMax, int xMin, int xMax, LightClusters::LightID lightId, const glm::vec4& eyePosRadius,
-    std::vector< std::vector<LightClusters::LightIndex>>& clusterGrid) {
+uint32_t scanLightVolumeBoxSlice(FrustumGrid& grid, const FrustumGrid::Planes planes[3], int zSlice, int yMin, int yMax,
+                                 int xMin, int xMax, LightClusters::LightID lightId, const glm::vec4& eyePosRadius,
+                                 std::vector<std::vector<LightClusters::LightIndex>>& clusterGrid) {
     glm::ivec3 gridPosToOffset(1, grid.dims.x, grid.dims.x * grid.dims.y);
     uint32_t numClustersTouched = 0;
 
@@ -236,8 +237,9 @@ uint32_t scanLightVolumeBoxSlice(FrustumGrid& grid, const FrustumGrid::Planes pl
     return numClustersTouched;
 }
 
-uint32_t scanLightVolumeBox(FrustumGrid& grid, const FrustumGrid::Planes planes[3], int zMin, int zMax, int yMin, int yMax, int xMin, int xMax, LightClusters::LightID lightId, const glm::vec4& eyePosRadius,
-    std::vector< std::vector<LightClusters::LightIndex>>& clusterGrid) {
+uint32_t scanLightVolumeBox(FrustumGrid& grid, const FrustumGrid::Planes planes[3], int zMin, int zMax, int yMin, int yMax,
+                            int xMin, int xMax, LightClusters::LightID lightId, const glm::vec4& eyePosRadius,
+                            std::vector<std::vector<LightClusters::LightIndex>>& clusterGrid) {
     glm::ivec3 gridPosToOffset(1, grid.dims.x, grid.dims.x * grid.dims.y);
     uint32_t numClustersTouched = 0;
 
@@ -254,8 +256,9 @@ uint32_t scanLightVolumeBox(FrustumGrid& grid, const FrustumGrid::Planes planes[
     return numClustersTouched;
 }
 
-uint32_t scanLightVolumeSphere(FrustumGrid& grid, const FrustumGrid::Planes planes[3], int zMin, int zMax, int yMin, int yMax, int xMin, int xMax, LightClusters::LightID lightId, const glm::vec4& eyePosRadius,
-    std::vector< std::vector<LightClusters::LightIndex>>& clusterGrid) {
+uint32_t scanLightVolumeSphere(FrustumGrid& grid, const FrustumGrid::Planes planes[3], int zMin, int zMax, int yMin, int yMax,
+                               int xMin, int xMax, LightClusters::LightID lightId, const glm::vec4& eyePosRadius,
+                               std::vector<std::vector<LightClusters::LightIndex>>& clusterGrid) {
     glm::ivec3 gridPosToOffset(1, grid.dims.x, grid.dims.x * grid.dims.y);
     uint32_t numClustersTouched = 0;
     const auto& xPlanes = planes[0];
@@ -312,7 +315,9 @@ uint32_t scanLightVolumeSphere(FrustumGrid& grid, const FrustumGrid::Planes plan
                     clusterGrid[index].emplace_back(lightId);
                     numClustersTouched++;
                 } else {
-                    qCDebug(renderutils) << "WARNING: LightClusters::scanLightVolumeSphere invalid index found ? numClusters = " << clusterGrid.size() << " index = " << index << " found from cluster xyz = " << x << " " << y << " " << z;
+                    qCDebug(renderutils) << "WARNING: LightClusters::scanLightVolumeSphere invalid index found ? numClusters = "
+                                         << clusterGrid.size() << " index = " << index << " found from cluster xyz = " << x
+                                         << " " << y << " " << z;
                 }
             }
         }
@@ -328,8 +333,8 @@ glm::ivec3 LightClusters::updateClusters() {
     // Clean up last info
     uint32_t numClusters = (uint32_t)_clusterGrid.size();
 
-    std::vector< std::vector< LightIndex > > clusterGridPoint(numClusters);
-    std::vector< std::vector< LightIndex > > clusterGridSpot(numClusters);
+    std::vector<std::vector<LightIndex>> clusterGridPoint(numClusters);
+    std::vector<std::vector<LightIndex>> clusterGridSpot(numClusters);
 
     _clusterGrid.clear();
     _clusterGrid.resize(numClusters, EMPTY_CLUSTER);
@@ -337,7 +342,6 @@ glm::ivec3 LightClusters::updateClusters() {
     uint32_t maxNumIndices = (uint32_t)_clusterContent.size();
     _clusterContent.clear();
     _clusterContent.resize(maxNumIndices, INVALID_LIGHT);
-
 
     auto theFrustumGrid(_frustumGridBuffer.get());
 
@@ -384,7 +388,7 @@ glm::ivec3 LightClusters::updateClusters() {
             continue;
         }
 
-        // CLamp the z range 
+        // CLamp the z range
         zMin = std::max(0, zMin);
 
         auto xLeftDistance = radius - distanceToPlane(eyeOri, _gridPlanes[0][0]);
@@ -425,10 +429,11 @@ glm::ivec3 LightClusters::updateClusters() {
 
             float eyeToTangentCircleSinH = radius / eyeOriLenH;
 
-
             // rotate the eyeToOriDir (H & V) in both directions
-            glm::vec3 leftDir(eyeOriDirH.x * eyeToTangentCircleCosH + eyeOriDirH.z * eyeToTangentCircleSinH, 0.0f, eyeOriDirH.x * -eyeToTangentCircleSinH + eyeOriDirH.z * eyeToTangentCircleCosH);
-            glm::vec3 rightDir(eyeOriDirH.x * eyeToTangentCircleCosH - eyeOriDirH.z * eyeToTangentCircleSinH, 0.0f, eyeOriDirH.x * eyeToTangentCircleSinH + eyeOriDirH.z * eyeToTangentCircleCosH);
+            glm::vec3 leftDir(eyeOriDirH.x * eyeToTangentCircleCosH + eyeOriDirH.z * eyeToTangentCircleSinH, 0.0f,
+                              eyeOriDirH.x * -eyeToTangentCircleSinH + eyeOriDirH.z * eyeToTangentCircleCosH);
+            glm::vec3 rightDir(eyeOriDirH.x * eyeToTangentCircleCosH - eyeOriDirH.z * eyeToTangentCircleSinH, 0.0f,
+                               eyeOriDirH.x * eyeToTangentCircleSinH + eyeOriDirH.z * eyeToTangentCircleCosH);
 
             auto lc = theFrustumGrid.frustumGrid_eyeToClusterDirH(leftDir);
             if (lc > xMax) {
@@ -454,10 +459,11 @@ glm::ivec3 LightClusters::updateClusters() {
 
             float eyeToTangentCircleSinV = radius / eyeOriLenV;
 
-
             // rotate the eyeToOriDir (H & V) in both directions
-            glm::vec3 bottomDir(0.0f, eyeOriDirV.y * eyeToTangentCircleCosV + eyeOriDirV.z * eyeToTangentCircleSinV, eyeOriDirV.y * -eyeToTangentCircleSinV + eyeOriDirV.z * eyeToTangentCircleCosV);
-            glm::vec3 topDir(0.0f, eyeOriDirV.y * eyeToTangentCircleCosV - eyeOriDirV.z * eyeToTangentCircleSinV, eyeOriDirV.y * eyeToTangentCircleSinV + eyeOriDirV.z * eyeToTangentCircleCosV);
+            glm::vec3 bottomDir(0.0f, eyeOriDirV.y * eyeToTangentCircleCosV + eyeOriDirV.z * eyeToTangentCircleSinV,
+                                eyeOriDirV.y * -eyeToTangentCircleSinV + eyeOriDirV.z * eyeToTangentCircleCosV);
+            glm::vec3 topDir(0.0f, eyeOriDirV.y * eyeToTangentCircleCosV - eyeOriDirV.z * eyeToTangentCircleSinV,
+                             eyeOriDirV.y * eyeToTangentCircleSinV + eyeOriDirV.z * eyeToTangentCircleCosV);
 
             auto bc = theFrustumGrid.frustumGrid_eyeToClusterDirV(bottomDir);
             auto tc = theFrustumGrid.frustumGrid_eyeToClusterDirV(topDir);
@@ -468,16 +474,18 @@ glm::ivec3 LightClusters::updateClusters() {
                 tc = yMax;
             }
             yMin = std::max(yMin, bc);
-            yMax =std::min(tc, yMax);
+            yMax = std::min(tc, yMax);
             assert(yMin <= yMax);
         }
 
         // now voxelize
         auto& clusterGrid = (isSpot ? clusterGridSpot : clusterGridPoint);
         if (beyondFar) {
-            numClusterTouched += scanLightVolumeBoxSlice(theFrustumGrid, _gridPlanes, zMin, yMin, yMax, xMin, xMax, lightId, glm::vec4(glm::vec3(eyeOri), radius), clusterGrid);
+            numClusterTouched += scanLightVolumeBoxSlice(theFrustumGrid, _gridPlanes, zMin, yMin, yMax, xMin, xMax, lightId,
+                                                         glm::vec4(glm::vec3(eyeOri), radius), clusterGrid);
         } else {
-            numClusterTouched += scanLightVolumeSphere(theFrustumGrid, _gridPlanes, zMin, zMax, yMin, yMax, xMin, xMax, lightId, glm::vec4(glm::vec3(eyeOri), radius), clusterGrid);
+            numClusterTouched += scanLightVolumeSphere(theFrustumGrid, _gridPlanes, zMin, zMax, yMin, yMax, xMin, xMax, lightId,
+                                                       glm::vec4(glm::vec3(eyeOri), radius), clusterGrid);
         }
 
         numClusteredLights++;
@@ -490,7 +498,7 @@ glm::ivec3 LightClusters::updateClusters() {
         checkBudget = true;
     }
     uint16_t indexOffset = 0;
-    for (int i = 0; i < (int) clusterGridPoint.size(); i++) {
+    for (int i = 0; i < (int)clusterGridPoint.size(); i++) {
         auto& clusterPoint = clusterGridPoint[i];
         auto& clusterSpot = clusterGridSpot[i];
 
@@ -501,14 +509,14 @@ glm::ivec3 LightClusters::updateClusters() {
 
         // Check for overflow
         if (checkBudget) {
-            if ((indexOffset + numLights) > (uint16_t) maxNumIndices) {
+            if ((indexOffset + numLights) > (uint16_t)maxNumIndices) {
                 break;
             }
         }
 
-        // Encode the cluster grid: [ ContentOffset - 16bits, Num Point LIghts - 8bits, Num Spot Lights - 8bits] 
-        _clusterGrid[i] = (uint32_t)((0xFF000000 & (numLightsSpot << 24)) | (0x00FF0000 & (numLightsPoint << 16)) | (0x0000FFFF & offset));
-
+        // Encode the cluster grid: [ ContentOffset - 16bits, Num Point LIghts - 8bits, Num Spot Lights - 8bits]
+        _clusterGrid[i] = (uint32_t)((0xFF000000 & (numLightsSpot << 24)) | (0x00FF0000 & (numLightsPoint << 16)) |
+                                     (0x0000FFFF & offset));
 
         if (numLightsPoint) {
             memcpy(_clusterContent.data() + indexOffset, clusterPoint.data(), numLightsPoint * sizeof(LightIndex));
@@ -521,31 +529,28 @@ glm::ivec3 LightClusters::updateClusters() {
     }
 
     // update the buffers
-    _clusterGridBuffer._buffer->setData(_clusterGridBuffer._size, (gpu::Byte*) _clusterGrid.data());
-    _clusterContentBuffer._buffer->setSubData(0, indexOffset * sizeof(LightIndex), (gpu::Byte*) _clusterContent.data());
-    
+    _clusterGridBuffer._buffer->setData(_clusterGridBuffer._size, (gpu::Byte*)_clusterGrid.data());
+    _clusterContentBuffer._buffer->setSubData(0, indexOffset * sizeof(LightIndex), (gpu::Byte*)_clusterContent.data());
+
     return glm::ivec3(numLightsIn, numClusteredLights, numClusterTouched);
 }
-
-
 
 LightClusteringPass::LightClusteringPass() {
     _lightClusters = std::make_shared<LightClusters>();
 }
-
 
 void LightClusteringPass::configure(const Config& config) {
     if (_lightClusters) {
         _lightClusters->setRangeNearFar(config.rangeNear, config.rangeFar);
         _lightClusters->setDimensions(glm::uvec3(config.dimX, config.dimY, config.dimZ));
     }
-    
+
     _freeze = config.freeze;
 }
 
 void LightClusteringPass::run(const render::RenderContextPointer& renderContext, const Input& inputs, Output& output) {
     auto args = renderContext->args;
-    
+
     auto deferredTransform = inputs.get0();
     auto lightingModel = inputs.get1();
     auto lightFrame = inputs.get2();
@@ -555,13 +560,13 @@ void LightClusteringPass::run(const render::RenderContextPointer& renderContext,
     if (!_freeze) {
         _lightClusters->updateFrustum(args->getViewFrustum());
     }
-    
+
     // From the LightStage and the current frame, update the light cluster Grid
     auto lightStage = renderContext->_scene->getStage<LightStage>();
     assert(lightStage);
     _lightClusters->updateLightStage(lightStage);
     _lightClusters->updateLightFrame(lightFrame, lightingModel->isPointLightEnabled(), lightingModel->isSpotLightEnabled());
-    
+
     auto clusteringStats = _lightClusters->updateClusters();
 
     output = _lightClusters;
@@ -576,15 +581,12 @@ void LightClusteringPass::run(const render::RenderContextPointer& renderContext,
 }
 
 DebugLightClusters::DebugLightClusters() {
-
 }
-
 
 void DebugLightClusters::configure(const Config& config) {
     doDrawGrid = config.doDrawGrid;
     doDrawClusterFromDepth = config.doDrawClusterFromDepth;
     doDrawContent = config.doDrawContent;
-
 }
 
 const gpu::PipelinePointer DebugLightClusters::getDrawClusterGridPipeline() {
@@ -605,9 +607,10 @@ const gpu::PipelinePointer DebugLightClusters::getDrawClusterGridPipeline() {
 
 const gpu::PipelinePointer DebugLightClusters::getDrawClusterFromDepthPipeline() {
     if (!_drawClusterFromDepth) {
-        gpu::ShaderPointer program = gpu::Shader::createProgram(shader::render_utils::program::lightClusters_drawClusterFromDepth);
+        gpu::ShaderPointer program = gpu::Shader::createProgram(
+            shader::render_utils::program::lightClusters_drawClusterFromDepth);
         auto state = std::make_shared<gpu::State>();
-        
+
         // Blend on transparent
         state->setBlendFunction(true, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA);
 
@@ -619,9 +622,10 @@ const gpu::PipelinePointer DebugLightClusters::getDrawClusterFromDepthPipeline()
 
 const gpu::PipelinePointer DebugLightClusters::getDrawClusterContentPipeline() {
     if (!_drawClusterContent) {
-        gpu::ShaderPointer program = gpu::Shader::createProgram(shader::render_utils::program::lightClusters_drawClusterContent);
+        gpu::ShaderPointer program = gpu::Shader::createProgram(
+            shader::render_utils::program::lightClusters_drawClusterContent);
         auto state = std::make_shared<gpu::State>();
-        
+
         // Blend on transparent
         state->setBlendFunction(true, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA);
 
@@ -630,7 +634,6 @@ const gpu::PipelinePointer DebugLightClusters::getDrawClusterContentPipeline() {
     }
     return _drawClusterContent;
 }
-
 
 void DebugLightClusters::run(const render::RenderContextPointer& renderContext, const Inputs& inputs) {
     if (!(doDrawClusterFromDepth || doDrawContent || doDrawGrid)) {
@@ -644,8 +647,7 @@ void DebugLightClusters::run(const render::RenderContextPointer& renderContext, 
 
     auto args = renderContext->args;
 
-    
-    gpu::doInBatch(nullptr, args->_context, [&](gpu::Batch& batch) { 
+    gpu::doInBatch(nullptr, args->_context, [&](gpu::Batch& batch) {
         batch.enableStereo(false);
 
         // Assign the camera transform
@@ -657,7 +659,6 @@ void DebugLightClusters::run(const render::RenderContextPointer& renderContext, 
         batch.setProjectionTransform(projMat);
         batch.setViewTransform(viewMat, true);
 
-
         // Then the actual ClusterGrid attributes
         batch.setModelTransform(Transform());
 
@@ -668,8 +669,6 @@ void DebugLightClusters::run(const render::RenderContextPointer& renderContext, 
         batch.setUniformBuffer(ru::Buffer::LightClusterGrid, lightClusters->_clusterGridBuffer);
         batch.setUniformBuffer(ru::Buffer::LightClusterContent, lightClusters->_clusterContentBuffer);
 
-
-
         if (doDrawClusterFromDepth) {
             batch.setPipeline(getDrawClusterFromDepthPipeline());
             batch.setUniformBuffer(ru::Buffer::DeferredFrameTransform, deferredTransform->getFrameTransformBuffer());
@@ -679,13 +678,12 @@ void DebugLightClusters::run(const render::RenderContextPointer& renderContext, 
             }
 
             batch.draw(gpu::TRIANGLE_STRIP, 4, 0);
-              
+
             batch.setResourceTexture(ru::Texture::DeferredLinearZEye, nullptr);
             batch.setUniformBuffer(ru::Buffer::DeferredFrameTransform, nullptr);
         }
 
         if (doDrawContent) {
-
             // bind the one gpu::Pipeline we need
             batch.setPipeline(getDrawClusterContentPipeline());
             batch.setUniformBuffer(ru::Buffer::DeferredFrameTransform, deferredTransform->getFrameTransformBuffer());
@@ -695,15 +693,13 @@ void DebugLightClusters::run(const render::RenderContextPointer& renderContext, 
             }
 
             batch.draw(gpu::TRIANGLE_STRIP, 4, 0);
-              
+
             batch.setResourceTexture(ru::Texture::DeferredLinearZEye, nullptr);
             batch.setUniformBuffer(ru::Buffer::DeferredFrameTransform, nullptr);
         }
     });
 
-
-
-    gpu::doInBatch(nullptr, args->_context, [&](gpu::Batch& batch) { 
+    gpu::doInBatch(nullptr, args->_context, [&](gpu::Batch& batch) {
         auto& drawGridAndCleanBatch = batch;
         if (doDrawGrid) {
             // bind the one gpu::Pipeline we need

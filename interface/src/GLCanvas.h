@@ -21,5 +21,4 @@ protected:
     virtual bool event(QEvent* event) override;
 };
 
-
 #endif // hifi_GLCanvas_h

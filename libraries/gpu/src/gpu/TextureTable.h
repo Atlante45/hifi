@@ -25,7 +25,7 @@ public:
     TextureTable(const Array& textures);
 
     // Only for gpu::Context
-    const GPUObjectPointer gpuObject{};
+    const GPUObjectPointer gpuObject {};
 
     void setTexture(size_t index, const TexturePointer& texturePointer);
     void setTexture(size_t index, const TextureView& texturePointer);
@@ -36,9 +36,9 @@ public:
 private:
     mutable Mutex _mutex;
     Array _textures;
-    Stamp _stamp{ 1 };
+    Stamp _stamp { 1 };
 };
 
-}
+} // namespace gpu
 
 #endif

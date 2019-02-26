@@ -32,5 +32,4 @@ private:
     QScriptString _name;
 };
 
-
 #endif // hifi_DataViewClass_h

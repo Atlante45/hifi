@@ -18,8 +18,8 @@ QSharedPointer<FileLogger> logger;
 
 static const QString LAST_FRAME_FILE = "lastFrameFile";
 
-static void setup() { 
-    DependencyManager::set<tracing::Tracer>(); 
+static void setup() {
+    DependencyManager::set<tracing::Tracer>();
 }
 
 int main(int argc, char** argv) {

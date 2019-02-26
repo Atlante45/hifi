@@ -34,6 +34,6 @@ protected:
     const Frame::Time _offset;
 };
 
-}
+} // namespace recording
 
 #endif

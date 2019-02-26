@@ -16,11 +16,11 @@
 
 #include "AudioRingBuffer.h"
 
-
 class AudioRingBufferTests : public QObject {
     Q_OBJECT
 private slots:
     void runAllTests();
+
 private:
     void assertBufferSize(const AudioRingBuffer& buffer, int samples);
 };

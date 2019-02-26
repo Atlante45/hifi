@@ -9,14 +9,13 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef hifi_AboutUtil_h
 #define hifi_AboutUtil_h
 
 #include <QObject>
 
 /**jsdoc
- * The <code>HifiAbout</code> API provides information about the version of Interface that is currently running. It also 
+ * The <code>HifiAbout</code> API provides information about the version of Interface that is currently running. It also
  * provides the ability to open a Web page in an Interface browser window.
  *
  * @namespace HifiAbout
@@ -56,7 +55,8 @@ public slots:
      * @function HifiAbout.openUrl
      * @param {string} url - The URL of the Web page to display.
      */
-    void openUrl(const QString &url) const;
+    void openUrl(const QString& url) const;
+
 private:
     AboutUtil(QObject* parent = nullptr);
     QString _dateConverted;

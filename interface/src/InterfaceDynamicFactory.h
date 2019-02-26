@@ -16,14 +16,11 @@
 
 class InterfaceDynamicFactory : public EntityDynamicFactoryInterface {
 public:
-    InterfaceDynamicFactory() : EntityDynamicFactoryInterface() { }
-    virtual ~InterfaceDynamicFactory() { }
-    virtual EntityDynamicPointer factory(EntityDynamicType type,
-                                        const QUuid& id,
-                                        EntityItemPointer ownerEntity,
-                                        QVariantMap arguments) override;
-    virtual EntityDynamicPointer factoryBA(EntityItemPointer ownerEntity,
-                                          QByteArray data) override;
+    InterfaceDynamicFactory() : EntityDynamicFactoryInterface() {}
+    virtual ~InterfaceDynamicFactory() {}
+    virtual EntityDynamicPointer factory(EntityDynamicType type, const QUuid& id, EntityItemPointer ownerEntity,
+                                         QVariantMap arguments) override;
+    virtual EntityDynamicPointer factoryBA(EntityItemPointer ownerEntity, QByteArray data) override;
 };
 
 #endif // hifi_InterfaceDynamicFactory_h

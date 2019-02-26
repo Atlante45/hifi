@@ -11,10 +11,7 @@
 
 #include "ScriptAvatar.h"
 
-ScriptAvatar::ScriptAvatar(AvatarSharedPointer avatarData) :
-    ScriptAvatarData(avatarData)
-{
-
+ScriptAvatar::ScriptAvatar(AvatarSharedPointer avatarData) : ScriptAvatarData(avatarData) {
 }
 
 std::shared_ptr<Avatar> ScriptAvatar::lockAvatar() const {
@@ -109,7 +106,8 @@ float ScriptAvatar::getSimulationRate(const QString& rateName) const {
     if (auto lockedAvatar = lockAvatar()) {
         return lockedAvatar->getSimulationRate(rateName);
     } else {
-        return 0.0f;;
+        return 0.0f;
+        ;
     }
 }
 

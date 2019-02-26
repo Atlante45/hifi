@@ -16,9 +16,10 @@
 #include <PhysicsHelpers.h>
 #include "MyAvatar.h"
 
-
-DetailedMotionState::DetailedMotionState(AvatarPointer avatar, const btCollisionShape* shape, int jointIndex) : 
-    ObjectMotionState(shape), _avatar(avatar), _jointIndex(jointIndex) {
+DetailedMotionState::DetailedMotionState(AvatarPointer avatar, const btCollisionShape* shape, int jointIndex) :
+    ObjectMotionState(shape),
+    _avatar(avatar),
+    _jointIndex(jointIndex) {
     assert(_avatar);
     if (!_avatar->isMyAvatar()) {
         _otherAvatar = std::static_pointer_cast<OtherAvatar>(_avatar);
@@ -63,7 +64,7 @@ const btCollisionShape* DetailedMotionState::computeNewShape() {
     btCollisionShape* shape = nullptr;
     if (!_avatar->isMyAvatar()) {
         if (_otherAvatar != nullptr) {
-            shape =  _otherAvatar->createCollisionShape(_jointIndex, _isBound, _boundJoints);
+            shape = _otherAvatar->createCollisionShape(_jointIndex, _isBound, _boundJoints);
         }
     } else {
         std::shared_ptr<MyAvatar> myAvatar = std::static_pointer_cast<MyAvatar>(_avatar);
@@ -121,7 +122,7 @@ glm::vec3 DetailedMotionState::getObjectPosition() const {
             return _avatar->getFitBounds().calcCenter();
         }
     }
-    return  _avatar->getJointPosition(_jointIndex);
+    return _avatar->getJointPosition(_jointIndex);
 }
 
 // virtual

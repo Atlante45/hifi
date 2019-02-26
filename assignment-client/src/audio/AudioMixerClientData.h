@@ -23,11 +23,11 @@
 #include <AudioLimiter.h>
 #include <UUIDHasher.h>
 
-#include <plugins/Forward.h>
 #include <plugins/CodecPlugin.h>
+#include <plugins/Forward.h>
 
-#include "PositionalAudioStream.h"
 #include "AvatarAudioStream.h"
+#include "PositionalAudioStream.h"
 
 class AudioMixerClientData : public NodeData {
     Q_OBJECT
@@ -36,9 +36,9 @@ public:
         NodeIDStreamID nodeIDStreamID;
         PositionalAudioStream* positionalStream;
 
-        AddedStream(QUuid nodeID, Node::LocalID localNodeID,
-                    StreamID streamID, PositionalAudioStream* positionalStream) :
-            nodeIDStreamID(nodeID, localNodeID, streamID), positionalStream(positionalStream) {};
+        AddedStream(QUuid nodeID, Node::LocalID localNodeID, StreamID streamID, PositionalAudioStream* positionalStream) :
+            nodeIDStreamID(nodeID, localNodeID, streamID),
+            positionalStream(positionalStream) {};
     };
 
     using ConcurrentAddedStreams = tbb::concurrent_vector<AddedStream>;
@@ -120,9 +120,13 @@ public:
         bool ignoringListener { false };
 
         MixableStream(NodeIDStreamID nodeIDStreamID, PositionalAudioStream* positionalStream) :
-            nodeStreamID(nodeIDStreamID), hrtf(new AudioHRTF), positionalStream(positionalStream) {};
+            nodeStreamID(nodeIDStreamID),
+            hrtf(new AudioHRTF),
+            positionalStream(positionalStream) {};
         MixableStream(QUuid nodeID, Node::LocalID localNodeID, StreamID streamID, PositionalAudioStream* positionalStream) :
-            nodeStreamID(nodeID, localNodeID, streamID), hrtf(new AudioHRTF), positionalStream(positionalStream) {};
+            nodeStreamID(nodeID, localNodeID, streamID),
+            hrtf(new AudioHRTF),
+            positionalStream(positionalStream) {};
     };
 
     using MixableStreamsVector = std::vector<MixableStream>;
@@ -150,7 +154,6 @@ public:
     void clearStagedIgnoreChanges();
 
     const Node::IgnoredNodeIDs& getIgnoringNodeIDs() const { return _ignoringNodeIDs; }
-
 
     const std::vector<QUuid>& getSoloedNodes() const { return _soloedNodes; }
 
@@ -188,12 +191,12 @@ private:
 
     int _frameToSendStats { 0 };
 
-    float _masterAvatarGain { 1.0f };   // per-listener mixing gain, applied only to avatars
+    float _masterAvatarGain { 1.0f }; // per-listener mixing gain, applied only to avatars
 
     CodecPluginPointer _codec;
     QString _selectedCodecName;
-    Encoder* _encoder{ nullptr }; // for outbound mixed stream
-    Decoder* _decoder{ nullptr }; // for mic stream
+    Encoder* _encoder { nullptr }; // for outbound mixed stream
+    Decoder* _decoder { nullptr }; // for mic stream
 
     bool _shouldFlushEncoder { false };
 

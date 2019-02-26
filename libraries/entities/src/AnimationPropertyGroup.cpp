@@ -11,9 +11,8 @@
 
 #include "AnimationPropertyGroup.h"
 
-#include <QJsonDocument>
 #include <OctreePacketData.h>
-
+#include <QJsonDocument>
 
 #include "EntityItemProperties.h"
 #include "EntityItemPropertiesMacros.h"
@@ -21,31 +20,16 @@
 const float AnimationPropertyGroup::MAXIMUM_POSSIBLE_FRAME = 100000.0f;
 
 bool operator==(const AnimationPropertyGroup& a, const AnimationPropertyGroup& b) {
-    return
-        (a._currentFrame == b._currentFrame) &&
-        (a._running == b._running) &&
-        (a._loop == b._loop) &&
-        (a._hold == b._hold) &&
-        (a._firstFrame == b._firstFrame) &&
-        (a._lastFrame == b._lastFrame) &&
-        (a._fps == b._fps) &&
-        (a._allowTranslation == b._allowTranslation) &&
-        (a._url == b._url);
+    return (a._currentFrame == b._currentFrame) && (a._running == b._running) && (a._loop == b._loop) && (a._hold == b._hold) &&
+           (a._firstFrame == b._firstFrame) && (a._lastFrame == b._lastFrame) && (a._fps == b._fps) &&
+           (a._allowTranslation == b._allowTranslation) && (a._url == b._url);
 }
 
 bool operator!=(const AnimationPropertyGroup& a, const AnimationPropertyGroup& b) {
-    return
-        (a._currentFrame != b._currentFrame) ||
-        (a._running != b._running) ||
-        (a._loop != b._loop) ||
-        (a._hold != b._hold) ||
-        (a._firstFrame != b._firstFrame) ||
-        (a._lastFrame != b._lastFrame) ||
-        (a._fps != b._fps) ||
-        (a._allowTranslation != b._allowTranslation) ||
-        (a._url != b._url);
+    return (a._currentFrame != b._currentFrame) || (a._running != b._running) || (a._loop != b._loop) || (a._hold != b._hold) ||
+           (a._firstFrame != b._firstFrame) || (a._lastFrame != b._lastFrame) || (a._fps != b._fps) ||
+           (a._allowTranslation != b._allowTranslation) || (a._url != b._url);
 }
-
 
 /**jsdoc
  * The AnimationProperties are used to configure an animation.
@@ -60,9 +44,12 @@ bool operator!=(const AnimationPropertyGroup& a, const AnimationPropertyGroup& b
  * @property {boolean} hold=false - If <code>true</code> then the rotations and translations of the last frame played should be
  *     maintained when the animation stops playing.
  */
-void AnimationPropertyGroup::copyToScriptValue(const EntityPropertyFlags& desiredProperties, QScriptValue& properties, QScriptEngine* engine, bool skipDefaults, EntityItemProperties& defaultEntityProperties) const {
+void AnimationPropertyGroup::copyToScriptValue(const EntityPropertyFlags& desiredProperties, QScriptValue& properties,
+                                               QScriptEngine* engine, bool skipDefaults,
+                                               EntityItemProperties& defaultEntityProperties) const {
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_ANIMATION_URL, Animation, animation, URL, url);
-    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_ANIMATION_ALLOW_TRANSLATION, Animation, animation, AllowTranslation, allowTranslation);
+    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_ANIMATION_ALLOW_TRANSLATION, Animation, animation, AllowTranslation,
+                                        allowTranslation);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_ANIMATION_FPS, Animation, animation, FPS, fps);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_ANIMATION_FRAME_INDEX, Animation, animation, CurrentFrame, currentFrame);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_ANIMATION_PLAYING, Animation, animation, Running, running);
@@ -72,9 +59,7 @@ void AnimationPropertyGroup::copyToScriptValue(const EntityPropertyFlags& desire
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_ANIMATION_HOLD, Animation, animation, Hold, hold);
 }
 
-
 void AnimationPropertyGroup::copyFromScriptValue(const QScriptValue& object, bool& _defaultSettings) {
-
     COPY_GROUP_PROPERTY_FROM_QSCRIPTVALUE(animation, url, QString, setURL);
     COPY_GROUP_PROPERTY_FROM_QSCRIPTVALUE(animation, allowTranslation, bool, setAllowTranslation);
 
@@ -159,7 +144,6 @@ void AnimationPropertyGroup::setFromOldAnimationSettings(const QString& value) {
         allowTranslation = settingsMap["allowTranslation"].toBool();
     }
 
-
     setAllowTranslation(allowTranslation);
     setFPS(fps);
     setCurrentFrame(currentFrame);
@@ -170,12 +154,11 @@ void AnimationPropertyGroup::setFromOldAnimationSettings(const QString& value) {
     setHold(hold);
 }
 
-
 void AnimationPropertyGroup::debugDump() const {
     qCDebug(entities) << "   AnimationPropertyGroup: ---------------------------------------------";
     qCDebug(entities) << "       fps:" << getFPS() << " has changed:" << fpsChanged();
     qCDebug(entities) << "currentFrame:" << getCurrentFrame() << " has changed:" << currentFrameChanged();
-    qCDebug(entities) << "allowTranslation:" << getAllowTranslation() << " has changed:" << allowTranslationChanged(); 
+    qCDebug(entities) << "allowTranslation:" << getAllowTranslation() << " has changed:" << allowTranslationChanged();
 }
 
 void AnimationPropertyGroup::listChangedProperties(QList<QString>& out) {
@@ -208,14 +191,9 @@ void AnimationPropertyGroup::listChangedProperties(QList<QString>& out) {
     }
 }
 
-
-bool AnimationPropertyGroup::appendToEditPacket(OctreePacketData* packetData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
-                                    OctreeElement::AppendState& appendState) const {
-
+bool AnimationPropertyGroup::appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+                                                EntityPropertyFlags& propertyFlags, EntityPropertyFlags& propertiesDidntFit,
+                                                int& propertyCount, OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_ANIMATION_URL, getURL());
@@ -231,8 +209,8 @@ bool AnimationPropertyGroup::appendToEditPacket(OctreePacketData* packetData,
     return true;
 }
 
-
-bool AnimationPropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt , int& processedBytes) {
+bool AnimationPropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt,
+                                                  int& processedBytes) {
     int bytesRead = 0;
     bool overwriteLocalData = true;
     bool somethingChanged = false;
@@ -256,7 +234,7 @@ bool AnimationPropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyF
     DECODE_GROUP_PROPERTY_HAS_CHANGED(PROP_ANIMATION_FIRST_FRAME, FirstFrame);
     DECODE_GROUP_PROPERTY_HAS_CHANGED(PROP_ANIMATION_LAST_FRAME, LastFrame);
     DECODE_GROUP_PROPERTY_HAS_CHANGED(PROP_ANIMATION_HOLD, Hold);
-    
+
     processedBytes += bytesRead;
 
     Q_UNUSED(somethingChanged);
@@ -336,13 +314,10 @@ EntityPropertyFlags AnimationPropertyGroup::getEntityProperties(EncodeBitstreamP
 }
 
 void AnimationPropertyGroup::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
-                                EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                EntityPropertyFlags& requestedProperties,
-                                EntityPropertyFlags& propertyFlags,
-                                EntityPropertyFlags& propertiesDidntFit,
-                                int& propertyCount,
-                                OctreeElement::AppendState& appendState) const {
-
+                                                EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
+                                                EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                                EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                                OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_ANIMATION_URL, getURL());
@@ -357,10 +332,9 @@ void AnimationPropertyGroup::appendSubclassData(OctreePacketData* packetData, En
 }
 
 int AnimationPropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                            ReadBitstreamToTreeParams& args,
-                                            EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                            bool& somethingChanged) {
-
+                                                             ReadBitstreamToTreeParams& args,
+                                                             EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
+                                                             bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 

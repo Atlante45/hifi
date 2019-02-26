@@ -18,13 +18,10 @@ class AudioStreamStats {
 public:
     // Intermediate packets should have no flag set
     // Unique packets should have both flags set
-    enum AppendFlag : quint8 {
-        START = 1,
-        END = 2
-    };
+    enum AppendFlag : quint8 { START = 1, END = 2 };
 
-    AudioStreamStats()
-        : _streamType(-1),
+    AudioStreamStats() :
+        _streamType(-1),
         _streamIdentifier(),
         _timeGapMin(0),
         _timeGapMax(0),
@@ -40,8 +37,7 @@ public:
         _overflowCount(0),
         _framesDropped(0),
         _packetStreamStats(),
-        _packetStreamWindowStats()
-    {}
+        _packetStreamWindowStats() {}
 
     qint32 _streamType;
     QUuid _streamIdentifier;
@@ -68,4 +64,4 @@ public:
 
 static_assert(sizeof(AudioStreamStats) == 152, "AudioStreamStats size isn't right");
 
-#endif  // hifi_AudioStreamStats_h
+#endif // hifi_AudioStreamStats_h

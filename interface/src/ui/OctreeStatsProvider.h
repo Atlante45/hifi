@@ -13,8 +13,8 @@
 #define hifi_OctreeStatsProvider_h
 
 #include <OctreeSceneStats.h>
-#include <QTimer>
 #include <QColor>
+#include <QTimer>
 
 #include "DependencyManager.h"
 
@@ -43,70 +43,46 @@ public:
 
     int serversNum() const;
 
-    QString serverElements() const {
-        return m_serverElements;
-    }
+    QString serverElements() const { return m_serverElements; }
 
-    QString localElements() const {
-        return m_localElements;
-    }
+    QString localElements() const { return m_localElements; }
 
-    QString localElementsMemory() const {
-        return m_localElementsMemory;
-    }
+    QString localElementsMemory() const { return m_localElementsMemory; }
 
-    QString sendingMode() const {
-        return m_sendingMode;
-    }
+    QString sendingMode() const { return m_sendingMode; }
 
-    QString processedPackets() const {
-        return m_processedPackets;
-    }
+    QString processedPackets() const { return m_processedPackets; }
 
-    QString processedPacketsElements() const {
-        return m_processedPacketsElements;
-    }
+    QString processedPacketsElements() const { return m_processedPacketsElements; }
 
-    QString processedPacketsEntities() const {
-        return m_processedPacketsEntities;
-    }
+    QString processedPacketsEntities() const { return m_processedPacketsEntities; }
 
-    QString processedPacketsTiming() const {
-        return m_processedPacketsTiming;
-    }
+    QString processedPacketsTiming() const { return m_processedPacketsTiming; }
 
-    QString outboundEditPackets() const {
-        return m_outboundEditPackets;
-    }
+    QString outboundEditPackets() const { return m_outboundEditPackets; }
 
-    QString entityUpdateTime() const {
-        return m_entityUpdateTime;
-    }
+    QString entityUpdateTime() const { return m_entityUpdateTime; }
 
-    QString entityUpdates() const {
-        return m_entityUpdates;
-    }
+    QString entityUpdates() const { return m_entityUpdates; }
 
-    QStringList servers() const {
-        return m_servers;
-    }
+    QStringList servers() const { return m_servers; }
 
 signals:
 
     void serversNumChanged(int serversNum);
-    void serverElementsChanged(const QString &serverElements);
-    void localElementsChanged(const QString &localElements);
-    void sendingModeChanged(const QString &sendingMode);
-    void processedPacketsChanged(const QString &processedPackets);
-    void localElementsMemoryChanged(const QString &localElementsMemory);
-    void processedPacketsElementsChanged(const QString &processedPacketsElements);
-    void processedPacketsEntitiesChanged(const QString &processedPacketsEntities);
-    void processedPacketsTimingChanged(const QString &processedPacketsTiming);
-    void outboundEditPacketsChanged(const QString &outboundEditPackets);
-    void entityUpdateTimeChanged(const QString &entityUpdateTime);
-    void entityUpdatesChanged(const QString &entityUpdates);
+    void serverElementsChanged(const QString& serverElements);
+    void localElementsChanged(const QString& localElements);
+    void sendingModeChanged(const QString& sendingMode);
+    void processedPacketsChanged(const QString& processedPackets);
+    void localElementsMemoryChanged(const QString& localElementsMemory);
+    void processedPacketsElementsChanged(const QString& processedPacketsElements);
+    void processedPacketsEntitiesChanged(const QString& processedPacketsEntities);
+    void processedPacketsTimingChanged(const QString& processedPacketsTiming);
+    void outboundEditPacketsChanged(const QString& outboundEditPackets);
+    void entityUpdateTimeChanged(const QString& entityUpdateTime);
+    void entityUpdatesChanged(const QString& entityUpdates);
 
-    void serversChanged(const QStringList &servers);
+    void serversChanged(const QStringList& servers);
 
 public slots:
     void startUpdates();
@@ -115,6 +91,7 @@ public slots:
 
 private slots:
     void updateOctreeStatsData();
+
 protected:
     void updateOctreeServers();
     void showOctreeServersOfType(NodeType_t serverType);
@@ -122,7 +99,7 @@ protected:
 private:
     NodeToOctreeSceneStats* _model;
     int _statCount;
-    
+
     const int SAMPLES_PER_SECOND = 10;
     SimpleMovingAverage _averageUpdatesPerSecond;
     quint64 _lastWindowAt = usecTimestampNow();

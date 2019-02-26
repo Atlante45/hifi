@@ -10,26 +10,26 @@
 
 #include <set>
 
-#include <QtCore/QThread>
 #include <QtCore/QFile>
+#include <QtCore/QThread>
 
+#include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
-#include <QtCore/QJsonArray>
 
-#include <PathUtils.h>
 #include <NumericalConstants.h>
+#include <PathUtils.h>
 
 #include <StreamUtils.h>
 
-#include "StandardController.h"
-#include "StateController.h"
 #include "InputRecorder.h"
 #include "Logging.h"
+#include "StandardController.h"
+#include "StateController.h"
 
 #include "impl/conditionals/AndConditional.h"
-#include "impl/conditionals/NotConditional.h"
 #include "impl/conditionals/EndpointConditional.h"
+#include "impl/conditionals/NotConditional.h"
 #include "impl/conditionals/ScriptConditional.h"
 
 #include "impl/endpoints/ActionEndpoint.h"
@@ -41,15 +41,14 @@
 #include "impl/endpoints/ScriptEndpoint.h"
 #include "impl/endpoints/StandardEndpoint.h"
 
-#include "impl/Route.h"
 #include "impl/Mapping.h"
-
+#include "impl/Route.h"
 
 namespace controller {
-    const uint16_t UserInputMapper::STANDARD_DEVICE = 0;
-    const uint16_t UserInputMapper::ACTIONS_DEVICE = Input::invalidInput().device - 0x00FF;
-    const uint16_t UserInputMapper::STATE_DEVICE = Input::invalidInput().device - 0x0100;
-}
+const uint16_t UserInputMapper::STANDARD_DEVICE = 0;
+const uint16_t UserInputMapper::ACTIONS_DEVICE = Input::invalidInput().device - 0x00FF;
+const uint16_t UserInputMapper::STATE_DEVICE = Input::invalidInput().device - 0x0100;
+} // namespace controller
 
 // Default contruct allocate the poutput size with the current hardcoded action channels
 controller::UserInputMapper::UserInputMapper() {
@@ -59,7 +58,6 @@ controller::UserInputMapper::UserInputMapper() {
 }
 
 namespace controller {
-
 
 UserInputMapper::~UserInputMapper() {
 }
@@ -107,7 +105,6 @@ void UserInputMapper::registerDevice(InputDevice::Pointer device) {
 }
 
 void UserInputMapper::removeDevice(int deviceID) {
-
     Locker locker(_lock);
     auto proxyEntry = _registeredDevices.find(deviceID);
 
@@ -141,7 +138,6 @@ void UserInputMapper::removeDevice(int deviceID) {
 
     emit hardwareChanged();
 }
-
 
 void UserInputMapper::loadDefaultMapping(uint16 deviceID) {
     Locker locker(_lock);
@@ -265,15 +261,23 @@ void UserInputMapper::update(float deltaTime) {
     runMappings();
 
     // merge the bisected and non-bisected axes for now
-    fixBisectedAxis(_actionStates[toInt(Action::TRANSLATE_X)], _actionStates[toInt(Action::LATERAL_LEFT)], _actionStates[toInt(Action::LATERAL_RIGHT)]);
-    fixBisectedAxis(_actionStates[toInt(Action::TRANSLATE_Y)], _actionStates[toInt(Action::VERTICAL_DOWN)], _actionStates[toInt(Action::VERTICAL_UP)]);
-    fixBisectedAxis(_actionStates[toInt(Action::TRANSLATE_Z)], _actionStates[toInt(Action::LONGITUDINAL_FORWARD)], _actionStates[toInt(Action::LONGITUDINAL_BACKWARD)]);
-    fixBisectedAxis(_actionStates[toInt(Action::TRANSLATE_CAMERA_Z)], _actionStates[toInt(Action::BOOM_IN)], _actionStates[toInt(Action::BOOM_OUT)]);
-    fixBisectedAxis(_actionStates[toInt(Action::ROTATE_Y)], _actionStates[toInt(Action::YAW_LEFT)], _actionStates[toInt(Action::YAW_RIGHT)]);
-    fixBisectedAxis(_actionStates[toInt(Action::ROTATE_X)], _actionStates[toInt(Action::PITCH_UP)], _actionStates[toInt(Action::PITCH_DOWN)]);
+    fixBisectedAxis(_actionStates[toInt(Action::TRANSLATE_X)], _actionStates[toInt(Action::LATERAL_LEFT)],
+                    _actionStates[toInt(Action::LATERAL_RIGHT)]);
+    fixBisectedAxis(_actionStates[toInt(Action::TRANSLATE_Y)], _actionStates[toInt(Action::VERTICAL_DOWN)],
+                    _actionStates[toInt(Action::VERTICAL_UP)]);
+    fixBisectedAxis(_actionStates[toInt(Action::TRANSLATE_Z)], _actionStates[toInt(Action::LONGITUDINAL_FORWARD)],
+                    _actionStates[toInt(Action::LONGITUDINAL_BACKWARD)]);
+    fixBisectedAxis(_actionStates[toInt(Action::TRANSLATE_CAMERA_Z)], _actionStates[toInt(Action::BOOM_IN)],
+                    _actionStates[toInt(Action::BOOM_OUT)]);
+    fixBisectedAxis(_actionStates[toInt(Action::ROTATE_Y)], _actionStates[toInt(Action::YAW_LEFT)],
+                    _actionStates[toInt(Action::YAW_RIGHT)]);
+    fixBisectedAxis(_actionStates[toInt(Action::ROTATE_X)], _actionStates[toInt(Action::PITCH_UP)],
+                    _actionStates[toInt(Action::PITCH_DOWN)]);
 
-    fixBisectedAxis(_actionStates[toInt(Action::RETICLE_X)], _actionStates[toInt(Action::RETICLE_LEFT)], _actionStates[toInt(Action::RETICLE_RIGHT)]);
-    fixBisectedAxis(_actionStates[toInt(Action::RETICLE_Y)], _actionStates[toInt(Action::RETICLE_UP)], _actionStates[toInt(Action::RETICLE_DOWN)]);
+    fixBisectedAxis(_actionStates[toInt(Action::RETICLE_X)], _actionStates[toInt(Action::RETICLE_LEFT)],
+                    _actionStates[toInt(Action::RETICLE_RIGHT)]);
+    fixBisectedAxis(_actionStates[toInt(Action::RETICLE_Y)], _actionStates[toInt(Action::RETICLE_UP)],
+                    _actionStates[toInt(Action::RETICLE_DOWN)]);
 
     static const float EPSILON = 0.01f;
     for (auto i = 0; i < toInt(Action::NUM_ACTIONS); i++) {
@@ -358,7 +362,6 @@ Pose UserInputMapper::getPoseState(Action action) const {
     return _poseStates[toInt(action)];
 }
 
-
 bool UserInputMapper::triggerHapticPulse(float strength, float duration, controller::Hand hand) {
     Locker locker(_lock);
     bool toReturn = false;
@@ -437,7 +440,7 @@ void handFromScriptValue(const QScriptValue& object, controller::Hand& hand) {
 }
 
 void UserInputMapper::registerControllerTypes(QScriptEngine* engine) {
-    qScriptRegisterSequenceMetaType<QVector<Action> >(engine);
+    qScriptRegisterSequenceMetaType<QVector<Action>>(engine);
     qScriptRegisterSequenceMetaType<Input::NamedVector>(engine);
     qScriptRegisterMetaType(engine, actionToScriptValue, actionFromScriptValue);
     qScriptRegisterMetaType(engine, inputToScriptValue, inputFromScriptValue);
@@ -520,9 +523,7 @@ void UserInputMapper::applyRoutes(const Route::List& routes) {
         }
 
         // Try all the deferred routes
-        deferredRoutes.remove_if([](Route::Pointer route) {
-            return UserInputMapper::applyRoute(route);
-        });
+        deferredRoutes.remove_if([](Route::Pointer route) { return UserInputMapper::applyRoute(route); });
 
         if (!applyRoute(route)) {
             deferredRoutes.push_back(route);
@@ -534,7 +535,6 @@ void UserInputMapper::applyRoutes(const Route::List& routes) {
         UserInputMapper::applyRoute(route, force);
     }
 }
-
 
 bool UserInputMapper::applyRoute(const Route::Pointer& route, bool force) {
     if (debugRoutes && route->debug) {
@@ -560,7 +560,6 @@ bool UserInputMapper::applyRoute(const Route::Pointer& route, bool force) {
             return true;
         }
     }
-
 
     // Most endpoints can only be read once (though a given mapping can route them to
     // multiple places).  Consider... If the default is to wire the A button to JUMP
@@ -676,7 +675,6 @@ Endpoint::Pointer UserInputMapper::endpointFor(const QScriptValue& endpoint) {
         return std::make_shared<AnyEndpoint>(children);
     }
 
-
     qWarning() << "Unsupported input type " << endpoint.toString();
     return Endpoint::Pointer();
 }
@@ -704,7 +702,6 @@ Endpoint::Pointer UserInputMapper::compositeEndpointFor(Endpoint::Pointer first,
     return result;
 }
 
-
 Mapping::Pointer UserInputMapper::newMapping(const QString& mappingName) {
     Locker locker(_lock);
     if (_mappingsByName.count(mappingName)) {
@@ -717,7 +714,7 @@ Mapping::Pointer UserInputMapper::newMapping(const QString& mappingName) {
 }
 
 // FIXME handle asynchronous loading in the UserInputMapper
-//QObject* ScriptingInterface::loadMapping(const QString& jsonUrl) {
+// QObject* ScriptingInterface::loadMapping(const QString& jsonUrl) {
 //    QObject* result = nullptr;
 //    auto request = ResourceManager::createResourceRequest(nullptr, QUrl(jsonUrl));
 //    if (request) {
@@ -871,7 +868,6 @@ Endpoint::Pointer UserInputMapper::parseEndpoint(const QJsonValue& value) {
     }
     return result;
 }
-
 
 Conditional::Pointer UserInputMapper::conditionalFor(const QJSValue& condition) {
     return Conditional::Pointer();
@@ -1082,7 +1078,6 @@ Route::Pointer UserInputMapper::parseRoute(const QJsonValue& value) {
         return Route::Pointer();
     }
 
-
     result->destination = parseDestination(obj[JSON_CHANNEL_TO]);
     if (!result->destination) {
         qWarning() << "Invalid route destination " << obj[JSON_CHANNEL_TO];
@@ -1127,7 +1122,6 @@ void injectConditional(Route::Pointer& route, Conditional::Pointer& conditional)
 
     route->conditional = std::make_shared<AndConditional>(conditional, route->conditional);
 }
-
 
 Mapping::Pointer UserInputMapper::parseMapping(const QJsonValue& json) {
     if (!json.isObject()) {
@@ -1183,7 +1177,7 @@ Mapping::Pointer UserInputMapper::parseMapping(const QString& json) {
     return parseMapping(doc.object());
 }
 
-template <typename T>
+template<typename T>
 bool hasDebuggableRoute(const T& routes) {
     for (const auto& route : routes) {
         if (route->debug) {
@@ -1193,7 +1187,6 @@ bool hasDebuggableRoute(const T& routes) {
     return false;
 }
 
-
 void UserInputMapper::enableMapping(const Mapping::Pointer& mapping) {
     Locker locker(_lock);
     // New routes for a device get injected IN FRONT of existing routes.  Routes
@@ -1201,15 +1194,11 @@ void UserInputMapper::enableMapping(const Mapping::Pointer& mapping) {
     // takes place after all of the hardware -> standard or hardware -> action processing
     // because standard -> action is the first set of routes added.
     Route::List standardRoutes = mapping->routes;
-    standardRoutes.remove_if([](const Route::Pointer& value) {
-        return (value->source->getInput().device != STANDARD_DEVICE);
-    });
+    standardRoutes.remove_if([](const Route::Pointer& value) { return (value->source->getInput().device != STANDARD_DEVICE); });
     _standardRoutes.insert(_standardRoutes.begin(), standardRoutes.begin(), standardRoutes.end());
 
     Route::List deviceRoutes = mapping->routes;
-    deviceRoutes.remove_if([](const Route::Pointer& value) {
-        return (value->source->getInput().device == STANDARD_DEVICE);
-    });
+    deviceRoutes.remove_if([](const Route::Pointer& value) { return (value->source->getInput().device == STANDARD_DEVICE); });
     _deviceRoutes.insert(_deviceRoutes.begin(), deviceRoutes.begin(), deviceRoutes.end());
 
     if (!debuggableRoutes) {
@@ -1221,17 +1210,12 @@ void UserInputMapper::disableMapping(const Mapping::Pointer& mapping) {
     Locker locker(_lock);
     const auto& deviceRoutes = mapping->routes;
     std::set<Route::Pointer> routeSet(deviceRoutes.begin(), deviceRoutes.end());
-    _deviceRoutes.remove_if([&](const Route::Pointer& value){
-        return routeSet.count(value) != 0;
-    });
-    _standardRoutes.remove_if([&](const Route::Pointer& value) {
-        return routeSet.count(value) != 0;
-    });
+    _deviceRoutes.remove_if([&](const Route::Pointer& value) { return routeSet.count(value) != 0; });
+    _standardRoutes.remove_if([&](const Route::Pointer& value) { return routeSet.count(value) != 0; });
 
     if (debuggableRoutes) {
         debuggableRoutes = hasDebuggableRoute(_deviceRoutes) || hasDebuggableRoute(_standardRoutes);
     }
 }
 
-}
-
+} // namespace controller

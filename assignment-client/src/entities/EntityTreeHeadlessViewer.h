@@ -12,11 +12,11 @@
 #ifndef hifi_EntityTreeHeadlessViewer_h
 #define hifi_EntityTreeHeadlessViewer_h
 
-#include <udt/PacketHeaders.h>
-#include <SharedUtil.h>
 #include <Octree.h>
 #include <OctreePacketData.h>
+#include <SharedUtil.h>
 #include <ViewFrustum.h>
+#include <udt/PacketHeaders.h>
 
 #include "../octree/OctreeHeadlessViewer.h"
 #include "EntityTree.h"

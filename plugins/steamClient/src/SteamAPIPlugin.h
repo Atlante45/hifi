@@ -9,7 +9,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef hifi_SteamAPIPlugin_h
 #define hifi_SteamAPIPlugin_h
 

@@ -13,9 +13,9 @@
 
 #include <assert.h>
 
-#include "GLMHelpers.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include "GLMHelpers.h"
 
 #include <bitset>
 
@@ -52,8 +52,7 @@ public:
         _scale(1.0f),
         _translation(0.0f),
         _flags(FLAG_CACHE_INVALID_BITSET) // invalid cache
-    {
-    }
+    {}
     Transform(Quat rotation, Vec3 scale, Vec3 translation) :
         _rotation(rotation),
         _scale(scale),
@@ -68,13 +67,10 @@ public:
         _rotation(transform._rotation),
         _scale(transform._scale),
         _translation(transform._translation),
-        _flags(transform._flags)
-    {
+        _flags(transform._flags) {
         invalidCache();
     }
-    Transform(const Mat4& raw) {
-        evalFromRawMatrix(raw);
-    }
+    Transform(const Mat4& raw) { evalFromRawMatrix(raw); }
     ~Transform() {}
 
     Transform& operator=(const Transform& transform) {
@@ -98,18 +94,18 @@ public:
 
     const Vec3& getTranslation() const;
     Transform& setTranslation(const Vec3& translation); // [new this] = [translation] * [this.rotation] * [this.scale]
-    Transform& preTranslate(const Vec3& translation);   // [new this] = [translation] * [this]
-    Transform& postTranslate(const Vec3& translation);  // [new this] = [this] * [translation] equivalent to:glTranslate
+    Transform& preTranslate(const Vec3& translation); // [new this] = [translation] * [this]
+    Transform& postTranslate(const Vec3& translation); // [new this] = [this] * [translation] equivalent to:glTranslate
 
     const Quat& getRotation() const;
     Transform& setRotation(const Quat& rotation); // [new this] = [this.translation] * [rotation] * [this.scale]
-    Transform& preRotate(const Quat& rotation);   // [new this] = [rotation] * [this]
-    Transform& postRotate(const Quat& rotation);  // [new this] = [this] * [rotation] equivalent to:glRotate
+    Transform& preRotate(const Quat& rotation); // [new this] = [rotation] * [this]
+    Transform& postRotate(const Quat& rotation); // [new this] = [this] * [rotation] equivalent to:glRotate
 
     const Vec3& getScale() const;
     Transform& setScale(float scale);
-    Transform& setScale(const Vec3& scale);  // [new this] = [this.translation] * [this.rotation] * [scale]
-    Transform& postScale(float scale);       // [new this] = [this] * [scale] equivalent to:glScale
+    Transform& setScale(const Vec3& scale); // [new this] = [this.translation] * [this.rotation] * [scale]
+    Transform& postScale(float scale); // [new this] = [this] * [scale] equivalent to:glScale
     Transform& postScale(const Vec3& scale); // [new this] = [this] * [scale] equivalent to:glScale
 
     bool isIdentity() const { return (_flags & ~Flags(FLAG_CACHE_INVALID_BITSET)).none(); }
@@ -143,7 +139,6 @@ public:
     // Left will be inversed before the multiplication
     static Transform& inverseMult(Transform& result, const Transform& left, const Transform& right);
 
-
     static Transform fromJson(const QJsonValue& json);
     static QJsonObject toJson(const Transform& transform);
 
@@ -154,7 +149,6 @@ public:
     bool containsNaN() const { return isNaN(_rotation) || isNaN(glm::dot(_scale, _translation)); }
 
 protected:
-
     enum Flag {
         FLAG_CACHE_INVALID = 0,
 
@@ -194,7 +188,6 @@ protected:
 
     void flagScaling() { _flags.set(FLAG_SCALING, true); }
     void unflagScaling() { _flags.set(FLAG_SCALING, false); }
-
 
     void flagUniform() { _flags.set(FLAG_NON_UNIFORM, false); }
     void flagNonUniform() { _flags.set(FLAG_NON_UNIFORM, true); }
@@ -238,7 +231,7 @@ inline Transform& Transform::preTranslate(const Vec3& translation) {
     return *this;
 }
 
-inline Transform&  Transform::postTranslate(const Vec3& translation) {
+inline Transform& Transform::postTranslate(const Vec3& translation) {
     if (translation == Vec3()) {
         return *this;
     }
@@ -331,7 +324,7 @@ inline Transform& Transform::setScale(float scale) {
     }
     invalidCache();
     flagUniform();
-    
+
     if (scale == 1.0f) {
         unflagScaling();
     } else {
@@ -348,7 +341,7 @@ inline Transform& Transform::setScale(const Vec3& scale) {
 
     if ((scale.x == scale.y) && (scale.x == scale.z)) {
         return setScale(scale.x);
-    } 
+    }
 
     invalidCache();
     flagScaling();
@@ -482,7 +475,7 @@ inline Transform& Transform::evalInverse(Transform& inverse) const {
     return inverse;
 }
 
-inline Transform& Transform::mult( Transform& result, const Transform& left, const Transform& right) {
+inline Transform& Transform::mult(Transform& result, const Transform& left, const Transform& right) {
     result = left;
     if (right.isTranslating()) {
         result.postTranslate(right.getTranslation());
@@ -502,7 +495,7 @@ inline Transform& Transform::mult( Transform& result, const Transform& left, con
     return result;
 }
 
-inline Transform& Transform::inverseMult( Transform& result, const Transform& left, const Transform& right) {
+inline Transform& Transform::inverseMult(Transform& result, const Transform& left, const Transform& right) {
     result.setIdentity();
 
     if (left.isScaling()) {

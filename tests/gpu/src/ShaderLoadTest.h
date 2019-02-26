@@ -11,24 +11,24 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <QtTest/QtTest>
 #include <QtCore/QTemporaryDir>
+#include <QtTest/QtTest>
 
-#include <gpu/Forward.h>
 #include <gl/OffscreenGLCanvas.h>
+#include <gpu/Forward.h>
 
 #define USE_LOCAL_SHADERS 1
 
 namespace std {
-    template <>
-    struct hash<std::pair<std::string, std::string>> {
-        size_t operator()(const std::pair<std::string, std::string>& a) const {
-            std::hash<std::string> hasher;
-            return hasher(a.first) + hasher(a.second);
-        }
-    };
+template<>
+struct hash<std::pair<std::string, std::string>> {
+    size_t operator()(const std::pair<std::string, std::string>& a) const {
+        std::hash<std::string> hasher;
+        return hasher(a.first) + hasher(a.second);
+    }
+};
 
-}
+} // namespace std
 
 using ShadersByName = std::unordered_map<std::string, std::string>;
 using Program = std::pair<std::string, std::string>;
@@ -38,7 +38,6 @@ class ShaderLoadTest : public QObject {
     Q_OBJECT
 
 private:
-
     void parseCacheFile();
 #if USE_LOCAL_SHADERS
     void parseCacheDirectory();
@@ -58,5 +57,5 @@ private:
     QString _resourcesPath;
     OffscreenGLCanvas _canvas;
     gpu::ContextPointer _gpuContext;
-    const glm::uvec2 _size{ 640, 480 };
+    const glm::uvec2 _size { 640, 480 };
 };

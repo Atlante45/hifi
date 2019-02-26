@@ -9,19 +9,18 @@
 
 #include "AnimDebugDraw.h"
 
-#include <qmath.h>
-#include <gpu/Batch.h>
 #include <GLMHelpers.h>
+#include <gpu/Batch.h>
+#include <qmath.h>
 #include <shaders/Shaders.h>
 
 #include "AbstractViewStateInterface.h"
-#include "RenderUtilsLogging.h"
 #include "DebugDraw.h"
+#include "RenderUtilsLogging.h"
 #include "StencilMaskPass.h"
 
 class AnimDebugDrawData {
 public:
-
     struct Vertex {
         glm::vec3 pos;
         uint32_t rgba;
@@ -31,7 +30,6 @@ public:
     typedef Payload::DataPointer Pointer;
 
     AnimDebugDrawData() {
-
         _vertexFormat = std::make_shared<gpu::Stream::Format>();
         _vertexBuffer = std::make_shared<gpu::Buffer>();
         _indexBuffer = std::make_shared<gpu::Buffer>();
@@ -43,7 +41,7 @@ public:
     void render(RenderArgs* args) {
         auto& batch = *args->_batch;
         batch.setPipeline(_pipeline);
-        auto transform = Transform{};
+        auto transform = Transform {};
         batch.setModelTransform(transform);
 
         batch.setInputFormat(_vertexFormat);
@@ -67,12 +65,20 @@ public:
 typedef render::Payload<AnimDebugDrawData> AnimDebugDrawPayload;
 
 namespace render {
-    template <> const ItemKey payloadGetKey(const AnimDebugDrawData::Pointer& data) { return (data->_isVisible ? ItemKey::Builder::transparentShape() : ItemKey::Builder::transparentShape().withInvisible()).withTagBits(ItemKey::TAG_BITS_ALL); }
-    template <> const Item::Bound payloadGetBound(const AnimDebugDrawData::Pointer& data) { return data->_bound; }
-    template <> void payloadRender(const AnimDebugDrawData::Pointer& data, RenderArgs* args) {
-        data->render(args);
-    }
+template<>
+const ItemKey payloadGetKey(const AnimDebugDrawData::Pointer& data) {
+    return (data->_isVisible ? ItemKey::Builder::transparentShape() : ItemKey::Builder::transparentShape().withInvisible())
+        .withTagBits(ItemKey::TAG_BITS_ALL);
 }
+template<>
+const Item::Bound payloadGetBound(const AnimDebugDrawData::Pointer& data) {
+    return data->_bound;
+}
+template<>
+void payloadRender(const AnimDebugDrawData::Pointer& data, RenderArgs* args) {
+    data->render(args);
+}
+} // namespace render
 
 AnimDebugDraw& AnimDebugDraw::getInstance() {
     static AnimDebugDraw instance;
@@ -84,23 +90,18 @@ static uint32_t toRGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 }
 
 static uint32_t toRGBA(const glm::vec4& v) {
-    return toRGBA(static_cast<uint8_t>(v.r * 255.0f),
-                  static_cast<uint8_t>(v.g * 255.0f),
-                  static_cast<uint8_t>(v.b * 255.0f),
+    return toRGBA(static_cast<uint8_t>(v.r * 255.0f), static_cast<uint8_t>(v.g * 255.0f), static_cast<uint8_t>(v.b * 255.0f),
                   static_cast<uint8_t>(v.a * 255.0f));
 }
 
 gpu::PipelinePointer AnimDebugDraw::_pipeline;
 
-AnimDebugDraw::AnimDebugDraw() :
-    _itemID(0) {
-
+AnimDebugDraw::AnimDebugDraw() : _itemID(0) {
     auto state = std::make_shared<gpu::State>();
     state->setCullMode(gpu::State::CULL_BACK);
     state->setDepthTest(true, true, gpu::LESS_EQUAL);
-    state->setBlendFunction(false, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD,
-                            gpu::State::INV_SRC_ALPHA, gpu::State::FACTOR_ALPHA,
-                            gpu::State::BLEND_OP_ADD, gpu::State::ONE);
+    state->setBlendFunction(false, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
+                            gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
     PrepareStencil::testMaskDrawShape(*state.get());
     auto program = gpu::Shader::createProgram(shader::render_utils::program::animdebugdraw);
     _pipeline = gpu::Pipeline::create(program, state);
@@ -148,7 +149,8 @@ void AnimDebugDraw::shutdown() {
     }
 }
 
-void AnimDebugDraw::addAbsolutePoses(const std::string& key, AnimSkeleton::ConstPointer skeleton, const AnimPoseVec& poses, const AnimPose& rootPose, const glm::vec4& color) {
+void AnimDebugDraw::addAbsolutePoses(const std::string& key, AnimSkeleton::ConstPointer skeleton, const AnimPoseVec& poses,
+                                     const AnimPose& rootPose, const glm::vec4& color) {
     _posesInfoMap[key] = PosesInfo(skeleton, poses, rootPose, color);
 }
 
@@ -162,15 +164,15 @@ static const uint32_t blue = toRGBA(0, 0, 255, 255);
 
 const int NUM_CIRCLE_SLICES = 24;
 
-static void addBone(const AnimPose& rootPose, const AnimPose& pose, float radius, glm::vec4& vecColor, AnimDebugDrawData::Vertex*& v) {
-
+static void addBone(const AnimPose& rootPose, const AnimPose& pose, float radius, glm::vec4& vecColor,
+                    AnimDebugDrawData::Vertex*& v) {
     const float XYZ_AXIS_LENGTH = radius * 4.0f;
     const uint32_t color = toRGBA(vecColor);
 
     AnimPose finalPose = rootPose * pose;
     glm::vec3 base = rootPose * pose.trans();
 
-    glm::vec3 xRing[NUM_CIRCLE_SLICES + 1];  // one extra for last index.
+    glm::vec3 xRing[NUM_CIRCLE_SLICES + 1]; // one extra for last index.
     glm::vec3 yRing[NUM_CIRCLE_SLICES + 1];
     glm::vec3 zRing[NUM_CIRCLE_SLICES + 1];
     const float dTheta = (2.0f * (float)M_PI) / NUM_CIRCLE_SLICES;
@@ -237,9 +239,8 @@ static void addBone(const AnimPose& rootPose, const AnimPose& pose, float radius
     }
 }
 
-static void addLink(const AnimPose& rootPose, const AnimPose& pose, const AnimPose& parentPose,
-                    float radius, const glm::vec4& colorVec, AnimDebugDrawData::Vertex*& v) {
-
+static void addLink(const AnimPose& rootPose, const AnimPose& pose, const AnimPose& parentPose, float radius,
+                    const glm::vec4& colorVec, AnimDebugDrawData::Vertex*& v) {
     uint32_t color = toRGBA(colorVec);
 
     AnimPose pose0 = rootPose * parentPose;
@@ -256,7 +257,6 @@ static void addLink(const AnimPose& rootPose, const AnimPose& pose, const AnimPo
 
     // make sure there's room between the two bones to draw a nice bone link.
     if (glm::dot(boneTip - pose0.trans(), boneAxisWorld) > glm::dot(boneBase - pose0.trans(), boneAxisWorld)) {
-
         // there is room, so lets draw a nice bone
 
         glm::vec3 uAxis, vAxis, wAxis;
@@ -311,7 +311,6 @@ static void addLine(const glm::vec3& start, const glm::vec3& end, const glm::vec
 }
 
 void AnimDebugDraw::update() {
-
     render::ScenePointer scene = AbstractViewStateInterface::instance()->getMain3DScene();
     if (!scene) {
         return;
@@ -326,7 +325,6 @@ void AnimDebugDraw::update() {
     std::shared_ptr<PosesInfoMap> posesInfoMapCopy;
     posesInfoMapCopy = std::make_shared<PosesInfoMap>(_posesInfoMap);
     transaction.updateItem<AnimDebugDrawData>(_itemID, [posesInfoMapCopy](AnimDebugDrawData& data) {
-
         const size_t VERTICES_PER_BONE = (6 + (NUM_CIRCLE_SLICES * 2) * 3);
         const size_t VERTICES_PER_LINK = 8 * 2;
         const size_t VERTICES_PER_RAY = 2;
@@ -360,7 +358,7 @@ void AnimDebugDraw::update() {
         // allocate verts!
         std::vector<AnimDebugDrawData::Vertex> vertices;
         vertices.resize(numVerts);
-        //Vertex* verts = (Vertex*)data._vertexBuffer->editData();
+        // Vertex* verts = (Vertex*)data._vertexBuffer->editData();
         AnimDebugDrawData::Vertex* v = nullptr;
         if (numVerts) {
             v = &vertices[0];
@@ -397,7 +395,8 @@ void AnimDebugDraw::update() {
             addBone(AnimPose::identity, AnimPose(glm::vec3(1), rot, pos), radius, color, v);
         }
 
-        AnimPose myAvatarPose(glm::vec3(1), DebugDraw::getInstance().getMyAvatarRot(), DebugDraw::getInstance().getMyAvatarPos());
+        AnimPose myAvatarPose(glm::vec3(1), DebugDraw::getInstance().getMyAvatarRot(),
+                              DebugDraw::getInstance().getMyAvatarPos());
         for (auto& iter : myAvatarMarkerMap) {
             glm::quat rot = std::get<0>(iter.second);
             glm::vec3 pos = std::get<1>(iter.second);

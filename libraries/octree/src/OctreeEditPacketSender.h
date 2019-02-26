@@ -20,7 +20,7 @@
 #include "SentPacketHistory.h"
 
 /// Utility for processing, packing, queueing and sending of outbound edit messages.
-class OctreeEditPacketSender :  public PacketSender {
+class OctreeEditPacketSender : public PacketSender {
     Q_OBJECT
 public:
     OctreeEditPacketSender();
@@ -64,7 +64,7 @@ public:
 
     // you must override these...
     virtual char getMyNodeType() const = 0;
-    virtual void adjustEditPacketForClockSkew(PacketType type, QByteArray& buffer, qint64 clockSkew) { }
+    virtual void adjustEditPacketForClockSkew(PacketType type, QByteArray& buffer, qint64 clockSkew) {}
 
     void processNackPacket(ReceivedMessage& message, SharedNodePointer sendingNode);
 

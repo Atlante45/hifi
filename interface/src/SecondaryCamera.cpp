@@ -15,14 +15,14 @@
 #include <RenderForwardTask.h>
 #include <RenderViewTask.h>
 
-#include <glm/gtx/transform.hpp>
 #include <gpu/Context.h>
+#include <glm/gtx/transform.hpp>
 
 #include "Application.h"
 
 using RenderArgsPointer = std::shared_ptr<RenderArgs>;
 
-class SecondaryCameraJob {  // Changes renderContext for our framebuffer and view.
+class SecondaryCameraJob { // Changes renderContext for our framebuffer and view.
 public:
     using Config = SecondaryCameraJobConfig;
     using JobModel = render::Job::ModelO<SecondaryCameraJob, RenderArgsPointer, Config>;
@@ -48,7 +48,8 @@ public:
 
     void setPortalProjection(ViewFrustum& srcViewFrustum) {
         if (_portalEntranceEntityId.isNull() || _attachedEntityId.isNull()) {
-            qWarning() << "ERROR: Cannot set portal projection for SecondaryCamera without an attachedEntityId AND portalEntranceEntityId set.";
+            qWarning() << "ERROR: Cannot set portal projection for SecondaryCamera without an attachedEntityId AND "
+                          "portalEntranceEntityId set.";
             return;
         }
 
@@ -83,7 +84,7 @@ public:
         glm::vec3 mainCameraPositionWorld = qApp->getCamera().getPosition();
         glm::vec3 mainCameraPositionPortalEntrance = vec3(portalEntranceFromWorld * vec4(mainCameraPositionWorld, 1.0f));
         mainCameraPositionPortalEntrance = vec3(-mainCameraPositionPortalEntrance.x, mainCameraPositionPortalEntrance.y,
-            -mainCameraPositionPortalEntrance.z);
+                                                -mainCameraPositionPortalEntrance.z);
         glm::vec3 portalExitCameraPositionWorld = vec3(worldFromPortalExit * vec4(mainCameraPositionPortalEntrance, 1.0f));
 
         srcViewFrustum.setPosition(portalExitCameraPositionWorld);
@@ -94,7 +95,8 @@ public:
         // but the values are the same.
         glm::vec3 upperRight = halfPortalExitPropertiesDimensions - mainCameraPositionPortalEntrance;
         glm::vec3 bottomLeft = -halfPortalExitPropertiesDimensions - mainCameraPositionPortalEntrance;
-        glm::mat4 frustum = glm::frustum(bottomLeft.x, upperRight.x, bottomLeft.y, upperRight.y, nearClip, _farClipPlaneDistance);
+        glm::mat4 frustum = glm::frustum(bottomLeft.x, upperRight.x, bottomLeft.y, upperRight.y, nearClip,
+                                         _farClipPlaneDistance);
         srcViewFrustum.setProjection(frustum);
     }
 
@@ -125,7 +127,7 @@ public:
         // get mirror camera position by reflecting main camera position's z coordinate in mirror space
         glm::vec3 mainCameraPositionWorld = qApp->getCamera().getPosition();
         glm::vec3 mainCameraPositionMirror = vec3(mirrorFromWorld * vec4(mainCameraPositionWorld, 1.0f));
-        glm::vec3 mirrorCameraPositionMirror = vec3(mainCameraPositionMirror.x, mainCameraPositionMirror.y, 
+        glm::vec3 mirrorCameraPositionMirror = vec3(mainCameraPositionMirror.x, mainCameraPositionMirror.y,
                                                     -mainCameraPositionMirror.z);
         glm::vec3 mirrorCameraPositionWorld = vec3(worldFromMirror * vec4(mirrorCameraPositionMirror, 1.0f));
 
@@ -138,7 +140,8 @@ public:
         float nearClip = mirrorCameraPositionMirror.z + mirrorPropertiesDimensions.z * 2.0f;
         glm::vec3 upperRight = halfMirrorPropertiesDimensions - mirrorCameraPositionMirror;
         glm::vec3 bottomLeft = -halfMirrorPropertiesDimensions - mirrorCameraPositionMirror;
-        glm::mat4 frustum = glm::frustum(bottomLeft.x, upperRight.x, bottomLeft.y, upperRight.y, nearClip, _farClipPlaneDistance);
+        glm::mat4 frustum = glm::frustum(bottomLeft.x, upperRight.x, bottomLeft.y, upperRight.y, nearClip,
+                                         _farClipPlaneDistance);
         srcViewFrustum.setProjection(frustum);
     }
 
@@ -146,7 +149,8 @@ public:
         auto args = renderContext->args;
         auto textureCache = DependencyManager::get<TextureCache>();
         gpu::FramebufferPointer destFramebuffer;
-        destFramebuffer = textureCache->getSpectatorCameraFramebuffer(_textureWidth, _textureHeight); // FIXME: Change the destination based on some unimplemented config var
+        destFramebuffer = textureCache->getSpectatorCameraFramebuffer(
+            _textureWidth, _textureHeight); // FIXME: Change the destination based on some unimplemented config var
         if (destFramebuffer) {
             _cachedArgsPointer->_blitFramebuffer = args->_blitFramebuffer;
             _cachedArgsPointer->_viewport = args->_viewport;
@@ -188,9 +192,9 @@ public:
                     srcViewFrustum.setPosition(_position);
                     srcViewFrustum.setOrientation(_orientation);
                 }
-                srcViewFrustum.setProjection(glm::perspective(glm::radians(_vFoV), 
-                                            ((float)args->_viewport.z / (float)args->_viewport.w), 
-                                            _nearClipPlaneDistance, _farClipPlaneDistance));
+                srcViewFrustum.setProjection(glm::perspective(glm::radians(_vFoV),
+                                                              ((float)args->_viewport.z / (float)args->_viewport.w),
+                                                              _nearClipPlaneDistance, _farClipPlaneDistance));
             }
             // Without calculating the bound planes, the secondary camera will use the same culling frustum as the main camera,
             // which is not what we want here.
@@ -238,7 +242,10 @@ void SecondaryCameraJobConfig::setOrientation(glm::quat orient) {
 }
 
 void SecondaryCameraJobConfig::enableSecondaryCameraRenderConfigs(bool enabled) {
-    qApp->getRenderEngine()->getConfiguration()->getConfig<SecondaryCameraRenderTask>("SecondaryCameraJob")->setEnabled(enabled);
+    qApp->getRenderEngine()
+        ->getConfiguration()
+        ->getConfig<SecondaryCameraRenderTask>("SecondaryCameraJob")
+        ->setEnabled(enabled);
     setEnabled(enabled);
 }
 
@@ -248,17 +255,17 @@ void SecondaryCameraJobConfig::resetSizeSpectatorCamera(int width, int height) {
     emit dirty();
 }
 
-class EndSecondaryCameraFrame {  // Restores renderContext.
+class EndSecondaryCameraFrame { // Restores renderContext.
 public:
     using JobModel = render::Job::ModelI<EndSecondaryCameraFrame, RenderArgsPointer>;
 
     void run(const render::RenderContextPointer& renderContext, const RenderArgsPointer& cachedArgs) {
         auto args = renderContext->args;
         if (cachedArgs) {
-        args->_blitFramebuffer = cachedArgs->_blitFramebuffer;
-        args->_viewport = cachedArgs->_viewport;
-        args->_displayMode = cachedArgs->_displayMode;
-        args->_renderMode = cachedArgs->_renderMode;
+            args->_blitFramebuffer = cachedArgs->_blitFramebuffer;
+            args->_viewport = cachedArgs->_viewport;
+            args->_displayMode = cachedArgs->_displayMode;
+            args->_renderMode = cachedArgs->_renderMode;
         }
         args->popViewFrustum();
 
@@ -269,10 +276,12 @@ public:
     }
 };
 
-void SecondaryCameraRenderTask::build(JobModel& task, const render::Varying& inputs, render::Varying& outputs, render::CullFunctor cullFunctor, bool isDeferred) {
+void SecondaryCameraRenderTask::build(JobModel& task, const render::Varying& inputs, render::Varying& outputs,
+                                      render::CullFunctor cullFunctor, bool isDeferred) {
     const auto cachedArg = task.addJob<SecondaryCameraJob>("SecondaryCamera");
 
-    task.addJob<RenderViewTask>("RenderSecondView", cullFunctor, isDeferred, render::ItemKey::TAG_BITS_1, render::ItemKey::TAG_BITS_1);
+    task.addJob<RenderViewTask>("RenderSecondView", cullFunctor, isDeferred, render::ItemKey::TAG_BITS_1,
+                                render::ItemKey::TAG_BITS_1);
 
     task.addJob<EndSecondaryCameraFrame>("EndSecondaryCamera", cachedArg);
 }

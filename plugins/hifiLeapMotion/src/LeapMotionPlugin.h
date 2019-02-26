@@ -67,8 +67,8 @@ protected:
         virtual void focusOutEvent() override {};
 
         void update(float deltaTime, const controller::InputCalibrationData& inputCalibrationData,
-            const std::vector<LeapMotionPlugin::LeapMotionJoint>& joints, 
-            const std::vector<LeapMotionPlugin::LeapMotionJoint>& prevJoints);
+                    const std::vector<LeapMotionPlugin::LeapMotionJoint>& joints,
+                    const std::vector<LeapMotionPlugin::LeapMotionJoint>& prevJoints);
 
         void clearState();
 

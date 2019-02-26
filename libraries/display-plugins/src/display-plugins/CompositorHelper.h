@@ -12,15 +12,15 @@
 #include <atomic>
 #include <cstdint>
 
-#include <QtCore/QObject>
 #include <QtCore/QMutex>
+#include <QtCore/QObject>
 #include <QtCore/QPropertyAnimation>
 #include <QtGui/QCursor>
 #include <QtGui/QMouseEvent>
 
+#include <DependencyManager.h>
 #include <GLMHelpers.h>
 #include <Transform.h>
-#include <DependencyManager.h>
 
 #include "DisplayPlugin.h"
 
@@ -52,7 +52,8 @@ public:
     void setRenderingWidget(QWidget* widget) { _renderingWidget = widget; }
 
     bool calculateRayUICollisionPoint(const glm::vec3& position, const glm::vec3& direction, glm::vec3& result) const;
-    bool calculateParabolaUICollisionPoint(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration, glm::vec3& result, float& parabolicDistance) const;
+    bool calculateParabolaUICollisionPoint(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
+                                           glm::vec3& result, float& parabolicDistance) const;
 
     bool isHMD() const;
     bool fakeEventActive() const { return _fakeMouseEvent; }
@@ -61,8 +62,8 @@ public:
     // Frame of reference:
     // Spherical: Polar coordinates that gives the position on the sphere we project on (yaw,pitch)
     // Overlay: Position on the overlay (x,y)
-    glm::vec2 sphericalToOverlay(const glm::vec2 & sphericalPos) const;
-    glm::vec2 overlayToSpherical(const glm::vec2 & overlayPos) const;
+    glm::vec2 sphericalToOverlay(const glm::vec2& sphericalPos) const;
+    glm::vec2 overlayToSpherical(const glm::vec2& overlayPos) const;
     void computeHmdPickRay(const glm::vec2& cursorPos, glm::vec3& origin, glm::vec3& direction) const;
 
     glm::vec2 overlayFromSphereSurface(const glm::vec3& sphereSurfacePoint) const;
@@ -76,7 +77,12 @@ public:
     glm::mat4 getUiTransform() const;
 
     float getAlpha() const { return _alpha; }
-    void setAlpha(float alpha) { if (alpha != _alpha) { emit alphaChanged();  _alpha = alpha; } }
+    void setAlpha(float alpha) {
+        if (alpha != _alpha) {
+            emit alphaChanged();
+            _alpha = alpha;
+        }
+    }
 
     bool getReticleVisible() const { return _reticleVisible; }
     void setReticleVisible(bool visible) { _reticleVisible = visible; }
@@ -91,7 +97,7 @@ public:
     glm::vec2 getReticleMaximumPosition() const;
 
     glm::mat4 getReticleTransform(const glm::mat4& eyePose = glm::mat4(), const glm::vec3& headPosition = glm::vec3()) const;
-    glm::mat4 getPoint2DTransform(const glm::vec2& point, float sizeX , float sizeY) const;
+    glm::mat4 getPoint2DTransform(const glm::vec2& point, float sizeX, float sizeY) const;
 
     ReticleInterface* getReticleInterface() { return _reticleInterface; }
 
@@ -128,15 +134,15 @@ private:
     DisplayPluginPointer _currentDisplayPlugin;
     glm::mat4 _currentCamera;
     glm::mat4 _sensorToWorldMatrix;
-    QWidget* _renderingWidget{ nullptr };
+    QWidget* _renderingWidget { nullptr };
 
     //// Support for hovering and tooltips
-    //static EntityItemID _noItemId;
-    //EntityItemID _hoverItemId { _noItemId };
+    // static EntityItemID _noItemId;
+    // EntityItemID _hoverItemId { _noItemId };
 
-    //QString _hoverItemTitle;
-    //QString _hoverItemDescription;
-    //quint64 _hoverItemEnterUsecs { 0 };
+    // QString _hoverItemTitle;
+    // QString _hoverItemDescription;
+    // quint64 _hoverItemEnterUsecs { 0 };
 
     bool _isOverDesktop { true };
     float _textureFov { VIRTUAL_UI_TARGET_FOV.y };

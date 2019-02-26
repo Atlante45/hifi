@@ -36,4 +36,3 @@ public:
 };
 
 #endif // hifi_WebInputMode_h
-

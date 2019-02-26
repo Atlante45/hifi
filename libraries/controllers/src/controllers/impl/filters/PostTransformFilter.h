@@ -18,16 +18,18 @@ namespace controller {
 
 class PostTransformFilter : public Filter {
     REGISTER_FILTER_CLASS(PostTransformFilter);
+
 public:
     PostTransformFilter() = default;
     PostTransformFilter(glm::mat4 transform) : _transform(transform) {}
     virtual AxisValue apply(AxisValue value) const override { return value; }
     virtual Pose apply(Pose value) const override { return value.postTransform(_transform); }
     virtual bool parseParameters(const QJsonValue& parameters) override { return parseMat4Parameter(parameters, _transform); }
+
 private:
     glm::mat4 _transform;
 };
 
-}
+} // namespace controller
 
 #endif

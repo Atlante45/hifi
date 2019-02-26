@@ -8,8 +8,8 @@
 
 #include "HysteresisFilter.h"
 
-#include <QtCore/QJsonObject>
 #include <QtCore/QJsonArray>
+#include <QtCore/QJsonObject>
 
 using namespace controller;
 
@@ -18,7 +18,6 @@ HysteresisFilter::HysteresisFilter(float min, float max) : _min(min), _max(max) 
         std::swap(_min, _max);
     }
 };
-
 
 AxisValue HysteresisFilter::apply(AxisValue value) const {
     if (_signaled) {

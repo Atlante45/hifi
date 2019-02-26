@@ -14,8 +14,8 @@
 
 #include <QtCore/QObject>
 
-#include <controllers/UserInputMapper.h>
 #include <controllers/ScriptingInterface.h>
+#include <controllers/UserInputMapper.h>
 
 #include <KeyEvent.h>
 #include <MouseEvent.h>
@@ -23,7 +23,6 @@
 #include <TouchEvent.h>
 #include <WheelEvent.h>
 class ScriptEngine;
-
 
 /**jsdoc
  * The Controller API provides facilities to interact with computer and controller hardware.
@@ -142,7 +141,7 @@ class ScriptEngine;
  *
  * <h5>Entity Methods:</h5>
  *
- * <p>The default scripts implement hand controller actions that use {@link Entities.callEntityMethod} to call entity script 
+ * <p>The default scripts implement hand controller actions that use {@link Entities.callEntityMethod} to call entity script
  * methods, if present in the entity being interacted with.</p>
  *
  * <table>
@@ -152,14 +151,14 @@ class ScriptEngine;
  *   <tbody>
  *     <tr>
  *       <td><code>startFarTrigger</code><br /><code>continueFarTrigger</code><br /><code>stopFarTrigger</code></td>
- *       <td>These methods are called when a user is more than 0.3m away from the entity, the entity is triggerable, and the 
+ *       <td>These methods are called when a user is more than 0.3m away from the entity, the entity is triggerable, and the
  *         user starts, continues, or stops squeezing the trigger.</td>
  *       </td>
  *       <td>A light switch that can be toggled on and off from a distance.</td>
  *     </tr>
  *     <tr>
  *       <td><code>startNearTrigger</code><br /><code>continueNearTrigger</code><br /><code>stopNearTrigger</code></td>
- *       <td>These methods are called when a user is less than 0.3m away from the entity, the entity is triggerable, and the 
+ *       <td>These methods are called when a user is less than 0.3m away from the entity, the entity is triggerable, and the
  *         user starts, continues, or stops squeezing the trigger.</td>
  *       <td>A doorbell that can be rung when a user is near.</td>
  *     </tr>
@@ -171,13 +170,13 @@ class ScriptEngine;
  *     </tr>
  *     <tr>
  *       <td><code>startNearGrab</code><br /><code>continueNearGrab</code><br /></td>
- *       <td>These methods are called when a user is less than 0.3m away from the entity, the entity is either cloneable, or 
+ *       <td>These methods are called when a user is less than 0.3m away from the entity, the entity is either cloneable, or
  *         grabbable and not locked, and the user starts or continues to squeeze the trigger.</td>
  *       <td>A ball that glows when it's being held close.</td>
  *     </tr>
  *     <tr>
  *       <td><code>releaseGrab</code></td>
- *       <td>This method is called when a user releases the trigger when having been either distance or near grabbing an 
+ *       <td>This method is called when a user releases the trigger when having been either distance or near grabbing an
  *         entity.</td>
  *       <td>Turn off the ball glow or comet trail with the user finishes grabbing it.</td>
  *     </tr>
@@ -204,23 +203,23 @@ class ScriptEngine;
  * @property {Controller.Actions} Actions - Predefined actions on Interface and the user's avatar. These can be used as end
  *     points in a {@link RouteObject} mapping. A synonym for <code>Controller.Hardware.Actions</code>.
  *     <em>Read-only.</em><br />
- *     Default mappings are provided from the <code>Controller.Hardware.Keyboard</code> and <code>Controller.Standard</code> to 
- *     actions in 
+ *     Default mappings are provided from the <code>Controller.Hardware.Keyboard</code> and <code>Controller.Standard</code> to
+ *     actions in
  *     <a href="https://github.com/highfidelity/hifi/blob/master/interface/resources/controllers/keyboardMouse.json">
- *     keyboardMouse.json</a> and 
+ *     keyboardMouse.json</a> and
  *     <a href="https://github.com/highfidelity/hifi/blob/master/interface/resources/controllers/standard.json">
  *     standard.json</a>, respectively.
  *
- * @property {Controller.Hardware} Hardware - Standard and hardware-specific controller and computer outputs, plus predefined 
- *     actions on Interface and the user's avatar. The outputs can be mapped to <code>Actions</code> or functions in a 
- *     {@link RouteObject} mapping. Additionally, hardware-specific controller outputs can be mapped to <code>Standard</code> 
+ * @property {Controller.Hardware} Hardware - Standard and hardware-specific controller and computer outputs, plus predefined
+ *     actions on Interface and the user's avatar. The outputs can be mapped to <code>Actions</code> or functions in a
+ *     {@link RouteObject} mapping. Additionally, hardware-specific controller outputs can be mapped to <code>Standard</code>
  *     controller outputs. <em>Read-only.</em>
  *
- * @property {Controller.Standard} Standard - Standard controller outputs that can be mapped to <code>Actions</code> or 
+ * @property {Controller.Standard} Standard - Standard controller outputs that can be mapped to <code>Actions</code> or
  *     functions in a {@link RouteObject} mapping. <em>Read-only.</em><br />
- *     Each hardware device has a mapping from its outputs to <code>Controller.Standard</code> items, specified in a JSON file. 
+ *     Each hardware device has a mapping from its outputs to <code>Controller.Standard</code> items, specified in a JSON file.
  *     For example, <a href="https://github.com/highfidelity/hifi/blob/master/interface/resources/controllers/leapmotion.json">
- *     leapmotion.json</a> and 
+ *     leapmotion.json</a> and
  *     <a href="https://github.com/highfidelity/hifi/blob/master/interface/resources/controllers/vive.json">vive.json</a>.
  */
 
@@ -228,21 +227,21 @@ class ScriptEngine;
 class ControllerScriptingInterface : public controller::ScriptingInterface {
     Q_OBJECT
 
-public:    
+public:
     virtual ~ControllerScriptingInterface() {}
 
     void emitKeyPressEvent(QKeyEvent* event);
     void emitKeyReleaseEvent(QKeyEvent* event);
-    
+
     void emitMouseMoveEvent(QMouseEvent* event);
-    void emitMousePressEvent(QMouseEvent* event); 
+    void emitMousePressEvent(QMouseEvent* event);
     void emitMouseDoublePressEvent(QMouseEvent* event);
     void emitMouseReleaseEvent(QMouseEvent* event);
 
     void emitTouchBeginEvent(const TouchEvent& event);
-    void emitTouchEndEvent(const TouchEvent& event); 
+    void emitTouchEndEvent(const TouchEvent& event);
     void emitTouchUpdateEvent(const TouchEvent& event);
-    
+
     void emitWheelEvent(QWheelEvent* event);
 
     bool isKeyCaptured(QKeyEvent* event) const;
@@ -255,7 +254,7 @@ public slots:
     /**jsdoc
      * Disable default Interface actions for a particular key event.
      * @function Controller.captureKeyEvents
-     * @param {KeyEvent} event - Details of the key event to be captured. The <code>key</code> property must be specified. The 
+     * @param {KeyEvent} event - Details of the key event to be captured. The <code>key</code> property must be specified. The
      *     <code>text</code> property is ignored. The other properties default to <code>false</code>.
      * @example <caption>Disable left and right strafing.</caption>
      * var STRAFE_LEFT = { "key": 16777234, isShifted: true };
@@ -272,10 +271,10 @@ public slots:
     virtual void captureKeyEvents(const KeyEvent& event);
 
     /**jsdoc
-     * Re-enable default Interface actions for a particular key event that has been disabled using 
+     * Re-enable default Interface actions for a particular key event that has been disabled using
      * {@link Controller.captureKeyEvents|captureKeyEvents}.
      * @function Controller.releaseKeyEvents
-     * @param {KeyEvent} event - Details of the key event to release from capture. The <code>key</code> property must be 
+     * @param {KeyEvent} event - Details of the key event to release from capture. The <code>key</code> property must be
      *     specified. The <code>text</code> property is ignored. The other properties default to <code>false</code>.
      */
     virtual void releaseKeyEvents(const KeyEvent& event);
@@ -289,7 +288,7 @@ public slots:
     virtual void captureJoystick(int joystickIndex);
 
     /**jsdoc
-     * Re-enable default Interface actions for a joystick that has been disabled using 
+     * Re-enable default Interface actions for a joystick that has been disabled using
      * {@link Controller.captureJoystick|captureJoystick}.
      * @function Controller.releaseJoystick
      * @param {number} joystickID - The integer ID of the joystick.
@@ -316,12 +315,11 @@ public slots:
     virtual void captureEntityClickEvents();
 
     /**jsdoc
-     * Re-enable {@link Entities.mousePressOnEntity} and {@link Entities.mouseDoublePressOnEntity} events on entities that were 
+     * Re-enable {@link Entities.mousePressOnEntity} and {@link Entities.mouseDoublePressOnEntity} events on entities that were
      * disabled using {@link Controller.captureEntityClickEvents|captureEntityClickEvents}.
      * @function Controller.releaseEntityClickEvents
      */
     virtual void releaseEntityClickEvents();
-
 
     /**jsdoc
      * Get the dimensions of the Interface window's interior if in desktop mode or the HUD surface if in HMD mode.
@@ -331,7 +329,7 @@ public slots:
     virtual glm::vec2 getViewportDimensions() const;
 
     /**jsdoc
-     * Get the recommended area to position UI on the HUD surface if in HMD mode or Interface's window interior if in desktop 
+     * Get the recommended area to position UI on the HUD surface if in HMD mode or Interface's window interior if in desktop
      * mode.
      * @function Controller.getRecommendedHUDRect
      * @returns {Rect} The recommended area in which to position UI.
@@ -341,9 +339,9 @@ public slots:
     /**jsdoc
      * Enables or disables the virtual game pad that is displayed on certain devices (e.g., Android).
      * @function Controller.setVPadEnabled
-     * @param {boolean} enable - If <code>true</code> then the virtual game pad doesn't work, otherwise it does work provided 
+     * @param {boolean} enable - If <code>true</code> then the virtual game pad doesn't work, otherwise it does work provided
      *     that it is not hidden by {@link Controller.setVPadHidden|setVPadHidden}.
-     *    
+     *
      */
     virtual void setVPadEnabled(bool enable);
 
@@ -355,7 +353,7 @@ public slots:
     virtual void setVPadHidden(bool hidden); // Call it when a window should hide it
 
     /**jsdoc
-     * Sets the amount of extra margin between the virtual game pad that is displayed on certain devices (e.g., Android) and 
+     * Sets the amount of extra margin between the virtual game pad that is displayed on certain devices (e.g., Android) and
      * the bottom of the display.
      * @function Controller.setVPadExtraBottomMargin
      * @param {number} margin - Integer number of pixels in the extra margin.
@@ -460,7 +458,7 @@ signals:
     void wheelEvent(const WheelEvent& event);
 
 private:
-    QMultiMap<int,KeyEvent> _capturedKeys;
+    QMultiMap<int, KeyEvent> _capturedKeys;
     QSet<int> _capturedJoysticks;
     bool _captureEntityClicks;
 
@@ -473,6 +471,5 @@ const int NUMBER_OF_TRIGGERS_PER_PALM = 1;
 const int NUMBER_OF_BUTTONS_PER_PALM = 6;
 const int PALM_SPATIALCONTROL = 0;
 const int TIP_SPATIALCONTROL = 1;
-
 
 #endif // hifi_ControllerScriptingInterface_h

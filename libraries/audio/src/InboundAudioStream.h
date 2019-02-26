@@ -15,16 +15,16 @@
 #include <Node.h>
 #include <NodeData.h>
 #include <NumericalConstants.h>
-#include <udt/PacketHeaders.h>
 #include <ReceivedMessage.h>
 #include <StDev.h>
+#include <udt/PacketHeaders.h>
 
 #include <plugins/CodecPlugin.h>
 
 #include "AudioRingBuffer.h"
+#include "AudioStreamStats.h"
 #include "MovingMinMaxAvg.h"
 #include "SequenceNumberStats.h"
-#include "AudioStreamStats.h"
 #include "TimeWeightedAvg.h"
 
 // Audio Env bitset
@@ -75,7 +75,7 @@ public:
 
     /// returns the desired number of jitter buffer frames under the dyanmic jitter buffers scheme
     int getCalculatedJitterBufferFrames() const { return _calculatedJitterBufferFrames; }
-    
+
     bool dynamicJitterBufferEnabled() const { return _dynamicJitterBufferEnabled; }
     int getStaticJitterBufferFrames() { return _staticJitterBufferFrames; }
     int getDesiredJitterBufferFrames() { return _desiredJitterBufferFrames; }
@@ -95,7 +95,7 @@ public:
     int getOverflowCount() const { return _ringBuffer.getOverflowCount(); }
 
     int getPacketsReceived() const { return _incomingSequenceNumberStats.getReceived(); }
-    
+
     bool hasReverb() const { return _hasReverb; }
     float getRevebTime() const { return _reverbTime; }
     float getWetLevel() const { return _wetLevel; }
@@ -123,7 +123,7 @@ private:
 protected:
     // disallow copying of InboundAudioStream objects
     InboundAudioStream(const InboundAudioStream&);
-    InboundAudioStream& operator= (const InboundAudioStream&);
+    InboundAudioStream& operator=(const InboundAudioStream&);
 
     /// parses the info between the seq num and the audio data in the network packet and calculates
     /// how many audio samples this packet contains (used when filling in samples for dropped packets).
@@ -139,15 +139,14 @@ protected:
 
     /// writes silent frames to the buffer that may be dropped to reduce latency caused by the buffer
     virtual int writeDroppableSilentFrames(int silentFrames);
-    
-protected:
 
+protected:
     AudioRingBuffer _ringBuffer;
     int _numChannels;
 
     bool _lastPopSucceeded { false };
     AudioRingBuffer::ConstIterator _lastPopOutput;
-    
+
     bool _dynamicJitterBufferEnabled { DEFAULT_DYNAMIC_JITTER_BUFFER_ENABLED };
     int _staticJitterBufferFrames { DEFAULT_STATIC_JITTER_FRAMES };
     int _desiredJitterBufferFrames;
@@ -165,7 +164,9 @@ protected:
     SequenceNumberStats _incomingSequenceNumberStats;
 
     quint64 _lastPacketReceivedTime { 0 };
-    MovingMinMaxAvg<quint64> _timeGapStatsForDesiredCalcOnTooManyStarves { 0, WINDOW_SECONDS_FOR_DESIRED_CALC_ON_TOO_MANY_STARVES };
+    MovingMinMaxAvg<quint64> _timeGapStatsForDesiredCalcOnTooManyStarves {
+        0, WINDOW_SECONDS_FOR_DESIRED_CALC_ON_TOO_MANY_STARVES
+    };
     int _calculatedJitterBufferFrames { 0 };
     MovingMinMaxAvg<quint64> _timeGapStatsForDesiredReduction { 0, WINDOW_SECONDS_FOR_DESIRED_REDUCTION };
 

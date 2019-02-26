@@ -39,7 +39,6 @@ public:
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs);
 
 private:
-
 #include "BloomThreshold.shared.slh"
 
     gpu::FramebufferPointer _outputBuffer;
@@ -47,14 +46,14 @@ private:
     gpu::StructBuffer<Parameters> _parameters;
 };
 
-
 class BloomApplyConfig : public render::Job::Config {
     Q_OBJECT
 };
 
 class BloomApply {
 public:
-    using Inputs = render::VaryingSet5<gpu::FramebufferPointer, gpu::FramebufferPointer, gpu::FramebufferPointer, gpu::FramebufferPointer, graphics::BloomPointer>;
+    using Inputs = render::VaryingSet5<gpu::FramebufferPointer, gpu::FramebufferPointer, gpu::FramebufferPointer,
+                                       gpu::FramebufferPointer, graphics::BloomPointer>;
     using Config = BloomApplyConfig;
     using JobModel = render::Job::ModelI<BloomApply, Inputs, Config>;
 
@@ -64,7 +63,6 @@ public:
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs);
 
 private:
-
 #include "BloomApply.shared.slh"
 
     gpu::PipelinePointer _pipeline;
@@ -81,7 +79,6 @@ public:
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs);
 
 private:
-
     gpu::PipelinePointer _pipeline;
 };
 
@@ -90,7 +87,6 @@ class DebugBloomConfig : public render::Job::Config {
     Q_PROPERTY(int mode MEMBER mode NOTIFY dirty)
 
 public:
-
     enum Mode {
         MODE_LEVEL0 = 0,
         MODE_LEVEL1,
@@ -102,7 +98,7 @@ public:
 
     DebugBloomConfig() : render::Job::Config(false) {}
 
-    int mode{ MODE_ALL_LEVELS };
+    int mode { MODE_ALL_LEVELS };
 
 signals:
     void dirty();
@@ -110,7 +106,8 @@ signals:
 
 class DebugBloom {
 public:
-    using Inputs = render::VaryingSet5<gpu::FramebufferPointer, gpu::FramebufferPointer, gpu::FramebufferPointer, gpu::FramebufferPointer, gpu::FramebufferPointer>;
+    using Inputs = render::VaryingSet5<gpu::FramebufferPointer, gpu::FramebufferPointer, gpu::FramebufferPointer,
+                                       gpu::FramebufferPointer, gpu::FramebufferPointer>;
     using Config = DebugBloomConfig;
     using JobModel = render::Job::ModelI<DebugBloom, Inputs, Config>;
 
@@ -129,13 +126,12 @@ class BloomEffect {
 public:
     using Inputs = render::VaryingSet3<DeferredFrameTransformPointer, gpu::FramebufferPointer, BloomStage::FramePointer>;
     using Config = BloomConfig;
-	using JobModel = render::Task::ModelI<BloomEffect, Inputs, Config>;
+    using JobModel = render::Task::ModelI<BloomEffect, Inputs, Config>;
 
-	BloomEffect();
+    BloomEffect();
 
-	void configure(const Config& config);
-	void build(JobModel& task, const render::Varying& inputs, render::Varying& outputs);
-
+    void configure(const Config& config);
+    void build(JobModel& task, const render::Varying& inputs, render::Varying& outputs);
 };
 
 #endif // hifi_render_utils_BloomEffect_h

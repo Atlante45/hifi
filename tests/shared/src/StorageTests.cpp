@@ -28,7 +28,6 @@ StorageTests::~StorageTests() {
     }
 }
 
-
 void StorageTests::testConversion() {
     {
         QFileInfo fileInfo(_testFile);

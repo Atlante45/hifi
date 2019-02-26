@@ -52,13 +52,13 @@ public:
 
 signals:
     void inputDeviceRunningChanged(const QString& pluginName, bool isRunning, const QStringList& runningDevices);
-    
+
 private:
     PluginManager() = default;
 
-    DisplayPluginProvider _displayPluginProvider { []()->DisplayPluginList { return {}; } };
-    InputPluginProvider _inputPluginProvider { []()->InputPluginList { return {}; } };
-    CodecPluginProvider _codecPluginProvider { []()->CodecPluginList { return {}; } };
+    DisplayPluginProvider _displayPluginProvider { []() -> DisplayPluginList { return {}; } };
+    InputPluginProvider _inputPluginProvider { []() -> InputPluginList { return {}; } };
+    CodecPluginProvider _codecPluginProvider { []() -> CodecPluginList { return {}; } };
     InputPluginSettingsPersister _inputSettingsPersister { [](const InputPluginList& list) {} };
     PluginContainer* _container { nullptr };
     DisplayPluginList _displayPlugins;

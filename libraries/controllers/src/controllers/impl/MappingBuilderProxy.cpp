@@ -8,15 +8,15 @@
 
 #include "MappingBuilderProxy.h"
 
-#include <QtCore/QHash>
 #include <QtCore/QDebug>
+#include <QtCore/QHash>
 
-#include <QtCore/QJsonObject>
 #include <QtCore/QJsonArray>
+#include <QtCore/QJsonObject>
 
-#include "RouteBuilderProxy.h"
-#include "../ScriptingInterface.h"
 #include "../Logging.h"
+#include "../ScriptingInterface.h"
+#include "RouteBuilderProxy.h"
 
 using namespace controller;
 
@@ -59,5 +59,3 @@ QObject* MappingBuilderProxy::enable(bool enable) {
     _parent.enableMapping(_mapping->name, enable);
     return this;
 }
-
-

@@ -28,18 +28,18 @@
 #include <QString>
 #include <QUuid>
 
-#include <SharedUtil.h>
-#include <ShapeInfo.h>
 #include <NLPacket.h>
+#include <ShapeInfo.h>
+#include <SharedUtil.h>
 #include <udt/PacketHeaders.h>
 
-#include "MaterialMappingMode.h"
 #include "BillboardMode.h"
-#include "RenderLayer.h"
-#include "PrimitiveMode.h"
-#include "WebInputMode.h"
-#include "PulseMode.h"
 #include "GizmoType.h"
+#include "MaterialMappingMode.h"
+#include "PrimitiveMode.h"
+#include "PulseMode.h"
+#include "RenderLayer.h"
+#include "WebInputMode.h"
 
 #include "OctreeConstants.h"
 #include "OctreeElement.h"
@@ -53,11 +53,11 @@ typedef quint64 OCTREE_PACKET_SENT_TIME;
 typedef uint16_t OCTREE_PACKET_INTERNAL_SECTION_SIZE;
 const int MAX_OCTREE_PACKET_SIZE = udt::MAX_PACKET_SIZE;
 
-const unsigned int OCTREE_PACKET_EXTRA_HEADERS_SIZE = sizeof(OCTREE_PACKET_FLAGS)
-                + sizeof(OCTREE_PACKET_SEQUENCE) + sizeof(OCTREE_PACKET_SENT_TIME);
+const unsigned int OCTREE_PACKET_EXTRA_HEADERS_SIZE = sizeof(OCTREE_PACKET_FLAGS) + sizeof(OCTREE_PACKET_SEQUENCE) +
+                                                      sizeof(OCTREE_PACKET_SENT_TIME);
 
-const unsigned int MAX_OCTREE_PACKET_DATA_SIZE =
-    udt::MAX_PACKET_SIZE - (NLPacket::MAX_PACKET_HEADER_SIZE + OCTREE_PACKET_EXTRA_HEADERS_SIZE);
+const unsigned int MAX_OCTREE_PACKET_DATA_SIZE = udt::MAX_PACKET_SIZE -
+                                                 (NLPacket::MAX_PACKET_HEADER_SIZE + OCTREE_PACKET_EXTRA_HEADERS_SIZE);
 const unsigned int MAX_OCTREE_UNCOMRESSED_PACKET_SIZE = MAX_OCTREE_PACKET_DATA_SIZE;
 
 const unsigned int MINIMUM_ATTEMPT_MORE_PACKING = sizeof(OCTREE_PACKET_INTERNAL_SECTION_SIZE) + 40;
@@ -74,9 +74,8 @@ class LevelDetails {
         _bytesOfOctalCodes(bytesOfOctalCodes),
         _bytesOfBitmasks(bytesOfBitmasks),
         _bytesOfColor(bytesOfColor),
-        _bytesReservedAtStart(bytesReservedAtStart) {
-    }
-    
+        _bytesReservedAtStart(bytesReservedAtStart) {}
+
     friend class OctreePacketData;
 
 private:
@@ -87,7 +86,7 @@ private:
     int _bytesReservedAtStart;
 };
 
-/// Handles packing of the data portion of PacketType_OCTREE_DATA messages. 
+/// Handles packing of the data portion of PacketType_OCTREE_DATA messages.
 class OctreePacketData {
 public:
     OctreePacketData(bool enableCompression = false, int maxFinalizedSize = MAX_OCTREE_PACKET_DATA_SIZE);
@@ -98,11 +97,11 @@ public:
 
     /// reset completely, all data is discarded
     void reset();
-    
+
     /// call to begin encoding a subtree starting at this point, this will append the octcode to the uncompressed stream
     /// at this point. May fail if new datastream is too long. In failure case the stream remains in it's previous state.
     bool startSubTree(const unsigned char* octcode = NULL);
-    
+
     // call to indicate that the current subtree is complete and changes should be committed.
     void endSubTree();
 
@@ -114,7 +113,7 @@ public:
 
     /// discards all content back to a previous marker key
     void discardLevel(LevelDetails key);
-    
+
     /// ends a level, and performs any expensive finalization. may fail if finalization creates a stream which is too large
     /// if the finalization would fail, the packet will automatically discard the previous level.
     bool endLevel(LevelDetails key);
@@ -122,9 +121,9 @@ public:
     /// appends a bitmask to the end of the stream, may fail if new data stream is too long to fit in packet
     bool appendBitMask(unsigned char bitmask);
 
-    /// updates the value of a bitmask from a previously appended portion of the uncompressed stream, might fail if the new 
+    /// updates the value of a bitmask from a previously appended portion of the uncompressed stream, might fail if the new
     /// bitmask would cause packet to be less compressed, or if offset was out of range.
-    bool updatePriorBitMask(int offset, unsigned char bitmask); 
+    bool updatePriorBitMask(int offset, unsigned char bitmask);
 
     /// reserves space in the stream for a future bitmask, may fail if new data stream is too long to fit in packet
     bool reserveBitMask();
@@ -236,10 +235,10 @@ public:
 
     /// load finalized content to allow access to decoded content for parsing
     void loadFinalizedContent(const unsigned char* data, int length);
-    
+
     /// returns whether or not zlib compression enabled on finalization
     bool isCompressed() const { return _enableCompression; }
-    
+
     /// returns the target uncompressed size
     unsigned int getTargetSize() const { return _targetSize; }
 
@@ -251,28 +250,73 @@ public:
     /// displays contents for debugging
     void debugContent();
     void debugBytes();
-    
+
     static quint64 getCompressContentTime() { return _compressContentTime; } /// total time spent compressing content
     static quint64 getCompressContentCalls() { return _compressContentCalls; } /// total calls to compress content
-    static quint64 getTotalBytesOfOctalCodes() { return _totalBytesOfOctalCodes; }  /// total bytes for octal codes
-    static quint64 getTotalBytesOfBitMasks() { return _totalBytesOfBitMasks; }  /// total bytes of bitmasks
+    static quint64 getTotalBytesOfOctalCodes() { return _totalBytesOfOctalCodes; } /// total bytes for octal codes
+    static quint64 getTotalBytesOfBitMasks() { return _totalBytesOfBitMasks; } /// total bytes of bitmasks
     static quint64 getTotalBytesOfColor() { return _totalBytesOfColor; } /// total bytes of color
-    
-    static int unpackDataFromBytes(const unsigned char* dataBytes, float& result) { memcpy(&result, dataBytes, sizeof(result)); return sizeof(result); }
-    static int unpackDataFromBytes(const unsigned char* dataBytes, bool& result) { memcpy(&result, dataBytes, sizeof(result)); return sizeof(result); }
-    static int unpackDataFromBytes(const unsigned char* dataBytes, quint64& result) { memcpy(&result, dataBytes, sizeof(result)); return sizeof(result); }
-    static int unpackDataFromBytes(const unsigned char* dataBytes, uint32_t& result) { memcpy(&result, dataBytes, sizeof(result)); return sizeof(result); }
-    static int unpackDataFromBytes(const unsigned char* dataBytes, uint16_t& result) { memcpy(&result, dataBytes, sizeof(result)); return sizeof(result); }
-    static int unpackDataFromBytes(const unsigned char* dataBytes, uint8_t& result) { memcpy(&result, dataBytes, sizeof(result)); return sizeof(result); }
-    static int unpackDataFromBytes(const unsigned char* dataBytes, glm::quat& result) { int bytes = unpackOrientationQuatFromBytes(dataBytes, result); return bytes; }
-    static int unpackDataFromBytes(const unsigned char* dataBytes, ShapeType& result) { memcpy(&result, dataBytes, sizeof(result)); return sizeof(result); }
-    static int unpackDataFromBytes(const unsigned char* dataBytes, MaterialMappingMode& result) { memcpy(&result, dataBytes, sizeof(result)); return sizeof(result); }
-    static int unpackDataFromBytes(const unsigned char* dataBytes, BillboardMode& result) { memcpy(&result, dataBytes, sizeof(result)); return sizeof(result); }
-    static int unpackDataFromBytes(const unsigned char* dataBytes, RenderLayer& result) { memcpy(&result, dataBytes, sizeof(result)); return sizeof(result); }
-    static int unpackDataFromBytes(const unsigned char* dataBytes, PrimitiveMode& result) { memcpy(&result, dataBytes, sizeof(result)); return sizeof(result); }
-    static int unpackDataFromBytes(const unsigned char* dataBytes, WebInputMode& result) { memcpy(&result, dataBytes, sizeof(result)); return sizeof(result); }
-    static int unpackDataFromBytes(const unsigned char* dataBytes, PulseMode& result) { memcpy(&result, dataBytes, sizeof(result)); return sizeof(result); }
-    static int unpackDataFromBytes(const unsigned char* dataBytes, GizmoType& result) { memcpy(&result, dataBytes, sizeof(result)); return sizeof(result); }
+
+    static int unpackDataFromBytes(const unsigned char* dataBytes, float& result) {
+        memcpy(&result, dataBytes, sizeof(result));
+        return sizeof(result);
+    }
+    static int unpackDataFromBytes(const unsigned char* dataBytes, bool& result) {
+        memcpy(&result, dataBytes, sizeof(result));
+        return sizeof(result);
+    }
+    static int unpackDataFromBytes(const unsigned char* dataBytes, quint64& result) {
+        memcpy(&result, dataBytes, sizeof(result));
+        return sizeof(result);
+    }
+    static int unpackDataFromBytes(const unsigned char* dataBytes, uint32_t& result) {
+        memcpy(&result, dataBytes, sizeof(result));
+        return sizeof(result);
+    }
+    static int unpackDataFromBytes(const unsigned char* dataBytes, uint16_t& result) {
+        memcpy(&result, dataBytes, sizeof(result));
+        return sizeof(result);
+    }
+    static int unpackDataFromBytes(const unsigned char* dataBytes, uint8_t& result) {
+        memcpy(&result, dataBytes, sizeof(result));
+        return sizeof(result);
+    }
+    static int unpackDataFromBytes(const unsigned char* dataBytes, glm::quat& result) {
+        int bytes = unpackOrientationQuatFromBytes(dataBytes, result);
+        return bytes;
+    }
+    static int unpackDataFromBytes(const unsigned char* dataBytes, ShapeType& result) {
+        memcpy(&result, dataBytes, sizeof(result));
+        return sizeof(result);
+    }
+    static int unpackDataFromBytes(const unsigned char* dataBytes, MaterialMappingMode& result) {
+        memcpy(&result, dataBytes, sizeof(result));
+        return sizeof(result);
+    }
+    static int unpackDataFromBytes(const unsigned char* dataBytes, BillboardMode& result) {
+        memcpy(&result, dataBytes, sizeof(result));
+        return sizeof(result);
+    }
+    static int unpackDataFromBytes(const unsigned char* dataBytes, RenderLayer& result) {
+        memcpy(&result, dataBytes, sizeof(result));
+        return sizeof(result);
+    }
+    static int unpackDataFromBytes(const unsigned char* dataBytes, PrimitiveMode& result) {
+        memcpy(&result, dataBytes, sizeof(result));
+        return sizeof(result);
+    }
+    static int unpackDataFromBytes(const unsigned char* dataBytes, WebInputMode& result) {
+        memcpy(&result, dataBytes, sizeof(result));
+        return sizeof(result);
+    }
+    static int unpackDataFromBytes(const unsigned char* dataBytes, PulseMode& result) {
+        memcpy(&result, dataBytes, sizeof(result));
+        return sizeof(result);
+    }
+    static int unpackDataFromBytes(const unsigned char* dataBytes, GizmoType& result) {
+        memcpy(&result, dataBytes, sizeof(result));
+        return sizeof(result);
+    }
     static int unpackDataFromBytes(const unsigned char* dataBytes, glm::vec2& result);
     static int unpackDataFromBytes(const unsigned char* dataBytes, glm::vec3& result);
     static int unpackDataFromBytes(const unsigned char* dataBytes, glm::u8vec3& result);
@@ -289,13 +333,13 @@ public:
 private:
     /// appends raw bytes, might fail if byte would cause packet to be too large
     bool append(const unsigned char* data, int length);
-    
+
     /// append a single byte, might fail if byte would cause packet to be too large
     bool append(unsigned char byte);
 
     unsigned int _targetSize;
     bool _enableCompression;
-    
+
     QByteArray _uncompressedByteArray;
     unsigned char* _uncompressed { nullptr };
     int _bytesInUse;
@@ -305,7 +349,7 @@ private:
     int _subTreeBytesReserved; // the number of reserved bytes at start of a subtree
 
     bool compressContent();
-    
+
     QByteArray _compressedByteArray;
     unsigned char* _compressed { nullptr };
     int _compressedBytes;

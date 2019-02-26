@@ -13,11 +13,13 @@
 
 #include <GizmoEntityItem.h>
 
-namespace render { namespace entities {
+namespace render {
+namespace entities {
 
 class GizmoEntityRenderer : public TypedEntityRenderer<GizmoEntityItem> {
     using Parent = TypedEntityRenderer<GizmoEntityItem>;
     using Pointer = std::shared_ptr<GizmoEntityRenderer>;
+
 public:
     GizmoEntityRenderer(const EntityItemPointer& entity);
     ~GizmoEntityRenderer();
@@ -41,8 +43,8 @@ private:
     int _majorTicksGeometryID { 0 };
     int _minorTicksGeometryID { 0 };
     gpu::Primitive _solidPrimitive { gpu::TRIANGLE_FAN };
-
 };
 
-} }
+} // namespace entities
+} // namespace render
 #endif // hifi_RenderableGizmoEntityItem_h

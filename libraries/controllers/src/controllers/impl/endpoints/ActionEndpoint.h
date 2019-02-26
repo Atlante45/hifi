@@ -12,8 +12,8 @@
 
 #include "../Endpoint.h"
 
-#include "../../Actions.h"
 #include <DependencyManager.h>
+#include "../../Actions.h"
 
 #include "../../UserInputMapper.h"
 
@@ -21,7 +21,7 @@ namespace controller {
 
 class ActionEndpoint : public Endpoint {
 public:
-    ActionEndpoint(const Input& id = Input::INVALID_INPUT) : Endpoint(id) { }
+    ActionEndpoint(const Input& id = Input::INVALID_INPUT) : Endpoint(id) {}
 
     virtual AxisValue peek() const override { return _currentValue; }
     virtual void apply(AxisValue newValue, const Pointer& source) override;
@@ -33,9 +33,9 @@ public:
 
 private:
     AxisValue _currentValue { 0.0f, 0 };
-    Pose _currentPose{};
+    Pose _currentPose {};
 };
 
-}
+} // namespace controller
 
 #endif

@@ -10,12 +10,12 @@
 #ifndef hifi_Shared_Preferences_h
 #define hifi_Shared_Preferences_h
 
-#include <functional>
-#include <QtCore/QObject>
-#include <QtCore/QVariant>
 #include <QtCore/QList>
+#include <QtCore/QObject>
 #include <QtCore/QString>
+#include <QtCore/QVariant>
 #include <QtCore/QVariantMap>
+#include <functional>
 
 #include "DependencyManager.h"
 
@@ -64,14 +64,14 @@ public:
     };
 
     explicit Preference(QObject* parent = nullptr) : QObject(parent) {}
-    Preference(const QString& category, const QString& name, QObject* parent = nullptr)
-        : QObject(parent), _category(category), _name(name) { }
+    Preference(const QString& category, const QString& name, QObject* parent = nullptr) :
+        QObject(parent),
+        _category(category),
+        _name(name) {}
 
     const QString& getCategory() const { return _category; }
     const QString& getName() const { return _name; }
-    bool isEnabled() const {
-        return _enabled;
-    }
+    bool isEnabled() const { return _enabled; }
 
     void setEnabled(bool enabled) {
         if (enabled != _enabled) {
@@ -106,8 +106,9 @@ class ButtonPreference : public Preference {
     Q_OBJECT
 public:
     using Lambda = std::function<void()>;
-    ButtonPreference(const QString& category, const QString& name, Lambda triggerHandler)
-        : Preference(category, name), _triggerHandler(triggerHandler) { }
+    ButtonPreference(const QString& category, const QString& name, Lambda triggerHandler) :
+        Preference(category, name),
+        _triggerHandler(triggerHandler) {}
     Type getType() override { return Button; }
     Q_INVOKABLE void trigger() { _triggerHandler(); }
 
@@ -115,24 +116,30 @@ protected:
     const Lambda _triggerHandler;
 };
 
-
-template <typename T>
+template<typename T>
 class TypedPreference : public Preference {
 public:
     using Getter = std::function<T()>;
     using Setter = std::function<void(const T&)>;
 
-    TypedPreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : Preference(category, name), _getter(getter), _setter(setter) { }
+    TypedPreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        Preference(category, name),
+        _getter(getter),
+        _setter(setter) {}
 
     T getValue() const { return _value; }
-    void setValue(const T& value) { if (_value != value) { _value = value; emitValueChanged(); } }
+    void setValue(const T& value) {
+        if (_value != value) {
+            _value = value;
+            emitValueChanged();
+        }
+    }
     void load() override { _value = _getter(); }
-    void save() const override { 
+    void save() const override {
         T oldValue = _getter();
         if (_value != oldValue) {
-            _setter(_value); 
-        } 
+            _setter(_value);
+        }
     }
 
 protected:
@@ -146,8 +153,8 @@ class BoolPreference : public TypedPreference<bool> {
     Q_PROPERTY(bool value READ getValue WRITE setValue NOTIFY valueChanged)
 
 public:
-    BoolPreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : TypedPreference(category, name, getter, setter) { }
+    BoolPreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        TypedPreference(category, name, getter, setter) {}
 
 signals:
     void valueChanged();
@@ -165,8 +172,8 @@ class FloatPreference : public TypedPreference<float> {
     Q_PROPERTY(float decimals READ getDecimals CONSTANT)
 
 public:
-    FloatPreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : TypedPreference(category, name, getter, setter) { }
+    FloatPreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        TypedPreference(category, name, getter, setter) {}
 
     float getMin() const { return _min; }
     void setMin(float min) { _min = min; };
@@ -192,7 +199,6 @@ protected:
     float _step { 0.1f };
 };
 
-
 class IntPreference : public TypedPreference<int> {
     Q_OBJECT
     Q_PROPERTY(float value READ getValue WRITE setValue NOTIFY valueChanged)
@@ -202,8 +208,8 @@ class IntPreference : public TypedPreference<int> {
     Q_PROPERTY(int decimals READ getDecimals CONSTANT)
 
 public:
-    IntPreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : TypedPreference(category, name, getter, setter) { }
+    IntPreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        TypedPreference(category, name, getter, setter) {}
 
     float getMin() const { return _min; }
     void setMin(float min) { _min = min; };
@@ -234,8 +240,8 @@ class StringPreference : public TypedPreference<QString> {
     Q_PROPERTY(QString value READ getValue WRITE setValue NOTIFY valueChanged)
 
 public:
-    StringPreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : TypedPreference(category, name, getter, setter) { }
+    StringPreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        TypedPreference(category, name, getter, setter) {}
 
 signals:
     void valueChanged();
@@ -247,8 +253,8 @@ protected:
 class SliderPreference : public FloatPreference {
     Q_OBJECT
 public:
-    SliderPreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : FloatPreference(category, name, getter, setter) { }
+    SliderPreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        FloatPreference(category, name, getter, setter) {}
 
     Type getType() override { return Slider; }
 };
@@ -256,8 +262,8 @@ public:
 class SpinnerPreference : public FloatPreference {
     Q_OBJECT
 public:
-    SpinnerPreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : FloatPreference(category, name, getter, setter) { }
+    SpinnerPreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        FloatPreference(category, name, getter, setter) {}
 
     Type getType() override { return Spinner; }
 };
@@ -265,8 +271,8 @@ public:
 class SpinnerSliderPreference : public FloatPreference {
     Q_OBJECT
 public:
-    SpinnerSliderPreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : FloatPreference(category, name, getter, setter) { }
+    SpinnerSliderPreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        FloatPreference(category, name, getter, setter) {}
 
     Type getType() override { return SpinnerSlider; }
 };
@@ -274,8 +280,8 @@ public:
 class IntSpinnerPreference : public IntPreference {
     Q_OBJECT
 public:
-    IntSpinnerPreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : IntPreference(category, name, getter, setter) { }
+    IntSpinnerPreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        IntPreference(category, name, getter, setter) {}
 
     Type getType() override { return Spinner; }
 };
@@ -285,8 +291,8 @@ class EditPreference : public StringPreference {
     Q_PROPERTY(QString placeholderText READ getPlaceholderText CONSTANT)
 
 public:
-    EditPreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : StringPreference(category, name, getter, setter) { }
+    EditPreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        StringPreference(category, name, getter, setter) {}
     Type getType() override { return Editable; }
     const QString& getPlaceholderText() const { return _placeholderText; }
     void setPlaceholderText(const QString& placeholderText) { _placeholderText = placeholderText; }
@@ -300,10 +306,10 @@ class ComboBoxPreference : public EditPreference {
     Q_PROPERTY(QStringList items READ getItems CONSTANT)
 
 public:
-    ComboBoxPreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : EditPreference(category, name, getter, setter) { }
+    ComboBoxPreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        EditPreference(category, name, getter, setter) {}
     Type getType() override { return ComboBox; }
- 
+
     const QStringList& getItems() { return _items; }
     void setItems(const QStringList& items) { _items = items; }
 
@@ -316,8 +322,8 @@ class BrowsePreference : public EditPreference {
     Q_PROPERTY(QString browseLabel READ getBrowseLabel CONSTANT)
 
 public:
-    BrowsePreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : EditPreference(category, name, getter, setter) { }
+    BrowsePreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        EditPreference(category, name, getter, setter) {}
     Type getType() override { return Browsable; }
 
     const QString& getBrowseLabel() { return _browseLabel; }
@@ -330,24 +336,24 @@ protected:
 class AvatarPreference : public BrowsePreference {
     Q_OBJECT
 public:
-    AvatarPreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : BrowsePreference(category, name, getter, setter) {
+    AvatarPreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        BrowsePreference(category, name, getter, setter) {
         _browseLabel = "Change";
     }
     Type getType() override { return Avatar; }
 };
 
-
 class CheckPreference : public BoolPreference {
     Q_OBJECT
     Q_PROPERTY(bool indented READ getIndented CONSTANT)
 public:
-    CheckPreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : BoolPreference(category, name, getter, setter) { }
+    CheckPreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        BoolPreference(category, name, getter, setter) {}
     Type getType() override { return Checkbox; }
 
     bool getIndented() { return _isIndented; }
     void setIndented(const bool indented) { _isIndented = indented; }
+
 protected:
     bool _isIndented { false };
 };
@@ -355,8 +361,8 @@ protected:
 class PrimaryHandPreference : public StringPreference {
     Q_OBJECT
 public:
-    PrimaryHandPreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : StringPreference(category, name, getter, setter) { }
+    PrimaryHandPreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        StringPreference(category, name, getter, setter) {}
     Type getType() override { return PrimaryHand; }
 };
 
@@ -366,8 +372,8 @@ class RadioButtonsPreference : public IntPreference {
     Q_PROPERTY(QStringList items READ getItems CONSTANT)
     Q_PROPERTY(bool indented READ getIndented CONSTANT)
 public:
-    RadioButtonsPreference(const QString& category, const QString& name, Getter getter, Setter setter)
-        : IntPreference(category, name, getter, setter) { }
+    RadioButtonsPreference(const QString& category, const QString& name, Getter getter, Setter setter) :
+        IntPreference(category, name, getter, setter) {}
     Type getType() override { return RadioButtons; }
 
     const QString& getHeading() { return _heading; }
@@ -383,5 +389,3 @@ protected:
     bool _indented { false };
 };
 #endif
-
-

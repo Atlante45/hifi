@@ -12,31 +12,29 @@
 #include "RecurseOctreeToJSONOperator.h"
 #include "EntityItemProperties.h"
 
-RecurseOctreeToJSONOperator::RecurseOctreeToJSONOperator(const OctreeElementPointer&, QScriptEngine* engine,
-    QString jsonPrefix, bool skipDefaults, bool skipThoseWithBadParents):
+RecurseOctreeToJSONOperator::RecurseOctreeToJSONOperator(const OctreeElementPointer&, QScriptEngine* engine, QString jsonPrefix,
+                                                         bool skipDefaults, bool skipThoseWithBadParents) :
     _engine(engine),
     _json(jsonPrefix),
     _skipDefaults(skipDefaults),
-    _skipThoseWithBadParents(skipThoseWithBadParents)
-{
+    _skipThoseWithBadParents(skipThoseWithBadParents) {
     _toStringMethod = _engine->evaluate("(function() { return JSON.stringify(this, null, '    ') })");
 }
 
 bool RecurseOctreeToJSONOperator::postRecursion(const OctreeElementPointer& element) {
     EntityTreeElementPointer entityTreeElement = std::static_pointer_cast<EntityTreeElement>(element);
 
-    entityTreeElement->forEachEntity([&](const EntityItemPointer& entity) { processEntity(entity); } );
+    entityTreeElement->forEachEntity([&](const EntityItemPointer& entity) { processEntity(entity); });
     return true;
 }
 
 void RecurseOctreeToJSONOperator::processEntity(const EntityItemPointer& entity) {
     if (_skipThoseWithBadParents && !entity->isParentIDValid()) {
-        return;  // we weren't able to resolve a parent from _parentID, so don't save this entity.
+        return; // we weren't able to resolve a parent from _parentID, so don't save this entity.
     }
 
-    QScriptValue qScriptValues = _skipDefaults
-        ? EntityItemNonDefaultPropertiesToScriptValue(_engine, entity->getProperties())
-        : EntityItemPropertiesToScriptValue(_engine, entity->getProperties());
+    QScriptValue qScriptValues = _skipDefaults ? EntityItemNonDefaultPropertiesToScriptValue(_engine, entity->getProperties())
+                                               : EntityItemPropertiesToScriptValue(_engine, entity->getProperties());
 
     if (_comma) {
         _json += ',';

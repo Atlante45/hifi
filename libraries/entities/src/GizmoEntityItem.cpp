@@ -28,13 +28,13 @@ void GizmoEntityItem::setUnscaledDimensions(const glm::vec3& value) {
     EntityItem::setUnscaledDimensions(glm::vec3(value.x, ENTITY_ITEM_MIN_DIMENSION, value.z));
 }
 
-EntityItemProperties GizmoEntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
-    EntityItemProperties properties = EntityItem::getProperties(desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
+EntityItemProperties GizmoEntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                                    bool allowEmptyDesiredProperties) const {
+    EntityItemProperties properties = EntityItem::getProperties(
+        desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
 
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(gizmoType, getGizmoType);
-    withReadLock([&] {
-        _ringProperties.getProperties(properties);
-    });
+    withReadLock([&] { _ringProperties.getProperties(properties); });
 
     return properties;
 }
@@ -53,8 +53,8 @@ bool GizmoEntityItem::setProperties(const EntityItemProperties& properties) {
         if (wantDebug) {
             uint64_t now = usecTimestampNow();
             int elapsed = now - getLastEdited();
-            qCDebug(entities) << "GizmoEntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                    "now=" << now << " getLastEdited()=" << getLastEdited();
+            qCDebug(entities) << "GizmoEntityItem::setProperties() AFTER update... edited AGO=" << elapsed << "now=" << now
+                              << " getLastEdited()=" << getLastEdited();
         }
         setLastEdited(properties.getLastEdited());
     }
@@ -62,18 +62,16 @@ bool GizmoEntityItem::setProperties(const EntityItemProperties& properties) {
 }
 
 int GizmoEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) {
-
+                                                      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                      bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 
     READ_ENTITY_PROPERTY(PROP_GIZMO_TYPE, GizmoType, setGizmoType);
     withWriteLock([&] {
         int bytesFromRing = _ringProperties.readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
-            propertyFlags, overwriteLocalData,
-            somethingChanged);
+                                                                             propertyFlags, overwriteLocalData,
+                                                                             somethingChanged);
         bytesRead += bytesFromRing;
         dataAt += bytesFromRing;
     });
@@ -91,19 +89,16 @@ EntityPropertyFlags GizmoEntityItem::getEntityProperties(EncodeBitstreamParams& 
 }
 
 void GizmoEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
-                                    EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
-                                    OctreeElement::AppendState& appendState) const {
-
+                                         EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
+                                         EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                         EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                         OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_GIZMO_TYPE, (uint32_t)getGizmoType());
     withReadLock([&] {
         _ringProperties.appendSubclassData(packetData, params, entityTreeElementExtraEncodeData, requestedProperties,
-            propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                                           propertyFlags, propertiesDidntFit, propertyCount, appendState);
     });
 }
 
@@ -112,14 +107,15 @@ bool GizmoEntityItem::supportsDetailedIntersection() const {
 }
 
 bool GizmoEntityItem::findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                                                  OctreeElementPointer& element,
-                                                  float& distance, BoxFace& face, glm::vec3& surfaceNormal,
-                                                  QVariantMap& extraInfo, bool precisionPicking) const {
+                                                  OctreeElementPointer& element, float& distance, BoxFace& face,
+                                                  glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                                  bool precisionPicking) const {
     glm::vec3 dimensions = getScaledDimensions();
     glm::vec2 xyDimensions(dimensions.x, dimensions.z);
     glm::quat rotation = getWorldOrientation();
     rotation = glm::angleAxis(-(float)M_PI_2, rotation * Vectors::RIGHT) * rotation;
-    glm::vec3 position = getWorldPosition() + rotation * (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint()));
+    glm::vec3 position = getWorldPosition() +
+                         rotation * (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint()));
 
     if (findRayRectangleIntersection(origin, direction, rotation, position, xyDimensions, distance)) {
         glm::vec3 hitPosition = origin + (distance * direction);
@@ -144,9 +140,9 @@ bool GizmoEntityItem::findDetailedRayIntersection(const glm::vec3& origin, const
     return false;
 }
 
-bool GizmoEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                                       OctreeElementPointer& element, float& parabolicDistance,
-                                                       BoxFace& face, glm::vec3& surfaceNormal,
+bool GizmoEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
+                                                       const glm::vec3& acceleration, OctreeElementPointer& element,
+                                                       float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
                                                        QVariantMap& extraInfo, bool precisionPicking) const {
     //// Scale the dimensions by the diameter
     glm::vec3 dimensions = getScaledDimensions();
@@ -161,7 +157,8 @@ bool GizmoEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, 
     glm::vec3 localAcceleration = inverseRot * acceleration;
 
     if (findParabolaRectangleIntersection(localOrigin, localVelocity, localAcceleration, xyDimensions, parabolicDistance)) {
-        glm::vec3 localHitPosition = localOrigin + localVelocity * parabolicDistance + 0.5f * localAcceleration * parabolicDistance * parabolicDistance;
+        glm::vec3 localHitPosition = localOrigin + localVelocity * parabolicDistance +
+                                     0.5f * localAcceleration * parabolicDistance * parabolicDistance;
         localHitPosition.x /= xyDimensions.x;
         localHitPosition.y /= xyDimensions.y;
         float distanceToHit = glm::length(localHitPosition);
@@ -184,19 +181,13 @@ bool GizmoEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, 
 }
 
 void GizmoEntityItem::setGizmoType(GizmoType value) {
-    withWriteLock([&] {
-        _gizmoType = value;
-    });
+    withWriteLock([&] { _gizmoType = value; });
 }
 
 GizmoType GizmoEntityItem::getGizmoType() const {
-    return resultWithReadLock<GizmoType>([&] {
-        return _gizmoType;
-    });
+    return resultWithReadLock<GizmoType>([&] { return _gizmoType; });
 }
 
 RingGizmoPropertyGroup GizmoEntityItem::getRingProperties() const {
-    return resultWithReadLock<RingGizmoPropertyGroup>([&] {
-        return _ringProperties;
-    });
+    return resultWithReadLock<RingGizmoPropertyGroup>([&] { return _ringProperties; });
 }

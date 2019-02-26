@@ -48,7 +48,7 @@ public:
         InputRecorder* inputRecorder = InputRecorder::getInstance();
         if (inputRecorder->isPlayingback()) {
             auto userInputMapper = DependencyManager::get<UserInputMapper>();
-            QString actionName =  userInputMapper->getStandardPoseName(_input.getChannel());
+            QString actionName = userInputMapper->getStandardPoseName(_input.getChannel());
             return inputRecorder->getPoseState(actionName);
         }
         return VirtualEndpoint::pose();
@@ -66,6 +66,6 @@ private:
     bool _read { false };
 };
 
-}
+} // namespace controller
 
 #endif

@@ -12,8 +12,8 @@
 #ifndef hifi_SimulationOwner_h
 #define hifi_SimulationOwner_h
 
-#include <QtCore/QDebug>
 #include <QtCore/QByteArray>
+#include <QtCore/QDebug>
 
 #include <SharedUtil.h>
 #include <UUID.h>
@@ -102,7 +102,6 @@ const uint8_t SCRIPT_POKE_SIMULATION_PRIORITY = SCRIPT_GRAB_SIMULATION_PRIORITY 
 const uint8_t PERSONAL_SIMULATION_PRIORITY = SCRIPT_GRAB_SIMULATION_PRIORITY;
 const uint8_t AVATAR_ENTITY_SIMULATION_PRIORITY = PERSONAL_SIMULATION_PRIORITY;
 
-
 class SimulationOwner {
 public:
     static const int NUM_BYTES_ENCODED;
@@ -150,7 +149,5 @@ private:
     uint64_t _expiry; // time when ownership can transition at equal priority
     uint8_t _priority; // priority of current owner
 };
-
-
 
 #endif // hifi_SimulationOwner_h

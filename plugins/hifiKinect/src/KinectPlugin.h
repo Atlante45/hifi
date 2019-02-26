@@ -26,7 +26,8 @@
 #include <SimpleMovingAverage.h>
 
 // Safe release for interfaces
-template<class Interface> inline void SafeRelease(Interface *& pInterfaceToRelease) {
+template<class Interface>
+inline void SafeRelease(Interface*& pInterfaceToRelease) {
     if (pInterfaceToRelease != NULL) {
         pInterfaceToRelease->Release();
         pInterfaceToRelease = NULL;
@@ -66,7 +67,6 @@ private:
     ThreadSafeMovingAverage<glm::quat, 2> _RightHandOrientationAverage;
 
 protected:
-
     struct KinectJoint {
         glm::vec3 position;
         glm::quat orientation;
@@ -84,8 +84,9 @@ protected:
         virtual void update(float deltaTime, const controller::InputCalibrationData& inputCalibrationData) override {};
         virtual void focusOutEvent() override {};
 
-        void update(float deltaTime, const controller::InputCalibrationData& inputCalibrationData, 
-                const std::vector<KinectPlugin::KinectJoint>& joints, const std::vector<KinectPlugin::KinectJoint>& prevJoints);
+        void update(float deltaTime, const controller::InputCalibrationData& inputCalibrationData,
+                    const std::vector<KinectPlugin::KinectJoint>& joints,
+                    const std::vector<KinectPlugin::KinectJoint>& prevJoints);
 
         void clearState();
     };
@@ -105,7 +106,6 @@ protected:
     // one frame old copy of _joints, used to caluclate angular and linear velocity.
     std::vector<KinectJoint> _prevJoints;
 
-
     // Kinect SDK related items...
 
     bool KinectPlugin::initializeDefaultSensor() const;
@@ -121,8 +121,6 @@ protected:
     // Body reader
     mutable IBodyFrameReader* _bodyFrameReader { nullptr };
 #endif
-
 };
 
 #endif // hifi_KinectPlugin_h
-

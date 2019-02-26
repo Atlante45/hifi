@@ -20,12 +20,12 @@
 #include "../HifiSockAddr.h"
 #include "../NetworkLogging.h"
 
+#include <Trace.h>
 #include "CongestionControl.h"
 #include "ControlPacket.h"
 #include "Packet.h"
 #include "PacketList.h"
 #include "Socket.h"
-#include <Trace.h>
 
 using namespace udt;
 using namespace std::chrono;
@@ -34,10 +34,9 @@ Connection::Connection(Socket* parentSocket, HifiSockAddr destination, std::uniq
     QObject(parentSocket),
     _parentSocket(parentSocket),
     _destination(destination),
-    _congestionControl(move(congestionControl))
-{
+    _congestionControl(move(congestionControl)) {
     Q_ASSERT_X(parentSocket, "Connection::Connection", "Must be called with a valid Socket*");
-    
+
     Q_ASSERT_X(_congestionControl, "Connection::Connection", "Must be called with a valid CongestionControl object");
     _congestionControl->init();
 
@@ -47,7 +46,6 @@ Connection::Connection(Socket* parentSocket, HifiSockAddr destination, std::uniq
 
     _ackPacket = ControlPacket::create(ControlPacket::ACK, ACK_PACKET_PAYLOAD_BYTES);
     _handshakeACK = ControlPacket::create(ControlPacket::HandshakeACK, HANDSHAKE_ACK_PAYLOAD_BYTES);
-
 
     // setup psuedo-random number generation shared by all connections
     static std::random_device rd;
@@ -71,15 +69,15 @@ void Connection::stopSendQueue() {
     if (auto sendQueue = _sendQueue.release()) {
         // grab the send queue thread so we can wait on it
         QThread* sendQueueThread = sendQueue->thread();
-        
+
         // tell the send queue to stop and be deleted
-        
+
         sendQueue->stop();
 
         _lastMessageNumber = sendQueue->getCurrentMessageNumber();
 
         sendQueue->deleteLater();
-        
+
         // wait on the send queue thread so we know the send queue is gone
         sendQueueThread->quit();
         sendQueueThread->wait();
@@ -99,24 +97,25 @@ SendQueue& Connection::getSendQueue() {
 
         if (!_hasReceivedHandshakeACK) {
             // First time creating a send queue for this connection
-            _sendQueue = SendQueue::create(_parentSocket, _destination, _initialSequenceNumber - 1, _lastMessageNumber, _hasReceivedHandshakeACK);
+            _sendQueue = SendQueue::create(_parentSocket, _destination, _initialSequenceNumber - 1, _lastMessageNumber,
+                                           _hasReceivedHandshakeACK);
             _lastReceivedACK = _sendQueue->getCurrentSequenceNumber();
         } else {
             // Connection already has a handshake from a previous send queue
-            _sendQueue = SendQueue::create(_parentSocket, _destination, _lastReceivedACK, _lastMessageNumber, _hasReceivedHandshakeACK);
+            _sendQueue = SendQueue::create(_parentSocket, _destination, _lastReceivedACK, _lastMessageNumber,
+                                           _hasReceivedHandshakeACK);
         }
 
 #ifdef UDT_CONNECTION_DEBUG
         qCDebug(networking) << "Created SendQueue for connection to" << _destination;
 #endif
-        
+
         QObject::connect(_sendQueue.get(), &SendQueue::packetSent, this, &Connection::packetSent);
         QObject::connect(_sendQueue.get(), &SendQueue::packetSent, this, &Connection::recordSentPackets);
         QObject::connect(_sendQueue.get(), &SendQueue::packetRetransmitted, this, &Connection::recordRetransmission);
         QObject::connect(_sendQueue.get(), &SendQueue::queueInactive, this, &Connection::queueInactive);
         QObject::connect(_sendQueue.get(), &SendQueue::timeout, this, &Connection::queueTimeout);
 
-        
         // set defaults on the send queue from our congestion control object and estimatedTimeout()
         _sendQueue->setPacketSendPeriod(_congestionControl->_packetSendPeriod);
         _sendQueue->setEstimatedTimeout(_congestionControl->estimatedTimeout());
@@ -125,23 +124,21 @@ SendQueue& Connection::getSendQueue() {
         // give the randomized sequence number to the congestion control object
         _congestionControl->setInitialSendSequenceNumber(_sendQueue->getCurrentSequenceNumber());
     }
-    
+
     return *_sendQueue;
 }
 
 void Connection::queueInactive() {
     // tell our current send queue to go down and reset our ptr to it to null
     stopSendQueue();
-    
+
 #ifdef UDT_CONNECTION_DEBUG
     qCDebug(networking) << "Connection to" << _destination << "has stopped its SendQueue.";
 #endif
 }
 
 void Connection::queueTimeout() {
-    updateCongestionControlAndSendQueue([this] {
-        _congestionControl->onTimeout();
-    });
+    updateCongestionControlAndSendQueue([this] { _congestionControl->onTimeout(); });
 }
 
 void Connection::sendReliablePacket(std::unique_ptr<Packet> packet) {
@@ -172,8 +169,7 @@ void Connection::queueReceivedMessagePacket(std::unique_ptr<Packet> packet) {
         _parentSocket->messageReceived(std::move(packet));
 
         // if this was the last or only packet, then we can remove the pending message from our hash
-        if (packetPosition == Packet::PacketPosition::LAST ||
-            packetPosition == Packet::PacketPosition::ONLY) {
+        if (packetPosition == Packet::PacketPosition::LAST || packetPosition == Packet::PacketPosition::ONLY) {
             processedLastOrOnly = true;
         }
     }
@@ -186,15 +182,15 @@ void Connection::queueReceivedMessagePacket(std::unique_ptr<Packet> packet) {
 void Connection::sync() {
 }
 
-void Connection::recordSentPackets(int wireSize, int payloadSize,
-                                   SequenceNumber seqNum, p_high_resolution_clock::time_point timePoint) {
+void Connection::recordSentPackets(int wireSize, int payloadSize, SequenceNumber seqNum,
+                                   p_high_resolution_clock::time_point timePoint) {
     _stats.recordSentPackets(payloadSize, wireSize);
 
     _congestionControl->onPacketSent(wireSize, seqNum, timePoint);
 }
 
-void Connection::recordRetransmission(int wireSize, int payloadSize,
-                                      SequenceNumber seqNum, p_high_resolution_clock::time_point timePoint) {
+void Connection::recordRetransmission(int wireSize, int payloadSize, SequenceNumber seqNum,
+                                      p_high_resolution_clock::time_point timePoint) {
     _stats.recordRetransmittedPackets(payloadSize, wireSize);
 
     _congestionControl->onPacketReSent(wireSize, seqNum, timePoint);
@@ -221,7 +217,7 @@ void Connection::sendACK() {
 
     // have the socket send off our packet
     _parentSocket->writeBasePacket(*_ackPacket, _destination);
-    
+
     _stats.recordSentACK(_ackPacket->getWireSize());
 }
 
@@ -253,10 +249,10 @@ bool Connection::processReceivedSequenceNumber(SequenceNumber sequenceNumber, in
 
         return false;
     }
-    
+
     // mark our last receive time as now (to push the potential expiry farther)
     _lastReceiveTime = p_high_resolution_clock::now();
-    
+
     // If this is not the next sequence number, report loss
     if (sequenceNumber > _lastReceivedSequenceNumber + 1) {
         if (_lastReceivedSequenceNumber + 1 == sequenceNumber - 1) {
@@ -265,9 +261,9 @@ bool Connection::processReceivedSequenceNumber(SequenceNumber sequenceNumber, in
             _lossList.append(_lastReceivedSequenceNumber + 1, sequenceNumber - 1);
         }
     }
-    
+
     bool wasDuplicate = false;
-    
+
     if (sequenceNumber > _lastReceivedSequenceNumber) {
         // Update largest recieved sequence number
         _lastReceivedSequenceNumber = sequenceNumber;
@@ -278,7 +274,7 @@ bool Connection::processReceivedSequenceNumber(SequenceNumber sequenceNumber, in
 
     // using a congestion control that ACKs every packet (like TCP Vegas)
     sendACK();
-    
+
     if (wasDuplicate) {
         _stats.recordDuplicatePackets(payloadSize, packetSize);
     } else {
@@ -289,12 +285,11 @@ bool Connection::processReceivedSequenceNumber(SequenceNumber sequenceNumber, in
 }
 
 void Connection::processControl(ControlPacketPointer controlPacket) {
-    
     // Simple dispatch to control packets processing methods based on their type.
-    
+
     // Processing of control packets (other than Handshake / Handshake ACK)
     // is not performed if the handshake has not been completed.
-    
+
     switch (controlPacket->getType()) {
         case ControlPacket::ACK:
             if (_hasReceivedHandshakeACK) {
@@ -326,17 +321,17 @@ void Connection::processACK(ControlPacketPointer controlPacket) {
     // read the ACKed sequence number
     SequenceNumber ack;
     controlPacket->readPrimitive(&ack);
-    
+
     // update the total count of received ACKs
     _stats.recordReceivedACK(controlPacket->getWireSize());
-    
+
     // validate that this isn't a BS ACK
     if (ack > getSendQueue().getCurrentSequenceNumber()) {
         // in UDT they specifically break the connection here - do we want to do anything?
         Q_ASSERT_X(false, "Connection::processACK", "ACK recieved higher than largest sent sequence number");
         return;
     }
-    
+
     if (ack < _lastReceivedACK) {
         // this is an out of order ACK, bail
         return;
@@ -357,14 +352,14 @@ void Connection::processACK(ControlPacketPointer controlPacket) {
             _sendQueue->fastRetransmit(ack + 1);
         }
     });
-    
+
     _stats.record(ConnectionStats::Stats::ProcessedACK);
 }
 
 void Connection::processHandshake(ControlPacketPointer controlPacket) {
     SequenceNumber initialSequenceNumber;
     controlPacket->readPrimitive(&initialSequenceNumber);
-    
+
     if (!_hasReceivedHandshake || initialSequenceNumber != _initialReceiveSequenceNumber) {
         // server sent us a handshake - we need to assume this means state should be reset
         // as long as we haven't received a handshake yet or we have and we've received some data
@@ -382,7 +377,7 @@ void Connection::processHandshake(ControlPacketPointer controlPacket) {
     _handshakeACK->reset();
     _handshakeACK->writePrimitive(initialSequenceNumber);
     _parentSocket->writeBasePacket(*_handshakeACK, _destination);
-    
+
     // indicate that handshake has been received
     _hasReceivedHandshake = true;
 
@@ -409,18 +404,17 @@ void Connection::processHandshakeACK(ControlPacketPointer controlPacket) {
 }
 
 void Connection::resetReceiveState() {
-    
     // reset all SequenceNumber member variables back to default
     SequenceNumber defaultSequenceNumber;
-    
+
     _lastReceivedSequenceNumber = defaultSequenceNumber;
-    
+
     // clear the loss list
     _lossList.clear();
-    
+
     // clear sync variables
     _connectionStart = p_high_resolution_clock::now();
-    
+
     // clear any pending received messages
     for (auto& pendingMessage : _pendingReceivedMessages) {
         _parentSocket->messageFailed(this, pendingMessage.first);
@@ -428,30 +422,29 @@ void Connection::resetReceiveState() {
     _pendingReceivedMessages.clear();
 }
 
-void Connection::updateCongestionControlAndSendQueue(std::function<void ()> congestionCallback) {
+void Connection::updateCongestionControlAndSendQueue(std::function<void()> congestionCallback) {
     // update the last sent sequence number in congestion control
     _congestionControl->setSendCurrentSequenceNumber(getSendQueue().getCurrentSequenceNumber());
-    
+
     // fire congestion control callback
     congestionCallback();
-    
+
     auto& sendQueue = getSendQueue();
-    
+
     // now that we've updated the congestion control, update the packet send period and flow window size
     sendQueue.setPacketSendPeriod(_congestionControl->_packetSendPeriod);
     sendQueue.setEstimatedTimeout(_congestionControl->estimatedTimeout());
     sendQueue.setFlowWindowSize(_congestionControl->_congestionWindowSize);
-    
+
     // record connection stats
     _stats.recordPacketSendPeriod(_congestionControl->_packetSendPeriod);
     _stats.recordCongestionWindowSize(_congestionControl->_congestionWindowSize);
 }
 
 void PendingReceivedMessage::enqueuePacket(std::unique_ptr<Packet> packet) {
-    Q_ASSERT_X(packet->isPartOfMessage(),
-               "PendingReceivedMessage::enqueuePacket",
+    Q_ASSERT_X(packet->isPartOfMessage(), "PendingReceivedMessage::enqueuePacket",
                "called with a packet that is not part of a message");
-    
+
     if (packet->getPacketPosition() == Packet::PacketPosition::LAST ||
         packet->getPacketPosition() == Packet::PacketPosition::ONLY) {
         _hasLastPacket = true;
@@ -461,20 +454,20 @@ void PendingReceivedMessage::enqueuePacket(std::unique_ptr<Packet> packet) {
     // Insert into the packets list in sorted order. Because we generally expect to receive packets in order, begin
     // searching from the end of the list.
     auto messagePartNumber = packet->getMessagePartNumber();
-    auto it = std::find_if(_packets.rbegin(), _packets.rend(),
-        [&](const std::unique_ptr<Packet>& value) { return messagePartNumber >= value->getMessagePartNumber(); });
+    auto it = std::find_if(_packets.rbegin(), _packets.rend(), [&](const std::unique_ptr<Packet>& value) {
+        return messagePartNumber >= value->getMessagePartNumber();
+    });
 
     if (it != _packets.rend() && ((*it)->getMessagePartNumber() == messagePartNumber)) {
         qCDebug(networking) << "PendingReceivedMessage::enqueuePacket: This is a duplicate packet";
         return;
     }
-    
+
     _packets.insert(it.base(), std::move(packet));
 }
 
 bool PendingReceivedMessage::hasAvailablePackets() const {
-    return _packets.size() > 0
-        && _nextPartNumber == _packets.front()->getMessagePartNumber();
+    return _packets.size() > 0 && _nextPartNumber == _packets.front()->getMessagePartNumber();
 }
 
 std::unique_ptr<Packet> PendingReceivedMessage::removeNextPacket() {

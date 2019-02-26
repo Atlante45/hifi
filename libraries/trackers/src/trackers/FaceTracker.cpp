@@ -8,25 +8,24 @@
 
 #include "FaceTracker.h"
 
-#include <QTimer>
 #include <GLMHelpers.h>
+#include <QTimer>
 #include "Logging.h"
 //#include "Menu.h"
 
-const int FPS_TIMER_DELAY = 2000;  // ms
-const int FPS_TIMER_DURATION = 2000;  // ms
+const int FPS_TIMER_DELAY = 2000; // ms
+const int FPS_TIMER_DURATION = 2000; // ms
 
 const float DEFAULT_EYE_DEFLECTION = 0.25f;
 Setting::Handle<float> FaceTracker::_eyeDeflection("faceshiftEyeDeflection", DEFAULT_EYE_DEFLECTION);
 bool FaceTracker::_isMuted { true };
 
 void FaceTracker::init() {
-    _isInitialized = true;  // FaceTracker can be used now
+    _isInitialized = true; // FaceTracker can be used now
 }
 
 inline float FaceTracker::getBlendshapeCoefficient(int index) const {
-    return isValidBlendshapeIndex(index) ? glm::mix(0.0f, _blendshapeCoefficients[index], getFadeCoefficient())
-                                         : 0.0f;
+    return isValidBlendshapeIndex(index) ? glm::mix(0.0f, _blendshapeCoefficients[index], getFadeCoefficient()) : 0.0f;
 }
 
 const QVector<float>& FaceTracker::getBlendshapeCoefficients() const {
@@ -60,7 +59,7 @@ void FaceTracker::update(float deltaTime) {
     static const float EPSILON = 0.02f; // MUST BE < 1.0f
     static const float INVERSE_AT_EPSILON = -std::log(EPSILON); // So that f(1.0f) = EPSILON ~ 0.0f
     static const float RELAXATION_TIME = 0.8f; // sec
-    
+
     if (isTracking()) {
         if (_relaxationStatus == 1.0f) {
             _fadeCoefficient = 1.0f;
@@ -110,13 +109,13 @@ void FaceTracker::setEyeDeflection(float eyeDeflection) {
     _eyeDeflection.set(eyeDeflection);
 }
 
-void FaceTracker::updateFakeCoefficients(float leftBlink, float rightBlink, float browUp,
-    float jawOpen, float mouth2, float mouth3, float mouth4, QVector<float>& coefficients) {
+void FaceTracker::updateFakeCoefficients(float leftBlink, float rightBlink, float browUp, float jawOpen, float mouth2,
+                                         float mouth3, float mouth4, QVector<float>& coefficients) {
     const int MMMM_BLENDSHAPE = 34;
     const int FUNNEL_BLENDSHAPE = 40;
     const int SMILE_LEFT_BLENDSHAPE = 28;
     const int SMILE_RIGHT_BLENDSHAPE = 29;
-    const int MAX_FAKE_BLENDSHAPE = 40;  //  Largest modified blendshape from above and below
+    const int MAX_FAKE_BLENDSHAPE = 40; //  Largest modified blendshape from above and below
 
     coefficients.resize(std::max((int)coefficients.size(), MAX_FAKE_BLENDSHAPE + 1));
     qFill(coefficients.begin(), coefficients.end(), 0.0f);
@@ -130,4 +129,3 @@ void FaceTracker::updateFakeCoefficients(float leftBlink, float rightBlink, floa
     coefficients[MMMM_BLENDSHAPE] = mouth2;
     coefficients[FUNNEL_BLENDSHAPE] = mouth3;
 }
-

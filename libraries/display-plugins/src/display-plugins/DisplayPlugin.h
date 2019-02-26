@@ -7,4 +7,3 @@
 //
 
 #include <plugins/DisplayPlugin.h>
-

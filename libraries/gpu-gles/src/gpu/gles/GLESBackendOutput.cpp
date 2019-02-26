@@ -15,17 +15,12 @@
 #include <gpu/gl/GLFramebuffer.h>
 #include <gpu/gl/GLTexture.h>
 
-namespace gpu { namespace gles { 
-
+namespace gpu {
+namespace gles {
 
 // returns the FOV from the projection matrix
-static inline vec4 extractFov( const glm::mat4& m) {
-    static const std::array<vec4, 4> CLIPS{ {
-                                                { 1, 0, 0, 1 },
-                                                { -1, 0, 0, 1 },
-                                                { 0, 1, 0, 1 },
-                                                { 0, -1, 0, 1 }
-                                            } };
+static inline vec4 extractFov(const glm::mat4& m) {
+    static const std::array<vec4, 4> CLIPS { { { 1, 0, 0, 1 }, { -1, 0, 0, 1 }, { 0, 1, 0, 1 }, { 0, -1, 0, 1 } } };
 
     glm::mat4 mt = glm::transpose(m);
     vec4 v, result;
@@ -44,7 +39,6 @@ static inline vec4 extractFov( const glm::mat4& m) {
     return result;
 }
 
-
 class GLESFramebuffer : public gl::GLFramebuffer {
     using Parent = gl::GLFramebuffer;
     static GLuint allocate() {
@@ -52,13 +46,14 @@ class GLESFramebuffer : public gl::GLFramebuffer {
         glGenFramebuffers(1, &result);
         return result;
     }
+
 public:
     void update() override {
         GLint currentFBO = -1;
         glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &currentFBO);
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
-        vec2 focalPoint{ -1.0f };
+        vec2 focalPoint { -1.0f };
 
 #if 0
         {
@@ -80,23 +75,12 @@ public:
         if (_gpuObject.getColorStamps() != _colorStamps) {
             if (_gpuObject.hasColor()) {
                 _colorBuffers.clear();
-                static const GLenum colorAttachments[] = {
-                    GL_COLOR_ATTACHMENT0,
-                    GL_COLOR_ATTACHMENT1,
-                    GL_COLOR_ATTACHMENT2,
-                    GL_COLOR_ATTACHMENT3,
-                    GL_COLOR_ATTACHMENT4,
-                    GL_COLOR_ATTACHMENT5,
-                    GL_COLOR_ATTACHMENT6,
-                    GL_COLOR_ATTACHMENT7,
-                    GL_COLOR_ATTACHMENT8,
-                    GL_COLOR_ATTACHMENT9,
-                    GL_COLOR_ATTACHMENT10,
-                    GL_COLOR_ATTACHMENT11,
-                    GL_COLOR_ATTACHMENT12,
-                    GL_COLOR_ATTACHMENT13,
-                    GL_COLOR_ATTACHMENT14,
-                    GL_COLOR_ATTACHMENT15 };
+                static const GLenum colorAttachments[] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1,  GL_COLOR_ATTACHMENT2,
+                                                           GL_COLOR_ATTACHMENT3,  GL_COLOR_ATTACHMENT4,  GL_COLOR_ATTACHMENT5,
+                                                           GL_COLOR_ATTACHMENT6,  GL_COLOR_ATTACHMENT7,  GL_COLOR_ATTACHMENT8,
+                                                           GL_COLOR_ATTACHMENT9,  GL_COLOR_ATTACHMENT10, GL_COLOR_ATTACHMENT11,
+                                                           GL_COLOR_ATTACHMENT12, GL_COLOR_ATTACHMENT13, GL_COLOR_ATTACHMENT14,
+                                                           GL_COLOR_ATTACHMENT15 };
 
                 int unit = 0;
                 auto backend = _backend.lock();
@@ -111,7 +95,8 @@ public:
 
                     if (gltexture) {
                         if (gltexture->_target == GL_TEXTURE_2D) {
-                            glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[unit], GL_TEXTURE_2D, gltexture->_texture, 0);
+                            glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[unit], GL_TEXTURE_2D, gltexture->_texture,
+                                                   0);
 #if 0
                             if (glTextureFoveationParametersQCOM && focalPoint.x != -1.0f) {
                                 static GLint FOVEATION_QUERY = 0;
@@ -131,7 +116,8 @@ public:
                             }
 #endif
                         } else if (gltexture->_target == GL_TEXTURE_2D_MULTISAMPLE) {
-                            glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[unit], GL_TEXTURE_2D_MULTISAMPLE, gltexture->_texture, 0);
+                            glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[unit], GL_TEXTURE_2D_MULTISAMPLE,
+                                                   gltexture->_texture, 0);
                         } else {
                             glFramebufferTextureLayer(GL_FRAMEBUFFER, colorAttachments[unit], gltexture->_texture, 0,
                                                       b._subresource);
@@ -176,12 +162,11 @@ public:
             _depthStamp = _gpuObject.getDepthStamp();
         }
 
-
         // Last but not least, define where we draw
         if (!_colorBuffers.empty()) {
             glDrawBuffers((GLsizei)_colorBuffers.size(), _colorBuffers.data());
         } else {
-            GLenum DrawBuffers[1] = {GL_NONE};
+            GLenum DrawBuffers[1] = { GL_NONE };
             glDrawBuffers(1, DrawBuffers);
         }
 
@@ -196,10 +181,9 @@ public:
         checkStatus();
     }
 
-
 public:
-    GLESFramebuffer(const std::weak_ptr<gl::GLBackend>& backend, const gpu::Framebuffer& framebuffer)
-        : Parent(backend, framebuffer, allocate()) { }
+    GLESFramebuffer(const std::weak_ptr<gl::GLBackend>& backend, const gpu::Framebuffer& framebuffer) :
+        Parent(backend, framebuffer, allocate()) {}
 };
 
 gl::GLFramebuffer* GLESBackend::syncGPUObject(const Framebuffer& framebuffer) {
@@ -233,9 +217,7 @@ void GLESBackend::do_blit(const Batch& batch, size_t paramOffset) {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, getFramebufferID(srcframebuffer));
 
     // Blit!
-    glBlitFramebuffer(srcvp.x, srcvp.y, srcvp.z, srcvp.w, 
-        dstvp.x, dstvp.y, dstvp.z, dstvp.w,
-        GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    glBlitFramebuffer(srcvp.x, srcvp.y, srcvp.z, srcvp.w, dstvp.x, dstvp.y, dstvp.z, dstvp.w, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
     // Always clean the read fbo to 0
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
@@ -245,8 +227,8 @@ void GLESBackend::do_blit(const Batch& batch, size_t paramOffset) {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _output._drawFBO);
     }
 
-    (void) CHECK_GL_ERROR();
+    (void)CHECK_GL_ERROR();
 }
 
-
-} }
+} // namespace gles
+} // namespace gpu

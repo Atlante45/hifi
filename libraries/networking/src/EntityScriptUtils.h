@@ -16,14 +16,7 @@
 class EntityScriptStatus_ : public QObject {
     Q_OBJECT
 public:
-    enum EntityScriptStatus {
-        PENDING,
-        LOADING,
-        ERROR_LOADING_SCRIPT,
-        ERROR_RUNNING_SCRIPT,
-        RUNNING,
-        UNLOADED
-    };
+    enum EntityScriptStatus { PENDING, LOADING, ERROR_LOADING_SCRIPT, ERROR_RUNNING_SCRIPT, RUNNING, UNLOADED };
     Q_ENUM(EntityScriptStatus)
     static QString valueToKey(EntityScriptStatus status) {
         return QMetaEnum::fromType<EntityScriptStatus>().valueToKey(status);

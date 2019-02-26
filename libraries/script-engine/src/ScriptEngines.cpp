@@ -12,11 +12,11 @@
 
 #include <QtWidgets/QApplication>
 
-#include <shared/QtHelpers.h>
+#include <PathUtils.h>
 #include <SettingHandle.h>
 #include <UserActivityLogger.h>
-#include <PathUtils.h>
 #include <shared/FileUtils.h>
+#include <shared/QtHelpers.h>
 
 #include "ScriptEngine.h"
 #include "ScriptEngineLogging.h"
@@ -33,7 +33,6 @@ static const QUrl DEFAULT_SCRIPTS_LOCATION { "file:///~//defaultScripts.js" };
 static Setting::Handle<QVariantList> runningScriptsHandle(SETTINGS_KEY, { QVariant(DEFAULT_SCRIPTS_LOCATION) });
 
 const int RELOAD_ALL_SCRIPTS_TIMEOUT = 1000;
-
 
 ScriptsModel& getScriptsModel() {
     static ScriptsModel scriptsModel;
@@ -64,9 +63,7 @@ void ScriptEngines::onErrorLoadingScript(const QString& url) {
     emit errorLoadingScript(url);
 }
 
-ScriptEngines::ScriptEngines(ScriptEngine::Context context)
-    : _context(context)
-{
+ScriptEngines::ScriptEngines(ScriptEngine::Context context) : _context(context) {
     _scriptsModelFilter.setSourceModel(&_scriptsModel);
     _scriptsModelFilter.sort(0, Qt::AscendingOrder);
     _scriptsModelFilter.setDynamicSortFilter(true);
@@ -78,8 +75,7 @@ QUrl normalizeScriptURL(const QUrl& rawScriptURL) {
         QUrl defaultScriptLoc = PathUtils::defaultScriptsLocation();
 
         // if this url is something "beneath" the default script url, replace the local path with ~
-        if (fullNormal.scheme() == defaultScriptLoc.scheme() &&
-            fullNormal.host() == defaultScriptLoc.host() &&
+        if (fullNormal.scheme() == defaultScriptLoc.scheme() && fullNormal.host() == defaultScriptLoc.host() &&
             fullNormal.path().startsWith(defaultScriptLoc.path())) {
             fullNormal.setPath("/~/" + fullNormal.path().mid(defaultScriptLoc.path().size()));
         }
@@ -100,8 +96,7 @@ QString expandScriptPath(const QString& rawPath) {
 
 QUrl expandScriptUrl(const QUrl& rawScriptURL) {
     QUrl normalizedScriptURL = normalizeScriptURL(rawScriptURL);
-    if (normalizedScriptURL.scheme() == "http" ||
-        normalizedScriptURL.scheme() == "https" ||
+    if (normalizedScriptURL.scheme() == "http" || normalizedScriptURL.scheme() == "https" ||
         normalizedScriptURL.scheme() == "atp") {
         return normalizedScriptURL;
     } else if (normalizedScriptURL.scheme() == "file") {
@@ -116,9 +111,7 @@ QUrl expandScriptUrl(const QUrl& rawScriptURL) {
             QUrl defaultScriptsLoc = PathUtils::defaultScriptsLocation();
             if (!defaultScriptsLoc.isParentOf(url)) {
                 qCWarning(scriptengine) << "Script.include() ignoring file path"
-                                        << "-- outside of standard libraries: "
-                                        << url.path()
-                                        << defaultScriptsLoc.path();
+                                        << "-- outside of standard libraries: " << url.path() << defaultScriptsLoc.path();
                 return rawScriptURL;
             }
             if (rawScriptURL.path().endsWith("/") && !url.path().endsWith("/")) {
@@ -132,13 +125,11 @@ QUrl expandScriptUrl(const QUrl& rawScriptURL) {
     }
 }
 
-
 QObject* scriptsModel();
 
 bool NativeScriptInitializers::registerNativeScriptInitializer(NativeScriptInitializer initializer) {
-    return registerScriptInitializer([initializer](ScriptEnginePointer engine) {
-        initializer(qobject_cast<QScriptEngine*>(engine.data()));
-    });
+    return registerScriptInitializer(
+        [initializer](ScriptEnginePointer engine) { initializer(qobject_cast<QScriptEngine*>(engine.data())); });
 }
 
 bool NativeScriptInitializers::registerScriptInitializer(ScriptInitializer initializer) {
@@ -262,10 +253,11 @@ QVariantList ScriptEngines::getLocal() {
 QVariantList ScriptEngines::getRunning() {
     QVariantList result;
     auto runningScripts = getRunningScripts();
-    foreach(const QString& runningScript, runningScripts) {
+    foreach (const QString& runningScript, runningScripts) {
         QUrl runningScriptURL = QUrl(runningScript);
         if (!runningScriptURL.isValid()) {
-            runningScriptURL = QUrl::fromLocalFile(runningScriptURL.toDisplayString(QUrl::FormattingOptions(QUrl::FullyEncoded)));
+            runningScriptURL = QUrl::fromLocalFile(
+                runningScriptURL.toDisplayString(QUrl::FormattingOptions(QUrl::FullyEncoded)));
         }
         QVariantMap resultNode;
         resultNode.insert("name", runningScriptURL.fileName());
@@ -352,7 +344,7 @@ void ScriptEngines::saveScripts() {
         QReadLocker lock(&_scriptEnginesHashLock);
         for (auto it = _scriptEnginesHash.begin(); it != _scriptEnginesHash.end(); ++it) {
             // Save user-loaded scripts, only if they are set to quit when finished
-            if (it.value() && it.value()->isUserLoaded()  && !it.value()->isQuitWhenFinished()) {
+            if (it.value() && it.value()->isUserLoaded() && !it.value()->isQuitWhenFinished()) {
                 auto normalizedUrl = normalizeScriptURL(it.key());
                 list.append(normalizedUrl.toString());
             }
@@ -380,7 +372,7 @@ void ScriptEngines::stopAllScripts(bool restart) {
     }
 
     for (QHash<QUrl, ScriptEnginePointer>::const_iterator it = _scriptEnginesHash.constBegin();
-        it != _scriptEnginesHash.constEnd(); it++) {
+         it != _scriptEnginesHash.constEnd(); it++) {
         ScriptEnginePointer scriptEngine = it.value();
         // skip already stopped scripts
         if (scriptEngine->isFinished() || scriptEngine->isStopping()) {
@@ -392,9 +384,8 @@ void ScriptEngines::stopAllScripts(bool restart) {
             _isReloading = true;
             ScriptEngine::Type type = scriptEngine->getType();
 
-            connect(scriptEngine.data(), &ScriptEngine::finished, this, [this, type] (QString scriptName) {
-                reloadScript(scriptName, true)->setType(type);
-            });
+            connect(scriptEngine.data(), &ScriptEngine::finished, this,
+                    [this, type](QString scriptName) { reloadScript(scriptName, true)->setType(type); });
         }
 
         // stop all scripts
@@ -403,9 +394,7 @@ void ScriptEngines::stopAllScripts(bool restart) {
 
     if (restart) {
         qCDebug(scriptengine) << "stopAllScripts -- emitting scriptsReloading";
-        QTimer::singleShot(RELOAD_ALL_SCRIPTS_TIMEOUT, this, [&] {
-            _isReloading = false;
-        });
+        QTimer::singleShot(RELOAD_ALL_SCRIPTS_TIMEOUT, this, [&] { _isReloading = false; });
         emit scriptsReloading();
     }
 }
@@ -428,10 +417,10 @@ bool ScriptEngines::stopScript(const QString& rawScriptURL, bool restart) {
                 scriptCache->deleteScript(scriptURL);
 
                 if (!scriptEngine->isStopping()) {
-                    connect(scriptEngine.data(), &ScriptEngine::finished,
-                            this, [this, isUserLoaded, type](QString scriptName, ScriptEnginePointer engine) {
-                            reloadScript(scriptName, isUserLoaded)->setType(type);
-                    });
+                    connect(scriptEngine.data(), &ScriptEngine::finished, this,
+                            [this, isUserLoaded, type](QString scriptName, ScriptEnginePointer engine) {
+                                reloadScript(scriptName, isUserLoaded)->setType(type);
+                            });
                 }
             }
             scriptEngine->stop();
@@ -456,21 +445,15 @@ ScriptEnginePointer ScriptEngines::loadScript(const QUrl& scriptFilename, bool i
                                               bool activateMainWindow, bool reload, bool quitWhenFinished) {
     if (thread() != QThread::currentThread()) {
         ScriptEnginePointer result { nullptr };
-        BLOCKING_INVOKE_METHOD(this, "loadScript", Q_RETURN_ARG(ScriptEnginePointer, result),
-            Q_ARG(QUrl, scriptFilename),
-            Q_ARG(bool, isUserLoaded),
-            Q_ARG(bool, loadScriptFromEditor),
-            Q_ARG(bool, activateMainWindow),
-            Q_ARG(bool, reload));
+        BLOCKING_INVOKE_METHOD(this, "loadScript", Q_RETURN_ARG(ScriptEnginePointer, result), Q_ARG(QUrl, scriptFilename),
+                               Q_ARG(bool, isUserLoaded), Q_ARG(bool, loadScriptFromEditor), Q_ARG(bool, activateMainWindow),
+                               Q_ARG(bool, reload));
         return result;
     }
     QUrl scriptUrl;
     if (!scriptFilename.isValid() ||
-        (scriptFilename.scheme() != "http" &&
-         scriptFilename.scheme() != "https" &&
-         scriptFilename.scheme() != "atp" &&
-         scriptFilename.scheme() != "file" &&
-         scriptFilename.scheme() != "about")) {
+        (scriptFilename.scheme() != "http" && scriptFilename.scheme() != "https" && scriptFilename.scheme() != "atp" &&
+         scriptFilename.scheme() != "file" && scriptFilename.scheme() != "about")) {
         // deal with a "url" like c:/something
         scriptUrl = normalizeScriptURL(QUrl::fromLocalFile(scriptFilename.toString()));
     } else {
@@ -545,7 +528,7 @@ void ScriptEngines::quitWhenFinished() {
 }
 
 int ScriptEngines::runScriptInitializers(ScriptEnginePointer scriptEngine) {
-    int ii=0;
+    int ii = 0;
     for (auto initializer : _scriptInitializers) {
         ii++;
         initializer(scriptEngine);
@@ -555,12 +538,10 @@ int ScriptEngines::runScriptInitializers(ScriptEnginePointer scriptEngine) {
 
 void ScriptEngines::launchScriptEngine(ScriptEnginePointer scriptEngine) {
     connect(scriptEngine.data(), &ScriptEngine::finished, this, &ScriptEngines::onScriptFinished, Qt::DirectConnection);
-    connect(scriptEngine.data(), &ScriptEngine::loadScript, [this](const QString& scriptName, bool userLoaded) {
-        loadScript(scriptName, userLoaded);
-    });
-    connect(scriptEngine.data(), &ScriptEngine::reloadScript, [this](const QString& scriptName, bool userLoaded) {
-        loadScript(scriptName, userLoaded, false, false, true);
-    });
+    connect(scriptEngine.data(), &ScriptEngine::loadScript,
+            [this](const QString& scriptName, bool userLoaded) { loadScript(scriptName, userLoaded); });
+    connect(scriptEngine.data(), &ScriptEngine::reloadScript,
+            [this](const QString& scriptName, bool userLoaded) { loadScript(scriptName, userLoaded, false, false, true); });
 
     // register our application services and set it off on its own thread
     runScriptInitializers(scriptEngine);

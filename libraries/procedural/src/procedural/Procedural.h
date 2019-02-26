@@ -11,21 +11,19 @@
 #include <atomic>
 
 #include <QtCore/qglobal.h>
+#include <QtCore/QJsonArray>
+#include <QtCore/QJsonObject>
 #include <QtCore/QString>
 #include <QtCore/QUrl>
-#include <QtCore/QJsonObject>
-#include <QtCore/QJsonArray>
 
-#include <gpu/Shader.h>
-#include <gpu/Pipeline.h>
 #include <gpu/Batch.h>
+#include <gpu/Pipeline.h>
+#include <gpu/Shader.h>
 #include <material-networking/ShaderCache.h>
 #include <material-networking/TextureCache.h>
 
 using UniformLambdas = std::list<std::function<void(gpu::Batch& batch)>>;
-const size_t MAX_PROCEDURAL_TEXTURE_CHANNELS{ 4 };
-
-
+const size_t MAX_PROCEDURAL_TEXTURE_CHANNELS { 4 };
 
 struct ProceduralData {
     static QJsonValue getProceduralData(const QString& proceduralJson);
@@ -41,10 +39,7 @@ struct ProceduralData {
 
 class ProceduralProgramKey {
 public:
-    enum FlagBit {
-        IS_TRANSPARENT = 0,
-        NUM_FLAGS
-    };
+    enum FlagBit { IS_TRANSPARENT = 0, NUM_FLAGS };
 
     typedef std::bitset<NUM_FLAGS> Flags;
 
@@ -59,13 +54,13 @@ public:
     }
 };
 namespace std {
-    template <>
-    struct hash<ProceduralProgramKey> {
-        size_t operator()(const ProceduralProgramKey& key) const {
-            return std::hash<std::bitset<ProceduralProgramKey::FlagBit::NUM_FLAGS>>()(key._flags);
-        }
-    };
-}
+template<>
+struct hash<ProceduralProgramKey> {
+    size_t operator()(const ProceduralProgramKey& key) const {
+        return std::hash<std::bitset<ProceduralProgramKey::FlagBit::NUM_FLAGS>>()(key._flags);
+    }
+};
+} // namespace std
 inline bool operator==(const ProceduralProgramKey& a, const ProceduralProgramKey& b) {
     return a._flags == b._flags;
 }
@@ -82,7 +77,8 @@ public:
 
     bool isReady() const;
     bool isEnabled() const { return _enabled; }
-    void prepare(gpu::Batch& batch, const glm::vec3& position, const glm::vec3& size, const glm::quat& orientation, const ProceduralProgramKey key = ProceduralProgramKey());
+    void prepare(gpu::Batch& batch, const glm::vec3& position, const glm::vec3& size, const glm::quat& orientation,
+                 const ProceduralProgramKey key = ProceduralProgramKey());
 
     glm::vec4 getColor(const glm::vec4& entityColor) const;
     quint64 getFadeStartTime() const { return _fadeStartTime; }
@@ -97,14 +93,13 @@ public:
     gpu::StatePointer _opaqueState { std::make_shared<gpu::State>() };
     gpu::StatePointer _transparentState { std::make_shared<gpu::State>() };
 
-
 protected:
     // DO NOT TOUCH
     // We have to pack these in a particular way to match the ProceduralCommon.slh
-    // layout.  
+    // layout.
     struct StandardInputs {
         vec4 date;
-        vec4 position; 
+        vec4 position;
         vec4 scale;
         float time;
         int frameCount;

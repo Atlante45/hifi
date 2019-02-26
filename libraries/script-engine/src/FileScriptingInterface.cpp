@@ -11,27 +11,26 @@
 
 #include "FileScriptingInterface.h"
 
-#include <QtCore/QTemporaryDir>
+#include <QtCore/QBuffer>
+#include <QtCore/QByteArray>
+#include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
-#include <QtCore/QDebug>
-#include <QtCore/QBuffer>
-#include <QtCore/QTextCodec>
-#include <QtCore/QIODevice>
-#include <QtCore/QUrl>
-#include <QtCore/QByteArray>
-#include <QtCore/QString>
 #include <QtCore/QFileInfo>
+#include <QtCore/QIODevice>
+#include <QtCore/QString>
+#include <QtCore/QTemporaryDir>
+#include <QtCore/QTextCodec>
+#include <QtCore/QUrl>
 
 // FIXME quazip hasn't been built on the android toolchain
 #if !defined(Q_OS_ANDROID)
-#include <quazip5/quazip.h>
 #include <quazip5/JlCompress.h>
+#include <quazip5/quazip.h>
 #endif
 
 #include "ResourceManager.h"
 #include "ScriptEngineLogging.h"
-
 
 FileScriptingInterface::FileScriptingInterface(QObject* parent) : QObject(parent) {
     // nothing for now
@@ -47,7 +46,7 @@ void FileScriptingInterface::runUnzip(QString path, QUrl url, bool autoAdd, bool
         tempDir = zipTemp.path();
         path.remove("file:///");
     }
-    
+
     qCDebug(scriptengine) << "Temporary directory at: " + tempDir;
     if (!isTempDir(tempDir)) {
         qCDebug(scriptengine) << "Temporary directory mismatch; risk of losing files";
@@ -55,8 +54,8 @@ void FileScriptingInterface::runUnzip(QString path, QUrl url, bool autoAdd, bool
     }
 
     QStringList fileList = unzipFile(path, tempDir);
-    
-    if(fileList.isEmpty()) {
+
+    if (fileList.isEmpty()) {
         qCDebug(scriptengine) << "Unzip failed";
     }
 
@@ -68,7 +67,6 @@ void FileScriptingInterface::runUnzip(QString path, QUrl url, bool autoAdd, bool
     }
 
     emit unzipResult(path, fileList, autoAdd, isZip, isBlocks);
-
 }
 
 QStringList FileScriptingInterface::unzipFile(QString path, QString tempDir) {
@@ -132,9 +130,9 @@ QString FileScriptingInterface::convertUrlToPath(QUrl url) {
 // this function is not in use
 void FileScriptingInterface::downloadZip(QString path, const QString link) {
     QUrl url = QUrl(link);
-    auto request = DependencyManager::get<ResourceManager>()->createResourceRequest(
-        nullptr, url, true, -1, "FileScriptingInterface::downloadZip");
-    connect(request, &ResourceRequest::finished, this, [this, path]{
+    auto request = DependencyManager::get<ResourceManager>()->createResourceRequest(nullptr, url, true, -1,
+                                                                                    "FileScriptingInterface::downloadZip");
+    connect(request, &ResourceRequest::finished, this, [this, path] {
         unzipFile(path, ""); // so intellisense isn't mad
     });
     request->send();
@@ -158,8 +156,6 @@ void FileScriptingInterface::recursiveFileScan(QFileInfo file, QString* dirName)
         files = JlCompress::getFileList(file.fileName());
     }*/
 
-    foreach (QFileInfo file, files) {
-        recursiveFileScan(file, dirName);
-    }
+    foreach (QFileInfo file, files) { recursiveFileScan(file, dirName); }
     return;
 }

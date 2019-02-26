@@ -14,21 +14,21 @@
 
 #include <stdint.h>
 
-#include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <btBulletDynamicsCommon.h>
 
 #include <EntityItem.h>
 #include <EntitySimulation.h>
 #include <workload/Space.h>
 
-#include "PhysicsEngine.h"
 #include "EntityMotionState.h"
+#include "PhysicsEngine.h"
 
 class PhysicalEntitySimulation;
 using PhysicalEntitySimulationPointer = std::shared_ptr<PhysicalEntitySimulation>;
 using SetOfEntityMotionStates = QSet<EntityMotionState*>;
 
-class VectorOfEntityMotionStates: public std::vector<EntityMotionState*> {
+class VectorOfEntityMotionStates : public std::vector<EntityMotionState*> {
 public:
     void remove(uint32_t index) {
         assert(index < size());
@@ -118,7 +118,6 @@ private:
     uint64_t _nextBidExpiry;
     uint32_t _lastStepSendPackets { 0 };
 };
-
 
 typedef std::shared_ptr<PhysicalEntitySimulation> PhysicalEntitySimulationPointer;
 

@@ -10,10 +10,10 @@
 // Odd ordering of header is required to avoid 'macro redinition warnings'
 #include <AudioClient.h>
 
-#include <QtCore/QThread>
-#include <QtCore/QLoggingCategory>
-#include <QtCore/QFileInfo>
 #include <QtCore/QDateTime>
+#include <QtCore/QFileInfo>
+#include <QtCore/QLoggingCategory>
+#include <QtCore/QThread>
 
 #include <GLMHelpers.h>
 
@@ -23,19 +23,19 @@
 #include <gpu/Frame.h>
 #include <gpu/gl/GLBackend.h>
 
-#include <ViewFrustum.h>
 #include <PathUtils.h>
-#include <shared/NsightHelpers.h>
+#include <ViewFrustum.h>
 #include <controllers/Pose.h>
 #include <display-plugins/CompositorHelper.h>
-#include <ui-plugins/PluginContainer.h>
 #include <gl/OffscreenGLCanvas.h>
+#include <shared/NsightHelpers.h>
+#include <ui-plugins/PluginContainer.h>
 
 #include "OpenVrHelpers.h"
 
 Q_DECLARE_LOGGING_CATEGORY(displayplugins)
 
-const char* OpenVrThreadedSubmit{ "OpenVR Threaded Submit" };  // this probably shouldn't be hardcoded here
+const char* OpenVrThreadedSubmit { "OpenVR Threaded Submit" }; // this probably shouldn't be hardcoded here
 
 PoseData _nextRenderPoseData;
 PoseData _nextSimPoseData;
@@ -43,11 +43,11 @@ PoseData _nextSimPoseData;
 #define MIN_CORES_FOR_NORMAL_RENDER 5
 bool forceInterleavedReprojection = (QThread::idealThreadCount() < MIN_CORES_FOR_NORMAL_RENDER);
 
-static std::array<vr::Hmd_Eye, 2> VR_EYES{ { vr::Eye_Left, vr::Eye_Right } };
-bool _openVrDisplayActive{ false };
+static std::array<vr::Hmd_Eye, 2> VR_EYES { { vr::Eye_Left, vr::Eye_Right } };
+bool _openVrDisplayActive { false };
 // Flip y-axis since GL UV coords are backwards.
-static vr::VRTextureBounds_t OPENVR_TEXTURE_BOUNDS_LEFT{ 0, 0, 0.5f, 1 };
-static vr::VRTextureBounds_t OPENVR_TEXTURE_BOUNDS_RIGHT{ 0.5f, 0, 1, 1 };
+static vr::VRTextureBounds_t OPENVR_TEXTURE_BOUNDS_LEFT { 0, 0, 0.5f, 1 };
+static vr::VRTextureBounds_t OPENVR_TEXTURE_BOUNDS_RIGHT { 0.5f, 0, 1, 1 };
 
 #define REPROJECTION_BINDING 1
 
@@ -187,13 +187,13 @@ public:
         });
     }
 
-    GLuint _program{ 0 };
+    GLuint _program { 0 };
 
     void updateProgram() {
         if (!_program) {
             std::string vsSource = HMD_REPROJECTION_VERT;
             std::string fsSource = HMD_REPROJECTION_FRAG;
-            GLuint vertexShader{ 0 }, fragmentShader{ 0 };
+            GLuint vertexShader { 0 }, fragmentShader { 0 };
             std::string error;
             ::gl::compileShader(GL_VERTEX_SHADER, vsSource, vertexShader, error);
             ::gl::compileShader(GL_FRAGMENT_SHADER, fsSource, fragmentShader, error);
@@ -208,13 +208,13 @@ public:
 #define COLOR_BUFFER_COUNT 4
 
     void run() override {
-        GLuint _framebuffer{ 0 };
+        GLuint _framebuffer { 0 };
         std::array<GLuint, COLOR_BUFFER_COUNT> _colors;
-        size_t currentColorBuffer{ 0 };
-        size_t globalColorBufferCount{ 0 };
-        GLuint _uniformBuffer{ 0 };
-        GLuint _vao{ 0 };
-        GLuint _depth{ 0 };
+        size_t currentColorBuffer { 0 };
+        size_t globalColorBufferCount { 0 };
+        GLuint _uniformBuffer { 0 };
+        GLuint _vao { 0 };
+        GLuint _depth { 0 };
         Reprojection _reprojection;
 
         QThread::currentThread()->setPriority(QThread::Priority::TimeCriticalPriority);
@@ -272,11 +272,11 @@ public:
                 }
 
                 glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-                static const vr::VRTextureBounds_t leftBounds{ 0, 0, 0.5f, 1 };
-                static const vr::VRTextureBounds_t rightBounds{ 0.5f, 0, 1, 1 };
+                static const vr::VRTextureBounds_t leftBounds { 0, 0, 0.5f, 1 };
+                static const vr::VRTextureBounds_t rightBounds { 0.5f, 0, 1, 1 };
 
-                vr::Texture_t texture{ (void*)(uintptr_t)_colors[currentColorBuffer], vr::TextureType_OpenGL,
-                                       vr::ColorSpace_Auto };
+                vr::Texture_t texture { (void*)(uintptr_t)_colors[currentColorBuffer], vr::TextureType_OpenGL,
+                                        vr::ColorSpace_Auto };
                 vr::VRCompositor()->Submit(vr::Eye_Left, &texture, &leftBounds);
                 vr::VRCompositor()->Submit(vr::Eye_Right, &texture, &rightBounds);
                 _plugin._presentRate.increment();
@@ -336,9 +336,9 @@ public:
     CompositeInfo::Queue _queue;
 
     PoseData _nextRender, _nextSim;
-    bool _quit{ false };
-    GLuint _currentTexture{ 0 };
-    std::atomic<uint32_t> _presentCount{ 0 };
+    bool _quit { false };
+    GLuint _currentTexture { 0 };
+    std::atomic<uint32_t> _presentCount { 0 };
     Condition _presented;
     OpenVrDisplayPlugin& _plugin;
 };
@@ -497,8 +497,8 @@ void OpenVrDisplayPlugin::internalDeactivate() {
 
     _openVrDisplayActive = false;
     if (_system) {
-        // TODO: Invalidate poses. It's fine if someone else sets these shared values, but we're about to stop updating them, and
-        // we don't want ViveControllerManager to consider old values to be valid.
+        // TODO: Invalidate poses. It's fine if someone else sets these shared values, but we're about to stop updating them,
+        // and we don't want ViveControllerManager to consider old values to be valid.
         _container->makeRenderingContextCurrent();
         releaseOpenVrSystem();
         _system = nullptr;
@@ -571,11 +571,11 @@ bool OpenVrDisplayPlugin::beginFrameRender(uint32_t frameIndex) {
         _lastGoodHMDPose = nextSimPoseData.vrPoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
     }
 
-    vr::TrackedDeviceIndex_t handIndices[2]{ vr::k_unTrackedDeviceIndexInvalid, vr::k_unTrackedDeviceIndexInvalid };
+    vr::TrackedDeviceIndex_t handIndices[2] { vr::k_unTrackedDeviceIndexInvalid, vr::k_unTrackedDeviceIndexInvalid };
     {
         vr::TrackedDeviceIndex_t controllerIndices[2];
-        auto trackedCount =
-            _system->GetSortedTrackedDeviceIndicesOfClass(vr::TrackedDeviceClass_Controller, controllerIndices, 2);
+        auto trackedCount = _system->GetSortedTrackedDeviceIndicesOfClass(vr::TrackedDeviceClass_Controller, controllerIndices,
+                                                                          2);
         // Find the left and right hand controllers, if they exist
         for (uint32_t i = 0; i < std::min<uint32_t>(trackedCount, 2); ++i) {
             if (nextSimPoseData.vrPoses[i].bPoseIsValid) {
@@ -652,7 +652,7 @@ void OpenVrDisplayPlugin::hmdPresent() {
         _submitThread->waitForPresent();
     } else {
         GLuint glTexId = getGLBackend()->getTextureID(_compositeFramebuffer->getRenderBuffer(0));
-        vr::Texture_t vrTexture{ (void*)(uintptr_t)glTexId, vr::TextureType_OpenGL, vr::ColorSpace_Auto };
+        vr::Texture_t vrTexture { (void*)(uintptr_t)glTexId, vr::TextureType_OpenGL, vr::ColorSpace_Auto };
         vr::VRCompositor()->Submit(vr::Eye_Left, &vrTexture, &OPENVR_TEXTURE_BOUNDS_LEFT);
         vr::VRCompositor()->Submit(vr::Eye_Right, &vrTexture, &OPENVR_TEXTURE_BOUNDS_RIGHT);
         vr::VRCompositor()->PostPresentHandoff();

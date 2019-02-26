@@ -15,6 +15,7 @@
 
 class MaterialEntityItem : public EntityItem {
     using Pointer = std::shared_ptr<MaterialEntityItem>;
+
 public:
     static EntityItemPointer factory(const EntityItemID& entityID, const EntityItemProperties& properties);
 
@@ -22,25 +23,22 @@ public:
 
     ALLOW_INSTANTIATION // This class can be instantiated
 
-    // methods for getting/setting all properties of an entity
-    virtual EntityItemProperties getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const override;
+        // methods for getting/setting all properties of an entity
+        virtual EntityItemProperties
+        getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const override;
     virtual bool setProperties(const EntityItemProperties& properties) override;
 
     virtual EntityPropertyFlags getEntityProperties(EncodeBitstreamParams& params) const override;
 
     virtual void appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                     EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
+                                    EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                    EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                                     OctreeElement::AppendState& appendState) const override;
 
-
     virtual int readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                 ReadBitstreamToTreeParams& args,
-                                                 EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                 bool& somethingChanged) override;
+                                                 ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                 bool overwriteLocalData, bool& somethingChanged) override;
 
     void debugDump() const override;
 
@@ -74,10 +72,10 @@ public:
     AACube calculateInitialQueryAACube(bool& success) override;
 
 private:
-    // URL for this material.  Currently, only JSON format is supported.  Set to "materialData" to use the material data to live edit a material.
-    // The following fields are supported in the JSON:
-    // materialVersion: a uint for the version of this network material (currently, only 1 is supported)
-    // materials, which is either an object or an array of objects, each with the following properties:
+    // URL for this material.  Currently, only JSON format is supported.  Set to "materialData" to use the material data to live
+    // edit a material. The following fields are supported in the JSON: materialVersion: a uint for the version of this network
+    // material (currently, only 1 is supported) materials, which is either an object or an array of objects, each with the
+    // following properties:
     //   strings:
     //     name (NOT YET USED), model (NOT YET USED, should use "hifi_pbr")
     //   floats:
@@ -87,18 +85,20 @@ private:
     //   colors (arrays of 3 floats 0-1.  Optional fourth value in array can be a boolean isSRGB):
     //     emissive, albedo
     //   urls to textures:
-    //     emissiveMap, albedoMap (set opacityMap = albedoMap for transparency), metallicMap or specularMap, roughnessMap or glossMap,
-    //     normalMap or bumpMap, occlusionMap, lightmapMap (broken, FIXME), scatteringMap (only works if normal mapped)
+    //     emissiveMap, albedoMap (set opacityMap = albedoMap for transparency), metallicMap or specularMap, roughnessMap or
+    //     glossMap, normalMap or bumpMap, occlusionMap, lightmapMap (broken, FIXME), scatteringMap (only works if normal
+    //     mapped)
     QString _materialURL;
     // Type of material.  "uv" or "projected".
     MaterialMappingMode _materialMappingMode { UV };
     bool _materialRepeat { true };
     glm::vec3 _desiredDimensions;
-    // Priority for this material when applying it to its parent.  Only the highest priority material will be used.  Materials with the same priority are (essentially) randomly sorted.
-    // Base materials that come with models always have priority 0.
+    // Priority for this material when applying it to its parent.  Only the highest priority material will be used.  Materials
+    // with the same priority are (essentially) randomly sorted. Base materials that come with models always have priority 0.
     quint16 _priority { 0 };
-    // An identifier for choosing a submesh or submeshes within a parent.  If in the format "mat::<string>", all submeshes with material name "<string>" will be replaced.  Otherwise,
-    // parentMaterialName will be parsed as an unsigned int (strings not starting with "mat::" will parse to 0), representing the mesh index to modify.
+    // An identifier for choosing a submesh or submeshes within a parent.  If in the format "mat::<string>", all submeshes with
+    // material name "<string>" will be replaced.  Otherwise, parentMaterialName will be parsed as an unsigned int (strings not
+    // starting with "mat::" will parse to 0), representing the mesh index to modify.
     QString _parentMaterialName { "0" };
     // Offset position in UV-space of top left of material, (0, 0) to (1, 1)
     glm::vec2 _materialMappingPos { 0, 0 };
@@ -107,7 +107,6 @@ private:
     // How much to rotate this material within its parent's UV-space (degrees)
     float _materialMappingRot { 0 };
     QString _materialData;
-
 };
 
 #endif // hifi_MaterialEntityItem_h

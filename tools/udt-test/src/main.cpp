@@ -20,4 +20,3 @@ int main(int argc, char* argv[]) {
     UDTTest app(argc, argv);
     return app.exec();
 }
-

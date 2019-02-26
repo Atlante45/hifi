@@ -13,15 +13,15 @@
 #ifndef hifi_PhysicsDebugDraw_h
 #define hifi_PhysicsDebugDraw_h
 
-#include <stdint.h>
 #include <LinearMath/btIDebugDraw.h>
+#include <stdint.h>
 
 class PhysicsDebugDraw : public btIDebugDraw {
 public:
     using btIDebugDraw::drawLine;
     virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color) override;
-    virtual void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance,
-                                  int lifeTime, const btVector3& color) override;
+    virtual void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime,
+                                  const btVector3& color) override;
     virtual void reportErrorWarning(const char* warningString) override;
     virtual void draw3dText(const btVector3& location, const char* textString) override;
     virtual void setDebugMode(int debugMode) override;

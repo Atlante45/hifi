@@ -1,7 +1,7 @@
 #include "TestCase.h"
 
-#include <QtCore/QLoggingCategory>
 #include <QtCore/QDir>
+#include <QtCore/QLoggingCategory>
 
 void TestCase::destroy() {
 }

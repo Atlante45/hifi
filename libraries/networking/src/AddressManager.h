@@ -35,7 +35,7 @@ const QString GET_PLACE = "/api/v1/places/%1";
  * The location API provides facilities related to your current location in the metaverse.
  *
  * <h5>Getter/Setter</h5>
- * <p>You can get and set your current metaverse address by directly reading a string value from and writing a string value to 
+ * <p>You can get and set your current metaverse address by directly reading a string value from and writing a string value to
  * the <code>location</code> object. This is an alternative to using the <code>location.href</code> property or this object's
  * functions.</p>
  *
@@ -53,12 +53,12 @@ const QString GET_PLACE = "/api/v1/places/%1";
  *     <code>localhost</code>, or an IP address). Is blank if you're in a serverless domain.
  *     <em>Read-only.</em>
  * @property {string} href - Your current metaverse address (e.g., <code>"hifi://avatarisland/15,-10,26/0,0,0,1"</code>)
- *     regardless of whether or not you're connected to the domain. Starts with <code>"file:///"</code> if you're in a 
+ *     regardless of whether or not you're connected to the domain. Starts with <code>"file:///"</code> if you're in a
  *     serverless domain.
  *     <em>Read-only.</em>
  * @property {boolean} isConnected - <code>true</code> if you're connected to the domain in your current <code>href</code>
  *     metaverse address, otherwise <code>false</code>.
- * @property {string} pathname - The location and orientation in your current <code>href</code> metaverse address 
+ * @property {string} pathname - The location and orientation in your current <code>href</code> metaverse address
  *     (e.g., <code>"/15,-10,26/0,0,0,1"</code>).
  *     <em>Read-only.</em>
  * @property {string} placename - The place name in your current <code>href</code> metaverse address
@@ -188,8 +188,8 @@ public slots:
     /**jsdoc
      * Go to a specified metaverse address.
      * @function location.handleLookupString
-     * @param {string} address - The address to go to: a <code>"hifi://"<code> address, an IP address (e.g., 
-     * <code>"127.0.0.1"</code> or <code>"localhost"</code>), a domain name, a named path on a domain (starts with 
+     * @param {string} address - The address to go to: a <code>"hifi://"<code> address, an IP address (e.g.,
+     * <code>"127.0.0.1"</code> or <code>"localhost"</code>), a domain name, a named path on a domain (starts with
      * <code>"/"</code>), a position or position and orientation, or a user (starts with <code>"@"</code>).
      * @param {boolean} fromSuggestions=false - Set to <code>true</code> if the address is obtained from the "Goto" dialog.
      *    Helps ensure that user's location history is correctly maintained.
@@ -197,7 +197,7 @@ public slots:
     void handleLookupString(const QString& lookupString, bool fromSuggestions = false);
 
     /**jsdoc
-     * Go to a position and orientation resulting from a lookup for a named path in the domain (set in the domain server's 
+     * Go to a position and orientation resulting from a lookup for a named path in the domain (set in the domain server's
      * settings).
      * @function location.goToViewpointForPath
      * @param {string} path - The position and orientation corresponding to the named path.
@@ -208,8 +208,9 @@ public slots:
     // functions and signals that should be exposed are moved to a scripting interface class.
     //
     // we currently expect this to be called from NodeList once handleLookupString has been called with a path
-    bool goToViewpointForPath(const QString& viewpointString, const QString& pathString)
-        { return handleViewpoint(viewpointString, false, DomainPathResponse, false, pathString); }
+    bool goToViewpointForPath(const QString& viewpointString, const QString& pathString) {
+        return handleViewpoint(viewpointString, false, DomainPathResponse, false, pathString);
+    }
 
     /**jsdoc
      * Go back to the previous location in your navigation history, if there is one.
@@ -231,7 +232,8 @@ public slots:
      *     location history is correctly maintained.
      */
     void goToLocalSandbox(QString path = "", LookupTrigger trigger = LookupTrigger::StartupFromSettings) {
-        handleUrl(SANDBOX_HIFI_ADDRESS + path, trigger); }
+        handleUrl(SANDBOX_HIFI_ADDRESS + path, trigger);
+    }
 
     /**jsdoc
      * Go to the default "welcome" metaverse address.
@@ -245,21 +247,21 @@ public slots:
      * Go to the specified user's location.
      * @function location.goToUser
      * @param {string} username - The user's username.
-     * @param {boolean} matchOrientation=true - If <code>true</code> then go to a location just in front of the user and turn to face
-     *     them, otherwise go to the user's exact location and orientation.
+     * @param {boolean} matchOrientation=true - If <code>true</code> then go to a location just in front of the user and turn to
+     * face them, otherwise go to the user's exact location and orientation.
      */
     void goToUser(const QString& username, bool shouldMatchOrientation = true);
 
     /**jsdoc
-    * Go to the last address tried.  This will be the last URL tried from location.handleLookupString
-    * @function location.goToLastAddress
-    */
+     * Go to the last address tried.  This will be the last URL tried from location.handleLookupString
+     * @function location.goToLastAddress
+     */
     void goToLastAddress() { handleUrl(_lastVisitedURL, LookupTrigger::AttemptedRefresh); }
 
     /**jsdoc
-    * Returns if going back is possible.
-    * @function location.canGoBack
-    */
+     * Returns if going back is possible.
+     * @function location.canGoBack
+     */
     bool canGoBack() const;
 
     /**jsdoc
@@ -285,7 +287,7 @@ public slots:
     void copyAddress();
 
     /**jsdoc
-     * Copy your current metaverse location and orientation (i.e., <code>location.pathname</code> property value) to the OS 
+     * Copy your current metaverse location and orientation (i.e., <code>location.pathname</code> property value) to the OS
      * clipboard.
      * @function location.copyPath
      */
@@ -311,7 +313,7 @@ signals:
     void lookupResultsFinished();
 
     /**jsdoc
-     * Triggered when looking up the details of a metaverse user or location to go to has completed and the domain or user is 
+     * Triggered when looking up the details of a metaverse user or location to go to has completed and the domain or user is
      * offline.
      * @function location.lookupResultIsOffline
      * @returns {Signal}
@@ -352,9 +354,9 @@ signals:
      * @function location.locationChangeRequired
      * @param {Vec3} position - The position to go to.
      * @param {boolean} hasOrientationChange - If <code>true</code> then a new <code>orientation</code> has been requested.
-     * @param {Quat} orientation - The orientation to change to. Is {@link Quat(0)|Quat.IDENTITY} if 
+     * @param {Quat} orientation - The orientation to change to. Is {@link Quat(0)|Quat.IDENTITY} if
      *     <code>hasOrientationChange</code> is <code>false</code>.
-     * @param {boolean} shouldFaceLocation - If <code>true</code> then the request is to go to a position near that specified 
+     * @param {boolean} shouldFaceLocation - If <code>true</code> then the request is to go to a position near that specified
      *     and orient your avatar to face it. For example when you visit someone from the "People" dialog.
      * @returns {Signal}
      * @example <caption>Report location change requests.</caption>
@@ -368,8 +370,7 @@ signals:
      *
      * location.locationChangeRequired.connect(onLocationChangeRequired);
      */
-    void locationChangeRequired(const glm::vec3& newPosition,
-                                bool hasOrientationChange, const glm::quat& newOrientation,
+    void locationChangeRequired(const glm::vec3& newPosition, bool hasOrientationChange, const glm::quat& newOrientation,
                                 bool shouldFaceLocation);
 
     /**jsdoc
@@ -405,7 +406,7 @@ signals:
      * Triggered when there's a change in whether or not there's a previous location that can be navigated to using
      * {@link location.goBack|goBack}. (Reflects changes in the state of the "Goto" dialog's back arrow.)
      * @function location.goBackPossible
-     * @param {boolean} isPossible - <code>true</code> if there's a previous location to navigate to, otherwise 
+     * @param {boolean} isPossible - <code>true</code> if there's a previous location to navigate to, otherwise
      *     <code>false</code>.
      * @returns {Signal}
      * @example <caption>Report when ability to navigate back changes.</caption>
@@ -480,4 +481,4 @@ private:
     QUrl _previousAPILookup;
 };
 
-#endif  // hifi_AddressManager_h
+#endif // hifi_AddressManager_h

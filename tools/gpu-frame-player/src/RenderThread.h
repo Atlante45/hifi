@@ -18,20 +18,21 @@
 #include <gl/Context.h>
 #include <gpu/gl/GLBackend.h>
 #else
-#include <vk/VKWindow.h>
 #include <gpu/vk/VKBackend.h>
+#include <vk/VKWindow.h>
 #endif
 
 class RenderThread : public GenericThread {
     using Parent = GenericThread;
+
 public:
-    QWindow* _window{ nullptr };
+    QWindow* _window { nullptr };
 
 #ifdef USE_GL
     gl::Context _context;
 #else
-    vks::Context& _context{ vks::Context::get() };
-    const vk::Device& _device{ _context.device };
+    vks::Context& _context { vks::Context::get() };
+    const vk::Device& _device { _context.device };
 
     vk::SurfaceKHR _surface;
     vk::RenderPass _renderPass;
@@ -45,19 +46,18 @@ public:
 #endif
 
     std::mutex _mutex;
-    gpu::ContextPointer _gpuContext;  // initialized during window creation
+    gpu::ContextPointer _gpuContext; // initialized during window creation
     std::shared_ptr<gpu::Backend> _backend;
-    std::atomic<size_t> _presentCount{ 0 };
+    std::atomic<size_t> _presentCount { 0 };
     QElapsedTimer _elapsed;
-    size_t _frameIndex{ 0 };
+    size_t _frameIndex { 0 };
     std::mutex _frameLock;
     std::queue<gpu::FramePointer> _pendingFrames;
     std::queue<QSize> _pendingSize;
     gpu::FramePointer _activeFrame;
-    uint32_t _externalTexture{ 0 };
+    uint32_t _externalTexture { 0 };
     void move(const glm::vec3& v);
     glm::mat4 _correction;
-
 
     void resize(const QSize& newSize);
     void setup() override;

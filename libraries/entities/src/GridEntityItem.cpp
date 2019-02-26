@@ -30,14 +30,14 @@ void GridEntityItem::setUnscaledDimensions(const glm::vec3& value) {
     EntityItem::setUnscaledDimensions(glm::vec3(value.x, value.y, GRID_ENTITY_ITEM_FIXED_DEPTH));
 }
 
-EntityItemProperties GridEntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
-    EntityItemProperties properties = EntityItem::getProperties(desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
+EntityItemProperties GridEntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                                   bool allowEmptyDesiredProperties) const {
+    EntityItemProperties properties = EntityItem::getProperties(
+        desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
 
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(color, getColor);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(alpha, getAlpha);
-    withReadLock([&] {
-        _pulseProperties.getProperties(properties);
-    });
+    withReadLock([&] { _pulseProperties.getProperties(properties); });
 
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(followCamera, getFollowCamera);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(majorGridEvery, getMajorGridEvery);
@@ -65,8 +65,8 @@ bool GridEntityItem::setProperties(const EntityItemProperties& properties) {
         if (wantDebug) {
             uint64_t now = usecTimestampNow();
             int elapsed = now - getLastEdited();
-            qCDebug(entities) << "GridEntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                    "now=" << now << " getLastEdited()=" << getLastEdited();
+            qCDebug(entities) << "GridEntityItem::setProperties() AFTER update... edited AGO=" << elapsed << "now=" << now
+                              << " getLastEdited()=" << getLastEdited();
         }
         setLastEdited(properties.getLastEdited());
     }
@@ -74,10 +74,8 @@ bool GridEntityItem::setProperties(const EntityItemProperties& properties) {
 }
 
 int GridEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) {
-
+                                                     ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                     bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 
@@ -85,8 +83,8 @@ int GridEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, 
     READ_ENTITY_PROPERTY(PROP_ALPHA, float, setAlpha);
     withWriteLock([&] {
         int bytesFromPulse = _pulseProperties.readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
-            propertyFlags, overwriteLocalData,
-            somethingChanged);
+                                                                               propertyFlags, overwriteLocalData,
+                                                                               somethingChanged);
         bytesRead += bytesFromPulse;
         dataAt += bytesFromPulse;
     });
@@ -113,20 +111,17 @@ EntityPropertyFlags GridEntityItem::getEntityProperties(EncodeBitstreamParams& p
 }
 
 void GridEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
-                                    EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
-                                    OctreeElement::AppendState& appendState) const {
-
+                                        EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
+                                        EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                        EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                        OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_COLOR, getColor());
     APPEND_ENTITY_PROPERTY(PROP_ALPHA, getAlpha());
     withReadLock([&] {
         _pulseProperties.appendSubclassData(packetData, params, entityTreeElementExtraEncodeData, requestedProperties,
-            propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                                            propertyFlags, propertiesDidntFit, propertyCount, appendState);
     });
 
     APPEND_ENTITY_PROPERTY(PROP_GRID_FOLLOW_CAMERA, getFollowCamera());
@@ -135,39 +130,27 @@ void GridEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBits
 }
 
 void GridEntityItem::setColor(const glm::u8vec3& color) {
-    withWriteLock([&] {
-        _color = color;
-    });
+    withWriteLock([&] { _color = color; });
 }
 
 glm::u8vec3 GridEntityItem::getColor() const {
-    return resultWithReadLock<glm::u8vec3>([&] {
-        return _color;
-    });
+    return resultWithReadLock<glm::u8vec3>([&] { return _color; });
 }
 
 void GridEntityItem::setAlpha(float alpha) {
-    withWriteLock([&] {
-        _alpha = alpha;
-    });
+    withWriteLock([&] { _alpha = alpha; });
 }
 
 float GridEntityItem::getAlpha() const {
-    return resultWithReadLock<float>([&] {
-        return _alpha;
-    });
+    return resultWithReadLock<float>([&] { return _alpha; });
 }
 
 void GridEntityItem::setFollowCamera(bool followCamera) {
-    withWriteLock([&] {
-        _followCamera = followCamera;
-    });
+    withWriteLock([&] { _followCamera = followCamera; });
 }
 
 bool GridEntityItem::getFollowCamera() const {
-    return resultWithReadLock<bool>([&] {
-        return _followCamera;
-    });
+    return resultWithReadLock<bool>([&] { return _followCamera; });
 }
 
 void GridEntityItem::setMajorGridEvery(uint32_t majorGridEvery) {
@@ -178,9 +161,7 @@ void GridEntityItem::setMajorGridEvery(uint32_t majorGridEvery) {
 }
 
 uint32_t GridEntityItem::getMajorGridEvery() const {
-    return resultWithReadLock<uint32_t>([&] {
-        return _majorGridEvery;
-    });
+    return resultWithReadLock<uint32_t>([&] { return _majorGridEvery; });
 }
 
 void GridEntityItem::setMinorGridEvery(float minorGridEvery) {
@@ -191,13 +172,9 @@ void GridEntityItem::setMinorGridEvery(float minorGridEvery) {
 }
 
 float GridEntityItem::getMinorGridEvery() const {
-    return resultWithReadLock<float>([&] {
-        return _minorGridEvery;
-    });
+    return resultWithReadLock<float>([&] { return _minorGridEvery; });
 }
 
 PulsePropertyGroup GridEntityItem::getPulseProperties() const {
-    return resultWithReadLock<PulsePropertyGroup>([&] {
-        return _pulseProperties;
-    });
+    return resultWithReadLock<PulsePropertyGroup>([&] { return _pulseProperties; });
 }

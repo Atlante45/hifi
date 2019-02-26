@@ -20,14 +20,15 @@
 
 class UpdateEntityOperator : public RecurseOctreeOperator {
 public:
-    UpdateEntityOperator(EntityTreePointer tree, EntityTreeElementPointer containingElement,
-                         EntityItemPointer existingEntity, const AACube newQueryAACube);
+    UpdateEntityOperator(EntityTreePointer tree, EntityTreeElementPointer containingElement, EntityItemPointer existingEntity,
+                         const AACube newQueryAACube);
 
     ~UpdateEntityOperator();
 
     virtual bool preRecursion(const OctreeElementPointer& element) override;
     virtual bool postRecursion(const OctreeElementPointer& element) override;
     virtual OctreeElementPointer possiblyCreateChildAt(const OctreeElementPointer& element, int childIndex) override;
+
 private:
     EntityTreePointer _tree;
     EntityItemPointer _existingEntity;

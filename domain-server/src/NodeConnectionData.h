@@ -20,7 +20,7 @@ class NodeConnectionData {
 public:
     static NodeConnectionData fromDataStream(QDataStream& dataStream, const HifiSockAddr& senderSockAddr,
                                              bool isConnectRequest = true);
-    
+
     QUuid connectUUID;
     NodeType_t nodeType;
     HifiSockAddr publicSockAddr;
@@ -33,6 +33,5 @@ public:
 
     QByteArray protocolVersion;
 };
-
 
 #endif // hifi_NodeConnectionData_h

@@ -13,18 +13,17 @@
 #ifndef hifi_AvatarPackager_h
 #define hifi_AvatarPackager_h
 
-#include <QObject>
 #include <DependencyManager.h>
+#include <QObject>
 
 #include "FileDialogHelper.h"
 
-#include "avatar/AvatarProject.h"
 #include "SettingHandle.h"
+#include "avatar/AvatarProject.h"
 
 class RecentAvatarProject {
 public:
     RecentAvatarProject() = default;
-    
 
     RecentAvatarProject(QString projectName, QString projectFSTPath, bool hadErrors) {
         _projectName = projectName;
@@ -43,9 +42,7 @@ public:
 
     bool getHadErrors() const { return _hadErrors; }
 
-    QString getProjectPath() const {
-        return QFileInfo(_projectFSTPath).absoluteDir().absolutePath();
-    }
+    QString getProjectPath() const { return QFileInfo(_projectFSTPath).absoluteDir().absolutePath(); }
 
     bool operator==(const RecentAvatarProject& other) const {
         return _projectName == other._projectName && _projectFSTPath == other._projectFSTPath;
@@ -55,7 +52,6 @@ private:
     QString _projectName;
     QString _projectFSTPath;
     bool _hadErrors;
-
 };
 
 class AvatarPackager : public QObject, public Dependency {
@@ -64,7 +60,7 @@ class AvatarPackager : public QObject, public Dependency {
     Q_PROPERTY(AvatarProject* currentAvatarProject READ getAvatarProject NOTIFY avatarProjectChanged)
     Q_PROPERTY(QString AVATAR_PROJECTS_PATH READ getAvatarProjectsPath CONSTANT)
     Q_PROPERTY(QVariantList recentProjects READ getRecentProjects NOTIFY recentProjectsChanged)
-public: 
+public:
     AvatarPackager();
     bool open();
 
@@ -98,8 +94,7 @@ private:
 
     void recentProjectsFromVariantList(QVariantList projectsVariant);
 
-
     Setting::Handle<QVariantList> _recentProjectsSetting { "io.highfidelity.avatarPackager.recentProjects", QVariantList() };
 };
 
-#endif  // hifi_AvatarPackager_h
+#endif // hifi_AvatarPackager_h

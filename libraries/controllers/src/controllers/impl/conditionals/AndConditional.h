@@ -18,11 +18,9 @@ class AndConditional : public Conditional {
 public:
     using Pointer = std::shared_ptr<AndConditional>;
 
-    AndConditional(Conditional::List children)
-        : _children(children) {}
+    AndConditional(Conditional::List children) : _children(children) {}
 
-    AndConditional(Conditional::Pointer& first, Conditional::Pointer& second)
-        : _children({ first, second }) {}
+    AndConditional(Conditional::Pointer& first, Conditional::Pointer& second) : _children({ first, second }) {}
 
     virtual bool satisfied() override;
 
@@ -30,6 +28,6 @@ private:
     Conditional::List _children;
 };
 
-}
+} // namespace controller
 
 #endif

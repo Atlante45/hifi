@@ -12,10 +12,9 @@
 #ifndef hifi_MathUtils_h
 #define hifi_MathUtils_h
 
-template <class T>
+template<class T>
 T divideRoundUp(const T& numerator, int divisor) {
     return (numerator + divisor - T(1)) / divisor;
 }
 
 #endif // hifi_MathUtils_h
-

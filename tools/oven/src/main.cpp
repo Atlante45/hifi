@@ -15,7 +15,7 @@
 #include <SettingInterface.h>
 #include <SharedUtil.h>
 
-int main (int argc, char** argv) {
+int main(int argc, char** argv) {
     setupHifiApplication("Oven");
 
     // init the settings interface so we can save and load settings

@@ -12,9 +12,9 @@
 #include "HTTPResourceRequest.h"
 
 #include <QFile>
+#include <QMetaEnum>
 #include <QNetworkReply>
 #include <QNetworkRequest>
-#include <QMetaEnum>
 
 #include <SharedUtil.h>
 #include <StatTracker.h>
@@ -75,7 +75,7 @@ void HTTPResourceRequest::doSend() {
     networkRequest.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, false);
 
     _reply = NetworkAccessManager::getInstance().get(networkRequest);
-    
+
     connect(_reply, &QNetworkReply::finished, this, &HTTPResourceRequest::onRequestFinished);
     connect(_reply, &QNetworkReply::downloadProgress, this, &HTTPResourceRequest::onDownloadProgress);
 
@@ -88,7 +88,7 @@ void HTTPResourceRequest::onRequestFinished() {
 
     cleanupTimer();
 
-    // Content-Range headers have the form: 
+    // Content-Range headers have the form:
     //
     //   Content-Range: <unit> <range-start>-<range-end>/<size>
     //   Content-Range: <unit> <range-start>-<range-end>/*
@@ -124,7 +124,7 @@ void HTTPResourceRequest::onRequestFinished() {
         return { true, contentTypeParts[0] };
     };
 
-    switch(_reply->error()) {
+    switch (_reply->error()) {
         case QNetworkReply::NoError:
             _data = _reply->readAll();
             _loadedFromCache = _reply->attribute(QNetworkRequest::SourceIsFromCacheAttribute).toBool();
@@ -177,14 +177,14 @@ void HTTPResourceRequest::onRequestFinished() {
             break;
 
         case QNetworkReply::UnknownContentError: // Script.include('QUrl("https://httpbin.org/status/402")')
-        case QNetworkReply::ContentOperationNotPermittedError: //Script.include('https://httpbin.org/status/403')
+        case QNetworkReply::ContentOperationNotPermittedError: // Script.include('https://httpbin.org/status/403')
         case QNetworkReply::AuthenticationRequiredError: // Script.include('https://httpbin.org/basic-auth/user/passwd')
             _result = AccessDenied;
             break;
 
-        case QNetworkReply::RemoteHostClosedError:  // Script.include('http://127.0.0.1:22')
+        case QNetworkReply::RemoteHostClosedError: // Script.include('http://127.0.0.1:22')
         case QNetworkReply::ConnectionRefusedError: // Script.include(http://127.0.0.1:1')
-        case QNetworkReply::HostNotFoundError:      // Script.include('http://foo.bar.highfidelity.io')
+        case QNetworkReply::HostNotFoundError: // Script.include('http://foo.bar.highfidelity.io')
         case QNetworkReply::ServiceUnavailableError: // Script.include('QUrl("https://httpbin.org/status/503")')
             _result = ServerUnavailable;
             break;
@@ -192,14 +192,15 @@ void HTTPResourceRequest::onRequestFinished() {
         case QNetworkReply::UnknownServerError: // Script.include('QUrl("https://httpbin.org/status/504")')
         case QNetworkReply::InternalServerError: // Script.include('QUrl("https://httpbin.org/status/500")')
         default:
-            qCDebug(networking) << "HTTPResourceRequest error:" << QMetaEnum::fromType<QNetworkReply::NetworkError>().valueToKey(_reply->error());
+            qCDebug(networking) << "HTTPResourceRequest error:"
+                                << QMetaEnum::fromType<QNetworkReply::NetworkError>().valueToKey(_reply->error());
             _result = Error;
             break;
     }
     _reply->disconnect(this);
     _reply->deleteLater();
     _reply = nullptr;
-    
+
     _state = Finished;
     emit finished();
 
@@ -217,7 +218,7 @@ void HTTPResourceRequest::onRequestFinished() {
 
 void HTTPResourceRequest::onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal) {
     Q_ASSERT(_state == InProgress);
-    
+
     // We've received data, so reset the timer
     _sendTimer->start();
 
@@ -235,7 +236,7 @@ void HTTPResourceRequest::onTimeout() {
     _reply = nullptr;
 
     cleanupTimer();
-    
+
     _result = Timeout;
     _state = Finished;
     emit finished();

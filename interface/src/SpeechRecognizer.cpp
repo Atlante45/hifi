@@ -11,8 +11,8 @@
 
 #include "SpeechRecognizer.h"
 
-#include <QtGlobal>
 #include <QDebug>
+#include <QtGlobal>
 
 #include "InterfaceLogging.h"
 
@@ -30,7 +30,6 @@ SpeechRecognizer::SpeechRecognizer() :
     _speechRecognizerGrammar(NULL),
     _commandRecognizedEvent(NULL),
     _commandRecognizedNotifier(NULL) {
-
     HRESULT hr = ::CoInitialize(NULL);
 
     if (SUCCEEDED(hr)) {
@@ -68,7 +67,6 @@ void SpeechRecognizer::setEnabled(bool enabled) {
     _enabled = enabled;
 
     if (_enabled) {
-
         HRESULT hr = S_OK;
 
         // Set up dedicated recognizer instead of using shared Windows recognizer.
@@ -81,13 +79,13 @@ void SpeechRecognizer::setEnabled(bool enabled) {
         if (SUCCEEDED(hr)) {
             ISpObjectToken* audioToken;
             ISpObjectTokenCategory* audioTokenCategory;
-            hr = CoCreateInstance(CLSID_SpObjectTokenCategory, NULL, CLSCTX_ALL, IID_ISpObjectTokenCategory, 
-                (void**)&audioTokenCategory);
+            hr = CoCreateInstance(CLSID_SpObjectTokenCategory, NULL, CLSCTX_ALL, IID_ISpObjectTokenCategory,
+                                  (void**)&audioTokenCategory);
             if (SUCCEEDED(hr)) {
                 hr = audioTokenCategory->SetId(SPCAT_AUDIOIN, TRUE);
             }
             if (SUCCEEDED(hr)) {
-                WCHAR * tokenID;
+                WCHAR* tokenID;
                 hr = audioTokenCategory->GetDefaultTokenId(&tokenID);
                 if (SUCCEEDED(hr)) {
                     hr = CoCreateInstance(CLSID_SpObjectToken, NULL, CLSCTX_ALL, IID_ISpObjectToken, (void**)&audioToken);
@@ -100,11 +98,10 @@ void SpeechRecognizer::setEnabled(bool enabled) {
             if (SUCCEEDED(hr)) {
                 hr = static_cast<ISpRecognizer*>(_speechRecognizer)->SetInput(audioToken, TRUE);
             }
-
         }
         if (SUCCEEDED(hr)) {
             hr = static_cast<ISpRecognizer*>(_speechRecognizer)
-                ->CreateRecoContext(reinterpret_cast<ISpRecoContext**>(&_speechRecognizerContext));
+                     ->CreateRecoContext(reinterpret_cast<ISpRecoContext**>(&_speechRecognizerContext));
             if (FAILED(hr)) {
                 static_cast<ISpRecognizer*>(_speechRecognizer)->Release();
             }
@@ -123,22 +120,22 @@ void SpeechRecognizer::setEnabled(bool enabled) {
                 hr = S_FALSE;
             }
         }
-        
+
         // Set which events to be notified of.
         if (SUCCEEDED(hr)) {
             hr = static_cast<ISpRecoContext*>(_speechRecognizerContext)
-                ->SetInterest(SPFEI(SPEI_RECOGNITION), SPFEI(SPEI_RECOGNITION));
+                     ->SetInterest(SPFEI(SPEI_RECOGNITION), SPFEI(SPEI_RECOGNITION));
         }
 
         // Create grammar and load commands.
         if (SUCCEEDED(hr)) {
             hr = static_cast<ISpRecoContext*>(_speechRecognizerContext)
-                ->CreateGrammar(NULL, reinterpret_cast<ISpRecoGrammar**>(&_speechRecognizerGrammar));
+                     ->CreateGrammar(NULL, reinterpret_cast<ISpRecoGrammar**>(&_speechRecognizerGrammar));
         }
         if (SUCCEEDED(hr)) {
             reloadCommands();
         }
-        
+
         _enabled = SUCCEEDED(hr);
 
         qCDebug(interfaceapp) << "Speech recognition" << (_enabled ? "enabled" : "enable failed");
@@ -185,14 +182,14 @@ void SpeechRecognizer::reloadCommands() {
         ruleID += 1;
 
         if (SUCCEEDED(hr)) {
-            hr = static_cast<ISpRecoGrammar*>(_speechRecognizerGrammar)->
-                GetRule(NULL, ruleID, SPRAF_TopLevel | SPRAF_Active | SPRAF_Dynamic, TRUE, &initialState);
+            hr = static_cast<ISpRecoGrammar*>(_speechRecognizerGrammar)
+                     ->GetRule(NULL, ruleID, SPRAF_TopLevel | SPRAF_Active | SPRAF_Dynamic, TRUE, &initialState);
         }
 
         if (SUCCEEDED(hr)) {
             const std::wstring command = (*iter).toStdWString();
-            hr = static_cast<ISpRecoGrammar*>(_speechRecognizerGrammar)->
-                AddWordTransition(initialState, NULL, command.c_str(), L" ", SPWT_LEXICAL, 1.0, NULL);
+            hr = static_cast<ISpRecoGrammar*>(_speechRecognizerGrammar)
+                     ->AddWordTransition(initialState, NULL, command.c_str(), L" ", SPWT_LEXICAL, 1.0, NULL);
         }
     }
 

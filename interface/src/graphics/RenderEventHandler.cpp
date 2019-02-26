@@ -9,21 +9,22 @@
 //
 #include "RenderEventHandler.h"
 
-#include "Application.h"
 #include <shared/GlobalAppProperties.h>
 #include <shared/QtHelpers.h>
+#include "Application.h"
 
 #include "CrashHandler.h"
 
 RenderEventHandler::RenderEventHandler(CheckCall checkCall, RenderCall renderCall) :
     _checkCall(checkCall),
-    _renderCall(renderCall)
-{
+    _renderCall(renderCall) {
     // Transfer to a new thread
-    moveToNewNamedThread(this, "RenderThread", [this](QThread* renderThread) {
-        hifi::qt::addBlockingForbiddenThread("Render", renderThread);
-        _lastTimeRendered.start();
-    }, std::bind(&RenderEventHandler::initialize, this), QThread::HighestPriority);
+    moveToNewNamedThread(this, "RenderThread",
+                         [this](QThread* renderThread) {
+                             hifi::qt::addBlockingForbiddenThread("Render", renderThread);
+                             _lastTimeRendered.start();
+                         },
+                         std::bind(&RenderEventHandler::initialize, this), QThread::HighestPriority);
 }
 
 void RenderEventHandler::initialize() {
@@ -45,14 +46,13 @@ void RenderEventHandler::render() {
 
 bool RenderEventHandler::event(QEvent* event) {
     switch ((int)event->type()) {
-    case ApplicationEvent::Render:
-        render();
-        _pendingRenderEvent.store(false);
-        return true;
+        case ApplicationEvent::Render:
+            render();
+            _pendingRenderEvent.store(false);
+            return true;
 
-    default:
-        break;
+        default:
+            break;
     }
     return Parent::event(event);
 }
-

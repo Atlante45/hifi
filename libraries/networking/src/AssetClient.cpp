@@ -16,8 +16,8 @@
 #include <QtCore/QBuffer>
 #include <QtCore/QStandardPaths>
 #include <QtCore/QThread>
-#include <QtScript/QScriptEngine>
 #include <QtNetwork/QNetworkDiskCache>
+#include <QtScript/QScriptEngine>
 
 #include <shared/GlobalAppProperties.h>
 #include <shared/MiniPromises.h>
@@ -36,9 +36,7 @@ MessageID AssetClient::_currentID = 0;
 
 AssetClient::AssetClient() {
     _cacheDir = qApp->property(hifi::properties::APP_LOCAL_DATA_PATH).toString();
-    setCustomDeleter([](Dependency* dependency){
-        static_cast<AssetClient*>(dependency)->deleteLater();
-    });
+    setCustomDeleter([](Dependency* dependency) { static_cast<AssetClient*>(dependency)->deleteLater(); });
 
     auto nodeList = DependencyManager::get<LimitedNodeList>();
     auto& packetReceiver = nodeList->getPacketReceiver();
@@ -49,8 +47,8 @@ AssetClient::AssetClient() {
     packetReceiver.registerListener(PacketType::AssetUploadReply, this, "handleAssetUploadReply");
 
     connect(nodeList.data(), &LimitedNodeList::nodeKilled, this, &AssetClient::handleNodeKilled);
-    connect(nodeList.data(), &LimitedNodeList::clientConnectionToNodeReset,
-            this, &AssetClient::handleNodeClientConnectionReset);
+    connect(nodeList.data(), &LimitedNodeList::clientConnectionToNodeReset, this,
+            &AssetClient::handleNodeClientConnectionReset);
 }
 
 void AssetClient::initCaching() {
@@ -71,18 +69,17 @@ void AssetClient::initCaching() {
         cache->setMaximumCacheSize(MAXIMUM_CACHE_SIZE);
         cache->setCacheDirectory(_cacheDir);
         networkAccessManager.setCache(cache);
-        qInfo() << "ResourceManager disk cache setup at" << _cacheDir
-                 << "(size:" << MAXIMUM_CACHE_SIZE / BYTES_PER_GIGABYTES << "GB)";
+        qInfo() << "ResourceManager disk cache setup at" << _cacheDir << "(size:" << MAXIMUM_CACHE_SIZE / BYTES_PER_GIGABYTES
+                << "GB)";
     } else {
         auto cache = qobject_cast<QNetworkDiskCache*>(networkAccessManager.cache());
         qInfo() << "ResourceManager disk cache already setup at" << cache->cacheDirectory()
                 << "(size:" << cache->maximumCacheSize() / BYTES_PER_GIGABYTES << "GB)";
     }
-
 }
 
 namespace {
-    const QString& CACHE_ERROR_MESSAGE{ "AssetClient::Error: %1 %2" };
+const QString& CACHE_ERROR_MESSAGE { "AssetClient::Error: %1 %2" };
 }
 
 MiniPromise::Promise AssetClient::cacheInfoRequestAsync(MiniPromise::Promise deferred) {
@@ -116,13 +113,13 @@ MiniPromise::Promise AssetClient::queryCacheMetaAsync(const QUrl& url, MiniPromi
             QVariantMap attributes, rawHeaders;
             if (!metaData.isValid()) {
                 deferred->reject("invalid cache entry", {
-                    { "_url", url },
-                    { "isValid", metaData.isValid() },
-                    { "metaDataURL", metaData.url() },
-                });
+                                                            { "_url", url },
+                                                            { "isValid", metaData.isValid() },
+                                                            { "metaDataURL", metaData.url() },
+                                                        });
             } else {
                 auto metaAttributes = metaData.attributes();
-                foreach(QNetworkRequest::Attribute k, metaAttributes.keys()) {
+                foreach (QNetworkRequest::Attribute k, metaAttributes.keys()) {
                     attributes[QString::number(k)] = metaAttributes[k];
                 }
                 for (const auto& i : metaData.rawHeaders()) {
@@ -178,41 +175,39 @@ MiniPromise::Promise AssetClient::loadFromCacheAsync(const QUrl& url, MiniPromis
                 deferred->handle(error, result);
             });
         } else {
-           deferred->reject(errorMessage.arg("cache unavailable"));
+            deferred->reject(errorMessage.arg("cache unavailable"));
         }
     }
     return deferred;
 }
 
 namespace {
-    // parse RFC 1123 HTTP date format
-    QDateTime parseHttpDate(const QString& dateString) {
-        QDateTime dt = QDateTime::fromString(dateString.left(25), "ddd, dd MMM yyyy HH:mm:ss");
-        if (!dt.isValid()) {
-            dt = QDateTime::fromString(dateString, Qt::ISODateWithMs);
-        }
-        if (!dt.isValid()) {
-            qDebug() << __FUNCTION__ << "unrecognized date format:" << dateString;
-        }
-        dt.setTimeSpec(Qt::UTC);
-        return dt;
+// parse RFC 1123 HTTP date format
+QDateTime parseHttpDate(const QString& dateString) {
+    QDateTime dt = QDateTime::fromString(dateString.left(25), "ddd, dd MMM yyyy HH:mm:ss");
+    if (!dt.isValid()) {
+        dt = QDateTime::fromString(dateString, Qt::ISODateWithMs);
     }
-    QDateTime getHttpDateValue(const QVariantMap& headers, const QString& keyName, const QDateTime& defaultValue) {
-        return headers.contains(keyName) ? parseHttpDate(headers[keyName].toString()) : defaultValue;
+    if (!dt.isValid()) {
+        qDebug() << __FUNCTION__ << "unrecognized date format:" << dateString;
     }
+    dt.setTimeSpec(Qt::UTC);
+    return dt;
 }
+QDateTime getHttpDateValue(const QVariantMap& headers, const QString& keyName, const QDateTime& defaultValue) {
+    return headers.contains(keyName) ? parseHttpDate(headers[keyName].toString()) : defaultValue;
+}
+} // namespace
 
-MiniPromise::Promise AssetClient::saveToCacheAsync(const QUrl& url, const QByteArray& data, const QVariantMap& headers, MiniPromise::Promise deferred) {
+MiniPromise::Promise AssetClient::saveToCacheAsync(const QUrl& url, const QByteArray& data, const QVariantMap& headers,
+                                                   MiniPromise::Promise deferred) {
     if (!deferred) {
         deferred = makePromise(__FUNCTION__); // create on caller's thread
     }
     if (QThread::currentThread() != thread()) {
-        QMetaObject::invokeMethod(
-            this, "saveToCacheAsync", Qt::QueuedConnection,
-            Q_ARG(const QUrl&, url),
-            Q_ARG(const QByteArray&, data),
-            Q_ARG(const QVariantMap&, headers),
-            Q_ARG(MiniPromise::Promise, deferred));
+        QMetaObject::invokeMethod(this, "saveToCacheAsync", Qt::QueuedConnection, Q_ARG(const QUrl&, url),
+                                  Q_ARG(const QByteArray&, data), Q_ARG(const QVariantMap&, headers),
+                                  Q_ARG(MiniPromise::Promise, deferred));
     } else {
         auto cache = NetworkAccessManager::getInstance().cache();
         if (cache) {
@@ -247,16 +242,14 @@ MiniPromise::Promise AssetClient::saveToCacheAsync(const QUrl& url, const QByteA
 
 void AssetClient::cacheInfoRequest(QObject* reciever, QString slot) {
     if (QThread::currentThread() != thread()) {
-        QMetaObject::invokeMethod(this, "cacheInfoRequest", Qt::QueuedConnection,
-                                  Q_ARG(QObject*, reciever), Q_ARG(QString, slot));
+        QMetaObject::invokeMethod(this, "cacheInfoRequest", Qt::QueuedConnection, Q_ARG(QObject*, reciever),
+                                  Q_ARG(QString, slot));
         return;
     }
 
-
     if (auto* cache = qobject_cast<QNetworkDiskCache*>(NetworkAccessManager::getInstance().cache())) {
         QMetaObject::invokeMethod(reciever, slot.toStdString().data(), Qt::QueuedConnection,
-                                  Q_ARG(QString, cache->cacheDirectory()),
-                                  Q_ARG(qint64, cache->cacheSize()),
+                                  Q_ARG(QString, cache->cacheDirectory()), Q_ARG(qint64, cache->cacheSize()),
                                   Q_ARG(qint64, cache->maximumCacheSize()));
     } else {
         qCWarning(asset_client) << "No disk cache to get info from.";
@@ -289,7 +282,6 @@ void AssetClient::handleAssetMappingOperationReply(QSharedPointer<ReceivedMessag
     // Check if we have any pending requests for this node
     auto messageMapIt = _pendingMappingRequests.find(senderNode);
     if (messageMapIt != _pendingMappingRequests.end()) {
-
         // Found the node, get the MessageID -> Callback map
         auto& messageCallbackMap = messageMapIt->second;
 
@@ -312,7 +304,7 @@ bool haveAssetServer() {
 
     if (!assetServer) {
         qCWarning(asset_client) << "Could not complete AssetClient operation "
-            << "since you are not currently connected to an asset-server.";
+                                << "since you are not currently connected to an asset-server.";
         return false;
     }
 
@@ -351,7 +343,8 @@ SetMappingRequest* AssetClient::createSetMappingRequest(const AssetUtils::AssetP
     return request;
 }
 
-RenameMappingRequest* AssetClient::createRenameMappingRequest(const AssetUtils::AssetPath& oldPath, const AssetUtils::AssetPath& newPath) {
+RenameMappingRequest* AssetClient::createRenameMappingRequest(const AssetUtils::AssetPath& oldPath,
+                                                              const AssetUtils::AssetPath& newPath) {
     auto request = new RenameMappingRequest(oldPath, newPath);
 
     request->moveToThread(thread());
@@ -405,7 +398,6 @@ MessageID AssetClient::getAsset(const QString& hash, AssetUtils::DataOffset star
     SharedNodePointer assetServer = nodeList->soloNodeOfType(NodeType::AssetServer);
 
     if (assetServer) {
-
         auto messageID = ++_currentID;
 
         auto payloadSize = sizeof(messageID) + AssetUtils::SHA256_HASH_LENGTH + sizeof(start) + sizeof(end);
@@ -476,7 +468,6 @@ void AssetClient::handleAssetGetInfoReply(QSharedPointer<ReceivedMessage> messag
     // Check if we have any pending requests for this node
     auto messageMapIt = _pendingInfoRequests.find(senderNode);
     if (messageMapIt != _pendingInfoRequests.end()) {
-
         // Found the node, get the MessageID -> Callback map
         auto& messageCallbackMap = messageMapIt->second;
 
@@ -534,14 +525,11 @@ void AssetClient::handleAssetGetReply(QSharedPointer<ReceivedMessage> message, S
     // Store message in case we need to disconnect from it later.
     callbacks.message = message;
 
-
     auto weakNode = senderNode.toWeakRef();
-    connect(message.data(), &ReceivedMessage::progress, this, [this, weakNode, messageID, length](qint64 size) {
-        handleProgressCallback(weakNode, messageID, size, length);
-    });
-    connect(message.data(), &ReceivedMessage::completed, this, [this, weakNode, messageID, length]() {
-        handleCompleteCallback(weakNode, messageID, length);
-    });
+    connect(message.data(), &ReceivedMessage::progress, this,
+            [this, weakNode, messageID, length](qint64 size) { handleProgressCallback(weakNode, messageID, size, length); });
+    connect(message.data(), &ReceivedMessage::completed, this,
+            [this, weakNode, messageID, length]() { handleCompleteCallback(weakNode, messageID, length); });
 
     if (message->isComplete()) {
         disconnect(message.data(), nullptr, this, nullptr);
@@ -552,13 +540,12 @@ void AssetClient::handleAssetGetReply(QSharedPointer<ReceivedMessage> message, S
             callbacks.completeCallback(true, error, message->readAll());
         }
 
-
         messageCallbackMap.erase(requestIt);
     }
 }
 
-void AssetClient::handleProgressCallback(const QWeakPointer<Node>& node, MessageID messageID,
-                                         qint64 size, AssetUtils::DataOffset length) {
+void AssetClient::handleProgressCallback(const QWeakPointer<Node>& node, MessageID messageID, qint64 size,
+                                         AssetUtils::DataOffset length) {
     auto senderNode = node.toStrongRef();
 
     if (!senderNode) {
@@ -630,7 +617,6 @@ void AssetClient::handleCompleteCallback(const QWeakPointer<Node>& node, Message
     messageCallbackMap.erase(messageID);
 }
 
-
 MessageID AssetClient::getAssetMapping(const AssetUtils::AssetPath& path, MappingOperationCallback callback) {
     Q_ASSERT(QThread::currentThread() == thread());
 
@@ -697,7 +683,7 @@ MessageID AssetClient::deleteAssetMappings(const AssetUtils::AssetPathList& path
 
         packetList->writePrimitive(int(paths.size()));
 
-        for (auto& path: paths) {
+        for (auto& path : paths) {
             packetList->writeString(path);
         }
 
@@ -712,7 +698,8 @@ MessageID AssetClient::deleteAssetMappings(const AssetUtils::AssetPathList& path
     return INVALID_MESSAGE_ID;
 }
 
-MessageID AssetClient::setAssetMapping(const QString& path, const AssetUtils::AssetHash& hash, MappingOperationCallback callback) {
+MessageID AssetClient::setAssetMapping(const QString& path, const AssetUtils::AssetHash& hash,
+                                       MappingOperationCallback callback) {
     Q_ASSERT(QThread::currentThread() == thread());
 
     auto nodeList = DependencyManager::get<LimitedNodeList>();
@@ -740,7 +727,8 @@ MessageID AssetClient::setAssetMapping(const QString& path, const AssetUtils::As
     return INVALID_MESSAGE_ID;
 }
 
-MessageID AssetClient::renameAssetMapping(const AssetUtils::AssetPath& oldPath, const AssetUtils::AssetPath& newPath, MappingOperationCallback callback) {
+MessageID AssetClient::renameAssetMapping(const AssetUtils::AssetPath& oldPath, const AssetUtils::AssetPath& newPath,
+                                          MappingOperationCallback callback) {
     auto nodeList = DependencyManager::get<LimitedNodeList>();
     SharedNodePointer assetServer = nodeList->soloNodeOfType(NodeType::AssetServer);
 
@@ -759,7 +747,6 @@ MessageID AssetClient::renameAssetMapping(const AssetUtils::AssetPath& oldPath, 
             _pendingMappingRequests[assetServer][messageID] = callback;
 
             return messageID;
-
         }
     }
 
@@ -767,7 +754,8 @@ MessageID AssetClient::renameAssetMapping(const AssetUtils::AssetPath& oldPath, 
     return INVALID_MESSAGE_ID;
 }
 
-MessageID AssetClient::setBakingEnabled(const AssetUtils::AssetPathList& paths, bool enabled, MappingOperationCallback callback) {
+MessageID AssetClient::setBakingEnabled(const AssetUtils::AssetPathList& paths, bool enabled,
+                                        MappingOperationCallback callback) {
     auto nodeList = DependencyManager::get<LimitedNodeList>();
     SharedNodePointer assetServer = nodeList->soloNodeOfType(NodeType::AssetServer);
 
@@ -828,7 +816,6 @@ bool AssetClient::cancelGetAssetRequest(MessageID id) {
         auto& messageCallbackMap = kv.second;
         auto requestIt = messageCallbackMap.find(id);
         if (requestIt != messageCallbackMap.end()) {
-
             auto& message = requestIt->second.message;
             if (message) {
                 // disconnect from all signals emitting from the pending message
@@ -905,7 +892,6 @@ void AssetClient::handleAssetUploadReply(QSharedPointer<ReceivedMessage> message
     // Check if we have any pending requests for this node
     auto messageMapIt = _pendingUploads.find(senderNode);
     if (messageMapIt != _pendingUploads.end()) {
-
         // Found the node, get the MessageID -> Callback map
         auto& messageCallbackMap = messageMapIt->second;
 
@@ -950,13 +936,13 @@ void AssetClient::handleNodeClientConnectionReset(SharedNodePointer node) {
         return;
     }
 
-    qCDebug(asset_client) << "AssetClient detected client connection reset handshake with Asset Server - failing any pending requests";
+    qCDebug(asset_client)
+        << "AssetClient detected client connection reset handshake with Asset Server - failing any pending requests";
 
     forceFailureOfPendingRequests(node);
 }
 
 void AssetClient::forceFailureOfPendingRequests(SharedNodePointer node) {
-
     {
         auto messageMapIt = _pendingRequests.find(node);
         if (messageMapIt != _pendingRequests.end()) {

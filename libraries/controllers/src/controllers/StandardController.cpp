@@ -18,8 +18,8 @@
 
 namespace controller {
 
-StandardController::StandardController() : InputDevice("Standard") { 
-    _deviceID = UserInputMapper::STANDARD_DEVICE; 
+StandardController::StandardController() : InputDevice("Standard") {
+    _deviceID = UserInputMapper::STANDARD_DEVICE;
 }
 
 void StandardController::focusOutEvent() {
@@ -28,9 +28,9 @@ void StandardController::focusOutEvent() {
 };
 
 /**jsdoc
- * <p>The <code>Controller.Standard</code> object has properties representing standard controller outputs. Those for physical 
- * controllers are based on the XBox controller, with aliases for PlayStation. The property values are integer IDs, uniquely 
- * identifying each output. <em>Read-only.</em> These can be mapped to actions or functions in a {@link RouteObject} 
+ * <p>The <code>Controller.Standard</code> object has properties representing standard controller outputs. Those for physical
+ * controllers are based on the XBox controller, with aliases for PlayStation. The property values are integer IDs, uniquely
+ * identifying each output. <em>Read-only.</em> These can be mapped to actions or functions in a {@link RouteObject}
  * mapping.</p>
  *
  * <p>The data value provided by each control is either a number or a {@link Pose}. Numbers are typically normalized to
@@ -107,39 +107,39 @@ void StandardController::focusOutEvent() {
  *       </td></tr>
  *     <tr><td><code>RightSecondaryThumb</code></td><td>number</td><td>number</td><td>Right secondary thumb button pressed.
  *       </td></tr>
- *     <tr><td><code>LeftPrimaryThumbTouch</code></td><td>number</td><td>number</td><td>Left thumb touching primary thumb 
+ *     <tr><td><code>LeftPrimaryThumbTouch</code></td><td>number</td><td>number</td><td>Left thumb touching primary thumb
  *       button.</td></tr>
- *     <tr><td><code>LeftSecondaryThumbTouch</code></td><td>number</td><td>number</td><td>Left thumb touching secondary thumb 
+ *     <tr><td><code>LeftSecondaryThumbTouch</code></td><td>number</td><td>number</td><td>Left thumb touching secondary thumb
  *       button.</td></tr>
- *     <tr><td><code>LeftThumbUp</code></td><td>number</td><td>number</td><td>Left thumb not touching primary or secondary 
+ *     <tr><td><code>LeftThumbUp</code></td><td>number</td><td>number</td><td>Left thumb not touching primary or secondary
  *       thumb buttons.</td></tr>
- *     <tr><td><code>RightPrimaryThumbTouch</code></td><td>number</td><td>number</td><td>Right thumb touching primary thumb 
+ *     <tr><td><code>RightPrimaryThumbTouch</code></td><td>number</td><td>number</td><td>Right thumb touching primary thumb
  *       button.</td></tr>
- *     <tr><td><code>RightSecondaryThumbTouch</code></td><td>number</td><td>number</td><td>Right thumb touching secondary thumb 
+ *     <tr><td><code>RightSecondaryThumbTouch</code></td><td>number</td><td>number</td><td>Right thumb touching secondary thumb
  *       button.</td></tr>
- *     <tr><td><code>RightThumbUp</code></td><td>number</td><td>number</td><td>Right thumb not touching primary or secondary 
+ *     <tr><td><code>RightThumbUp</code></td><td>number</td><td>number</td><td>Right thumb not touching primary or secondary
  *       thumb buttons.</td></tr>
- *     <tr><td><code>LeftPrimaryIndex</code></td><td>number</td><td>number</td><td>Left primary index control pressed. 
+ *     <tr><td><code>LeftPrimaryIndex</code></td><td>number</td><td>number</td><td>Left primary index control pressed.
  *       <strong>To Do:</strong> <em>Implement this for current controllers.</em></td></tr>
  *     <tr><td><code>LeftSecondaryIndex</code></td><td>number</td><td>number</td><td>Left secondary index control pressed.
  *       </td></tr>
- *     <tr><td><code>RightPrimaryIndex</code></td><td>number</td><td>number</td><td>Right primary index control pressed. 
+ *     <tr><td><code>RightPrimaryIndex</code></td><td>number</td><td>number</td><td>Right primary index control pressed.
  *       <strong>To Do:</strong> <em>Implement this for current controllers.</em></td></tr>
  *     <tr><td><code>RightSecondaryIndex</code></td><td>number</td><td>number</td><td>Right secondary index control pressed.
  *       </td></tr>
- *     <tr><td><code>LeftPrimaryIndexTouch</code></td><td>number</td><td>number</td><td>Left index finger is touching primary 
+ *     <tr><td><code>LeftPrimaryIndexTouch</code></td><td>number</td><td>number</td><td>Left index finger is touching primary
  *       index finger control.</td></tr>
- *     <tr><td><code>LeftSecondaryIndexTouch</code></td><td>number</td><td>number</td><td>Left index finger is touching 
+ *     <tr><td><code>LeftSecondaryIndexTouch</code></td><td>number</td><td>number</td><td>Left index finger is touching
  *       secondary index finger control.</td></tr>
- *     <tr><td><code>LeftIndexPoint</code></td><td>number</td><td>number</td><td>Left index finger is pointing, not touching 
+ *     <tr><td><code>LeftIndexPoint</code></td><td>number</td><td>number</td><td>Left index finger is pointing, not touching
  *       primary or secondary index finger controls.</td></tr>
- *     <tr><td><code>RightPrimaryIndexTouch</code></td><td>number</td><td>number</td><td>Right index finger is touching primary 
+ *     <tr><td><code>RightPrimaryIndexTouch</code></td><td>number</td><td>number</td><td>Right index finger is touching primary
  *       index finger control.</td></tr>
- *     <tr><td><code>RightSecondaryIndexTouch</code></td><td>number</td><td>number</td><td>Right index finger is touching 
+ *     <tr><td><code>RightSecondaryIndexTouch</code></td><td>number</td><td>number</td><td>Right index finger is touching
  *       secondary index finger control.</td></tr>
- *     <tr><td><code>RightIndexPoint</code></td><td>number</td><td>number</td><td>Right index finger is pointing, not touching 
+ *     <tr><td><code>RightIndexPoint</code></td><td>number</td><td>number</td><td>Right index finger is pointing, not touching
  *       primary or secondary index finger controls.</td></tr>
- * 
+ *
  *     <tr><td colspan="4"><strong>Avatar Skeleton</strong></td></tr>
  *     <tr><td><code>Hips</code></td><td>number</td><td>{@link Pose}</td><td>Hips pose.</td></tr>
  *     <tr><td><code>Spine2</code></td><td>number</td><td>{@link Pose}</td><td>Spine2 pose.</td></tr>
@@ -236,159 +236,89 @@ void StandardController::focusOutEvent() {
 Input::NamedVector StandardController::getAvailableInputs() const {
     static Input::NamedVector availableInputs {
         // Buttons
-        makePair(A, "A"),
-        makePair(B, "B"),
-        makePair(X, "X"),
-        makePair(Y, "Y"),
+        makePair(A, "A"), makePair(B, "B"), makePair(X, "X"), makePair(Y, "Y"),
 
         // DPad
-        makePair(DU, "DU"),
-        makePair(DD, "DD"),
-        makePair(DL, "DL"),
-        makePair(DR, "DR"),
+        makePair(DU, "DU"), makePair(DD, "DD"), makePair(DL, "DL"), makePair(DR, "DR"),
 
         // Bumpers
-        makePair(LB, "LB"),
-        makePair(RB, "RB"),
+        makePair(LB, "LB"), makePair(RB, "RB"),
 
         // Stick press
-        makePair(LS, "LS"),
-        makePair(RS, "RS"),
+        makePair(LS, "LS"), makePair(RS, "RS"),
 
-        makePair(LS_TOUCH, "LSTouch"),
-        makePair(RS_TOUCH, "RSTouch"),
+        makePair(LS_TOUCH, "LSTouch"), makePair(RS_TOUCH, "RSTouch"),
 
         // Center buttons
-        makePair(START, "Start"),
-        makePair(BACK, "Back"),
+        makePair(START, "Start"), makePair(BACK, "Back"),
 
         // Analog sticks
-        makePair(LY, "LY"),
-        makePair(LX, "LX"),
-        makePair(RY, "RY"),
-        makePair(RX, "RX"),
+        makePair(LY, "LY"), makePair(LX, "LX"), makePair(RY, "RY"), makePair(RX, "RX"),
 
         // Triggers
-        makePair(LT, "LT"),
-        makePair(RT, "RT"),
-        makePair(LT_CLICK, "LTClick"),
-        makePair(RT_CLICK, "RTClick"),
+        makePair(LT, "LT"), makePair(RT, "RT"), makePair(LT_CLICK, "LTClick"), makePair(RT_CLICK, "RTClick"),
 
         // Finger abstractions
-        makePair(LEFT_PRIMARY_THUMB, "LeftPrimaryThumb"),
-        makePair(LEFT_SECONDARY_THUMB, "LeftSecondaryThumb"),
-        makePair(LEFT_THUMB_UP, "LeftThumbUp"),
-        makePair(RIGHT_PRIMARY_THUMB, "RightPrimaryThumb"),
-        makePair(RIGHT_SECONDARY_THUMB, "RightSecondaryThumb"),
-        makePair(RIGHT_THUMB_UP, "RightThumbUp"),
+        makePair(LEFT_PRIMARY_THUMB, "LeftPrimaryThumb"), makePair(LEFT_SECONDARY_THUMB, "LeftSecondaryThumb"),
+        makePair(LEFT_THUMB_UP, "LeftThumbUp"), makePair(RIGHT_PRIMARY_THUMB, "RightPrimaryThumb"),
+        makePair(RIGHT_SECONDARY_THUMB, "RightSecondaryThumb"), makePair(RIGHT_THUMB_UP, "RightThumbUp"),
 
         makePair(LEFT_PRIMARY_THUMB_TOUCH, "LeftPrimaryThumbTouch"),
         makePair(LEFT_SECONDARY_THUMB_TOUCH, "LeftSecondaryThumbTouch"),
         makePair(RIGHT_PRIMARY_THUMB_TOUCH, "RightPrimaryThumbTouch"),
         makePair(RIGHT_SECONDARY_THUMB_TOUCH, "RightSecondaryThumbTouch"),
 
-        makePair(LEFT_INDEX_POINT, "LeftIndexPoint"),
-        makePair(RIGHT_INDEX_POINT, "RightIndexPoint"),
+        makePair(LEFT_INDEX_POINT, "LeftIndexPoint"), makePair(RIGHT_INDEX_POINT, "RightIndexPoint"),
 
-        makePair(LEFT_PRIMARY_INDEX, "LeftPrimaryIndex"),
-        makePair(LEFT_SECONDARY_INDEX, "LeftSecondaryIndex"),
-        makePair(RIGHT_PRIMARY_INDEX, "RightPrimaryIndex"),
-        makePair(RIGHT_SECONDARY_INDEX, "RightSecondaryIndex"),
+        makePair(LEFT_PRIMARY_INDEX, "LeftPrimaryIndex"), makePair(LEFT_SECONDARY_INDEX, "LeftSecondaryIndex"),
+        makePair(RIGHT_PRIMARY_INDEX, "RightPrimaryIndex"), makePair(RIGHT_SECONDARY_INDEX, "RightSecondaryIndex"),
 
         makePair(LEFT_PRIMARY_INDEX_TOUCH, "LeftPrimaryIndexTouch"),
         makePair(LEFT_SECONDARY_INDEX_TOUCH, "LeftSecondaryIndexTouch"),
         makePair(RIGHT_PRIMARY_INDEX_TOUCH, "RightPrimaryIndexTouch"),
         makePair(RIGHT_SECONDARY_INDEX_TOUCH, "RightSecondaryIndexTouch"),
 
-        makePair(LEFT_GRIP, "LeftGrip"),
-        makePair(LEFT_GRIP_TOUCH, "LeftGripTouch"),
-        makePair(RIGHT_GRIP, "RightGrip"),
+        makePair(LEFT_GRIP, "LeftGrip"), makePair(LEFT_GRIP_TOUCH, "LeftGripTouch"), makePair(RIGHT_GRIP, "RightGrip"),
         makePair(RIGHT_GRIP_TOUCH, "RightGripTouch"),
 
         // Poses
-        makePair(LEFT_HAND, "LeftHand"),
-        makePair(LEFT_HAND_THUMB1, "LeftHandThumb1"),
-        makePair(LEFT_HAND_THUMB2, "LeftHandThumb2"),
-        makePair(LEFT_HAND_THUMB3, "LeftHandThumb3"),
-        makePair(LEFT_HAND_THUMB4, "LeftHandThumb4"),
-        makePair(LEFT_HAND_INDEX1, "LeftHandIndex1"),
-        makePair(LEFT_HAND_INDEX2, "LeftHandIndex2"),
-        makePair(LEFT_HAND_INDEX3, "LeftHandIndex3"),
-        makePair(LEFT_HAND_INDEX4, "LeftHandIndex4"),
-        makePair(LEFT_HAND_MIDDLE1, "LeftHandMiddle1"),
-        makePair(LEFT_HAND_MIDDLE2, "LeftHandMiddle2"),
-        makePair(LEFT_HAND_MIDDLE3, "LeftHandMiddle3"),
-        makePair(LEFT_HAND_MIDDLE4, "LeftHandMiddle4"),
-        makePair(LEFT_HAND_RING1, "LeftHandRing1"),
-        makePair(LEFT_HAND_RING2, "LeftHandRing2"),
-        makePair(LEFT_HAND_RING3, "LeftHandRing3"),
-        makePair(LEFT_HAND_RING4, "LeftHandRing4"),
-        makePair(LEFT_HAND_PINKY1, "LeftHandPinky1"),
-        makePair(LEFT_HAND_PINKY2, "LeftHandPinky2"),
-        makePair(LEFT_HAND_PINKY3, "LeftHandPinky3"),
-        makePair(LEFT_HAND_PINKY4, "LeftHandPinky4"),
-        makePair(RIGHT_HAND, "RightHand"),
-        makePair(RIGHT_HAND_THUMB1, "RightHandThumb1"),
-        makePair(RIGHT_HAND_THUMB2, "RightHandThumb2"),
-        makePair(RIGHT_HAND_THUMB3, "RightHandThumb3"),
-        makePair(RIGHT_HAND_THUMB4, "RightHandThumb4"),
-        makePair(RIGHT_HAND_INDEX1, "RightHandIndex1"),
-        makePair(RIGHT_HAND_INDEX2, "RightHandIndex2"),
-        makePair(RIGHT_HAND_INDEX3, "RightHandIndex3"),
-        makePair(RIGHT_HAND_INDEX4, "RightHandIndex4"),
-        makePair(RIGHT_HAND_MIDDLE1, "RightHandMiddle1"),
-        makePair(RIGHT_HAND_MIDDLE2, "RightHandMiddle2"),
-        makePair(RIGHT_HAND_MIDDLE3, "RightHandMiddle3"),
-        makePair(RIGHT_HAND_MIDDLE4, "RightHandMiddle4"),
-        makePair(RIGHT_HAND_RING1, "RightHandRing1"),
-        makePair(RIGHT_HAND_RING2, "RightHandRing2"),
-        makePair(RIGHT_HAND_RING3, "RightHandRing3"),
-        makePair(RIGHT_HAND_RING4, "RightHandRing4"),
-        makePair(RIGHT_HAND_PINKY1, "RightHandPinky1"),
-        makePair(RIGHT_HAND_PINKY2, "RightHandPinky2"),
-        makePair(RIGHT_HAND_PINKY3, "RightHandPinky3"),
-        makePair(RIGHT_HAND_PINKY4, "RightHandPinky4"),
-        makePair(LEFT_FOOT, "LeftFoot"),
-        makePair(RIGHT_FOOT, "RightFoot"),
-        makePair(RIGHT_ARM, "RightArm"),
-        makePair(LEFT_ARM, "LeftArm"),
-        makePair(HIPS, "Hips"),
-        makePair(SPINE2, "Spine2"),
-        makePair(HEAD, "Head"),
+        makePair(LEFT_HAND, "LeftHand"), makePair(LEFT_HAND_THUMB1, "LeftHandThumb1"),
+        makePair(LEFT_HAND_THUMB2, "LeftHandThumb2"), makePair(LEFT_HAND_THUMB3, "LeftHandThumb3"),
+        makePair(LEFT_HAND_THUMB4, "LeftHandThumb4"), makePair(LEFT_HAND_INDEX1, "LeftHandIndex1"),
+        makePair(LEFT_HAND_INDEX2, "LeftHandIndex2"), makePair(LEFT_HAND_INDEX3, "LeftHandIndex3"),
+        makePair(LEFT_HAND_INDEX4, "LeftHandIndex4"), makePair(LEFT_HAND_MIDDLE1, "LeftHandMiddle1"),
+        makePair(LEFT_HAND_MIDDLE2, "LeftHandMiddle2"), makePair(LEFT_HAND_MIDDLE3, "LeftHandMiddle3"),
+        makePair(LEFT_HAND_MIDDLE4, "LeftHandMiddle4"), makePair(LEFT_HAND_RING1, "LeftHandRing1"),
+        makePair(LEFT_HAND_RING2, "LeftHandRing2"), makePair(LEFT_HAND_RING3, "LeftHandRing3"),
+        makePair(LEFT_HAND_RING4, "LeftHandRing4"), makePair(LEFT_HAND_PINKY1, "LeftHandPinky1"),
+        makePair(LEFT_HAND_PINKY2, "LeftHandPinky2"), makePair(LEFT_HAND_PINKY3, "LeftHandPinky3"),
+        makePair(LEFT_HAND_PINKY4, "LeftHandPinky4"), makePair(RIGHT_HAND, "RightHand"),
+        makePair(RIGHT_HAND_THUMB1, "RightHandThumb1"), makePair(RIGHT_HAND_THUMB2, "RightHandThumb2"),
+        makePair(RIGHT_HAND_THUMB3, "RightHandThumb3"), makePair(RIGHT_HAND_THUMB4, "RightHandThumb4"),
+        makePair(RIGHT_HAND_INDEX1, "RightHandIndex1"), makePair(RIGHT_HAND_INDEX2, "RightHandIndex2"),
+        makePair(RIGHT_HAND_INDEX3, "RightHandIndex3"), makePair(RIGHT_HAND_INDEX4, "RightHandIndex4"),
+        makePair(RIGHT_HAND_MIDDLE1, "RightHandMiddle1"), makePair(RIGHT_HAND_MIDDLE2, "RightHandMiddle2"),
+        makePair(RIGHT_HAND_MIDDLE3, "RightHandMiddle3"), makePair(RIGHT_HAND_MIDDLE4, "RightHandMiddle4"),
+        makePair(RIGHT_HAND_RING1, "RightHandRing1"), makePair(RIGHT_HAND_RING2, "RightHandRing2"),
+        makePair(RIGHT_HAND_RING3, "RightHandRing3"), makePair(RIGHT_HAND_RING4, "RightHandRing4"),
+        makePair(RIGHT_HAND_PINKY1, "RightHandPinky1"), makePair(RIGHT_HAND_PINKY2, "RightHandPinky2"),
+        makePair(RIGHT_HAND_PINKY3, "RightHandPinky3"), makePair(RIGHT_HAND_PINKY4, "RightHandPinky4"),
+        makePair(LEFT_FOOT, "LeftFoot"), makePair(RIGHT_FOOT, "RightFoot"), makePair(RIGHT_ARM, "RightArm"),
+        makePair(LEFT_ARM, "LeftArm"), makePair(HIPS, "Hips"), makePair(SPINE2, "Spine2"), makePair(HEAD, "Head"),
 
         // Aliases, PlayStation style names
-        makePair(LB, "L1"),
-        makePair(RB, "R1"),
-        makePair(LT, "L2"),
-        makePair(RT, "R2"),
-        makePair(LS, "L3"),
-        makePair(RS, "R3"),
-        makePair(BACK, "Select"),
-        makePair(A, "Cross"),
-        makePair(B, "Circle"),
-        makePair(X, "Square"),
-        makePair(Y, "Triangle"),
-        makePair(DU, "Up"),
-        makePair(DD, "Down"),
-        makePair(DL, "Left"),
-        makePair(DR, "Right"),
+        makePair(LB, "L1"), makePair(RB, "R1"), makePair(LT, "L2"), makePair(RT, "R2"), makePair(LS, "L3"), makePair(RS, "R3"),
+        makePair(BACK, "Select"), makePair(A, "Cross"), makePair(B, "Circle"), makePair(X, "Square"), makePair(Y, "Triangle"),
+        makePair(DU, "Up"), makePair(DD, "Down"), makePair(DL, "Left"), makePair(DR, "Right"),
 
-        makePair(TRACKED_OBJECT_00, "TrackedObject00"),
-        makePair(TRACKED_OBJECT_01, "TrackedObject01"),
-        makePair(TRACKED_OBJECT_02, "TrackedObject02"),
-        makePair(TRACKED_OBJECT_03, "TrackedObject03"),
-        makePair(TRACKED_OBJECT_04, "TrackedObject04"),
-        makePair(TRACKED_OBJECT_05, "TrackedObject05"),
-        makePair(TRACKED_OBJECT_06, "TrackedObject06"),
-        makePair(TRACKED_OBJECT_07, "TrackedObject07"),
-        makePair(TRACKED_OBJECT_08, "TrackedObject08"),
-        makePair(TRACKED_OBJECT_09, "TrackedObject09"),
-        makePair(TRACKED_OBJECT_10, "TrackedObject10"),
-        makePair(TRACKED_OBJECT_11, "TrackedObject11"),
-        makePair(TRACKED_OBJECT_12, "TrackedObject12"),
-        makePair(TRACKED_OBJECT_13, "TrackedObject13"),
-        makePair(TRACKED_OBJECT_14, "TrackedObject14"),
-        makePair(TRACKED_OBJECT_15, "TrackedObject15")
+        makePair(TRACKED_OBJECT_00, "TrackedObject00"), makePair(TRACKED_OBJECT_01, "TrackedObject01"),
+        makePair(TRACKED_OBJECT_02, "TrackedObject02"), makePair(TRACKED_OBJECT_03, "TrackedObject03"),
+        makePair(TRACKED_OBJECT_04, "TrackedObject04"), makePair(TRACKED_OBJECT_05, "TrackedObject05"),
+        makePair(TRACKED_OBJECT_06, "TrackedObject06"), makePair(TRACKED_OBJECT_07, "TrackedObject07"),
+        makePair(TRACKED_OBJECT_08, "TrackedObject08"), makePair(TRACKED_OBJECT_09, "TrackedObject09"),
+        makePair(TRACKED_OBJECT_10, "TrackedObject10"), makePair(TRACKED_OBJECT_11, "TrackedObject11"),
+        makePair(TRACKED_OBJECT_12, "TrackedObject12"), makePair(TRACKED_OBJECT_13, "TrackedObject13"),
+        makePair(TRACKED_OBJECT_14, "TrackedObject14"), makePair(TRACKED_OBJECT_15, "TrackedObject15")
     };
     return availableInputs;
 }
@@ -403,4 +333,4 @@ QStringList StandardController::getDefaultMappingConfigs() const {
     return QStringList() << DEFAULT_NAV_MAPPING_JSON << DEFAULT_MAPPING_JSON;
 }
 
-}
+} // namespace controller

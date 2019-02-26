@@ -22,7 +22,7 @@
 #include "GLMHelpers.h"
 
 /**jsdoc
- * The Vec3 API facilities for generating and manipulating 3-dimensional vectors. High Fidelity uses a right-handed 
+ * The Vec3 API facilities for generating and manipulating 3-dimensional vectors. High Fidelity uses a right-handed
  * Cartesian coordinate system where the y-axis is the "up" and the negative z-axis is the "front" direction.
  * <img alt="High Fidelity coordinate system" src="https://docs.highfidelity.com/images/opengl-coord-system.jpg" />
  *
@@ -38,37 +38,37 @@
  * @property {Vec3} UNIT_X - <code>{ x: 1, y: 0, z: 0 }</code> : Unit vector in the x-axis direction. <em>Read-only.</em>
  * @property {Vec3} UNIT_Y - <code>{ x: 0, y: 1, z: 0 }</code> : Unit vector in the y-axis direction. <em>Read-only.</em>
  * @property {Vec3} UNIT_Z - <code>{ x: 0, y: 0, z: 1 }</code> : Unit vector in the z-axis direction. <em>Read-only.</em>
- * @property {Vec3} UNIT_NEG_X - <code>{ x: -1, y: 0, z: 0 }</code> : Unit vector in the negative x-axis direction. 
+ * @property {Vec3} UNIT_NEG_X - <code>{ x: -1, y: 0, z: 0 }</code> : Unit vector in the negative x-axis direction.
  *     <em>Read-only.</em>
- * @property {Vec3} UNIT_NEG_Y - <code>{ x: 0, y: -1, z: 0 }</code> : Unit vector in the negative y-axis direction. 
+ * @property {Vec3} UNIT_NEG_Y - <code>{ x: 0, y: -1, z: 0 }</code> : Unit vector in the negative y-axis direction.
  *     <em>Read-only.</em>
- * @property {Vec3} UNIT_NEG_Z - <code>{ x: 0, y: 0, z: -1 }</code> : Unit vector in the negative z-axis direction. 
+ * @property {Vec3} UNIT_NEG_Z - <code>{ x: 0, y: 0, z: -1 }</code> : Unit vector in the negative z-axis direction.
  *     <em>Read-only.</em>
- * @property {Vec3} UNIT_XY - <code>{ x: 0.707107, y: 0.707107, z: 0 }</code> : Unit vector in the direction of the diagonal 
+ * @property {Vec3} UNIT_XY - <code>{ x: 0.707107, y: 0.707107, z: 0 }</code> : Unit vector in the direction of the diagonal
  *     between the x and y axes. <em>Read-only.</em>
- * @property {Vec3} UNIT_XZ - <code>{ x: 0.707107, y: 0, z: 0.707107 }</code> : Unit vector in the direction of the diagonal 
+ * @property {Vec3} UNIT_XZ - <code>{ x: 0.707107, y: 0, z: 0.707107 }</code> : Unit vector in the direction of the diagonal
  *     between the x and z axes. <em>Read-only.</em>
- * @property {Vec3} UNIT_YZ - <code>{ x: 0, y: 0.707107, z: 0.707107 }</code> : Unit vector in the direction of the diagonal 
+ * @property {Vec3} UNIT_YZ - <code>{ x: 0, y: 0.707107, z: 0.707107 }</code> : Unit vector in the direction of the diagonal
  *     between the y and z axes. <em>Read-only.</em>
- * @property {Vec3} UNIT_XYZ - <code>{ x: 0.577350, y: 0.577350, z: 0.577350 }</code> : Unit vector in the direction of the 
+ * @property {Vec3} UNIT_XYZ - <code>{ x: 0.577350, y: 0.577350, z: 0.577350 }</code> : Unit vector in the direction of the
  *     diagonal between the x, y, and z axes. <em>Read-only.</em>
- * @property {Vec3} FLOAT_MAX - <code>{ x: 3.402823e+38, y: 3.402823e+38, z: 3.402823e+38 }</code> : Vector with all axis 
+ * @property {Vec3} FLOAT_MAX - <code>{ x: 3.402823e+38, y: 3.402823e+38, z: 3.402823e+38 }</code> : Vector with all axis
  *     values set to the maximum floating point value. <em>Read-only.</em>
- * @property {Vec3} FLOAT_MIN - <code>{ x: -3.402823e+38, y: -3.402823e+38, z: -3.402823e+38 }</code> : Vector with all axis 
+ * @property {Vec3} FLOAT_MIN - <code>{ x: -3.402823e+38, y: -3.402823e+38, z: -3.402823e+38 }</code> : Vector with all axis
  *     values set to the negative of the maximum floating point value. <em>Read-only.</em>
- * @property {Vec3} ZERO - <code>{ x: 0, y: 0, z: 0 }</code> : Vector with all axis values set to <code>0</code>. 
+ * @property {Vec3} ZERO - <code>{ x: 0, y: 0, z: 0 }</code> : Vector with all axis values set to <code>0</code>.
  *     <em>Read-only.</em>
- * @property {Vec3} ONE - <code>{ x: 1, y: 1, z: 1 }</code> : Vector with all axis values set to <code>1</code>. 
+ * @property {Vec3} ONE - <code>{ x: 1, y: 1, z: 1 }</code> : Vector with all axis values set to <code>1</code>.
  *     <em>Read-only.</em>
- * @property {Vec3} TWO - <code>{ x: 2, y: 2, z: 2 }</code> : Vector with all axis values set to <code>2</code>. 
+ * @property {Vec3} TWO - <code>{ x: 2, y: 2, z: 2 }</code> : Vector with all axis values set to <code>2</code>.
  *     <em>Read-only.</em>
- * @property {Vec3} HALF - <code>{ x: 0.5, y: 0.5, z: 0.5 }</code> : Vector with all axis values set to <code>0.5</code>. 
+ * @property {Vec3} HALF - <code>{ x: 0.5, y: 0.5, z: 0.5 }</code> : Vector with all axis values set to <code>0.5</code>.
  *     <em>Read-only.</em>
- * @property {Vec3} RIGHT - <code>{ x: 1, y: 0, z: 0 }</code> : Unit vector in the "right" direction. Synonym for 
+ * @property {Vec3} RIGHT - <code>{ x: 1, y: 0, z: 0 }</code> : Unit vector in the "right" direction. Synonym for
  *     <code>UNIT_X</code>. <em>Read-only.</em>
- * @property {Vec3} UP - <code>{ x: 0, y: 1, z: 0 }</code> : Unit vector in the "up" direction. Synonym for 
+ * @property {Vec3} UP - <code>{ x: 0, y: 1, z: 0 }</code> : Unit vector in the "up" direction. Synonym for
  *     <code>UNIT_Y</code>. <em>Read-only.</em>
- * @property {Vec3} FRONT - <code>{ x: 0, y: 0, z: -1 }</code> : Unit vector in the "front" direction. Synonym for 
+ * @property {Vec3} FRONT - <code>{ x: 0, y: 0, z: -1 }</code> : Unit vector in the "front" direction. Synonym for
  *     <code>UNIT_NEG_Z</code>. <em>Read-only.</em>
  */
 
@@ -96,7 +96,7 @@ class Vec3 : public QObject, protected QScriptable {
     Q_PROPERTY(glm::vec3 FRONT READ FRONT CONSTANT)
 
 public slots:
-    
+
     /**jsdoc
      * Calculate the reflection of a vector in a plane.
      * @function Vec3(0).reflect
@@ -110,7 +110,7 @@ public slots:
      * print(JSON.stringify(reflected));  // {"x":1,"y":-2,"z":3}
      */
     glm::vec3 reflect(const glm::vec3& v1, const glm::vec3& v2) { return glm::reflect(v1, v2); }
-    
+
     /**jsdoc
      * Calculate the cross product of two vectors.
      * @function Vec3(0).cross
@@ -124,7 +124,7 @@ public slots:
      * print(JSON.stringify(crossProduct)); // {"x":0,"y":0,"z":1}
      */
     glm::vec3 cross(const glm::vec3& v1, const glm::vec3& v2) { return glm::cross(v1, v2); }
-    
+
     /**jsdoc
      * Calculate the dot product of two vectors.
      * @function Vec3(0).dot
@@ -138,7 +138,7 @@ public slots:
      * print(dotProduct); // 0
      */
     float dot(const glm::vec3& v1, const glm::vec3& v2) { return glm::dot(v1, v2); }
-    
+
     /**jsdoc
      * Multiply a vector by a scale factor.
      * @function Vec3(0).multiply
@@ -147,7 +147,7 @@ public slots:
      * @returns {Vec3} The vector with each ordinate value multiplied by the <code>scale</code>.
      */
     glm::vec3 multiply(const glm::vec3& v1, float f) { return v1 * f; }
-    
+
     /**jsdoc
      * Multiply a vector by a scale factor.
      * @function Vec3(0).multiply
@@ -156,13 +156,13 @@ public slots:
      * @returns {Vec3} The vector with each ordinate value multiplied by the <code>scale</code>.
      */
     glm::vec3 multiply(float f, const glm::vec3& v1) { return v1 * f; }
-    
+
     /**jsdoc
      * Multiply two vectors.
      * @function Vec3(0).multiplyVbyV
      * @param {Vec3} v1 - The first vector.
      * @param {Vec3} v2 - The second vector.
-     * @returns {Vec3} A vector formed by multiplying the ordinates of two vectors: <code>{ x: v1.x * v2.x, y: v1.y * v2.y, 
+     * @returns {Vec3} A vector formed by multiplying the ordinates of two vectors: <code>{ x: v1.x * v2.x, y: v1.y * v2.y,
      *     z: v1.z * v2.z }</code>.
      * @example <caption>Multiply two vectors.</caption>
      * var v1 = { x: 1, y: 2, z: 3 };
@@ -171,7 +171,7 @@ public slots:
      * print(JSON.stringify(multiplied));  // {"x":1,"y":4,"z":9}
      */
     glm::vec3 multiplyVbyV(const glm::vec3& v1, const glm::vec3& v2) { return v1 * v2; }
-    
+
     /**jsdoc
      * Rotate a vector.
      * @function Vec3(0).multiplyQbyV
@@ -185,7 +185,7 @@ public slots:
      * print(JSON.stringify(result));  // {"x":0,"y":1.000,"z":1.19e-7}
      */
     glm::vec3 multiplyQbyV(const glm::quat& q, const glm::vec3& v) { return q * v; }
-    
+
     /**jsdoc
      * Calculate the sum of two vectors.
      * @function Vec3(0).sum
@@ -194,7 +194,7 @@ public slots:
      * @returns {Vec3} The sum of the two vectors.
      */
     glm::vec3 sum(const glm::vec3& v1, const glm::vec3& v2) { return v1 + v2; }
-    
+
     /**jsdoc
      * Calculate one vector subtracted from another.
      * @function Vec3(0).subtract
@@ -203,7 +203,7 @@ public slots:
      * @returns {Vec3} The second vector subtracted from the first.
      */
     glm::vec3 subtract(const glm::vec3& v1, const glm::vec3& v2) { return v1 - v2; }
-    
+
     /**jsdoc
      * Calculate the length of a vector
      * @function Vec3(0).length
@@ -211,7 +211,7 @@ public slots:
      * @returns {number} The length of the vector.
      */
     float length(const glm::vec3& v) { return glm::length(v); }
-    
+
     /**jsdoc
      * Calculate the distance between two points.
      * @function Vec3(0).distance
@@ -229,14 +229,14 @@ public slots:
      * print(distance); // 10
      */
     float distance(const glm::vec3& v1, const glm::vec3& v2) { return glm::distance(v1, v2); }
-    
+
     /**jsdoc
      * Calculate the angle of rotation from one vector onto another, with the sign depending on a reference vector.
      * @function Vec3(0).orientedAngle
      * @param {Vec3} v1 - The first vector.
      * @param {Vec3} v2 - The second vector.
      * @param {Vec3} ref - Reference vector.
-     * @returns {number} The angle of rotation from the first vector to the second, in degrees, with a positive sign if the 
+     * @returns {number} The angle of rotation from the first vector to the second, in degrees, with a positive sign if the
      * rotation axis aligns with the reference vector (has a positive dot product) otherwise a negative sign.
      * @example <caption>Compare <code>Vec3.angle()</code> and <code>Vec3.orientedAngle()</code>.</caption>
      * var v1 = { x: 5, y: 0, z: 0 };
@@ -250,7 +250,7 @@ public slots:
      * print(Vec3.orientedAngle(v1, v2, { x: 1, y: -2, z: -1 }));  // 45
      */
     float orientedAngle(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3);
-    
+
     /**jsdoc
      * Normalize a vector so that its length is <code>1</code>.
      * @function Vec3(0).normalize
@@ -263,7 +263,7 @@ public slots:
      * print(Vec3.length(normalized));  // 1
      */
     glm::vec3 normalize(const glm::vec3& v) { return glm::normalize(v); };
-    
+
     /**jsdoc
      * Calculate a linear interpolation between two vectors.
      * @function Vec3(0).mix
@@ -278,7 +278,7 @@ public slots:
      * print(JSON.stringify(interpolated));  // {"x":2.5,"y":7.5","z":0}
      */
     glm::vec3 mix(const glm::vec3& v1, const glm::vec3& v2, float m) { return glm::mix(v1, v2, m); }
-    
+
     /**jsdoc
      * Print to the program log a text label followed by a vector value.
      * @function Vec3(0).print
@@ -290,9 +290,9 @@ public slots:
      * print("Vector: " + JSON.stringify(v));  // {"x":1,"y":2,"z":3}
      */
     void print(const QString& label, const glm::vec3& v);
-    
+
     /**jsdoc
-     * Test whether two vectors are equal. <strong>Note:</strong> The vectors must be exactly equal in order for 
+     * Test whether two vectors are equal. <strong>Note:</strong> The vectors must be exactly equal in order for
      * <code>true</code> to be returned; it is often better to use {@link Vec3(0).withinEpsilon|withinEpsilon}.
      * @function Vec3(0).equal
      * @param {Vec3} v1 - The first vector.
@@ -309,15 +309,15 @@ public slots:
      * print(equal);  // false
      */
     bool equal(const glm::vec3& v1, const glm::vec3& v2) { return v1 == v2; }
-    
+
     /**jsdoc
-     * Test whether two vectors are equal within a tolerance. <strong>Note:</strong> It is often better to use this function 
+     * Test whether two vectors are equal within a tolerance. <strong>Note:</strong> It is often better to use this function
      * than {@link Vec3(0).equal|equal}.
      * @function Vec3(0).withinEpsilon
      * @param {Vec3} v1 - The first vector.
      * @param {Vec3} v2 - The second vector.
      * @param {number} epsilon - The maximum distance between the two vectors.
-     * @returns {boolean} <code>true</code> if the distance between the points represented by the vectors is less than or equal 
+     * @returns {boolean} <code>true</code> if the distance between the points represented by the vectors is less than or equal
      * to the <code>epsilon</code>, otherwise <code>false</code>.
      * @example <caption>Testing vectors for near equality.</caption>
      * var v1 = { x: 10, y: 10, z: 10 };
@@ -329,12 +329,12 @@ public slots:
      * print(equal);  // true
      */
     bool withinEpsilon(const glm::vec3& v1, const glm::vec3& v2, float epsilon);
-    
+
     /**jsdoc
      * Calculate polar coordinates (elevation, azimuth, radius) that transform the unit z-axis vector onto a point.
      * @function Vec3(0).toPolar
      * @param {Vec3} p - The point to calculate the polar coordinates for.
-     * @returns {Vec3} Vector of polar coordinates for the point: <code>x</code> elevation rotation about the x-axis in 
+     * @returns {Vec3} Vector of polar coordinates for the point: <code>x</code> elevation rotation about the x-axis in
      *     radians, <code>y</code> azimuth rotation about the y-axis in radians, and <code>z</code> scale.
      * @example <caption>Polar coordinates for a point.</caption>
      * var v = { x: 5, y: 2.5, z: 5 };
@@ -345,11 +345,11 @@ public slots:
      */
     // FIXME misnamed, should be 'spherical' or 'euler' depending on the implementation
     glm::vec3 toPolar(const glm::vec3& v);
-    
+
     /**jsdoc
      * Calculate the coordinates of a point from polar coordinate transformation of the unit z-axis vector.
      * @function Vec3(0).fromPolar
-     * @param {Vec3} polar - The polar coordinates of a point: <code>x</code> elevation rotation about the x-axis in radians, 
+     * @param {Vec3} polar - The polar coordinates of a point: <code>x</code> elevation rotation about the x-axis in radians,
      *    <code>y</code> azimuth rotation about the y-axis in radians, and <code>z</code> scale.
      * @returns {Vec3} The coordinates of the point.
      * @example <caption>Polar coordinates to Cartesian.</caption>
@@ -359,9 +359,9 @@ public slots:
      */
     // FIXME misnamed, should be 'spherical' or 'euler' depending on the implementation
     glm::vec3 fromPolar(const glm::vec3& polar);
-    
+
     /**jsdoc
-     * Calculate the unit vector corresponding to polar coordinates elevation and azimuth transformation of the unit z-axis 
+     * Calculate the unit vector corresponding to polar coordinates elevation and azimuth transformation of the unit z-axis
      * vector.
      * @function Vec3(0).fromPolar
      * @param {number} elevation - Rotation about the x-axis, in radians.
@@ -378,7 +378,7 @@ public slots:
      */
     // FIXME misnamed, should be 'spherical' or 'euler' depending on the implementation
     glm::vec3 fromPolar(float elevation, float azimuth);
-    
+
     /**jsdoc
      * Calculate the angle between two vectors.
      * @function Vec3(0).getAngle

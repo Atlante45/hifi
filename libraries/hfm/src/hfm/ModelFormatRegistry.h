@@ -19,7 +19,8 @@
 class ModelFormatRegistry : public Dependency {
 public:
     void addFormat(const hfm::Serializer& serializer);
-    std::shared_ptr<hfm::Serializer> getSerializerForMediaType(const hifi::ByteArray& data, const hifi::URL& url, const std::string& webMediaType) const;
+    std::shared_ptr<hfm::Serializer> getSerializerForMediaType(const hifi::ByteArray& data, const hifi::URL& url,
+                                                               const std::string& webMediaType) const;
 
 protected:
     hfm::FormatRegistry _hfmFormatRegistry;

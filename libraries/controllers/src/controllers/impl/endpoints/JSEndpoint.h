@@ -20,9 +20,7 @@ namespace controller {
 class JSEndpoint : public Endpoint {
 public:
     using Endpoint::apply;
-    JSEndpoint(const QJSValue& callable)
-        : Endpoint(Input::INVALID_INPUT), _callable(callable) {
-    }
+    JSEndpoint(const QJSValue& callable) : Endpoint(Input::INVALID_INPUT), _callable(callable) {}
 
     virtual AxisValue peek() const override;
     virtual void apply(AxisValue newValue, const Pointer& source) override;
@@ -31,6 +29,6 @@ private:
     mutable QJSValue _callable;
 };
 
-}
+} // namespace controller
 
 #endif

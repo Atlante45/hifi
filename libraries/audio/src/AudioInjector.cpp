@@ -15,25 +15,25 @@
 #include <QtCore/QDataStream>
 
 #include <NodeList.h>
-#include <udt/PacketHeaders.h>
 #include <SharedUtil.h>
 #include <UUID.h>
+#include <udt/PacketHeaders.h>
 
 #include "AbstractAudioInterface.h"
-#include "AudioInjectorManager.h"
-#include "AudioRingBuffer.h"
-#include "AudioLogging.h"
-#include "SoundCache.h"
-#include "AudioSRC.h"
 #include "AudioHelpers.h"
+#include "AudioInjectorManager.h"
+#include "AudioLogging.h"
+#include "AudioRingBuffer.h"
+#include "AudioSRC.h"
+#include "SoundCache.h"
 
-AbstractAudioInterface* AudioInjector::_localAudioInterface{ nullptr };
+AbstractAudioInterface* AudioInjector::_localAudioInterface { nullptr };
 
-AudioInjectorState operator& (AudioInjectorState lhs, AudioInjectorState rhs) {
+AudioInjectorState operator&(AudioInjectorState lhs, AudioInjectorState rhs) {
     return static_cast<AudioInjectorState>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
 };
 
-AudioInjectorState& operator|= (AudioInjectorState& lhs, AudioInjectorState rhs) {
+AudioInjectorState& operator|=(AudioInjectorState& lhs, AudioInjectorState rhs) {
     lhs = static_cast<AudioInjectorState>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
     return lhs;
 };
@@ -41,14 +41,12 @@ AudioInjectorState& operator|= (AudioInjectorState& lhs, AudioInjectorState rhs)
 AudioInjector::AudioInjector(SharedSoundPointer sound, const AudioInjectorOptions& injectorOptions) :
     _sound(sound),
     _audioData(sound->getAudioData()),
-    _options(injectorOptions)
-{
+    _options(injectorOptions) {
 }
 
 AudioInjector::AudioInjector(AudioDataPointer audioData, const AudioInjectorOptions& injectorOptions) :
     _audioData(audioData),
-    _options(injectorOptions)
-{
+    _options(injectorOptions) {
 }
 
 AudioInjector::~AudioInjector() {
@@ -74,14 +72,14 @@ void AudioInjector::finishNetworkInjection() {
 
     // if we are already finished with local
     // injection, then we are finished
-    if(stateHas(AudioInjectorState::LocalInjectionFinished)) {
+    if (stateHas(AudioInjectorState::LocalInjectionFinished)) {
         finish();
     }
 }
 
 void AudioInjector::finishLocalInjection() {
     _state |= AudioInjectorState::LocalInjectionFinished;
-    if(_options.localOnly || stateHas(AudioInjectorState::NetworkInjectionFinished)) {
+    if (_options.localOnly || stateHas(AudioInjectorState::NetworkInjectionFinished)) {
         finish();
     }
 }
@@ -127,7 +125,7 @@ void AudioInjector::restart() {
     }
 }
 
-bool AudioInjector::inject(bool(AudioInjectorManager::*injection)(const AudioInjectorPointer&)) {
+bool AudioInjector::inject(bool (AudioInjectorManager::*injection)(const AudioInjectorPointer&)) {
     _state = AudioInjectorState::NotFinished;
 
     int byteOffset = 0;
@@ -157,7 +155,6 @@ bool AudioInjector::injectLocally() {
     bool success = false;
     if (_localAudioInterface) {
         if (_audioData->getNumBytes() > 0) {
-
             _localBuffer = new AudioInjectorLocalBuffer(_audioData);
 
             _localBuffer->open(QIODevice::ReadOnly);
@@ -210,7 +207,8 @@ qint64 writeStringToStream(const QString& string, QDataStream& stream) {
 
 int64_t AudioInjector::injectNextFrame() {
     if (stateHas(AudioInjectorState::NetworkInjectionFinished)) {
-        qCDebug(audio)  << "AudioInjector::injectNextFrame called but AudioInjector has finished and was not restarted. Returning.";
+        qCDebug(audio)
+            << "AudioInjector::injectNextFrame called but AudioInjector has finished and was not restarted. Returning.";
         return NEXT_FRAME_DELTA_ERROR_OR_FINISHED;
     }
 
@@ -221,8 +219,7 @@ int64_t AudioInjector::injectNextFrame() {
     static int audioDataOffset = -1;
 
     if (!_currentPacket) {
-        if (_currentSendOffset < 0 ||
-            _currentSendOffset >= (int)_audioData->getNumBytes()) {
+        if (_currentSendOffset < 0 || _currentSendOffset >= (int)_audioData->getNumBytes()) {
             _currentSendOffset = 0;
         }
 
@@ -243,7 +240,7 @@ int64_t AudioInjector::injectNextFrame() {
             QDataStream audioPacketStream(_currentPacket.get());
 
             // pack some placeholder sequence number for now
-            audioPacketStream << (quint16) 0;
+            audioPacketStream << (quint16)0;
 
             // current injectors don't use codecs, so pack in the unknown codec name
             QString noCodecForInjectors("");
@@ -262,18 +259,14 @@ int64_t AudioInjector::injectNextFrame() {
 
             // pack the position for injected audio
             positionOptionOffset = _currentPacket->pos();
-            audioPacketStream.writeRawData(reinterpret_cast<const char*>(&_options.position),
-                                           sizeof(_options.position));
+            audioPacketStream.writeRawData(reinterpret_cast<const char*>(&_options.position), sizeof(_options.position));
 
             // pack our orientation for injected audio
-            audioPacketStream.writeRawData(reinterpret_cast<const char*>(&_options.orientation),
-                                           sizeof(_options.orientation));
+            audioPacketStream.writeRawData(reinterpret_cast<const char*>(&_options.orientation), sizeof(_options.orientation));
 
-            audioPacketStream.writeRawData(reinterpret_cast<const char*>(&_options.position),
-                sizeof(_options.position));
+            audioPacketStream.writeRawData(reinterpret_cast<const char*>(&_options.position), sizeof(_options.position));
             glm::vec3 boxCorner = glm::vec3(0);
-            audioPacketStream.writeRawData(reinterpret_cast<const char*>(&boxCorner),
-                sizeof(glm::vec3));
+            audioPacketStream.writeRawData(reinterpret_cast<const char*>(&boxCorner), sizeof(glm::vec3));
 
             // pack zero for radius
             float radius = 0;
@@ -289,7 +282,7 @@ int64_t AudioInjector::injectNextFrame() {
 
         } else {
             // no samples to inject, return immediately
-            qCDebug(audio)  << "AudioInjector::injectNextFrame() called with no samples to inject. Returning.";
+            qCDebug(audio) << "AudioInjector::injectNextFrame() called with no samples to inject. Returning.";
             return NEXT_FRAME_DELTA_ERROR_OR_FINISHED;
         }
     }
@@ -350,8 +343,7 @@ int64_t AudioInjector::injectNextFrame() {
         _loudness += abs(sample) / (AudioConstants::MAX_SAMPLE_VALUE / 2.0f);
     }
     _loudness /= (float)samplesLeftToCopy;
-    _currentSendOffset = (_currentSendOffset + totalBytesLeftToCopy) %
-                         _audioData->getNumBytes();
+    _currentSendOffset = (_currentSendOffset + totalBytesLeftToCopy) % _audioData->getNumBytes();
 
     // FIXME -- good place to call codec encode here. We need to figure out how to tell the AudioInjector which
     // codec to use... possible through AbstractAudioInterface.
@@ -389,9 +381,11 @@ int64_t AudioInjector::injectNextFrame() {
 
     if (currentFrameBasedOnElapsedTime - _nextFrame > MAX_ALLOWED_FRAMES_TO_FALL_BEHIND) {
         // If we are falling behind by more frames than our threshold, let's skip the frames ahead
-        qCDebug(audio)  << this << "injectNextFrame() skipping ahead, fell behind by " << (currentFrameBasedOnElapsedTime - _nextFrame) << " frames";
+        qCDebug(audio) << this << "injectNextFrame() skipping ahead, fell behind by "
+                       << (currentFrameBasedOnElapsedTime - _nextFrame) << " frames";
         _nextFrame = currentFrameBasedOnElapsedTime;
-        _currentSendOffset = _nextFrame * AudioConstants::NETWORK_FRAME_BYTES_PER_CHANNEL * (_options.stereo ? 2 : 1) % _audioData->getNumBytes();
+        _currentSendOffset = _nextFrame * AudioConstants::NETWORK_FRAME_BYTES_PER_CHANNEL * (_options.stereo ? 2 : 1) %
+                             _audioData->getNumBytes();
     }
 
     int64_t playNextFrameAt = ++_nextFrame * AudioConstants::NETWORK_FRAME_USECS;
@@ -428,14 +422,12 @@ AudioInjectorPointer AudioInjector::playSoundAndDelete(SharedSoundPointer sound,
     return injector;
 }
 
-
-AudioInjectorPointer AudioInjector::playSound(SharedSoundPointer sound,  const AudioInjectorOptions& options) {
+AudioInjectorPointer AudioInjector::playSound(SharedSoundPointer sound, const AudioInjectorOptions& options) {
     if (!sound || !sound->isReady()) {
         return AudioInjectorPointer();
     }
 
     if (options.pitch == 1.0f) {
-
         AudioInjectorPointer injector = AudioInjectorPointer::create(sound, options);
 
         if (!injector->inject(&AudioInjectorManager::threadInjector)) {
@@ -519,6 +511,6 @@ AudioInjectorPointer AudioInjector::playSound(AudioDataPointer audioData, const 
         int numSamples = maxOutputFrames * numChannels;
         auto newAudioData = AudioData::make(numSamples, numChannels, bufferPtr);
 
-        return  AudioInjector::playSound(newAudioData, options);
+        return AudioInjector::playSound(newAudioData, options);
     }
 }

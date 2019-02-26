@@ -15,9 +15,9 @@
 #include <memory>
 #include <mutex>
 
-#include <QObject>
 #include <QAbstractListModel>
 #include <QAudioDeviceInfo>
+#include <QObject>
 
 namespace scripting {
 
@@ -36,10 +36,12 @@ public:
     AudioDeviceList(QAudio::Mode mode = QAudio::AudioOutput);
     virtual ~AudioDeviceList();
 
-    virtual std::shared_ptr<AudioDevice> newDevice(const AudioDevice& device)
-        { return std::make_shared<AudioDevice>(device); }
+    virtual std::shared_ptr<AudioDevice> newDevice(const AudioDevice& device) { return std::make_shared<AudioDevice>(device); }
 
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override { Q_UNUSED(parent); return _devices.size(); }
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override {
+        Q_UNUSED(parent);
+        return _devices.size();
+    }
     QHash<int, QByteArray> roleNames() const override { return _roles; }
     Qt::ItemFlags flags(const QModelIndex& index) const override { return _flags; }
 
@@ -87,8 +89,9 @@ public:
     AudioInputDeviceList() : AudioDeviceList(QAudio::AudioInput) {}
     virtual ~AudioInputDeviceList() = default;
 
-    virtual std::shared_ptr<AudioDevice> newDevice(const AudioDevice& device) override
-        { return std::make_shared<AudioInputDevice>(device); }
+    virtual std::shared_ptr<AudioDevice> newDevice(const AudioDevice& device) override {
+        return std::make_shared<AudioInputDevice>(device);
+    }
 
     QVariant data(const QModelIndex& index, int role) const override;
 
@@ -128,8 +131,8 @@ private slots:
     void chooseOutputDevice(const QAudioDeviceInfo& device, bool isHMD);
 
     void onContextChanged(const QString& context);
-    void onDeviceSelected(QAudio::Mode mode, const QAudioDeviceInfo& device,
-                          const QAudioDeviceInfo& previousDevice, bool isHMD);
+    void onDeviceSelected(QAudio::Mode mode, const QAudioDeviceInfo& device, const QAudioDeviceInfo& previousDevice,
+                          bool isHMD);
     void onDeviceChanged(QAudio::Mode mode, const QAudioDeviceInfo& device);
     void onDevicesChanged(QAudio::Mode mode, const QList<QAudioDeviceInfo>& devices);
 
@@ -147,6 +150,6 @@ private:
     const bool& _contextIsHMD;
 };
 
-};
+}; // namespace scripting
 
 #endif // hifi_scripting_AudioDevices_h

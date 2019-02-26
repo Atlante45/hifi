@@ -12,167 +12,169 @@
 #ifndef hifi_SceneScriptingInterface_h
 #define hifi_SceneScriptingInterface_h
 
-#include <qscriptengine.h> // QObject
 #include <DependencyManager.h> // Dependency
+#include <qscriptengine.h> // QObject
 
 #include "graphics/Stage.h"
 
 // TODO: if QT moc ever supports nested classes, subclass these to the interface instead of namespacing
 namespace SceneScripting {
-    
-    /**jsdoc
-     * @typedef {object} Scene.Stage.Location
-     * @property {number} longitude
-     * @property {number} latitude
-     * @property {number} altitude
-     */
-    class Location : public QObject {
-        Q_OBJECT
 
-    public:
-        Location(graphics::SunSkyStagePointer skyStage) : _skyStage{ skyStage } {}
+/**jsdoc
+ * @typedef {object} Scene.Stage.Location
+ * @property {number} longitude
+ * @property {number} latitude
+ * @property {number} altitude
+ */
+class Location : public QObject {
+    Q_OBJECT
 
-        Q_PROPERTY(float longitude READ getLongitude WRITE setLongitude)
-        Q_PROPERTY(float latitude READ getLatitude WRITE setLatitude)
-        Q_PROPERTY(float altitude READ getAltitude WRITE setAltitude)
+public:
+    Location(graphics::SunSkyStagePointer skyStage) : _skyStage { skyStage } {}
 
-        float getLongitude() const;
-        float getLatitude() const;
-        float getAltitude() const;
-        void setLongitude(float longitude);
-        void setLatitude(float latitude);
-        void setAltitude(float altitude);
+    Q_PROPERTY(float longitude READ getLongitude WRITE setLongitude)
+    Q_PROPERTY(float latitude READ getLatitude WRITE setLatitude)
+    Q_PROPERTY(float altitude READ getAltitude WRITE setAltitude)
 
-    protected:
-        graphics::SunSkyStagePointer _skyStage;
-    };
-    using LocationPointer = std::unique_ptr<Location>;
-    
-    /**jsdoc
-     * @typedef {object} Scene.Stage.Time
-     * @property {number} hour
-     * @property {number} day
-     */
-    class Time : public QObject {
-        Q_OBJECT
+    float getLongitude() const;
+    float getLatitude() const;
+    float getAltitude() const;
+    void setLongitude(float longitude);
+    void setLatitude(float latitude);
+    void setAltitude(float altitude);
 
-    public:
-        Time(graphics::SunSkyStagePointer skyStage) : _skyStage{ skyStage } {}
-
-        Q_PROPERTY(float hour READ getHour WRITE setHour)
-        Q_PROPERTY(int day READ getDay WRITE setDay)
-
-        float getHour() const;
-        void setHour(float hour);
-        int getDay() const;
-        void setDay(int day);
-
-    protected:
-        graphics::SunSkyStagePointer _skyStage;
-    };
-    using TimePointer = std::unique_ptr<Time>;
-
-    /**jsdoc
-     * @typedef {object} Scene.Stage.KeyLight
-     * @property {Vec3} color
-     * @property {number} intensity
-     * @property {number} ambientIntensity
-     * @property {Vec3} direction
-     */
-    class KeyLight : public QObject {
-        Q_OBJECT
-
-    public:
-        KeyLight(graphics::SunSkyStagePointer skyStage) : _skyStage{ skyStage } {}
-
-        Q_PROPERTY(glm::vec3 color READ getColor WRITE setColor)
-        Q_PROPERTY(float intensity READ getIntensity WRITE setIntensity)
-        Q_PROPERTY(float ambientIntensity READ getAmbientIntensity WRITE setAmbientIntensity)
-        Q_PROPERTY(glm::vec3 direction READ getDirection WRITE setDirection)
-
-        glm::vec3 getColor() const;
-        void setColor(const glm::vec3& color);
-        float getIntensity() const;
-        void setIntensity(float intensity);
-        float getAmbientIntensity() const;
-        void setAmbientIntensity(float intensity);
-        glm::vec3 getDirection() const;
-        // setDirection is only effective if stage Sun model is disabled
-        void setDirection(const glm::vec3& direction);
-
-        // AmbientTexture is unscriptable - it must be set through the zone entity
-        void setAmbientSphere(const gpu::SHPointer& sphere);
-        void resetAmbientSphere() { setAmbientSphere(nullptr); }
-        void setAmbientMap(const gpu::TexturePointer& map);
-
-    protected:
-        graphics::SunSkyStagePointer _skyStage;
-    };
-    using KeyLightPointer = std::unique_ptr<KeyLight>;
-    
-    /**jsdoc
-     * @class Scene.Stage
-     *
-     * @hifi-interface
-     * @hifi-client-entity
-     * @hifi-avatar
-     *
-     * @property {string} backgroundMode
-     * @property {Scene.Stage.KeyLight} keyLight
-     * @property {Scene.Stage.Location} location
-     * @property {boolean} sunModel
-     * @property {Scene.Stage.Time} time
-     */
-    class Stage : public QObject {
-        Q_OBJECT
-
-    public:
-        Stage(graphics::SunSkyStagePointer skyStage)
-            : _skyStage{ skyStage },
-            _location{ new Location{ skyStage } }, _time{ new Time{ skyStage } }, _keyLight{ new KeyLight{ skyStage } }{}
-
-        /**jsdoc
-         * @function Scene.Stage.setOrientation
-         * @param {Quat} orientation
-         */
-        Q_INVOKABLE void setOrientation(const glm::quat& orientation) const;
-
-        Q_PROPERTY(Location* location READ getLocation)
-
-        Location* getLocation() const { return _location.get(); }
-
-        /**jsdoc
-         * @function Scene.Stage.setLocation
-         * @param {number} longitude
-         * @param {number} latitude
-         * @param {number} altitude
-         */
-        Q_INVOKABLE void setLocation(float longitude, float latitude, float altitude);
-
-        Q_PROPERTY(Time* time READ getTime)
-        Time* getTime() const { return _time.get(); }
-
-        Q_PROPERTY(KeyLight* keyLight READ getKeyLight)
-        KeyLight* getKeyLight() const { return _keyLight.get(); }
-
-        // Enable/disable the stage sun model which uses the key light to simulate
-        // the sun light based on the location of the stage relative to earth and the current time 
-        Q_PROPERTY(bool sunModel READ isSunModelEnabled WRITE setSunModelEnable)
-        void setSunModelEnable(bool isEnabled);
-        bool isSunModelEnabled() const;
-
-        Q_PROPERTY(QString backgroundMode READ getBackgroundMode WRITE setBackgroundMode)
-        void setBackgroundMode(const QString& mode);
-        QString getBackgroundMode() const;
-
-    protected:
-        graphics::SunSkyStagePointer _skyStage;
-        LocationPointer _location;
-        TimePointer _time;
-        KeyLightPointer _keyLight;
-    };
-    using StagePointer = std::unique_ptr<Stage>;
+protected:
+    graphics::SunSkyStagePointer _skyStage;
 };
+using LocationPointer = std::unique_ptr<Location>;
+
+/**jsdoc
+ * @typedef {object} Scene.Stage.Time
+ * @property {number} hour
+ * @property {number} day
+ */
+class Time : public QObject {
+    Q_OBJECT
+
+public:
+    Time(graphics::SunSkyStagePointer skyStage) : _skyStage { skyStage } {}
+
+    Q_PROPERTY(float hour READ getHour WRITE setHour)
+    Q_PROPERTY(int day READ getDay WRITE setDay)
+
+    float getHour() const;
+    void setHour(float hour);
+    int getDay() const;
+    void setDay(int day);
+
+protected:
+    graphics::SunSkyStagePointer _skyStage;
+};
+using TimePointer = std::unique_ptr<Time>;
+
+/**jsdoc
+ * @typedef {object} Scene.Stage.KeyLight
+ * @property {Vec3} color
+ * @property {number} intensity
+ * @property {number} ambientIntensity
+ * @property {Vec3} direction
+ */
+class KeyLight : public QObject {
+    Q_OBJECT
+
+public:
+    KeyLight(graphics::SunSkyStagePointer skyStage) : _skyStage { skyStage } {}
+
+    Q_PROPERTY(glm::vec3 color READ getColor WRITE setColor)
+    Q_PROPERTY(float intensity READ getIntensity WRITE setIntensity)
+    Q_PROPERTY(float ambientIntensity READ getAmbientIntensity WRITE setAmbientIntensity)
+    Q_PROPERTY(glm::vec3 direction READ getDirection WRITE setDirection)
+
+    glm::vec3 getColor() const;
+    void setColor(const glm::vec3& color);
+    float getIntensity() const;
+    void setIntensity(float intensity);
+    float getAmbientIntensity() const;
+    void setAmbientIntensity(float intensity);
+    glm::vec3 getDirection() const;
+    // setDirection is only effective if stage Sun model is disabled
+    void setDirection(const glm::vec3& direction);
+
+    // AmbientTexture is unscriptable - it must be set through the zone entity
+    void setAmbientSphere(const gpu::SHPointer& sphere);
+    void resetAmbientSphere() { setAmbientSphere(nullptr); }
+    void setAmbientMap(const gpu::TexturePointer& map);
+
+protected:
+    graphics::SunSkyStagePointer _skyStage;
+};
+using KeyLightPointer = std::unique_ptr<KeyLight>;
+
+/**jsdoc
+ * @class Scene.Stage
+ *
+ * @hifi-interface
+ * @hifi-client-entity
+ * @hifi-avatar
+ *
+ * @property {string} backgroundMode
+ * @property {Scene.Stage.KeyLight} keyLight
+ * @property {Scene.Stage.Location} location
+ * @property {boolean} sunModel
+ * @property {Scene.Stage.Time} time
+ */
+class Stage : public QObject {
+    Q_OBJECT
+
+public:
+    Stage(graphics::SunSkyStagePointer skyStage) :
+        _skyStage { skyStage },
+        _location { new Location { skyStage } },
+        _time { new Time { skyStage } },
+        _keyLight { new KeyLight { skyStage } } {}
+
+    /**jsdoc
+     * @function Scene.Stage.setOrientation
+     * @param {Quat} orientation
+     */
+    Q_INVOKABLE void setOrientation(const glm::quat& orientation) const;
+
+    Q_PROPERTY(Location* location READ getLocation)
+
+    Location* getLocation() const { return _location.get(); }
+
+    /**jsdoc
+     * @function Scene.Stage.setLocation
+     * @param {number} longitude
+     * @param {number} latitude
+     * @param {number} altitude
+     */
+    Q_INVOKABLE void setLocation(float longitude, float latitude, float altitude);
+
+    Q_PROPERTY(Time* time READ getTime)
+    Time* getTime() const { return _time.get(); }
+
+    Q_PROPERTY(KeyLight* keyLight READ getKeyLight)
+    KeyLight* getKeyLight() const { return _keyLight.get(); }
+
+    // Enable/disable the stage sun model which uses the key light to simulate
+    // the sun light based on the location of the stage relative to earth and the current time
+    Q_PROPERTY(bool sunModel READ isSunModelEnabled WRITE setSunModelEnable)
+    void setSunModelEnable(bool isEnabled);
+    bool isSunModelEnabled() const;
+
+    Q_PROPERTY(QString backgroundMode READ getBackgroundMode WRITE setBackgroundMode)
+    void setBackgroundMode(const QString& mode);
+    QString getBackgroundMode() const;
+
+protected:
+    graphics::SunSkyStagePointer _skyStage;
+    LocationPointer _location;
+    TimePointer _time;
+    KeyLightPointer _keyLight;
+};
+using StagePointer = std::unique_ptr<Stage>;
+}; // namespace SceneScripting
 
 /**jsdoc
  * @namespace Scene
@@ -199,7 +201,7 @@ public:
 
     Q_PROPERTY(SceneScripting::Stage* stage READ getStage)
     SceneScripting::Stage* getStage() const { return _stage.get(); }
- 
+
     graphics::SunSkyStagePointer getSkyStage() const;
 
 signals:
@@ -229,4 +231,4 @@ protected:
     bool _shouldRenderEntities = true;
 };
 
-#endif // hifi_SceneScriptingInterface_h 
+#endif // hifi_SceneScriptingInterface_h

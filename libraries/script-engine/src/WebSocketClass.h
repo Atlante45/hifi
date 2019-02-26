@@ -18,23 +18,23 @@
 
 class WebSocketClass : public QObject {
     Q_OBJECT
-        Q_PROPERTY(QString binaryType READ getBinaryType WRITE setBinaryType)
-        Q_PROPERTY(ulong bufferedAmount READ getBufferedAmount)
-        Q_PROPERTY(QString extensions READ getExtensions)
+    Q_PROPERTY(QString binaryType READ getBinaryType WRITE setBinaryType)
+    Q_PROPERTY(ulong bufferedAmount READ getBufferedAmount)
+    Q_PROPERTY(QString extensions READ getExtensions)
 
-        Q_PROPERTY(QScriptValue onclose READ getOnClose WRITE setOnClose)
-        Q_PROPERTY(QScriptValue onerror READ getOnError WRITE setOnError)
-        Q_PROPERTY(QScriptValue onmessage READ getOnMessage WRITE setOnMessage)
-        Q_PROPERTY(QScriptValue onopen READ getOnOpen WRITE setOnOpen)
+    Q_PROPERTY(QScriptValue onclose READ getOnClose WRITE setOnClose)
+    Q_PROPERTY(QScriptValue onerror READ getOnError WRITE setOnError)
+    Q_PROPERTY(QScriptValue onmessage READ getOnMessage WRITE setOnMessage)
+    Q_PROPERTY(QScriptValue onopen READ getOnOpen WRITE setOnOpen)
 
-        Q_PROPERTY(QString protocol READ getProtocol)
-        Q_PROPERTY(WebSocketClass::ReadyState readyState READ getReadyState)
-        Q_PROPERTY(QString url READ getURL)
+    Q_PROPERTY(QString protocol READ getProtocol)
+    Q_PROPERTY(WebSocketClass::ReadyState readyState READ getReadyState)
+    Q_PROPERTY(QString url READ getURL)
 
-        Q_PROPERTY(WebSocketClass::ReadyState CONNECTING READ getConnecting CONSTANT)
-        Q_PROPERTY(WebSocketClass::ReadyState OPEN READ getOpen CONSTANT)
-        Q_PROPERTY(WebSocketClass::ReadyState CLOSING READ getClosing CONSTANT)
-        Q_PROPERTY(WebSocketClass::ReadyState CLOSED READ getClosed CONSTANT)
+    Q_PROPERTY(WebSocketClass::ReadyState CONNECTING READ getConnecting CONSTANT)
+    Q_PROPERTY(WebSocketClass::ReadyState OPEN READ getOpen CONSTANT)
+    Q_PROPERTY(WebSocketClass::ReadyState CLOSING READ getClosing CONSTANT)
+    Q_PROPERTY(WebSocketClass::ReadyState CLOSED READ getClosed CONSTANT)
 
 public:
     WebSocketClass(QScriptEngine* engine, QString url);
@@ -43,12 +43,7 @@ public:
 
     static QScriptValue constructor(QScriptContext* context, QScriptEngine* engine);
 
-    enum ReadyState {
-        CONNECTING = 0,
-        OPEN,
-        CLOSING,
-        CLOSED
-    };
+    enum ReadyState { CONNECTING = 0, OPEN, CLOSING, CLOSED };
 
     QWebSocket* getWebSocket() { return _webSocket; }
 
@@ -124,7 +119,6 @@ private slots:
     void handleOnError(QAbstractSocket::SocketError error);
     void handleOnMessage(const QString& message);
     void handleOnOpen();
-
 };
 
 Q_DECLARE_METATYPE(QWebSocketProtocol::CloseCode);
@@ -133,8 +127,8 @@ Q_DECLARE_METATYPE(WebSocketClass::ReadyState);
 QScriptValue qWSCloseCodeToScriptValue(QScriptEngine* engine, const QWebSocketProtocol::CloseCode& closeCode);
 void qWSCloseCodeFromScriptValue(const QScriptValue& object, QWebSocketProtocol::CloseCode& closeCode);
 
-QScriptValue webSocketToScriptValue(QScriptEngine* engine, WebSocketClass* const &in);
-void webSocketFromScriptValue(const QScriptValue &object, WebSocketClass* &out);
+QScriptValue webSocketToScriptValue(QScriptEngine* engine, WebSocketClass* const& in);
+void webSocketFromScriptValue(const QScriptValue& object, WebSocketClass*& out);
 
 QScriptValue wscReadyStateToScriptValue(QScriptEngine* engine, const WebSocketClass::ReadyState& readyState);
 void wscReadyStateFromScriptValue(const QScriptValue& object, WebSocketClass::ReadyState& readyState);

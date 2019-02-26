@@ -14,18 +14,18 @@
 
 #include <gpu/Texture.h>
 
+#include <QColor>
 #include <QImage>
 #include <QMap>
-#include <QColor>
 #include <QMetaEnum>
 
 #include <DependencyManager.h>
 #include <ResourceCache.h>
+#include <TextureMeta.h>
 #include <graphics/TextureMap.h>
 #include <image/ColorChannel.h>
 #include <image/Image.h>
 #include <ktx/KTX.h>
-#include <TextureMeta.h>
 
 #include <gpu/Context.h>
 #include "KTXCache.h"
@@ -99,28 +99,24 @@ private:
     image::TextureUsage::Type _type;
     image::ColorChannel _sourceChannel;
 
-    enum class ResourceType {
-        META,
-        ORIGINAL,
-        KTX
-    };
+    enum class ResourceType { META, ORIGINAL, KTX };
 
     ResourceType _currentlyLoadingResourceType { ResourceType::META };
 
     static const uint16_t NULL_MIP_LEVEL;
     enum KTXResourceState {
         PENDING_INITIAL_LOAD = 0,
-        LOADING_INITIAL_DATA,    // Loading KTX Header + Low Resolution Mips
+        LOADING_INITIAL_DATA, // Loading KTX Header + Low Resolution Mips
         WAITING_FOR_MIP_REQUEST, // Waiting for the gpu layer to report that it needs higher resolution mips
-        PENDING_MIP_REQUEST,     // We have added ourselves to the ResourceCache queue
-        REQUESTING_MIP,          // We have a mip in flight
+        PENDING_MIP_REQUEST, // We have added ourselves to the ResourceCache queue
+        REQUESTING_MIP, // We have a mip in flight
         FAILED_TO_LOAD
     };
 
     KTXResourceState _ktxResourceState { PENDING_INITIAL_LOAD };
 
     // The current mips that are currently being requested w/ _ktxMipRequest
-    std::pair<uint16_t, uint16_t> _ktxMipLevelRangeInFlight{ NULL_MIP_LEVEL, NULL_MIP_LEVEL };
+    std::pair<uint16_t, uint16_t> _ktxMipLevelRangeInFlight { NULL_MIP_LEVEL, NULL_MIP_LEVEL };
 
     ResourceRequest* _ktxHeaderRequest { nullptr };
     ResourceRequest* _ktxMipRequest { nullptr };
@@ -150,14 +146,12 @@ using NetworkTexturePointer = QSharedPointer<NetworkTexture>;
 
 Q_DECLARE_METATYPE(QWeakPointer<NetworkTexture>)
 
-
 /// Stores cached textures, including render-to-texture targets.
 class TextureCache : public ResourceCache, public Dependency {
     Q_OBJECT
     SINGLETON_DEPENDENCY
 
 public:
-
     /// Returns the ID of the permutation/normal texture used for Perlin noise shader programs.  This texture
     /// has two lines: the first, a set of random numbers in [0, 255] to be used as permutation offsets, and
     /// the second, a set of random unit vectors to be used as noise gradients.
@@ -176,12 +170,15 @@ public:
     const gpu::TexturePointer& getBlackTexture();
 
     /// Returns a texture version of an image file
-    static gpu::TexturePointer getImageTexture(const QString& path, image::TextureUsage::Type type = image::TextureUsage::DEFAULT_TEXTURE, QVariantMap options = QVariantMap());
+    static gpu::TexturePointer getImageTexture(const QString& path,
+                                               image::TextureUsage::Type type = image::TextureUsage::DEFAULT_TEXTURE,
+                                               QVariantMap options = QVariantMap());
 
     /// Loads a texture from the specified URL.
     NetworkTexturePointer getTexture(const QUrl& url, image::TextureUsage::Type type = image::TextureUsage::DEFAULT_TEXTURE,
-        const QByteArray& content = QByteArray(), int maxNumPixels = ABSOLUTE_MAX_TEXTURE_NUM_PIXELS,
-        image::ColorChannel sourceChannel = image::ColorChannel::NONE);
+                                     const QByteArray& content = QByteArray(),
+                                     int maxNumPixels = ABSOLUTE_MAX_TEXTURE_NUM_PIXELS,
+                                     image::ColorChannel sourceChannel = image::ColorChannel::NONE);
 
     gpu::TexturePointer getTextureByHash(const std::string& hash);
     gpu::TexturePointer cacheTextureByHash(const std::string& hash, const gpu::TexturePointer& texture);
@@ -202,9 +199,9 @@ signals:
     void spectatorCameraFramebufferReset();
 
 protected:
-    
     // Overload ResourceCache::prefetch to allow specifying texture type for loads
-    Q_INVOKABLE ScriptableResource* prefetch(const QUrl& url, int type, int maxNumPixels = ABSOLUTE_MAX_TEXTURE_NUM_PIXELS, image::ColorChannel sourceChannel = image::ColorChannel::NONE);
+    Q_INVOKABLE ScriptableResource* prefetch(const QUrl& url, int type, int maxNumPixels = ABSOLUTE_MAX_TEXTURE_NUM_PIXELS,
+                                             image::ColorChannel sourceChannel = image::ColorChannel::NONE);
 
     virtual QSharedPointer<Resource> createResource(const QUrl& url) override;
     QSharedPointer<Resource> createResourceCopy(const QSharedPointer<Resource>& resource) override;

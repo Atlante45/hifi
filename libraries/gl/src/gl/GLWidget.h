@@ -13,7 +13,7 @@
 #include <QtWidgets/QWidget>
 
 namespace gl {
-    class Context;
+class Context;
 }
 
 class QOpenGLContext;
@@ -21,7 +21,7 @@ class QOpenGLContext;
 /// customized canvas that simply forwards requests/events to the singleton application
 class GLWidget : public QWidget {
     Q_OBJECT
-    
+
 public:
     GLWidget();
     ~GLWidget();
@@ -36,9 +36,8 @@ public:
     gl::Context* context() { return _context; }
     QOpenGLContext* qglContext();
 
-
 protected:
-    virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
+    virtual bool nativeEvent(const QByteArray& eventType, void* message, long* result) override;
     virtual bool event(QEvent* event) override;
     gl::Context* _context { nullptr };
 

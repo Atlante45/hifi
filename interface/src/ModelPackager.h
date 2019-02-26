@@ -20,25 +20,25 @@
 #include "ui/ModelsBrowser.h"
 
 namespace hfm {
-    class Model;
+class Model;
 };
 
 class ModelPackager : public QObject {
 public:
     static bool package();
-    
+
 private:
     bool selectModel();
-    
+
     bool loadModel();
     bool editProperties();
     bool zipModel();
-    
+
     void populateBasicMapping(QVariantHash& mapping, QString filename, const hfm::Model& hfmModel);
-    
+
     void listTextures();
     bool copyTextures(const QString& oldDir, const QDir& newDir);
-    
+
     QFileInfo _modelFile;
     QFileInfo _fbxInfo;
     QString _texDir;
@@ -49,8 +49,5 @@ private:
     QStringList _textures;
     QStringList _scripts;
 };
-
-
-
 
 #endif // hifi_ModelPackager_h

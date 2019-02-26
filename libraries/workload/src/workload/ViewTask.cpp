@@ -12,7 +12,6 @@
 
 using namespace workload;
 
-
 void AssignSpaceViews::run(const WorkloadContextPointer& renderContext, const Input& inputs) {
     // Just do what it says
     renderContext->_space->setViews(inputs);
@@ -74,17 +73,17 @@ void SetupViews::run(const WorkloadContextPointer& renderContext, const Input& i
 
     // Update regions based on the current config
     for (auto& v : outViews) {
-        View::updateRegionsFromBackFrontDistances(v, (float*) &data);
+        View::updateRegionsFromBackFrontDistances(v, (float*)&data);
     }
 
     // outViews is ready to be used
 }
 
-
 ControlViews::ControlViews() {
     for (int32_t i = 0; i < workload::Region::NUM_VIEW_REGIONS; i++) {
         regionBackFronts[i] = MIN_VIEW_BACK_FRONTS[i];
-        regionRegulators[i] = Regulator(std::chrono::milliseconds(2), MIN_VIEW_BACK_FRONTS[i], MAX_VIEW_BACK_FRONTS[i], glm::vec2(RELATIVE_STEP_DOWN), glm::vec2(RELATIVE_STEP_UP));
+        regionRegulators[i] = Regulator(std::chrono::milliseconds(2), MIN_VIEW_BACK_FRONTS[i], MAX_VIEW_BACK_FRONTS[i],
+                                        glm::vec2(RELATIVE_STEP_DOWN), glm::vec2(RELATIVE_STEP_UP));
     }
 }
 
@@ -121,7 +120,8 @@ void ControlViews::run(const workload::WorkloadContextPointer& runContext, const
         // inTimings[3] = postPhysics
         // inTimings[4] = non-physical kinematics
         // inTimings[5] = game loop
-        _dataExport.timings[workload::Region::R1] = std::chrono::duration<float, std::milli>(inTimings[2] + inTimings[3]).count();
+        _dataExport.timings[workload::Region::R1] = std::chrono::duration<float, std::milli>(inTimings[2] + inTimings[3])
+                                                        .count();
         _dataExport.timings[workload::Region::R2] = _dataExport.timings[workload::Region::R1];
         _dataExport.timings[workload::Region::R3] = std::chrono::duration<float, std::milli>(inTimings[4]).count();
         doExport = true;
@@ -180,9 +180,12 @@ void ControlViews::regulateViews(workload::Views& outViews, const workload::Timi
     // timings[5] = game loop
 
     auto loopDuration = timings[5];
-    regionBackFronts[workload::Region::R1] = regionRegulators[workload::Region::R1].run(loopDuration, timings[2] + timings[3], regionBackFronts[workload::Region::R1]);
-    regionBackFronts[workload::Region::R2] = regionRegulators[workload::Region::R2].run(loopDuration, timings[2] + timings[3], regionBackFronts[workload::Region::R2]);
-    regionBackFronts[workload::Region::R3] = regionRegulators[workload::Region::R3].run(loopDuration, timings[4], regionBackFronts[workload::Region::R3]);
+    regionBackFronts[workload::Region::R1] = regionRegulators[workload::Region::R1].run(loopDuration, timings[2] + timings[3],
+                                                                                        regionBackFronts[workload::Region::R1]);
+    regionBackFronts[workload::Region::R2] = regionRegulators[workload::Region::R2].run(loopDuration, timings[2] + timings[3],
+                                                                                        regionBackFronts[workload::Region::R2]);
+    regionBackFronts[workload::Region::R3] = regionRegulators[workload::Region::R3].run(loopDuration, timings[4],
+                                                                                        regionBackFronts[workload::Region::R3]);
 
     enforceRegionContainment();
     for (auto& outView : outViews) {

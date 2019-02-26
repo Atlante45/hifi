@@ -12,5 +12,7 @@
 
 using namespace gpu;
 
-Resource::Resource() {}
-Resource::~Resource() {}
+Resource::Resource() {
+}
+Resource::~Resource() {
+}

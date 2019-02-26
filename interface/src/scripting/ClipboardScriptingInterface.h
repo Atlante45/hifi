@@ -65,17 +65,17 @@ public:
      * @returns {boolean} <code>true</code> if the export was successful, otherwise <code>false</code>.
      */
     Q_INVOKABLE bool exportEntities(const QString& filename, const QVector<QUuid>& entityIDs);
-    
+
     /**jsdoc
-    * Export the entities with centers within a cube to a JSON file.
-    * @function Clipboard.exportEntities
-    * @param {string} filename Path and name of the file to export the entities to. Should have the extension ".json".
-    * @param {number} x X-coordinate of the cube center.
-    * @param {number} y Y-coordinate of the cube center.
-    * @param {number} z Z-coordinate of the cube center.
-    * @param {number} scale Half dimension of the cube.
-    * @returns {boolean} <code>true</code> if the export was successful, otherwise <code>false</code>.
-    */
+     * Export the entities with centers within a cube to a JSON file.
+     * @function Clipboard.exportEntities
+     * @param {string} filename Path and name of the file to export the entities to. Should have the extension ".json".
+     * @param {number} x X-coordinate of the cube center.
+     * @param {number} y Y-coordinate of the cube center.
+     * @param {number} z Z-coordinate of the cube center.
+     * @param {number} scale Half dimension of the cube.
+     * @returns {boolean} <code>true</code> if the export was successful, otherwise <code>false</code>.
+     */
     Q_INVOKABLE bool exportEntities(const QString& filename, float x, float y, float z, float scale);
 
     /**jsdoc

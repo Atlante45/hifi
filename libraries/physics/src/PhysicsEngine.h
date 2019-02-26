@@ -16,16 +16,16 @@
 #include <set>
 #include <vector>
 
-#include <QUuid>
-#include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <btBulletDynamicsCommon.h>
+#include <QUuid>
 
 #include "BulletUtil.h"
 #include "ContactInfo.h"
-#include "ObjectMotionState.h"
-#include "ThreadSafeDynamicsWorld.h"
 #include "ObjectAction.h"
 #include "ObjectConstraint.h"
+#include "ObjectMotionState.h"
+#include "ThreadSafeDynamicsWorld.h"
 
 const float HALF_SIMULATION_EXTENT = 512.0f; // meters
 
@@ -50,15 +50,14 @@ struct ContactTestResult {
         foundID(contactTestResult.foundID),
         testCollisionPoint(contactTestResult.testCollisionPoint),
         foundCollisionPoint(contactTestResult.foundCollisionPoint),
-        collisionNormal(contactTestResult.collisionNormal) {
-    }
+        collisionNormal(contactTestResult.collisionNormal) {}
 
-    ContactTestResult(const QUuid& foundID, const glm::vec3& testCollisionPoint, const glm::vec3& otherCollisionPoint, const glm::vec3& collisionNormal) :
+    ContactTestResult(const QUuid& foundID, const glm::vec3& testCollisionPoint, const glm::vec3& otherCollisionPoint,
+                      const glm::vec3& collisionNormal) :
         foundID(foundID),
         testCollisionPoint(testCollisionPoint),
         foundCollisionPoint(otherCollisionPoint),
-        collisionNormal(collisionNormal) {
-    }
+        collisionNormal(collisionNormal) {}
 
     QUuid foundID;
     // The deepest point of an intersection within the volume of the test shape, in world space.
@@ -146,7 +145,9 @@ public:
 
     // Function for getting colliding objects in the world of specified type
     // See PhysicsCollisionGroups.h for mask flags.
-    std::vector<ContactTestResult> contactTest(uint16_t mask, const ShapeInfo& regionShapeInfo, const Transform& regionTransform, uint16_t group = USER_COLLISION_GROUP_DYNAMIC, float threshold = 0.0f) const;
+    std::vector<ContactTestResult> contactTest(uint16_t mask, const ShapeInfo& regionShapeInfo,
+                                               const Transform& regionTransform, uint16_t group = USER_COLLISION_GROUP_DYNAMIC,
+                                               float threshold = 0.0f) const;
 
     void enableGlobalContactAddedCallback(bool enabled);
 
@@ -186,7 +187,6 @@ private:
     bool _dumpNextStats { false };
     bool _saveNextStats { false };
     bool _hasOutgoingChanges { false };
-
 };
 
 typedef std::shared_ptr<PhysicsEngine> PhysicsEnginePointer;

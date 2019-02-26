@@ -24,23 +24,21 @@ void GrabPropertyGroup::copyToScriptValue(const EntityPropertyFlags& desiredProp
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_FOLLOWS_CONTROLLER, Grab, grab, GrabFollowsController, grabFollowsController);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_TRIGGERABLE, Grab, grab, Triggerable, triggerable);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_EQUIPPABLE, Grab, grab, Equippable, equippable);
-    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_DELEGATE_TO_PARENT, Grab, grab,
-                                        GrabDelegateToParent, grabDelegateToParent);
-    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET, Grab, grab,
-                                        EquippableLeftPosition, equippableLeftPosition);
-    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET, Grab, grab,
-                                        EquippableLeftRotation, equippableLeftRotation);
-    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET, Grab, grab,
-                                        EquippableRightPosition, equippableRightPosition);
-    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET, Grab, grab,
-                                        EquippableRightRotation, equippableRightRotation);
-    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_EQUIPPABLE_INDICATOR_URL, Grab, grab,
-                                        EquippableIndicatorURL, equippableIndicatorURL);
-    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE, Grab, grab,
-                                        EquippableIndicatorScale, equippableIndicatorScale);
-    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET, Grab, grab,
-                                        EquippableIndicatorOffset, equippableIndicatorOffset);
-
+    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_DELEGATE_TO_PARENT, Grab, grab, GrabDelegateToParent, grabDelegateToParent);
+    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_LEFT_EQUIPPABLE_POSITION_OFFSET, Grab, grab, EquippableLeftPosition,
+                                        equippableLeftPosition);
+    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_LEFT_EQUIPPABLE_ROTATION_OFFSET, Grab, grab, EquippableLeftRotation,
+                                        equippableLeftRotation);
+    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_RIGHT_EQUIPPABLE_POSITION_OFFSET, Grab, grab, EquippableRightPosition,
+                                        equippableRightPosition);
+    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_RIGHT_EQUIPPABLE_ROTATION_OFFSET, Grab, grab, EquippableRightRotation,
+                                        equippableRightRotation);
+    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_EQUIPPABLE_INDICATOR_URL, Grab, grab, EquippableIndicatorURL,
+                                        equippableIndicatorURL);
+    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_EQUIPPABLE_INDICATOR_SCALE, Grab, grab, EquippableIndicatorScale,
+                                        equippableIndicatorScale);
+    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_GRAB_EQUIPPABLE_INDICATOR_OFFSET, Grab, grab, EquippableIndicatorOffset,
+                                        equippableIndicatorOffset);
 }
 
 void GrabPropertyGroup::copyFromScriptValue(const QScriptValue& object, bool& _defaultSettings) {
@@ -134,13 +132,9 @@ void GrabPropertyGroup::listChangedProperties(QList<QString>& out) {
     }
 }
 
-bool GrabPropertyGroup::appendToEditPacket(OctreePacketData* packetData,
-                                           EntityPropertyFlags& requestedProperties,
-                                           EntityPropertyFlags& propertyFlags,
-                                           EntityPropertyFlags& propertiesDidntFit,
-                                           int& propertyCount,
-                                           OctreeElement::AppendState& appendState) const {
-
+bool GrabPropertyGroup::appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+                                           EntityPropertyFlags& propertyFlags, EntityPropertyFlags& propertiesDidntFit,
+                                           int& propertyCount, OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_GRAB_GRABBABLE, getGrabbable());
@@ -160,9 +154,8 @@ bool GrabPropertyGroup::appendToEditPacket(OctreePacketData* packetData,
     return true;
 }
 
-bool GrabPropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyFlags,
-                                             const unsigned char*& dataAt , int& processedBytes) {
-
+bool GrabPropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt,
+                                             int& processedBytes) {
     int bytesRead = 0;
     bool overwriteLocalData = true;
     bool somethingChanged = false;
@@ -269,8 +262,7 @@ bool GrabPropertyGroup::setProperties(const EntityItemProperties& properties) {
                                               setEquippableRightPosition);
     SET_ENTITY_GROUP_PROPERTY_FROM_PROPERTIES(Grab, EquippableRightRotation, equippableRightRotation,
                                               setEquippableRightRotation);
-    SET_ENTITY_GROUP_PROPERTY_FROM_PROPERTIES(Grab, EquippableIndicatorURL, equippableIndicatorURL,
-                                              setEquippableIndicatorURL);
+    SET_ENTITY_GROUP_PROPERTY_FROM_PROPERTIES(Grab, EquippableIndicatorURL, equippableIndicatorURL, setEquippableIndicatorURL);
     SET_ENTITY_GROUP_PROPERTY_FROM_PROPERTIES(Grab, EquippableIndicatorScale, equippableIndicatorScale,
                                               setEquippableIndicatorScale);
     SET_ENTITY_GROUP_PROPERTY_FROM_PROPERTIES(Grab, EquippableIndicatorOffset, equippableIndicatorOffset,
@@ -301,12 +293,9 @@ EntityPropertyFlags GrabPropertyGroup::getEntityProperties(EncodeBitstreamParams
 
 void GrabPropertyGroup::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                            EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                           EntityPropertyFlags& requestedProperties,
-                                           EntityPropertyFlags& propertyFlags,
-                                           EntityPropertyFlags& propertiesDidntFit,
-                                           int& propertyCount,
+                                           EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                           EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                                            OctreeElement::AppendState& appendState) const {
-
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_GRAB_GRABBABLE, getGrabbable());
@@ -325,10 +314,8 @@ void GrabPropertyGroup::appendSubclassData(OctreePacketData* packetData, EncodeB
 }
 
 int GrabPropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                        ReadBitstreamToTreeParams& args,
-                                                        EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                        bool& somethingChanged) {
-
+                                                        ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                        bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 

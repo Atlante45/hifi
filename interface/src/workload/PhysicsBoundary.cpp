@@ -33,18 +33,16 @@ void PhysicsBoundary::run(const workload::WorkloadContextPointer& context, const
             switch (nestable->getNestableType()) {
                 case NestableType::Entity: {
                     gameContext->_simulation->changeEntity(std::static_pointer_cast<EntityItem>(nestable));
-                }
-                break;
+                } break;
                 case NestableType::Avatar: {
                     auto avatar = std::static_pointer_cast<OtherAvatar>(nestable);
                     avatar->setWorkloadRegion(change.region);
                     if (avatar->isInPhysicsSimulation() != avatar->shouldBeInPhysicsSimulation()) {
                         DependencyManager::get<AvatarManager>()->queuePhysicsChange(avatar);
                     }
-                }
-                break;
+                } break;
                 default:
-                break;
+                    break;
             }
         }
     }

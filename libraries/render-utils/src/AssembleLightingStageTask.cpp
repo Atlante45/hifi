@@ -27,11 +27,10 @@ void FetchCurrentFrames::run(const render::RenderContextPointer& renderContext, 
     output.edit3() = std::make_shared<BloomStage::Frame>(bloomStage->_currentFrame);
 }
 
-
 void AssembleLightingStageTask::build(JobModel& task, const render::Varying& input, render::Varying& output) {
     const auto& fetchCullSortOut = input.get<Input>();
     const auto& items = fetchCullSortOut.get0();
-    //const auto& items = input.get<Input>();
+    // const auto& items = input.get<Input>();
 
     const auto& lights = items[RenderFetchCullSortTask::LIGHT];
     const auto& metas = items[RenderFetchCullSortTask::META];
@@ -47,4 +46,3 @@ void AssembleLightingStageTask::build(JobModel& task, const render::Varying& inp
 
     output = Output(currentStageFrames, zones);
 }
-

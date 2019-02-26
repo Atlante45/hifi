@@ -17,5 +17,3 @@ static const QString HEADER_NAME = "com.highfidelity.recording.Header";
 static const QString TEST_NAME = "com.highfidelity.recording.Test";
 
 #endif // hifi_FrameTests_h
-
-

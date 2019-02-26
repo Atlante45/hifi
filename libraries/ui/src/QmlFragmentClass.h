@@ -16,12 +16,13 @@ class QmlFragmentClass : public QmlWindowClass {
 
 private:
     static QScriptValue internal_constructor(QScriptContext* context, QScriptEngine* engine, bool restricted);
-public: 
+
+public:
     static QScriptValue constructor(QScriptContext* context, QScriptEngine* engine) {
         return internal_constructor(context, engine, false);
     }
 
-    static QScriptValue restricted_constructor(QScriptContext* context, QScriptEngine* engine ){
+    static QScriptValue restricted_constructor(QScriptContext* context, QScriptEngine* engine) {
         return internal_constructor(context, engine, true);
     }
 
@@ -30,7 +31,7 @@ public:
     /**jsdoc
      * Creates a new button, adds it to this and returns it.
      * @function QmlFragmentClass#addButton
-     * @param properties {object} button properties 
+     * @param properties {object} button properties
      * @returns {TabletButtonProxy}
      */
     Q_INVOKABLE QObject* addButton(const QVariant& properties);
@@ -47,9 +48,9 @@ protected:
 
     static std::mutex _mutex;
     static std::map<QString, QScriptValue> _fragments;
+
 private:
     QString qml;
-
 };
 
 #endif

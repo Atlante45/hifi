@@ -77,12 +77,10 @@ void OctreeProcessor::processDatagram(ReceivedMessage& message, SharedNodePointe
 
         if (extraDebugging) {
             qCDebug(octree) << "OctreeProcessor::processDatagram() ... "
-                               "Got Packet Section color:" << packetIsColored <<
-                               "compressed:" << packetIsCompressed <<
-                               "sequence: " <<  sequence <<
-                               "flight: " << flightTime << " usec" <<
-                               "size:" << message.getSize() <<
-                               "data:" << message.getBytesLeftToRead();
+                               "Got Packet Section color:"
+                            << packetIsColored << "compressed:" << packetIsCompressed << "sequence: " << sequence
+                            << "flight: " << flightTime << " usec"
+                            << "size:" << message.getSize() << "data:" << message.getBytesLeftToRead();
         }
 
         _packetsInLastWindow++;
@@ -102,7 +100,7 @@ void OctreeProcessor::processDatagram(ReceivedMessage& message, SharedNodePointe
 
         while (message.getBytesLeftToRead() > 0 && !error) {
             if (packetIsCompressed) {
-                if (message.getBytesLeftToRead() > (qint64) sizeof(OCTREE_PACKET_INTERNAL_SECTION_SIZE)) {
+                if (message.getBytesLeftToRead() > (qint64)sizeof(OCTREE_PACKET_INTERNAL_SECTION_SIZE)) {
                     message.readPrimitive(&sectionLength);
                 } else {
                     sectionLength = 0;
@@ -114,8 +112,7 @@ void OctreeProcessor::processDatagram(ReceivedMessage& message, SharedNodePointe
 
             if (sectionLength) {
                 // ask the VoxelTree to read the bitstream into the tree
-                ReadBitstreamToTreeParams args(WANT_EXISTS_BITS, NULL,
-                                               sourceUUID, sourceNode);
+                ReadBitstreamToTreeParams args(WANT_EXISTS_BITS, NULL, sourceUUID, sourceNode);
                 quint64 startUncompress, startLock = usecTimestampNow();
                 quint64 startReadBitsteam, endReadBitsteam;
                 // FIXME STUTTER - there may be an opportunity to bump this lock outside of the
@@ -124,19 +121,17 @@ void OctreeProcessor::processDatagram(ReceivedMessage& message, SharedNodePointe
                     startUncompress = usecTimestampNow();
 
                     OctreePacketData packetData(packetIsCompressed);
-                    packetData.loadFinalizedContent(reinterpret_cast<const unsigned char*>(message.getRawMessage() + message.getPosition()),
-                        sectionLength);
+                    packetData.loadFinalizedContent(reinterpret_cast<const unsigned char*>(message.getRawMessage() +
+                                                                                           message.getPosition()),
+                                                    sectionLength);
                     if (extraDebugging) {
                         qCDebug(octree) << "OctreeProcessor::processDatagram() ... "
-                            "Got Packet Section color:" << packetIsColored <<
-                            "compressed:" << packetIsCompressed <<
-                            "sequence: " << sequence <<
-                            "flight: " << flightTime << " usec" <<
-                            "size:" << message.getSize() <<
-                            "data:" << message.getBytesLeftToRead() <<
-                            "subsection:" << subsection <<
-                            "sectionLength:" << sectionLength <<
-                            "uncompressed:" << packetData.getUncompressedSize();
+                                           "Got Packet Section color:"
+                                        << packetIsColored << "compressed:" << packetIsCompressed << "sequence: " << sequence
+                                        << "flight: " << flightTime << " usec"
+                                        << "size:" << message.getSize() << "data:" << message.getBytesLeftToRead()
+                                        << "subsection:" << subsection << "sectionLength:" << sectionLength
+                                        << "uncompressed:" << packetData.getUncompressedSize();
                     }
 
                     if (extraDebugging) {
@@ -162,7 +157,6 @@ void OctreeProcessor::processDatagram(ReceivedMessage& message, SharedNodePointe
                 totalWaitingForLock += (startUncompress - startLock);
                 totalUncompress += (startReadBitsteam - startUncompress);
                 totalReadBitsteam += (endReadBitsteam - startReadBitsteam);
-
             }
             subsection++;
         }
@@ -197,19 +191,13 @@ void OctreeProcessor::processDatagram(ReceivedMessage& message, SharedNodePointe
     }
 }
 
-
 void OctreeProcessor::clearNonLocalEntities() {
     if (_tree) {
-        _tree->withWriteLock([&] {
-            _tree->eraseNonLocalEntities();
-        });
+        _tree->withWriteLock([&] { _tree->eraseNonLocalEntities(); });
     }
 }
 void OctreeProcessor::clear() {
     if (_tree) {
-        _tree->withWriteLock([&] {
-            _tree->eraseAllOctreeElements();
-        });
+        _tree->withWriteLock([&] { _tree->eraseAllOctreeElements(); });
     }
 }
-

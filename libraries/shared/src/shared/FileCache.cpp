@@ -11,18 +11,17 @@
 
 #include "FileCache.h"
 
-
-#include <unordered_set>
-#include <queue>
 #include <cassert>
+#include <queue>
+#include <unordered_set>
 
 #include <QtCore/QDateTime>
 #include <QtCore/QDir>
 #include <QtCore/QSaveFile>
 #include <QtCore/QStorageInfo>
 
-#include "../PathUtils.h"
 #include "../NumericalConstants.h"
+#include "../PathUtils.h"
 
 #ifdef Q_OS_WIN
 #include <sys/utime.h>
@@ -43,7 +42,6 @@ static const char EXT_SEP = '.';
 const size_t FileCache::DEFAULT_MAX_SIZE { GB_TO_BYTES(5) };
 const size_t FileCache::MAX_MAX_SIZE { GB_TO_BYTES(100) };
 const size_t FileCache::DEFAULT_MIN_FREE_STORAGE_SPACE { GB_TO_BYTES(1) };
-
 
 std::string getCacheName(const std::string& dirname_str) {
     QString dirname { dirname_str.c_str() };
@@ -102,7 +100,7 @@ void FileCache::initialize() {
         auto files = dir.entryList(nameFilters, filters, sort);
 
         // load persisted files
-        foreach(QString filename, files) {
+        foreach (QString filename, files) {
             const Key key = filename.section('.', 0, 0).toStdString();
             const std::string filepath = dir.filePath(filename).toStdString();
             const size_t length = QFileInfo(filepath.c_str()).size();
@@ -145,7 +143,6 @@ FilePointer FileCache::writeFile(const char* data, File::Metadata&& metadata, bo
         return file;
     }
 
-
     Lock lock(_mutex);
 
     if (!_initialized) {
@@ -168,10 +165,8 @@ FilePointer FileCache::writeFile(const char* data, File::Metadata&& metadata, bo
     }
 
     QSaveFile saveFile(QString::fromStdString(filepath));
-    if (saveFile.open(QIODevice::WriteOnly)
-        && saveFile.write(data, metadata.length) == static_cast<qint64>(metadata.length)
-        && saveFile.commit()) {
-
+    if (saveFile.open(QIODevice::WriteOnly) && saveFile.write(data, metadata.length) == static_cast<qint64>(metadata.length) &&
+        saveFile.commit()) {
         file = addFile(std::move(metadata), filepath);
     } else {
         qCWarning(file_cache, "[%s] Failed to write %s", _dirname.c_str(), metadata.key.c_str());
@@ -179,7 +174,6 @@ FilePointer FileCache::writeFile(const char* data, File::Metadata&& metadata, bo
     assert(!file || (file->_locked && file->_parent.lock()));
     return file;
 }
-
 
 FilePointer FileCache::getFile(const Key& key) {
     Lock lock(_mutex);
@@ -221,7 +215,7 @@ std::string FileCache::getFilepath(const Key& key) {
     return _dirpath + DIR_SEP + key + EXT_SEP + _ext;
 }
 
-// This is a non-public function that uses the mutex because it's 
+// This is a non-public function that uses the mutex because it's
 // essentially a public function specifically to a File object
 void FileCache::addUnusedFile(const FilePointer& file) {
     assert(file->_locked);
@@ -251,12 +245,10 @@ size_t FileCache::getOverbudgetAmount() const {
 }
 
 namespace cache {
-    struct FilePointerComparator {
-        bool operator()(const FilePointer& a, const FilePointer& b) {
-            return a->_modified > b->_modified;
-        }
-    };
-}
+struct FilePointerComparator {
+    bool operator()(const FilePointer& a, const FilePointer& b) { return a->_modified > b->_modified; }
+};
+} // namespace cache
 
 // Take file pointer by value to insure it doesn't get destructed during the "erase()" calls
 void FileCache::eject(FilePointer file) {
@@ -337,7 +329,8 @@ void File::deleter(File* file) {
         return;
     }
 
-    // Any other operations we might do should be done inside a locked section, so we need to delegate to a FileCache member function
+    // Any other operations we might do should be done inside a locked section, so we need to delegate to a FileCache member
+    // function
     cache->releaseFile(file);
 }
 
@@ -360,4 +353,3 @@ void File::touch() {
     utime(_filepath.c_str(), nullptr);
     _modified = std::max<int64_t>(QFileInfo(_filepath.c_str()).lastRead().toMSecsSinceEpoch(), _modified);
 }
-

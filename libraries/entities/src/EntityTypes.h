@@ -42,11 +42,11 @@ public:
      *     <tr><th>Value</th><th>Description</th><th>Properties</th></tr>
      *   </thead>
      *   <tbody>
-     *     <tr><td><code>"Box"</code></td><td>A rectangular prism. This is a synonym of <code>"Shape"</code> for the case 
+     *     <tr><td><code>"Box"</code></td><td>A rectangular prism. This is a synonym of <code>"Shape"</code> for the case
      *       where the entity's <code>shape</code> property value is <code>"Cube"</code>.<br />
-     *       If an entity is created with its <code>type</code> 
-     *       set to <code>"Box"</code> it will always be created with a <code>shape</code> property value of 
-     *       <code>"Cube"</code>. If an entity of type <code>Shape</code> or <code>Sphere</code> has its <code>shape</code> set 
+     *       If an entity is created with its <code>type</code>
+     *       set to <code>"Box"</code> it will always be created with a <code>shape</code> property value of
+     *       <code>"Cube"</code>. If an entity of type <code>Shape</code> or <code>Sphere</code> has its <code>shape</code> set
      *       to <code>"Cube"</code> then its <code>type</code> will be reported as <code>"Box"</code>.
      *       <td>{@link Entities.EntityProperties-Box|EntityProperties-Box}</td></tr>
      *     <tr><td><code>"Sphere"</code></td><td>A sphere. This is a synonym of <code>"Shape"</code> for the case
@@ -67,7 +67,7 @@ public:
      *       <td>{@link Entities.EntityProperties-Image|EntityProperties-Image}</td></tr>
      *     <tr><td><code>"Web"</code></td><td>A browsable Web page.</td>
      *       <td>{@link Entities.EntityProperties-Web|EntityProperties-Web}</td></tr>
-     *     <tr><td><code>"ParticleEffect"</code></td><td>A particle system that can be used to simulate things such as fire, 
+     *     <tr><td><code>"ParticleEffect"</code></td><td>A particle system that can be used to simulate things such as fire,
      *       smoke, snow, magic spells, etc.</td>
      *       <td>{@link Entities.EntityProperties-ParticleEffect|EntityProperties-ParticleEffect}</td></tr>
      *     <tr><td><code>"Line"</code></td><td>A sequence of one or more simple straight lines.</td>
@@ -115,8 +115,10 @@ public:
     static const QString& getEntityTypeName(EntityType entityType);
     static EntityTypes::EntityType getEntityTypeFromName(const QString& name);
     static bool registerEntityType(EntityType entityType, const char* name, EntityTypeFactory factoryMethod);
-    static void extractEntityTypeAndID(const unsigned char* data, int dataLength, EntityTypes::EntityType& typeOut, QUuid& idOut);
-    static EntityItemPointer constructEntityItem(EntityType entityType, const EntityItemID& entityID, const EntityItemProperties& properties);
+    static void extractEntityTypeAndID(const unsigned char* data, int dataLength, EntityTypes::EntityType& typeOut,
+                                       QUuid& idOut);
+    static EntityItemPointer constructEntityItem(EntityType entityType, const EntityItemID& entityID,
+                                                 const EntityItemProperties& properties);
     static EntityItemPointer constructEntityItem(const unsigned char* data, int bytesToRead);
     static EntityItemPointer constructEntityItem(const QUuid& id, const EntityItemProperties& properties);
 
@@ -127,14 +129,12 @@ private:
     static bool _factoriesInitialized;
 };
 
-
-/// Macro for registering entity types. Make sure to add an element to the EntityType enum with your name, and your class should be
-/// named NameEntityItem and must of a static method called factory that takes an EnityItemID, and EntityItemProperties and return a newly
-/// constructed (heap allocated) instance of your type. e.g. The following prototype:
+/// Macro for registering entity types. Make sure to add an element to the EntityType enum with your name, and your class should
+/// be named NameEntityItem and must of a static method called factory that takes an EnityItemID, and EntityItemProperties and
+/// return a newly constructed (heap allocated) instance of your type. e.g. The following prototype:
 //        static EntityItemPointer factory(const EntityItemID& entityID, const EntityItemProperties& properties);
-#define REGISTER_ENTITY_TYPE(x) bool x##Registration = \
-            EntityTypes::registerEntityType(EntityTypes::x, #x, x##EntityItem::factory);
-
+#define REGISTER_ENTITY_TYPE(x)                                                                                                \
+    bool x##Registration = EntityTypes::registerEntityType(EntityTypes::x, #x, x##EntityItem::factory);
 
 struct EntityRegistrationChecker {
     EntityRegistrationChecker(bool result, const char* debugMessage) {
@@ -146,14 +146,12 @@ struct EntityRegistrationChecker {
 
 /// Macro for registering entity types with an overloaded factory. Like using the REGISTER_ENTITY_TYPE macro: Make sure to add
 /// an element to the EntityType enum with your name. But unlike  REGISTER_ENTITY_TYPE, your class can be named anything
-/// so long as you provide a static method passed to the macro, that takes an EnityItemID, and EntityItemProperties and 
+/// so long as you provide a static method passed to the macro, that takes an EnityItemID, and EntityItemProperties and
 /// returns a newly constructed (heap allocated) instance of your type. e.g. The following prototype:
 //        static EntityItemPointer factory(const EntityItemID& entityID, const EntityItemProperties& properties);
-#define REGISTER_ENTITY_TYPE_WITH_FACTORY(x,y) static bool x##Registration = \
-            EntityTypes::registerEntityType(EntityTypes::x, #x, y); \
-            EntityRegistrationChecker x##RegistrationChecker( \
-                x##Registration, \
-                "UNEXPECTED: REGISTER_ENTITY_TYPE_WITH_FACTORY(" #x "," #y ") FAILED.!");
-
+#define REGISTER_ENTITY_TYPE_WITH_FACTORY(x, y)                                                                                \
+    static bool x##Registration = EntityTypes::registerEntityType(EntityTypes::x, #x, y);                                      \
+    EntityRegistrationChecker x##RegistrationChecker(x##Registration,                                                          \
+                                                     "UNEXPECTED: REGISTER_ENTITY_TYPE_WITH_FACTORY(" #x "," #y ") FAILED.!");
 
 #endif // hifi_EntityTypes_h

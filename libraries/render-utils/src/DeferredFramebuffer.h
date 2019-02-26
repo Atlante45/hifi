@@ -12,9 +12,8 @@
 #ifndef hifi_DeferredFramebuffer_h
 #define hifi_DeferredFramebuffer_h
 
-#include "gpu/Resource.h"
 #include "gpu/Framebuffer.h"
-
+#include "gpu/Resource.h"
 
 // DeferredFramebuffer is  a helper class gathering in one place the GBuffer (Framebuffer) and lighting framebuffer
 class DeferredFramebuffer {

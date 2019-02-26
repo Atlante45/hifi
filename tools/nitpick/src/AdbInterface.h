@@ -18,10 +18,10 @@ public:
 
 private:
 #ifdef Q_OS_WIN
-    const QString _adbExe{ "adb.exe" };
+    const QString _adbExe { "adb.exe" };
 #else
     // Both Mac and Linux use "python"
-    const QString _adbExe{ "adb" };
+    const QString _adbExe { "adb" };
 #endif
 
     QString _adbCommand;

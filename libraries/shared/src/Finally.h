@@ -17,13 +17,14 @@
 
 class Finally {
 public:
-    template <typename F>
+    template<typename F>
     Finally(F f) : _f(f) {}
     ~Finally() { _f(); }
     void trigger() {
         _f();
         _f = [] {};
     }
+
 private:
     std::function<void()> _f;
 };

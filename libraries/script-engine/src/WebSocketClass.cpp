@@ -16,18 +16,12 @@
 
 #include "ScriptEngine.h"
 
-WebSocketClass::WebSocketClass(QScriptEngine* engine, QString url) :
-    _webSocket(new QWebSocket()),
-    _engine(engine)
-{
+WebSocketClass::WebSocketClass(QScriptEngine* engine, QString url) : _webSocket(new QWebSocket()), _engine(engine) {
     initialize();
     _webSocket->open(url);
 }
 
-WebSocketClass::WebSocketClass(QScriptEngine* engine, QWebSocket* qWebSocket) :
-    _webSocket(qWebSocket),
-    _engine(engine)
-{
+WebSocketClass::WebSocketClass(QScriptEngine* engine, QWebSocket* qWebSocket) : _webSocket(qWebSocket), _engine(engine) {
     initialize();
 }
 
@@ -35,8 +29,8 @@ void WebSocketClass::initialize() {
     connect(_webSocket, &QWebSocket::disconnected, this, &WebSocketClass::handleOnClose);
     connect(_webSocket, &QWebSocket::textMessageReceived, this, &WebSocketClass::handleOnMessage);
     connect(_webSocket, &QWebSocket::connected, this, &WebSocketClass::handleOnOpen);
-    connect(_webSocket, static_cast<void(QWebSocket::*)(QAbstractSocket::SocketError)>(&QWebSocket::error), this,
-        &WebSocketClass::handleOnError);
+    connect(_webSocket, static_cast<void (QWebSocket::*)(QAbstractSocket::SocketError)>(&QWebSocket::error), this,
+            &WebSocketClass::handleOnError);
     _binaryType = QStringLiteral("blob");
 }
 
@@ -103,19 +97,19 @@ void WebSocketClass::handleOnOpen() {
     }
 }
 
-QScriptValue qWSCloseCodeToScriptValue(QScriptEngine* engine, const QWebSocketProtocol::CloseCode &closeCode) {
+QScriptValue qWSCloseCodeToScriptValue(QScriptEngine* engine, const QWebSocketProtocol::CloseCode& closeCode) {
     return closeCode;
 }
 
-void qWSCloseCodeFromScriptValue(const QScriptValue &object, QWebSocketProtocol::CloseCode &closeCode) {
+void qWSCloseCodeFromScriptValue(const QScriptValue& object, QWebSocketProtocol::CloseCode& closeCode) {
     closeCode = (QWebSocketProtocol::CloseCode)object.toUInt16();
 }
 
-QScriptValue webSocketToScriptValue(QScriptEngine* engine, WebSocketClass* const &in) {
+QScriptValue webSocketToScriptValue(QScriptEngine* engine, WebSocketClass* const& in) {
     return engine->newQObject(in, QScriptEngine::ScriptOwnership);
 }
 
-void webSocketFromScriptValue(const QScriptValue &object, WebSocketClass* &out) {
+void webSocketFromScriptValue(const QScriptValue& object, WebSocketClass*& out) {
     out = qobject_cast<WebSocketClass*>(object.toQObject());
 }
 

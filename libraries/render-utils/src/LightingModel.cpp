@@ -12,12 +12,13 @@
 
 LightingModel::LightingModel() {
     Parameters parameters;
-    _parametersBuffer = gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(Parameters), (const gpu::Byte*) &parameters, sizeof(Parameters)));
+    _parametersBuffer = gpu::BufferView(
+        std::make_shared<gpu::Buffer>(sizeof(Parameters), (const gpu::Byte*)&parameters, sizeof(Parameters)));
 }
 
 void LightingModel::setUnlit(bool enable) {
     if (enable != isUnlitEnabled()) {
-        _parametersBuffer.edit<Parameters>().enableUnlit = (float) enable;
+        _parametersBuffer.edit<Parameters>().enableUnlit = (float)enable;
     }
 }
 bool LightingModel::isUnlitEnabled() const {
@@ -242,7 +243,6 @@ void MakeLightingModel::configure(const Config& config) {
 }
 
 void MakeLightingModel::run(const render::RenderContextPointer& renderContext, LightingModelPointer& lightingModel) {
-
     lightingModel = _lightingModel;
 
     // make sure the enableTexturing flag of the render ARgs is in sync

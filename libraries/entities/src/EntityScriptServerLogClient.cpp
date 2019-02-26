@@ -51,16 +51,19 @@ void EntityScriptServerLogClient::enableToEntityServerScriptLog(bool enable) {
 
         if (_subscribed != enable) {
             if (enable) {
-                emit receivedNewLogLines("====================== Subscribed to the Entity Script Server's log ======================");
+                emit receivedNewLogLines(
+                    "====================== Subscribed to the Entity Script Server's log ======================");
             } else {
-                emit receivedNewLogLines("==================== Unsubscribed from the Entity Script Server's log ====================");
+                emit receivedNewLogLines(
+                    "==================== Unsubscribed from the Entity Script Server's log ====================");
             }
         }
         _subscribed = enable;
     }
 }
 
-void EntityScriptServerLogClient::handleEntityServerScriptLogPacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer senderNode) {
+void EntityScriptServerLogClient::handleEntityServerScriptLogPacket(QSharedPointer<ReceivedMessage> message,
+                                                                    SharedNodePointer senderNode) {
     emit receivedNewLogLines(QString::fromUtf8(message->readAll()));
 }
 

@@ -11,17 +11,17 @@
 
 #include "FileResourceRequest.h"
 
+#include <QtCore/QDebug>
 #include <QtCore/QFile>
 #include <QtCore/QFileSelector>
-#include <QtCore/QDebug>
 
+#include <PathUtils.h>
 #include <StatTracker.h>
 #include <shared/FileUtils.h>
-#include <PathUtils.h>
 
 #include "NetworkLogging.h"
-#include "ResourceManager.h"
 #include "NetworkingConstants.h"
+#include "ResourceManager.h"
 
 void FileResourceRequest::doSend() {
     auto statTracker = DependencyManager::get<StatTracker>();
@@ -39,7 +39,6 @@ void FileResourceRequest::doSend() {
         }
     }
 
-
     // Allow platform specific versions of files loaded out of a resource cache via file://
     {
         QString originalFilename = filename;
@@ -54,7 +53,6 @@ void FileResourceRequest::doSend() {
         QFile file(filename);
         if (file.exists()) {
             if (file.open(QFile::ReadOnly)) {
-
                 if (file.size() < _byteRange.fromInclusive || file.size() < _byteRange.toExclusive) {
                     _result = ResourceRequest::InvalidByteRange;
                 } else {
@@ -82,7 +80,7 @@ void FileResourceRequest::doSend() {
             _result = ResourceRequest::NotFound;
         }
     }
-    
+
     _state = Finished;
     emit finished();
 

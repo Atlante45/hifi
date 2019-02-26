@@ -23,7 +23,6 @@ Tooltip::Tooltip(QQuickItem* parent) : QQuickItem(parent) {
 }
 
 Tooltip::~Tooltip() {
-
 }
 
 void Tooltip::setTitle(const QString& title) {
@@ -86,9 +85,7 @@ void Tooltip::requestHyperlinkImage() {
             callbackParams.callbackReceiver = this;
             callbackParams.jsonCallbackMethod = "handleAPIResponse";
 
-            accountManager->sendRequest(GET_PLACE.arg(_title),
-                                        AccountManagerAuth::None,
-                                        QNetworkAccessManager::GetOperation,
+            accountManager->sendRequest(GET_PLACE.arg(_title), AccountManagerAuth::None, QNetworkAccessManager::GetOperation,
                                         callbackParams);
         }
     }
@@ -125,5 +122,4 @@ void Tooltip::handleAPIResponse(QNetworkReply* requestReply) {
             }
         }
     }
-
 }

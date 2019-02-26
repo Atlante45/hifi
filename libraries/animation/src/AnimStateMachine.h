@@ -33,7 +33,8 @@
 //   interpTarget frame.
 // * interpType - How the interpolation is performed.
 //   * SnapshotBoth: Stores two snapshots, the previous animation before interpolation begins and the target state at the
-//     interTarget frame.  Then during the interpolation period the two snapshots are interpolated to produce smooth motion between them.
+//     interTarget frame.  Then during the interpolation period the two snapshots are interpolated to produce smooth motion
+//     between them.
 //   * SnapshotPrev: Stores a snapshot of the previous animation before interpolation begins.  However the target state is
 //     evaluated dynamically.  During the interpolation period the previous snapshot is interpolated with the target pose
 //     to produce smooth motion between them.  This mode is useful for interping into a blended animation where the actual
@@ -42,20 +43,17 @@
 class AnimStateMachine : public AnimNode {
 public:
     friend class AnimNodeLoader;
-    friend bool processStateMachineNode(AnimNode::Pointer node, const QJsonObject& jsonObj, const QString& nodeId, const QUrl& jsonUrl);
+    friend bool processStateMachineNode(AnimNode::Pointer node, const QJsonObject& jsonObj, const QString& nodeId,
+                                        const QUrl& jsonUrl);
 
-    enum class InterpType {
-        SnapshotBoth = 0,
-        SnapshotPrev,
-        NumTypes
-    };
+    enum class InterpType { SnapshotBoth = 0, SnapshotPrev, NumTypes };
 
 protected:
-
     class State {
     public:
         friend AnimStateMachine;
-        friend bool processStateMachineNode(AnimNode::Pointer node, const QJsonObject& jsonObj, const QString& nodeId, const QUrl& jsonUrl);
+        friend bool processStateMachineNode(AnimNode::Pointer node, const QJsonObject& jsonObj, const QString& nodeId,
+                                            const QUrl& jsonUrl);
 
         using Pointer = std::shared_ptr<State>;
         using ConstPointer = std::shared_ptr<const State>;
@@ -64,6 +62,7 @@ protected:
         public:
             friend AnimStateMachine;
             Transition(const QString& var, State::Pointer state) : _var(var), _state(state) {}
+
         protected:
             QString _var;
             State::Pointer _state;
@@ -84,7 +83,6 @@ protected:
         const QString& getID() const { return _id; }
 
     protected:
-
         void setInterpTarget(float interpTarget) { _interpTarget = interpTarget; }
         void setInterpDuration(float interpDuration) { _interpDuration = interpDuration; }
 
@@ -92,7 +90,7 @@ protected:
 
         QString _id;
         int _childIndex;
-        float _interpTarget;  // frames
+        float _interpTarget; // frames
         float _interpDuration; // frames
         InterpType _interpType;
 
@@ -109,16 +107,15 @@ protected:
     };
 
 public:
-
     explicit AnimStateMachine(const QString& id);
     virtual ~AnimStateMachine() override;
 
-    virtual const AnimPoseVec& evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) override;
+    virtual const AnimPoseVec& evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                        AnimVariantMap& triggersOut) override;
 
     void setCurrentStateVar(QString& currentStateVar) { _currentStateVar = currentStateVar; }
 
 protected:
-
     void setCurrentState(State::Pointer state);
 
     void addState(State::Pointer state);

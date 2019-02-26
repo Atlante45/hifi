@@ -11,13 +11,12 @@
 
 #include "OctreeEntitiesFileParser.h"
 
-#include <sstream>
 #include <cctype>
+#include <sstream>
 
-#include <QUuid>
 #include <QJsonDocument>
 #include <QJsonObject>
-
+#include <QUuid>
 
 using std::string;
 
@@ -53,8 +52,7 @@ bool OctreeEntitiesFileParser::parseEntities(QVariantMap& parsedEntities) {
     while (true) {
         if (token == '}') {
             break;
-        }
-        else if (token != '"') {
+        } else if (token != '"') {
             _errorString = "Incorrect key string";
             return false;
         }
@@ -107,7 +105,7 @@ bool OctreeEntitiesFileParser::parseEntities(QVariantMap& parsedEntities) {
                 _errorString = "Invalid Id string";
                 return false;
             }
-            QUuid idValue = QUuid::fromString(QLatin1String(idString.c_str()) );
+            QUuid idValue = QUuid::fromString(QLatin1String(idString.c_str()));
             if (idValue.isNull()) {
                 _errorString = "Id value invalid UUID string: " + idString;
                 return false;
@@ -248,29 +246,29 @@ int OctreeEntitiesFileParser::findMatchingBrace() const {
     int nestCount = 1;
     while (index < _entitiesLength && nestCount != 0) {
         switch (_entitiesContents[index++]) {
-        case '{':
-            ++nestCount;
-            break;
+            case '{':
+                ++nestCount;
+                break;
 
-        case '}':
-            --nestCount;
-            break;
+            case '}':
+                --nestCount;
+                break;
 
-        case '"':
-            // Skip string
-            while (index < _entitiesLength) {
-                if (_entitiesContents[index] == '"') {
+            case '"':
+                // Skip string
+                while (index < _entitiesLength) {
+                    if (_entitiesContents[index] == '"') {
+                        ++index;
+                        break;
+                    } else if (_entitiesContents[index] == '\\' && _entitiesContents[++index] == 'u') {
+                        index += 4;
+                    }
                     ++index;
-                    break;
-                } else if (_entitiesContents[index] == '\\' && _entitiesContents[++index] == 'u') {
-                    index += 4;
                 }
-                ++index;
-            }
-            break;
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 

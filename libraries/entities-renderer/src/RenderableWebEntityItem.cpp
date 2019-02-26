@@ -11,21 +11,20 @@
 #include <QtCore/QTimer>
 #include <QtGui/QOpenGLContext>
 #include <QtGui/QTouchDevice>
+#include <QtQml/QQmlContext>
 #include <QtQuick/QQuickItem>
 #include <QtQuick/QQuickWindow>
-#include <QtQml/QQmlContext>
 
-
+#include <EntityScriptingInterface.h>
 #include <GeometryCache.h>
 #include <PathUtils.h>
 #include <PointerEvent.h>
 #include <gl/GLHelpers.h>
 #include <ui/OffscreenQmlSurface.h>
 #include <ui/TabletScriptingInterface.h>
-#include <EntityScriptingInterface.h>
 
-#include "EntitiesRendererLogging.h"
 #include <NetworkingConstants.h>
+#include "EntitiesRendererLogging.h"
 
 using namespace render;
 using namespace render::entities;
@@ -33,8 +32,10 @@ using namespace render::entities;
 const QString WebEntityRenderer::QML = "Web3DSurface.qml";
 const char* WebEntityRenderer::URL_PROPERTY = "url";
 
-std::function<void(QString, bool, QSharedPointer<OffscreenQmlSurface>&, bool&)> WebEntityRenderer::_acquireWebSurfaceOperator = nullptr;
-std::function<void(QSharedPointer<OffscreenQmlSurface>&, bool&, std::vector<QMetaObject::Connection>&)> WebEntityRenderer::_releaseWebSurfaceOperator = nullptr;
+std::function<void(QString, bool, QSharedPointer<OffscreenQmlSurface>&, bool&)>
+    WebEntityRenderer::_acquireWebSurfaceOperator = nullptr;
+std::function<void(QSharedPointer<OffscreenQmlSurface>&, bool&, std::vector<QMetaObject::Connection>&)>
+    WebEntityRenderer::_releaseWebSurfaceOperator = nullptr;
 
 static int MAX_WINDOW_SIZE = 4096;
 const float METERS_TO_INCHES = 39.3701f;
@@ -59,8 +60,7 @@ WebEntityRenderer::ContentType WebEntityRenderer::getContentType(const QString& 
     const QUrl url(urlString);
     auto scheme = url.scheme();
     if (scheme == HIFI_URL_SCHEME_ABOUT || scheme == HIFI_URL_SCHEME_HTTP || scheme == HIFI_URL_SCHEME_HTTPS ||
-        scheme == URL_SCHEME_DATA ||
-        urlString.toLower().endsWith(".htm") || urlString.toLower().endsWith(".html")) {
+        scheme == URL_SCHEME_DATA || urlString.toLower().endsWith(".htm") || urlString.toLower().endsWith(".html")) {
         return ContentType::HtmlContent;
     }
     return ContentType::QmlContent;
@@ -68,7 +68,7 @@ WebEntityRenderer::ContentType WebEntityRenderer::getContentType(const QString& 
 
 WebEntityRenderer::WebEntityRenderer(const EntityItemPointer& entity) : Parent(entity) {
     static std::once_flag once;
-    std::call_once(once, [&]{
+    std::call_once(once, [&] {
         _touchDevice.setCapabilities(QTouchDevice::Position);
         _touchDevice.setType(QTouchDevice::TouchScreen);
         _touchDevice.setName("WebEntityRendererTouchDevice");
@@ -107,53 +107,51 @@ bool WebEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityPointe
 
     {
         QSharedPointer<OffscreenQmlSurface> webSurface;
-        withReadLock([&] {
-            webSurface = _webSurface;
-        });
+        withReadLock([&] { webSurface = _webSurface; });
         if (webSurface && uvec2(getWindowSize(entity)) != toGlm(webSurface->size())) {
             return true;
         }
     }
 
-    if(resultWithReadLock<bool>([&] {
-        if (_color != entity->getColor()) {
-            return true;
-        }
+    if (resultWithReadLock<bool>([&] {
+            if (_color != entity->getColor()) {
+                return true;
+            }
 
-        if (_alpha != entity->getAlpha()) {
-            return true;
-        }
+            if (_alpha != entity->getAlpha()) {
+                return true;
+            }
 
-        if (_billboardMode != entity->getBillboardMode()) {
-            return true;
-        }
+            if (_billboardMode != entity->getBillboardMode()) {
+                return true;
+            }
 
-        if (_sourceURL != entity->getSourceUrl()) {
-            return true;
-        }
+            if (_sourceURL != entity->getSourceUrl()) {
+                return true;
+            }
 
-        if (_dpi != entity->getDPI()) {
-            return true;
-        }
+            if (_dpi != entity->getDPI()) {
+                return true;
+            }
 
-        if (_scriptURL != entity->getScriptURL()) {
-            return true;
-        }
+            if (_scriptURL != entity->getScriptURL()) {
+                return true;
+            }
 
-        if (_maxFPS != entity->getMaxFPS()) {
-            return true;
-        }
+            if (_maxFPS != entity->getMaxFPS()) {
+                return true;
+            }
 
-        if (_inputMode != entity->getInputMode()) {
-            return true;
-        }
+            if (_inputMode != entity->getInputMode()) {
+                return true;
+            }
 
-        if (_pulseProperties != entity->getPulseProperties()) {
-            return true;
-        }
+            if (_pulseProperties != entity->getPulseProperties()) {
+                return true;
+            }
 
-        return false;
-    })) {
+            return false;
+        })) {
         return true;
     }
 
@@ -161,9 +159,7 @@ bool WebEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityPointe
 }
 
 bool WebEntityRenderer::needsRenderUpdate() const {
-    if (resultWithReadLock<bool>([this] {
-        return !_webSurface;
-    })) {
+    if (resultWithReadLock<bool>([this] { return !_webSurface; })) {
         return true;
     }
 
@@ -173,9 +169,9 @@ bool WebEntityRenderer::needsRenderUpdate() const {
 void WebEntityRenderer::onTimeout() {
     uint64_t lastRenderTime;
     if (!resultWithReadLock<bool>([&] {
-        lastRenderTime = _lastRenderTime;
-        return (_lastRenderTime != 0 && (bool)_webSurface);
-    })) {
+            lastRenderTime = _lastRenderTime;
+            return (_lastRenderTime != 0 && (bool)_webSurface);
+        })) {
         return;
     }
 
@@ -184,7 +180,8 @@ void WebEntityRenderer::onTimeout() {
     }
 }
 
-void WebEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) {
+void WebEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                       const TypedEntityPointer& entity) {
     // If the content type has changed, or the old content type was QML, we need to
     // destroy the existing surface (because surfaces don't support changing the root
     // object, so subsequent loads of content just overlap the existing content
@@ -193,9 +190,7 @@ void WebEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene
     {
         auto newContentType = getContentType(newSourceURL);
         ContentType currentContentType;
-        withReadLock([&] {
-            urlChanged = _sourceURL != newSourceURL;
-        });
+        withReadLock([&] { urlChanged = _sourceURL != newSourceURL; });
         currentContentType = _contentType;
 
         if (urlChanged) {
@@ -205,7 +200,6 @@ void WebEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene
             _contentType = newContentType;
         }
     }
-
 
     withWriteLock([&] {
         _inputMode = entity->getInputMode();
@@ -243,7 +237,8 @@ void WebEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene
                     auto maxFPS = entity->getMaxFPS();
                     if (_maxFPS != maxFPS) {
                         // We special case YouTube URLs since we know they are videos that we should play with at least 30 FPS.
-                        // FIXME this doesn't handle redirects or shortened URLs, consider using a signaling method from the web entity
+                        // FIXME this doesn't handle redirects or shortened URLs, consider using a signaling method from the web
+                        // entity
                         if (QUrl(_sourceURL).host().endsWith("youtube.com", Qt::CaseInsensitive)) {
                             _webSurface->setMaxFps(YOUTUBE_MAX_FPS);
                         } else {
@@ -289,16 +284,12 @@ Item::Bound WebEntityRenderer::getBound() {
 
 void WebEntityRenderer::doRender(RenderArgs* args) {
     PerformanceTimer perfTimer("WebEntityRenderer::render");
-    withWriteLock([&] {
-        _lastRenderTime = usecTimestampNow();
-    });
+    withWriteLock([&] { _lastRenderTime = usecTimestampNow(); });
 
     // Try to update the texture
     {
         QSharedPointer<OffscreenQmlSurface> webSurface;
-        withReadLock([&] {
-            webSurface = _webSurface;
-        });
+        withReadLock([&] { webSurface = _webSurface; });
         if (!webSurface) {
             return;
         }
@@ -323,7 +314,8 @@ void WebEntityRenderer::doRender(RenderArgs* args) {
     });
     batch.setResourceTexture(0, _texture);
 
-    transform.setRotation(EntityItem::getBillboardRotation(transform.getTranslation(), transform.getRotation(), _billboardMode, args->getViewFrustum().getPosition()));
+    transform.setRotation(EntityItem::getBillboardRotation(transform.getTranslation(), transform.getRotation(), _billboardMode,
+                                                           args->getViewFrustum().getPosition()));
     batch.setModelTransform(transform);
 
     // Turn off jitter for these entities
@@ -341,16 +333,21 @@ void WebEntityRenderer::buildWebSurface(const EntityItemPointer& entity, const Q
     }
 
     ++_currentWebCount;
-    WebEntityRenderer::acquireWebSurface(newSourceURL, _contentType == ContentType::HtmlContent, _webSurface, _cachedWebSurface);
+    WebEntityRenderer::acquireWebSurface(newSourceURL, _contentType == ContentType::HtmlContent, _webSurface,
+                                         _cachedWebSurface);
     _fadeStartTime = usecTimestampNow();
     _webSurface->resume();
 
-    _connections.push_back(QObject::connect(this, &WebEntityRenderer::scriptEventReceived, _webSurface.data(), &OffscreenQmlSurface::emitScriptEvent));
-    _connections.push_back(QObject::connect(_webSurface.data(), &OffscreenQmlSurface::webEventReceived, this, &WebEntityRenderer::webEventReceived));
+    _connections.push_back(QObject::connect(this, &WebEntityRenderer::scriptEventReceived, _webSurface.data(),
+                                            &OffscreenQmlSurface::emitScriptEvent));
+    _connections.push_back(QObject::connect(_webSurface.data(), &OffscreenQmlSurface::webEventReceived, this,
+                                            &WebEntityRenderer::webEventReceived));
     const EntityItemID entityItemID = entity->getID();
-    _connections.push_back(QObject::connect(_webSurface.data(), &OffscreenQmlSurface::webEventReceived, this, [entityItemID](const QVariant& message) {
-        emit DependencyManager::get<EntityScriptingInterface>()->webEventReceived(entityItemID, message);
-    }));
+    _connections.push_back(
+        QObject::connect(_webSurface.data(), &OffscreenQmlSurface::webEventReceived, this,
+                         [entityItemID](const QVariant& message) {
+                             emit DependencyManager::get<EntityScriptingInterface>()->webEventReceived(entityItemID, message);
+                         }));
 }
 
 void WebEntityRenderer::destroyWebSurface() {
@@ -392,10 +389,11 @@ void WebEntityRenderer::hoverEnterEntity(const PointerEvent& event) {
 
 void WebEntityRenderer::hoverLeaveEntity(const PointerEvent& event) {
     if (_inputMode == WebInputMode::MOUSE) {
-        PointerEvent endEvent(PointerEvent::Release, event.getID(), event.getPos2D(), event.getPos3D(), event.getNormal(), event.getDirection(),
-            event.getButton(), event.getButtons(), event.getKeyboardModifiers());
+        PointerEvent endEvent(PointerEvent::Release, event.getID(), event.getPos2D(), event.getPos3D(), event.getNormal(),
+                              event.getDirection(), event.getButton(), event.getButtons(), event.getKeyboardModifiers());
         handlePointerEvent(endEvent);
-        // QML onReleased is only triggered if a click has happened first.  We need to send this "fake" mouse move event to properly trigger an onExited.
+        // QML onReleased is only triggered if a click has happened first.  We need to send this "fake" mouse move event to
+        // properly trigger an onExited.
         PointerEvent endMoveEvent(PointerEvent::Move, event.getID());
         handlePointerEvent(endMoveEvent);
     } else if (_webSurface) {

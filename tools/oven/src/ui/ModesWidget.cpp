@@ -19,9 +19,7 @@
 #include "ModelBakeWidget.h"
 #include "SkyboxBakeWidget.h"
 
-ModesWidget::ModesWidget(QWidget* parent, Qt::WindowFlags flags) :
-    QWidget(parent, flags)
-{
+ModesWidget::ModesWidget(QWidget* parent, Qt::WindowFlags flags) : QWidget(parent, flags) {
     setupUI();
 }
 

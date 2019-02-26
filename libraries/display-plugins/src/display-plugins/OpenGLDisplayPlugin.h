@@ -24,19 +24,21 @@
 #include <gpu/Batch.h>
 
 namespace gpu {
-    namespace gl {
-        class GLBackend;
-    }
+namespace gl {
+class GLBackend;
 }
+} // namespace gpu
 
 class OpenGLDisplayPlugin : public DisplayPlugin {
     Q_OBJECT
     Q_PROPERTY(float hudAlpha MEMBER _hudAlpha)
     using Parent = DisplayPlugin;
+
 protected:
     using Mutex = std::mutex;
     using Lock = std::unique_lock<Mutex>;
     using Condition = std::condition_variable;
+
 public:
     ~OpenGLDisplayPlugin();
     // These must be final to ensure proper ordering of operations
@@ -50,13 +52,9 @@ public:
     void captureFrame(const std::string& outputName) const override;
     void submitFrame(const gpu::FramePointer& newFrame) override;
 
-    glm::uvec2 getRecommendedRenderSize() const override {
-        return getSurfacePixels();
-    }
+    glm::uvec2 getRecommendedRenderSize() const override { return getSurfacePixels(); }
 
-    glm::uvec2 getRecommendedUiSize() const override {
-        return getSurfaceSize();
-    }
+    glm::uvec2 getRecommendedUiSize() const override { return getSurfaceSize(); }
 
     virtual bool setDisplayTexture(const QString& name) override;
     virtual bool onDisplayTextureReset() { return false; };
@@ -81,7 +79,8 @@ public:
     // Three threads, one for rendering, one for texture transfers, one reserved for the GL driver
     int getRequiredThreadCount() const override { return 3; }
 
-    void copyTextureToQuickFramebuffer(NetworkTexturePointer source, QOpenGLFramebufferObject* target, GLsync* fenceSync) override;
+    void copyTextureToQuickFramebuffer(NetworkTexturePointer source, QOpenGLFramebufferObject* target,
+                                       GLsync* fenceSync) override;
 
 protected:
     friend class PresentThread;
@@ -118,8 +117,10 @@ protected:
     // Plugin specific functionality to send the composed scene to the output window or device
     virtual void internalPresent();
 
-    void renderFromTexture(gpu::Batch& batch, const gpu::TexturePointer& texture, const glm::ivec4& viewport, const glm::ivec4& scissor, const gpu::FramebufferPointer& fbo);
-    void renderFromTexture(gpu::Batch& batch, const gpu::TexturePointer& texture, const glm::ivec4& viewport, const glm::ivec4& scissor);
+    void renderFromTexture(gpu::Batch& batch, const gpu::TexturePointer& texture, const glm::ivec4& viewport,
+                           const glm::ivec4& scissor, const gpu::FramebufferPointer& fbo);
+    void renderFromTexture(gpu::Batch& batch, const gpu::TexturePointer& texture, const glm::ivec4& viewport,
+                           const glm::ivec4& scissor);
     virtual void updateFrameData();
     virtual glm::mat4 getViewCorrection() { return glm::mat4(); }
 
@@ -132,7 +133,7 @@ protected:
     void render(std::function<void(gpu::Batch& batch)> f);
 
     bool _vsyncEnabled { true };
-    QThread* _presentThread{ nullptr };
+    QThread* _presentThread { nullptr };
     std::queue<gpu::FramePointer> _newFrameQueue;
     RateCounter<200> _droppedFrameRate;
     RateCounter<200> _newFrameRate;
@@ -149,7 +150,7 @@ protected:
     gpu::PipelinePointer _simplePipeline;
     gpu::PipelinePointer _presentPipeline;
     gpu::PipelinePointer _cursorPipeline;
-    gpu::TexturePointer _displayTexture{};
+    gpu::TexturePointer _displayTexture {};
     float _compositeHUDAlpha { 1.0f };
 
     struct CursorData {
@@ -184,6 +185,5 @@ protected:
     // Any resource shared by the main thread and the presentation thread must
     // be serialized through this mutex
     mutable Mutex _presentMutex;
-    float _hudAlpha{ 1.0f };
+    float _hudAlpha { 1.0f };
 };
-

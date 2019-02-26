@@ -9,20 +9,19 @@
 #include <mutex>
 
 #include <QtCore/QObject>
-#include <QtCore/QtPlugin>
 #include <QtCore/QStringList>
+#include <QtCore/QtPlugin>
 
-#include <plugins/RuntimePlugin.h>
 #include <plugins/DisplayPlugin.h>
 #include <plugins/InputPlugin.h>
+#include <plugins/RuntimePlugin.h>
 
-#include "OculusDisplayPlugin.h"
-#include "OculusDebugDisplayPlugin.h"
-#include "OculusPlatformPlugin.h"
 #include "OculusControllerManager.h"
+#include "OculusDebugDisplayPlugin.h"
+#include "OculusDisplayPlugin.h"
+#include "OculusPlatformPlugin.h"
 
-class OculusProvider : public QObject, public DisplayProvider, InputProvider, OculusPlatformProvider
-{
+class OculusProvider : public QObject, public DisplayProvider, InputProvider, OculusPlatformProvider {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID DisplayProvider_iid FILE "oculus.json")
     Q_INTERFACES(DisplayProvider)
@@ -43,8 +42,8 @@ public:
                 _displayPlugins.push_back(plugin);
             }
 
-            // Windows Oculus Simulator... uses head tracking and the same rendering 
-            // as the connected hardware, but without using the SDK to display to the 
+            // Windows Oculus Simulator... uses head tracking and the same rendering
+            // as the connected hardware, but without using the SDK to display to the
             // Rift.  Useful for debugging Rift performance with nSight.
             plugin = DisplayPluginPointer(new OculusDebugDisplayPlugin());
             if (plugin->isSupported()) {
@@ -67,20 +66,13 @@ public:
 
     virtual OculusPlatformPluginPointer getOculusPlatformPlugin() override {
         static std::once_flag once;
-        std::call_once(once, [&] {
-            _oculusPlatformPlugin = std::make_shared<OculusAPIPlugin>();
-            
-        });
+        std::call_once(once, [&] { _oculusPlatformPlugin = std::make_shared<OculusAPIPlugin>(); });
         return _oculusPlatformPlugin;
     }
 
-    virtual void destroyInputPlugins() override {
-        _inputPlugins.clear();
-    }
+    virtual void destroyInputPlugins() override { _inputPlugins.clear(); }
 
-    virtual void destroyDisplayPlugins() override {
-        _displayPlugins.clear();
-    }
+    virtual void destroyDisplayPlugins() override { _displayPlugins.clear(); }
 
 private:
     DisplayPluginList _displayPlugins;

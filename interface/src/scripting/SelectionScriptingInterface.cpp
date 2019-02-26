@@ -63,7 +63,8 @@ bool SelectionScriptingInterface::addToSelectedItemsList(const QString& listName
     }
     return false;
 }
-bool SelectionScriptingInterface::removeFromSelectedItemsList(const QString& listName, const QString& itemType, const QUuid& id) {
+bool SelectionScriptingInterface::removeFromSelectedItemsList(const QString& listName, const QString& itemType,
+                                                              const QUuid& id) {
     if (itemType == "avatar") {
         return removeFromGameplayObjects(listName, (QUuid)id);
     } else if (itemType == "entity" || itemType == "overlay") {
@@ -101,7 +102,6 @@ bool SelectionScriptingInterface::enableListHighlight(const QString& listName, c
     auto highlightStyle = _highlightStyleMap.find(listName);
     if (highlightStyle == _highlightStyleMap.end()) {
         highlightStyle = _highlightStyleMap.insert(listName, SelectionHighlightStyle());
-
     }
 
     if (!(*highlightStyle).isBoundToList()) {
@@ -116,9 +116,9 @@ bool SelectionScriptingInterface::enableListHighlight(const QString& listName, c
         render::Transaction transaction;
         transaction.resetSelectionHighlight(listName.toStdString(), (*highlightStyle).getStyle());
         mainScene->enqueueTransaction(transaction);
-    }
-    else {
-        qWarning() << "SelectionToSceneHandler::highlightStyleChanged(), Unexpected null scene, possibly during application shutdown";
+    } else {
+        qWarning()
+            << "SelectionToSceneHandler::highlightStyleChanged(), Unexpected null scene, possibly during application shutdown";
     }
 
     return true;
@@ -139,9 +139,9 @@ bool SelectionScriptingInterface::disableListHighlight(const QString& listName) 
             render::Transaction transaction;
             transaction.removeHighlightFromSelection(listName.toStdString());
             mainScene->enqueueTransaction(transaction);
-        }
-        else {
-            qWarning() << "SelectionToSceneHandler::highlightStyleChanged(), Unexpected null scene, possibly during application shutdown";
+        } else {
+            qWarning() << "SelectionToSceneHandler::highlightStyleChanged(), Unexpected null scene, possibly during "
+                          "application shutdown";
         }
     }
 
@@ -180,7 +180,8 @@ bool SelectionScriptingInterface::disableListToScene(const QString& listName) {
     return true;
 }
 
-template <class T> bool SelectionScriptingInterface::addToGameplayObjects(const QString& listName, T idToAdd) {
+template<class T>
+bool SelectionScriptingInterface::addToGameplayObjects(const QString& listName, T idToAdd) {
     {
         QWriteLocker lock(&_selectionListsLock);
         GameplayObjects currentList = _selectedItemsListMap.value(listName);
@@ -190,7 +191,8 @@ template <class T> bool SelectionScriptingInterface::addToGameplayObjects(const 
     onSelectedItemsListChanged(listName);
     return true;
 }
-template <class T> bool SelectionScriptingInterface::removeFromGameplayObjects(const QString& listName, T idToRemove) {
+template<class T>
+bool SelectionScriptingInterface::removeFromGameplayObjects(const QString& listName, T idToRemove) {
     bool listExist = false;
     {
         QWriteLocker lock(&_selectionListsLock);
@@ -203,8 +205,7 @@ template <class T> bool SelectionScriptingInterface::removeFromGameplayObjects(c
     if (listExist) {
         onSelectedItemsListChanged(listName);
         return true;
-    }
-    else {
+    } else {
         return false;
     }
 }
@@ -222,7 +223,6 @@ void SelectionScriptingInterface::printList(const QString& listName) {
     auto currentList = _selectedItemsListMap.find(listName);
     if (currentList != _selectedItemsListMap.end()) {
         if ((*currentList).getContainsData()) {
-
             qDebug() << "List named " << listName << ":";
             qDebug() << "Avatar IDs:";
             for (auto i : (*currentList).getAvatarIDs()) {
@@ -235,8 +235,7 @@ void SelectionScriptingInterface::printList(const QString& listName) {
                 qDebug() << j << ';';
             }
             qDebug() << "";
-        }
-        else {
+        } else {
             qDebug() << "List named " << listName << " empty";
         }
     } else {
@@ -265,7 +264,7 @@ QVariantMap SelectionScriptingInterface::getSelectedItemsList(const QString& lis
             }
             if (!(*currentList).getEntityIDs().empty()) {
                 for (auto j : (*currentList).getEntityIDs()) {
-                    entityIDs.push_back((QUuid)j );
+                    entityIDs.push_back((QUuid)j);
                 }
             }
         }
@@ -273,8 +272,7 @@ QVariantMap SelectionScriptingInterface::getSelectedItemsList(const QString& lis
         list["entities"] = (entityIDs);
 
         return list;
-    }
-    else {
+    } else {
         return list;
     }
 }
@@ -324,7 +322,6 @@ void SelectionScriptingInterface::onSelectedItemsListChanged(const QString& list
     emit selectedItemsListChanged(listName);
 }
 
-
 SelectionToSceneHandler::SelectionToSceneHandler() {
 }
 
@@ -349,7 +346,8 @@ void SelectionToSceneHandler::updateSceneFromSelectedList() {
         auto entityTreeRenderer = DependencyManager::get<EntityTreeRenderer>();
 
         for (QUuid& currentAvatarID : thisList.getAvatarIDs()) {
-            auto avatar = std::static_pointer_cast<Avatar>(DependencyManager::get<AvatarManager>()->getAvatarBySessionID(currentAvatarID));
+            auto avatar = std::static_pointer_cast<Avatar>(
+                DependencyManager::get<AvatarManager>()->getAvatarBySessionID(currentAvatarID));
             if (avatar) {
                 currentID = avatar->getRenderItemID();
                 if (currentID != render::Item::INVALID_ITEM_ID) {
@@ -370,7 +368,8 @@ void SelectionToSceneHandler::updateSceneFromSelectedList() {
 
         mainScene->enqueueTransaction(transaction);
     } else {
-        qWarning() << "SelectionToSceneHandler::updateRendererSelectedList(), Unexpected null scene, possibly during application shutdown";
+        qWarning() << "SelectionToSceneHandler::updateRendererSelectedList(), Unexpected null scene, possibly during "
+                      "application shutdown";
     }
 }
 
@@ -443,7 +442,7 @@ bool SelectionHighlightStyle::fromVariantMap(const QVariantMap& properties) {
  * @property {Color} outlineOccludedColor - ""
  * @property {Color} fillUnoccludedColor- ""
  * @property {Color} fillOccludedColor- ""
- * @property {number} outlineUnoccludedAlpha - Alpha value ranging from <code>0.0</code> (not visible) to <code>1.0</code> 
+ * @property {number} outlineUnoccludedAlpha - Alpha value ranging from <code>0.0</code> (not visible) to <code>1.0</code>
  *     (fully opaque) for the specified highlight region.
  * @property {number} outlineOccludedAlpha - ""
  * @property {number} fillUnoccludedAlpha - ""

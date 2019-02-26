@@ -11,8 +11,8 @@
 
 #include "AmbientLightPropertyGroup.h"
 
-#include <QJsonDocument>
 #include <OctreePacketData.h>
+#include <QJsonDocument>
 
 #include "EntityItemProperties.h"
 #include "EntityItemPropertiesMacros.h"
@@ -20,16 +20,17 @@
 const float AmbientLightPropertyGroup::DEFAULT_AMBIENT_LIGHT_INTENSITY = 0.5f;
 
 void AmbientLightPropertyGroup::copyToScriptValue(const EntityPropertyFlags& desiredProperties, QScriptValue& properties,
-    QScriptEngine* engine, bool skipDefaults, EntityItemProperties& defaultEntityProperties) const {
-    
-    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_AMBIENT_LIGHT_INTENSITY, AmbientLight, ambientLight, AmbientIntensity, ambientIntensity);
+                                                  QScriptEngine* engine, bool skipDefaults,
+                                                  EntityItemProperties& defaultEntityProperties) const {
+    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_AMBIENT_LIGHT_INTENSITY, AmbientLight, ambientLight, AmbientIntensity,
+                                        ambientIntensity);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_AMBIENT_LIGHT_URL, AmbientLight, ambientLight, AmbientURL, ambientURL);
 }
 
 void AmbientLightPropertyGroup::copyFromScriptValue(const QScriptValue& object, bool& _defaultSettings) {
     COPY_GROUP_PROPERTY_FROM_QSCRIPTVALUE(ambientLight, ambientIntensity, float, setAmbientIntensity);
     COPY_GROUP_PROPERTY_FROM_QSCRIPTVALUE(ambientLight, ambientURL, QString, setAmbientURL);
-    
+
     // legacy property support
     COPY_PROPERTY_FROM_QSCRIPTVALUE_GETTER(ambientLightAmbientIntensity, float, setAmbientIntensity, getAmbientIntensity);
 }
@@ -53,34 +54,29 @@ void AmbientLightPropertyGroup::listChangedProperties(QList<QString>& out) {
     }
 }
 
-bool AmbientLightPropertyGroup::appendToEditPacket(OctreePacketData* packetData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount, 
-                                    OctreeElement::AppendState& appendState) const {
-
+bool AmbientLightPropertyGroup::appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+                                                   EntityPropertyFlags& propertyFlags, EntityPropertyFlags& propertiesDidntFit,
+                                                   int& propertyCount, OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
-    
+
     APPEND_ENTITY_PROPERTY(PROP_AMBIENT_LIGHT_INTENSITY, getAmbientIntensity());
     APPEND_ENTITY_PROPERTY(PROP_AMBIENT_LIGHT_URL, getAmbientURL());
-    
+
     return true;
 }
 
 bool AmbientLightPropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt,
-    int& processedBytes) {
-        
+                                                     int& processedBytes) {
     int bytesRead = 0;
     bool overwriteLocalData = true;
     bool somethingChanged = false;
-    
+
     READ_ENTITY_PROPERTY(PROP_AMBIENT_LIGHT_INTENSITY, float, setAmbientIntensity);
     READ_ENTITY_PROPERTY(PROP_AMBIENT_LIGHT_URL, QString, setAmbientURL);
-    
+
     DECODE_GROUP_PROPERTY_HAS_CHANGED(PROP_AMBIENT_LIGHT_INTENSITY, AmbientIntensity);
     DECODE_GROUP_PROPERTY_HAS_CHANGED(PROP_AMBIENT_LIGHT_URL, AmbientURL);
-    
+
     processedBytes += bytesRead;
 
     Q_UNUSED(somethingChanged);
@@ -95,10 +91,10 @@ void AmbientLightPropertyGroup::markAllChanged() {
 
 EntityPropertyFlags AmbientLightPropertyGroup::getChangedProperties() const {
     EntityPropertyFlags changedProperties;
- 
+
     CHECK_PROPERTY_CHANGE(PROP_AMBIENT_LIGHT_INTENSITY, ambientIntensity);
     CHECK_PROPERTY_CHANGE(PROP_AMBIENT_LIGHT_URL, ambientURL);
-    
+
     return changedProperties;
 }
 
@@ -124,29 +120,25 @@ EntityPropertyFlags AmbientLightPropertyGroup::getEntityProperties(EncodeBitstre
 
     return requestedProperties;
 }
-    
-void AmbientLightPropertyGroup::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params, 
-    EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-    EntityPropertyFlags& requestedProperties,
-    EntityPropertyFlags& propertyFlags,
-    EntityPropertyFlags& propertiesDidntFit,
-    int& propertyCount, 
-    OctreeElement::AppendState& appendState) const {
 
+void AmbientLightPropertyGroup::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
+                                                   EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
+                                                   EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                                   EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                                   OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_AMBIENT_LIGHT_INTENSITY, getAmbientIntensity());
     APPEND_ENTITY_PROPERTY(PROP_AMBIENT_LIGHT_URL, getAmbientURL());
 }
 
-int AmbientLightPropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead, 
-    ReadBitstreamToTreeParams& args,
-    EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-    bool& somethingChanged) {
-
+int AmbientLightPropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
+                                                                ReadBitstreamToTreeParams& args,
+                                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
+                                                                bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
-    
+
     READ_ENTITY_PROPERTY(PROP_AMBIENT_LIGHT_INTENSITY, float, setAmbientIntensity);
     READ_ENTITY_PROPERTY(PROP_AMBIENT_LIGHT_URL, QString, setAmbientURL);
 

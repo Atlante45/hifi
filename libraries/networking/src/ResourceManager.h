@@ -15,14 +15,14 @@
 #include <functional>
 
 #include <QObject>
-#include <QtCore/QMutex>
 #include <QThread>
+#include <QtCore/QMutex>
 
 #include <DependencyManager.h>
 
 #include "ResourceRequest.h"
 
-class ResourceManager: public QObject, public Dependency {
+class ResourceManager : public QObject, public Dependency {
     Q_OBJECT
     SINGLETON_DEPENDENCY
 
@@ -34,12 +34,8 @@ public:
     QString normalizeURL(const QString& urlString);
     QUrl normalizeURL(const QUrl& url);
 
-    ResourceRequest* createResourceRequest(
-        QObject* parent,
-        const QUrl& url,
-        const bool isObservable = true,
-        const qint64 callerId = -1,
-        const QString& extra = "");
+    ResourceRequest* createResourceRequest(QObject* parent, const QUrl& url, const bool isObservable = true,
+                                           const qint64 callerId = -1, const QString& extra = "");
 
     void init();
     void cleanup();
@@ -59,7 +55,6 @@ private:
     bool _atpSupportEnabled;
     PrefixMap _prefixMap;
     QMutex _prefixMapLock;
-
 };
 
 #endif

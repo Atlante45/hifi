@@ -13,12 +13,12 @@
 #ifndef hifi_Midi_h
 #define hifi_Midi_h
 
-#include <QtCore/QObject>
-#include <QAbstractNativeEventFilter>
 #include <DependencyManager.h>
+#include <QAbstractNativeEventFilter>
+#include <QtCore/QObject>
 
-#include <vector>
 #include <string>
+#include <vector>
 
 /**jsdoc
  * @namespace Midi
@@ -33,11 +33,12 @@ class Midi : public QObject, public Dependency {
     SINGLETON_DEPENDENCY
 
 public:
-    void midiReceived(int device, int raw, int channel, int status, int type, int note, int velocity, int bend, int program);  // relay a note to Javascript
-    void midiHardwareChange();  // relay hardware change to Javascript
-    void sendRawMessage(int device, int raw);  // relay midi message to MIDI outputs
-    void sendNote(int status, int note, int velocity);  // relay a note to MIDI outputs
-    void sendMessage(int device, int channel, int type, int note, int velocity);  // relay a message to MIDI outputs 
+    void midiReceived(int device, int raw, int channel, int status, int type, int note, int velocity, int bend,
+                      int program); // relay a note to Javascript
+    void midiHardwareChange(); // relay hardware change to Javascript
+    void sendRawMessage(int device, int raw); // relay midi message to MIDI outputs
+    void sendNote(int status, int note, int velocity); // relay a note to MIDI outputs
+    void sendMessage(int device, int channel, int type, int note, int velocity); // relay a message to MIDI outputs
     static void USBchanged();
 
 private:
@@ -53,7 +54,7 @@ signals:
     void midiMessage(QVariantMap eventData);
     void midiReset();
 
-    public slots:
+public slots:
 
     /**jsdoc
      * Send Raw MIDI packet to a particular device.
@@ -126,14 +127,12 @@ signals:
      */
     Q_INVOKABLE void thruModeEnable(bool enable);
 
-
     /**jsdoc
      * Broadcast on all unblocked devices.
      * @function Midi.broadcastEnable
      * @param {boolean} enable
      */
     Q_INVOKABLE void broadcastEnable(bool enable);
-    
 
     /// filter by event types
 
@@ -184,7 +183,6 @@ signals:
      * @param {boolean} enable
      */
     Q_INVOKABLE void typeSystemMessageEnable(bool enable);
-
 
 public:
     Midi();

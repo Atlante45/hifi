@@ -44,7 +44,6 @@ protected:
     QSharedPointer<Resource> _resource;
 
 private:
-
     // no copies
     AnimNodeLoader(const AnimNodeLoader&) = delete;
     AnimNodeLoader& operator=(const AnimNodeLoader&) = delete;

@@ -38,7 +38,7 @@ bool GLTexelFormat::isCompressed() const {
         case GL_COMPRESSED_SRGB_S3TC_DXT1_EXT:
         case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT:
         case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT:
-    
+
         case GL_COMPRESSED_R11_EAC:
         case GL_COMPRESSED_SIGNED_R11_EAC:
         case GL_COMPRESSED_RG11_EAC:
@@ -84,7 +84,6 @@ bool GLTexelFormat::isCompressed() const {
         case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10:
         case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12:
 #endif
-
 
             return true;
         default:
@@ -197,7 +196,7 @@ GLenum GLTexelFormat::evalGLTexelFormatInternal(const gpu::Element& dstFormat) {
                     }
                     break;
 
-                 case gpu::DEPTH_STENCIL:
+                case gpu::DEPTH_STENCIL:
                     result = GL_DEPTH24_STENCIL8;
                     break;
 
@@ -213,49 +212,49 @@ GLenum GLTexelFormat::evalGLTexelFormatInternal(const gpu::Element& dstFormat) {
                 case gpu::RGBA:
                 case gpu::XY:
                     switch (dstFormat.getType()) {
-                    case gpu::UINT32:
-                        result = GL_RG32UI;
-                        break;
-                    case gpu::INT32:
-                        result = GL_RG32I;
-                        break;
-                    case gpu::FLOAT:
-                        result = GL_RG32F;
-                        break;
-                    case gpu::UINT16:
-                        result = GL_RG16UI;
-                        break;
-                    case gpu::INT16:
-                        result = GL_RG16I;
-                        break;
-                    case gpu::NUINT16:
-                        result = GL_RG16;
-                        break;
-                    case gpu::NINT16:
-                        result = GL_RG16_SNORM;
-                        break;
-                    case gpu::HALF:
-                        result = GL_RG16F;
-                        break;
-                    case gpu::UINT8:
-                        result = GL_RG8UI;
-                        break;
-                    case gpu::INT8:
-                        result = GL_RG8I;
-                        break;
-                    case gpu::NUINT8:
-                        result = GL_RG8;
-                        break;
-                    case gpu::NINT8:
-                        result = GL_RG8_SNORM;
-                        break;
-                    case gpu::NUINT32:
-                    case gpu::NINT32:
-                    case gpu::NUINT2:
-                    case gpu::NINT2_10_10_10:
-                    case gpu::COMPRESSED:
-                    case gpu::NUM_TYPES: // quiet compiler
-                        Q_UNREACHABLE();
+                        case gpu::UINT32:
+                            result = GL_RG32UI;
+                            break;
+                        case gpu::INT32:
+                            result = GL_RG32I;
+                            break;
+                        case gpu::FLOAT:
+                            result = GL_RG32F;
+                            break;
+                        case gpu::UINT16:
+                            result = GL_RG16UI;
+                            break;
+                        case gpu::INT16:
+                            result = GL_RG16I;
+                            break;
+                        case gpu::NUINT16:
+                            result = GL_RG16;
+                            break;
+                        case gpu::NINT16:
+                            result = GL_RG16_SNORM;
+                            break;
+                        case gpu::HALF:
+                            result = GL_RG16F;
+                            break;
+                        case gpu::UINT8:
+                            result = GL_RG8UI;
+                            break;
+                        case gpu::INT8:
+                            result = GL_RG8I;
+                            break;
+                        case gpu::NUINT8:
+                            result = GL_RG8;
+                            break;
+                        case gpu::NINT8:
+                            result = GL_RG8_SNORM;
+                            break;
+                        case gpu::NUINT32:
+                        case gpu::NINT32:
+                        case gpu::NUINT2:
+                        case gpu::NINT2_10_10_10:
+                        case gpu::COMPRESSED:
+                        case gpu::NUM_TYPES: // quiet compiler
+                            Q_UNREACHABLE();
                     }
                     break;
                 default:
@@ -419,584 +418,582 @@ GLTexelFormat GLTexelFormat::evalGLTexelFormat(const Element& dstFormat, const E
         GLTexelFormat texel = { GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE };
 
         switch (dstFormat.getDimension()) {
-        case gpu::SCALAR: {
-            texel.format = GL_RED;
-            texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
+            case gpu::SCALAR: {
+                texel.format = GL_RED;
+                texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
 
-            switch (dstFormat.getSemantic()) {
-            case gpu::RED:
-            case gpu::RGB:
-            case gpu::RGBA:
-                texel.internalFormat = GL_R8;
+                switch (dstFormat.getSemantic()) {
+                    case gpu::RED:
+                    case gpu::RGB:
+                    case gpu::RGBA:
+                        texel.internalFormat = GL_R8;
+                        break;
+
+                    case gpu::DEPTH:
+                        texel.format = GL_DEPTH_COMPONENT;
+                        texel.internalFormat = GL_DEPTH_COMPONENT32;
+                        break;
+
+                    case gpu::DEPTH_STENCIL:
+                        texel.type = GL_UNSIGNED_INT_24_8;
+                        texel.format = GL_DEPTH_STENCIL;
+                        texel.internalFormat = GL_DEPTH24_STENCIL8;
+                        break;
+                    default:
+                        qCWarning(gpugllogging) << "Unknown combination of texel format";
+                }
                 break;
-
-            case gpu::DEPTH:
-                texel.format = GL_DEPTH_COMPONENT;
-                texel.internalFormat = GL_DEPTH_COMPONENT32;
-                break;
-
-            case gpu::DEPTH_STENCIL:
-                texel.type = GL_UNSIGNED_INT_24_8;
-                texel.format = GL_DEPTH_STENCIL;
-                texel.internalFormat = GL_DEPTH24_STENCIL8;
-                break;
-            default:
-                qCWarning(gpugllogging) << "Unknown combination of texel format";
-            }
-            break;
-        }
-
-        case gpu::VEC2: {
-            texel.format = GL_RG;
-            texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
-
-            switch (dstFormat.getSemantic()) {
-            case gpu::RGB:
-            case gpu::RGBA:
-            case gpu::XY:
-                texel.internalFormat = GL_RG8;
-                break;
-            default:
-                qCWarning(gpugllogging) << "Unknown combination of texel format";
             }
 
-            break;
-        }
+            case gpu::VEC2: {
+                texel.format = GL_RG;
+                texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
 
-        case gpu::VEC3: {
-            texel.format = GL_RGB;
+                switch (dstFormat.getSemantic()) {
+                    case gpu::RGB:
+                    case gpu::RGBA:
+                    case gpu::XY:
+                        texel.internalFormat = GL_RG8;
+                        break;
+                    default:
+                        qCWarning(gpugllogging) << "Unknown combination of texel format";
+                }
 
-            texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
-
-            switch (dstFormat.getSemantic()) {
-            case gpu::RGB:
-            case gpu::RGBA:
-                texel.internalFormat = GL_RGB8;
                 break;
-            default:
-                qCWarning(gpugllogging) << "Unknown combination of texel format";
             }
 
-            break;
-        }
+            case gpu::VEC3: {
+                texel.format = GL_RGB;
 
-        case gpu::VEC4: {
-            texel.format = GL_RGBA;
-            texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
+                texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
 
-            switch (srcFormat.getSemantic()) {
-            case gpu::BGRA:
-            case gpu::SBGRA:
-#if defined(USE_GLES)
+                switch (dstFormat.getSemantic()) {
+                    case gpu::RGB:
+                    case gpu::RGBA:
+                        texel.internalFormat = GL_RGB8;
+                        break;
+                    default:
+                        qCWarning(gpugllogging) << "Unknown combination of texel format";
+                }
+
+                break;
+            }
+
+            case gpu::VEC4: {
                 texel.format = GL_RGBA;
+                texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
+
+                switch (srcFormat.getSemantic()) {
+                    case gpu::BGRA:
+                    case gpu::SBGRA:
+#if defined(USE_GLES)
+                        texel.format = GL_RGBA;
 #else
-                texel.format = GL_BGRA;
+                        texel.format = GL_BGRA;
 #endif
-                break;
-            case gpu::RGB:
-            case gpu::RGBA:
-            case gpu::SRGB:
-            case gpu::SRGBA:
-            default:
-                break;
-            };
+                        break;
+                    case gpu::RGB:
+                    case gpu::RGBA:
+                    case gpu::SRGB:
+                    case gpu::SRGBA:
+                    default:
+                        break;
+                };
 
-            switch (dstFormat.getSemantic()) {
-            case gpu::RGB:
-                texel.internalFormat = GL_RGB8;
+                switch (dstFormat.getSemantic()) {
+                    case gpu::RGB:
+                        texel.internalFormat = GL_RGB8;
+                        break;
+                    case gpu::RGBA:
+                        texel.internalFormat = GL_RGBA8;
+                        break;
+                    case gpu::SRGB:
+                        texel.internalFormat = GL_SRGB8;
+                        break;
+                    case gpu::SRGBA:
+                        texel.internalFormat = GL_SRGB8_ALPHA8;
+                        break;
+                    default:
+                        qCWarning(gpugllogging) << "Unknown combination of texel format";
+                }
+
                 break;
-            case gpu::RGBA:
-                texel.internalFormat = GL_RGBA8;
-                break;
-            case gpu::SRGB:
-                texel.internalFormat = GL_SRGB8;
-                break;
-            case gpu::SRGBA:
-                texel.internalFormat = GL_SRGB8_ALPHA8;
-                break;
-            default:
-                qCWarning(gpugllogging) << "Unknown combination of texel format";
             }
 
-            break;
-        }
+            case gpu::TILE4x4: {
+                texel.format = GL_RGBA;
+                texel.type = ELEMENT_TYPE_TO_GL[srcFormat.getType()];
 
-        case gpu::TILE4x4: {
-            texel.format = GL_RGBA;
-            texel.type = ELEMENT_TYPE_TO_GL[srcFormat.getType()];
-
-            switch (srcFormat.getSemantic()) {
-            case gpu::BGRA:
-            case gpu::SBGRA:
+                switch (srcFormat.getSemantic()) {
+                    case gpu::BGRA:
+                    case gpu::SBGRA:
 #if !defined(USE_GLES)
-                texel.format = GL_BGRA;
-                break;
+                        texel.format = GL_BGRA;
+                        break;
 #endif
-            case gpu::RGB:
-            case gpu::RGBA:
-            case gpu::SRGB:
-            case gpu::SRGBA:
-            default:
-                break;
-            };
+                    case gpu::RGB:
+                    case gpu::RGBA:
+                    case gpu::SRGB:
+                    case gpu::SRGBA:
+                    default:
+                        break;
+                };
 
-            switch (dstFormat.getSemantic()) {
-            case gpu::COMPRESSED_BC4_RED:
-                texel.internalFormat = GL_COMPRESSED_RED_RGTC1;
+                switch (dstFormat.getSemantic()) {
+                    case gpu::COMPRESSED_BC4_RED:
+                        texel.internalFormat = GL_COMPRESSED_RED_RGTC1;
+                        break;
+                    case gpu::COMPRESSED_BC1_SRGB:
+                        texel.internalFormat = GL_COMPRESSED_SRGB_S3TC_DXT1_EXT;
+                        break;
+                    case gpu::COMPRESSED_BC1_SRGBA:
+                        texel.internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+                        break;
+                    case gpu::COMPRESSED_BC3_SRGBA:
+                        texel.internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+                        break;
+                    case gpu::COMPRESSED_BC5_XY:
+                        texel.internalFormat = GL_COMPRESSED_RG_RGTC2;
+                        break;
+                    case gpu::COMPRESSED_BC6_RGB:
+                        texel.internalFormat = GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT;
+                        break;
+                    case gpu::COMPRESSED_BC7_SRGBA:
+                        texel.internalFormat = GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM;
+                        break;
+                    case gpu::COMPRESSED_ETC2_RGB:
+                        texel.internalFormat = GL_COMPRESSED_RGB8_ETC2;
+                        break;
+                    case gpu::COMPRESSED_ETC2_SRGB:
+                        texel.internalFormat = GL_COMPRESSED_SRGB8_ETC2;
+                        break;
+                    case gpu::COMPRESSED_ETC2_RGB_PUNCHTHROUGH_ALPHA:
+                        texel.internalFormat = GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+                        break;
+                    case gpu::COMPRESSED_ETC2_SRGB_PUNCHTHROUGH_ALPHA:
+                        texel.internalFormat = GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+                        break;
+                    case gpu::COMPRESSED_ETC2_RGBA:
+                        texel.internalFormat = GL_COMPRESSED_RGBA8_ETC2_EAC;
+                        break;
+                    case gpu::COMPRESSED_ETC2_SRGBA:
+                        texel.internalFormat = GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
+                        break;
+                    case gpu::COMPRESSED_EAC_RED:
+                        texel.internalFormat = GL_COMPRESSED_R11_EAC;
+                        break;
+                    case gpu::COMPRESSED_EAC_RED_SIGNED:
+                        texel.internalFormat = GL_COMPRESSED_SIGNED_R11_EAC;
+                        break;
+                    case gpu::COMPRESSED_EAC_XY:
+                        texel.internalFormat = GL_COMPRESSED_RG11_EAC;
+                        break;
+                    case gpu::COMPRESSED_EAC_XY_SIGNED:
+                        texel.internalFormat = GL_COMPRESSED_SIGNED_RG11_EAC;
+                        break;
+                    default:
+                        qCWarning(gpugllogging) << "Unknown combination of texel format";
+                }
                 break;
-            case gpu::COMPRESSED_BC1_SRGB:
-                texel.internalFormat = GL_COMPRESSED_SRGB_S3TC_DXT1_EXT;
-                break;
-            case gpu::COMPRESSED_BC1_SRGBA:
-                texel.internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
-                break;
-            case gpu::COMPRESSED_BC3_SRGBA:
-                texel.internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
-                break;
-            case gpu::COMPRESSED_BC5_XY:
-                texel.internalFormat = GL_COMPRESSED_RG_RGTC2;
-                break;
-            case gpu::COMPRESSED_BC6_RGB:
-                texel.internalFormat = GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT;
-                break;
-            case gpu::COMPRESSED_BC7_SRGBA:
-                texel.internalFormat = GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM;
-                break;
-            case gpu::COMPRESSED_ETC2_RGB:
-                texel.internalFormat = GL_COMPRESSED_RGB8_ETC2;
-                break;
-            case gpu::COMPRESSED_ETC2_SRGB:
-                texel.internalFormat = GL_COMPRESSED_SRGB8_ETC2;
-                break;
-            case gpu::COMPRESSED_ETC2_RGB_PUNCHTHROUGH_ALPHA:
-                texel.internalFormat = GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
-                break;
-            case gpu::COMPRESSED_ETC2_SRGB_PUNCHTHROUGH_ALPHA:
-                texel.internalFormat = GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2;
-                break;
-            case gpu::COMPRESSED_ETC2_RGBA:
-                texel.internalFormat = GL_COMPRESSED_RGBA8_ETC2_EAC;
-                break;
-            case gpu::COMPRESSED_ETC2_SRGBA:
-                texel.internalFormat = GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
-                break;
-            case gpu::COMPRESSED_EAC_RED:
-                texel.internalFormat = GL_COMPRESSED_R11_EAC;
-                break;
-            case gpu::COMPRESSED_EAC_RED_SIGNED:
-                texel.internalFormat = GL_COMPRESSED_SIGNED_R11_EAC;
-                break;
-            case gpu::COMPRESSED_EAC_XY:
-                texel.internalFormat = GL_COMPRESSED_RG11_EAC;
-                break;
-            case gpu::COMPRESSED_EAC_XY_SIGNED:
-                texel.internalFormat = GL_COMPRESSED_SIGNED_RG11_EAC;
-                break;
+            }
+
             default:
                 qCWarning(gpugllogging) << "Unknown combination of texel format";
-            }
-            break;
-        }
-
-        default:
-            qCWarning(gpugllogging) << "Unknown combination of texel format";
         }
         return texel;
     } else {
         GLTexelFormat texel = { GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE };
 
         switch (dstFormat.getDimension()) {
-        case gpu::SCALAR: {
-            texel.format = GL_RED;
-            texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
+            case gpu::SCALAR: {
+                texel.format = GL_RED;
+                texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
 
-            switch (dstFormat.getSemantic()) {
+                switch (dstFormat.getSemantic()) {
+                    case gpu::RED:
+                    case gpu::RGB:
+                    case gpu::RGBA:
+                    case gpu::SRGB:
+                    case gpu::SRGBA:
+                        texel.internalFormat = GL_RED;
+                        switch (dstFormat.getType()) {
+                            case gpu::UINT32: {
+                                texel.internalFormat = GL_R32UI;
+                                break;
+                            }
+                            case gpu::INT32: {
+                                texel.internalFormat = GL_R32I;
+                                break;
+                            }
+                            case gpu::NUINT32: {
+                                texel.internalFormat = GL_R8;
+                                break;
+                            }
+                            case gpu::NINT32: {
+                                texel.internalFormat = GL_R8_SNORM;
+                                break;
+                            }
+                            case gpu::FLOAT: {
+                                texel.internalFormat = GL_R32F;
+                                break;
+                            }
+                            case gpu::UINT16: {
+                                texel.internalFormat = GL_R16UI;
+                                break;
+                            }
+                            case gpu::INT16: {
+                                texel.internalFormat = GL_R16I;
+                                break;
+                            }
+                            case gpu::NUINT16: {
+                                texel.internalFormat = GL_R16;
+                                break;
+                            }
+                            case gpu::NINT16: {
+                                texel.internalFormat = GL_R16_SNORM;
+                                break;
+                            }
+                            case gpu::HALF: {
+                                texel.internalFormat = GL_R16F;
+                                break;
+                            }
+                            case gpu::UINT8: {
+                                texel.internalFormat = GL_R8UI;
+                                break;
+                            }
+                            case gpu::INT8: {
+                                texel.internalFormat = GL_R8I;
+                                break;
+                            }
+                            case gpu::NUINT8: {
+                                if ((dstFormat.getSemantic() == gpu::SRGB || dstFormat.getSemantic() == gpu::SRGBA)) {
+                                    texel.internalFormat = GL_SLUMINANCE8_EXT;
+                                } else {
+                                    texel.internalFormat = GL_R8;
+                                }
+                                break;
+                            }
+                            case gpu::NINT8: {
+                                texel.internalFormat = GL_R8_SNORM;
+                                break;
+                            }
+                            case gpu::COMPRESSED:
+                            case gpu::NUINT2:
+                            case gpu::NINT2_10_10_10:
+                            case gpu::NUM_TYPES: { // quiet compiler
+                                Q_UNREACHABLE();
+                            }
+                        }
+                        break;
 
-            case gpu::RED:
-            case gpu::RGB:
-            case gpu::RGBA:
-            case gpu::SRGB:
-            case gpu::SRGBA:
-                texel.internalFormat = GL_RED;
-                switch (dstFormat.getType()) {
-                case gpu::UINT32: {
-                    texel.internalFormat = GL_R32UI;
-                    break;
-                }
-                case gpu::INT32: {
-                    texel.internalFormat = GL_R32I;
-                    break;
-                }
-                case gpu::NUINT32: {
-                    texel.internalFormat = GL_R8;
-                    break;
-                }
-                case gpu::NINT32: {
-                    texel.internalFormat = GL_R8_SNORM;
-                    break;
-                }
-                case gpu::FLOAT: {
-                    texel.internalFormat = GL_R32F;
-                    break;
-                }
-                case gpu::UINT16: {
-                    texel.internalFormat = GL_R16UI;
-                    break;
-                }
-                case gpu::INT16: {
-                    texel.internalFormat = GL_R16I;
-                    break;
-                }
-                case gpu::NUINT16: {
-                    texel.internalFormat = GL_R16;
-                    break;
-                }
-                case gpu::NINT16: {
-                    texel.internalFormat = GL_R16_SNORM;
-                    break;
-                }
-                case gpu::HALF: {
-                    texel.internalFormat = GL_R16F;
-                    break;
-                }
-                case gpu::UINT8: {
-                    texel.internalFormat = GL_R8UI;
-                    break;
-                }
-                case gpu::INT8: {
-                    texel.internalFormat = GL_R8I;
-                    break;
-                }
-                case gpu::NUINT8: {
-                    if ((dstFormat.getSemantic() == gpu::SRGB || dstFormat.getSemantic() == gpu::SRGBA)) {
-                        texel.internalFormat = GL_SLUMINANCE8_EXT;
-                    } else {
-                        texel.internalFormat = GL_R8;
-                    }
-                    break;
-                }
-                case gpu::NINT8: {
-                    texel.internalFormat = GL_R8_SNORM;
-                    break;
-                }
-                case gpu::COMPRESSED:
-                case gpu::NUINT2:
-                case gpu::NINT2_10_10_10:
-                case gpu::NUM_TYPES: { // quiet compiler
-                    Q_UNREACHABLE();
+                    case gpu::R11G11B10:
+                        texel.format = GL_RGB;
+                        texel.type = GL_UNSIGNED_INT_10F_11F_11F_REV;
+                        texel.internalFormat = GL_R11F_G11F_B10F;
+                        break;
+
+                    case gpu::RGB9E5:
+                        texel.format = GL_RGB;
+                        texel.type = GL_UNSIGNED_INT_5_9_9_9_REV;
+                        texel.internalFormat = GL_RGB9_E5;
+                        break;
+
+                    case gpu::DEPTH:
+                        texel.format = GL_DEPTH_COMPONENT; // It's depth component to load it
+                        texel.internalFormat = GL_DEPTH_COMPONENT32;
+                        switch (dstFormat.getType()) {
+                            case gpu::UINT32:
+                            case gpu::INT32:
+                            case gpu::NUINT32:
+                            case gpu::NINT32: {
+                                texel.internalFormat = GL_DEPTH_COMPONENT32;
+                                break;
+                            }
+                            case gpu::FLOAT: {
+                                texel.internalFormat = GL_DEPTH_COMPONENT32F;
+                                break;
+                            }
+                            case gpu::UINT16:
+                            case gpu::INT16:
+                            case gpu::NUINT16:
+                            case gpu::NINT16:
+                            case gpu::HALF: {
+                                texel.internalFormat = GL_DEPTH_COMPONENT16;
+                                break;
+                            }
+                            case gpu::UINT8:
+                            case gpu::INT8:
+                            case gpu::NUINT8:
+                            case gpu::NINT8: {
+                                texel.internalFormat = GL_DEPTH_COMPONENT24;
+                                break;
+                            }
+                            case gpu::NINT2_10_10_10:
+                            case gpu::COMPRESSED:
+                            case gpu::NUINT2:
+                            case gpu::NUM_TYPES: { // quiet compiler
+                                Q_UNREACHABLE();
+                            }
+                        }
+                        break;
+                    case gpu::DEPTH_STENCIL:
+                        texel.type = GL_UNSIGNED_INT_24_8;
+                        texel.format = GL_DEPTH_STENCIL;
+                        texel.internalFormat = GL_DEPTH24_STENCIL8;
+                        break;
+                    default:
+                        qCWarning(gpugllogging) << "Unknown combination of texel format";
                 }
 
-                }
                 break;
+            }
 
-            case gpu::R11G11B10:
+            case gpu::VEC2: {
+                texel.format = GL_RG;
+                texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
+
+                switch (dstFormat.getSemantic()) {
+                    case gpu::RGB:
+                    case gpu::RGBA:
+                    case gpu::XY:
+                        switch (dstFormat.getType()) {
+                            case gpu::UINT32:
+                                texel.internalFormat = GL_RG32UI;
+                                break;
+                            case gpu::INT32:
+                                texel.internalFormat = GL_RG32I;
+                                break;
+                            case gpu::FLOAT:
+                                texel.internalFormat = GL_RG32F;
+                                break;
+                            case gpu::UINT16:
+                                texel.internalFormat = GL_RG16UI;
+                                break;
+                            case gpu::INT16:
+                                texel.internalFormat = GL_RG16I;
+                                break;
+                            case gpu::NUINT16:
+                                texel.internalFormat = GL_RG16;
+                                break;
+                            case gpu::NINT16:
+                                texel.internalFormat = GL_RG16_SNORM;
+                                break;
+                            case gpu::HALF:
+                                texel.type = GL_FLOAT;
+                                texel.internalFormat = GL_RG16F;
+                                break;
+                            case gpu::UINT8:
+                                texel.internalFormat = GL_RG8UI;
+                                break;
+                            case gpu::INT8:
+                                texel.internalFormat = GL_RG8I;
+                                break;
+                            case gpu::NUINT8:
+                                texel.internalFormat = GL_RG8;
+                                break;
+                            case gpu::NINT8:
+                                texel.internalFormat = GL_RG8_SNORM;
+                                break;
+                            case gpu::NUINT32:
+                            case gpu::NINT32:
+                            case gpu::NUINT2:
+                            case gpu::NINT2_10_10_10:
+                            case gpu::COMPRESSED:
+                            case gpu::NUM_TYPES: // quiet compiler
+                                Q_UNREACHABLE();
+                        }
+                        break;
+                    default:
+                        qCWarning(gpugllogging) << "Unknown combination of texel format";
+                }
+
+                break;
+            }
+
+            case gpu::VEC3: {
                 texel.format = GL_RGB;
-                texel.type = GL_UNSIGNED_INT_10F_11F_11F_REV;
-                texel.internalFormat = GL_R11F_G11F_B10F;
-                break;
 
-            case gpu::RGB9E5:
-                texel.format = GL_RGB;
-                texel.type = GL_UNSIGNED_INT_5_9_9_9_REV;
-                texel.internalFormat = GL_RGB9_E5;
-                break;
+                texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
 
-            case gpu::DEPTH:
-                texel.format = GL_DEPTH_COMPONENT; // It's depth component to load it
-                texel.internalFormat = GL_DEPTH_COMPONENT32;
-                switch (dstFormat.getType()) {
-                case gpu::UINT32:
-                case gpu::INT32:
-                case gpu::NUINT32:
-                case gpu::NINT32: {
-                    texel.internalFormat = GL_DEPTH_COMPONENT32;
-                    break;
-                }
-                case gpu::FLOAT: {
-                    texel.internalFormat = GL_DEPTH_COMPONENT32F;
-                    break;
-                }
-                case gpu::UINT16:
-                case gpu::INT16:
-                case gpu::NUINT16:
-                case gpu::NINT16:
-                case gpu::HALF: {
-                    texel.internalFormat = GL_DEPTH_COMPONENT16;
-                    break;
-                }
-                case gpu::UINT8:
-                case gpu::INT8:
-                case gpu::NUINT8:
-                case gpu::NINT8: {
-                    texel.internalFormat = GL_DEPTH_COMPONENT24;
-                    break;
-                }
-                case gpu::NINT2_10_10_10:
-                case gpu::COMPRESSED:
-                case gpu::NUINT2:
-                case gpu::NUM_TYPES: { // quiet compiler
-                    Q_UNREACHABLE();
-                }
+                switch (dstFormat.getSemantic()) {
+                    case gpu::RGB:
+                    case gpu::RGBA:
+                        texel.internalFormat = GL_RGB8;
+                        break;
+                    case gpu::SRGB:
+                    case gpu::SRGBA:
+                        texel.internalFormat = GL_SRGB8; // standard 2.2 gamma correction color
+                        break;
+                    default:
+                        qCWarning(gpugllogging) << "Unknown combination of texel format";
                 }
                 break;
-            case gpu::DEPTH_STENCIL:
-                texel.type = GL_UNSIGNED_INT_24_8;
-                texel.format = GL_DEPTH_STENCIL;
-                texel.internalFormat = GL_DEPTH24_STENCIL8;
-                break;
-            default:
-                qCWarning(gpugllogging) << "Unknown combination of texel format";
             }
 
-            break;
-        }
+            case gpu::VEC4: {
+                texel.format = GL_RGBA;
+                texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
 
-        case gpu::VEC2: {
-            texel.format = GL_RG;
-            texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
-
-            switch (dstFormat.getSemantic()) {
-            case gpu::RGB:
-            case gpu::RGBA:
-            case gpu::XY:
-                switch (dstFormat.getType()) {
-                case gpu::UINT32:
-                    texel.internalFormat = GL_RG32UI;
-                    break;
-                case gpu::INT32:
-                    texel.internalFormat = GL_RG32I;
-                    break;
-                case gpu::FLOAT:
-                    texel.internalFormat = GL_RG32F;
-                    break;
-                case gpu::UINT16:
-                    texel.internalFormat = GL_RG16UI;
-                    break;
-                case gpu::INT16:
-                    texel.internalFormat = GL_RG16I;
-                    break;
-                case gpu::NUINT16:
-                    texel.internalFormat = GL_RG16;
-                    break;
-                case gpu::NINT16:
-                    texel.internalFormat = GL_RG16_SNORM;
-                    break;
-                case gpu::HALF:
-                    texel.type = GL_FLOAT;
-                    texel.internalFormat = GL_RG16F;
-                    break;
-                case gpu::UINT8:
-                    texel.internalFormat = GL_RG8UI;
-                    break;
-                case gpu::INT8:
-                    texel.internalFormat = GL_RG8I;
-                    break;
-                case gpu::NUINT8:
-                    texel.internalFormat = GL_RG8;
-                    break;
-                case gpu::NINT8:
-                    texel.internalFormat = GL_RG8_SNORM;
-                    break;
-                case gpu::NUINT32:
-                case gpu::NINT32:
-                case gpu::NUINT2:
-                case gpu::NINT2_10_10_10:
-                case gpu::COMPRESSED:
-                case gpu::NUM_TYPES: // quiet compiler
-                    Q_UNREACHABLE();
+                switch (dstFormat.getSemantic()) {
+                    case gpu::RGB:
+                        texel.internalFormat = GL_RGB8;
+                        break;
+                    case gpu::RGBA:
+                        texel.internalFormat = GL_RGBA8;
+                        switch (dstFormat.getType()) {
+                            case gpu::UINT32:
+                                texel.format = GL_RGBA_INTEGER;
+                                texel.internalFormat = GL_RGBA32UI;
+                                break;
+                            case gpu::INT32:
+                                texel.format = GL_RGBA_INTEGER;
+                                texel.internalFormat = GL_RGBA32I;
+                                break;
+                            case gpu::FLOAT:
+                                texel.internalFormat = GL_RGBA32F;
+                                break;
+                            case gpu::UINT16:
+                                texel.format = GL_RGBA_INTEGER;
+                                texel.internalFormat = GL_RGBA16UI;
+                                break;
+                            case gpu::INT16:
+                                texel.format = GL_RGBA_INTEGER;
+                                texel.internalFormat = GL_RGBA16I;
+                                break;
+                            case gpu::NUINT16:
+                                texel.format = GL_RGBA;
+                                texel.internalFormat = GL_RGBA16;
+                                break;
+                            case gpu::NINT16:
+                                texel.format = GL_RGBA;
+                                texel.internalFormat = GL_RGBA16_SNORM;
+                                break;
+                            case gpu::HALF:
+                                texel.format = GL_RGBA;
+                                texel.internalFormat = GL_RGBA16F;
+                                break;
+                            case gpu::UINT8:
+                                texel.format = GL_RGBA_INTEGER;
+                                texel.internalFormat = GL_RGBA8UI;
+                                break;
+                            case gpu::INT8:
+                                texel.format = GL_RGBA_INTEGER;
+                                texel.internalFormat = GL_RGBA8I;
+                                break;
+                            case gpu::NUINT8:
+                                texel.format = GL_RGBA;
+                                texel.internalFormat = GL_RGBA8;
+                                break;
+                            case gpu::NINT8:
+                                texel.format = GL_RGBA;
+                                texel.internalFormat = GL_RGBA8_SNORM;
+                                break;
+                            case gpu::NUINT2:
+                                texel.format = GL_RGBA;
+                                texel.internalFormat = GL_RGBA2;
+                                break;
+                            case gpu::NINT2_10_10_10:
+                                texel.format = GL_RGBA;
+                                texel.internalFormat = GL_RGB10_A2;
+                                break;
+                            case gpu::NUINT32:
+                            case gpu::NINT32:
+                            case gpu::COMPRESSED:
+                            case gpu::NUM_TYPES: // quiet compiler
+                                Q_UNREACHABLE();
+                        }
+                        break;
+                    case gpu::SRGB:
+                        texel.internalFormat = GL_SRGB8;
+                        break;
+                    case gpu::SRGBA:
+                        texel.internalFormat = GL_SRGB8_ALPHA8; // standard 2.2 gamma correction color
+                        break;
+                    default:
+                        qCWarning(gpugllogging) << "Unknown combination of texel format";
                 }
                 break;
-            default:
-                qCWarning(gpugllogging) << "Unknown combination of texel format";
             }
 
-            break;
-        }
+            case gpu::TILE4x4: {
+                texel.format = GL_RGBA;
+                texel.type = ELEMENT_TYPE_TO_GL[srcFormat.getType()];
 
-        case gpu::VEC3: {
-            texel.format = GL_RGB;
-
-            texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
-
-            switch (dstFormat.getSemantic()) {
-            case gpu::RGB:
-            case gpu::RGBA:
-                texel.internalFormat = GL_RGB8;
-                break;
-            case gpu::SRGB:
-            case gpu::SRGBA:
-                texel.internalFormat = GL_SRGB8; // standard 2.2 gamma correction color
-                break;
-            default:
-                qCWarning(gpugllogging) << "Unknown combination of texel format";
-            }
-            break;
-        }
-
-        case gpu::VEC4: {
-            texel.format = GL_RGBA;
-            texel.type = ELEMENT_TYPE_TO_GL[dstFormat.getType()];
-
-            switch (dstFormat.getSemantic()) {
-            case gpu::RGB:
-                texel.internalFormat = GL_RGB8;
-                break;
-            case gpu::RGBA:
-                texel.internalFormat = GL_RGBA8;
-                switch (dstFormat.getType()) {
-                case gpu::UINT32:
-                    texel.format = GL_RGBA_INTEGER;
-                    texel.internalFormat = GL_RGBA32UI;
-                    break;
-                case gpu::INT32:
-                    texel.format = GL_RGBA_INTEGER;
-                    texel.internalFormat = GL_RGBA32I;
-                    break;
-                case gpu::FLOAT:
-                    texel.internalFormat = GL_RGBA32F;
-                    break;
-                case gpu::UINT16:
-                    texel.format = GL_RGBA_INTEGER;
-                    texel.internalFormat = GL_RGBA16UI;
-                    break;
-                case gpu::INT16:
-                    texel.format = GL_RGBA_INTEGER;
-                    texel.internalFormat = GL_RGBA16I;
-                    break;
-                case gpu::NUINT16:
-                    texel.format = GL_RGBA;
-                    texel.internalFormat = GL_RGBA16;
-                    break;
-                case gpu::NINT16:
-                    texel.format = GL_RGBA;
-                    texel.internalFormat = GL_RGBA16_SNORM;
-                    break;
-                case gpu::HALF:
-                    texel.format = GL_RGBA;
-                    texel.internalFormat = GL_RGBA16F;
-                    break;
-                case gpu::UINT8:
-                    texel.format = GL_RGBA_INTEGER;
-                    texel.internalFormat = GL_RGBA8UI;
-                    break;
-                case gpu::INT8:
-                    texel.format = GL_RGBA_INTEGER;
-                    texel.internalFormat = GL_RGBA8I;
-                    break;
-                case gpu::NUINT8:
-                    texel.format = GL_RGBA;
-                    texel.internalFormat = GL_RGBA8;
-                    break;
-                case gpu::NINT8:
-                    texel.format = GL_RGBA;
-                    texel.internalFormat = GL_RGBA8_SNORM;
-                    break;
-                case gpu::NUINT2:
-                    texel.format = GL_RGBA;
-                    texel.internalFormat = GL_RGBA2;
-                    break;
-                case gpu::NINT2_10_10_10:
-                    texel.format = GL_RGBA;
-                    texel.internalFormat = GL_RGB10_A2;
-                    break;
-                case gpu::NUINT32:
-                case gpu::NINT32:
-                case gpu::COMPRESSED:
-                case gpu::NUM_TYPES: // quiet compiler
-                    Q_UNREACHABLE();
-                }
-                break;
-            case gpu::SRGB:
-                texel.internalFormat = GL_SRGB8;
-                break;
-            case gpu::SRGBA:
-                texel.internalFormat = GL_SRGB8_ALPHA8; // standard 2.2 gamma correction color
-                break;
-            default:
-                qCWarning(gpugllogging) << "Unknown combination of texel format";
-            }
-            break;
-        }
-
-        case gpu::TILE4x4: {
-            texel.format = GL_RGBA;
-            texel.type = ELEMENT_TYPE_TO_GL[srcFormat.getType()];
-
-            switch (srcFormat.getSemantic()) {
-            case gpu::BGRA:
-            case gpu::SBGRA:
+                switch (srcFormat.getSemantic()) {
+                    case gpu::BGRA:
+                    case gpu::SBGRA:
 #if !defined(USE_GLES)
-                texel.format = GL_BGRA;
-                break;
+                        texel.format = GL_BGRA;
+                        break;
 #endif
-            case gpu::RGB:
-            case gpu::RGBA:
-            case gpu::SRGB:
-            case gpu::SRGBA:
-            default:
-                break;
-            };
+                    case gpu::RGB:
+                    case gpu::RGBA:
+                    case gpu::SRGB:
+                    case gpu::SRGBA:
+                    default:
+                        break;
+                };
 
-            switch (dstFormat.getSemantic()) {
-            case gpu::COMPRESSED_BC4_RED:
-                texel.internalFormat = GL_COMPRESSED_RED_RGTC1;
+                switch (dstFormat.getSemantic()) {
+                    case gpu::COMPRESSED_BC4_RED:
+                        texel.internalFormat = GL_COMPRESSED_RED_RGTC1;
+                        break;
+                    case gpu::COMPRESSED_BC1_SRGB:
+                        texel.internalFormat = GL_COMPRESSED_SRGB_S3TC_DXT1_EXT;
+                        break;
+                    case gpu::COMPRESSED_BC1_SRGBA:
+                        texel.internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+                        break;
+                    case gpu::COMPRESSED_BC3_SRGBA:
+                        texel.internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+                        break;
+                    case gpu::COMPRESSED_BC5_XY:
+                        texel.internalFormat = GL_COMPRESSED_RG_RGTC2;
+                        break;
+                    case gpu::COMPRESSED_BC6_RGB:
+                        texel.internalFormat = GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT;
+                        break;
+                    case gpu::COMPRESSED_BC7_SRGBA:
+                        texel.internalFormat = GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM;
+                        break;
+                    case gpu::COMPRESSED_ETC2_RGB:
+                        texel.internalFormat = GL_COMPRESSED_RGB8_ETC2;
+                        break;
+                    case gpu::COMPRESSED_ETC2_SRGB:
+                        texel.internalFormat = GL_COMPRESSED_SRGB8_ETC2;
+                        break;
+                    case gpu::COMPRESSED_ETC2_RGB_PUNCHTHROUGH_ALPHA:
+                        texel.internalFormat = GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+                        break;
+                    case gpu::COMPRESSED_ETC2_SRGB_PUNCHTHROUGH_ALPHA:
+                        texel.internalFormat = GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+                        break;
+                    case gpu::COMPRESSED_ETC2_RGBA:
+                        texel.internalFormat = GL_COMPRESSED_RGBA8_ETC2_EAC;
+                        break;
+                    case gpu::COMPRESSED_ETC2_SRGBA:
+                        texel.internalFormat = GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
+                        break;
+                    case gpu::COMPRESSED_EAC_RED:
+                        texel.internalFormat = GL_COMPRESSED_R11_EAC;
+                        break;
+                    case gpu::COMPRESSED_EAC_RED_SIGNED:
+                        texel.internalFormat = GL_COMPRESSED_SIGNED_R11_EAC;
+                        break;
+                    case gpu::COMPRESSED_EAC_XY:
+                        texel.internalFormat = GL_COMPRESSED_RG11_EAC;
+                        break;
+                    case gpu::COMPRESSED_EAC_XY_SIGNED:
+                        texel.internalFormat = GL_COMPRESSED_SIGNED_RG11_EAC;
+                        break;
+                    default:
+                        qCWarning(gpugllogging) << "Unknown combination of texel format";
+                }
                 break;
-            case gpu::COMPRESSED_BC1_SRGB:
-                texel.internalFormat = GL_COMPRESSED_SRGB_S3TC_DXT1_EXT;
-                break;
-            case gpu::COMPRESSED_BC1_SRGBA:
-                texel.internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
-                break;
-            case gpu::COMPRESSED_BC3_SRGBA:
-                texel.internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
-                break;
-            case gpu::COMPRESSED_BC5_XY:
-                texel.internalFormat = GL_COMPRESSED_RG_RGTC2;
-                break;
-            case gpu::COMPRESSED_BC6_RGB:
-                texel.internalFormat = GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT;
-                break;
-            case gpu::COMPRESSED_BC7_SRGBA:
-                texel.internalFormat = GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM;
-                break;
-            case gpu::COMPRESSED_ETC2_RGB:
-                texel.internalFormat = GL_COMPRESSED_RGB8_ETC2;
-                break;
-            case gpu::COMPRESSED_ETC2_SRGB:
-                texel.internalFormat = GL_COMPRESSED_SRGB8_ETC2;
-                break;
-            case gpu::COMPRESSED_ETC2_RGB_PUNCHTHROUGH_ALPHA:
-                texel.internalFormat = GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
-                break;
-            case gpu::COMPRESSED_ETC2_SRGB_PUNCHTHROUGH_ALPHA:
-                texel.internalFormat = GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2;
-                break;
-            case gpu::COMPRESSED_ETC2_RGBA:
-                texel.internalFormat = GL_COMPRESSED_RGBA8_ETC2_EAC;
-                break;
-            case gpu::COMPRESSED_ETC2_SRGBA:
-                texel.internalFormat = GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
-                break;
-            case gpu::COMPRESSED_EAC_RED:
-                texel.internalFormat = GL_COMPRESSED_R11_EAC;
-                break;
-            case gpu::COMPRESSED_EAC_RED_SIGNED:
-                texel.internalFormat = GL_COMPRESSED_SIGNED_R11_EAC;
-                break;
-            case gpu::COMPRESSED_EAC_XY:
-                texel.internalFormat = GL_COMPRESSED_RG11_EAC;
-                break;
-            case gpu::COMPRESSED_EAC_XY_SIGNED:
-                texel.internalFormat = GL_COMPRESSED_SIGNED_RG11_EAC;
-                break;
+            }
+
             default:
                 qCWarning(gpugllogging) << "Unknown combination of texel format";
-            }
-            break;
-        }
-
-        default:
-            qCWarning(gpugllogging) << "Unknown combination of texel format";
         }
         return texel;
     }

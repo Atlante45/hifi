@@ -12,10 +12,10 @@
 
 #include <glm/glm.hpp>
 
-#include <unordered_set>
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <unordered_set>
 
 #include <QtQml/QJSValue>
 #include <QtScript/QScriptValue>
@@ -23,181 +23,183 @@
 #include <DependencyManager.h>
 #include <RegisteredMetaTypes.h>
 
+#include "Actions.h"
+#include "DeviceProxy.h"
 #include "Forward.h"
-#include "Pose.h"
 #include "Input.h"
 #include "InputDevice.h"
-#include "DeviceProxy.h"
+#include "Pose.h"
 #include "StandardControls.h"
-#include "Actions.h"
 #include "StateController.h"
 
 namespace controller {
 
-    class RouteBuilderProxy;
-    class MappingBuilderProxy;
+class RouteBuilderProxy;
+class MappingBuilderProxy;
 
-    class UserInputMapper : public QObject, public Dependency {
-        Q_OBJECT
-        SINGLETON_DEPENDENCY
-        Q_ENUMS(Action)
+class UserInputMapper : public QObject, public Dependency {
+    Q_OBJECT
+    SINGLETON_DEPENDENCY
+    Q_ENUMS(Action)
 
-    public:
-        // FIXME move to unordered set / map
-        using EndpointToInputMap = std::map<EndpointPointer, Input>;
-        using MappingNameMap = std::map<QString, MappingPointer>;
-        using MappingDeviceMap = std::map<uint16_t, MappingPointer>;
-        using MappingStack = std::list<MappingPointer>;
-        using InputToEndpointMap = std::map<Input, EndpointPointer>;
-        using EndpointSet = std::unordered_set<EndpointPointer>;
-        using EndpointPair = std::pair<EndpointPointer, EndpointPointer>;
-        using EndpointPairMap = std::map<EndpointPair, EndpointPointer>;
-        using DevicesMap = std::map<int, InputDevice::Pointer>;
-        using uint16 = uint16_t;
-        using uint32 = uint32_t;
+public:
+    // FIXME move to unordered set / map
+    using EndpointToInputMap = std::map<EndpointPointer, Input>;
+    using MappingNameMap = std::map<QString, MappingPointer>;
+    using MappingDeviceMap = std::map<uint16_t, MappingPointer>;
+    using MappingStack = std::list<MappingPointer>;
+    using InputToEndpointMap = std::map<Input, EndpointPointer>;
+    using EndpointSet = std::unordered_set<EndpointPointer>;
+    using EndpointPair = std::pair<EndpointPointer, EndpointPointer>;
+    using EndpointPairMap = std::map<EndpointPair, EndpointPointer>;
+    using DevicesMap = std::map<int, InputDevice::Pointer>;
+    using uint16 = uint16_t;
+    using uint32 = uint32_t;
 
-        static const uint16_t STANDARD_DEVICE;
-        static const uint16_t ACTIONS_DEVICE;
-        static const uint16_t STATE_DEVICE;
+    static const uint16_t STANDARD_DEVICE;
+    static const uint16_t ACTIONS_DEVICE;
+    static const uint16_t STATE_DEVICE;
 
-        UserInputMapper();
-        virtual ~UserInputMapper();
+    UserInputMapper();
+    virtual ~UserInputMapper();
 
+    static void registerControllerTypes(QScriptEngine* engine);
 
-        static void registerControllerTypes(QScriptEngine* engine);
+    void registerDevice(InputDevice::Pointer device);
+    InputDevice::Pointer getDevice(const Input& input);
+    QString getDeviceName(uint16 deviceID);
 
-        void registerDevice(InputDevice::Pointer device);
-        InputDevice::Pointer getDevice(const Input& input);
-        QString getDeviceName(uint16 deviceID);
+    Input::NamedVector getAvailableInputs(uint16 deviceID) const;
+    Input::NamedVector getActionInputs() const { return getAvailableInputs(ACTIONS_DEVICE); }
+    Input::NamedVector getStandardInputs() const { return getAvailableInputs(STANDARD_DEVICE); }
 
-        Input::NamedVector getAvailableInputs(uint16 deviceID) const;
-        Input::NamedVector getActionInputs() const { return getAvailableInputs(ACTIONS_DEVICE); }
-        Input::NamedVector getStandardInputs() const { return getAvailableInputs(STANDARD_DEVICE); }
+    int findDevice(QString name) const;
+    QVector<QString> getDeviceNames();
+    Input findDeviceInput(const QString& inputName) const;
 
-        int findDevice(QString name) const;
-        QVector<QString> getDeviceNames();
-        Input findDeviceInput(const QString& inputName) const;
+    QVector<Action> getAllActions() const;
+    QString getActionName(Action action) const;
+    QString getStandardPoseName(uint16_t pose);
+    float getActionState(Action action) const { return _actionStates[toInt(action)]; }
+    Pose getPoseState(Action action) const;
+    int findAction(const QString& actionName) const;
+    QVector<QString> getActionNames() const;
+    Input inputFromAction(Action action) const { return getActionInputs()[toInt(action)].first; }
 
-        QVector<Action> getAllActions() const;
-        QString getActionName(Action action) const;
-        QString getStandardPoseName(uint16_t pose);
-        float getActionState(Action action) const { return _actionStates[toInt(action)]; }
-        Pose getPoseState(Action action) const;
-        int findAction(const QString& actionName) const;
-        QVector<QString> getActionNames() const;
-        Input inputFromAction(Action action) const { return getActionInputs()[toInt(action)].first; }
+    void setActionState(Action action, float value) { _actionStates[toInt(action)] = value; }
+    void deltaActionState(Action action, float delta) { _actionStates[toInt(action)] += delta; }
+    void setActionState(Action action, const Pose& value) { _poseStates[toInt(action)] = value; }
+    bool triggerHapticPulse(float strength, float duration, controller::Hand hand);
+    bool triggerHapticPulseOnDevice(uint16 deviceID, float strength, float duration, controller::Hand hand);
 
-        void setActionState(Action action, float value) { _actionStates[toInt(action)] = value; }
-        void deltaActionState(Action action, float delta) { _actionStates[toInt(action)] += delta; }
-        void setActionState(Action action, const Pose& value) { _poseStates[toInt(action)] = value; }
-        bool triggerHapticPulse(float strength, float duration, controller::Hand hand);
-        bool triggerHapticPulseOnDevice(uint16 deviceID, float strength, float duration, controller::Hand hand);
+    static Input makeStandardInput(controller::StandardButtonChannel button);
+    static Input makeStandardInput(controller::StandardAxisChannel axis);
+    static Input makeStandardInput(controller::StandardPoseChannel pose);
 
-        static Input makeStandardInput(controller::StandardButtonChannel button);
-        static Input makeStandardInput(controller::StandardAxisChannel axis);
-        static Input makeStandardInput(controller::StandardPoseChannel pose);
+    void removeDevice(int device);
 
-        void removeDevice(int device);
+    // Update means go grab all the device input channels and update the output channel values
+    void update(float deltaTime);
 
-        // Update means go grab all the device input channels and update the output channel values
-        void update(float deltaTime);
+    const DevicesMap& getDevices() { return _registeredDevices; }
+    uint16 getStandardDeviceID() const { return STANDARD_DEVICE; }
+    InputDevice::Pointer getStandardDevice() { return _registeredDevices[getStandardDeviceID()]; }
+    StateController::Pointer getStateDevice() { return _stateDevice; }
 
-        const DevicesMap& getDevices() { return _registeredDevices; }
-        uint16 getStandardDeviceID() const { return STANDARD_DEVICE; }
-        InputDevice::Pointer getStandardDevice() { return _registeredDevices[getStandardDeviceID()]; }
-        StateController::Pointer getStateDevice() { return _stateDevice; }
+    MappingPointer newMapping(const QString& mappingName);
+    MappingPointer parseMapping(const QString& json);
+    MappingPointer loadMapping(const QString& jsonFile, bool enable = false);
+    MappingPointer loadMappings(const QStringList& jsonFiles);
 
-        MappingPointer newMapping(const QString& mappingName);
-        MappingPointer parseMapping(const QString& json);
-        MappingPointer loadMapping(const QString& jsonFile, bool enable = false);
-        MappingPointer loadMappings(const QStringList& jsonFiles);
+    void loadDefaultMapping(uint16 deviceID);
+    void enableMapping(const QString& mappingName, bool enable = true);
 
-        void loadDefaultMapping(uint16 deviceID);
-        void enableMapping(const QString& mappingName, bool enable = true);
+    void setInputCalibrationData(const InputCalibrationData& data) { inputCalibrationData = data; }
+    const InputCalibrationData& getInputCalibrationData() { return inputCalibrationData; }
 
-        void setInputCalibrationData(const InputCalibrationData& data) { inputCalibrationData = data; }
-        const InputCalibrationData& getInputCalibrationData() { return inputCalibrationData; }
+    void unloadMappings(const QStringList& jsonFiles);
+    void unloadMapping(const QString& jsonFile);
 
-        void unloadMappings(const QStringList& jsonFiles);
-        void unloadMapping(const QString& jsonFile);
+    AxisValue getValue(const Input& input) const;
+    Pose getPose(const Input& input) const;
 
-        AxisValue getValue(const Input& input) const;
-        Pose getPose(const Input& input) const;
+    // perform an action when the UserInputMapper mutex is acquired.
+    using Locker = std::unique_lock<std::recursive_mutex>;
+    template<typename F>
+    void withLock(F&& f) {
+        Locker locker(_lock);
+        f();
+    }
 
-        // perform an action when the UserInputMapper mutex is acquired.
-        using Locker = std::unique_lock<std::recursive_mutex>;
-        template <typename F>
-        void withLock(F&& f) { Locker locker(_lock); f(); }
+    EndpointPointer endpointFor(const Input& endpoint) const;
 
-        EndpointPointer endpointFor(const Input& endpoint) const;
+signals:
+    void actionEvent(int action, float state);
+    void inputEvent(int input, float state);
+    void hardwareChanged();
 
-    signals:
-        void actionEvent(int action, float state);
-        void inputEvent(int input, float state);
-        void hardwareChanged();
+protected:
+    // GetFreeDeviceID should be called before registering a device to use an ID not used by a different device.
+    uint16 getFreeDeviceID() { return _nextFreeDeviceID++; }
+    DevicesMap _registeredDevices;
+    StateController::Pointer _stateDevice;
+    uint16 _nextFreeDeviceID = STANDARD_DEVICE + 1;
 
-    protected:
-        // GetFreeDeviceID should be called before registering a device to use an ID not used by a different device.
-        uint16 getFreeDeviceID() { return _nextFreeDeviceID++; }
-        DevicesMap _registeredDevices;
-        StateController::Pointer _stateDevice;
-        uint16 _nextFreeDeviceID = STANDARD_DEVICE + 1;
+    std::vector<float> _actionStates = std::vector<float>(toInt(Action::NUM_ACTIONS), 0.0f);
+    std::vector<float> _actionScales = std::vector<float>(toInt(Action::NUM_ACTIONS), 1.0f);
+    std::vector<float> _lastActionStates = std::vector<float>(toInt(Action::NUM_ACTIONS), 0.0f);
+    std::vector<Pose> _poseStates = std::vector<Pose>(toInt(Action::NUM_ACTIONS));
+    std::vector<AxisValue> _lastStandardStates = std::vector<AxisValue>();
 
-        std::vector<float> _actionStates = std::vector<float>(toInt(Action::NUM_ACTIONS), 0.0f);
-        std::vector<float> _actionScales = std::vector<float>(toInt(Action::NUM_ACTIONS), 1.0f);
-        std::vector<float> _lastActionStates = std::vector<float>(toInt(Action::NUM_ACTIONS), 0.0f);
-        std::vector<Pose> _poseStates = std::vector<Pose>(toInt(Action::NUM_ACTIONS));
-        std::vector<AxisValue> _lastStandardStates = std::vector<AxisValue>();
+    static AxisValue getValue(const EndpointPointer& endpoint, bool peek = false);
+    static Pose getPose(const EndpointPointer& endpoint, bool peek = false);
 
-        static AxisValue getValue(const EndpointPointer& endpoint, bool peek = false);
-        static Pose getPose(const EndpointPointer& endpoint, bool peek = false);
+    friend class RouteBuilderProxy;
+    friend class MappingBuilderProxy;
 
-        friend class RouteBuilderProxy;
-        friend class MappingBuilderProxy;
+    void runMappings();
 
-        void runMappings();
+    static void applyRoutes(const RouteList& route);
+    static bool applyRoute(const RoutePointer& route, bool force = false);
+    void enableMapping(const MappingPointer& mapping);
+    void disableMapping(const MappingPointer& mapping);
+    EndpointPointer endpointFor(const QJSValue& endpoint);
+    EndpointPointer endpointFor(const QScriptValue& endpoint);
+    EndpointPointer compositeEndpointFor(EndpointPointer first, EndpointPointer second);
+    ConditionalPointer conditionalFor(const QJSValue& endpoint);
+    ConditionalPointer conditionalFor(const QScriptValue& endpoint);
+    ConditionalPointer conditionalFor(const Input& endpoint) const;
 
-        static void applyRoutes(const RouteList& route);
-        static bool applyRoute(const RoutePointer& route, bool force = false);
-        void enableMapping(const MappingPointer& mapping);
-        void disableMapping(const MappingPointer& mapping);
-        EndpointPointer endpointFor(const QJSValue& endpoint);
-        EndpointPointer endpointFor(const QScriptValue& endpoint);
-        EndpointPointer compositeEndpointFor(EndpointPointer first, EndpointPointer second);
-        ConditionalPointer conditionalFor(const QJSValue& endpoint);
-        ConditionalPointer conditionalFor(const QScriptValue& endpoint);
-        ConditionalPointer conditionalFor(const Input& endpoint) const;
-        
-        MappingPointer parseMapping(const QJsonValue& json);
-        RoutePointer parseRoute(const QJsonValue& value);
-        EndpointPointer parseDestination(const QJsonValue& value);
-        EndpointPointer parseSource(const QJsonValue& value);
-        EndpointPointer parseAxis(const QJsonValue& value);
-        EndpointPointer parseAny(const QJsonValue& value);
-        EndpointPointer parseEndpoint(const QJsonValue& value);
-        ConditionalPointer parseConditional(const QJsonValue& value);
+    MappingPointer parseMapping(const QJsonValue& json);
+    RoutePointer parseRoute(const QJsonValue& value);
+    EndpointPointer parseDestination(const QJsonValue& value);
+    EndpointPointer parseSource(const QJsonValue& value);
+    EndpointPointer parseAxis(const QJsonValue& value);
+    EndpointPointer parseAny(const QJsonValue& value);
+    EndpointPointer parseEndpoint(const QJsonValue& value);
+    ConditionalPointer parseConditional(const QJsonValue& value);
 
-        static FilterPointer parseFilter(const QJsonValue& value);
-        static FilterList parseFilters(const QJsonValue& value);
+    static FilterPointer parseFilter(const QJsonValue& value);
+    static FilterList parseFilters(const QJsonValue& value);
 
-        InputToEndpointMap _endpointsByInput;
-        EndpointToInputMap _inputsByEndpoint;
-        EndpointPairMap _compositeEndpoints;
+    InputToEndpointMap _endpointsByInput;
+    EndpointToInputMap _inputsByEndpoint;
+    EndpointPairMap _compositeEndpoints;
 
-        MappingNameMap _mappingsByName;
-        MappingDeviceMap _mappingsByDevice;
+    MappingNameMap _mappingsByName;
+    MappingDeviceMap _mappingsByDevice;
 
-        RouteList _deviceRoutes;
-        RouteList _standardRoutes;
+    RouteList _deviceRoutes;
+    RouteList _standardRoutes;
 
-        QSet<QString> _loadedRouteJsonFiles;
+    QSet<QString> _loadedRouteJsonFiles;
 
-        InputCalibrationData inputCalibrationData;
+    InputCalibrationData inputCalibrationData;
 
-        mutable std::recursive_mutex _lock;
-    };
+    mutable std::recursive_mutex _lock;
+};
 
-}
+} // namespace controller
 
 Q_DECLARE_METATYPE(controller::Input::NamedPair)
 Q_DECLARE_METATYPE(controller::Pose)

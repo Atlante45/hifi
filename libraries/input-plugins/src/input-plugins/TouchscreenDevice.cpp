@@ -11,15 +11,15 @@
 #include "TouchscreenDevice.h"
 #include "KeyboardMouseDevice.h"
 
-#include <QtGui/QTouchEvent>
 #include <QGestureEvent>
 #include <QGuiApplication>
-#include <QWindow>
 #include <QScreen>
+#include <QWindow>
+#include <QtGui/QTouchEvent>
 
-#include <controllers/UserInputMapper.h>
-#include <PathUtils.h>
 #include <NumericalConstants.h>
+#include <PathUtils.h>
+#include <controllers/UserInputMapper.h>
 
 const char* TouchscreenDevice::NAME = "Touchscreen";
 
@@ -34,9 +34,7 @@ bool TouchscreenDevice::isSupported() const {
 
 void TouchscreenDevice::pluginUpdate(float deltaTime, const controller::InputCalibrationData& inputCalibrationData) {
     auto userInputMapper = DependencyManager::get<controller::UserInputMapper>();
-    userInputMapper->withLock([&, this]() {
-        _inputDevice->update(deltaTime, inputCalibrationData);
-    });
+    userInputMapper->withLock([&, this]() { _inputDevice->update(deltaTime, inputCalibrationData); });
 
     float distanceScaleX, distanceScaleY;
     if (_touchPointCount == 1) {
@@ -55,7 +53,7 @@ void TouchscreenDevice::pluginUpdate(float deltaTime, const controller::InputCal
             distanceScaleY = (_currentTouchVec.y - _firstTouchVec.y) / _screenDPIScale.y;
             _inputDevice->_axisStateMap[_inputDevice->makeInput(TOUCH_AXIS_Y_NEG).getChannel()].value = distanceScaleY;
         }
-    } else  if (_touchPointCount == 2) {
+    } else if (_touchPointCount == 2) {
         if (_pinchScale > _lastPinchScale && _pinchScale != 0) {
             _inputDevice->_axisStateMap[_inputDevice->makeInput(TOUCH_GESTURE_PINCH_POS).getChannel()].value = 1.0f;
         } else if (_pinchScale != 0) {

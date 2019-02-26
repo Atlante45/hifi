@@ -9,21 +9,21 @@
 #include "SharedObject.h"
 
 #include <QtCore/qlogging.h>
-#include <QtQuick/QQuickWindow>
-#include <QtQuick/QQuickItem>
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlEngine>
+#include <QtQuick/QQuickItem>
+#include <QtQuick/QQuickWindow>
 
-#include <QtGui/QOpenGLContext>
 #include <QPointer>
+#include <QtGui/QOpenGLContext>
 
 #include <NumericalConstants.h>
-#include <shared/NsightHelpers.h>
-#include <gl/QOpenGLContextWrapper.h>
 #include <gl/GLHelpers.h>
+#include <gl/QOpenGLContextWrapper.h>
+#include <shared/NsightHelpers.h>
 
-#include "../OffscreenSurface.h"
 #include "../Logging.h"
+#include "../OffscreenSurface.h"
 
 #include "Profiling.h"
 #include "RenderControl.h"
@@ -77,7 +77,6 @@ SharedObject::SharedObject() {
 
     QObject::connect(qApp, &QCoreApplication::aboutToQuit, this, &SharedObject::onAboutToQuit);
 }
-
 
 SharedObject::~SharedObject() {
     // After destroy returns, the rendering thread should be gone
@@ -173,7 +172,6 @@ void SharedObject::setRootItem(QQuickItem* rootItem) {
     QObject::connect(_renderControl, &QQuickRenderControl::renderRequested, this, &SharedObject::requestRender);
     QObject::connect(_renderControl, &QQuickRenderControl::sceneChanged, this, &SharedObject::requestRenderSync);
 #endif
-
 }
 
 void SharedObject::destroy() {
@@ -210,7 +208,7 @@ void SharedObject::destroy() {
     }
     // Block until the rendering thread has stopped
     // FIXME this is undesirable because this is blocking the main thread,
-    // but I haven't found a reliable way to do this only at application 
+    // but I haven't found a reliable way to do this only at application
     // shutdown
     if (_renderThread) {
         _renderThread->wait();
@@ -220,13 +218,11 @@ void SharedObject::destroy() {
 #endif
 }
 
-
 #define SINGLE_QML_ENGINE 0
 
-
 #if SINGLE_QML_ENGINE
-static QQmlEngine* globalEngine{ nullptr };
-static size_t globalEngineRefCount{ 0 };
+static QQmlEngine* globalEngine { nullptr };
+static size_t globalEngineRefCount { 0 };
 #endif
 
 QQmlEngine* SharedObject::acquireEngine(OffscreenSurface* surface) {
@@ -304,7 +300,7 @@ void SharedObject::releaseTextureAndFence() {
     // If the most recent texture was unused, we can directly recycle it
     if (_latestTextureAndFence.first) {
         getTextureCache().releaseTexture(_latestTextureAndFence);
-        _latestTextureAndFence = TextureAndFence{ 0, 0 };
+        _latestTextureAndFence = TextureAndFence { 0, 0 };
     }
 #endif
 }
@@ -422,8 +418,7 @@ bool SharedObject::fetchTexture(TextureAndFence& textureAndFence) {
     return true;
 }
 
-void hifi::qml::impl::SharedObject::addToDeletionList(QObject * object)
-{
+void hifi::qml::impl::SharedObject::addToDeletionList(QObject* object) {
     _deletionList.append(QPointer<QObject>(object));
 }
 
@@ -458,7 +453,7 @@ void SharedObject::onInitialize() {
     QObject::connect(_renderTimer, &QTimer::timeout, this, &SharedObject::onTimer);
 
     _renderTimer->setTimerType(Qt::PreciseTimer);
-    _renderTimer->setInterval(MIN_TIMER_MS);  // 5ms, Qt::PreciseTimer required
+    _renderTimer->setInterval(MIN_TIMER_MS); // 5ms, Qt::PreciseTimer required
     _renderTimer->start();
 #endif
 }

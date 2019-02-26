@@ -11,9 +11,9 @@
 #define hifi_Controllers_Filter_h
 
 #include <list>
+#include <map>
 #include <memory>
 #include <numeric>
-#include <map>
 
 #include <shared/Factory.h>
 
@@ -28,42 +28,42 @@ class QJsonValue;
 
 namespace controller {
 
-    // Encapsulates part of a filter chain
-    class Filter {
-    public:
-        using Pointer = std::shared_ptr<Filter>;
-        using List = std::list<Pointer>;
-        using Lambda = std::function<float(float)>;
-        using Factory = hifi::SimpleFactory<Filter, QString>;
+// Encapsulates part of a filter chain
+class Filter {
+public:
+    using Pointer = std::shared_ptr<Filter>;
+    using List = std::list<Pointer>;
+    using Lambda = std::function<float(float)>;
+    using Factory = hifi::SimpleFactory<Filter, QString>;
 
-        virtual ~Filter() = default;
+    virtual ~Filter() = default;
 
-        virtual AxisValue apply(AxisValue value) const = 0;
-        virtual Pose apply(Pose value) const = 0;
+    virtual AxisValue apply(AxisValue value) const = 0;
+    virtual Pose apply(Pose value) const = 0;
 
-        // Factory features
-        virtual bool parseParameters(const QJsonValue& parameters) { return true; }
+    // Factory features
+    virtual bool parseParameters(const QJsonValue& parameters) { return true; }
 
-        static Pointer parse(const QJsonValue& json);
-        static void registerBuilder(const QString& name, Factory::Builder builder);
-        static Factory& getFactory() { return _factory; }
+    static Pointer parse(const QJsonValue& json);
+    static void registerBuilder(const QString& name, Factory::Builder builder);
+    static Factory& getFactory() { return _factory; }
 
-        static bool parseSingleFloatParameter(const QJsonValue& parameters, const QString& name, float& output);
-        static bool parseVec3Parameter(const QJsonValue& parameters, glm::vec3& output);
-        static bool parseQuatParameter(const QJsonValue& parameters, glm::quat& output);
-        static bool parseMat4Parameter(const QJsonValue& parameters, glm::mat4& output);
-    protected:
-        static Factory _factory;
-    };
-}
+    static bool parseSingleFloatParameter(const QJsonValue& parameters, const QString& name, float& output);
+    static bool parseVec3Parameter(const QJsonValue& parameters, glm::vec3& output);
+    static bool parseQuatParameter(const QJsonValue& parameters, glm::quat& output);
+    static bool parseMat4Parameter(const QJsonValue& parameters, glm::mat4& output);
 
-#define REGISTER_FILTER_CLASS(classEntry) \
-    private: \
-    using Registrar = Filter::Factory::Registrar<classEntry>; \
+protected:
+    static Factory _factory;
+};
+} // namespace controller
+
+#define REGISTER_FILTER_CLASS(classEntry)                                                                                      \
+private:                                                                                                                       \
+    using Registrar = Filter::Factory::Registrar<classEntry>;                                                                  \
     static Registrar _registrar;
 
-#define REGISTER_FILTER_CLASS_INSTANCE(classEntry, className) \
+#define REGISTER_FILTER_CLASS_INSTANCE(classEntry, className)                                                                  \
     classEntry::Registrar classEntry::_registrar(className, Filter::getFactory());
-
 
 #endif

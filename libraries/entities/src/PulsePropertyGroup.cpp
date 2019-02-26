@@ -58,8 +58,8 @@ void PulsePropertyGroup::setAlphaModeFromString(const QString& pulseMode) {
 }
 
 void PulsePropertyGroup::copyToScriptValue(const EntityPropertyFlags& desiredProperties, QScriptValue& properties,
-                                          QScriptEngine* engine, bool skipDefaults,
-                                          EntityItemProperties& defaultEntityProperties) const {
+                                           QScriptEngine* engine, bool skipDefaults,
+                                           EntityItemProperties& defaultEntityProperties) const {
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_PULSE_MIN, Pulse, pulse, Min, min);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_PULSE_MAX, Pulse, pulse, Max, max);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_PULSE_PERIOD, Pulse, pulse, Period, period);
@@ -110,13 +110,9 @@ void PulsePropertyGroup::listChangedProperties(QList<QString>& out) {
     }
 }
 
-bool PulsePropertyGroup::appendToEditPacket(OctreePacketData* packetData,
-                                           EntityPropertyFlags& requestedProperties,
-                                           EntityPropertyFlags& propertyFlags,
-                                           EntityPropertyFlags& propertiesDidntFit,
-                                           int& propertyCount,
-                                           OctreeElement::AppendState& appendState) const {
-
+bool PulsePropertyGroup::appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+                                            EntityPropertyFlags& propertyFlags, EntityPropertyFlags& propertiesDidntFit,
+                                            int& propertyCount, OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_PULSE_MIN, getMin());
@@ -128,9 +124,8 @@ bool PulsePropertyGroup::appendToEditPacket(OctreePacketData* packetData,
     return true;
 }
 
-bool PulsePropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyFlags,
-                                             const unsigned char*& dataAt , int& processedBytes) {
-
+bool PulsePropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt,
+                                              int& processedBytes) {
     int bytesRead = 0;
     bool overwriteLocalData = true;
     bool somethingChanged = false;
@@ -207,13 +202,10 @@ EntityPropertyFlags PulsePropertyGroup::getEntityProperties(EncodeBitstreamParam
 }
 
 void PulsePropertyGroup::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
-                                           EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                           EntityPropertyFlags& requestedProperties,
-                                           EntityPropertyFlags& propertyFlags,
-                                           EntityPropertyFlags& propertiesDidntFit,
-                                           int& propertyCount,
-                                           OctreeElement::AppendState& appendState) const {
-
+                                            EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
+                                            EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                            EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                            OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_PULSE_MIN, getMin());
@@ -224,10 +216,8 @@ void PulsePropertyGroup::appendSubclassData(OctreePacketData* packetData, Encode
 }
 
 int PulsePropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                        ReadBitstreamToTreeParams& args,
-                                                        EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                        bool& somethingChanged) {
-
+                                                         ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                         bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 
@@ -241,9 +231,6 @@ int PulsePropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* da
 }
 
 bool PulsePropertyGroup::operator==(const PulsePropertyGroup& a) const {
-    return (a._min == _min) &&
-           (a._max == _max) &&
-           (a._period == _period) &&
-           (a._colorMode == _colorMode) &&
+    return (a._min == _min) && (a._max == _max) && (a._period == _period) && (a._colorMode == _colorMode) &&
            (a._alphaMode == _alphaMode);
 }

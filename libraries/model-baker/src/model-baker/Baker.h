@@ -21,20 +21,20 @@
 #include "ParseMaterialMappingTask.h"
 
 namespace baker {
-    class Baker {
-    public:
-        Baker(const hfm::Model::Pointer& hfmModel, const QVariantHash& mapping);
+class Baker {
+public:
+    Baker(const hfm::Model::Pointer& hfmModel, const QVariantHash& mapping);
 
-        void run();
+    void run();
 
-        // Outputs, available after run() is called
-        hfm::Model::Pointer hfmModel;
-        MaterialMapping materialMapping;
+    // Outputs, available after run() is called
+    hfm::Model::Pointer hfmModel;
+    MaterialMapping materialMapping;
 
-    protected:
-        EnginePointer _engine;
-    };
-
+protected:
+    EnginePointer _engine;
 };
 
-#endif //hifi_baker_Baker_h
+}; // namespace baker
+
+#endif // hifi_baker_Baker_h

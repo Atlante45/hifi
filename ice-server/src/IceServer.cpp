@@ -22,8 +22,8 @@
 #include <LimitedNodeList.h>
 #include <NetworkAccessManager.h>
 #include <NetworkingConstants.h>
-#include <udt/PacketHeaders.h>
 #include <SharedUtil.h>
+#include <udt/PacketHeaders.h>
 
 const int CLEAR_INACTIVE_PEERS_INTERVAL_MSECS = 1 * 1000;
 const int PEER_SILENCE_THRESHOLD_MSECS = 5 * 1000;
@@ -32,15 +32,14 @@ IceServer::IceServer(int argc, char* argv[]) :
     QCoreApplication(argc, argv),
     _id(QUuid::createUuid()),
     _serverSocket(0, false),
-    _activePeers()
-{
+    _activePeers() {
     // start the ice-server socket
     qDebug() << "ice-server socket is listening on" << ICE_SERVER_DEFAULT_PORT;
     _serverSocket.bind(QHostAddress::AnyIPv4, ICE_SERVER_DEFAULT_PORT);
 
     // set processPacket as the verified packet callback for the udt::Socket
-    _serverSocket.setPacketHandler([this](std::unique_ptr<udt::Packet> packet) { processPacket(std::move(packet));  });
-    
+    _serverSocket.setPacketHandler([this](std::unique_ptr<udt::Packet> packet) { processPacket(std::move(packet)); });
+
     // set packetVersionMatch as the verify packet operator for the udt::Socket
     using std::placeholders::_1;
     _serverSocket.setPacketFilterOperator(std::bind(&IceServer::packetVersionMatch, this, _1));
@@ -58,7 +57,7 @@ IceServer::IceServer(int argc, char* argv[]) :
 bool IceServer::packetVersionMatch(const udt::Packet& packet) {
     PacketType headerType = NLPacket::typeInHeader(packet);
     PacketVersion headerVersion = NLPacket::versionInHeader(packet);
-    
+
     if (headerVersion == versionForPacketType(headerType)) {
         return true;
     } else {
@@ -67,12 +66,10 @@ bool IceServer::packetVersionMatch(const udt::Packet& packet) {
 }
 
 void IceServer::processPacket(std::unique_ptr<udt::Packet> packet) {
-
     auto nlPacket = NLPacket::fromBase(std::move(packet));
-    
+
     // make sure that this packet at least looks like something we can read
     if (nlPacket->getPayloadSize() >= NLPacket::localHeaderSize(PacketType::ICEServerHeartbeat)) {
-        
         if (nlPacket->getType() == PacketType::ICEServerHeartbeat) {
             SharedNetworkPeer peer = addOrUpdateHeartbeatingPeer(*nlPacket);
             if (peer) {
@@ -84,37 +81,37 @@ void IceServer::processPacket(std::unique_ptr<udt::Packet> packet) {
                 static auto ackPacket = NLPacket::create(PacketType::ICEServerHeartbeatACK);
                 _serverSocket.writePacket(*ackPacket, nlPacket->getSenderSockAddr());
             } else {
-                // we couldn't verify this peer - respond back to them so they know they may need to perform keypair re-generation
+                // we couldn't verify this peer - respond back to them so they know they may need to perform keypair
+                // re-generation
                 static auto deniedPacket = NLPacket::create(PacketType::ICEServerHeartbeatDenied);
                 _serverSocket.writePacket(*deniedPacket, nlPacket->getSenderSockAddr());
             }
         } else if (nlPacket->getType() == PacketType::ICEServerQuery) {
             QDataStream heartbeatStream(nlPacket.get());
-            
+
             // this is a node hoping to connect to a heartbeating peer - do we have the heartbeating peer?
             QUuid senderUUID;
             heartbeatStream >> senderUUID;
-            
+
             // pull the public and private sock addrs for this peer
             HifiSockAddr publicSocket, localSocket;
             heartbeatStream >> publicSocket >> localSocket;
-            
+
             // check if this node also included a UUID that they would like to connect to
             QUuid connectRequestID;
             heartbeatStream >> connectRequestID;
-            
+
             SharedNetworkPeer matchingPeer = _activePeers.value(connectRequestID);
-            
+
             if (matchingPeer) {
-                
                 qDebug() << "Sending information for peer" << connectRequestID << "to peer" << senderUUID;
-                
+
                 // we have the peer they want to connect to - send them pack the information for that peer
                 sendPeerInformationPacket(*matchingPeer, &nlPacket->getSenderSockAddr());
-                
+
                 // we also need to send them to the active peer they are hoping to connect to
                 // create a dummy peer object we can pass to sendPeerInformationPacket
-                
+
                 NetworkPeer dummyPeer(senderUUID, publicSocket, localSocket);
                 sendPeerInformationPacket(dummyPeer, matchingPeer->getActiveSocket());
             } else {
@@ -125,7 +122,6 @@ void IceServer::processPacket(std::unique_ptr<udt::Packet> packet) {
 }
 
 SharedNetworkPeer IceServer::addOrUpdateHeartbeatingPeer(NLPacket& packet) {
-
     // pull the UUID, public and private sock addrs for this peer
     QUuid senderUUID;
     HifiSockAddr publicSocket, localSocket;
@@ -156,7 +152,7 @@ SharedNetworkPeer IceServer::addOrUpdateHeartbeatingPeer(NLPacket& packet) {
 
         // update our last heard microstamp for this network peer to now
         matchingPeer->setLastHeardMicrostamp(usecTimestampNow());
-        
+
         return matchingPeer;
     } else {
         // not verified, return the empty peer object
@@ -170,7 +166,6 @@ bool IceServer::isVerifiedHeartbeat(const QUuid& domainID, const QByteArray& pla
         // check if we have a public key for this domain ID - if we do not then fire off the request for it
         auto it = _domainPublicKeys.find(domainID);
         if (it != _domainPublicKeys.end()) {
-
             // attempt to verify the signature for this heartbeat
             const auto rsaPublicKey = it->second.get();
 
@@ -180,8 +175,7 @@ bool IceServer::isVerifiedHeartbeat(const QUuid& domainID, const QByteArray& pla
                                                     reinterpret_cast<const unsigned char*>(hashedPlaintext.constData()),
                                                     hashedPlaintext.size(),
                                                     reinterpret_cast<const unsigned char*>(signature.constData()),
-                                                    signature.size(),
-                                                    rsaPublicKey);
+                                                    signature.size(), rsaPublicKey);
 
                 if (verificationResult == 1) {
                     // this is the only success case - we return true here to indicate that the heartbeat is verified
@@ -244,7 +238,6 @@ void IceServer::publicKeyReplyFinished(QNetworkReply* reply) {
         if (responseObject[STATUS_KEY].toString() == SUCCESS_VALUE) {
             auto dataObject = responseObject[DATA_KEY].toObject();
             if (dataObject.contains(PUBLIC_KEY_KEY)) {
-
                 // grab the base 64 public key from the API response
                 auto apiPublicKey = QByteArray::fromBase64(dataObject[PUBLIC_KEY_KEY].toString().toUtf8());
 
@@ -271,7 +264,7 @@ void IceServer::publicKeyReplyFinished(QNetworkReply* reply) {
         // there was a problem getting the public key for the domain
         // log it since it will be re-requested on the next heartbeat
 
-        qWarning() << "Error retreiving public key for domain with ID" << domainID << "-" <<  reply->errorString();
+        qWarning() << "Error retreiving public key for domain with ID" << domainID << "-" << reply->errorString();
     }
 
     // remove this domain ID from the list of pending public key requests
@@ -285,7 +278,7 @@ void IceServer::sendPeerInformationPacket(const NetworkPeer& peer, const HifiSoc
 
     // get the byte array for this peer
     peerPacket->write(peer.toByteArray());
-    
+
     // write the current packet
     _serverSocket.writePacket(*peerPacket, *destinationSockAddr);
 }

@@ -23,8 +23,7 @@ public:
     TextOverlay(const TextOverlay* textOverlay);
 
     TextOverlay* createClone() const override;
-    QSizeF textSize(const QString& text) const;  // Pixels
+    QSizeF textSize(const QString& text) const; // Pixels
 };
 
- 
 #endif // hifi_TextOverlay_h

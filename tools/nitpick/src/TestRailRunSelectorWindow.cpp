@@ -13,7 +13,7 @@
 
 #include <cmath>
 
-TestRailRunSelectorWindow::TestRailRunSelectorWindow(QWidget *parent) {
+TestRailRunSelectorWindow::TestRailRunSelectorWindow(QWidget* parent) {
     setupUi(this);
 
     projectIDLineEdit->setValidator(new QIntValidator(1, 999, this));

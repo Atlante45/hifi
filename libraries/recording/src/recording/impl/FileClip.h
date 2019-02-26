@@ -31,6 +31,6 @@ private:
     QFile _file;
 };
 
-}
+} // namespace recording
 
 #endif

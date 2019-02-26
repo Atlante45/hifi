@@ -10,17 +10,17 @@
 //
 #include "Scene.h"
 
-#include <numeric>
 #include <gpu/Batch.h>
+#include <numeric>
+#include "HighlightStage.h"
 #include "Logging.h"
 #include "TransitionStage.h"
-#include "HighlightStage.h"
 
 using namespace render;
 
 void Transaction::resetItem(ItemID id, const PayloadPointer& payload) {
     if (payload) {
-        _resetItems.emplace_back(Reset{ id, payload });
+        _resetItems.emplace_back(Reset { id, payload });
     } else {
         qCDebug(renderlogging) << "WARNING: Transaction::resetItem with a null payload!";
         removeItem(id);
@@ -56,7 +56,7 @@ void Transaction::resetSelection(const Selection& selection) {
 }
 
 void Transaction::resetSelectionHighlight(const std::string& selectionName, const HighlightStyle& style) {
-    _highlightResets.emplace_back(selectionName, style );
+    _highlightResets.emplace_back(selectionName, style);
 }
 
 void Transaction::removeHighlightFromSelection(const std::string& selectionName) {
@@ -111,7 +111,6 @@ void Transaction::merge(const std::vector<Transaction>& transactionContainer) {
     }
 }
 
-
 void Transaction::merge(std::vector<Transaction>&& transactionContainer) {
     reserve(transactionContainer);
     auto begin = std::make_move_iterator(transactionContainer.begin());
@@ -122,18 +121,16 @@ void Transaction::merge(std::vector<Transaction>&& transactionContainer) {
     transactionContainer.clear();
 }
 
-
-template <typename T>
+template<typename T>
 void moveElements(T& target, T& source) {
     target.insert(target.end(), std::make_move_iterator(source.begin()), std::make_move_iterator(source.end()));
     source.clear();
 }
 
-template <typename T>
+template<typename T>
 void copyElements(T& target, const T& source) {
     target.insert(target.end(), source.begin(), source.end());
 }
-
 
 void Transaction::merge(Transaction&& transaction) {
     moveElements(_resetItems, transaction._resetItems);
@@ -174,10 +171,7 @@ void Transaction::clear() {
     _highlightQueries.clear();
 }
 
-
-Scene::Scene(glm::vec3 origin, float size) :
-    _masterSpatialTree(origin, size)
-{
+Scene::Scene(glm::vec3 origin, float size) : _masterSpatialTree(origin, size) {
     _items.push_back(Item()); // add the itemID #0 to nothing
 }
 
@@ -223,7 +217,6 @@ uint32_t Scene::enqueueFrame() {
     return ++_transactionFrameNumber;
 }
 
- 
 void Scene::processTransactionQueue() {
     PROFILE_RANGE(render, __FUNCTION__);
 
@@ -246,7 +239,7 @@ void Scene::processTransactionFrame(const Transaction& transaction) {
     PROFILE_RANGE(render, __FUNCTION__);
     {
         std::unique_lock<std::mutex> lock(_itemsMutex);
-        // Here we should be able to check the value of last ItemID allocated 
+        // Here we should be able to check the value of last ItemID allocated
         // and allocate new items accordingly
         ItemID maxID = _IDAllocator.load();
         if (maxID > _items.size()) {
@@ -392,9 +385,11 @@ void Scene::transitionItems(const Transaction::TransitionAdds& transactions) {
         // Remove pre-existing transition, if need be
         if (!TransitionStage::isIndexInvalid(transitionId)) {
             // Only remove if:
-            // transitioning to something other than none or we're transitioning to none from ELEMENT_LEAVE_DOMAIN or USER_LEAVE_DOMAIN
+            // transitioning to something other than none or we're transitioning to none from ELEMENT_LEAVE_DOMAIN or
+            // USER_LEAVE_DOMAIN
             const auto& oldTransitionType = transitionStage->getTransition(transitionId).eventType;
-            if (transitionType != Transition::NONE || !(oldTransitionType == Transition::ELEMENT_LEAVE_DOMAIN || oldTransitionType == Transition::USER_LEAVE_DOMAIN)) {
+            if (transitionType != Transition::NONE || !(oldTransitionType == Transition::ELEMENT_LEAVE_DOMAIN ||
+                                                        oldTransitionType == Transition::USER_LEAVE_DOMAIN)) {
                 resetItemTransition(itemId);
             }
         }
@@ -576,7 +571,6 @@ StagePointer Scene::getStage(const Stage::Name& name) const {
     } else {
         return (*found).second;
     }
-
 }
 
 void Scene::resetStage(const Stage::Name& name, const StagePointer& stage) {

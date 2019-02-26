@@ -13,30 +13,30 @@
 
 namespace controller {
 
-    class ExponentialSmoothingFilter : public Filter {
-        REGISTER_FILTER_CLASS(ExponentialSmoothingFilter);
+class ExponentialSmoothingFilter : public Filter {
+    REGISTER_FILTER_CLASS(ExponentialSmoothingFilter);
 
-    public:
-        ExponentialSmoothingFilter() {}
-        ExponentialSmoothingFilter(float rotationConstant, float translationConstant) :
-            _translationConstant(translationConstant), _rotationConstant(rotationConstant) {}
+public:
+    ExponentialSmoothingFilter() {}
+    ExponentialSmoothingFilter(float rotationConstant, float translationConstant) :
+        _translationConstant(translationConstant),
+        _rotationConstant(rotationConstant) {}
 
-        AxisValue apply(AxisValue value) const override { return value; }
-        Pose apply(Pose value) const override;
-        bool parseParameters(const QJsonValue& parameters) override;
+    AxisValue apply(AxisValue value) const override { return value; }
+    Pose apply(Pose value) const override;
+    bool parseParameters(const QJsonValue& parameters) override;
 
-    private:
+private:
+    // Constant between 0 and 1.
+    // 1 indicates no smoothing at all, poses are passed through unaltered.
+    // Values near 1 are less smooth with lower latency.
+    // Values near 0 are more smooth with higher latency.
+    float _translationConstant { 0.375f };
+    float _rotationConstant { 0.375f };
 
-        // Constant between 0 and 1.
-        // 1 indicates no smoothing at all, poses are passed through unaltered.
-        // Values near 1 are less smooth with lower latency.
-        // Values near 0 are more smooth with higher latency.
-        float _translationConstant { 0.375f };
-        float _rotationConstant { 0.375f };
+    mutable Pose _prevSensorValue { Pose() }; // sensor space
+};
 
-        mutable Pose _prevSensorValue { Pose() };  // sensor space
-    };
-
-}
+} // namespace controller
 
 #endif

@@ -9,11 +9,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #include "AssetServer.h"
 
-#include <thread>
 #include <memory>
+#include <thread>
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QCryptographicHash>
@@ -25,14 +24,14 @@
 #include <QtCore/QJsonDocument>
 #include <QtCore/QSaveFile>
 #include <QtCore/QString>
-#include <QtGui/QImageReader>
-#include <QtCore/QVector>
 #include <QtCore/QUrlQuery>
+#include <QtCore/QVector>
+#include <QtGui/QImageReader>
 
 #include <ClientServerUtils.h>
 #include <NodeType.h>
-#include <SharedUtil.h>
 #include <PathUtils.h>
+#include <SharedUtil.h>
 #include <image/Image.h>
 
 #include "AssetServerLogging.h"
@@ -49,7 +48,7 @@ static const int INTERFACE_RUNNING_CHECK_FREQUENCY_MS = 1000;
 
 static const QStringList BAKEABLE_MODEL_EXTENSIONS = { "fbx" };
 static QStringList BAKEABLE_TEXTURE_EXTENSIONS;
-static const QStringList BAKEABLE_SCRIPT_EXTENSIONS = { };
+static const QStringList BAKEABLE_SCRIPT_EXTENSIONS = {};
 
 static const QString BAKED_MODEL_SIMPLE_NAME = "asset.fbx";
 static const QString BAKED_TEXTURE_SIMPLE_NAME = "texture.ktx";
@@ -109,7 +108,8 @@ BakeVersion currentBakeVersionForAssetType(BakedAssetType type) {
 
 const QString ASSET_SERVER_LOGGING_TARGET_NAME = "asset-server";
 
-void AssetServer::bakeAsset(const AssetUtils::AssetHash& assetHash, const AssetUtils::AssetPath& assetPath, const QString& filePath) {
+void AssetServer::bakeAsset(const AssetUtils::AssetHash& assetHash, const AssetUtils::AssetPath& assetPath,
+                            const QString& filePath) {
     qDebug() << "Starting bake for: " << assetPath << assetHash;
     auto it = _pendingBakes.find(assetHash);
     if (it == _pendingBakes.end()) {
@@ -131,7 +131,8 @@ QString AssetServer::getPathToAssetHash(const AssetUtils::AssetHash& assetHash) 
     return _filesDirectory.absoluteFilePath(assetHash);
 }
 
-std::pair<AssetUtils::BakingStatus, QString> AssetServer::getAssetStatus(const AssetUtils::AssetPath& path, const AssetUtils::AssetHash& hash) {
+std::pair<AssetUtils::BakingStatus, QString> AssetServer::getAssetStatus(const AssetUtils::AssetPath& path,
+                                                                         const AssetUtils::AssetHash& hash) {
     auto it = _pendingBakes.find(hash);
     if (it != _pendingBakes.end()) {
         return { (*it)->isBaking() ? AssetUtils::Baking : AssetUtils::Pending, "" };
@@ -177,7 +178,7 @@ std::pair<AssetUtils::BakingStatus, QString> AssetServer::getAssetStatus(const A
             return { AssetUtils::Error, meta.lastBakeErrors };
         }
     }
-    
+
     return { AssetUtils::Pending, "" };
 }
 
@@ -200,7 +201,7 @@ void AssetServer::maybeBake(const AssetUtils::AssetPath& path, const AssetUtils:
 void AssetServer::createEmptyMetaFile(const AssetUtils::AssetHash& hash) {
     QString metaFilePath = "atp:/" + hash + "/meta.json";
     QFile metaFile { metaFilePath };
-    
+
     if (!metaFile.exists()) {
         qDebug() << "Creating metafile for " << hash;
         if (metaFile.open(QFile::WriteOnly)) {
@@ -280,18 +281,16 @@ void updateConsumedCores() {
     auto coreCount = std::thread::hardware_concurrency();
     if (isInterfaceRunning) {
         coreCount = coreCount > MIN_CORES_FOR_MULTICORE ? CPU_AFFINITY_COUNT_HIGH : CPU_AFFINITY_COUNT_LOW;
-    } 
+    }
     qCDebug(asset_server) << "Setting max consumed cores to " << coreCount;
     setMaxCores(coreCount);
 }
-
 
 AssetServer::AssetServer(ReceivedMessage& message) :
     ThreadedAssignment(message),
     _transferTaskPool(this),
     _bakingTaskPool(this),
-    _filesizeLimit(AssetUtils::MAX_UPLOAD_SIZE)
-{
+    _filesizeLimit(AssetUtils::MAX_UPLOAD_SIZE) {
     BAKEABLE_TEXTURE_EXTENSIONS = image::getSupportedFormats();
     qDebug() << "Supported baking texture formats:" << BAKEABLE_MODEL_EXTENSIONS;
 
@@ -303,17 +302,15 @@ AssetServer::AssetServer(ReceivedMessage& message) :
 
     // Queue all requests until the Asset Server is fully setup
     auto& packetReceiver = DependencyManager::get<NodeList>()->getPacketReceiver();
-    packetReceiver.registerListenerForTypes({ PacketType::AssetGet, PacketType::AssetGetInfo, PacketType::AssetUpload, PacketType::AssetMappingOperation }, this, "queueRequests");
+    packetReceiver.registerListenerForTypes({ PacketType::AssetGet, PacketType::AssetGetInfo, PacketType::AssetUpload,
+                                              PacketType::AssetMappingOperation },
+                                            this, "queueRequests");
 
 #ifdef Q_OS_WIN
     updateConsumedCores();
     QTimer* timer = new QTimer(this);
-    auto timerConnection = connect(timer, &QTimer::timeout, [] {
-        updateConsumedCores();
-    });
-    connect(qApp, &QCoreApplication::aboutToQuit, [this, timerConnection] {
-        disconnect(timerConnection);
-    });
+    auto timerConnection = connect(timer, &QTimer::timeout, [] { updateConsumedCores(); });
+    connect(qApp, &QCoreApplication::aboutToQuit, [this, timerConnection] { disconnect(timerConnection); });
     timer->setInterval(INTERFACE_RUNNING_CHECK_FREQUENCY_MS);
     timer->setTimerType(Qt::CoarseTimer);
     timer->start();
@@ -321,14 +318,13 @@ AssetServer::AssetServer(ReceivedMessage& message) :
 }
 
 void AssetServer::aboutToFinish() {
-
     // remove pending transfer tasks
     _transferTaskPool.clear();
 
     // abort each of our still running bake tasks, remove pending bakes that were never put on the thread pool
     auto it = _pendingBakes.begin();
     while (it != _pendingBakes.end()) {
-        auto pendingRunnable =  _bakingTaskPool.tryTake(it->get());
+        auto pendingRunnable = _bakingTaskPool.tryTake(it->get());
 
         if (pendingRunnable) {
             it = _pendingBakes.erase(it);
@@ -346,7 +342,6 @@ void AssetServer::aboutToFinish() {
 }
 
 void AssetServer::run() {
-
     qCDebug(asset_server) << "Waiting for connection to domain to request settings from domain-server.";
 
     // wait until we have the domain-server settings, otherwise we bail
@@ -368,7 +363,8 @@ void AssetServer::completeSetup() {
     static const QString ASSET_SERVER_SETTINGS_KEY = "asset_server";
 
     if (!settingsObject.contains(ASSET_SERVER_SETTINGS_KEY)) {
-        qCCritical(asset_server) << "Received settings from the domain-server with no asset-server section. Stopping assignment.";
+        qCCritical(asset_server)
+            << "Received settings from the domain-server with no asset-server section. Stopping assignment.";
         setFinished(true);
         return;
     }
@@ -383,8 +379,10 @@ void AssetServer::completeSetup() {
     if (maxBandwidthFloat > 0.0) {
         int maxBandwidth = maxBandwidthFloat * BITS_PER_MEGABITS;
         nodeList->setConnectionMaxBandwidth(maxBandwidth);
-        qCInfo(asset_server) << "Set maximum bandwith per connection to" << maxBandwidthFloat << "Mb/s."
-                    " (" << maxBandwidth << "bits/s)";
+        qCInfo(asset_server) << "Set maximum bandwith per connection to" << maxBandwidthFloat
+                             << "Mb/s."
+                                " ("
+                             << maxBandwidth << "bits/s)";
     }
 
     // get the path to the asset folder from the domain server settings
@@ -392,7 +390,8 @@ void AssetServer::completeSetup() {
     auto assetsJSONValue = assetServerObject[ASSETS_PATH_OPTION];
 
     if (!assetsJSONValue.isString()) {
-        qCCritical(asset_server) << "Received an assets path from the domain-server that could not be parsed. Stopping assignment.";
+        qCCritical(asset_server)
+            << "Received an assets path from the domain-server that could not be parsed. Stopping assignment.";
         setFinished(true);
         return;
     }
@@ -567,8 +566,8 @@ void AssetServer::cleanupBakedFilesForDeletedAssets() {
         // check if we have a mapping that points to this hash
         auto matchingMapping = std::find_if(std::begin(_fileMappings), std::end(_fileMappings),
                                             [&hash](const std::pair<AssetUtils::AssetPath, AssetUtils::AssetHash> mappingPair) {
-            return mappingPair.second == hash;
-        });
+                                                return mappingPair.second == hash;
+                                            });
 
         if (matchingMapping == std::end(_fileMappings)) {
             // we didn't find a mapping for this hash, remove any baked content we still have for it
@@ -631,7 +630,6 @@ void AssetServer::handleGetMappingOperation(ReceivedMessage& message, NLPacketLi
 
     auto it = _fileMappings.find(assetPath);
     if (it != _fileMappings.end()) {
-
         // check if we should re-direct to a baked asset
 
         // first, figure out from the mapping extension what type of file this is
@@ -639,7 +637,7 @@ void AssetServer::handleGetMappingOperation(ReceivedMessage& message, NLPacketLi
 
         auto type = assetTypeForFilename(assetPath);
         QString bakedRootFile = bakedFilenameForAssetType(type);
-        
+
         auto originalAssetHash = it->second;
         QString redirectedAssetHash;
         QString bakedAssetPath;
@@ -697,7 +695,6 @@ void AssetServer::handleGetMappingOperation(ReceivedMessage& message, NLPacketLi
                     if (!bakingDisabled) {
                         maybeBake(assetPath, originalAssetHash);
                     }
-
                 }
             }
         }
@@ -713,7 +710,7 @@ void AssetServer::handleGetAllMappingOperation(NLPacketList& replyPacket) {
 
     replyPacket.writePrimitive(count);
 
-    for (auto it = _fileMappings.cbegin(); it != _fileMappings.cend(); ++ it) {
+    for (auto it = _fileMappings.cbegin(); it != _fileMappings.cend(); ++it) {
         auto mapping = it->first;
         auto hash = it->second;
         replyPacket.writeString(mapping);
@@ -737,7 +734,8 @@ void AssetServer::handleSetMappingOperation(ReceivedMessage& message, bool hasWr
 
         // don't process a set mapping operation that is inside the hidden baked folder
         if (assetPath.startsWith(AssetUtils::HIDDEN_BAKED_CONTENT_FOLDER)) {
-            qCDebug(asset_server) << "Refusing to process a set mapping operation inside" << AssetUtils::HIDDEN_BAKED_CONTENT_FOLDER;
+            qCDebug(asset_server) << "Refusing to process a set mapping operation inside"
+                                  << AssetUtils::HIDDEN_BAKED_CONTENT_FOLDER;
             replyPacket.writePrimitive(AssetUtils::AssetServerError::PermissionDenied);
         } else {
             if (setMapping(assetPath, assetHash)) {
@@ -765,8 +763,8 @@ void AssetServer::handleDeleteMappingsOperation(ReceivedMessage& message, bool h
             if (!mapping.startsWith(AssetUtils::HIDDEN_BAKED_CONTENT_FOLDER)) {
                 mappingsToDelete << mapping;
             } else {
-                qCDebug(asset_server) << "Refusing to delete mapping" << mapping
-                    << "that is inside" << AssetUtils::HIDDEN_BAKED_CONTENT_FOLDER;
+                qCDebug(asset_server) << "Refusing to delete mapping" << mapping << "that is inside"
+                                      << AssetUtils::HIDDEN_BAKED_CONTENT_FOLDER;
             }
         }
 
@@ -785,9 +783,10 @@ void AssetServer::handleRenameMappingOperation(ReceivedMessage& message, bool ha
         QString oldPath = message.readString();
         QString newPath = message.readString();
 
-        if (oldPath.startsWith(AssetUtils::HIDDEN_BAKED_CONTENT_FOLDER) || newPath.startsWith(AssetUtils::HIDDEN_BAKED_CONTENT_FOLDER)) {
-            qCDebug(asset_server) << "Cannot rename" << oldPath << "to" << newPath
-                << "since one of the paths is inside" << AssetUtils::HIDDEN_BAKED_CONTENT_FOLDER;
+        if (oldPath.startsWith(AssetUtils::HIDDEN_BAKED_CONTENT_FOLDER) ||
+            newPath.startsWith(AssetUtils::HIDDEN_BAKED_CONTENT_FOLDER)) {
+            qCDebug(asset_server) << "Cannot rename" << oldPath << "to" << newPath << "since one of the paths is inside"
+                                  << AssetUtils::HIDDEN_BAKED_CONTENT_FOLDER;
             replyPacket.writePrimitive(AssetUtils::AssetServerError::PermissionDenied);
         } else {
             if (renameMapping(oldPath, newPath)) {
@@ -807,7 +806,7 @@ void AssetServer::handleSetBakingEnabledOperation(ReceivedMessage& message, bool
         bool enabled { true };
         message.readPrimitive(&enabled);
 
-        int numberOfMappings{ 0 };
+        int numberOfMappings { 0 };
         message.readPrimitive(&numberOfMappings);
 
         QStringList mappings;
@@ -838,7 +837,8 @@ void AssetServer::handleAssetGetInfo(QSharedPointer<ReceivedMessage> message, Sh
     message->readPrimitive(&messageID);
     assetHash = message->readWithoutCopy(AssetUtils::SHA256_HASH_LENGTH);
 
-    auto size = qint64(sizeof(MessageID) + AssetUtils::SHA256_HASH_LENGTH + sizeof(AssetUtils::AssetServerError) + sizeof(qint64));
+    auto size = qint64(sizeof(MessageID) + AssetUtils::SHA256_HASH_LENGTH + sizeof(AssetUtils::AssetServerError) +
+                       sizeof(qint64));
     auto replyPacket = NLPacket::create(PacketType::AssetGetInfoReply, size, true);
 
     QByteArray hexHash = assetHash.toHex();
@@ -863,8 +863,8 @@ void AssetServer::handleAssetGetInfo(QSharedPointer<ReceivedMessage> message, Sh
 }
 
 void AssetServer::handleAssetGet(QSharedPointer<ReceivedMessage> message, SharedNodePointer senderNode) {
-
-    auto minSize = qint64(sizeof(MessageID) + AssetUtils::SHA256_HASH_LENGTH + sizeof(AssetUtils::DataOffset) + sizeof(AssetUtils::DataOffset));
+    auto minSize = qint64(sizeof(MessageID) + AssetUtils::SHA256_HASH_LENGTH + sizeof(AssetUtils::DataOffset) +
+                          sizeof(AssetUtils::DataOffset));
 
     if (message->getSize() < minSize) {
         qCDebug(asset_server) << "ERROR bad file request";
@@ -882,7 +882,6 @@ void AssetServer::handleAssetUpload(QSharedPointer<ReceivedMessage> message, Sha
         canWriteToAssetServer = senderNode->getCanWriteToAssetServer();
     }
 
-
     if (canWriteToAssetServer) {
         qCDebug(asset_server) << "Starting an UploadAssetTask for upload from" << message->getSourceID();
 
@@ -893,7 +892,8 @@ void AssetServer::handleAssetUpload(QSharedPointer<ReceivedMessage> message, Sha
         // for now this also means it isn't allowed to add assets
         // so return a packet with error that indicates that
 
-        auto permissionErrorPacket = NLPacket::create(PacketType::AssetUploadReply, sizeof(MessageID) + sizeof(AssetUtils::AssetServerError), true);
+        auto permissionErrorPacket = NLPacket::create(PacketType::AssetUploadReply,
+                                                      sizeof(MessageID) + sizeof(AssetUtils::AssetServerError), true);
 
         MessageID messageID;
         message->readPrimitive(&messageID);
@@ -969,7 +969,6 @@ void AssetServer::sendStatsPacket() {
 static const QString MAP_FILE_NAME = "map.json";
 
 bool AssetServer::loadMappingsFromFile() {
-
     auto mapFilePath = _resourcesDirectory.absoluteFilePath(MAP_FILE_NAME);
 
     QFile mapFile { mapFilePath };
@@ -981,7 +980,8 @@ bool AssetServer::loadMappingsFromFile() {
 
             if (error.error == QJsonParseError::NoError) {
                 if (!jsonDocument.isObject()) {
-                    qCWarning(asset_server) << "Failed to read mapping file, root value in" << mapFilePath << "is not an object";
+                    qCWarning(asset_server)
+                        << "Failed to read mapping file, root value in" << mapFilePath << "is not an object";
                     return false;
                 }
 
@@ -1005,7 +1005,6 @@ bool AssetServer::loadMappingsFromFile() {
                         qCWarning(asset_server) << "Will not keep mapping for" << key << "since it does not have a valid hash.";
                         continue;
                     }
-
 
                     qDebug() << "Added " << key << value.toString();
                     _fileMappings[key] = value.toString();
@@ -1152,7 +1151,7 @@ bool AssetServer::deleteMappings(const AssetUtils::AssetPathList& paths) {
                 hashesToCheckForDeletion << it->second;
 
                 qCDebug(asset_server) << "Deleted a mapping:" << path << "=>" << it->second;
-                
+
                 _fileMappings.erase(it);
             } else {
                 qCDebug(asset_server) << "Unable to delete a mapping that was not found:" << path;
@@ -1202,8 +1201,9 @@ bool AssetServer::renameMapping(AssetUtils::AssetPath oldPath, AssetUtils::Asset
     newPath = newPath.trimmed();
 
     if (!AssetUtils::isValidFilePath(oldPath) || !AssetUtils::isValidFilePath(newPath)) {
-        qCWarning(asset_server) << "Cannot perform rename with invalid paths - both should have leading forward and no ending slashes:"
-            << oldPath << "=>" << newPath;
+        qCWarning(asset_server)
+            << "Cannot perform rename with invalid paths - both should have leading forward and no ending slashes:" << oldPath
+            << "=>" << newPath;
 
         return false;
     }
@@ -1325,8 +1325,8 @@ void AssetServer::handleFailedBake(QString originalAssetHash, QString assetPath,
     _pendingBakes.remove(originalAssetHash);
 }
 
-void AssetServer::handleCompletedBake(QString originalAssetHash, QString originalAssetPath,
-                                      QString bakedTempOutputDir, QVector<QString> bakedFilePaths) {
+void AssetServer::handleCompletedBake(QString originalAssetHash, QString originalAssetPath, QString bakedTempOutputDir,
+                                      QVector<QString> bakedFilePaths) {
     bool errorCompletingBake { false };
     QString errorReason;
 
@@ -1462,10 +1462,7 @@ std::pair<bool, AssetMeta> AssetServer::readMetaFile(AssetUtils::AssetHash hash)
             auto failedLastBake = root[FAILED_LAST_BAKE_KEY];
             auto lastBakeErrors = root[LAST_BAKE_ERRORS_KEY];
 
-            if (bakeVersion.isDouble()
-                && failedLastBake.isBool()
-                && lastBakeErrors.isString()) {
-
+            if (bakeVersion.isDouble() && failedLastBake.isBool() && lastBakeErrors.isString()) {
                 AssetMeta meta;
                 meta.bakeVersion = bakeVersion.toInt();
                 meta.failedLastBake = failedLastBake.toBool();
@@ -1530,7 +1527,7 @@ bool AssetServer::setBakingEnabled(const AssetUtils::AssetPathList& paths, bool 
             bool currentlyDisabled = (it != _fileMappings.end() && it->second == hash);
 
             if (enabled && currentlyDisabled) {
-                QStringList bakedMappings{ bakedMapping };
+                QStringList bakedMappings { bakedMapping };
                 deleteMappings(bakedMappings);
                 maybeBake(path, hash);
                 qDebug() << "Enabled baking for" << path;

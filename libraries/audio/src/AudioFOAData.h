@@ -16,11 +16,11 @@
 // and are copyright the Ambisonic Toolkit Community and Joseph Anderson, 2011, 2016.
 
 // Derived from IRCAM Listen public HRTF database
-// Copyright (c) 2002 IRCAM (Institut de Recherche et Coordination Acoustique/Musique). All Rights Reserved 
+// Copyright (c) 2002 IRCAM (Institut de Recherche et Coordination Acoustique/Musique). All Rights Reserved
 //
-// Use of Materials 
+// Use of Materials
 // The Listen database is public and available for any use. We would however appreciate an acknowledgment
-// of the database somewhere in the description of your work (e.g. paper) or in your development. 
+// of the database somewhere in the description of your work (e.g. paper) or in your development.
 
 #if defined(_MSC_VER)
 #define ALIGN32 __declspec(align(32))

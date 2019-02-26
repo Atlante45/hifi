@@ -15,7 +15,6 @@
 #include <render/Engine.h>
 #include <render/RenderFetchCullSortTask.h>
 
-
 class UpdateSceneTask {
 public:
     using JobModel = render::Task::Model<UpdateSceneTask>;
@@ -23,8 +22,6 @@ public:
     UpdateSceneTask() {}
 
     void build(JobModel& task, const render::Varying& inputs, render::Varying& outputs);
-
 };
-
 
 #endif // hifi_UpdateSceneTask_h

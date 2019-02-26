@@ -15,6 +15,7 @@
 
 class ImageEntityItem : public EntityItem {
     using Pointer = std::shared_ptr<ImageEntityItem>;
+
 public:
     static EntityItemPointer factory(const EntityItemID& entityID, const EntityItemProperties& properties);
 
@@ -22,37 +23,35 @@ public:
 
     ALLOW_INSTANTIATION // This class can be instantiated
 
-    virtual void setUnscaledDimensions(const glm::vec3& value) override;
+        virtual void
+        setUnscaledDimensions(const glm::vec3& value) override;
 
     // methods for getting/setting all properties of an entity
-    EntityItemProperties getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const override;
+    EntityItemProperties getProperties(const EntityPropertyFlags& desiredProperties,
+                                       bool allowEmptyDesiredProperties) const override;
     bool setProperties(const EntityItemProperties& properties) override;
 
     EntityPropertyFlags getEntityProperties(EncodeBitstreamParams& params) const override;
 
     void appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                             EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                            EntityPropertyFlags& requestedProperties,
-                            EntityPropertyFlags& propertyFlags,
-                            EntityPropertyFlags& propertiesDidntFit,
-                            int& propertyCount,
+                            EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                            EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                             OctreeElement::AppendState& appendState) const override;
 
-    int readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                         ReadBitstreamToTreeParams& args,
+    int readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead, ReadBitstreamToTreeParams& args,
                                          EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
                                          bool& somethingChanged) override;
 
     glm::vec3 getRaycastDimensions() const override;
     virtual bool supportsDetailedIntersection() const override { return true; }
-    virtual bool findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                         OctreeElementPointer& element, float& distance,
-                         BoxFace& face, glm::vec3& surfaceNormal,
-                         QVariantMap& extraInfo, bool precisionPicking) const override;
+    virtual bool findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction, OctreeElementPointer& element,
+                                             float& distance, BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                             bool precisionPicking) const override;
     virtual bool findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
-                         const glm::vec3& acceleration, OctreeElementPointer& element, float& parabolicDistance,
-                         BoxFace& face, glm::vec3& surfaceNormal,
-                         QVariantMap& extraInfo, bool precisionPicking) const override;
+                                                  const glm::vec3& acceleration, OctreeElementPointer& element,
+                                                  float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+                                                  QVariantMap& extraInfo, bool precisionPicking) const override;
 
     void setImageURL(const QString& imageUrl);
     QString getImageURL() const;

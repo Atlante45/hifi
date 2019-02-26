@@ -15,7 +15,7 @@
 #include <QQuickImageProvider>
 #include <QReadWriteLock>
 
-class SecurityImageProvider: public QQuickImageProvider {
+class SecurityImageProvider : public QQuickImageProvider {
 public:
     static const QString PROVIDER_NAME;
 
@@ -24,10 +24,10 @@ public:
     QPixmap requestPixmap(const QString& id, QSize* size, const QSize& requestedSize) override;
 
     void setSecurityImage(const QPixmap* pixmap);
+
 protected:
     QReadWriteLock _rwLock;
     QPixmap _securityImage;
 };
 
-#endif //hifi_SecurityImageProvider_h
-
+#endif // hifi_SecurityImageProvider_h

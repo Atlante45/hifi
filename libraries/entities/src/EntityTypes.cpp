@@ -16,24 +16,24 @@
 #include <ByteCountCoding.h>
 #include <Octree.h>
 
+#include "EntitiesLogging.h"
 #include "EntityItem.h"
 #include "EntityItemProperties.h"
-#include "EntitiesLogging.h"
 
-#include "ShapeEntityItem.h"
+#include "GizmoEntityItem.h"
+#include "GridEntityItem.h"
+#include "ImageEntityItem.h"
+#include "LightEntityItem.h"
+#include "LineEntityItem.h"
+#include "MaterialEntityItem.h"
 #include "ModelEntityItem.h"
 #include "ParticleEffectEntityItem.h"
-#include "TextEntityItem.h"
-#include "ImageEntityItem.h"
-#include "WebEntityItem.h"
-#include "LineEntityItem.h"
 #include "PolyLineEntityItem.h"
 #include "PolyVoxEntityItem.h"
-#include "GridEntityItem.h"
-#include "GizmoEntityItem.h"
-#include "LightEntityItem.h"
+#include "ShapeEntityItem.h"
+#include "TextEntityItem.h"
+#include "WebEntityItem.h"
 #include "ZoneEntityItem.h"
-#include "MaterialEntityItem.h"
 
 QMap<EntityTypes::EntityType, QString> EntityTypes::_typeToNameMap;
 QMap<QString, EntityTypes::EntityType> EntityTypes::_nameToTypeMap;
@@ -87,7 +87,7 @@ bool EntityTypes::registerEntityType(EntityType entityType, const char* name, En
     _typeToNameMap[entityType] = name;
     _nameToTypeMap[name] = entityType;
     if (!_factoriesInitialized) {
-        memset(&_factories,0,sizeof(_factories));
+        memset(&_factories, 0, sizeof(_factories));
         _factoriesInitialized = true;
     }
     if (entityType >= 0 && entityType < NUM_TYPES) {
@@ -98,7 +98,7 @@ bool EntityTypes::registerEntityType(EntityType entityType, const char* name, En
 }
 
 EntityItemPointer EntityTypes::constructEntityItem(EntityType entityType, const EntityItemID& entityID,
-                                                    const EntityItemProperties& properties) {
+                                                   const EntityItemProperties& properties) {
     EntityItemPointer newEntityItem = NULL;
     EntityTypeFactory factory = NULL;
     if (entityType >= 0 && entityType < NUM_TYPES) {
@@ -113,8 +113,8 @@ EntityItemPointer EntityTypes::constructEntityItem(EntityType entityType, const 
     return newEntityItem;
 }
 
-void EntityTypes::extractEntityTypeAndID(const unsigned char* data, int dataLength, EntityTypes::EntityType& typeOut, QUuid& idOut) {
-
+void EntityTypes::extractEntityTypeAndID(const unsigned char* data, int dataLength, EntityTypes::EntityType& typeOut,
+                                         QUuid& idOut) {
     // Header bytes
     //    object ID [16 bytes]
     //    ByteCountCoded(type code) [~1 byte]

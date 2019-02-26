@@ -12,13 +12,13 @@
 #ifndef hifi_FBXSerializer_h
 #define hifi_FBXSerializer_h
 
-#include <QtGlobal>
 #include <QMetaType>
 #include <QSet>
 #include <QUrl>
 #include <QVarLengthArray>
 #include <QVariant>
 #include <QVector>
+#include <QtGlobal>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -26,8 +26,8 @@
 #include <Extents.h>
 #include <Transform.h>
 
-#include "FBX.h"
 #include <hfm/HFMSerializer.h>
+#include "FBX.h"
 
 #include <graphics/Geometry.h>
 #include <graphics/Material.h>
@@ -47,7 +47,7 @@ public:
     uint8_t currentTextureBlendMode;
     bool useMaterial;
 
-    template <typename T>
+    template<typename T>
     bool assign(T& ref, const T& v) {
         if (ref == v) {
             return false;
@@ -69,9 +69,8 @@ public:
         alphaSource(0),
         currentTextureBlendMode(0),
         useMaterial(true),
-        isDefault(true)
-    {}
-    
+        isDefault(true) {}
+
     TextureParam(const TextureParam& src) :
         cropping(src.cropping),
         UVSet(src.UVSet),
@@ -81,9 +80,7 @@ public:
         alphaSource(src.alphaSource),
         currentTextureBlendMode(src.currentTextureBlendMode),
         useMaterial(src.useMaterial),
-        isDefault(src.isDefault)
-    {}
-    
+        isDefault(src.isDefault) {}
 };
 
 class MaterialParam {
@@ -91,15 +88,9 @@ public:
     glm::vec3 translation;
     glm::vec3 scaling;
 
-    MaterialParam() :
-        translation(0.0),
-        scaling(1.0)
-    {}
+    MaterialParam() : translation(0.0), scaling(1.0) {}
 
-    MaterialParam(const MaterialParam& src) :
-        translation(src.translation),
-        scaling(src.scaling)
-    {}
+    MaterialParam(const MaterialParam& src) : translation(src.translation), scaling(src.scaling) {}
 };
 
 class ExtractedMesh;
@@ -134,7 +125,6 @@ public:
     // Hashes texture content by filepath, in case they are inlined
     QHash<QByteArray, QByteArray> _textureContent;
     QHash<QString, TextureParam> _textureParams;
-
 
     QHash<QString, QString> diffuseTextures;
     QHash<QString, QString> diffuseFactorTextures;

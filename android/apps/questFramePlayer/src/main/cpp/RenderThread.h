@@ -11,22 +11,23 @@
 #include <QtCore/QElapsedTimer>
 
 #include <GenericThread.h>
-#include <shared/RateCounter.h>
 #include <gl/Config.h>
 #include <gl/Context.h>
 #include <gpu/gl/GLBackend.h>
 #include <ovr/VrHandler.h>
+#include <shared/RateCounter.h>
 
 class RenderThread : public GenericThread, ovr::VrHandler {
     using Parent = GenericThread;
+
 public:
     std::mutex _mutex;
-    gpu::ContextPointer _gpuContext;  // initialized during window creation
+    gpu::ContextPointer _gpuContext; // initialized during window creation
     std::shared_ptr<gpu::Backend> _backend;
     std::mutex _frameLock;
     std::queue<gpu::FramePointer> _pendingFrames;
     gpu::FramePointer _activeFrame;
-    uint32_t _externalTexture{ 0 };
+    uint32_t _externalTexture { 0 };
     glm::mat4 _correction;
 
     void move(const glm::vec3& v);

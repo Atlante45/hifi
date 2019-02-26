@@ -16,7 +16,6 @@
 #include <QtCore/QStringList>
 #include <QtCore/QUrl>
 
-
 class FileDialogHelper : public QObject {
     Q_OBJECT
     Q_ENUMS(StandardLocation)
@@ -73,6 +72,5 @@ private:
     QFileSystemWatcher _fsWatcher;
     QString _fsWatcherPath;
 };
-
 
 #endif

@@ -9,7 +9,8 @@
 #ifndef hifi_gpu_FrameIOKeys_h
 #define hifi_gpu_FrameIOKeys_h
 
-namespace gpu { namespace keys {
+namespace gpu {
+namespace keys {
 
 static const char* binary = "binary";
 static const char* L00 = "L00";
@@ -110,7 +111,6 @@ static const char* wrapModeU = "wrapModeU";
 static const char* wrapModeV = "wrapModeV";
 static const char* wrapModeW = "wrapModeW";
 
-
 static const char* backWriteMask = "backWriteMask";
 static const char* frontWriteMask = "frontWriteMask";
 static const char* reference = "reference";
@@ -206,9 +206,12 @@ static const char* COMMAND_NAMES[] = {
 };
 
 template<class T, size_t N>
-constexpr size_t array_size(T (&)[N]) { return N; }
+constexpr size_t array_size(T (&)[N]) {
+    return N;
+}
 
 static_assert(array_size(COMMAND_NAMES) == Batch::Command::NUM_COMMANDS, "Command array sizes must match");
-}}  // namespace gpu::keys
+} // namespace keys
+} // namespace gpu
 
 #endif

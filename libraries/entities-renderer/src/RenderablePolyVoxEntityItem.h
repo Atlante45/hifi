@@ -16,21 +16,23 @@
 
 #include <QSemaphore>
 
-#include <PolyVoxCore/SimpleVolume.h>
 #include <PolyVoxCore/Raycast.h>
+#include <PolyVoxCore/SimpleVolume.h>
 
-#include <gpu/Forward.h>
+#include <PolyVoxEntityItem.h>
+#include <TextureCache.h>
 #include <gpu/Context.h>
+#include <gpu/Forward.h>
 #include <graphics/Forward.h>
 #include <graphics/Geometry.h>
-#include <TextureCache.h>
-#include <PolyVoxEntityItem.h>
 
 #include "RenderableEntityItem.h"
 
-namespace render { namespace entities {
+namespace render {
+namespace entities {
 class PolyVoxEntityRenderer;
-} } 
+}
+} // namespace render
 
 class RenderablePolyVoxEntityItem : public PolyVoxEntityItem, public scriptable::ModelProvider {
     friend class render::entities::PolyVoxEntityRenderer;
@@ -52,14 +54,13 @@ public:
     int getOnCount() const override { return _onCount; }
 
     virtual bool supportsDetailedIntersection() const override { return true; }
-    virtual bool findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                                             OctreeElementPointer& element, float& distance,
-                                             BoxFace& face, glm::vec3& surfaceNormal,
-                                             QVariantMap& extraInfo, bool precisionPicking) const override;
+    virtual bool findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction, OctreeElementPointer& element,
+                                             float& distance, BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                             bool precisionPicking) const override;
     virtual bool findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const vec3& accleration,
-                                                  OctreeElementPointer& element, float& parabolicDistance,
-                                                  BoxFace& face, glm::vec3& surfaceNormal,
-                                                  QVariantMap& extraInfo, bool precisionPicking) const override;
+                                                  OctreeElementPointer& element, float& parabolicDistance, BoxFace& face,
+                                                  glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                                  bool precisionPicking) const override;
 
     virtual void setVoxelData(const QByteArray& voxelData) override;
     virtual void setVoxelVolumeSize(const glm::vec3& voxelVolumeSize) override;
@@ -82,8 +83,8 @@ public:
 
     // coords are in world-space
     virtual bool setSphere(const vec3& center, float radius, uint8_t toValue) override;
-    virtual bool setCapsule(const vec3& startWorldCoords, const vec3& endWorldCoords,
-                            float radiusWorldCoords, uint8_t toValue) override;
+    virtual bool setCapsule(const vec3& startWorldCoords, const vec3& endWorldCoords, float radiusWorldCoords,
+                            uint8_t toValue) override;
     virtual bool setAll(uint8_t toValue) override;
     virtual bool setCuboid(const vec3& lowPosition, const vec3& cuboidSize, int toValue) override;
 
@@ -115,7 +116,12 @@ public:
     uint8_t getVoxelInternal(const ivec3& v) const;
     bool setVoxelInternal(const ivec3& v, uint8_t toValue);
 
-    void setVolDataDirty() { withWriteLock([&] { _volDataDirty = true; _meshReady = false; }); }
+    void setVolDataDirty() {
+        withWriteLock([&] {
+            _volDataDirty = true;
+            _meshReady = false;
+        });
+    }
 
     bool getMeshes(MeshProxyList& result) override; // deprecated
     virtual scriptable::ScriptableModelBase getScriptableModel() override;
@@ -138,13 +144,13 @@ private:
     // The PolyVoxEntityItem class has _voxelData which contains dimensions and compressed voxel data.  The dimensions
     // may not match _voxelVolumeSize.
     bool _meshDirty { true }; // does collision-shape need to be recomputed?
-    bool _meshReady{ false };
+    bool _meshReady { false };
     graphics::MeshPointer _mesh;
 
     ShapeInfo _shapeInfo;
 
     std::shared_ptr<PolyVox::SimpleVolume<uint8_t>> _volData;
-    bool _voxelDataDirty{ true };
+    bool _voxelDataDirty { true };
     bool _volDataDirty { false }; // does recomputeMesh need to be called?
     int _onCount; // how many non-zero voxels are in _volData
 
@@ -157,10 +163,10 @@ private:
     EntityItemWeakPointer _xPNeighbor; // neighbor found by going along positive X axis
     EntityItemWeakPointer _yPNeighbor;
     EntityItemWeakPointer _zPNeighbor;
-
 };
 
-namespace render { namespace entities {
+namespace render {
+namespace entities {
 
 class PolyVoxEntityRenderer : public TypedEntityRenderer<RenderablePolyVoxEntityItem> {
     using Parent = TypedEntityRenderer<RenderablePolyVoxEntityItem>;
@@ -171,19 +177,22 @@ public:
     virtual scriptable::ScriptableModelBase getScriptableModel() override {
         return asTypedEntity<RenderablePolyVoxEntityItem>()->getScriptableModel();
     }
-    
+
 protected:
-    virtual ItemKey getKey() override { return ItemKey::Builder::opaqueShape().withTagBits(getTagMask()).withLayer(getHifiRenderLayer()); }
+    virtual ItemKey getKey() override {
+        return ItemKey::Builder::opaqueShape().withTagBits(getTagMask()).withLayer(getHifiRenderLayer());
+    }
     virtual ShapeKey getShapeKey() override;
     virtual bool needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const override;
-    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) override;
+    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                const TypedEntityPointer& entity) override;
     virtual void doRenderUpdateAsynchronousTyped(const TypedEntityPointer& entity) override;
     virtual void doRender(RenderArgs* args) override;
     virtual bool isTransparent() const override { return false; }
 
 private:
 #ifdef POLYVOX_ENTITY_USE_FADE_EFFECT
-    bool _hasTransitioned{ false };
+    bool _hasTransitioned { false };
 #endif
 
     graphics::MeshPointer _mesh;
@@ -193,10 +202,10 @@ private:
     glm::mat4 _lastVoxelToWorldMatrix;
     PolyVoxEntityItem::PolyVoxSurfaceStyle _lastSurfaceStyle { PolyVoxEntityItem::SURFACE_MARCHING_CUBES };
     std::array<QString, 3> _xyzTextureUrls;
-    bool _neighborsNeedUpdate{ false };
+    bool _neighborsNeedUpdate { false };
 };
 
-} }
-
+} // namespace entities
+} // namespace render
 
 #endif // hifi_RenderablePolyVoxEntityItem_h

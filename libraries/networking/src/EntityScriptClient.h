@@ -12,16 +12,17 @@
 #ifndef hifi_EntityScriptClient_h
 #define hifi_EntityScriptClient_h
 
+#include "AssetUtils.h"
 #include "ClientServerUtils.h"
+#include "EntityScriptUtils.h"
 #include "LimitedNodeList.h"
 #include "ReceivedMessage.h"
-#include "AssetUtils.h"
-#include "EntityScriptUtils.h"
 
 #include <DependencyManager.h>
 #include <unordered_map>
 
-using GetScriptStatusCallback = std::function<void(bool responseReceived, bool isRunning, EntityScriptStatus status, QString errorInfo)>;
+using GetScriptStatusCallback = std::function<void(bool responseReceived, bool isRunning, EntityScriptStatus status,
+                                                   QString errorInfo)>;
 
 class GetScriptStatusRequest : public QObject {
     Q_OBJECT
@@ -34,7 +35,7 @@ public:
     bool getResponseReceived() const { return _responseReceived; }
     bool getIsRunning() const { return _isRunning; }
     EntityScriptStatus getStatus() const { return _status; }
-    QString getErrorInfo() const { return _errorInfo;  }
+    QString getErrorInfo() const { return _errorInfo; }
 
 signals:
     void finished(GetScriptStatusRequest* request);
@@ -60,7 +61,6 @@ public:
     MessageID getEntityServerScriptStatus(QUuid entityID, GetScriptStatusCallback callback);
     void callEntityServerMethod(QUuid id, const QString& method, const QStringList& params);
 
-
 private slots:
     void handleNodeKilled(SharedNodePointer node);
     void handleNodeClientConnectionReset(SharedNodePointer node);
@@ -69,11 +69,11 @@ private slots:
 
 private:
     static MessageID _currentID;
-    std::unordered_map<SharedNodePointer, std::unordered_map<MessageID, GetScriptStatusCallback>> _pendingEntityScriptStatusRequests;
+    std::unordered_map<SharedNodePointer, std::unordered_map<MessageID, GetScriptStatusCallback>>
+        _pendingEntityScriptStatusRequests;
 
     void forceFailureOfPendingRequests(SharedNodePointer node);
 };
-
 
 class EntityScriptServerServices : public QObject, public Dependency {
     Q_OBJECT

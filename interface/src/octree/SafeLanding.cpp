@@ -13,22 +13,23 @@
 
 #include <SharedUtil.h>
 
-#include "EntityTreeRenderer.h"
-#include "RenderableModelEntityItem.h"
-#include "InterfaceLogging.h"
 #include "Application.h"
+#include "EntityTreeRenderer.h"
+#include "InterfaceLogging.h"
+#include "RenderableModelEntityItem.h"
 
 const int SafeLanding::SEQUENCE_MODULO = std::numeric_limits<OCTREE_PACKET_SEQUENCE>::max() + 1;
 
 namespace {
-    template<typename T> bool lessThanWraparound(int a, int b) {
-        constexpr int MAX_T_VALUE = std::numeric_limits<T>::max();
-        if (b <= a) {
-            b += MAX_T_VALUE;
-        }
-        return (b - a) < (MAX_T_VALUE / 2);
+template<typename T>
+bool lessThanWraparound(int a, int b) {
+    constexpr int MAX_T_VALUE = std::numeric_limits<T>::max();
+    if (b <= a) {
+        b += MAX_T_VALUE;
     }
+    return (b - a) < (MAX_T_VALUE / 2);
 }
+} // namespace
 
 bool SafeLanding::SequenceLessThan::operator()(const int& a, const int& b) const {
     return lessThanWraparound<OCTREE_PACKET_SEQUENCE>(a, b);
@@ -43,10 +44,10 @@ void SafeLanding::startEntitySequence(QSharedPointer<EntityTreeRenderer> entityT
         _trackedEntities.clear();
         _trackingEntities = true;
         _maxTrackedEntityCount = 0;
-        connect(std::const_pointer_cast<EntityTree>(_entityTree).get(),
-            &EntityTree::addingEntity, this, &SafeLanding::addTrackedEntity);
-        connect(std::const_pointer_cast<EntityTree>(_entityTree).get(),
-            &EntityTree::deletingEntity, this, &SafeLanding::deleteTrackedEntity);
+        connect(std::const_pointer_cast<EntityTree>(_entityTree).get(), &EntityTree::addingEntity, this,
+                &SafeLanding::addTrackedEntity);
+        connect(std::const_pointer_cast<EntityTree>(_entityTree).get(), &EntityTree::deletingEntity, this,
+                &SafeLanding::deleteTrackedEntity);
 
         _sequenceNumbers.clear();
         _initialStart = INVALID_SEQUENCE;
@@ -73,7 +74,6 @@ void SafeLanding::addTrackedEntity(const EntityItemID& entityID) {
         EntityItemPointer entity = _entityTree->findEntityByID(entityID);
 
         if (entity && entity->getCreated() < _startTime) {
-
             _trackedEntities.emplace(entityID, entity);
             int trackedEntityCount = (int)_trackedEntities.size();
 
@@ -138,16 +138,14 @@ float SafeLanding::loadingProgressPercentage() {
 bool SafeLanding::isSequenceNumbersComplete() {
     if (_initialStart != INVALID_SEQUENCE) {
         Locker lock(_lock);
-        int sequenceSize = _initialStart <= _initialEnd ? _initialEnd - _initialStart:
-                _initialEnd + SEQUENCE_MODULO - _initialStart;
+        int sequenceSize = _initialStart <= _initialEnd ? _initialEnd - _initialStart
+                                                        : _initialEnd + SEQUENCE_MODULO - _initialStart;
         auto startIter = _sequenceNumbers.find(_initialStart);
         auto endIter = _sequenceNumbers.find(_initialEnd - 1);
 
         bool missingSequenceNumbers = qApp->isMissingSequenceNumbers();
-        if (sequenceSize == 0 ||
-            (startIter != _sequenceNumbers.end()
-            && endIter != _sequenceNumbers.end()
-             && ((distance(startIter, endIter) == sequenceSize - 1) || !missingSequenceNumbers))) {
+        if (sequenceSize == 0 || (startIter != _sequenceNumbers.end() && endIter != _sequenceNumbers.end() &&
+                                  ((distance(startIter, endIter) == sequenceSize - 1) || !missingSequenceNumbers))) {
             bool enableInterstitial = DependencyManager::get<NodeList>()->getDomainHandler().getInterstitialModeEnabled();
             if (!enableInterstitial) {
                 _trackingEntities = false; // Don't track anything else that comes in.
@@ -162,13 +160,14 @@ bool isEntityPhysicsReady(const EntityItemPointer& entity) {
     if (entity && !entity->getCollisionless()) {
         const auto& entityType = entity->getType();
         if (entityType == EntityTypes::Model) {
-            RenderableModelEntityItem * modelEntity = std::dynamic_pointer_cast<RenderableModelEntityItem>(entity).get();
-            static const std::set<ShapeType> downloadedCollisionTypes
-                { SHAPE_TYPE_COMPOUND, SHAPE_TYPE_SIMPLE_COMPOUND, SHAPE_TYPE_STATIC_MESH,  SHAPE_TYPE_SIMPLE_HULL };
+            RenderableModelEntityItem* modelEntity = std::dynamic_pointer_cast<RenderableModelEntityItem>(entity).get();
+            static const std::set<ShapeType> downloadedCollisionTypes { SHAPE_TYPE_COMPOUND, SHAPE_TYPE_SIMPLE_COMPOUND,
+                                                                        SHAPE_TYPE_STATIC_MESH, SHAPE_TYPE_SIMPLE_HULL };
             bool hasAABox;
             entity->getAABox(hasAABox);
             if (hasAABox && downloadedCollisionTypes.count(modelEntity->getShapeType()) != 0) {
-                return (!entity->shouldBePhysical() || entity->isReadyToComputeShape() || modelEntity->computeShapeFailedToLoad());
+                return (!entity->shouldBePhysical() || entity->isReadyToComputeShape() ||
+                        modelEntity->computeShapeFailedToLoad());
             }
         }
     }
@@ -178,7 +177,6 @@ bool isEntityPhysicsReady(const EntityItemPointer& entity) {
 
 bool SafeLanding::isEntityLoadingComplete() {
     Locker lock(_lock);
-
 
     auto entityTree = qApp->getEntities();
     auto entityMapIter = _trackedEntities.begin();
@@ -214,7 +212,6 @@ bool SafeLanding::isEntityLoadingComplete() {
         _trackedEntityStabilityCount++;
     }
 
-
     return _trackedEntities.empty();
 }
 
@@ -225,7 +222,7 @@ float SafeLanding::ElevatedPriority(const EntityItem& entityItem) {
 void SafeLanding::debugDumpSequenceIDs() const {
     int p = -1;
     qCDebug(interfaceapp) << "Sequence set size:" << _sequenceNumbers.size();
-    for (auto s: _sequenceNumbers) {
+    for (auto s : _sequenceNumbers) {
         if (p == -1) {
             p = s;
             qCDebug(interfaceapp) << "First:" << s;

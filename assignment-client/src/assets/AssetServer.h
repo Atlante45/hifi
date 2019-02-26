@@ -12,9 +12,9 @@
 #ifndef hifi_AssetServer_h
 #define hifi_AssetServer_h
 
+#include <QRunnable>
 #include <QtCore/QDir>
 #include <QtCore/QThreadPool>
-#include <QRunnable>
 
 #include <ThreadedAssignment.h>
 
@@ -62,8 +62,7 @@ enum class ScriptBakeVersion : BakeVersion {
 };
 
 struct AssetMeta {
-    AssetMeta() {
-    }
+    AssetMeta() {}
 
     BakeVersion bakeVersion { INITIAL_BAKE_VERSION };
     bool failedLastBake { false };
@@ -129,7 +128,8 @@ private:
 
     QString getPathToAssetHash(const AssetUtils::AssetHash& assetHash);
 
-    std::pair<AssetUtils::BakingStatus, QString> getAssetStatus(const AssetUtils::AssetPath& path, const AssetUtils::AssetHash& hash);
+    std::pair<AssetUtils::BakingStatus, QString> getAssetStatus(const AssetUtils::AssetPath& path,
+                                                                const AssetUtils::AssetHash& hash);
 
     void bakeAssets();
     void maybeBake(const AssetUtils::AssetPath& path, const AssetUtils::AssetHash& hash);

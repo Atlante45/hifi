@@ -26,7 +26,8 @@ glm::vec3 normalizeDirForPacking(const glm::vec3& dir) {
     return dir;
 }
 
-void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphicsMeshPointer, const baker::MeshNormals& meshNormals, const baker::MeshTangents& meshTangentsIn) {
+void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphicsMeshPointer,
+                       const baker::MeshNormals& meshNormals, const baker::MeshTangents& meshTangentsIn) {
     auto graphicsMesh = std::make_shared<graphics::Mesh>();
 
     // Fill tangents with a dummy value to force tangents to be present if there are normals
@@ -39,7 +40,7 @@ void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphics
     }
 
     unsigned int totalSourceIndices = 0;
-    foreach(const HFMMeshPart& part, hfmMesh.parts) {
+    foreach (const HFMMeshPart& part, hfmMesh.parts) {
         totalSourceIndices += (part.quadTrianglesIndices.size() + part.triangleIndices.size());
     }
 
@@ -60,7 +61,7 @@ void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphics
     // evaluate all attribute elements and data sizes
 
     // Position is a vec3
-    const auto positionElement = gpu::Element(gpu::VEC3, gpu::FLOAT, gpu::XYZ); 
+    const auto positionElement = gpu::Element(gpu::VEC3, gpu::FLOAT, gpu::XYZ);
     const int positionsSize = numVerts * positionElement.getSize();
 
     // Normal and tangent are always there together packed in normalized xyz32bits word (times 2)
@@ -85,13 +86,16 @@ void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphics
 
     // Support for 4 skinning clusters:
     // 4 Indices are uint8 ideally, uint16 if more than 256.
-    const auto clusterIndiceElement = (hfmMesh.clusters.size() < UINT8_MAX ? gpu::Element(gpu::VEC4, gpu::UINT8, gpu::XYZW) : gpu::Element(gpu::VEC4, gpu::UINT16, gpu::XYZW));
+    const auto clusterIndiceElement = (hfmMesh.clusters.size() < UINT8_MAX ? gpu::Element(gpu::VEC4, gpu::UINT8, gpu::XYZW)
+                                                                           : gpu::Element(gpu::VEC4, gpu::UINT16, gpu::XYZW));
     // 4 Weights are normalized 16bits
     const auto clusterWeightElement = gpu::Element(gpu::VEC4, gpu::NUINT16, gpu::XYZW);
 
     // Cluster indices and weights must be the same sizes
     const int NUM_CLUSTERS_PER_VERT = 4;
-    const int numVertClusters = (hfmMesh.clusterIndices.size() == hfmMesh.clusterWeights.size() ? hfmMesh.clusterIndices.size() / NUM_CLUSTERS_PER_VERT : 0);
+    const int numVertClusters = (hfmMesh.clusterIndices.size() == hfmMesh.clusterWeights.size()
+                                     ? hfmMesh.clusterIndices.size() / NUM_CLUSTERS_PER_VERT
+                                     : 0);
     const int clusterIndicesSize = numVertClusters * clusterIndiceElement.getSize();
     const int clusterWeightsSize = numVertClusters * clusterWeightElement.getSize();
 
@@ -110,7 +114,7 @@ void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphics
     vertBuffer->resize(totalVertsSize);
 
     // First positions
-    vertBuffer->setSubData(positionsOffset, positionsSize, (const gpu::Byte*) hfmMesh.vertices.data());
+    vertBuffer->setSubData(positionsOffset, positionsSize, (const gpu::Byte*)hfmMesh.vertices.data());
 
     // Interleave normals and tangents
     if (normalsSize > 0) {
@@ -119,9 +123,7 @@ void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphics
         normalsAndTangents.reserve(meshNormals.size() + (int)meshTangents.size());
         auto normalIt = meshNormals.cbegin();
         auto tangentIt = meshTangents.cbegin();
-        for (;
-            normalIt != meshNormals.cend();
-            ++normalIt, ++tangentIt) {
+        for (; normalIt != meshNormals.cend(); ++normalIt, ++tangentIt) {
 #if HFM_PACK_NORMALS
             const auto normal = normalizeDirForPacking(*normalIt);
             const auto tangent = normalizeDirForPacking(*tangentIt);
@@ -134,7 +136,7 @@ void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphics
             normalsAndTangents.push_back(packedNormal);
             normalsAndTangents.push_back(packedTangent);
         }
-        vertBuffer->setSubData(normalsAndTangentsOffset, normalsAndTangentsSize, (const gpu::Byte*) normalsAndTangents.data());
+        vertBuffer->setSubData(normalsAndTangentsOffset, normalsAndTangentsSize, (const gpu::Byte*)normalsAndTangents.data());
     }
 
     // Pack colors
@@ -146,9 +148,9 @@ void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphics
         for (const auto& color : hfmMesh.colors) {
             colors.push_back(glm::packUnorm4x8(glm::vec4(color, 1.0f)));
         }
-        vertBuffer->setSubData(colorsOffset, colorsSize, (const gpu::Byte*) colors.data());
+        vertBuffer->setSubData(colorsOffset, colorsSize, (const gpu::Byte*)colors.data());
 #else
-        vertBuffer->setSubData(colorsOffset, colorsSize, (const gpu::Byte*) hfmMesh.colors.constData());
+        vertBuffer->setSubData(colorsOffset, colorsSize, (const gpu::Byte*)hfmMesh.colors.constData());
 #endif
     }
 
@@ -163,7 +165,7 @@ void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphics
             texCoordVec2h.y = glm::detail::toFloat16(texCoordVec2f.y);
             texCoordData.push_back(texCoordVec2h);
         }
-        vertBuffer->setSubData(texCoordsOffset, texCoordsSize, (const gpu::Byte*) texCoordData.constData());
+        vertBuffer->setSubData(texCoordsOffset, texCoordsSize, (const gpu::Byte*)texCoordData.constData());
     }
     if (texCoords1Size > 0) {
         QVector<vec2h> texCoordData;
@@ -175,7 +177,7 @@ void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphics
             texCoordVec2h.y = glm::detail::toFloat16(texCoordVec2f.y);
             texCoordData.push_back(texCoordVec2h);
         }
-        vertBuffer->setSubData(texCoords1Offset, texCoords1Size, (const gpu::Byte*) texCoordData.constData());
+        vertBuffer->setSubData(texCoords1Offset, texCoords1Size, (const gpu::Byte*)texCoordData.constData());
     }
 
     // Clusters data
@@ -189,15 +191,15 @@ void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphics
                 assert(hfmMesh.clusterIndices[i] <= UINT8_MAX);
                 clusterIndices[i] = (uint8_t)(hfmMesh.clusterIndices[i]);
             }
-            vertBuffer->setSubData(clusterIndicesOffset, clusterIndicesSize, (const gpu::Byte*) clusterIndices.constData());
+            vertBuffer->setSubData(clusterIndicesOffset, clusterIndicesSize, (const gpu::Byte*)clusterIndices.constData());
         } else {
-            vertBuffer->setSubData(clusterIndicesOffset, clusterIndicesSize, (const gpu::Byte*) hfmMesh.clusterIndices.constData());
+            vertBuffer->setSubData(clusterIndicesOffset, clusterIndicesSize,
+                                   (const gpu::Byte*)hfmMesh.clusterIndices.constData());
         }
     }
     if (clusterWeightsSize > 0) {
-        vertBuffer->setSubData(clusterWeightsOffset, clusterWeightsSize, (const gpu::Byte*) hfmMesh.clusterWeights.constData());
+        vertBuffer->setSubData(clusterWeightsOffset, clusterWeightsSize, (const gpu::Byte*)hfmMesh.clusterWeights.constData());
     }
-
 
     // Now we decide on how to interleave the attributes and provide the vertices among bufers:
     // Aka the Vertex format and the vertexBufferStream
@@ -244,7 +246,8 @@ void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphics
         vertexFormat->setAttribute(gpu::Stream::TEXCOORD1, attribChannel, texCoordsElement, bufOffset);
         bufOffset += texCoordsElement.getSize();
     } else if (texCoordsSize) {
-        vertexFormat->setAttribute(gpu::Stream::TEXCOORD1, attribChannel, texCoordsElement, bufOffset - texCoordsElement.getSize());
+        vertexFormat->setAttribute(gpu::Stream::TEXCOORD1, attribChannel, texCoordsElement,
+                                   bufOffset - texCoordsElement.getSize());
     }
     if (clusterIndicesSize) {
         vertexFormat->setAttribute(gpu::Stream::SKIN_CLUSTER_INDEX, attribChannel, clusterIndiceElement, bufOffset);
@@ -287,14 +290,23 @@ void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphics
         auto source = vertBuffer->getData();
 
         for (int i = 0; i < numVerts; i++) {
-
-            if (vPositionSize) memcpy(vDest + vPositionOffset, source + positionsOffset + i * vPositionSize, vPositionSize);
-            if (vNormalsAndTangentsSize) memcpy(vDest + vNormalsAndTangentsOffset, source + normalsAndTangentsOffset + i * vNormalsAndTangentsSize, vNormalsAndTangentsSize);
-            if (vColorSize) memcpy(vDest + vColorOffset, source + colorsOffset + i * vColorSize, vColorSize);
-            if (vTexcoord0Size) memcpy(vDest + vTexcoord0Offset, source + texCoordsOffset + i * vTexcoord0Size, vTexcoord0Size);
-            if (vTexcoord1Size) memcpy(vDest + vTexcoord1Offset, source + texCoords1Offset + i * vTexcoord1Size, vTexcoord1Size);
-            if (vClusterIndiceSize) memcpy(vDest + vClusterIndiceOffset, source + clusterIndicesOffset + i * vClusterIndiceSize, vClusterIndiceSize);
-            if (vClusterWeightSize) memcpy(vDest + vClusterWeightOffset, source + clusterWeightsOffset + i * vClusterWeightSize, vClusterWeightSize);
+            if (vPositionSize)
+                memcpy(vDest + vPositionOffset, source + positionsOffset + i * vPositionSize, vPositionSize);
+            if (vNormalsAndTangentsSize)
+                memcpy(vDest + vNormalsAndTangentsOffset, source + normalsAndTangentsOffset + i * vNormalsAndTangentsSize,
+                       vNormalsAndTangentsSize);
+            if (vColorSize)
+                memcpy(vDest + vColorOffset, source + colorsOffset + i * vColorSize, vColorSize);
+            if (vTexcoord0Size)
+                memcpy(vDest + vTexcoord0Offset, source + texCoordsOffset + i * vTexcoord0Size, vTexcoord0Size);
+            if (vTexcoord1Size)
+                memcpy(vDest + vTexcoord1Offset, source + texCoords1Offset + i * vTexcoord1Size, vTexcoord1Size);
+            if (vClusterIndiceSize)
+                memcpy(vDest + vClusterIndiceOffset, source + clusterIndicesOffset + i * vClusterIndiceSize,
+                       vClusterIndiceSize);
+            if (vClusterWeightSize)
+                memcpy(vDest + vClusterWeightOffset, source + clusterWeightsOffset + i * vClusterWeightSize,
+                       vClusterWeightSize);
 
             vDest += vStride;
         }
@@ -309,7 +321,7 @@ void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphics
 
     // Index and Part Buffers
     unsigned int totalIndices = 0;
-    foreach(const HFMMeshPart& part, hfmMesh.parts) {
+    foreach (const HFMMeshPart& part, hfmMesh.parts) {
         totalIndices += (part.quadTrianglesIndices.size() + part.triangleIndices.size());
     }
 
@@ -324,26 +336,24 @@ void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphics
     int indexNum = 0;
     int offset = 0;
 
-    std::vector< graphics::Mesh::Part > parts;
+    std::vector<graphics::Mesh::Part> parts;
     if (hfmMesh.parts.size() > 1) {
         indexNum = 0;
     }
-    foreach(const HFMMeshPart& part, hfmMesh.parts) {
+    foreach (const HFMMeshPart& part, hfmMesh.parts) {
         graphics::Mesh::Part modelPart(indexNum, 0, 0, graphics::Mesh::TRIANGLES);
 
         if (part.quadTrianglesIndices.size()) {
-            indexBuffer->setSubData(offset,
-                part.quadTrianglesIndices.size() * sizeof(int),
-                (gpu::Byte*) part.quadTrianglesIndices.constData());
+            indexBuffer->setSubData(offset, part.quadTrianglesIndices.size() * sizeof(int),
+                                    (gpu::Byte*)part.quadTrianglesIndices.constData());
             offset += part.quadTrianglesIndices.size() * sizeof(int);
             indexNum += part.quadTrianglesIndices.size();
             modelPart._numIndices += part.quadTrianglesIndices.size();
         }
 
         if (part.triangleIndices.size()) {
-            indexBuffer->setSubData(offset,
-                part.triangleIndices.size() * sizeof(int),
-                (gpu::Byte*) part.triangleIndices.constData());
+            indexBuffer->setSubData(offset, part.triangleIndices.size() * sizeof(int),
+                                    (gpu::Byte*)part.triangleIndices.constData());
             offset += part.triangleIndices.size() * sizeof(int);
             indexNum += part.triangleIndices.size();
             modelPart._numIndices += part.triangleIndices.size();
@@ -357,7 +367,7 @@ void buildGraphicsMesh(const hfm::Mesh& hfmMesh, graphics::MeshPointer& graphics
 
     if (parts.size()) {
         auto pb = std::make_shared<gpu::Buffer>();
-        pb->setData(parts.size() * sizeof(graphics::Mesh::Part), (const gpu::Byte*) parts.data());
+        pb->setData(parts.size() * sizeof(graphics::Mesh::Part), (const gpu::Byte*)parts.data());
         gpu::BufferView pbv(pb, gpu::Element(gpu::VEC4, gpu::UINT32, gpu::XYZW));
         graphicsMesh->setPartBuffer(pbv);
     } else {
@@ -383,7 +393,7 @@ void BuildGraphicsMeshTask::run(const baker::BakeContextPointer& context, const 
     for (int i = 0; i < n; i++) {
         graphicsMeshes.emplace_back();
         auto& graphicsMesh = graphicsMeshes[i];
-        
+
         // Try to create the graphics::Mesh
         buildGraphicsMesh(meshes[i], graphicsMesh, normalsPerMesh[i], tangentsPerMesh[i]);
 

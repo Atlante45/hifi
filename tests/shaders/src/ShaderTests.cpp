@@ -11,34 +11,34 @@
 
 #include "ShaderTests.h"
 
-#include <fstream>
-#include <sstream>
-#include <regex>
 #include <algorithm>
+#include <fstream>
+#include <regex>
+#include <sstream>
 
 #include <QtCore/QJsonDocument>
 
 #include <GLMHelpers.h>
 
+#include <shared/FileUtils.h>
 #include <test-utils/GLMTestUtils.h>
 #include <test-utils/QTestExtensions.h>
-#include <shared/FileUtils.h>
 
-#include <shaders/Shaders.h>
 #include <gl/Config.h>
 #include <gl/GLHelpers.h>
+#include <gl/QOpenGLContextWrapper.h>
 #include <gpu/gl/GLBackend.h>
 #include <gpu/gl/GLShader.h>
-#include <gl/QOpenGLContextWrapper.h>
+#include <shaders/Shaders.h>
 
 #define RUNTIME_SHADER_COMPILE_TEST 1
 
 #if RUNTIME_SHADER_COMPILE_TEST
-#include <spirv_cross.hpp>
-#include <glslang/Public/ShaderLang.h>
 #include <SPIRV/GlslangToSpv.h>
+#include <glslang/Public/ShaderLang.h>
 #include <spirv-tools/libspirv.hpp>
 #include <spirv-tools/optimizer.hpp>
+#include <spirv_cross.hpp>
 #include <vulkan/vulkan.hpp>
 
 #ifdef DEBUG
@@ -81,7 +81,7 @@ void ShaderTests::cleanupTestCase() {
 
 #if RUNTIME_SHADER_COMPILE_TEST
 
-template <typename C>
+template<typename C>
 QStringList toQStringList(const C& c) {
     QStringList result;
     for (const auto& v : c) {
@@ -90,7 +90,7 @@ QStringList toQStringList(const C& c) {
     return result;
 }
 
-template <typename C, typename F>
+template<typename C, typename F>
 std::unordered_set<std::string> toStringSet(const C& c, F f) {
     std::unordered_set<std::string> result;
     for (const auto& v : c) {
@@ -99,7 +99,7 @@ std::unordered_set<std::string> toStringSet(const C& c, F f) {
     return result;
 }
 
-template <typename C>
+template<typename C>
 bool isSubset(const C& parent, const C& child) {
     for (const auto& v : child) {
         if (0 == parent.count(v)) {
@@ -158,7 +158,7 @@ bool compareBindings(const C& actual, const gpu::Shader::LocationMap& expected) 
 
 #endif
 
-template <typename K, typename V>
+template<typename K, typename V>
 std::unordered_map<V, K> invertMap(const std::unordered_map<K, V>& map) {
     std::unordered_map<V, K> result;
     for (const auto& entry : map) {
@@ -170,10 +170,8 @@ std::unordered_map<V, K> invertMap(const std::unordered_map<K, V>& map) {
     return result;
 }
 
-static void verifyInterface(const gpu::Shader::Source& vertexSource,
-                            const gpu::Shader::Source& fragmentSource,
-                            shader::Dialect dialect,
-                            shader::Variant variant) {
+static void verifyInterface(const gpu::Shader::Source& vertexSource, const gpu::Shader::Source& fragmentSource,
+                            shader::Dialect dialect, shader::Variant variant) {
     const auto& fragmentReflection = fragmentSource.getReflection(dialect, variant);
     if (fragmentReflection.inputs.empty()) {
         return;
@@ -325,9 +323,9 @@ bool endsWith(const std::string& s, const std::string& f) {
 }
 
 EShLanguage getShaderStage(const std::string& shaderName) {
-    static const std::string VERT_EXT{ ".vert" };
-    static const std::string FRAG_EXT{ ".frag" };
-    static const std::string GEOM_EXT{ ".geom" };
+    static const std::string VERT_EXT { ".vert" };
+    static const std::string FRAG_EXT { ".frag" };
+    static const std::string GEOM_EXT { ".geom" };
     static const size_t EXT_SIZE = VERT_EXT.size();
     if (shaderName.size() < EXT_SIZE) {
         throw std::runtime_error("Invalid shader name");
@@ -378,38 +376,38 @@ void rebuildSource(shader::Dialect dialect, shader::Variant variant, const shade
             throw std::runtime_error("Wrong");
         }
 
-    // Output the SPIR-V code from the shader program
-    std::vector<uint32_t> spirv;
-    glslang::GlslangToSpv(*program.getIntermediate(stage), spirv);
+        // Output the SPIR-V code from the shader program
+        std::vector<uint32_t> spirv;
+        glslang::GlslangToSpv(*program.getIntermediate(stage), spirv);
 
-    spvtools::SpirvTools core(SPV_ENV_VULKAN_1_1);
-    spvtools::Optimizer opt(SPV_ENV_VULKAN_1_1);
+        spvtools::SpirvTools core(SPV_ENV_VULKAN_1_1);
+        spvtools::Optimizer opt(SPV_ENV_VULKAN_1_1);
 
-    auto outputLambda = [](spv_message_level_t, const char*, const spv_position_t&, const char* m) { qWarning() << m; };
-    core.SetMessageConsumer(outputLambda);
-    opt.SetMessageConsumer(outputLambda);
+        auto outputLambda = [](spv_message_level_t, const char*, const spv_position_t&, const char* m) { qWarning() << m; };
+        core.SetMessageConsumer(outputLambda);
+        opt.SetMessageConsumer(outputLambda);
 
-    if (!core.Validate(spirv)) {
-        throw std::runtime_error("invalid spirv");
-    }
-    writeSpirv(baseOutName + ".spv", spirv);
+        if (!core.Validate(spirv)) {
+            throw std::runtime_error("invalid spirv");
+        }
+        writeSpirv(baseOutName + ".spv", spirv);
 
-    opt.RegisterPass(spvtools::CreateFreezeSpecConstantValuePass())
-        .RegisterPass(spvtools::CreateStrengthReductionPass())
-        .RegisterPass(spvtools::CreateEliminateDeadConstantPass())
-        .RegisterPass(spvtools::CreateEliminateDeadFunctionsPass())
-        .RegisterPass(spvtools::CreateUnifyConstantPass());
+        opt.RegisterPass(spvtools::CreateFreezeSpecConstantValuePass())
+            .RegisterPass(spvtools::CreateStrengthReductionPass())
+            .RegisterPass(spvtools::CreateEliminateDeadConstantPass())
+            .RegisterPass(spvtools::CreateEliminateDeadFunctionsPass())
+            .RegisterPass(spvtools::CreateUnifyConstantPass());
 
-    std::vector<uint32_t> optspirv;
-    if (!opt.Run(spirv.data(), spirv.size(), &optspirv)) {
-        throw std::runtime_error("bad optimize run");
-    }
-    writeSpirv(baseOutName + ".opt.spv", optspirv);
+        std::vector<uint32_t> optspirv;
+        if (!opt.Run(spirv.data(), spirv.size(), &optspirv)) {
+            throw std::runtime_error("bad optimize run");
+        }
+        writeSpirv(baseOutName + ".opt.spv", optspirv);
 
-    std::string disassembly;
-    if (!core.Disassemble(optspirv, &disassembly)) {
-        throw std::runtime_error("bad disassembly");
-    }
+        std::string disassembly;
+        if (!core.Disassemble(optspirv, &disassembly)) {
+            throw std::runtime_error("bad disassembly");
+        }
 
         write(baseOutName + ".spv.txt", disassembly);
     } catch (const std::runtime_error& error) {

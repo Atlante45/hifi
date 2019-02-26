@@ -17,30 +17,28 @@
 #include "../AudioSRC.h"
 
 // high/low part of int64_t
-#define LO32(a)   ((uint32_t)(a))
-#define HI32(a)   ((int32_t)((a) >> 32))
+#define LO32(a) ((uint32_t)(a))
+#define HI32(a) ((int32_t)((a) >> 32))
 
 int AudioSRC::multirateFilter1_AVX2(const float* input0, float* output0, int inputFrames) {
     int outputFrames = 0;
 
-    assert(_numTaps % 8 == 0);  // SIMD8
+    assert(_numTaps % 8 == 0); // SIMD8
 
-    if (_step == 0) {   // rational
+    if (_step == 0) { // rational
 
         int32_t i = HI32(_offset);
 
         while (i < inputFrames) {
-
             const float* c0 = &_polyphaseFilter[_numTaps * _phase];
 
             __m256 acc0 = _mm256_setzero_ps();
 
             for (int j = 0; j < _numTaps; j += 8) {
-
-                //float coef = c0[j];
+                // float coef = c0[j];
                 __m256 coef0 = _mm256_loadu_ps(&c0[j]);
 
-                //acc += input[i + j] * coef;
+                // acc += input[i + j] * coef;
                 acc0 = _mm256_fmadd_ps(_mm256_loadu_ps(&input0[i + j]), coef0, acc0);
             }
 
@@ -59,10 +57,9 @@ int AudioSRC::multirateFilter1_AVX2(const float* input0, float* output0, int inp
         }
         _offset = (int64_t)(i - inputFrames) << 32;
 
-    } else {    // irrational
+    } else { // irrational
 
         while (HI32(_offset) < inputFrames) {
-
             int32_t i = HI32(_offset);
             uint32_t f = LO32(_offset);
 
@@ -76,14 +73,13 @@ int AudioSRC::multirateFilter1_AVX2(const float* input0, float* output0, int inp
             __m256 frac = _mm256_broadcast_ss(&ftmp);
 
             for (int j = 0; j < _numTaps; j += 8) {
-
-                //float coef = c0[j] + frac * (c1[j] - c0[j]);
+                // float coef = c0[j] + frac * (c1[j] - c0[j]);
                 __m256 coef0 = _mm256_loadu_ps(&c0[j]);
                 __m256 coef1 = _mm256_loadu_ps(&c1[j]);
                 coef1 = _mm256_sub_ps(coef1, coef0);
                 coef0 = _mm256_fmadd_ps(coef1, frac, coef0);
 
-                //acc += input[i + j] * coef;
+                // acc += input[i + j] * coef;
                 acc0 = _mm256_fmadd_ps(_mm256_loadu_ps(&input0[i + j]), coef0, acc0);
             }
 
@@ -107,25 +103,23 @@ int AudioSRC::multirateFilter1_AVX2(const float* input0, float* output0, int inp
 int AudioSRC::multirateFilter2_AVX2(const float* input0, const float* input1, float* output0, float* output1, int inputFrames) {
     int outputFrames = 0;
 
-    assert(_numTaps % 8 == 0);  // SIMD8
+    assert(_numTaps % 8 == 0); // SIMD8
 
-    if (_step == 0) {   // rational
+    if (_step == 0) { // rational
 
         int32_t i = HI32(_offset);
 
         while (i < inputFrames) {
-
             const float* c0 = &_polyphaseFilter[_numTaps * _phase];
 
             __m256 acc0 = _mm256_setzero_ps();
             __m256 acc1 = _mm256_setzero_ps();
 
             for (int j = 0; j < _numTaps; j += 8) {
-
-                //float coef = c0[j];
+                // float coef = c0[j];
                 __m256 coef0 = _mm256_loadu_ps(&c0[j]);
 
-                //acc += input[i + j] * coef;
+                // acc += input[i + j] * coef;
                 acc0 = _mm256_fmadd_ps(_mm256_loadu_ps(&input0[i + j]), coef0, acc0);
                 acc1 = _mm256_fmadd_ps(_mm256_loadu_ps(&input1[i + j]), coef0, acc1);
             }
@@ -136,7 +130,7 @@ int AudioSRC::multirateFilter2_AVX2(const float* input0, const float* input1, fl
             t0 = _mm_add_ps(t0, _mm_movehdup_ps(t0));
 
             _mm_store_ss(&output0[outputFrames], t0);
-            _mm_store_ss(&output1[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0,0,0,2)));
+            _mm_store_ss(&output1[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0, 0, 0, 2)));
             outputFrames += 1;
 
             i += _stepTable[_phase];
@@ -146,10 +140,9 @@ int AudioSRC::multirateFilter2_AVX2(const float* input0, const float* input1, fl
         }
         _offset = (int64_t)(i - inputFrames) << 32;
 
-    } else {    // irrational
+    } else { // irrational
 
         while (HI32(_offset) < inputFrames) {
-
             int32_t i = HI32(_offset);
             uint32_t f = LO32(_offset);
 
@@ -164,14 +157,13 @@ int AudioSRC::multirateFilter2_AVX2(const float* input0, const float* input1, fl
             __m256 frac = _mm256_broadcast_ss(&ftmp);
 
             for (int j = 0; j < _numTaps; j += 8) {
-
-                //float coef = c0[j] + frac * (c1[j] - c0[j]);
+                // float coef = c0[j] + frac * (c1[j] - c0[j]);
                 __m256 coef0 = _mm256_loadu_ps(&c0[j]);
                 __m256 coef1 = _mm256_loadu_ps(&c1[j]);
                 coef1 = _mm256_sub_ps(coef1, coef0);
                 coef0 = _mm256_fmadd_ps(coef1, frac, coef0);
 
-                //acc += input[i + j] * coef;
+                // acc += input[i + j] * coef;
                 acc0 = _mm256_fmadd_ps(_mm256_loadu_ps(&input0[i + j]), coef0, acc0);
                 acc1 = _mm256_fmadd_ps(_mm256_loadu_ps(&input1[i + j]), coef0, acc1);
             }
@@ -182,7 +174,7 @@ int AudioSRC::multirateFilter2_AVX2(const float* input0, const float* input1, fl
             t0 = _mm_add_ps(t0, _mm_movehdup_ps(t0));
 
             _mm_store_ss(&output0[outputFrames], t0);
-            _mm_store_ss(&output1[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0,0,0,2)));
+            _mm_store_ss(&output1[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0, 0, 0, 2)));
             outputFrames += 1;
 
             _offset += _step;
@@ -194,18 +186,17 @@ int AudioSRC::multirateFilter2_AVX2(const float* input0, const float* input1, fl
     return outputFrames;
 }
 
-int AudioSRC::multirateFilter4_AVX2(const float* input0, const float* input1, const float* input2, const float* input3, 
+int AudioSRC::multirateFilter4_AVX2(const float* input0, const float* input1, const float* input2, const float* input3,
                                     float* output0, float* output1, float* output2, float* output3, int inputFrames) {
     int outputFrames = 0;
 
-    assert(_numTaps % 8 == 0);  // SIMD8
+    assert(_numTaps % 8 == 0); // SIMD8
 
-    if (_step == 0) {   // rational
+    if (_step == 0) { // rational
 
         int32_t i = HI32(_offset);
 
         while (i < inputFrames) {
-
             const float* c0 = &_polyphaseFilter[_numTaps * _phase];
 
             __m256 acc0 = _mm256_setzero_ps();
@@ -214,11 +205,10 @@ int AudioSRC::multirateFilter4_AVX2(const float* input0, const float* input1, co
             __m256 acc3 = _mm256_setzero_ps();
 
             for (int j = 0; j < _numTaps; j += 8) {
-
-                //float coef = c0[j];
+                // float coef = c0[j];
                 __m256 coef0 = _mm256_loadu_ps(&c0[j]);
 
-                //acc += input[i + j] * coef;
+                // acc += input[i + j] * coef;
                 acc0 = _mm256_fmadd_ps(_mm256_loadu_ps(&input0[i + j]), coef0, acc0);
                 acc1 = _mm256_fmadd_ps(_mm256_loadu_ps(&input1[i + j]), coef0, acc1);
                 acc2 = _mm256_fmadd_ps(_mm256_loadu_ps(&input2[i + j]), coef0, acc2);
@@ -232,9 +222,9 @@ int AudioSRC::multirateFilter4_AVX2(const float* input0, const float* input1, co
             __m128 t0 = _mm_add_ps(_mm256_castps256_ps128(acc0), _mm256_extractf128_ps(acc0, 1));
 
             _mm_store_ss(&output0[outputFrames], t0);
-            _mm_store_ss(&output1[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0,0,0,1)));
-            _mm_store_ss(&output2[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0,0,0,2)));
-            _mm_store_ss(&output3[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0,0,0,3)));
+            _mm_store_ss(&output1[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0, 0, 0, 1)));
+            _mm_store_ss(&output2[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0, 0, 0, 2)));
+            _mm_store_ss(&output3[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0, 0, 0, 3)));
             outputFrames += 1;
 
             i += _stepTable[_phase];
@@ -244,10 +234,9 @@ int AudioSRC::multirateFilter4_AVX2(const float* input0, const float* input1, co
         }
         _offset = (int64_t)(i - inputFrames) << 32;
 
-    } else {    // irrational
+    } else { // irrational
 
         while (HI32(_offset) < inputFrames) {
-
             int32_t i = HI32(_offset);
             uint32_t f = LO32(_offset);
 
@@ -264,14 +253,13 @@ int AudioSRC::multirateFilter4_AVX2(const float* input0, const float* input1, co
             __m256 frac = _mm256_broadcast_ss(&ftmp);
 
             for (int j = 0; j < _numTaps; j += 8) {
-
-                //float coef = c0[j] + frac * (c1[j] - c0[j]);
+                // float coef = c0[j] + frac * (c1[j] - c0[j]);
                 __m256 coef0 = _mm256_loadu_ps(&c0[j]);
                 __m256 coef1 = _mm256_loadu_ps(&c1[j]);
                 coef1 = _mm256_sub_ps(coef1, coef0);
                 coef0 = _mm256_fmadd_ps(coef1, frac, coef0);
 
-                //acc += input[i + j] * coef;
+                // acc += input[i + j] * coef;
                 acc0 = _mm256_fmadd_ps(_mm256_loadu_ps(&input0[i + j]), coef0, acc0);
                 acc1 = _mm256_fmadd_ps(_mm256_loadu_ps(&input1[i + j]), coef0, acc1);
                 acc2 = _mm256_fmadd_ps(_mm256_loadu_ps(&input2[i + j]), coef0, acc2);
@@ -285,9 +273,9 @@ int AudioSRC::multirateFilter4_AVX2(const float* input0, const float* input1, co
             __m128 t0 = _mm_add_ps(_mm256_castps256_ps128(acc0), _mm256_extractf128_ps(acc0, 1));
 
             _mm_store_ss(&output0[outputFrames], t0);
-            _mm_store_ss(&output1[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0,0,0,1)));
-            _mm_store_ss(&output2[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0,0,0,2)));
-            _mm_store_ss(&output3[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0,0,0,3)));
+            _mm_store_ss(&output1[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0, 0, 0, 1)));
+            _mm_store_ss(&output2[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0, 0, 0, 2)));
+            _mm_store_ss(&output3[outputFrames], _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(0, 0, 0, 3)));
             outputFrames += 1;
 
             _offset += _step;

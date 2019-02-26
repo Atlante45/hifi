@@ -10,18 +10,17 @@
 #ifndef hifi_GraphicsEngine_h
 #define hifi_GraphicsEngine_h
 
-#include <gl/OffscreenGLCanvas.h>
 #include <gl/GLWidget.h>
+#include <gl/OffscreenGLCanvas.h>
 #include <qmutex.h>
 
-#include <render/Engine.h>
 #include <procedural/ProceduralSkybox.h>
+#include <render/Engine.h>
 
 #include <OctreeConstants.h>
 #include <shared/RateCounter.h>
 
 #include "FrameTimingsScriptingInterface.h"
-
 
 struct AppRenderArgs {
     render::Args _renderArgs;
@@ -31,12 +30,11 @@ struct AppRenderArgs {
     glm::mat4 _eyeProjections[2];
     glm::mat4 _headPose;
     glm::mat4 _sensorToWorld;
-    float _sensorToWorldScale{ 1.0f };
-    bool _isStereo{ false };
+    float _sensorToWorldScale { 1.0f };
+    bool _isStereo { false };
 };
 
-using RenderArgsEditor = std::function <void(AppRenderArgs&)>;
-
+using RenderArgsEditor = std::function<void(AppRenderArgs&)>;
 
 class GraphicsEngine {
 public:
@@ -68,19 +66,18 @@ private:
     void render_runRenderFrame(RenderArgs* renderArgs);
 
 protected:
-
-    mutable QMutex _renderArgsMutex{ QMutex::Recursive };
+    mutable QMutex _renderArgsMutex { QMutex::Recursive };
     AppRenderArgs _appRenderArgs;
 
     RateCounter<500> _renderLoopCounter;
 
-    uint32_t _renderFrameCount{ 0 };
-    render::ScenePointer _renderScene{ new render::Scene(glm::vec3(-0.5f * (float)TREE_SCALE), (float)TREE_SCALE) };
-    render::EnginePointer _renderEngine{ new render::RenderEngine() };
+    uint32_t _renderFrameCount { 0 };
+    render::ScenePointer _renderScene { new render::Scene(glm::vec3(-0.5f * (float)TREE_SCALE), (float)TREE_SCALE) };
+    render::EnginePointer _renderEngine { new render::RenderEngine() };
 
     gpu::ContextPointer _gpuContext; // initialized during window creation
 
-    QObject* _renderEventHandler{ nullptr };
+    QObject* _renderEventHandler { nullptr };
     friend class RenderEventHandler;
 
     FrameTimingsScriptingInterface _frameTimingsScriptingInterface;

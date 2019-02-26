@@ -11,12 +11,12 @@
 
 #include "CrashRecoveryHandler.h"
 
+#include <PathUtils.h>
 #include <QCoreApplication>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QFile>
 #include <QLabel>
-#include <PathUtils.h>
 #include <QRadioButton>
 #include <QStandardPaths>
 #include <QVBoxLayout>
@@ -28,7 +28,6 @@
 #include <RunningMarker.h>
 #include <SettingHandle.h>
 #include <SettingHelpers.h>
-
 
 bool CrashRecoveryHandler::checkForResetSettings(bool wasLikelyCrash, bool suppressPrompt) {
     QSettings::setDefaultFormat(JSON_FORMAT);
@@ -170,4 +169,3 @@ void CrashRecoveryHandler::handleCrash(CrashRecoveryHandler::Action action) {
         settings.setValue(TUTORIAL_COMPLETE_FLAG_KEY, tutorialComplete);
     }
 }
-

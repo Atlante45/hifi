@@ -12,8 +12,8 @@
 #ifndef hifi_PositionalAudioStream_h
 #define hifi_PositionalAudioStream_h
 
-#include <glm/gtx/quaternion.hpp>
 #include <AABox.h>
+#include <glm/gtx/quaternion.hpp>
 
 #include "InboundAudioStream.h"
 
@@ -27,8 +27,10 @@ struct NodeIDStreamID {
     Node::LocalID nodeLocalID;
     StreamID streamID;
 
-    NodeIDStreamID(QUuid nodeID, Node::LocalID nodeLocalID, StreamID streamID)
-        : nodeID(nodeID), nodeLocalID(nodeLocalID), streamID(streamID) {};
+    NodeIDStreamID(QUuid nodeID, Node::LocalID nodeLocalID, StreamID streamID) :
+        nodeID(nodeID),
+        nodeLocalID(nodeLocalID),
+        streamID(streamID) {};
 
     bool operator==(const NodeIDStreamID& other) const {
         return (nodeLocalID == other.nodeLocalID || nodeID == other.nodeID) && streamID == other.streamID;
@@ -40,10 +42,7 @@ using ChannelFlag = quint8;
 class PositionalAudioStream : public InboundAudioStream {
     Q_OBJECT
 public:
-    enum Type {
-        Microphone,
-        Injector
-    };
+    enum Type { Microphone, Injector };
 
     PositionalAudioStream(PositionalAudioStream::Type type, bool isStereo, int numStaticJitterFrames = -1);
 
@@ -82,7 +81,7 @@ public:
 protected:
     // disallow copying of PositionalAudioStream objects
     PositionalAudioStream(const PositionalAudioStream&);
-    PositionalAudioStream& operator= (const PositionalAudioStream&);
+    PositionalAudioStream& operator=(const PositionalAudioStream&);
 
     int parsePositionalData(const QByteArray& positionalByteArray);
 

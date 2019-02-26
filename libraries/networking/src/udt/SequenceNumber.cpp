@@ -28,10 +28,10 @@ int udt::seqoff(const SequenceNumber& seq1, const SequenceNumber& seq2) {
     if (glm::abs(seq1._value - seq2._value) < SequenceNumber::THRESHOLD) {
         return seq2._value - seq1._value;
     }
-    
+
     if (seq1._value < seq2._value) {
         return seq2._value - seq1._value - SequenceNumber::MAX - 1;
     }
-    
+
     return seq2._value - seq1._value + SequenceNumber::MAX + 1;
 }

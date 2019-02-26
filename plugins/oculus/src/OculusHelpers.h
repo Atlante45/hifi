@@ -9,18 +9,18 @@
 
 #include <QtCore/QLoggingCategory>
 
-#include <ovr_capi.h>
 #include <GLMHelpers.h>
-#include <glm/gtc/type_ptr.hpp>
+#include <ovr_capi.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <controllers/Forward.h>
 
 Q_DECLARE_LOGGING_CATEGORY(displayplugins)
 Q_DECLARE_LOGGING_CATEGORY(oculusLog)
 
-namespace hifi { 
-    
+namespace hifi {
+
 struct ovr {
     static bool available();
     static ovrSession acquireRenderSession();
@@ -56,29 +56,19 @@ struct ovr {
         }
     }
 
-    static inline glm::mat4 toGlm(const ovrMatrix4f& om) {
-        return glm::transpose(glm::make_mat4(&om.M[0][0]));
-    }
+    static inline glm::mat4 toGlm(const ovrMatrix4f& om) { return glm::transpose(glm::make_mat4(&om.M[0][0])); }
 
     static inline glm::mat4 toGlm(const ovrFovPort& fovport, float nearPlane = 0.01f, float farPlane = 10000.0f) {
         return toGlm(ovrMatrix4f_Projection(fovport, nearPlane, farPlane, true));
     }
 
-    static inline glm::vec3 toGlm(const ovrVector3f& ov) {
-        return glm::make_vec3(&ov.x);
-    }
+    static inline glm::vec3 toGlm(const ovrVector3f& ov) { return glm::make_vec3(&ov.x); }
 
-    static inline glm::vec2 toGlm(const ovrVector2f& ov) {
-        return glm::make_vec2(&ov.x);
-    }
+    static inline glm::vec2 toGlm(const ovrVector2f& ov) { return glm::make_vec2(&ov.x); }
 
-    static inline glm::uvec2 toGlm(const ovrSizei& ov) {
-        return glm::uvec2(ov.w, ov.h);
-    }
+    static inline glm::uvec2 toGlm(const ovrSizei& ov) { return glm::uvec2(ov.w, ov.h); }
 
-    static inline glm::quat toGlm(const ovrQuatf& oq) {
-        return glm::make_quat(&oq.x);
-    }
+    static inline glm::quat toGlm(const ovrQuatf& oq) { return glm::make_quat(&oq.x); }
 
     static inline glm::mat4 toGlm(const ovrPosef& op) {
         glm::mat4 orientation = glm::mat4_cast(toGlm(op.Orientation));
@@ -93,21 +83,13 @@ struct ovr {
         return result;
     }
 
-    static inline ovrVector3f fromGlm(const glm::vec3& v) {
-        return { v.x, v.y, v.z };
-    }
+    static inline ovrVector3f fromGlm(const glm::vec3& v) { return { v.x, v.y, v.z }; }
 
-    static inline ovrVector2f fromGlm(const glm::vec2& v) {
-        return { v.x, v.y };
-    }
+    static inline ovrVector2f fromGlm(const glm::vec2& v) { return { v.x, v.y }; }
 
-    static inline ovrSizei fromGlm(const glm::uvec2& v) {
-        return { (int)v.x, (int)v.y };
-    }
+    static inline ovrSizei fromGlm(const glm::uvec2& v) { return { (int)v.x, (int)v.y }; }
 
-    static inline ovrQuatf fromGlm(const glm::quat& q) {
-        return { q.x, q.y, q.z, q.w };
-    }
+    static inline ovrQuatf fromGlm(const glm::quat& q) { return { q.x, q.y, q.z, q.w }; }
 
     static inline ovrPosef poseFromGlm(const glm::mat4& m) {
         glm::vec3 translation = glm::vec3(m[3]) / m[3].w;
@@ -119,8 +101,8 @@ struct ovr {
     }
 
     static controller::Pose toControllerPose(ovrHandType hand, const ovrPoseStatef& handPose);
-    static controller::Pose toControllerPose(ovrHandType hand, const ovrPoseStatef& handPose, const ovrPoseStatef& lastHandPose);
-
+    static controller::Pose toControllerPose(ovrHandType hand, const ovrPoseStatef& handPose,
+                                             const ovrPoseStatef& lastHandPose);
 };
 
-}  // namespace hifi
+} // namespace hifi

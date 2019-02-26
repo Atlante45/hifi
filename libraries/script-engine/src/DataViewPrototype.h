@@ -19,7 +19,7 @@ class DataViewPrototype : public QObject, public QScriptable {
     Q_OBJECT
 public:
     DataViewPrototype(QObject* parent = NULL);
-    
+
 public slots:
     // Gets the value of the given type at the specified byte offset
     // from the start of the view. There is no alignment constraint;
@@ -39,7 +39,7 @@ public slots:
     quint32 getUint32(qint32 byteOffset, bool littleEndian = false);
     QScriptValue getFloat32(qint32 byteOffset, bool littleEndian = false);
     QScriptValue getFloat64(qint32 byteOffset, bool littleEndian = false);
-    
+
     // Stores a value of the given type at the specified byte offset
     // from the start of the view. There is no alignment constraint;
     // multi-byte values may be stored at any offset.
@@ -59,7 +59,7 @@ public slots:
     void setUint32(qint32 byteOffset, quint32 value, bool littleEndian = false);
     void setFloat32(qint32 byteOffset, float value, bool littleEndian = false);
     void setFloat64(qint32 byteOffset, double value, bool littleEndian = false);
-    
+
 private:
     QByteArray* thisArrayBuffer() const;
     bool realOffset(qint32& offset, size_t size) const;

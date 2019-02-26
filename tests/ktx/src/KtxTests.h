@@ -17,5 +17,3 @@ private slots:
     void testKhronosCompressionFunctions();
     void testKtxSerialization();
 };
-
-

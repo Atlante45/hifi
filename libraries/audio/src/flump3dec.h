@@ -1,20 +1,20 @@
 /*
  * FLUENDO S.A.
  * Copyright (C) <2005 - 2011>  <support@fluendo.com>
- * 
+ *
  * This Source Code is licensed under MIT license and the explanations attached
  * in MIT License Statements.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
  * of the Software, and to permit persons to whom the Software is furnished to do
  * so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,18 +22,18 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- * 
+ *
  * MIT license Statements for Fluendo's mp3 plug-in Source Code
  * ------------------------------------------------------------
  *
- * Fluendo's mp3 software Source Code (the "Source Code") is licensed under the 
+ * Fluendo's mp3 software Source Code (the "Source Code") is licensed under the
  * MIT license provisions.
  *
  * The MIT license is an open source license that permits the User to operate and
  * use in many forms the Source Code, which would be governed under its
- * regulations. 
+ * regulations.
  *
- * The purpose of this note is to clarify the intellectual property rights granted 
+ * The purpose of this note is to clarify the intellectual property rights granted
  * over the Source Code by Fluendo, as well as other legal issues that concern
  * your use of it.
  *
@@ -43,23 +43,23 @@
  * The MIT license allows you to do the following things with the Source Code:
  *
  * - Copy and use the Source Code alone or jointly with other code for any
- *   purposes. 
+ *   purposes.
  *   Copy of the Source Code is not limited and is royalty-free.
  *
- * - Merge the Source Code with other code for developing new applications with no 
+ * - Merge the Source Code with other code for developing new applications with no
  *   limits.
  *
- * - Modifying the Source Code for developing the plug-in or for implementing the 
- *   plug-in in other applications for any purposes. The MIT License does not 
- *   require you to share these modifications with anyone. 
+ * - Modifying the Source Code for developing the plug-in or for implementing the
+ *   plug-in in other applications for any purposes. The MIT License does not
+ *   require you to share these modifications with anyone.
  *
- * - Publish, distribute, sublicense and sell copies of the Source Code to third 
+ * - Publish, distribute, sublicense and sell copies of the Source Code to third
  *   parties.
  *
- * - Permit anyone to whom the Source Code is licensed to enjoy the rights above 
- *   subject to the MIT license provisions. 
+ * - Permit anyone to whom the Source Code is licensed to enjoy the rights above
+ *   subject to the MIT license provisions.
  *
- * By licensing this Source Code under the MIT License, Fluendo is offering to the 
+ * By licensing this Source Code under the MIT License, Fluendo is offering to the
  * community the rights set out above without restriction and without any
  * obligation for the User of the Source Code to release his/her modifications
  * back to the community. Anyone operating with the Source Code released from
@@ -72,7 +72,7 @@
  * "Copyright 2005 Fluendo, S.L. This Source Code is licensed under MIT license
  * and the explanations attached in MIT License Statements". These notices shall
  * be included in all copies of the Source Code or in substantial parts of the
- * Source Code which may be released separately or with modifications. 
+ * Source Code which may be released separately or with modifications.
  *
  * Patents over the plug-in and/or Source Code
  * -------------------------------------------
@@ -81,7 +81,7 @@
  * Fluendo might be covered by patents in various parts of the world.  Fluendo
  * does not own or claim to own any patents on the techniques used in the code.
  * (Such patents are owned or claimed to be owned by Thompson Licensing, S.A. and
- * some other entities as the case may be). 
+ * some other entities as the case may be).
  *
  * Fluendo has got the relevant licenses to cover its own activities with the
  * Source Code but it is not authorized to sublicense nor to grant the rights

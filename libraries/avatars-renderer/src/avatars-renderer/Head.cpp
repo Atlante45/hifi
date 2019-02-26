@@ -10,15 +10,15 @@
 
 #include "Head.h"
 
-#include <glm/gtx/quaternion.hpp>
 #include <gpu/Batch.h>
+#include <glm/gtx/quaternion.hpp>
 
-#include <NodeList.h>
 #include <DependencyManager.h>
 #include <GeometryUtil.h>
-#include <trackers/FaceTracker.h>
-#include <trackers/EyeTracker.h>
+#include <NodeList.h>
 #include <Rig.h>
+#include <trackers/EyeTracker.h>
+#include <trackers/FaceTracker.h>
 #include "Logging.h"
 
 #include "Avatar.h"
@@ -30,8 +30,7 @@ static bool disableEyelidAdjustment { false };
 Head::Head(Avatar* owningAvatar) :
     HeadData(owningAvatar),
     _leftEyeLookAtID(DependencyManager::get<GeometryCache>()->allocateID()),
-    _rightEyeLookAtID(DependencyManager::get<GeometryCache>()->allocateID())
-{
+    _rightEyeLookAtID(DependencyManager::get<GeometryCache>()->allocateID()) {
 }
 
 void Head::init() {
@@ -55,7 +54,8 @@ void Head::simulate(float deltaTime) {
     if (_longTermAverageLoudness == -1.0f) {
         _longTermAverageLoudness = _averageLoudness;
     } else {
-        _longTermAverageLoudness = glm::mix(_longTermAverageLoudness, _averageLoudness, glm::min(deltaTime / AUDIO_LONG_TERM_AVERAGING_SECS, 1.0f));
+        _longTermAverageLoudness = glm::mix(_longTermAverageLoudness, _averageLoudness,
+                                            glm::min(deltaTime / AUDIO_LONG_TERM_AVERAGING_SECS, 1.0f));
     }
 
     if (!_isEyeTrackerConnected) {
@@ -97,8 +97,11 @@ void Head::simulate(float deltaTime) {
             // no blinking when brows are raised; blink less with increasing loudness
             const float BASE_BLINK_RATE = 15.0f / 60.0f;
             const float ROOT_LOUDNESS_TO_BLINK_INTERVAL = 0.25f;
-            if (forceBlink || (_browAudioLift < EPSILON && shouldDo(glm::max(1.0f, sqrt(fabs(_averageLoudness - _longTermAverageLoudness)) *
-                ROOT_LOUDNESS_TO_BLINK_INTERVAL) / BASE_BLINK_RATE, deltaTime))) {
+            if (forceBlink ||
+                (_browAudioLift < EPSILON && shouldDo(glm::max(1.0f, sqrt(fabs(_averageLoudness - _longTermAverageLoudness)) *
+                                                                         ROOT_LOUDNESS_TO_BLINK_INTERVAL) /
+                                                          BASE_BLINK_RATE,
+                                                      deltaTime))) {
                 _leftEyeBlinkVelocity = BLINK_SPEED + randFloat() * BLINK_SPEED_VARIABILITY;
                 _rightEyeBlinkVelocity = BLINK_SPEED + randFloat() * BLINK_SPEED_VARIABILITY;
                 if (randFloat() < 0.5f) {
@@ -129,12 +132,12 @@ void Head::simulate(float deltaTime) {
         _leftEyeBlink = FULLY_OPEN;
     }
 
-        // use data to update fake Faceshift blendshape coefficients
+    // use data to update fake Faceshift blendshape coefficients
     if (getHasAudioEnabledFaceMovement()) {
         // Update audio attack data for facial animation (eyebrows and mouth)
         float audioAttackAveragingRate = (10.0f - deltaTime * NORMAL_HZ) / 10.0f; // --> 0.9 at 60 Hz
         _audioAttack = audioAttackAveragingRate * _audioAttack +
-            (1.0f - audioAttackAveragingRate) * fabs((audioLoudness - _longTermAverageLoudness) - _lastLoudness);
+                       (1.0f - audioAttackAveragingRate) * fabs((audioLoudness - _longTermAverageLoudness) - _lastLoudness);
         _lastLoudness = (audioLoudness - _longTermAverageLoudness);
         const float BROW_LIFT_THRESHOLD = 100.0f;
         if (_audioAttack > BROW_LIFT_THRESHOLD) {
@@ -152,14 +155,8 @@ void Head::simulate(float deltaTime) {
         _mouthTime = 0.0f;
     }
 
-    FaceTracker::updateFakeCoefficients(_leftEyeBlink,
-        _rightEyeBlink,
-        _browAudioLift,
-        _audioJawOpen,
-        _mouth2,
-        _mouth3,
-        _mouth4,
-        _transientBlendshapeCoefficients);
+    FaceTracker::updateFakeCoefficients(_leftEyeBlink, _rightEyeBlink, _browAudioLift, _audioJawOpen, _mouth2, _mouth3, _mouth4,
+                                        _transientBlendshapeCoefficients);
 
     if (getHasProceduralEyeFaceMovement()) {
         applyEyelidOffset(getOrientation());
@@ -224,7 +221,7 @@ void Head::applyEyelidOffset(glm::quat headOrientation) {
         return;
     }
 
-    const float EYE_PITCH_TO_COEFFICIENT = 3.5f;  // Empirically determined
+    const float EYE_PITCH_TO_COEFFICIENT = 3.5f; // Empirically determined
     const float MAX_EYELID_OFFSET = 1.5f;
     const float BLINK_DOWN_MULTIPLIER = 0.25f;
     const float OPEN_DOWN_MULTIPLIER = 0.3f;
@@ -237,15 +234,15 @@ void Head::applyEyelidOffset(glm::quat headOrientation) {
 
     float blinkUpCoefficient = -eyelidOffset;
     float blinkDownCoefficient = BLINK_DOWN_MULTIPLIER * eyelidOffset;
-    
+
     float openUpCoefficient = eyelidOffset;
     float openDownCoefficient = OPEN_DOWN_MULTIPLIER * eyelidOffset;
-    
+
     float browsUpCoefficient = BROW_UP_MULTIPLIER * eyelidOffset;
     float browsDownCoefficient = 0.0f;
 
     bool isLookingUp = (eyePitch > 0);
-    
+
     if (isLookingUp) {
         for (int i = 0; i < 2; i++) {
             _transientBlendshapeCoefficients[EYE_BLINK_INDICES[i]] = blinkUpCoefficient;
@@ -263,14 +260,14 @@ void Head::applyEyelidOffset(glm::quat headOrientation) {
 
 void Head::relax(float deltaTime) {
     // restore rotation, lean to neutral positions
-    const float LEAN_RELAXATION_PERIOD = 0.25f;   // seconds
+    const float LEAN_RELAXATION_PERIOD = 0.25f; // seconds
     float relaxationFactor = 1.0f - glm::min(deltaTime / LEAN_RELAXATION_PERIOD, 1.0f);
     _deltaYaw *= relaxationFactor;
     _deltaPitch *= relaxationFactor;
     _deltaRoll *= relaxationFactor;
 }
 
-void Head::setScale (float scale) {
+void Head::setScale(float scale) {
     if (_scale == scale) {
         return;
     }
@@ -282,7 +279,7 @@ glm::quat Head::getFinalOrientationInWorldFrame() const {
 }
 
 glm::quat Head::getFinalOrientationInLocalFrame() const {
-    return glm::quat(glm::radians(glm::vec3(getFinalPitch(), getFinalYaw(), getFinalRoll() )));
+    return glm::quat(glm::radians(glm::vec3(getFinalPitch(), getFinalYaw(), getFinalRoll())));
 }
 
 // Everyone else's head keeps track of a lookAtPosition that everybody sees the same, and refers to where that head
@@ -294,7 +291,8 @@ glm::quat Head::getFinalOrientationInLocalFrame() const {
 // However, if that head is looking at me, then I will attempt to adjust the lookAtPosition by the difference between
 // my (singular) eye position and my actual camera position. This adjustment is used on their eyeballs during rendering
 // (and also on any lookAt vector display for that head, during rendering). Note that:
-// 1. this adjustment can be made directly to the other head's eyeball joints, because we won't be send their joint information to others.
+// 1. this adjustment can be made directly to the other head's eyeball joints, because we won't be send their joint information
+// to others.
 // 2. the corrected position is a separate ivar, so the common/uncorrected value is still available
 //
 // There is a pun here: The two lookAtPositions will always be the same for my own avatar in my own Interface, because I

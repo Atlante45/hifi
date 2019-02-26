@@ -11,11 +11,12 @@
 #ifndef hifi_RenderableParticleEffectEntityItem_h
 #define hifi_RenderableParticleEffectEntityItem_h
 
-#include "RenderableEntityItem.h"
 #include <ParticleEffectEntityItem.h>
 #include <TextureCache.h>
+#include "RenderableEntityItem.h"
 
-namespace render { namespace entities {
+namespace render {
+namespace entities {
 
 class ParticleEffectEntityRenderer : public TypedEntityRenderer<ParticleEffectEntityItem> {
     using Parent = TypedEntityRenderer<ParticleEffectEntityItem>;
@@ -27,7 +28,8 @@ public:
 protected:
     virtual bool needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const override;
 
-    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) override;
+    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                const TypedEntityPointer& entity) override;
     virtual void doRenderUpdateAsynchronousTyped(const TypedEntityPointer& entity) override;
 
     virtual ItemKey getKey() override;
@@ -63,7 +65,6 @@ private:
     };
     using CpuParticles = std::deque<CpuParticle>;
 
-
     template<typename T>
     struct InterpolationData {
         T start;
@@ -81,7 +82,8 @@ private:
         glm::vec2 spare;
     };
 
-    static CpuParticle createParticle(uint64_t now, const Transform& baseTransform, const particle::Properties& particleProperties);
+    static CpuParticle createParticle(uint64_t now, const Transform& baseTransform,
+                                      const particle::Properties& particleProperties);
     void stepSimulation();
 
     particle::Properties _particleProperties;
@@ -90,7 +92,7 @@ private:
     CpuParticles _cpuParticles;
     bool _emitting { false };
     uint64_t _timeUntilNextEmit { 0 };
-    BufferPointer _particleBuffer{ std::make_shared<Buffer>() };
+    BufferPointer _particleBuffer { std::make_shared<Buffer>() };
     BufferView _uniformBuffer;
     quint64 _lastSimulated { 0 };
 
@@ -100,6 +102,7 @@ private:
     ScenePointer _scene;
 };
 
-} } // namespace 
+} // namespace entities
+} // namespace render
 
 #endif // hifi_RenderableParticleEffectEntityItem_h

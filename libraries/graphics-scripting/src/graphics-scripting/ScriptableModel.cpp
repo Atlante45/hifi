@@ -59,8 +59,7 @@ scriptable::ScriptableMaterial::ScriptableMaterial(const graphics::MaterialPoint
     emissive(material->getEmissive()),
     albedo(material->getAlbedo()),
     defaultFallthrough(material->getDefaultFallthrough()),
-    propertyFallthroughs(material->getPropertyFallthroughs())
-{
+    propertyFallthroughs(material->getPropertyFallthroughs()) {
     auto map = material->getTextureMap(graphics::Material::MapChannel::EMISSIVE_MAP);
     if (map && map->getTextureSource()) {
         emissiveMap = map->getTextureSource()->getUrl().toString();
@@ -117,7 +116,8 @@ scriptable::ScriptableMaterial::ScriptableMaterial(const graphics::MaterialPoint
     }
 }
 
-scriptable::ScriptableMaterialLayer& scriptable::ScriptableMaterialLayer::operator=(const scriptable::ScriptableMaterialLayer& materialLayer) {
+scriptable::ScriptableMaterialLayer& scriptable::ScriptableMaterialLayer::operator=(
+    const scriptable::ScriptableMaterialLayer& materialLayer) {
     material = materialLayer.material;
     priority = materialLayer.priority;
 
@@ -149,22 +149,25 @@ scriptable::ScriptableModelBase::~ScriptableModelBase() {
 }
 
 void scriptable::ScriptableModelBase::append(scriptable::WeakMeshPointer mesh) {
-    meshes << ScriptableMeshBase{ provider, this, mesh, this /*parent*/ };
+    meshes << ScriptableMeshBase { provider, this, mesh, this /*parent*/ };
 }
 
 void scriptable::ScriptableModelBase::append(const ScriptableMeshBase& mesh) {
     if (mesh.provider.lock().get() != provider.lock().get()) {
-        qCDebug(graphics_scripting) << "warning: appending mesh from different provider..." << mesh.provider.lock().get() << " != " << provider.lock().get();
+        qCDebug(graphics_scripting) << "warning: appending mesh from different provider..." << mesh.provider.lock().get()
+                                    << " != " << provider.lock().get();
     }
     meshes << mesh;
 }
 
-void scriptable::ScriptableModelBase::appendMaterial(const graphics::MaterialLayer& materialLayer, int shapeID, std::string materialName) {
+void scriptable::ScriptableModelBase::appendMaterial(const graphics::MaterialLayer& materialLayer, int shapeID,
+                                                     std::string materialName) {
     materialLayers[QString::number(shapeID)].push_back(ScriptableMaterialLayer(materialLayer));
     materialLayers["mat::" + QString::fromStdString(materialName)].push_back(ScriptableMaterialLayer(materialLayer));
 }
 
-void scriptable::ScriptableModelBase::appendMaterials(const std::unordered_map<std::string, graphics::MultiMaterial>& materialsToAppend) {
+void scriptable::ScriptableModelBase::appendMaterials(
+    const std::unordered_map<std::string, graphics::MultiMaterial>& materialsToAppend) {
     auto materialsToAppendCopy = materialsToAppend;
     for (auto& multiMaterial : materialsToAppendCopy) {
         while (!multiMaterial.second.empty()) {
@@ -182,15 +185,15 @@ void scriptable::ScriptableModelBase::appendMaterialNames(const std::vector<std:
 
 QString scriptable::ScriptableModel::toString() const {
     return QString("[ScriptableModel%1%2 numMeshes=%3]")
-        .arg(objectID.isNull() ? "" : " objectID="+objectID.toString())
-        .arg(objectName().isEmpty() ? "" : " name=" +objectName())
+        .arg(objectID.isNull() ? "" : " objectID=" + objectID.toString())
+        .arg(objectName().isEmpty() ? "" : " name=" + objectName())
         .arg(meshes.size());
 }
 
 scriptable::ScriptableModelPointer scriptable::ScriptableModel::cloneModel(const QVariantMap& options) {
     scriptable::ScriptableModelPointer clone = scriptable::ScriptableModelPointer(new scriptable::ScriptableModel(*this));
     clone->meshes.clear();
-    for (const auto &mesh : getConstMeshes()) {
+    for (const auto& mesh : getConstMeshes()) {
         auto cloned = mesh->cloneMesh();
         if (auto tmp = qobject_cast<scriptable::ScriptableMeshBase*>(cloned)) {
             clone->meshes << *tmp;
@@ -202,7 +205,6 @@ scriptable::ScriptableModelPointer scriptable::ScriptableModel::cloneModel(const
     return clone;
 }
 
-
 const scriptable::ScriptableMeshes scriptable::ScriptableModel::getConstMeshes() const {
     scriptable::ScriptableMeshes out;
     for (const auto& mesh : meshes) {
@@ -212,7 +214,8 @@ const scriptable::ScriptableMeshes scriptable::ScriptableModel::getConstMeshes()
         } else {
             qCDebug(graphics_scripting) << "reusing scriptable mesh" << m;
         }
-        const scriptable::ScriptableMeshPointer mp = scriptable::ScriptableMeshPointer(const_cast<scriptable::ScriptableMesh*>(m));
+        const scriptable::ScriptableMeshPointer mp = scriptable::ScriptableMeshPointer(
+            const_cast<scriptable::ScriptableMesh*>(m));
         out << mp;
     }
     return out;

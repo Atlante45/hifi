@@ -12,9 +12,9 @@
 #ifndef hifi_BaseScriptEngine_h
 #define hifi_BaseScriptEngine_h
 
-#include <functional>
 #include <QtCore/QDebug>
 #include <QtScript/QScriptEngine>
+#include <functional>
 
 class ScriptEngine;
 using ScriptEnginePointer = QSharedPointer<ScriptEngine>;
@@ -46,7 +46,7 @@ public:
     bool raiseException(const QScriptValue& exception);
 
     // helper to detect and log warnings when other code invokes QScriptEngine/BaseScriptEngine in thread-unsafe ways
-    static bool IS_THREADSAFE_INVOCATION(const QThread *thread, const QString& method);
+    static bool IS_THREADSAFE_INVOCATION(const QThread* thread, const QString& method);
 signals:
     void unhandledException(const QScriptValue& exception);
 
@@ -55,7 +55,9 @@ protected:
     // even though the context/engine parameters are redundant in most cases, the function signature matches `newFunction`
     // anyway so that newLambdaFunction can be used to rapidly prototype / test utility APIs and then if becoming
     // permanent more easily promoted into regular static newFunction scenarios.
-    QScriptValue newLambdaFunction(std::function<QScriptValue(QScriptContext *context, QScriptEngine* engine)> operation, const QScriptValue& data = QScriptValue(), const QScriptEngine::ValueOwnership& ownership = QScriptEngine::AutoOwnership);
+    QScriptValue newLambdaFunction(std::function<QScriptValue(QScriptContext* context, QScriptEngine* engine)> operation,
+                                   const QScriptValue& data = QScriptValue(),
+                                   const QScriptEngine::ValueOwnership& ownership = QScriptEngine::AutoOwnership);
 
 #ifdef DEBUG_JS
     static void _debugDump(const QString& header, const QScriptValue& object, const QString& footer = QString());
@@ -79,14 +81,16 @@ QScriptValue callScopedHandlerObject(QScriptValue handler, QScriptValue err, QSc
 class Lambda : public QObject {
     Q_OBJECT
 public:
-    Lambda(QScriptEngine *engine, std::function<QScriptValue(QScriptContext *context, QScriptEngine* engine)> operation, QScriptValue data);
+    Lambda(QScriptEngine* engine, std::function<QScriptValue(QScriptContext* context, QScriptEngine* engine)> operation,
+           QScriptValue data);
     ~Lambda();
-    public slots:
-        QScriptValue call();
+public slots:
+    QScriptValue call();
     QString toString() const;
+
 private:
     QScriptEngine* engine;
-    std::function<QScriptValue(QScriptContext *context, QScriptEngine* engine)> operation;
+    std::function<QScriptValue(QScriptContext* context, QScriptEngine* engine)> operation;
     QScriptValue data;
 };
 

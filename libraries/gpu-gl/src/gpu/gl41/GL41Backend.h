@@ -21,7 +21,8 @@
 
 #define GPU_INPUT_PROFILE GPU_CORE_41
 
-namespace gpu { namespace gl41 {
+namespace gpu {
+namespace gl41 {
 
 using namespace gpu::gl;
 
@@ -53,10 +54,12 @@ public:
         using Parent = GLTexture;
         friend class GL41Backend;
         static GLuint allocate(const Texture& texture);
+
     protected:
         GL41Texture(const std::weak_ptr<GLBackend>& backend, const Texture& texture);
         void generateMips() const override;
-        Size copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset, GLenum internalFormat, GLenum format, GLenum type, Size sourceSize, const void* sourcePointer) const override;
+        Size copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset, GLenum internalFormat,
+                                         GLenum format, GLenum type, Size sourceSize, const void* sourcePointer) const override;
         void syncSampler() const override;
 
         void withPreservedTexture(std::function<void()> f) const;
@@ -84,6 +87,7 @@ public:
     class GL41AttachmentTexture : public GL41FixedAllocationTexture {
         using Parent = GL41FixedAllocationTexture;
         friend class GL41Backend;
+
     protected:
         GL41AttachmentTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture);
         ~GL41AttachmentTexture();
@@ -92,6 +96,7 @@ public:
     class GL41StrictResourceTexture : public GL41FixedAllocationTexture {
         using Parent = GL41FixedAllocationTexture;
         friend class GL41Backend;
+
     protected:
         GL41StrictResourceTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture);
         ~GL41StrictResourceTexture();
@@ -101,7 +106,6 @@ public:
         using Parent = GL41Texture;
         friend class GL41Backend;
         using PromoteLambda = std::function<void()>;
-
 
     protected:
         GL41VariableAllocationTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture);
@@ -113,10 +117,12 @@ public:
         size_t demote() override;
         void populateTransferQueue(TransferQueue& pendingTransfers) override;
 
-        Size copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset, GLenum internalFormat, GLenum format, GLenum type, Size sourceSize, const void* sourcePointer) const override;
+        Size copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset, GLenum internalFormat,
+                                         GLenum format, GLenum type, Size sourceSize, const void* sourcePointer) const override;
         Size copyMipsFromTexture();
 
-        void copyTextureMipsInGPUMem(GLuint srcId, GLuint destId, uint16_t srcMipOffset, uint16_t destMipOffset, uint16_t populatedMips) override;
+        void copyTextureMipsInGPUMem(GLuint srcId, GLuint destId, uint16_t srcMipOffset, uint16_t destMipOffset,
+                                     uint16_t populatedMips) override;
 
         Size size() const override { return _size; }
     };
@@ -124,13 +130,13 @@ public:
     class GL41ResourceTexture : public GL41VariableAllocationTexture {
         using Parent = GL41VariableAllocationTexture;
         friend class GL41Backend;
+
     protected:
         GL41ResourceTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture);
         ~GL41ResourceTexture();
     };
 
 protected:
-
     void draw(GLenum mode, uint32 numVertices, uint32 startVertex) override;
 
     GLuint getFramebufferID(const FramebufferPointer& framebuffer) override;
@@ -174,9 +180,9 @@ protected:
     void postLinkProgram(ShaderObject& programObject, const Shader& program) const override;
 };
 
-} }
+} // namespace gl41
+} // namespace gpu
 
 Q_DECLARE_LOGGING_CATEGORY(gpugl41logging)
-
 
 #endif

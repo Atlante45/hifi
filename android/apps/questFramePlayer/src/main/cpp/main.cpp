@@ -8,16 +8,15 @@
 
 #include <android/log.h>
 
-#include <QtGui/QGuiApplication>
-#include <QtCore/QTimer>
-#include <QtCore/QFileInfo>
 #include <QtAndroidExtras/QAndroidJniObject>
+#include <QtCore/QFileInfo>
+#include <QtCore/QTimer>
+#include <QtGui/QGuiApplication>
 
 #include <Trace.h>
 
-#include "PlayerWindow.h"
 #include "AndroidHelper.h"
-
+#include "PlayerWindow.h"
 
 void messageHandler(QtMsgType type, const QMessageLogContext& context, const QString& message) {
     if (!message.isEmpty()) {
@@ -49,7 +48,7 @@ int main(int argc, char** argv) {
     auto oldMessageHandler = qInstallMessageHandler(messageHandler);
     DependencyManager::set<tracing::Tracer>();
     PlayerWindow window;
-    QTimer::singleShot(10, []{
+    QTimer::singleShot(10, [] {
         __android_log_write(ANDROID_LOG_WARN, "QQQ", "notifyLoadComplete");
         AndroidHelper::instance().notifyLoadComplete();
     });

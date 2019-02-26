@@ -12,19 +12,18 @@
 #ifndef hifi_TouchscreenVirtualPadDevice_h
 #define hifi_TouchscreenVirtualPadDevice_h
 
-#include <controllers/InputDevice.h>
-#include "InputPlugin.h"
 #include <QtGui/qtouchdevice.h>
+#include <controllers/InputDevice.h>
 #include <QtGui/QList>
+#include "InputPlugin.h"
 #include "VirtualPadManager.h"
 
 class QTouchEvent;
 class QGestureEvent;
 
 class TouchscreenVirtualPadDevice : public InputPlugin {
-Q_OBJECT
+    Q_OBJECT
 public:
-
     // Plugin functions
     virtual void init() override;
     virtual void resize();
@@ -44,23 +43,15 @@ public:
     static const char* NAME;
 
     int _viewTouchUpdateCount;
-    enum TouchAxisChannel {
-        LX,
-        LY,
-        RX,
-        RY
-    };
+    enum TouchAxisChannel { LX, LY, RX, RY };
 
-    enum TouchButtonChannel {
-        JUMP,
-        RB
-    };
+    enum TouchButtonChannel { JUMP, RB };
 
 protected:
-
     class InputDevice : public controller::InputDevice {
     public:
         InputDevice() : controller::InputDevice("TouchscreenVirtualPad") {}
+
     private:
         // Device functions
         virtual controller::Input::NamedVector getAvailableInputs() const override;
@@ -80,17 +71,10 @@ public:
     const std::shared_ptr<InputDevice>& getInputDevice() const { return _inputDevice; }
 
 protected:
-
-    enum TouchType {
-        MOVE = 1,
-        VIEW,
-        JUMP_BUTTON,
-        RB_BUTTON
-    };
+    enum TouchType { MOVE = 1, VIEW, JUMP_BUTTON, RB_BUTTON };
 
     class TouchscreenButton {
     public:
-
         TouchscreenButton() {};
 
         TouchscreenButton(TouchButtonChannel channelIn, TouchType touchTypeIn, float buttonRadiusIn, glm::vec2 buttonPositionIn,
@@ -115,26 +99,24 @@ protected:
         TouchButtonChannel channel;
 
         std::shared_ptr<InputDevice> _inputDevice;
-
     };
 
     class TouchscreenButtonsManager {
     public:
-
         TouchscreenButtonsManager();
 
         QVector<TouchscreenButton> buttons;
 
         void addButton(TouchscreenButton button);
-        int buttonsCount() {
-            return buttons.size();
-        }
+        int buttonsCount() { return buttons.size(); }
 
         void resetEventValues();
         bool processOngoingTouch(glm::vec2 thisPoint, int thisPointId);
-        bool findStartingTouchPointCandidate(glm::vec2 thisPoint, int thisPointId, int thisPointIdx, std::map<int, TouchType> &globalUnusedTouches);
-        void saveUnusedTouches(std::map<int, TouchType> &unusedTouchesInEvent, glm::vec2 thisPoint, int thisPointId);
-        void processBeginOrEnd(glm::vec2 thisPoint, const QList<QTouchEvent::TouchPoint>& tPoints, std::map<int, TouchType> globalUnusedTouches);
+        bool findStartingTouchPointCandidate(glm::vec2 thisPoint, int thisPointId, int thisPointIdx,
+                                             std::map<int, TouchType>& globalUnusedTouches);
+        void saveUnusedTouches(std::map<int, TouchType>& unusedTouchesInEvent, glm::vec2 thisPoint, int thisPointId);
+        void processBeginOrEnd(glm::vec2 thisPoint, const QList<QTouchEvent::TouchPoint>& tPoints,
+                               std::map<int, TouchType> globalUnusedTouches);
 
         void endTouchForAll();
         bool touchBeginInvalidForAllButtons(glm::vec2 touchPoint);
@@ -166,7 +148,7 @@ protected:
     glm::vec2 _fixedCenterPosition;
     float _fixedRadius;
     float _fixedRadiusForCalc;
-    int _extraBottomMargin {0};
+    int _extraBottomMargin { 0 };
 
     float _buttonRadius;
 
@@ -190,10 +172,9 @@ protected:
     void processUnusedTouches(std::map<int, TouchType> unusedTouchesInEvent);
 
     void processInputDeviceForView();
-// just for debug
+    // just for debug
 private:
     void debugPoints(const QTouchEvent* event, QString who);
-
 };
 
 #endif // hifi_TouchscreenVirtualPadDevice_h

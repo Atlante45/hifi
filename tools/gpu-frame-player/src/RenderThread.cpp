@@ -7,8 +7,8 @@
 //
 
 #include "RenderThread.h"
-#include <QtGui/QWindow>
 #include <gl/QOpenGLContextWrapper.h>
+#include <QtGui/QWindow>
 
 void RenderThread::submitFrame(const gpu::FramePointer& frame) {
     std::unique_lock<std::mutex> lock(_frameLock);
@@ -41,7 +41,7 @@ void RenderThread::initialize(QWindow* window) {
     QOpenGLContextWrapper(_context.qglContext()).makeCurrent(_window);
     glGenTextures(1, &_externalTexture);
     glBindTexture(GL_TEXTURE_2D, _externalTexture);
-    static const glm::u8vec4 color{ 0 };
+    static const glm::u8vec4 color { 0 };
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &color);
     gl::setSwapInterval(0);
     // GPU library init
@@ -53,12 +53,12 @@ void RenderThread::initialize(QWindow* window) {
     _context.moveToThread(_thread);
 #else
     auto size = window->size();
-    _extent = vk::Extent2D{ (uint32_t)size.width(), (uint32_t)size.height() };
+    _extent = vk::Extent2D { (uint32_t)size.width(), (uint32_t)size.height() };
 
     _context.setValidationEnabled(true);
     _context.requireExtensions({
-        std::string{ VK_KHR_SURFACE_EXTENSION_NAME },
-        std::string{ VK_KHR_WIN32_SURFACE_EXTENSION_NAME },
+        std::string { VK_KHR_SURFACE_EXTENSION_NAME },
+        std::string { VK_KHR_WIN32_SURFACE_EXTENSION_NAME },
     });
     _context.requireDeviceExtensions({ VK_KHR_SWAPCHAIN_EXTENSION_NAME });
     _context.createInstance();
@@ -70,8 +70,8 @@ void RenderThread::initialize(QWindow* window) {
     setupRenderPass();
     setupFramebuffers();
 
-    acquireComplete = _context.device.createSemaphore(vk::SemaphoreCreateInfo{});
-    renderComplete = _context.device.createSemaphore(vk::SemaphoreCreateInfo{});
+    acquireComplete = _context.device.createSemaphore(vk::SemaphoreCreateInfo {});
+    renderComplete = _context.device.createSemaphore(vk::SemaphoreCreateInfo {});
 
     // GPU library init
     gpu::Context::init<gpu::vulkan::VKBackend>();
@@ -114,11 +114,11 @@ void RenderThread::renderFrame(gpu::FramePointer& frame) {
     _context.makeCurrent();
 #endif
     if (_correction != glm::mat4()) {
-       std::unique_lock<std::mutex> lock(_frameLock);
-       if (_correction != glm::mat4()) {
-           _backend->setCameraCorrection(_correction, _activeFrame->view);
-           //_prevRenderView = _correction * _activeFrame->view;
-       }
+        std::unique_lock<std::mutex> lock(_frameLock);
+        if (_correction != glm::mat4()) {
+            _backend->setCameraCorrection(_correction, _activeFrame->view);
+            //_prevRenderView = _correction * _activeFrame->view;
+        }
     }
     _backend->recycle();
     _backend->syncCache();
@@ -126,7 +126,7 @@ void RenderThread::renderFrame(gpu::FramePointer& frame) {
     auto windowSize = _window->size();
 
 #ifndef USE_GL
-    auto windowExtent = vk::Extent2D{ (uint32_t)windowSize.width(), (uint32_t)windowSize.height() };
+    auto windowExtent = vk::Extent2D { (uint32_t)windowSize.width(), (uint32_t)windowSize.height() };
     if (windowExtent != _extent) {
         return;
     }
@@ -138,8 +138,8 @@ void RenderThread::renderFrame(gpu::FramePointer& frame) {
     }
 
     static const vk::Offset2D offset;
-    static const std::array<vk::ClearValue, 2> clearValues{
-        vk::ClearColorValue(std::array<float, 4Ui64>{ { 0.2f, 0.2f, 0.2f, 0.2f } }),
+    static const std::array<vk::ClearValue, 2> clearValues {
+        vk::ClearColorValue(std::array<float, 4Ui64> { { 0.2f, 0.2f, 0.2f, 0.2f } }),
         vk::ClearDepthStencilValue({ 1.0f, 0 }),
     };
 
@@ -147,15 +147,15 @@ void RenderThread::renderFrame(gpu::FramePointer& frame) {
     auto framebuffer = _framebuffers[swapchainIndex];
     const auto& commandBuffer = currentCommandBuffer = _context.createCommandBuffer();
 
-    auto rect = vk::Rect2D{ offset, _extent };
-    vk::RenderPassBeginInfo beginInfo{ _renderPass, framebuffer, rect, (uint32_t)clearValues.size(), clearValues.data() };
-    commandBuffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+    auto rect = vk::Rect2D { offset, _extent };
+    vk::RenderPassBeginInfo beginInfo { _renderPass, framebuffer, rect, (uint32_t)clearValues.size(), clearValues.data() };
+    commandBuffer.begin(vk::CommandBufferBeginInfo { vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
 
     using namespace vks::debug::marker;
-    beginRegion(commandBuffer, "executeFrame", glm::vec4{ 1, 1, 1, 1 });
+    beginRegion(commandBuffer, "executeFrame", glm::vec4 { 1, 1, 1, 1 });
 #endif
     auto& glbackend = (gpu::gl::GLBackend&)(*_backend);
-    glm::uvec2 fboSize{ frame->framebuffer->getWidth(), frame->framebuffer->getHeight() };
+    glm::uvec2 fboSize { frame->framebuffer->getWidth(), frame->framebuffer->getHeight() };
     auto fbo = glbackend.getFramebufferID(frame->framebuffer);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
     glClearColor(0, 0, 0, 1);
@@ -169,29 +169,27 @@ void RenderThread::renderFrame(gpu::FramePointer& frame) {
     }
 
 #ifdef USE_GL
-    //glDisable(GL_FRAMEBUFFER_SRGB);
-    //glClear(GL_COLOR_BUFFER_BIT);
+    // glDisable(GL_FRAMEBUFFER_SRGB);
+    // glClear(GL_COLOR_BUFFER_BIT);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glBlitFramebuffer(
-        0, 0, fboSize.x, fboSize.y, 
-        0, 0, windowSize.width(), windowSize.height(),
-        GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, 0, fboSize.x, fboSize.y, 0, 0, windowSize.width(), windowSize.height(), GL_COLOR_BUFFER_BIT,
+                      GL_NEAREST);
 
     (void)CHECK_GL_ERROR();
     _context.swapBuffers();
     _context.doneCurrent();
 #else
     endRegion(commandBuffer);
-    beginRegion(commandBuffer, "renderpass:testClear", glm::vec4{ 0, 1, 1, 1 });
+    beginRegion(commandBuffer, "renderpass:testClear", glm::vec4 { 0, 1, 1, 1 });
     commandBuffer.beginRenderPass(beginInfo, vk::SubpassContents::eInline);
     commandBuffer.endRenderPass();
     endRegion(commandBuffer);
     commandBuffer.end();
 
-    static const vk::PipelineStageFlags waitFlags{ vk::PipelineStageFlagBits::eBottomOfPipe };
-    vk::SubmitInfo submitInfo{ 1, &acquireComplete, &waitFlags, 1, &commandBuffer, 1, &renderComplete };
-    vk::Fence frameFence = _context.device.createFence(vk::FenceCreateInfo{});
+    static const vk::PipelineStageFlags waitFlags { vk::PipelineStageFlagBits::eBottomOfPipe };
+    vk::SubmitInfo submitInfo { 1, &acquireComplete, &waitFlags, 1, &commandBuffer, 1, &renderComplete };
+    vk::Fence frameFence = _context.device.createFence(vk::FenceCreateInfo {});
     _context.queue.submit(submitInfo, frameFence);
     _swapchain.queuePresent(renderComplete);
     _context.trashCommandBuffers({ commandBuffer });
@@ -209,7 +207,7 @@ bool RenderThread::process() {
         pendingFrames.swap(_pendingFrames);
         pendingSize.swap(_pendingSize);
     }
-    
+
     while (!pendingFrames.empty()) {
         _activeFrame = pendingFrames.front();
         pendingFrames.pop();

@@ -8,8 +8,8 @@
 
 #include "GLTexture.h"
 
-#include <QtCore/QThread>
 #include <NumericalConstants.h>
+#include <QtCore/QThread>
 
 #include "GLBackend.h"
 
@@ -22,18 +22,18 @@
 
 static const size_t DEFAULT_ALLOWED_TEXTURE_MEMORY = MB_TO_BYTES(DEFAULT_ALLOWED_TEXTURE_MEMORY_MB);
 
-namespace gpu { namespace gl {
+namespace gpu {
+namespace gl {
 
-enum class MemoryPressureState
-{
+enum class MemoryPressureState {
     Idle,
     Transfer,
     Undersubscribed,
 };
 
-static MemoryPressureState _memoryPressureState{ MemoryPressureState::Idle };
+static MemoryPressureState _memoryPressureState { MemoryPressureState::Idle };
 
-template <typename T>
+template<typename T>
 struct LessPairSecond {
     bool operator()(const T& a, const T& b) { return a.second < b.second; }
 };
@@ -45,7 +45,8 @@ using WorkQueue = std::priority_queue<QueuePair, std::vector<QueuePair>, LessPai
 
 using ImmediateQueuePair = std::pair<TexturePointer, float>;
 // Contains a priority sorted list of textures on which work is to be done in the current frame
-using ImmediateWorkQueue = std::priority_queue<ImmediateQueuePair, std::vector<ImmediateQueuePair>, LessPairSecond<ImmediateQueuePair>>;
+using ImmediateWorkQueue = std::priority_queue<ImmediateQueuePair, std::vector<ImmediateQueuePair>,
+                                               LessPairSecond<ImmediateQueuePair>>;
 
 // A map of weak texture pointers to queues of work to be done to transfer their data from the backing store to the GPU
 using TransferMap = std::map<TextureWeakPointer, TransferQueue, std::owner_less<TextureWeakPointer>>;
@@ -83,17 +84,17 @@ protected:
     bool processActiveBufferQueue();
     void processTransferQueues();
     void populateTransferQueue(const TexturePointer& texturePointer);
-    //void addToWorkQueue(const TexturePointer& texturePointer);
+    // void addToWorkQueue(const TexturePointer& texturePointer);
     void updateMemoryPressure();
 
     void processDemotes(size_t relief, const std::vector<TexturePointer>& strongTextures);
     void processPromotes();
 
 private:
-    std::atomic<bool> _shutdown{ false };
-    // Contains a priority sorted list of weak texture pointers that have been determined to be eligible for additional allocation
-    // While the memory state is 'undersubscribed', items will be removed from this list and processed, allocating additional memory
-    // per frame
+    std::atomic<bool> _shutdown { false };
+    // Contains a priority sorted list of weak texture pointers that have been determined to be eligible for additional
+    // allocation While the memory state is 'undersubscribed', items will be removed from this list and processed, allocating
+    // additional memory per frame
     WorkQueue _promoteQueue;
     // This queue contains jobs that will buffer data from the texture backing store (ideally a memory mapped KTX file)
     // to a CPU memory buffer.  This queue is populated on the main GPU thread, and drained on a dedicated thread.
@@ -106,15 +107,16 @@ private:
     // and the buffering thread
     Mutex _bufferMutex;
     // The buffering thread which drains the _activeBufferQueue and populates the _activeTransferQueue
-    TextureBufferThread* _transferThread{ nullptr };
+    TextureBufferThread* _transferThread { nullptr };
     // The amount of buffering work currently represented by the _activeBufferQueue
-    std::atomic<size_t> _queuedBufferSize{ 0 };
+    std::atomic<size_t> _queuedBufferSize { 0 };
     // This contains a map of all textures to queues of pending transfer jobs.  While in the transfer state, this map is used to
     // populate the _activeBufferQueue up to the limit specified in GLVariableAllocationTexture::MAX_BUFFER_SIZE
     TransferMap _pendingTransfersMap;
 };
 
-}}  // namespace gpu::gl
+} // namespace gl
+} // namespace gpu
 
 using namespace gpu;
 using namespace gpu::gl;
@@ -129,9 +131,8 @@ void GLBackend::killTextureManagementStage() {
 }
 
 std::vector<TexturePointer> GLTextureTransferEngine::getAllTextures() {
-    auto expiredBegin = std::remove_if(_registeredTextures.begin(), _registeredTextures.end(), [&](const std::weak_ptr<Texture>& weak) -> bool {
-        return weak.expired();
-    });
+    auto expiredBegin = std::remove_if(_registeredTextures.begin(), _registeredTextures.end(),
+                                       [&](const std::weak_ptr<Texture>& weak) -> bool { return weak.expired(); });
     _registeredTextures.erase(expiredBegin, _registeredTextures.end());
 
     std::vector<TexturePointer> result;
@@ -325,7 +326,7 @@ void GLTextureTransferEngineDefault::populateActiveBufferQueue() {
 
     // Queue up buffering jobs
     ActiveTransferQueue newBufferJobs;
-    size_t newTransferSize{ 0 };
+    size_t newTransferSize { 0 };
 
     for (auto itr = _pendingTransfersMap.begin(); itr != _pendingTransfersMap.end();) {
         const auto& weakTexture = itr->first;
@@ -344,7 +345,8 @@ void GLTextureTransferEngineDefault::populateActiveBufferQueue() {
         // Can't find any pending transfers, so move on
         if (textureTransferQueue.empty()) {
             if (vargltexture->hasPendingTransfers()) {
-                // qWarning(gpugllogging) << "Texture " << gltexture->_id << "(" << texture->source().c_str() << ") has no transfer jobs, but has pending transfers" ;
+                // qWarning(gpugllogging) << "Texture " << gltexture->_id << "(" << texture->source().c_str() << ") has no
+                // transfer jobs, but has pending transfers" ;
             }
             itr = _pendingTransfersMap.erase(itr);
             continue;
@@ -426,8 +428,8 @@ void GLTextureTransferEngineDefault::processPromotes() {
     // FIXME use max allocated memory per frame instead of promotion count
     static const size_t MAX_ALLOCATED_BYTES_PER_FRAME = GLVariableAllocationSupport::MAX_BUFFER_SIZE;
     static const size_t MAX_ALLOCATIONS_PER_FRAME = 8;
-    size_t allocatedBytes{ 0 };
-    size_t allocations{ 0 };
+    size_t allocatedBytes { 0 };
+    size_t allocations { 0 };
 
     while (!_promoteQueue.empty()) {
         // Grab the first item off the demote queue

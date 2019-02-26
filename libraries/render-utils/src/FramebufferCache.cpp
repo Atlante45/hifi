@@ -11,14 +11,14 @@
 
 #include "FramebufferCache.h"
 
-#include <glm/glm.hpp>
 #include <gpu/Format.h>
 #include <gpu/Framebuffer.h>
+#include <glm/glm.hpp>
 
 #include "RenderUtilsLogging.h"
 
 void FramebufferCache::setFrameBufferSize(QSize frameBufferSize) {
-    //If the size changed, we need to delete our FBOs
+    // If the size changed, we need to delete our FBOs
     if (_frameBufferSize != frameBufferSize) {
         _frameBufferSize = frameBufferSize;
         {
@@ -34,11 +34,12 @@ void FramebufferCache::createPrimaryFramebuffer() {
     auto smoothSampler = gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_MIP_LINEAR);
 }
 
-
 gpu::FramebufferPointer FramebufferCache::getFramebuffer() {
     std::unique_lock<std::mutex> lock(_mutex);
     if (_cachedFramebuffers.empty()) {
-        _cachedFramebuffers.push_back(gpu::FramebufferPointer(gpu::Framebuffer::create("cached", gpu::Element::COLOR_SRGBA_32, _frameBufferSize.width(), _frameBufferSize.height())));
+        _cachedFramebuffers.push_back(
+            gpu::FramebufferPointer(gpu::Framebuffer::create("cached", gpu::Element::COLOR_SRGBA_32, _frameBufferSize.width(),
+                                                             _frameBufferSize.height())));
     }
     gpu::FramebufferPointer result = _cachedFramebuffers.front();
     _cachedFramebuffers.pop_front();

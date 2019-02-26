@@ -49,9 +49,9 @@
 
 // Platform specific code to load the GL functions
 namespace gl {
-    void initModuleGl();
-    int getSwapInterval();
-    void setSwapInterval(int swapInterval);
-}
+void initModuleGl();
+int getSwapInterval();
+void setSwapInterval(int swapInterval);
+} // namespace gl
 
 #endif // hifi_gpu_GPUConfig_h

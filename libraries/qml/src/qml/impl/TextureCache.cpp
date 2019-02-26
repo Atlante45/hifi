@@ -4,8 +4,8 @@
 
 #include <gl/Config.h>
 
-#include <QtCore/QThread>
 #include <QtCore/QCoreApplication>
+#include <QtCore/QThread>
 
 #include "Profiling.h"
 

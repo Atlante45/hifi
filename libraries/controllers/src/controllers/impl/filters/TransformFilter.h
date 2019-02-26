@@ -18,6 +18,7 @@ namespace controller {
 
 class TransformFilter : public Filter {
     REGISTER_FILTER_CLASS(TransformFilter);
+
 public:
     TransformFilter() = default;
     TransformFilter(glm::mat4 transform) : _transform(transform) {}
@@ -30,6 +31,6 @@ private:
     glm::mat4 _transform;
 };
 
-}
+} // namespace controller
 
 #endif

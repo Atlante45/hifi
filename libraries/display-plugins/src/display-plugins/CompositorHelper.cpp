@@ -8,65 +8,65 @@
 
 #include "CompositorHelper.h"
 
-#include <memory>
 #include <math.h>
+#include <memory>
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include <QtCore/QTimer>
+#include <QQuickWindow>
 #include <QtCore/QThread>
+#include <QtCore/QTimer>
+#include <QtGui/QWindow>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDesktopWidget>
-#include <QtGui/QWindow>
-#include <QQuickWindow>
 
+#include <CursorManager.h>
 #include <DebugDraw.h>
+#include <DependencyManager.h>
+#include <NumericalConstants.h>
+#include <gl/GLWidget.h>
+#include <plugins/PluginManager.h>
 #include <shared/QtHelpers.h>
 #include <ui/Menu.h>
-#include <NumericalConstants.h>
-#include <DependencyManager.h>
-#include <plugins/PluginManager.h>
-#include <CursorManager.h>
-#include <gl/GLWidget.h>
 
 #include "GeometryUtil.h"
 
 // Used to animate the magnification windows
 
-//static const quint64 TOOLTIP_DELAY = 500 * MSECS_TO_USECS;
+// static const quint64 TOOLTIP_DELAY = 500 * MSECS_TO_USECS;
 
 static const float reticleSize = TWO_PI / 100.0f;
 
-//EntityItemID CompositorHelper::_noItemId;
+// EntityItemID CompositorHelper::_noItemId;
 static QString _tooltipId;
 
 const uvec2 CompositorHelper::VIRTUAL_SCREEN_SIZE = uvec2(3960, 1188); // ~10% more pixel density than old version, 72dx240d FOV
-const QRect CompositorHelper::VIRTUAL_SCREEN_RECOMMENDED_OVERLAY_RECT = QRect(956, 0, 2048, 1188); // don't include entire width only center 2048
+const QRect CompositorHelper::VIRTUAL_SCREEN_RECOMMENDED_OVERLAY_RECT = QRect(
+    956, 0, 2048, 1188); // don't include entire width only center 2048
 const float CompositorHelper::VIRTUAL_UI_ASPECT_RATIO = (float)VIRTUAL_SCREEN_SIZE.x / (float)VIRTUAL_SCREEN_SIZE.y;
 const vec2 CompositorHelper::VIRTUAL_UI_TARGET_FOV = vec2(PI * 3.0f / 2.0f, PI * 3.0f / 2.0f / VIRTUAL_UI_ASPECT_RATIO);
-const vec2 CompositorHelper::MOUSE_EXTENTS_ANGULAR_SIZE = vec2(PI * 2.0f, PI * 0.95f); // horizontal: full sphere,  vertical: ~5deg from poles
-const vec2 CompositorHelper::MOUSE_EXTENTS_PIXELS = vec2(VIRTUAL_SCREEN_SIZE) * (MOUSE_EXTENTS_ANGULAR_SIZE / VIRTUAL_UI_TARGET_FOV);
+const vec2 CompositorHelper::MOUSE_EXTENTS_ANGULAR_SIZE = vec2(
+    PI * 2.0f, PI * 0.95f); // horizontal: full sphere,  vertical: ~5deg from poles
+const vec2 CompositorHelper::MOUSE_EXTENTS_PIXELS = vec2(VIRTUAL_SCREEN_SIZE) *
+                                                    (MOUSE_EXTENTS_ANGULAR_SIZE / VIRTUAL_UI_TARGET_FOV);
 
 // Return a point's cartesian coordinates on a sphere from pitch and yaw
 glm::vec3 getPoint(float yaw, float pitch) {
-    return glm::vec3(glm::cos(-pitch) * (-glm::sin(yaw)),
-                     glm::sin(-pitch),
-                     glm::cos(-pitch) * (-glm::cos(yaw)));
+    return glm::vec3(glm::cos(-pitch) * (-glm::sin(yaw)), glm::sin(-pitch), glm::cos(-pitch) * (-glm::cos(yaw)));
 }
 
 // FIXME move to GLMHelpers
-//Checks if the given ray intersects the sphere at the origin. result will store a multiplier that should
-//be multiplied by dir and added to origin to get the location of the collision
-bool raySphereIntersect(const glm::vec3 &dir, const glm::vec3 &origin, float r, float* result)
-{
-    //Source: http://wiki.cgsociety.org/index.php/Ray_Sphere_Intersection
+// Checks if the given ray intersects the sphere at the origin. result will store a multiplier that should
+// be multiplied by dir and added to origin to get the location of the collision
+bool raySphereIntersect(const glm::vec3& dir, const glm::vec3& origin, float r, float* result) {
+    // Source: http://wiki.cgsociety.org/index.php/Ray_Sphere_Intersection
 
-    //Compute A, B and C coefficients
+    // Compute A, B and C coefficients
     float a = glm::dot(dir, dir);
     float b = 2 * glm::dot(dir, origin);
     float c = glm::dot(origin, origin) - (r * r);
 
-    //Find discriminant
+    // Find discriminant
     float disc = b * b - 4 * a * c;
 
     // if discriminant is negative there are no real roots, so return
@@ -114,11 +114,11 @@ bool raySphereIntersect(const glm::vec3 &dir, const glm::vec3 &origin, float r, 
 
 CompositorHelper::CompositorHelper() :
     _alphaPropertyAnimation(new QPropertyAnimation(this, "alpha")),
-    _reticleInterface(new ReticleInterface(this))
-{
+    _reticleInterface(new ReticleInterface(this)) {
     // FIX in a separate PR addressing the current mouse over entity bug
-    //auto entityScriptingInterface = DependencyManager::get<EntityScriptingInterface>();
-    //connect(entityScriptingInterface.data(), &EntityScriptingInterface::hoverEnterEntity, [=](const EntityItemID& entityItemID, const MouseEvent& event) {
+    // auto entityScriptingInterface = DependencyManager::get<EntityScriptingInterface>();
+    // connect(entityScriptingInterface.data(), &EntityScriptingInterface::hoverEnterEntity, [=](const EntityItemID&
+    // entityItemID, const MouseEvent& event) {
     //    if (_hoverItemId != entityItemID) {
     //        _hoverItemId = entityItemID;
     //        _hoverItemEnterUsecs = usecTimestampNow();
@@ -147,7 +147,8 @@ CompositorHelper::CompositorHelper() :
     //    }
     //});
 
-    //connect(entityScriptingInterface.data(), &EntityScriptingInterface::hoverLeaveEntity, [=](const EntityItemID& entityItemID, const MouseEvent& event) {
+    // connect(entityScriptingInterface.data(), &EntityScriptingInterface::hoverLeaveEntity, [=](const EntityItemID&
+    // entityItemID, const MouseEvent& event) {
     //    if (_hoverItemId == entityItemID) {
     //        _hoverItemId = _noItemId;
 
@@ -163,7 +164,6 @@ CompositorHelper::CompositorHelper() :
     //    }
     //});
 }
-
 
 bool CompositorHelper::isHMD() const {
     return _currentDisplayPlugin && _currentDisplayPlugin->isHmd();
@@ -192,8 +192,7 @@ void CompositorHelper::setAllowMouseCapture(bool capture) {
 
 void CompositorHelper::handleLeaveEvent() {
     if (shouldCaptureMouse()) {
-        
-        //QWidget* mainWidget = (QWidget*)qApp->getWindow();
+        // QWidget* mainWidget = (QWidget*)qApp->getWindow();
         static QWidget* mainWidget = nullptr;
         if (mainWidget == nullptr && _renderingWidget != nullptr) {
             mainWidget = _renderingWidget->parentWidget();
@@ -206,7 +205,7 @@ void CompositorHelper::handleLeaveEvent() {
             mainWidgetFrame.moveTopLeft(topLeftScreen);
         }
         QRect uncoveredRect = mainWidgetFrame;
-        foreach(QWidget* widget, QApplication::topLevelWidgets()) {
+        foreach (QWidget* widget, QApplication::topLevelWidgets()) {
             if (widget->isWindow() && widget->isVisible() && widget != mainWidget) {
                 QRect widgetFrame = widget->frameGeometry();
                 if (widgetFrame.intersects(uncoveredRect)) {
@@ -233,7 +232,6 @@ void CompositorHelper::handleLeaveEvent() {
     }
 }
 
-
 bool CompositorHelper::handleRealMouseMoveEvent(bool sendFakeEvent) {
     // If the mouse move came from a capture mouse related move, we completely ignore it.
     // Note: if not going to synthesize event - do not touch _ignoreMouseMove flag
@@ -256,7 +254,7 @@ bool CompositorHelper::handleRealMouseMoveEvent(bool sendFakeEvent) {
         }
 
         QCursor::setPos(QPoint(_lastKnownRealMouse.x(), _lastKnownRealMouse.y())); // move cursor back to where it was
-        return true;  // swallow the event
+        return true; // swallow the event
     } else {
         _lastKnownRealMouse = QCursor::pos();
     }
@@ -341,7 +339,7 @@ void CompositorHelper::setReticlePosition(const glm::vec2& position, bool sendFa
 
 void CompositorHelper::computeHmdPickRay(const glm::vec2& cursorPos, glm::vec3& origin, glm::vec3& direction) const {
     auto surfacePointAt = sphereSurfaceFromOverlay(cursorPos); // in world space
-    origin = vec3(_currentCamera[3]); 
+    origin = vec3(_currentCamera[3]);
     direction = glm::normalize(surfacePointAt - origin);
 }
 
@@ -351,8 +349,9 @@ glm::mat4 CompositorHelper::getUiTransform() const {
     return _sensorToWorldMatrix * modelMat;
 }
 
-//Finds the collision point of a world space ray
-bool CompositorHelper::calculateRayUICollisionPoint(const glm::vec3& position, const glm::vec3& direction, glm::vec3& result) const {
+// Finds the collision point of a world space ray
+bool CompositorHelper::calculateRayUICollisionPoint(const glm::vec3& position, const glm::vec3& direction,
+                                                    glm::vec3& result) const {
     glm::mat4 uiToWorld = getUiTransform();
     glm::mat4 worldToUi = glm::inverse(uiToWorld);
     glm::vec3 localPosition = transformPoint(worldToUi, position);
@@ -374,7 +373,9 @@ bool CompositorHelper::calculateRayUICollisionPoint(const glm::vec3& position, c
     return false;
 }
 
-bool CompositorHelper::calculateParabolaUICollisionPoint(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration, glm::vec3& result, float& parabolicDistance) const {
+bool CompositorHelper::calculateParabolaUICollisionPoint(const glm::vec3& origin, const glm::vec3& velocity,
+                                                         const glm::vec3& acceleration, glm::vec3& result,
+                                                         float& parabolicDistance) const {
     glm::mat4 uiToWorld = getUiTransform();
     glm::mat4 worldToUi = glm::inverse(uiToWorld);
     glm::vec3 localOrigin = transformPoint(worldToUi, origin);
@@ -383,7 +384,8 @@ bool CompositorHelper::calculateParabolaUICollisionPoint(const glm::vec3& origin
 
     const float UI_RADIUS = 1.0f;
     float intersectionDistance;
-    if (findParabolaSphereIntersection(localOrigin, localVelocity, localAcceleration, glm::vec3(0.0f), UI_RADIUS, intersectionDistance)) {
+    if (findParabolaSphereIntersection(localOrigin, localVelocity, localAcceleration, glm::vec3(0.0f), UI_RADIUS,
+                                       intersectionDistance)) {
         result = origin + velocity * intersectionDistance + 0.5f * acceleration * intersectionDistance * intersectionDistance;
         parabolicDistance = intersectionDistance;
         return true;
@@ -431,7 +433,7 @@ glm::vec3 CompositorHelper::sphereSurfaceFromOverlay(const glm::vec2& overlay) c
 }
 
 void CompositorHelper::updateTooltips() {
-    //if (_hoverItemId != _noItemId) {
+    // if (_hoverItemId != _noItemId) {
     //    quint64 hoverDuration = usecTimestampNow() - _hoverItemEnterUsecs;
     //    if (_hoverItemEnterUsecs != UINT64_MAX && !_hoverItemTitle.isEmpty() && hoverDuration > TOOLTIP_DELAY) {
     //        // TODO Enable and position the tooltip
@@ -447,8 +449,8 @@ glm::mat4 CompositorHelper::getReticleTransform(const glm::mat4& eyePose, const 
     glm::mat4 result;
     if (isHMD()) {
         vec2 spherical = overlayToSpherical(getReticlePosition());
-        vec3 overlaySurfacePoint = getPoint(spherical.x, spherical.y);  // overlay space
-        vec3 sensorSurfacePoint = _modelTransform.transform(overlaySurfacePoint);  // sensor space
+        vec3 overlaySurfacePoint = getPoint(spherical.x, spherical.y); // overlay space
+        vec3 sensorSurfacePoint = _modelTransform.transform(overlaySurfacePoint); // sensor space
         vec3 d = sensorSurfacePoint - headPosition;
         vec3 reticlePosition;
         if (glm::length(d) >= EPSILON) {
@@ -464,7 +466,8 @@ glm::mat4 CompositorHelper::getReticleTransform(const glm::mat4& eyePose, const 
         return glm::inverse(eyePose) * createMatFromScaleQuatAndPos(reticleScale, reticleOrientation, reticlePosition);
     } else {
         static const float CURSOR_PIXEL_SIZE = 32.0f;
-        const auto canvasSize = vec2(toGlm(_renderingWidget->size()));;
+        const auto canvasSize = vec2(toGlm(_renderingWidget->size()));
+        ;
         vec2 mousePosition = toGlm(_renderingWidget->mapFromGlobal(QCursor::pos()));
         mousePosition /= canvasSize;
         mousePosition *= 2.0;
@@ -479,8 +482,9 @@ glm::mat4 CompositorHelper::getReticleTransform(const glm::mat4& eyePose, const 
 
 glm::mat4 CompositorHelper::getPoint2DTransform(const glm::vec2& point, float sizeX, float sizeY) const {
     glm::mat4 result;
-    const auto canvasSize = vec2(toGlm(_renderingWidget->size()));;
-    QPoint qPoint(point.x,point.y);
+    const auto canvasSize = vec2(toGlm(_renderingWidget->size()));
+    ;
+    QPoint qPoint(point.x, point.y);
     vec2 position = toGlm(_renderingWidget->mapFromGlobal(qPoint));
     position /= canvasSize;
     position *= 2.0;
@@ -491,7 +495,6 @@ glm::mat4 CompositorHelper::getPoint2DTransform(const glm::vec2& point, float si
     result = glm::scale(glm::translate(glm::mat4(), vec3(position, 0.0f)), vec3(size, 1.0f));
     return result;
 }
-
 
 QVariant ReticleInterface::getPosition() const {
     return vec2ToVariant(_compositor->getReticlePosition());

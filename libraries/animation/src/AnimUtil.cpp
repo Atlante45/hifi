@@ -9,9 +9,9 @@
 //
 
 #include "AnimUtil.h"
+#include <DebugDraw.h>
 #include <GLMHelpers.h>
 #include <NumericalConstants.h>
-#include <DebugDraw.h>
 
 // TODO: use restrict keyword
 // TODO: excellent candidate for simd vectorization.
@@ -46,7 +46,6 @@ glm::quat averageQuats(size_t numQuats, const glm::quat* quats) {
 
 float accumulateTime(float startFrame, float endFrame, float timeScale, float currentFrame, float dt, bool loopFlag,
                      const QString& id, AnimVariantMap& triggersOut) {
-
     const float EPSILON = 0.0001f;
     float frame = currentFrame;
     const float clampedStartFrame = std::min(startFrame, endFrame);
@@ -94,11 +93,9 @@ float accumulateTime(float startFrame, float endFrame, float timeScale, float cu
 AnimPose boneLookAt(const glm::vec3& target, const AnimPose& bone) {
     glm::vec3 u, v, w;
     generateBasisVectors(target - bone.trans(), bone.rot() * Vectors::UNIT_X, u, v, w);
-    glm::mat4 lookAt(glm::vec4(v, 0.0f),
-                     glm::vec4(u, 0.0f),
+    glm::mat4 lookAt(glm::vec4(v, 0.0f), glm::vec4(u, 0.0f),
                      // AJT: TODO REVISIT THIS, this could be -w.
-                     glm::vec4(glm::normalize(glm::cross(v, u)), 0.0f),
-                     glm::vec4(bone.trans(), 1.0f));
+                     glm::vec4(glm::normalize(glm::cross(v, u)), 0.0f), glm::vec4(bone.trans(), 1.0f));
     return AnimPose(lookAt);
 }
 
@@ -106,7 +103,6 @@ AnimPose boneLookAt(const glm::vec3& target, const AnimPose& bone) {
 // assumes headRot is z-forward and y-up.
 // and returns a bodyRot that is also z-forward and y-up
 glm::quat computeBodyFacingFromHead(const glm::quat& headRot, const glm::vec3& up) {
-
     glm::vec3 bodyUp = glm::normalize(up);
 
     // initially take the body facing from the head.
@@ -125,7 +121,7 @@ glm::quat computeBodyFacingFromHead(const glm::quat& headRot, const glm::vec3& u
         if (nodDot < -NOD_THRESHOLD) { // head is looking downward
             // the body should face in the same direction as the top the head.
             bodyForward = headUp;
-        } else if (nodDot > NOD_THRESHOLD) {  // head is looking upward
+        } else if (nodDot > NOD_THRESHOLD) { // head is looking upward
             // the body should face away from the top of the head.
             bodyForward = -headUp;
         }

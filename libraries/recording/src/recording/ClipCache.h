@@ -51,7 +51,7 @@ using NetworkClipLoaderPointer = QSharedPointer<NetworkClipLoader>;
 class ClipCache : public ResourceCache, public Dependency {
     Q_OBJECT
     SINGLETON_DEPENDENCY
-    
+
 public slots:
     NetworkClipLoaderPointer getClipLoader(const QUrl& url);
 
@@ -63,6 +63,6 @@ private:
     ClipCache(QObject* parent = nullptr);
 };
 
-}
+} // namespace recording
 
 #endif

@@ -31,11 +31,11 @@ inline btScalar getErrorDifference(const btVector3& a, const btVector3& b) {
 }
 // Matrices are compared element-wise -- if the error value for any element > epsilon, then fail
 inline btScalar getErrorDifference(const btMatrix3x3& a, const btMatrix3x3& b) {
-    btScalar maxDiff   = 0;
+    btScalar maxDiff = 0;
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             btScalar diff = fabs(a[i][j] - b[i][j]);
-            maxDiff    = qMax(diff, maxDiff);
+            maxDiff = qMax(diff, maxDiff);
         }
     }
     return maxDiff;
@@ -46,7 +46,7 @@ inline btScalar getErrorDifference(const btMatrix3x3& a, const btMatrix3x3& b) {
 //
 
 // btMatrix3x3 stream printing (not advised to use this outside of the test macros, due to formatting)
-inline QTextStream& operator<< (QTextStream& stream, const btMatrix3x3& matrix) {
+inline QTextStream& operator<<(QTextStream& stream, const btMatrix3x3& matrix) {
     stream << "[\n\t\t";
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
@@ -54,10 +54,10 @@ inline QTextStream& operator<< (QTextStream& stream, const btMatrix3x3& matrix) 
         }
         stream << "\n\t\t";
     }
-    stream << "]\n\t";   // hacky as hell, but this should work...
+    stream << "]\n\t"; // hacky as hell, but this should work...
     return stream;
 }
-inline QTextStream& operator << (QTextStream& stream, const btVector3& v) {
+inline QTextStream& operator<<(QTextStream& stream, const btVector3& v) {
     return stream << "btVector3 { " << v.x() << ", " << v.y() << ", " << v.z() << " }";
 }
 // btScalar operator<< is already implemented (as it's just a typedef-ed float/double)
@@ -68,10 +68,9 @@ inline QTextStream& operator << (QTextStream& stream, const btVector3& v) {
 
 // Produces a relative error test for btMatrix3x3 usable with QCOMPARE_WITH_LAMBDA.
 // (used in a *few* physics tests that define QCOMPARE_WITH_RELATIVE_ERROR)
-inline auto errorTest (const btMatrix3x3& actual, const btMatrix3x3& expected, const btScalar acceptableRelativeError)
--> std::function<bool ()>
-{
-    return [&actual, &expected, acceptableRelativeError] () {
+inline auto errorTest(const btMatrix3x3& actual, const btMatrix3x3& expected, const btScalar acceptableRelativeError)
+    -> std::function<bool()> {
+    return [&actual, &expected, acceptableRelativeError]() {
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
                 if (expected[i][j] != btScalar(0.0f)) {

@@ -29,6 +29,7 @@ public:
     QOpenGLFramebufferObject* createFramebufferObject(const QSize& size) override;
     void synchronize(QQuickFramebufferObject* item) override;
     void render() override;
+
 private:
     bool _ready;
     QString _url;
@@ -59,7 +60,6 @@ public:
 private:
     QString m_url;
     bool m_ready { false };
-
 };
 
 #endif // hifi_ResourceImageItem_h

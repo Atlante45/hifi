@@ -16,19 +16,19 @@
 
 namespace controller {
 
-    struct AxisValue {
-    public:
-        float value { 0.0f };
-        // The value can be timestamped to determine if consecutive identical values should be output (e.g., mouse movement).
-        quint64 timestamp { 0 };
+struct AxisValue {
+public:
+    float value { 0.0f };
+    // The value can be timestamped to determine if consecutive identical values should be output (e.g., mouse movement).
+    quint64 timestamp { 0 };
 
-        AxisValue() {}
-        AxisValue(const float value, const quint64 timestamp);
+    AxisValue() {}
+    AxisValue(const float value, const quint64 timestamp);
 
-        bool operator ==(const AxisValue& right) const;
-        bool operator !=(const AxisValue& right) const { return !(*this == right); }
-    };
+    bool operator==(const AxisValue& right) const;
+    bool operator!=(const AxisValue& right) const { return !(*this == right); }
+};
 
-}
+} // namespace controller
 
 #endif // hifi_controllers_AxisValue_h

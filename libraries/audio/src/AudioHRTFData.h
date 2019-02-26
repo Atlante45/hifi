@@ -10,17 +10,17 @@
 //
 
 // Derived from IRCAM Listen public HRTF database
-// Copyright (c) 2002 IRCAM (Institut de Recherche et Coordination Acoustique/Musique). All Rights Reserved 
+// Copyright (c) 2002 IRCAM (Institut de Recherche et Coordination Acoustique/Musique). All Rights Reserved
 //
-// Use of Materials 
+// Use of Materials
 // The Listen database is public and available for any use. We would however appreciate an acknowledgment
-// of the database somewhere in the description of your work (e.g. paper) or in your development. 
+// of the database somewhere in the description of your work (e.g. paper) or in your development.
 
 //
 // Steps used to precompute the tables:
 //
 // 1) Select only subjects with consistent HRIR data
-//    Miller, et al. "Using Published HRTFs with SLAB3D: Metric-based Database Selection and Phenomena Observed"    
+//    Miller, et al. "Using Published HRTFs with SLAB3D: Metric-based Database Selection and Phenomena Observed"
 // 2) Convert all diffuse-field compensated HRIR from 44.1KHz to 24KHz with zero-phase resampling
 // 3) Extract a constant ITD from raw HRIR using weighted excess group delay
 //    Nam, Abel, Smith. "A Method for Estimating Interaural Time Difference for Binaural Synthesis"

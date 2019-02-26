@@ -7,7 +7,7 @@
 //
 
 #include "Deck.h"
- 
+
 #include <QtCore/QThread>
 
 #include <NumericalConstants.h>
@@ -20,8 +20,8 @@
 
 using namespace recording;
 
-Deck::Deck(QObject* parent) 
-    : QObject(parent) {}
+Deck::Deck(QObject* parent) : QObject(parent) {
+}
 
 void Deck::queueClip(ClipPointer clip, float timeOffset) {
     Locker lock(_mutex);
@@ -45,7 +45,7 @@ void Deck::queueClip(ClipPointer clip, float timeOffset) {
     _length = std::max(_length, clip->duration());
 }
 
-void Deck::play() { 
+void Deck::play() {
     Locker lock(_mutex);
     if (_pause) {
         _pause = false;
@@ -55,7 +55,7 @@ void Deck::play() {
     }
 }
 
-void Deck::pause() { 
+void Deck::pause() {
     Locker lock(_mutex);
     if (!_pause) {
         _pause = true;
@@ -127,7 +127,7 @@ void Deck::processFrames() {
         auto currentPosition = Frame::frameTimeFromEpoch(_startEpoch);
         if ((currentPosition - startingPosition) >= MAX_FRAME_PROCESSING_TIME) {
             qCWarning(recordingLog) << "Exceeded maximum frame processing time, breaking early";
-#ifdef WANT_RECORDING_DEBUG            
+#ifdef WANT_RECORDING_DEBUG
             qCDebug(recordingLog) << "Starting: " << currentPosition;
             qCDebug(recordingLog) << "Current:  " << startingPosition;
             qCDebug(recordingLog) << "Trigger:  " << triggerPosition;
@@ -150,7 +150,7 @@ void Deck::processFrames() {
         if (_loop) {
             // If we have looping enabled, start the playback over
             seek(0);
-            // FIXME configure the recording scripting interface to reset the avatar basis on a loop 
+            // FIXME configure the recording scripting interface to reset the avatar basis on a loop
             // if doing relative movement
             emit looped();
         } else {
@@ -158,7 +158,7 @@ void Deck::processFrames() {
             stop();
         }
         return;
-    } 
+    }
 
     // If we have more clip frames available, set the timer for the next one
     _position = Frame::frameTimeFromEpoch(_startEpoch);
@@ -167,7 +167,7 @@ void Deck::processFrames() {
         auto nextFrameTime = nextClip->positionFrameTime();
         nextInterval = (int)Frame::frameTimeToMilliseconds(nextFrameTime - _position);
         if (nextInterval < 0) {
-            qCWarning(recordingLog) << "Unexpected nextInterval < 0 nextFrameTime:" << nextFrameTime 
+            qCWarning(recordingLog) << "Unexpected nextInterval < 0 nextFrameTime:" << nextFrameTime
                                     << "_position:" << _position << "-- setting nextInterval to 0";
             nextInterval = 0;
         }
@@ -185,16 +185,12 @@ void Deck::processFrames() {
 
 void Deck::removeClip(const ClipConstPointer& clip) {
     Locker lock(_mutex);
-    _clips.remove_if([&](const Clip::ConstPointer& testClip)->bool {
-        return (clip == testClip);
-    });
+    _clips.remove_if([&](const Clip::ConstPointer& testClip) -> bool { return (clip == testClip); });
 }
 
 void Deck::removeClip(const QString& clipName) {
     Locker lock(_mutex);
-    _clips.remove_if([&](const Clip::ConstPointer& clip)->bool {
-        return (clip->getName() == clipName);
-    });
+    _clips.remove_if([&](const Clip::ConstPointer& clip) -> bool { return (clip->getName() == clipName); });
 }
 
 void Deck::removeAllClips() {
@@ -208,34 +204,33 @@ Deck::ClipList Deck::getClips(const QString& clipName) const {
     return result;
 }
 
-
-bool Deck::isPlaying() { 
+bool Deck::isPlaying() {
     Locker lock(_mutex);
-    return !_pause; 
+    return !_pause;
 }
 
-bool Deck::isPaused() const { 
+bool Deck::isPaused() const {
     Locker lock(_mutex);
     return _pause;
 }
 
-void Deck::stop() { 
+void Deck::stop() {
     Locker lock(_mutex);
     pause();
-    seek(0.0f); 
+    seek(0.0f);
 }
 
-float Deck::length() const { 
+float Deck::length() const {
     Locker lock(_mutex);
     return _length;
 }
 
-void Deck::loop(bool enable) { 
+void Deck::loop(bool enable) {
     Locker lock(_mutex);
     _loop = enable;
 }
 
-bool Deck::isLooping() const { 
+bool Deck::isLooping() const {
     Locker lock(_mutex);
     return _loop;
 }

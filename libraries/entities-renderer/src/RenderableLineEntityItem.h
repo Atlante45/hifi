@@ -12,19 +12,19 @@
 #ifndef hifi_RenderableLineEntityItem_h
 #define hifi_RenderableLineEntityItem_h
 
-#include "RenderableEntityItem.h"
-#include <LineEntityItem.h>
 #include <GeometryCache.h>
+#include <LineEntityItem.h>
+#include "RenderableEntityItem.h"
 
-
-namespace render { namespace entities { 
+namespace render {
+namespace entities {
 
 class LineEntityRenderer : public TypedEntityRenderer<LineEntityItem> {
     using Parent = TypedEntityRenderer<LineEntityItem>;
     friend class EntityRenderer;
 
 public:
-    LineEntityRenderer(const EntityItemPointer& entity) : Parent(entity) { }
+    LineEntityRenderer(const EntityItemPointer& entity) : Parent(entity) {}
 
 protected:
     virtual void onRemoveFromSceneTyped(const TypedEntityPointer& entity) override;
@@ -37,6 +37,7 @@ private:
     QVector<glm::vec3> _linePoints;
 };
 
-} } // namespace 
+} // namespace entities
+} // namespace render
 
 #endif // hifi_RenderableLineEntityItem_h

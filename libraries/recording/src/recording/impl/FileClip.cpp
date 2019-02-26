@@ -18,7 +18,6 @@
 #include "../Logging.h"
 #include "BufferClip.h"
 
-
 using namespace recording;
 
 FileClip::FileClip(const QString& fileName) : _file(fileName) {
@@ -33,16 +32,13 @@ FileClip::FileClip(const QString& fileName) : _file(fileName) {
     init(mappedFile, size);
 }
 
-
 QString FileClip::getName() const {
     return _file.fileName();
 }
 
-
-
 bool FileClip::write(const QString& fileName, Clip::Pointer clip) {
     // FIXME need to move this to a different thread
-    //qCDebug(recordingLog) << "Writing clip to file " << fileName << " with " << clip->frameCount() << " frames";
+    // qCDebug(recordingLog) << "Writing clip to file " << fileName << " with " << clip->frameCount() << " frames";
 
     if (0 == clip->frameCount()) {
         return false;

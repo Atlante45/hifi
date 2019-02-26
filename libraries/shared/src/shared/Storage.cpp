@@ -8,16 +8,19 @@
 
 #include "Storage.h"
 
-#include <QtCore/QFileInfo>
 #include <QtCore/QDebug>
+#include <QtCore/QFileInfo>
 #include "StorageLogging.h"
 
 Q_LOGGING_CATEGORY(storagelogging, "hifi.core.storage")
 
 using namespace storage;
 
-ViewStorage::ViewStorage(const storage::StoragePointer& owner, size_t size, const uint8_t* data)
-    : _owner(owner), _size(size), _data(data) {}
+ViewStorage::ViewStorage(const storage::StoragePointer& owner, size_t size, const uint8_t* data) :
+    _owner(owner),
+    _size(size),
+    _data(data) {
+}
 
 StoragePointer Storage::createView(size_t viewSize, size_t offset) const {
     auto selfSize = size();
@@ -26,8 +29,8 @@ StoragePointer Storage::createView(size_t viewSize, size_t offset) const {
     }
     if ((viewSize + offset) > selfSize) {
         return StoragePointer();
-        //TODO: Disable te exception for now and return an empty storage instead.
-        //throw std::runtime_error("Invalid mapping range");
+        // TODO: Disable te exception for now and return an empty storage instead.
+        // throw std::runtime_error("Invalid mapping range");
     }
     return std::make_shared<ViewStorage>(shared_from_this(), viewSize, data() + offset);
 }
@@ -75,7 +78,7 @@ FileStorage::FileStorage(const QString& filename) : _file(filename) {
         _hasWriteAccess = true;
     } else {
         _hasWriteAccess = false;
-        opened = _file.open(QFile::ReadOnly| QFile::Unbuffered);
+        opened = _file.open(QFile::ReadOnly | QFile::Unbuffered);
     }
 
     if (opened) {

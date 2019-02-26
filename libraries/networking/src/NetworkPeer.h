@@ -73,7 +73,7 @@ public:
 
     QByteArray toByteArray() const;
 
-    int getConnectionAttempts() const  { return _connectionAttempts; }
+    int getConnectionAttempts() const { return _connectionAttempts; }
     void incrementConnectionAttempts() { ++_connectionAttempts; }
     void resetConnectionAttempts() { _connectionAttempts = 0; }
 
@@ -117,7 +117,7 @@ protected:
     bool _isForcedNeverSilent { false };
 };
 
-QDebug operator<<(QDebug debug, const NetworkPeer &peer);
+QDebug operator<<(QDebug debug, const NetworkPeer& peer);
 typedef QSharedPointer<NetworkPeer> SharedNetworkPeer;
 
 #endif // hifi_NetworkPeer_h

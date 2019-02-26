@@ -18,115 +18,130 @@
 #include "DrawTask.h"
 
 namespace render {
-    class DrawSceneOctreeConfig : public Job::Config {
-        Q_OBJECT
-        Q_PROPERTY(bool showVisibleCells READ getShowVisibleCells WRITE setShowVisibleCells NOTIFY dirty())
-        Q_PROPERTY(bool showEmptyCells READ getShowEmptyCells WRITE setShowEmptyCells NOTIFY dirty())
-        Q_PROPERTY(int numAllocatedCells READ getNumAllocatedCells)
-        Q_PROPERTY(int numFreeCells READ getNumFreeCells)
+class DrawSceneOctreeConfig : public Job::Config {
+    Q_OBJECT
+    Q_PROPERTY(bool showVisibleCells READ getShowVisibleCells WRITE setShowVisibleCells NOTIFY dirty())
+    Q_PROPERTY(bool showEmptyCells READ getShowEmptyCells WRITE setShowEmptyCells NOTIFY dirty())
+    Q_PROPERTY(int numAllocatedCells READ getNumAllocatedCells)
+    Q_PROPERTY(int numFreeCells READ getNumFreeCells)
 
-    public:
+public:
+    DrawSceneOctreeConfig() : Job::Config(false) {}
 
-        DrawSceneOctreeConfig() : Job::Config(false) {}
+    int numAllocatedCells { 0 };
+    int numFreeCells { 0 };
 
-        int numAllocatedCells{ 0 };
-        int numFreeCells{ 0 };
+    int getNumAllocatedCells() const { return numAllocatedCells; }
+    int getNumFreeCells() const { return numFreeCells; }
 
-        int getNumAllocatedCells() const { return numAllocatedCells; }
-        int getNumFreeCells() const { return numFreeCells; }
+    bool showVisibleCells { true };
+    bool showEmptyCells { false };
 
-        bool showVisibleCells{ true };
-        bool showEmptyCells{ false };
+    bool getShowVisibleCells() { return showVisibleCells; }
+    bool getShowEmptyCells() { return showEmptyCells; }
 
-        bool getShowVisibleCells() { return showVisibleCells; }
-        bool getShowEmptyCells() { return showEmptyCells; }
+public slots:
+    void setShowVisibleCells(bool show) {
+        showVisibleCells = show;
+        emit dirty();
+    }
+    void setShowEmptyCells(bool show) {
+        showEmptyCells = show;
+        emit dirty();
+    }
 
-    public slots:
-        void setShowVisibleCells(bool show) { showVisibleCells = show; emit dirty(); }
-        void setShowEmptyCells(bool show) { showEmptyCells = show; emit dirty(); }
+signals:
+    void dirty();
+};
 
-    signals:
-        void dirty();
-    };
+class DrawSceneOctree {
+    gpu::PipelinePointer _drawCellBoundsPipeline;
+    gpu::PipelinePointer _drawLODReticlePipeline;
+    gpu::PipelinePointer _drawItemBoundPipeline;
+    gpu::BufferPointer _cellBoundsBuffer;
+    gpu::Stream::FormatPointer _cellBoundsFormat;
 
-    class DrawSceneOctree {
-        gpu::PipelinePointer _drawCellBoundsPipeline;
-        gpu::PipelinePointer _drawLODReticlePipeline;
-        gpu::PipelinePointer _drawItemBoundPipeline;
-        gpu::BufferPointer _cellBoundsBuffer;
-        gpu::Stream::FormatPointer _cellBoundsFormat;
+    bool _showVisibleCells; // initialized by Config
+    bool _showEmptyCells; // initialized by Config
 
-        bool _showVisibleCells; // initialized by Config
-        bool _showEmptyCells; // initialized by Config
+public:
+    using Config = DrawSceneOctreeConfig;
+    using JobModel = Job::ModelI<DrawSceneOctree, ItemSpatialTree::ItemSelection, Config>;
 
-    public:
-        using Config = DrawSceneOctreeConfig;
-        using JobModel = Job::ModelI<DrawSceneOctree, ItemSpatialTree::ItemSelection, Config>;
+    DrawSceneOctree() {}
 
-        DrawSceneOctree() {}
+    void configure(const Config& config);
+    void run(const RenderContextPointer& renderContext, const ItemSpatialTree::ItemSelection& selection);
 
-        void configure(const Config& config);
-        void run(const RenderContextPointer& renderContext, const ItemSpatialTree::ItemSelection& selection);
+    const gpu::PipelinePointer getDrawCellBoundsPipeline();
+    const gpu::PipelinePointer getDrawLODReticlePipeline();
+    const gpu::PipelinePointer getDrawItemBoundPipeline();
+};
 
-        const gpu::PipelinePointer getDrawCellBoundsPipeline();
-        const gpu::PipelinePointer getDrawLODReticlePipeline();
-        const gpu::PipelinePointer getDrawItemBoundPipeline();
-    };
+class DrawItemSelectionConfig : public Job::Config {
+    Q_OBJECT
+    Q_PROPERTY(bool showInsideItems READ getShowInsideItems WRITE setShowInsideItems NOTIFY dirty())
+    Q_PROPERTY(bool showInsideSubcellItems READ getShowInsideSubcellItems WRITE setShowInsideSubcellItems NOTIFY dirty())
+    Q_PROPERTY(bool showPartialItems READ getShowPartialItems WRITE setShowPartialItems NOTIFY dirty())
+    Q_PROPERTY(bool showPartialSubcellItems READ getShowPartialSubcellItems WRITE setShowPartialSubcellItems NOTIFY dirty())
+public:
+    DrawItemSelectionConfig() : Job::Config(false) {}
 
+    bool showInsideItems { true };
+    bool showInsideSubcellItems { true };
+    bool showPartialItems { true };
+    bool showPartialSubcellItems { true };
 
-    class DrawItemSelectionConfig : public Job::Config {
-        Q_OBJECT
-        Q_PROPERTY(bool showInsideItems READ getShowInsideItems WRITE setShowInsideItems NOTIFY dirty())
-        Q_PROPERTY(bool showInsideSubcellItems READ getShowInsideSubcellItems WRITE setShowInsideSubcellItems NOTIFY dirty())
-        Q_PROPERTY(bool showPartialItems READ getShowPartialItems WRITE setShowPartialItems NOTIFY dirty())
-        Q_PROPERTY(bool showPartialSubcellItems READ getShowPartialSubcellItems WRITE setShowPartialSubcellItems NOTIFY dirty())
-    public:
+    bool getShowInsideItems() const { return showInsideItems; };
+    bool getShowInsideSubcellItems() const { return showInsideSubcellItems; };
+    bool getShowPartialItems() const { return showPartialItems; };
+    bool getShowPartialSubcellItems() const { return showPartialSubcellItems; };
 
-        DrawItemSelectionConfig() : Job::Config(false) {}
+public slots:
+    void setShowInsideItems(bool show) {
+        showInsideItems = show;
+        emit dirty();
+    }
+    void setShowInsideSubcellItems(bool show) {
+        showInsideSubcellItems = show;
+        emit dirty();
+    }
+    void setShowPartialItems(bool show) {
+        showPartialItems = show;
+        emit dirty();
+    }
+    void setShowPartialSubcellItems(bool show) {
+        showPartialSubcellItems = show;
+        emit dirty();
+    }
 
-        bool showInsideItems{ true };
-        bool showInsideSubcellItems{ true };
-        bool showPartialItems{ true };
-        bool showPartialSubcellItems{ true };
+signals:
+    void dirty();
+};
 
-        bool getShowInsideItems() const { return showInsideItems; };
-        bool getShowInsideSubcellItems() const { return showInsideSubcellItems; };
-        bool getShowPartialItems() const { return showPartialItems; };
-        bool getShowPartialSubcellItems() const { return showPartialSubcellItems; };
+class DrawItemSelection {
+    gpu::PipelinePointer _drawItemBoundPipeline;
+    gpu::BufferPointer _boundsBufferInside;
+    gpu::BufferPointer _boundsBufferInsideSubcell;
+    gpu::BufferPointer _boundsBufferPartial;
+    gpu::BufferPointer _boundsBufferPartialSubcell;
 
-    public slots:
-        void setShowInsideItems(bool show) { showInsideItems = show; emit dirty(); }
-        void setShowInsideSubcellItems(bool show) { showInsideSubcellItems = show; emit dirty(); }
-        void setShowPartialItems(bool show) { showPartialItems = show; emit dirty(); }
-        void setShowPartialSubcellItems(bool show) { showPartialSubcellItems = show; emit dirty(); }
+    bool _showInsideItems; // initialized by Config
+    bool _showInsideSubcellItems; // initialized by Config
+    bool _showPartialItems; // initialized by Config
+    bool _showPartialSubcellItems; // initialized by Config
 
-    signals:
-        void dirty();
-    };
+public:
+    using Config = DrawItemSelectionConfig;
+    using JobModel = Job::ModelI<DrawItemSelection, ItemSpatialTree::ItemSelection, Config>;
 
-    class DrawItemSelection {
-        gpu::PipelinePointer _drawItemBoundPipeline;
-        gpu::BufferPointer _boundsBufferInside;
-        gpu::BufferPointer _boundsBufferInsideSubcell;
-        gpu::BufferPointer _boundsBufferPartial;
-        gpu::BufferPointer _boundsBufferPartialSubcell;
+    DrawItemSelection() {}
 
-        bool _showInsideItems; // initialized by Config
-        bool _showInsideSubcellItems; // initialized by Config
-        bool _showPartialItems; // initialized by Config
-        bool _showPartialSubcellItems; // initialized by Config
+    void configure(const Config& config);
+    void run(const RenderContextPointer& renderContext, const ItemSpatialTree::ItemSelection& selection);
 
-    public:
-        using Config = DrawItemSelectionConfig;
-        using JobModel = Job::ModelI<DrawItemSelection, ItemSpatialTree::ItemSelection, Config>;
-
-        DrawItemSelection() {}
-
-        void configure(const Config& config);
-        void run(const RenderContextPointer& renderContext, const ItemSpatialTree::ItemSelection& selection);
-
-        const gpu::PipelinePointer getDrawItemBoundPipeline();
-    };
-}
+    const gpu::PipelinePointer getDrawItemBoundPipeline();
+};
+} // namespace render
 
 #endif // hifi_render_DrawStatus_h

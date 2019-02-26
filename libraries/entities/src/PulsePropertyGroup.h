@@ -17,8 +17,8 @@
 
 #include <PulseMode.h>
 
-#include "PropertyGroup.h"
 #include "EntityItemPropertiesMacros.h"
+#include "PropertyGroup.h"
 
 class EntityItemProperties;
 class EncodeBitstreamParams;
@@ -52,15 +52,12 @@ public:
     virtual void debugDump() const override;
     virtual void listChangedProperties(QList<QString>& out) override;
 
-    virtual bool appendToEditPacket(OctreePacketData* packetData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
-                                    OctreeElement::AppendState& appendState) const override;
+    virtual bool appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+                                    EntityPropertyFlags& propertyFlags, EntityPropertyFlags& propertiesDidntFit,
+                                    int& propertyCount, OctreeElement::AppendState& appendState) const override;
 
-    virtual bool decodeFromEditPacket(EntityPropertyFlags& propertyFlags,
-                                      const unsigned char*& dataAt, int& processedBytes) override;
+    virtual bool decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt,
+                                      int& processedBytes) override;
     virtual void markAllChanged() override;
     virtual EntityPropertyFlags getChangedProperties() const override;
 
@@ -75,16 +72,13 @@ public:
 
     virtual void appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                     EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
+                                    EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                    EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                                     OctreeElement::AppendState& appendState) const override;
 
     virtual int readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) override;
+                                                 ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                 bool overwriteLocalData, bool& somethingChanged) override;
 
     bool operator==(const PulsePropertyGroup& a) const;
     bool operator!=(const PulsePropertyGroup& a) const { return !(*this == a); }

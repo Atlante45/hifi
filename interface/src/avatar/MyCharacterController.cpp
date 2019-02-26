@@ -14,12 +14,11 @@
 #include <BulletUtil.h>
 #include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
 
-#include "MyAvatar.h"
 #include "DetailedMotionState.h"
+#include "MyAvatar.h"
 
 // TODO: make avatars stand on steep slope
 // TODO: make avatars not snag on low ceilings
-
 
 void MyCharacterController::RayShotgunResult::reset() {
     hitFraction = 1.0f;
@@ -27,7 +26,6 @@ void MyCharacterController::RayShotgunResult::reset() {
 }
 
 MyCharacterController::MyCharacterController(std::shared_ptr<MyAvatar> avatar) {
-
     assert(avatar);
     _avatar = avatar;
     updateShapeIfNecessary();
@@ -65,8 +63,8 @@ void MyCharacterController::updateShapeIfNecessary() {
 
             _rigidBody->setSleepingThresholds(0.0f, 0.0f);
             _rigidBody->setAngularFactor(0.0f);
-            _rigidBody->setWorldTransform(btTransform(glmToBullet(_avatar->getWorldOrientation()),
-                                                      glmToBullet(_avatar->getWorldPosition())));
+            _rigidBody->setWorldTransform(
+                btTransform(glmToBullet(_avatar->getWorldOrientation()), glmToBullet(_avatar->getWorldPosition())));
             _rigidBody->setDamping(0.0f, 0.0f);
             if (_state == State::Hover) {
                 _rigidBody->setGravity(btVector3(0.0f, 0.0f, 0.0f));
@@ -74,7 +72,7 @@ void MyCharacterController::updateShapeIfNecessary() {
                 _rigidBody->setGravity(_gravity * _currentUp);
             }
             _rigidBody->setCollisionFlags(_rigidBody->getCollisionFlags() &
-                    ~(btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_STATIC_OBJECT));
+                                          ~(btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_STATIC_OBJECT));
         } else {
             // TODO: handle this failure case
         }
@@ -136,7 +134,8 @@ bool MyCharacterController::testRayShotgun(const glm::vec3& position, const glm:
     btScalar cosTheta = _minFloorNormalDotUp;
     btScalar sinTheta = sqrtf(1.0f - cosTheta * cosTheta);
     const btScalar MIN_FORWARD_SLOP = 0.12f; // HACK: not sure why this is necessary to detect steepest walkable slope
-    btScalar forwardSlop = (_maxStepHeight + _radius / cosTheta - _radius) * (cosTheta / sinTheta) - (_radius + stepLength) + MIN_FORWARD_SLOP;
+    btScalar forwardSlop = (_maxStepHeight + _radius / cosTheta - _radius) * (cosTheta / sinTheta) - (_radius + stepLength) +
+                           MIN_FORWARD_SLOP;
     if (forwardSlop < 0.0f) {
         // BIG step, no slop necessary
         forwardSlop = 0.0f;
@@ -155,7 +154,9 @@ bool MyCharacterController::testRayShotgun(const glm::vec3& position, const glm:
                     result.walkable = false;
                     // the top scan wasn't walkable so don't bother scanning the bottom
                     // remove both forwardSlop and backSlop
-                    result.hitFraction = glm::min(1.0f, (closestRayResult.m_closestHitFraction * (backSlop + stepLength + forwardSlop) - backSlop) / stepLength);
+                    result.hitFraction = glm::min(
+                        1.0f, (closestRayResult.m_closestHitFraction * (backSlop + stepLength + forwardSlop) - backSlop) /
+                                  stepLength);
                     return result.hitFraction < 1.0f;
                 }
             }
@@ -175,7 +176,9 @@ bool MyCharacterController::testRayShotgun(const glm::vec3& position, const glm:
                         result.walkable = false;
                         // the bottom scan wasn't walkable
                         // remove both forwardSlop and backSlop
-                        result.hitFraction = glm::min(1.0f, (closestRayResult.m_closestHitFraction * (backSlop + stepLength + forwardSlop) - backSlop) / stepLength);
+                        result.hitFraction = glm::min(
+                            1.0f, (closestRayResult.m_closestHitFraction * (backSlop + stepLength + forwardSlop) - backSlop) /
+                                      stepLength);
                         return result.hitFraction < 1.0f;
                     }
                 }
@@ -184,7 +187,8 @@ bool MyCharacterController::testRayShotgun(const glm::vec3& position, const glm:
     } else {
         // scan the bottom looking for nearest step point
         // remove forwardSlop
-        result.hitFraction = (closestRayResult.m_closestHitFraction * (backSlop + stepLength + forwardSlop)) / (backSlop + stepLength);
+        result.hitFraction = (closestRayResult.m_closestHitFraction * (backSlop + stepLength + forwardSlop)) /
+                             (backSlop + stepLength);
 
         for (int32_t i = 0; i < _bottomPoints.size(); ++i) {
             rayStart = newPosition + rotation * _bottomPoints[i] - backSlop * rayDirection;
@@ -204,7 +208,7 @@ bool MyCharacterController::testRayShotgun(const glm::vec3& position, const glm:
 }
 
 int32_t MyCharacterController::computeCollisionMask() const {
-    int32_t collisionMask = BULLET_COLLISION_MASK_MY_AVATAR; 
+    int32_t collisionMask = BULLET_COLLISION_MASK_MY_AVATAR;
     if (_collisionless && _collisionlessAllowed) {
         collisionMask = BULLET_COLLISION_MASK_COLLISIONLESS;
     } else if (!_collideWithOtherAvatars) {
@@ -271,12 +275,13 @@ void MyCharacterController::initRayShotgun(const btCollisionWorld* world) {
     // helper class for simple ray-traces against character
     class MeOnlyResultCallback : public btCollisionWorld::ClosestRayResultCallback {
     public:
-        MeOnlyResultCallback (btRigidBody* me) : btCollisionWorld::ClosestRayResultCallback(btVector3(0.0f, 0.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)) {
+        MeOnlyResultCallback(btRigidBody* me) :
+            btCollisionWorld::ClosestRayResultCallback(btVector3(0.0f, 0.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)) {
             _me = me;
             m_collisionFilterGroup = BULLET_COLLISION_GROUP_DYNAMIC;
             m_collisionFilterMask = BULLET_COLLISION_MASK_DYNAMIC;
         }
-        virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult,bool normalInWorldSpace) override {
+        virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace) override {
             if (rayResult.m_collisionObject != _me) {
                 return 1.0f;
             }
@@ -313,7 +318,7 @@ void MyCharacterController::initRayShotgun(const btCollisionWorld* world) {
                 offsetX += 0.5f * stepX;
             }
             for (int32_t j = 0; j < maxJ; ++j) {
-                btVector3 localRayEnd(offsetX + (btScalar)(j) * stepX, divisionLine + (btScalar)(i) * stepY, 0.0f);
+                btVector3 localRayEnd(offsetX + (btScalar)(j)*stepX, divisionLine + (btScalar)(i)*stepY, 0.0f);
                 btVector3 localRayStart = localRayEnd - reach;
                 MeOnlyResultCallback result(_rigidBody);
                 world->rayTest(position + rotation * localRayStart, position + rotation * localRayEnd, result);
@@ -345,7 +350,7 @@ void MyCharacterController::initRayShotgun(const btCollisionWorld* world) {
                 offsetX += 0.5f * stepX;
             }
             for (int32_t j = 0; j < maxJ; ++j) {
-                btVector3 localRayEnd(offsetX + (btScalar)(j) * stepX, (divisionLine - slop) - (btScalar)(i) * stepY, 0.0f);
+                btVector3 localRayEnd(offsetX + (btScalar)(j)*stepX, (divisionLine - slop) - (btScalar)(i)*stepY, 0.0f);
                 btVector3 localRayStart = localRayEnd - reach;
                 MeOnlyResultCallback result(_rigidBody);
                 world->rayTest(position + rotation * localRayStart, position + rotation * localRayEnd, result);
@@ -401,7 +406,7 @@ DetailedMotionState* MyCharacterController::createDetailedMotionStateForJoint(in
 }
 
 void MyCharacterController::clearDetailedMotionStates() {
-    _pendingFlags |= PENDING_FLAG_REMOVE_DETAILED_FROM_SIMULATION; 
+    _pendingFlags |= PENDING_FLAG_REMOVE_DETAILED_FROM_SIMULATION;
     // We make sure we don't add them again
     _pendingFlags &= ~PENDING_FLAG_ADD_DETAILED_TO_SIMULATION;
 }
@@ -430,7 +435,7 @@ void MyCharacterController::buildPhysicsTransaction(PhysicsEngine::Transaction& 
                 transaction.objectsToAdd.push_back(dMotionState);
             }
         }
-    } 
+    }
 }
 
 void MyCharacterController::handleProcessedPhysicsTransaction(PhysicsEngine::Transaction& transaction) {
@@ -441,11 +446,10 @@ void MyCharacterController::handleProcessedPhysicsTransaction(PhysicsEngine::Tra
     transaction.clear();
 }
 
-
 class DetailedRayResultCallback : public btCollisionWorld::AllHitsRayResultCallback {
 public:
-    DetailedRayResultCallback()
-        : btCollisionWorld::AllHitsRayResultCallback(btVector3(0.0f, 0.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)) {
+    DetailedRayResultCallback() :
+        btCollisionWorld::AllHitsRayResultCallback(btVector3(0.0f, 0.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)) {
         // the RayResultCallback's group and mask must match MY_AVATAR
         m_collisionFilterGroup = BULLET_COLLISION_GROUP_DETAILED_RAY;
         m_collisionFilterMask = BULLET_COLLISION_MASK_DETAILED_RAY;
@@ -456,8 +460,10 @@ public:
     }
 };
 
-std::vector<MyCharacterController::RayAvatarResult> MyCharacterController::rayTest(const btVector3& origin, const btVector3& direction,
-                                                                                   const btScalar& length, const QVector<uint>& jointsToExclude) const {
+std::vector<MyCharacterController::RayAvatarResult> MyCharacterController::rayTest(const btVector3& origin,
+                                                                                   const btVector3& direction,
+                                                                                   const btScalar& length,
+                                                                                   const QVector<uint>& jointsToExclude) const {
     std::vector<RayAvatarResult> foundAvatars;
     if (_dynamicsWorld) {
         btVector3 end = origin + length * direction;
@@ -487,9 +493,10 @@ std::vector<MyCharacterController::RayAvatarResult> MyCharacterController::rayTe
                     foundAvatars.push_back(result);
                 }
             }
-            std::sort(foundAvatars.begin(), foundAvatars.end(), [](const RayAvatarResult& resultA, const RayAvatarResult& resultB) {
-                return resultA._distance < resultB._distance;
-            });
+            std::sort(foundAvatars.begin(), foundAvatars.end(),
+                      [](const RayAvatarResult& resultA, const RayAvatarResult& resultB) {
+                          return resultA._distance < resultB._distance;
+                      });
         }
     }
     return foundAvatars;

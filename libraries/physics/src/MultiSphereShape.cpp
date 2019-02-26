@@ -12,20 +12,20 @@
 #include "MultiSphereShape.h"
 
 void SphereRegion::translate(const glm::vec3& translation) {
-    for (auto &line : _lines) {
+    for (auto& line : _lines) {
         line.first += translation;
         line.second += translation;
     }
 }
 void SphereRegion::dump(std::vector<std::pair<glm::vec3, glm::vec3>>& outLines) {
-    for (auto &line : _lines) {
+    for (auto& line : _lines) {
         outLines.push_back(line);
     }
 }
 
 void SphereRegion::insertUnique(const glm::vec3& point, std::vector<glm::vec3>& pointSet) {
     auto hit = std::find_if(pointSet.begin(), pointSet.end(), [point](const glm::vec3& pointFromSet) -> bool {
-        return (glm::length(pointFromSet-point) < FLT_EPSILON);
+        return (glm::length(pointFromSet - point) < FLT_EPSILON);
     });
     if (hit == pointSet.end()) {
         pointSet.push_back(point);
@@ -60,9 +60,9 @@ void SphereRegion::extractEdges(bool reverseY) {
 
 void SphereRegion::extractSphereRegion(std::vector<std::pair<glm::vec3, glm::vec3>>& outLines) {
     for (size_t i = 0; i < outLines.size(); i++) {
-        auto &line = outLines[i];
-        auto &p1 = line.first;
-        auto &p2 = line.second;
+        auto& line = outLines[i];
+        auto& p1 = line.first;
+        auto& p2 = line.second;
         p1.x = glm::abs(p1.x) < 0.001f ? 0.0f : p1.x;
         p1.y = glm::abs(p1.y) < 0.001f ? 0.0f : p1.y;
         p1.z = glm::abs(p1.z) < 0.001f ? 0.0f : p1.z;
@@ -71,11 +71,11 @@ void SphereRegion::extractSphereRegion(std::vector<std::pair<glm::vec3, glm::vec
         p2.z = glm::abs(p2.z) < 0.001f ? 0.0f : p2.z;
 
         glm::vec3 point1 = { p1.x != 0.0f ? glm::abs(p1.x) / p1.x : _direction.x,
-            p1.y != 0.0f ? glm::abs(p1.y) / p1.y : _direction.y,
-            p1.z != 0.0f ? glm::abs(p1.z) / p1.z : _direction.z };
+                             p1.y != 0.0f ? glm::abs(p1.y) / p1.y : _direction.y,
+                             p1.z != 0.0f ? glm::abs(p1.z) / p1.z : _direction.z };
         glm::vec3 point2 = { p2.x != 0.0f ? glm::abs(p2.x) / p2.x : _direction.x,
-            p2.y != 0.0f ? glm::abs(p2.y) / p2.y : _direction.y,
-            p2.z != 0.0f ? glm::abs(p2.z) / p2.z : _direction.z };
+                             p2.y != 0.0f ? glm::abs(p2.y) / p2.y : _direction.y,
+                             p2.z != 0.0f ? glm::abs(p2.z) / p2.z : _direction.z };
         if (point1 == _direction && point2 == _direction) {
             _lines.push_back(line);
         }
@@ -94,8 +94,8 @@ CollisionShapeExtractionMode MultiSphereShape::getExtractionModeByName(const QSt
     bool isLeftHand = name == "LEFTHAND";
     bool isRightFinger = name.indexOf("RIGHTHAND") == 0 && !isRightHand;
     bool isLeftFinger = name.indexOf("LEFTHAND") == 0 && !isLeftHand;
-    
-    //bool isFinger = 
+
+    // bool isFinger =
     if (isNeck || isLeftFinger || isRightFinger) {
         mode = CollisionShapeExtractionMode::SpheresY;
     } else if (isShoulder) {
@@ -112,9 +112,8 @@ void MultiSphereShape::filterUniquePoints(const std::vector<btVector3>& kdop, st
     for (size_t j = 0; j < kdop.size(); j++) {
         btVector3 btPoint = kdop[j];
         auto hit = std::find_if(uniquePoints.begin(), uniquePoints.end(), [btPoint](const glm::vec3& point) -> bool {
-            return (glm::length(btPoint.getX() - point.x) < FLT_EPSILON
-                && glm::length(btPoint.getY() - point.y) < FLT_EPSILON
-                && glm::length(btPoint.getZ() - point.z) < FLT_EPSILON);
+            return (glm::length(btPoint.getX() - point.x) < FLT_EPSILON &&
+                    glm::length(btPoint.getY() - point.y) < FLT_EPSILON && glm::length(btPoint.getZ() - point.z) < FLT_EPSILON);
         });
         if (hit == uniquePoints.end()) {
             uniquePoints.push_back(bulletToGLM(btPoint));
@@ -122,7 +121,8 @@ void MultiSphereShape::filterUniquePoints(const std::vector<btVector3>& kdop, st
     }
 }
 
-bool MultiSphereShape::computeMultiSphereShape(int jointIndex, const QString& name, const std::vector<btVector3>& kdop, float scale) {
+bool MultiSphereShape::computeMultiSphereShape(int jointIndex, const QString& name, const std::vector<btVector3>& kdop,
+                                               float scale) {
     _scale = scale;
     _jointIndex = jointIndex;
     _name = name;
@@ -137,7 +137,6 @@ bool MultiSphereShape::computeMultiSphereShape(int jointIndex, const QString& na
     _midPoint = glm::vec3(0.0f, 0.0f, 0.0f);
     std::vector<glm::vec3> relPoints;
     for (size_t i = 0; i < points.size(); i++) {
-
         min.x = points[i].x < min.x ? points[i].x : min.x;
         min.y = points[i].y < min.y ? points[i].y : min.y;
         min.z = points[i].z < min.z ? points[i].z : min.z;
@@ -157,9 +156,15 @@ bool MultiSphereShape::computeMultiSphereShape(int jointIndex, const QString& na
         relPoints.push_back(relPoint);
     }
     CollisionShapeExtractionMode applyMode = _mode;
-    float xCorrector = dimensions.x > dimensions.y && dimensions.x > dimensions.z ? -1.0f + (dimensions.x / (0.5f * (dimensions.y + dimensions.z))) : 0.0f;
-    float yCorrector = dimensions.y > dimensions.x && dimensions.y > dimensions.z ? -1.0f + (dimensions.y / (0.5f * (dimensions.x + dimensions.z))) : 0.0f;
-    float zCorrector = dimensions.z > dimensions.x && dimensions.z > dimensions.y ? -1.0f + (dimensions.z / (0.5f * (dimensions.x + dimensions.y))) : 0.0f;
+    float xCorrector = dimensions.x > dimensions.y && dimensions.x > dimensions.z
+                           ? -1.0f + (dimensions.x / (0.5f * (dimensions.y + dimensions.z)))
+                           : 0.0f;
+    float yCorrector = dimensions.y > dimensions.x && dimensions.y > dimensions.z
+                           ? -1.0f + (dimensions.y / (0.5f * (dimensions.x + dimensions.z)))
+                           : 0.0f;
+    float zCorrector = dimensions.z > dimensions.x && dimensions.z > dimensions.y
+                           ? -1.0f + (dimensions.z / (0.5f * (dimensions.x + dimensions.y)))
+                           : 0.0f;
 
     float xyDif = glm::abs(dimensions.x - dimensions.y);
     float xzDif = glm::abs(dimensions.x - dimensions.z);
@@ -172,18 +177,23 @@ bool MultiSphereShape::computeMultiSphereShape(int jointIndex, const QString& na
     if (xyDif < 0.5f * xyEpsilon && xzDif < 0.5f * xzEpsilon && yzDif < 0.5f * yzEpsilon) {
         applyMode = CollisionShapeExtractionMode::Sphere;
     } else if (xzDif < xzEpsilon) {
-        applyMode = dimensions.y > dimensions.z ? CollisionShapeExtractionMode::SpheresY : CollisionShapeExtractionMode::SpheresXZ;
+        applyMode = dimensions.y > dimensions.z ? CollisionShapeExtractionMode::SpheresY
+                                                : CollisionShapeExtractionMode::SpheresXZ;
     } else if (xyDif < xyEpsilon) {
-        applyMode = dimensions.z > dimensions.y ? CollisionShapeExtractionMode::SpheresZ : CollisionShapeExtractionMode::SpheresXY;
+        applyMode = dimensions.z > dimensions.y ? CollisionShapeExtractionMode::SpheresZ
+                                                : CollisionShapeExtractionMode::SpheresXY;
     } else if (yzDif < yzEpsilon) {
-        applyMode = dimensions.x > dimensions.y ? CollisionShapeExtractionMode::SpheresX : CollisionShapeExtractionMode::SpheresYZ;
+        applyMode = dimensions.x > dimensions.y ? CollisionShapeExtractionMode::SpheresX
+                                                : CollisionShapeExtractionMode::SpheresYZ;
     } else {
         applyMode = CollisionShapeExtractionMode::SpheresXYZ;
     }
 
     if (_mode != CollisionShapeExtractionMode::Automatic && applyMode != _mode) {
-        bool isModeSphereAxis = (_mode >= CollisionShapeExtractionMode::SpheresX && _mode <= CollisionShapeExtractionMode::SpheresZ);
-        bool isApplyModeComplex = (applyMode >= CollisionShapeExtractionMode::SpheresXY && applyMode <= CollisionShapeExtractionMode::SpheresXYZ);
+        bool isModeSphereAxis = (_mode >= CollisionShapeExtractionMode::SpheresX &&
+                                 _mode <= CollisionShapeExtractionMode::SpheresZ);
+        bool isApplyModeComplex = (applyMode >= CollisionShapeExtractionMode::SpheresXY &&
+                                   applyMode <= CollisionShapeExtractionMode::SpheresXYZ);
         applyMode = (isModeSphereAxis && isApplyModeComplex) ? CollisionShapeExtractionMode::Sphere : _mode;
     }
 
@@ -191,56 +201,56 @@ bool MultiSphereShape::computeMultiSphereShape(int jointIndex, const QString& na
     glm::vec3 axis, axis1, axis2;
     SphereShapeData sphere;
     switch (applyMode) {
-    case CollisionShapeExtractionMode::None:
-        break;
-    case CollisionShapeExtractionMode::Automatic:
-        break;
-    case CollisionShapeExtractionMode::Box:
-        break;
-    case CollisionShapeExtractionMode::Sphere:
-        sphere._radius = 0.5f * (dimensions.x + dimensions.y + dimensions.z) / 3.0f;
-        sphere._position = glm::vec3(0.0f);
-        _spheres.push_back(sphere);
-        break;
-    case CollisionShapeExtractionMode::SphereCollapse:
-        sphere._radius = 0.5f * glm::min(glm::min(dimensions.x, dimensions.y), dimensions.z);
-        sphere._position = glm::vec3(0.0f);
-        _spheres.push_back(sphere);
-        break;
-    case CollisionShapeExtractionMode::SpheresX:
-        axis = 0.5f* dimensions.x * Vectors::UNIT_NEG_X;
-        axes = { axis, -axis };
-        break;
-    case CollisionShapeExtractionMode::SpheresY:
-        axis = 0.5f* dimensions.y * Vectors::UNIT_NEG_Y;
-        axes = { axis, -axis };
-        break;
-    case CollisionShapeExtractionMode::SpheresZ:
-        axis = 0.5f* dimensions.z * Vectors::UNIT_NEG_Z;
-        axes = { axis, -axis };
-        break;
-    case CollisionShapeExtractionMode::SpheresXY:
-        axis1 = glm::vec3(0.5f * dimensions.x, 0.5f * dimensions.y, 0.0f);
-        axis2 = glm::vec3(0.5f * dimensions.x, -0.5f * dimensions.y, 0.0f);
-        axes = { axis1, axis2, -axis1, -axis2 };
-        break;
-    case CollisionShapeExtractionMode::SpheresYZ:
-        axis1 = glm::vec3(0.0f, 0.5f * dimensions.y, 0.5f * dimensions.z);
-        axis2 = glm::vec3(0.0f, 0.5f * dimensions.y, -0.5f * dimensions.z);
-        axes = { axis1, axis2, -axis1, -axis2 };
-        break;
-    case CollisionShapeExtractionMode::SpheresXZ:
-        axis1 = glm::vec3(0.5f * dimensions.x, 0.0f, 0.5f * dimensions.z);
-        axis2 = glm::vec3(-0.5f * dimensions.x, 0.0f, 0.5f * dimensions.z);
-        axes = { axis1, axis2, -axis1, -axis2 };
-        break;
-    case CollisionShapeExtractionMode::SpheresXYZ:
-        for (size_t i = 0; i < CORNER_SIGNS.size(); i++) {
-            axes.push_back(0.5f * (dimensions * CORNER_SIGNS[i]));
-        }
-        break;
-    default:
-        break;
+        case CollisionShapeExtractionMode::None:
+            break;
+        case CollisionShapeExtractionMode::Automatic:
+            break;
+        case CollisionShapeExtractionMode::Box:
+            break;
+        case CollisionShapeExtractionMode::Sphere:
+            sphere._radius = 0.5f * (dimensions.x + dimensions.y + dimensions.z) / 3.0f;
+            sphere._position = glm::vec3(0.0f);
+            _spheres.push_back(sphere);
+            break;
+        case CollisionShapeExtractionMode::SphereCollapse:
+            sphere._radius = 0.5f * glm::min(glm::min(dimensions.x, dimensions.y), dimensions.z);
+            sphere._position = glm::vec3(0.0f);
+            _spheres.push_back(sphere);
+            break;
+        case CollisionShapeExtractionMode::SpheresX:
+            axis = 0.5f * dimensions.x * Vectors::UNIT_NEG_X;
+            axes = { axis, -axis };
+            break;
+        case CollisionShapeExtractionMode::SpheresY:
+            axis = 0.5f * dimensions.y * Vectors::UNIT_NEG_Y;
+            axes = { axis, -axis };
+            break;
+        case CollisionShapeExtractionMode::SpheresZ:
+            axis = 0.5f * dimensions.z * Vectors::UNIT_NEG_Z;
+            axes = { axis, -axis };
+            break;
+        case CollisionShapeExtractionMode::SpheresXY:
+            axis1 = glm::vec3(0.5f * dimensions.x, 0.5f * dimensions.y, 0.0f);
+            axis2 = glm::vec3(0.5f * dimensions.x, -0.5f * dimensions.y, 0.0f);
+            axes = { axis1, axis2, -axis1, -axis2 };
+            break;
+        case CollisionShapeExtractionMode::SpheresYZ:
+            axis1 = glm::vec3(0.0f, 0.5f * dimensions.y, 0.5f * dimensions.z);
+            axis2 = glm::vec3(0.0f, 0.5f * dimensions.y, -0.5f * dimensions.z);
+            axes = { axis1, axis2, -axis1, -axis2 };
+            break;
+        case CollisionShapeExtractionMode::SpheresXZ:
+            axis1 = glm::vec3(0.5f * dimensions.x, 0.0f, 0.5f * dimensions.z);
+            axis2 = glm::vec3(-0.5f * dimensions.x, 0.0f, 0.5f * dimensions.z);
+            axes = { axis1, axis2, -axis1, -axis2 };
+            break;
+        case CollisionShapeExtractionMode::SpheresXYZ:
+            for (size_t i = 0; i < CORNER_SIGNS.size(); i++) {
+                axes.push_back(0.5f * (dimensions * CORNER_SIGNS[i]));
+            }
+            break;
+        default:
+            break;
     }
     if (axes.size() > 0) {
         spheresFromAxes(relPoints, axes, _spheres);
@@ -248,11 +258,12 @@ bool MultiSphereShape::computeMultiSphereShape(int jointIndex, const QString& na
     for (size_t i = 0; i < _spheres.size(); i++) {
         _spheres[i]._position += _midPoint;
     }
-    
+
     return _mode != CollisionShapeExtractionMode::None;
 }
 
-void MultiSphereShape::spheresFromAxes(const std::vector<glm::vec3>& points, const std::vector<glm::vec3>& axes, std::vector<SphereShapeData>& spheres) {
+void MultiSphereShape::spheresFromAxes(const std::vector<glm::vec3>& points, const std::vector<glm::vec3>& axes,
+                                       std::vector<SphereShapeData>& spheres) {
     float maxRadius = 0.0f;
     float maxAverageRadius = 0.0f;
     float minAverageRadius = glm::length(points[0]);
@@ -333,11 +344,15 @@ void MultiSphereShape::connectSpheres(int index1, int index2, bool onlyEdges) {
     std::vector<glm::vec3> edge1, edge2;
     if (onlyEdges) {
         std::vector<std::pair<glm::vec3, glm::vec3>> debugLines;
-        calculateSphereLines(debugLines, sphere1._position, sphere1._radius, DEFAULT_SPHERE_SUBDIVISIONS, glm::normalize(axis), ratio1, &edge1);
-        calculateSphereLines(debugLines, sphere2._position, sphere2._radius, DEFAULT_SPHERE_SUBDIVISIONS, glm::normalize(-axis), ratio2, &edge2);
+        calculateSphereLines(debugLines, sphere1._position, sphere1._radius, DEFAULT_SPHERE_SUBDIVISIONS, glm::normalize(axis),
+                             ratio1, &edge1);
+        calculateSphereLines(debugLines, sphere2._position, sphere2._radius, DEFAULT_SPHERE_SUBDIVISIONS, glm::normalize(-axis),
+                             ratio2, &edge2);
     } else {
-        calculateSphereLines(_debugLines, sphere1._position, sphere1._radius, DEFAULT_SPHERE_SUBDIVISIONS, glm::normalize(axis), ratio1, &edge1);
-        calculateSphereLines(_debugLines, sphere2._position, sphere2._radius, DEFAULT_SPHERE_SUBDIVISIONS, glm::normalize(-axis), ratio2, &edge2);
+        calculateSphereLines(_debugLines, sphere1._position, sphere1._radius, DEFAULT_SPHERE_SUBDIVISIONS, glm::normalize(axis),
+                             ratio1, &edge1);
+        calculateSphereLines(_debugLines, sphere2._position, sphere2._radius, DEFAULT_SPHERE_SUBDIVISIONS,
+                             glm::normalize(-axis), ratio2, &edge2);
     }
     connectEdges(_debugLines, edge1, edge2);
 }
@@ -347,7 +362,7 @@ void MultiSphereShape::calculateDebugLines() {
         auto sphere = _spheres[0];
         calculateSphereLines(_debugLines, sphere._position, sphere._radius);
     } else if (_spheres.size() == 2) {
-        connectSpheres(0, 1);        
+        connectSpheres(0, 1);
     } else if (_spheres.size() == 4) {
         std::vector<glm::vec3> axes;
         axes.resize(8);
@@ -355,7 +370,7 @@ void MultiSphereShape::calculateDebugLines() {
             for (size_t j = 0; j < 4; j++) {
                 auto axis = _spheres[j]._position - _midPoint;
                 glm::vec3 sign = { axis.x != 0.0f ? glm::abs(axis.x) / axis.x : 0.0f,
-                                   axis.x != 0.0f ? glm::abs(axis.y) / axis.y : 0.0f ,
+                                   axis.x != 0.0f ? glm::abs(axis.y) / axis.y : 0.0f,
                                    axis.z != 0.0f ? glm::abs(axis.z) / axis.z : 0.0f };
                 bool add = false;
                 if (sign.x == 0.0f) {
@@ -377,8 +392,8 @@ void MultiSphereShape::calculateDebugLines() {
                     axes[i] = axis;
                     break;
                 }
-            }            
-        }        
+            }
+        }
         calculateChamferBox(_debugLines, _spheres[0]._radius, axes, _midPoint);
     } else if (_spheres.size() == 8) {
         std::vector<glm::vec3> axes;
@@ -389,7 +404,8 @@ void MultiSphereShape::calculateDebugLines() {
     }
 }
 
-void MultiSphereShape::connectEdges(std::vector<std::pair<glm::vec3, glm::vec3>>& outLines, const std::vector<glm::vec3>& edge1, const std::vector<glm::vec3>& edge2, bool reverse) {
+void MultiSphereShape::connectEdges(std::vector<std::pair<glm::vec3, glm::vec3>>& outLines, const std::vector<glm::vec3>& edge1,
+                                    const std::vector<glm::vec3>& edge2, bool reverse) {
     if (edge1.size() == edge2.size()) {
         for (size_t i = 0; i < edge1.size(); i++) {
             size_t j = reverse ? edge1.size() - i - 1 : i;
@@ -398,21 +414,16 @@ void MultiSphereShape::connectEdges(std::vector<std::pair<glm::vec3, glm::vec3>>
     }
 }
 
-void MultiSphereShape::calculateChamferBox(std::vector<std::pair<glm::vec3, glm::vec3>>& outLines, const float& radius, const std::vector<glm::vec3>& axes, const glm::vec3& translation) {
+void MultiSphereShape::calculateChamferBox(std::vector<std::pair<glm::vec3, glm::vec3>>& outLines, const float& radius,
+                                           const std::vector<glm::vec3>& axes, const glm::vec3& translation) {
     std::vector<std::pair<glm::vec3, glm::vec3>> sphereLines;
     calculateSphereLines(sphereLines, glm::vec3(0.0f), radius);
 
-    std::vector<SphereRegion> regions = {
-        SphereRegion({ 1.0f, 1.0f, 1.0f }),
-        SphereRegion({ -1.0f, 1.0f, 1.0f }),
-        SphereRegion({ -1.0f, 1.0f, -1.0f }),
-        SphereRegion({ 1.0f, 1.0f, -1.0f }),
-        SphereRegion({ 1.0f, -1.0f, 1.0f }),
-        SphereRegion({ -1.0f, -1.0f, 1.0f }),
-        SphereRegion({ -1.0f, -1.0f, -1.0f }),
-        SphereRegion({ 1.0f, -1.0f, -1.0f })
-    };
-    
+    std::vector<SphereRegion> regions = { SphereRegion({ 1.0f, 1.0f, 1.0f }),    SphereRegion({ -1.0f, 1.0f, 1.0f }),
+                                          SphereRegion({ -1.0f, 1.0f, -1.0f }),  SphereRegion({ 1.0f, 1.0f, -1.0f }),
+                                          SphereRegion({ 1.0f, -1.0f, 1.0f }),   SphereRegion({ -1.0f, -1.0f, 1.0f }),
+                                          SphereRegion({ -1.0f, -1.0f, -1.0f }), SphereRegion({ 1.0f, -1.0f, -1.0f }) };
+
     assert(axes.size() == regions.size());
 
     for (size_t i = 0; i < regions.size(); i++) {
@@ -436,12 +447,11 @@ void MultiSphereShape::calculateChamferBox(std::vector<std::pair<glm::vec3, glm:
     connectEdges(outLines, regions[1].getEdgesY(), regions[5].getEdgesY());
     connectEdges(outLines, regions[2].getEdgesY(), regions[6].getEdgesY());
     connectEdges(outLines, regions[3].getEdgesY(), regions[7].getEdgesY());
-
 }
 
-void MultiSphereShape::calculateSphereLines(std::vector<std::pair<glm::vec3, glm::vec3>>& outLines, const glm::vec3& center, const float& radius,
-                                     const int& subdivisions, const glm::vec3& direction, const float& percentage, std::vector<glm::vec3>* edge) {
-    
+void MultiSphereShape::calculateSphereLines(std::vector<std::pair<glm::vec3, glm::vec3>>& outLines, const glm::vec3& center,
+                                            const float& radius, const int& subdivisions, const glm::vec3& direction,
+                                            const float& percentage, std::vector<glm::vec3>* edge) {
     float uTotalAngle = percentage * PI;
     float vTotalAngle = 2.0f * PI;
 

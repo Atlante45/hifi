@@ -12,15 +12,16 @@
 #ifndef hifi_ModelLoader_h
 #define hifi_ModelLoader_h
 
-#include <shared/HifiTypes.h>
 #include <hfm/HFM.h>
+#include <shared/HifiTypes.h>
 
 class ModelLoader {
 public:
     // Given the currently stored list of supported file formats, determine how to load a model from the given parameters.
     // If successful, return an owned reference to the newly loaded model.
     // If failed, return an empty reference.
-    hfm::Model::Pointer load(const hifi::ByteArray& data, const hifi::VariantHash& mapping, const hifi::URL& url, const std::string& webMediaType) const;
+    hfm::Model::Pointer load(const hifi::ByteArray& data, const hifi::VariantHash& mapping, const hifi::URL& url,
+                             const std::string& webMediaType) const;
 };
 
 #endif // hifi_ModelLoader_h

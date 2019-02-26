@@ -18,10 +18,11 @@
 #include "EntityServer.h"
 
 EntityTreeSendThread::EntityTreeSendThread(OctreeServer* myServer, const SharedNodePointer& node) :
-    OctreeSendThread(myServer, node)
-{
-    connect(std::static_pointer_cast<EntityTree>(myServer->getOctree()).get(), &EntityTree::editingEntityPointer, this, &EntityTreeSendThread::editingEntityPointer, Qt::QueuedConnection);
-    connect(std::static_pointer_cast<EntityTree>(myServer->getOctree()).get(), &EntityTree::deletingEntityPointer, this, &EntityTreeSendThread::deletingEntityPointer, Qt::QueuedConnection);
+    OctreeSendThread(myServer, node) {
+    connect(std::static_pointer_cast<EntityTree>(myServer->getOctree()).get(), &EntityTree::editingEntityPointer, this,
+            &EntityTreeSendThread::editingEntityPointer, Qt::QueuedConnection);
+    connect(std::static_pointer_cast<EntityTree>(myServer->getOctree()).get(), &EntityTree::deletingEntityPointer, this,
+            &EntityTreeSendThread::deletingEntityPointer, Qt::QueuedConnection);
 
     // connect to connection ID change on EntityNodeData so we can clear state for this receiver
     auto nodeData = static_cast<EntityNodeData*>(node->getLinkedData());
@@ -62,11 +63,11 @@ void EntityTreeSendThread::preDistributionProcessing() {
                 bool requiresFullScene = false;
 
                 // enumerate the set of entity IDs we know currently match the filter
-                foreach(const QUuid& entityID, nodeData->getSentFilteredEntities()) {
+                foreach (const QUuid& entityID, nodeData->getSentFilteredEntities()) {
                     if (includeAncestors) {
                         // we need to include ancestors - recurse up to reach them all and add their IDs
                         // to the set of extra entities to include for this node
-                        entityTree->withReadLock([&]{
+                        entityTree->withReadLock([&] {
                             auto filteredEntity = entityTree->findEntityByID(entityID);
                             if (filteredEntity) {
                                 requiresFullScene |= addAncestorsToExtraFlaggedEntities(entityID, *filteredEntity, *nodeData);
@@ -77,7 +78,7 @@ void EntityTreeSendThread::preDistributionProcessing() {
                     if (includeDescendants) {
                         // we need to include descendants - recurse down to reach them all and add their IDs
                         // to the set of extra entities to include for this node
-                        entityTree->withReadLock([&]{
+                        entityTree->withReadLock([&] {
                             auto filteredEntity = entityTree->findEntityByID(entityID);
                             if (filteredEntity) {
                                 requiresFullScene |= addDescendantsToExtraFlaggedEntities(entityID, *filteredEntity, *nodeData);
@@ -100,17 +101,17 @@ void EntityTreeSendThread::preDistributionProcessing() {
 }
 
 bool EntityTreeSendThread::traverseTreeAndSendContents(SharedNodePointer node, OctreeQueryNode* nodeData,
-            bool viewFrustumChanged, bool isFullScene) {
+                                                       bool viewFrustumChanged, bool isFullScene) {
     if (viewFrustumChanged || _traversal.finished()) {
         EntityTreeElementPointer root = std::dynamic_pointer_cast<EntityTreeElement>(_myServer->getOctree()->getRoot());
-
 
         DiffTraversal::View newView;
         newView.viewFrustums = nodeData->getCurrentViews();
 
-        int32_t lodLevelOffset = nodeData->getBoundaryLevelAdjust() + (viewFrustumChanged ? LOW_RES_MOVING_ADJUST : NO_BOUNDARY_ADJUST);
+        int32_t lodLevelOffset = nodeData->getBoundaryLevelAdjust() +
+                                 (viewFrustumChanged ? LOW_RES_MOVING_ADJUST : NO_BOUNDARY_ADJUST);
         newView.lodScaleFactor = powf(2.0f, lodLevelOffset);
-        
+
         startNewTraversal(newView, root, isFullScene);
 
         // When the viewFrustum changed the sort order may be incorrect, so we re-sort
@@ -146,11 +147,11 @@ bool EntityTreeSendThread::traverseTreeAndSendContents(SharedNodePointer node, O
     if (!_traversal.finished()) {
         quint64 startTime = usecTimestampNow();
 
-        #ifdef DEBUG
+#ifdef DEBUG
         const uint64_t TIME_BUDGET = 400; // usec
-        #else
+#else
         const uint64_t TIME_BUDGET = 200; // usec
-        #endif
+#endif
         _traversal.traverse(TIME_BUDGET);
         OctreeServer::trackTreeTraverseTime((float)(usecTimestampNow() - startTime));
     }
@@ -162,8 +163,8 @@ bool EntityTreeSendThread::traverseTreeAndSendContents(SharedNodePointer node, O
         nodeData->setReportInitialCompletion(false);
 
         // Send EntityQueryInitialResultsComplete reliable packet ...
-        auto initialCompletion = NLPacket::create(PacketType::EntityQueryInitialResultsComplete,
-            sizeof(OCTREE_PACKET_SEQUENCE), true);
+        auto initialCompletion = NLPacket::create(PacketType::EntityQueryInitialResultsComplete, sizeof(OCTREE_PACKET_SEQUENCE),
+                                                  true);
         initialCompletion->writePrimitive(OCTREE_PACKET_SEQUENCE(nodeData->getSequenceNumber()));
         DependencyManager::get<NodeList>()->sendPacket(std::move(initialCompletion), *node);
     }
@@ -171,8 +172,8 @@ bool EntityTreeSendThread::traverseTreeAndSendContents(SharedNodePointer node, O
     return sendComplete;
 }
 
-bool EntityTreeSendThread::addAncestorsToExtraFlaggedEntities(const QUuid& filteredEntityID,
-                                                              EntityItem& entityItem, EntityNodeData& nodeData) {
+bool EntityTreeSendThread::addAncestorsToExtraFlaggedEntities(const QUuid& filteredEntityID, EntityItem& entityItem,
+                                                              EntityNodeData& nodeData) {
     // check if this entity has a parent that is also an entity
     bool success = false;
     auto entityParent = entityItem.getParentPointer(success);
@@ -195,14 +196,13 @@ bool EntityTreeSendThread::addAncestorsToExtraFlaggedEntities(const QUuid& filte
     return false;
 }
 
-bool EntityTreeSendThread::addDescendantsToExtraFlaggedEntities(const QUuid& filteredEntityID,
-                                                                EntityItem& entityItem, EntityNodeData& nodeData) {
+bool EntityTreeSendThread::addDescendantsToExtraFlaggedEntities(const QUuid& filteredEntityID, EntityItem& entityItem,
+                                                                EntityNodeData& nodeData) {
     bool hasNewChild = false;
     bool hasNewDescendants = false;
 
     // enumerate the immediate children of this entity
     foreach (SpatiallyNestablePointer child, entityItem.getChildren()) {
-
         if (child && child->getNestableType() == NestableType::Entity) {
             // this is a child that is an entity
 
@@ -222,7 +222,6 @@ bool EntityTreeSendThread::addDescendantsToExtraFlaggedEntities(const QUuid& fil
 
 void EntityTreeSendThread::startNewTraversal(const DiffTraversal::View& view, EntityTreeElementPointer root,
                                              bool forceFirstPass) {
-
     DiffTraversal::Type type = _traversal.prepareNewTraversal(view, root, forceFirstPass);
     // there are three types of traversal:
     //
@@ -283,7 +282,7 @@ void EntityTreeSendThread::startNewTraversal(const DiffTraversal::View& view, En
             break;
         case DiffTraversal::Differential:
             assert(view.usesViewFrustums());
-            _traversal.setScanCallback([this] (DiffTraversal::VisibleElement& next) {
+            _traversal.setScanCallback([this](DiffTraversal::VisibleElement& next) {
                 next.element->forEachEntity([&](EntityItemPointer entity) {
                     // Bail early if we've already checked this entity this frame
                     if (_sendQueue.contains(entity.get())) {
@@ -312,7 +311,8 @@ void EntityTreeSendThread::startNewTraversal(const DiffTraversal::View& view, En
     }
 }
 
-bool EntityTreeSendThread::traverseTreeAndBuildNextPacketPayload(EncodeBitstreamParams& params, const QJsonObject& jsonFilters) {
+bool EntityTreeSendThread::traverseTreeAndBuildNextPacketPayload(EncodeBitstreamParams& params,
+                                                                 const QJsonObject& jsonFilters) {
     if (_sendQueue.empty()) {
         params.stopReason = EncodeBitstreamParams::FINISHED;
         OctreeServer::trackEncodeTime(OctreeServer::SKIP_TIME);
@@ -357,13 +357,13 @@ bool EntityTreeSendThread::traverseTreeAndBuildNextPacketPayload(EncodeBitstream
     nodeData->stats.encodeStarted();
     auto entityNode = _node.toStrongRef();
     auto entityNodeData = static_cast<EntityNodeData*>(entityNode->getLinkedData());
-    while(!_sendQueue.empty()) {
+    while (!_sendQueue.empty()) {
         PrioritizedEntity queuedItem = _sendQueue.top();
         EntityItemPointer entity = queuedItem.getEntity();
         if (entity) {
             const QUuid& entityID = entity->getID();
-            // Only send entities that match the jsonFilters, but keep track of everything we've tried to send so we don't try to send it again;
-            // also send if we previously matched since this represents change to a matched item.
+            // Only send entities that match the jsonFilters, but keep track of everything we've tried to send so we don't try
+            // to send it again; also send if we previously matched since this represents change to a matched item.
             bool entityMatchesFilters = entity->matchesJSONFilters(jsonFilters);
             bool entityPreviouslyMatchedFilter = entityNodeData->sentFilteredEntity(entityID);
 

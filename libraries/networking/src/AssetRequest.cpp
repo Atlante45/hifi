@@ -28,9 +28,7 @@ static int requestID = 0;
 AssetRequest::AssetRequest(const QString& hash, const ByteRange& byteRange) :
     _requestID(++requestID),
     _hash(hash),
-    _byteRange(byteRange)
-{
-    
+    _byteRange(byteRange) {
 }
 
 AssetRequest::~AssetRequest() {
@@ -59,7 +57,7 @@ void AssetRequest::start() {
         emit finished(this);
         return;
     }
-    
+
     // Try to load from cache
     _data = AssetUtils::loadFromCache(getUrl());
     if (!_data.isNull()) {
@@ -80,67 +78,70 @@ void AssetRequest::start() {
     auto hash = _hash;
 
     _assetRequestID = assetClient->getAsset(_hash, _byteRange.fromInclusive, _byteRange.toExclusive,
-        [this, that, hash](bool responseReceived, AssetUtils::AssetServerError serverError, const QByteArray& data) {
+                                            [this, that, hash](bool responseReceived, AssetUtils::AssetServerError serverError,
+                                                               const QByteArray& data) {
+                                                if (!that) {
+                                                    qCWarning(asset_client) << "Got reply for dead asset request " << hash
+                                                                            << "- error code" << _error;
+                                                    // If the request is dead, return
+                                                    return;
+                                                }
+                                                _assetRequestID = INVALID_MESSAGE_ID;
 
-        if (!that) {
-            qCWarning(asset_client) << "Got reply for dead asset request " << hash << "- error code" << _error;
-            // If the request is dead, return
-            return;
-        }
-        _assetRequestID = INVALID_MESSAGE_ID;
+                                                if (!responseReceived) {
+                                                    _error = NetworkError;
+                                                } else if (serverError != AssetUtils::AssetServerError::NoError) {
+                                                    switch (serverError) {
+                                                        case AssetUtils::AssetServerError::AssetNotFound:
+                                                            _error = NotFound;
+                                                            break;
+                                                        case AssetUtils::AssetServerError::InvalidByteRange:
+                                                            _error = InvalidByteRange;
+                                                            break;
+                                                        default:
+                                                            _error = UnknownError;
+                                                            break;
+                                                    }
+                                                } else {
+                                                    if (!_byteRange.isSet() && AssetUtils::hashData(data).toHex() != _hash) {
+                                                        // the hash of the received data does not match what we expect, so we
+                                                        // return an error
+                                                        _error = HashVerificationFailed;
+                                                    }
 
-        if (!responseReceived) {
-            _error = NetworkError;
-        } else if (serverError != AssetUtils::AssetServerError::NoError) {
-            switch (serverError) {
-                case AssetUtils::AssetServerError::AssetNotFound:
-                    _error = NotFound;
-                    break;
-                case AssetUtils::AssetServerError::InvalidByteRange:
-                    _error = InvalidByteRange;
-                    break;
-                default:
-                    _error = UnknownError;
-                    break;
-            }
-        } else {
-            if (!_byteRange.isSet() && AssetUtils::hashData(data).toHex() != _hash) {
-                // the hash of the received data does not match what we expect, so we return an error
-                _error = HashVerificationFailed;
-            }
+                                                    if (_error == NoError) {
+                                                        _data = data;
+                                                        _totalReceived += data.size();
+                                                        emit progress(_totalReceived, data.size());
 
-            if (_error == NoError) {
-                _data = data;
-                _totalReceived += data.size();
-                emit progress(_totalReceived, data.size());
+                                                        if (!_byteRange.isSet()) {
+                                                            AssetUtils::saveToCache(getUrl(), data);
+                                                        }
+                                                    }
+                                                }
 
-                if (!_byteRange.isSet()) {
-                    AssetUtils::saveToCache(getUrl(), data);
-                }
-            }
-        }
-        
-        if (_error != NoError) {
-            qCWarning(asset_client) << "Got error retrieving asset" << _hash << "- error code" << _error;
-        }
-        
-        _state = Finished;
-        emit finished(this);
-    }, [this, that](qint64 totalReceived, qint64 total) {
-        if (!that) {
-            // If the request is dead, return
-            return;
-        }
-        emit progress(totalReceived, total);
-    });
+                                                if (_error != NoError) {
+                                                    qCWarning(asset_client)
+                                                        << "Got error retrieving asset" << _hash << "- error code" << _error;
+                                                }
+
+                                                _state = Finished;
+                                                emit finished(this);
+                                            },
+                                            [this, that](qint64 totalReceived, qint64 total) {
+                                                if (!that) {
+                                                    // If the request is dead, return
+                                                    return;
+                                                }
+                                                emit progress(totalReceived, total);
+                                            });
 }
-
 
 const QString AssetRequest::getErrorString() const {
     QString result;
     if (_error != Error::NoError) {
         QVariant v;
-        v.setValue(_error); 
+        v.setValue(_error);
         result = v.toString(); // courtesy of Q_ENUM
     }
     return result;

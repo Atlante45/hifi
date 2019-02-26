@@ -20,34 +20,30 @@ static bool areFlagsSet(uint32_t flags, uint32_t mask) {
     return (flags & mask) != 0;
 }
 
-PointerEvent::PointerEvent(EventType type, uint32_t id) :
-    _type(type),
-    _id(id)
-{
+PointerEvent::PointerEvent(EventType type, uint32_t id) : _type(type), _id(id) {
 }
 
-PointerEvent::PointerEvent(EventType type, uint32_t id, const glm::vec2& pos2D, Button button, uint32_t buttons, Qt::KeyboardModifiers keyboardModifiers) :
+PointerEvent::PointerEvent(EventType type, uint32_t id, const glm::vec2& pos2D, Button button, uint32_t buttons,
+                           Qt::KeyboardModifiers keyboardModifiers) :
     _type(type),
     _id(id),
     _pos2D(pos2D),
     _button(button),
     _buttons(buttons),
-    _keyboardModifiers(keyboardModifiers)
-{
+    _keyboardModifiers(keyboardModifiers) {
 }
 
-PointerEvent::PointerEvent(const glm::vec2& pos2D, const glm::vec3& pos3D, const glm::vec3& normal, const glm::vec3& direction) :
+PointerEvent::PointerEvent(const glm::vec2& pos2D, const glm::vec3& pos3D, const glm::vec3& normal,
+                           const glm::vec3& direction) :
     _pos2D(pos2D),
     _pos3D(pos3D),
     _normal(normal),
-    _direction(direction)
-{
+    _direction(direction) {
 }
 
-PointerEvent::PointerEvent(EventType type, uint32_t id,
-                           const glm::vec2& pos2D, const glm::vec3& pos3D,
-                           const glm::vec3& normal, const glm::vec3& direction,
-                           Button button, uint32_t buttons, Qt::KeyboardModifiers keyboardModifiers) :
+PointerEvent::PointerEvent(EventType type, uint32_t id, const glm::vec2& pos2D, const glm::vec3& pos3D, const glm::vec3& normal,
+                           const glm::vec3& direction, Button button, uint32_t buttons,
+                           Qt::KeyboardModifiers keyboardModifiers) :
     _type(type),
     _id(id),
     _pos2D(pos2D),
@@ -56,8 +52,7 @@ PointerEvent::PointerEvent(EventType type, uint32_t id,
     _direction(direction),
     _button(button),
     _buttons(buttons),
-    _keyboardModifiers(keyboardModifiers)
-{
+    _keyboardModifiers(keyboardModifiers) {
 }
 
 void PointerEvent::setButton(Button button) {
@@ -78,7 +73,7 @@ void PointerEvent::setButton(Button button) {
  * @property {Vec3} direction - The direction of the intersection ray.
  * @property {string} button - The name of the button pressed: <code>None</code>, <code>Primary</code>, <code>Secondary</code>,
  *    or <code>Tertiary</code>.
- * @property {boolean} isPrimaryButton - <code>true</code> if the button pressed was the primary button, otherwise 
+ * @property {boolean} isPrimaryButton - <code>true</code> if the button pressed was the primary button, otherwise
  *     <code>undefined</code>;
  * @property {boolean} isLeftButton - <code>true</code> if the button pressed was the primary button, otherwise
  *     <code>undefined</code>;
@@ -100,7 +95,7 @@ void PointerEvent::setButton(Button button) {
  *     pressed when the event was generated.
  */
 /**jsdoc
- * <p>A KeyboardModifiers value is used to specify which modifier keys on the keyboard are pressed. The value is the sum 
+ * <p>A KeyboardModifiers value is used to specify which modifier keys on the keyboard are pressed. The value is the sum
  * (bitwise OR) of the relevant combination of values from the following table:</p>
  * <table>
  *   <thead>
@@ -110,12 +105,12 @@ void PointerEvent::setButton(Button button) {
  *     <tr><td>Shift</td><td><code>0x02000000</code></td><td><code>33554432</code></td>
  *         <td>A Shift key on the keyboard is pressed.</td></tr>
  *     <tr><td>Control</td><td><code>0x04000000</code></td><td><code>67108864</code></td>
- *         <td>A control key on the keyboard is pressed. On Windows the "control" key is the Ctrl key; on OSX it is the Command 
+ *         <td>A control key on the keyboard is pressed. On Windows the "control" key is the Ctrl key; on OSX it is the Command
  *         key.</td></tr>
  *     <tr><td>Alt</td><td><code>0x08000000</code></td><td><code>134217728</code></td>
  *         <td>An Alt key on the keyboard is pressed.</td></tr>
  *     <tr><td>Meta</td><td><code>0x10000000</code></td><td><code>268435456</code></td>
- *         <td>A meta key on the keyboard is pressed. On Windows the "meta" key is the Windows key; on OSX it is the Control 
+ *         <td>A meta key on the keyboard is pressed. On Windows the "meta" key is the Windows key; on OSX it is the Control
  *         (Splat) key.</td></tr>
  *     <tr><td>Keypad</td><td><code>0x20000000</code></td><td><code>536870912</code></td>
  *         <td>A keypad button is pressed.</td></tr>
@@ -129,19 +124,19 @@ QScriptValue PointerEvent::toScriptValue(QScriptEngine* engine, const PointerEve
     QScriptValue obj = engine->newObject();
 
     switch (event._type) {
-    case Press:
-        obj.setProperty("type", "Press");
-        break;
-    case DoublePress:
-        obj.setProperty("type", "DoublePress");
-        break;
-    case Release:
-        obj.setProperty("type", "Release");
-        break;
-    default:
-    case Move:
-        obj.setProperty("type", "Move");
-        break;
+        case Press:
+            obj.setProperty("type", "Press");
+            break;
+        case DoublePress:
+            obj.setProperty("type", "DoublePress");
+            break;
+        case Release:
+            obj.setProperty("type", "Release");
+            break;
+        default:
+        case Move:
+            obj.setProperty("type", "Move");
+            break;
     };
 
     obj.setProperty("id", event._id);
@@ -173,21 +168,21 @@ QScriptValue PointerEvent::toScriptValue(QScriptEngine* engine, const PointerEve
     bool isSecondaryButton = false;
     bool isTertiaryButton = false;
     switch (event._button) {
-    case NoButtons:
-        obj.setProperty("button", "None");
-        break;
-    case PrimaryButton:
-        obj.setProperty("button", "Primary");
-        isPrimaryButton = true;
-        break;
-    case SecondaryButton:
-        obj.setProperty("button", "Secondary");
-        isSecondaryButton = true;
-        break;
-    case TertiaryButton:
-        obj.setProperty("button", "Tertiary");
-        isTertiaryButton = true;
-        break;
+        case NoButtons:
+            obj.setProperty("button", "None");
+            break;
+        case PrimaryButton:
+            obj.setProperty("button", "Primary");
+            isPrimaryButton = true;
+            break;
+        case SecondaryButton:
+            obj.setProperty("button", "Secondary");
+            isSecondaryButton = true;
+            break;
+        case TertiaryButton:
+            obj.setProperty("button", "Tertiary");
+            isTertiaryButton = true;
+            break;
     }
 
     if (isPrimaryButton) {

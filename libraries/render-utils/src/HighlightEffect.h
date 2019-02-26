@@ -16,8 +16,8 @@
 #include <render/HighlightStage.h>
 #include <render/RenderFetchCullSortTask.h>
 
-#include "DeferredFramebuffer.h"
 #include "DeferredFrameTransform.h"
+#include "DeferredFramebuffer.h"
 
 class HighlightResources {
 public:
@@ -33,7 +33,6 @@ public:
     const glm::ivec2& getSourceFrameSize() const { return _frameSize; }
 
 protected:
-
     gpu::FramebufferPointer _depthFrameBuffer;
     gpu::FramebufferPointer _colorFrameBuffer;
     gpu::TexturePointer _depthStencilTexture;
@@ -48,10 +47,7 @@ using HighlightResourcesPointer = std::shared_ptr<HighlightResources>;
 
 class HighlightSharedParameters {
 public:
-
-    enum {
-        MAX_PASS_COUNT = 8
-    };
+    enum { MAX_PASS_COUNT = 8 };
 
     HighlightSharedParameters();
 
@@ -73,41 +69,34 @@ public:
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs);
 
 private:
-
     HighlightResourcesPointer _resources;
-
 };
 
 class SelectionToHighlight {
 public:
-
     using Outputs = std::vector<std::string>;
     using JobModel = render::Job::ModelO<SelectionToHighlight, Outputs>;
 
-    SelectionToHighlight(HighlightSharedParametersPointer parameters) : _sharedParameters{ parameters } {}
+    SelectionToHighlight(HighlightSharedParametersPointer parameters) : _sharedParameters { parameters } {}
 
     void run(const render::RenderContextPointer& renderContext, Outputs& outputs);
 
 private:
-
     HighlightSharedParametersPointer _sharedParameters;
 };
 
 class ExtractSelectionName {
 public:
-
     using Inputs = SelectionToHighlight::Outputs;
     using Outputs = std::string;
     using JobModel = render::Job::ModelIO<ExtractSelectionName, Inputs, Outputs>;
 
-    ExtractSelectionName(unsigned int highlightIndex) : _highlightPassIndex{ highlightIndex } {}
+    ExtractSelectionName(unsigned int highlightIndex) : _highlightPassIndex { highlightIndex } {}
 
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs);
 
 private:
-
     unsigned int _highlightPassIndex;
-
 };
 
 class DrawHighlightMask {
@@ -116,7 +105,8 @@ public:
     using Outputs = glm::ivec4;
     using JobModel = render::Job::ModelIO<DrawHighlightMask, Inputs, Outputs>;
 
-    DrawHighlightMask(unsigned int highlightIndex, render::ShapePlumberPointer shapePlumber, HighlightSharedParametersPointer parameters);
+    DrawHighlightMask(unsigned int highlightIndex, render::ShapePlumberPointer shapePlumber,
+                      HighlightSharedParametersPointer parameters);
 
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs);
 
@@ -133,8 +123,8 @@ protected:
 
 class DrawHighlight {
 public:
-
-    using Inputs = render::VaryingSet5<DeferredFrameTransformPointer, HighlightResourcesPointer, DeferredFramebufferPointer, glm::ivec4, gpu::FramebufferPointer>;
+    using Inputs = render::VaryingSet5<DeferredFrameTransformPointer, HighlightResourcesPointer, DeferredFramebufferPointer,
+                                       glm::ivec4, gpu::FramebufferPointer>;
     using Config = render::Job::Config;
     using JobModel = render::Job::ModelI<DrawHighlight, Inputs, Config>;
 
@@ -143,7 +133,6 @@ public:
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs);
 
 private:
-
 #include "Highlight_shared.slh"
 
     using HighlightConfigurationBuffer = gpu::StructBuffer<HighlightParameters>;
@@ -183,10 +172,9 @@ public:
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs);
 
 private:
-
     gpu::PipelinePointer _depthPipeline;
-    int _geometryDepthId{ 0 };
-    bool _isDisplayEnabled{ false };
+    int _geometryDepthId { 0 };
+    bool _isDisplayEnabled { false };
 
     const gpu::PipelinePointer& getDepthPipeline();
     void initializePipelines();
@@ -194,8 +182,8 @@ private:
 
 class DrawHighlightTask {
 public:
-
-    using Inputs = render::VaryingSet5<RenderFetchCullSortTask::BucketList, DeferredFramebufferPointer, gpu::FramebufferPointer, DeferredFrameTransformPointer, glm::vec2>;
+    using Inputs = render::VaryingSet5<RenderFetchCullSortTask::BucketList, DeferredFramebufferPointer, gpu::FramebufferPointer,
+                                       DeferredFrameTransformPointer, glm::vec2>;
     using Config = render::Task::Config;
     using JobModel = render::Task::ModelI<DrawHighlightTask, Inputs, Config>;
 
@@ -205,10 +193,8 @@ public:
     void build(JobModel& task, const render::Varying& inputs, render::Varying& outputs);
 
 private:
-    static const render::Varying addSelectItemJobs(JobModel& task, const render::Varying& selectionName, const RenderFetchCullSortTask::BucketList& items);
-
+    static const render::Varying addSelectItemJobs(JobModel& task, const render::Varying& selectionName,
+                                                   const RenderFetchCullSortTask::BucketList& items);
 };
 
 #endif // hifi_render_utils_HighlightEffect_h
-
-

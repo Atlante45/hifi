@@ -11,11 +11,11 @@
 #include <vector>
 
 #include <GLMHelpers.h>
-#include <Transform.h>
 #include <NumericalConstants.h>
+#include <Transform.h>
 
-#include <gpu/Resource.h>
 #include <gpu/Forward.h>
+#include <gpu/Resource.h>
 #include <gpu/Shader.h>
 #include <gpu/Stream.h>
 
@@ -31,7 +31,7 @@ public:
     virtual bool isReady() const { return true; }
     virtual size_t getTestCount() const { return 1; }
     virtual void renderTest(size_t test, const RenderArgs& args) = 0;
-    virtual QObject * statsObject() { return nullptr; }
+    virtual QObject* statsObject() { return nullptr; }
     virtual QUrl statUrl() { return QUrl(); }
 };
 

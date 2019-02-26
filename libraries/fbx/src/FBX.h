@@ -37,7 +37,6 @@ static const int32_t FBX_PROPERTY_COMPRESSED_FLAG = 1;
 class FBXNode;
 using FBXNodeList = QList<FBXNode>;
 
-
 /// A node within an FBX document.
 class FBXNode {
 public:

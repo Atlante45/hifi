@@ -13,9 +13,9 @@
 
 #include <QtScript/QScriptEngine>
 
-#include "PropertyGroup.h"
-#include "EntityItemPropertiesMacros.h"
 #include "EntityItemPropertiesDefaults.h"
+#include "EntityItemPropertiesMacros.h"
+#include "PropertyGroup.h"
 
 class EntityItemProperties;
 class EncodeBitstreamParams;
@@ -44,9 +44,11 @@ using u8vec3Color = glm::u8vec3;
  * @property {boolean} hasTickMarks=false - Whether or not to render tick marks.
  * @property {number} majorTickMarksAngle - The angle between major tick marks, in degrees.
  * @property {number} minorTickMarksAngle - The angle between minor tick marks, in degrees.
- * @property {number} majorTickMarksLength - The length of the major tick marks, as a fraction of the radius. A positive value draws tick marks
+ * @property {number} majorTickMarksLength - The length of the major tick marks, as a fraction of the radius. A positive value
+ draws tick marks
  *     outwards from the inner radius; a negative value draws tick marks inwards from the outer radius.
- * @property {number} minorTickMarksLength - The length of the minor tick marks, as a fraction of the radius. A positive value draws tick marks
+ * @property {number} minorTickMarksLength - The length of the minor tick marks, as a fraction of the radius. A positive value
+ draws tick marks
  *     outwards from the inner radius; a negative value draws tick marks inwards from the outer radius.
  * @property {Color} majorTickMarksColor - The color of the major tick marks.
  * @property {Color} minorTickMarksColor - The color of the minor tick marks.
@@ -65,15 +67,12 @@ public:
     virtual void debugDump() const override;
     virtual void listChangedProperties(QList<QString>& out) override;
 
-    virtual bool appendToEditPacket(OctreePacketData* packetData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
-                                    OctreeElement::AppendState& appendState) const override;
+    virtual bool appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+                                    EntityPropertyFlags& propertyFlags, EntityPropertyFlags& propertiesDidntFit,
+                                    int& propertyCount, OctreeElement::AppendState& appendState) const override;
 
-    virtual bool decodeFromEditPacket(EntityPropertyFlags& propertyFlags,
-                                      const unsigned char*& dataAt, int& processedBytes) override;
+    virtual bool decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt,
+                                      int& processedBytes) override;
     virtual void markAllChanged() override;
     virtual EntityPropertyFlags getChangedProperties() const override;
 
@@ -88,16 +87,13 @@ public:
 
     virtual void appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                     EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
+                                    EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                    EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                                     OctreeElement::AppendState& appendState) const override;
 
     virtual int readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) override;
+                                                 ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                 bool overwriteLocalData, bool& somethingChanged) override;
 
     bool operator==(const RingGizmoPropertyGroup& a) const;
     bool operator!=(const RingGizmoPropertyGroup& a) const { return !(*this == a); }
@@ -128,8 +124,10 @@ public:
     DEFINE_PROPERTY(PROP_MINOR_TICK_MARKS_ANGLE, MinorTickMarksAngle, minorTickMarksAngle, float, 0.0f);
     DEFINE_PROPERTY(PROP_MAJOR_TICK_MARKS_LENGTH, MajorTickMarksLength, majorTickMarksLength, float, 0.0f);
     DEFINE_PROPERTY(PROP_MINOR_TICK_MARKS_LENGTH, MinorTickMarksLength, minorTickMarksLength, float, 0.0f);
-    DEFINE_PROPERTY_REF(PROP_MAJOR_TICK_MARKS_COLOR, MajorTickMarksColor, majorTickMarksColor, u8vec3Color, ENTITY_ITEM_DEFAULT_COLOR);
-    DEFINE_PROPERTY_REF(PROP_MINOR_TICK_MARKS_COLOR, MinorTickMarksColor, minorTickMarksColor, u8vec3Color, ENTITY_ITEM_DEFAULT_COLOR);
+    DEFINE_PROPERTY_REF(PROP_MAJOR_TICK_MARKS_COLOR, MajorTickMarksColor, majorTickMarksColor, u8vec3Color,
+                        ENTITY_ITEM_DEFAULT_COLOR);
+    DEFINE_PROPERTY_REF(PROP_MINOR_TICK_MARKS_COLOR, MinorTickMarksColor, minorTickMarksColor, u8vec3Color,
+                        ENTITY_ITEM_DEFAULT_COLOR);
 };
 
 #endif // hifi_RingGizmoPropertyGroup_h

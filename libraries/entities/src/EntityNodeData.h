@@ -17,11 +17,11 @@
 #include <OctreeQueryNode.h>
 
 namespace EntityJSONQueryProperties {
-    static const QString SERVER_SCRIPTS_PROPERTY = "serverScripts";
-    static const QString FLAGS_PROPERTY = "flags";
-    static const QString INCLUDE_ANCESTORS_PROPERTY = "includeAncestors";
-    static const QString INCLUDE_DESCENDANTS_PROPERTY = "includeDescendants";
-}
+static const QString SERVER_SCRIPTS_PROPERTY = "serverScripts";
+static const QString FLAGS_PROPERTY = "flags";
+static const QString INCLUDE_ANCESTORS_PROPERTY = "includeAncestors";
+static const QString INCLUDE_DESCENDANTS_PROPERTY = "includeDescendants";
+} // namespace EntityJSONQueryProperties
 
 class EntityNodeData : public OctreeQueryNode {
 public:
@@ -29,7 +29,7 @@ public:
 
     quint64 getLastDeletedEntitiesSentAt() const { return _lastDeletedEntitiesSentAt; }
     void setLastDeletedEntitiesSentAt(quint64 sentAt) { _lastDeletedEntitiesSentAt = sentAt; }
-    
+
     // these can only be called from the OctreeSendThread for the given Node
     void insertSentFilteredEntity(const QUuid& entityID) { _sentFilteredEntities.insert(entityID); }
     void removeSentFilteredEntity(const QUuid& entityID) { _sentFilteredEntities.remove(entityID); }
@@ -40,9 +40,12 @@ public:
 
     // inserts the extra entity and returns a boolean indicating wether the extraEntityID was a new addition
     bool insertFlaggedExtraEntity(const QUuid& filteredEntityID, const QUuid& extraEntityID);
-    
+
     bool isEntityFlaggedAsExtra(const QUuid& entityID) const;
-    void resetFlaggedExtraEntities() { _previousFlaggedExtraEntities = _flaggedExtraEntities; _flaggedExtraEntities.clear(); }
+    void resetFlaggedExtraEntities() {
+        _previousFlaggedExtraEntities = _flaggedExtraEntities;
+        _flaggedExtraEntities.clear();
+    }
 
 private:
     quint64 _lastDeletedEntitiesSentAt { usecTimestampNow() };

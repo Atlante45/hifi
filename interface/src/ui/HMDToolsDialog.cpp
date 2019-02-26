@@ -17,33 +17,31 @@
 #include <QGuiApplication>
 #include <QLabel>
 #include <QPushButton>
-#include <QString>
 #include <QScreen>
+#include <QString>
 #include <QWindow>
 
-#include <plugins/PluginManager.h>
 #include <display-plugins/DisplayPlugin.h>
+#include <plugins/PluginManager.h>
 
 #include "Application.h"
+#include "DialogsManager.h"
 #include "MainWindow.h"
 #include "Menu.h"
-#include "DialogsManager.h"
 
 static const int WIDTH = 350;
 static const int HEIGHT = 100;
 
-
 HMDToolsDialog::HMDToolsDialog(QWidget* parent) :
-    QDialog(parent, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint)
-{
+    QDialog(parent, Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint) {
     // FIXME do we want to support more than one connected HMD?  It seems like a pretty corner case
-    foreach(auto displayPlugin, PluginManager::getInstance()->getDisplayPlugins()) {
+    foreach (auto displayPlugin, PluginManager::getInstance()->getDisplayPlugins()) {
         // The first plugin is always the standard 2D display, by convention
         if (_defaultPluginName.isEmpty()) {
             _defaultPluginName = displayPlugin->getName();
             continue;
         }
-        
+
         if (displayPlugin->isHmd()) {
             // Not all HMD's have corresponding screens
             if (displayPlugin->getHmdScreen() >= 0) {
@@ -87,37 +85,29 @@ HMDToolsDialog::HMDToolsDialog(QWidget* parent) :
         watchWindow(dialogsManager->getLodToolsDialog()->windowHandle());
     }
 
-    connect(_switchModeButton, &QPushButton::clicked, [this]{
-        toggleHMDMode();
-    });
-    
+    connect(_switchModeButton, &QPushButton::clicked, [this] { toggleHMDMode(); });
+
     // when the application is about to quit, leave HDM mode
-    connect(qApp, &Application::beforeAboutToQuit, [this]{
+    connect(qApp, &Application::beforeAboutToQuit, [this] {
         // FIXME this is ineffective because it doesn't trigger the menu to
         // save the fact that VR Mode is not checked.
         leaveHMDMode();
     });
 
-    connect(qApp, &Application::activeDisplayPluginChanged, [this]{
-        updateUi();
-    });
+    connect(qApp, &Application::activeDisplayPluginChanged, [this] { updateUi(); });
 
     // watch for our application window moving screens. If it does we want to update our screen details
     QWindow* mainWindow = qApp->getWindow()->windowHandle();
-    connect(mainWindow, &QWindow::screenChanged, [this]{
-        updateUi();
-    });
+    connect(mainWindow, &QWindow::screenChanged, [this] { updateUi(); });
 
     // keep track of changes to the number of screens
     connect(QApplication::desktop(), &QDesktopWidget::screenCountChanged, this, &HMDToolsDialog::screenCountChanged);
-    
+
     updateUi();
 }
 
 HMDToolsDialog::~HMDToolsDialog() {
-    foreach(HMDWindowWatcher* watcher, _windowWatchers) {
-        delete watcher;
-    }
+    foreach (HMDWindowWatcher* watcher, _windowWatchers) { delete watcher; }
     _windowWatchers.clear();
 }
 
@@ -199,7 +189,7 @@ void HMDToolsDialog::hideEvent(QHideEvent* event) {
 void HMDToolsDialog::screenCountChanged(int newCount) {
     int hmdScreenNumber = -1;
     auto displayPlugins = PluginManager::getInstance()->getDisplayPlugins();
-    foreach(auto dp, displayPlugins) {
+    foreach (auto dp, displayPlugins) {
         if (dp->isHmd()) {
             if (dp->getHmdScreen() >= 0) {
                 hmdScreenNumber = dp->getHmdScreen();
@@ -211,14 +201,12 @@ void HMDToolsDialog::screenCountChanged(int newCount) {
     if (qApp->isHMDMode() && _hmdScreenNumber != hmdScreenNumber) {
         qDebug() << "HMD Display changed WHILE IN HMD MODE";
         leaveHMDMode();
-        
+
         // if there is a new best HDM screen then go back into HDM mode after done leaving
         if (hmdScreenNumber >= 0) {
             qDebug() << "Trying to go back into HMD Mode";
             const int SLIGHT_DELAY = 2000;
-            QTimer::singleShot(SLIGHT_DELAY, [this]{
-                enterHMDMode();
-            });
+            QTimer::singleShot(SLIGHT_DELAY, [this] { enterHMDMode(); });
         }
     }
 }
@@ -231,12 +219,10 @@ void HMDToolsDialog::watchWindow(QWindow* window) {
     }
 }
 
-
 HMDWindowWatcher::HMDWindowWatcher(QWindow* window, HMDToolsDialog* hmdTools) :
     _window(window),
     _hmdTools(hmdTools),
-    _previousScreen(NULL)
-{
+    _previousScreen(NULL) {
     connect(window, &QWindow::screenChanged, this, &HMDWindowWatcher::windowScreenChanged);
     connect(window, &QWindow::xChanged, this, &HMDWindowWatcher::windowGeometryChanged);
     connect(window, &QWindow::yChanged, this, &HMDWindowWatcher::windowGeometryChanged);
@@ -247,14 +233,13 @@ HMDWindowWatcher::HMDWindowWatcher(QWindow* window, HMDToolsDialog* hmdTools) :
 HMDWindowWatcher::~HMDWindowWatcher() {
 }
 
-
 void HMDWindowWatcher::windowGeometryChanged(int arg) {
     _previousRect = _window->geometry();
     _previousScreen = _window->screen();
 }
 
 void HMDWindowWatcher::windowScreenChanged(QScreen* screen) {
-    // if we have more than one screen, and a known hmdScreen then try to 
+    // if we have more than one screen, and a known hmdScreen then try to
     // keep our dialog off of the hmdScreen
     if (QApplication::desktop()->screenCount() > 1) {
         int hmdScreenNumber = _hmdTools->_hmdScreenNumber;
@@ -263,10 +248,10 @@ void HMDWindowWatcher::windowScreenChanged(QScreen* screen) {
             QScreen* hmdScreen = QGuiApplication::screens()[hmdScreenNumber];
             if (screen == hmdScreen) {
                 qDebug() << "HMD Tools: Whoa! What are you doing? You don't want to move me to the HMD Screen!";
-        
+
                 // try to pick a better screen
                 QScreen* betterScreen = NULL;
-        
+
                 QScreen* lastApplicationScreen = _hmdTools->getLastApplicationScreen();
                 QWindow* appWindow = qApp->getWindow()->windowHandle();
                 QScreen* appScreen = appWindow->screen();
@@ -296,5 +281,3 @@ void HMDWindowWatcher::windowScreenChanged(QScreen* screen) {
         }
     }
 }
-
-

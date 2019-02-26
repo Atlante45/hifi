@@ -11,10 +11,11 @@
 QString const RectangleOverlay::TYPE = "rectangle";
 QUrl const RectangleOverlay::URL(QString("hifi/overlays/RectangleOverlay.qml"));
 
-RectangleOverlay::RectangleOverlay() : QmlOverlay(URL) {}
+RectangleOverlay::RectangleOverlay() : QmlOverlay(URL) {
+}
 
-RectangleOverlay::RectangleOverlay(const RectangleOverlay* rectangleOverlay) 
-    : QmlOverlay(URL, rectangleOverlay) { }
+RectangleOverlay::RectangleOverlay(const RectangleOverlay* rectangleOverlay) : QmlOverlay(URL, rectangleOverlay) {
+}
 
 RectangleOverlay* RectangleOverlay::createClone() const {
     return new RectangleOverlay(this);

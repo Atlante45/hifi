@@ -11,17 +11,15 @@
 
 #include "ICEClientApp.h"
 
+#include <QCommandLineParser>
 #include <QDataStream>
 #include <QLoggingCategory>
-#include <QCommandLineParser>
 
-#include <PathUtils.h>
 #include <LimitedNodeList.h>
 #include <NetworkLogging.h>
+#include <PathUtils.h>
 
-ICEClientApp::ICEClientApp(int argc, char* argv[]) :
-    QCoreApplication(argc, argv)
-{
+ICEClientApp::ICEClientApp(int argc, char* argv[]) : QCoreApplication(argc, argv) {
     // parse command-line
     QCommandLineParser parser;
     parser.setApplicationDescription("High Fidelity ICE client");
@@ -85,14 +83,14 @@ ICEClientApp::ICEClientApp(int argc, char* argv[]) :
         QString hostnamePortString = parser.value(iceServerAddressOption);
 
         QHostAddress address { hostnamePortString.left(hostnamePortString.indexOf(':')) };
-        quint16 port { (quint16) hostnamePortString.mid(hostnamePortString.indexOf(':') + 1).toUInt() };
+        quint16 port { (quint16)hostnamePortString.mid(hostnamePortString.indexOf(':') + 1).toUInt() };
         if (port == 0) {
             port = ICE_SERVER_DEFAULT_PORT;
         }
 
         if (address.isNull()) {
-            qCritical() << "Could not parse an IP address and port combination from" << hostnamePortString << "-" <<
-                "The parsed IP was" << address.toString() << "and the parsed port was" << port;
+            qCritical() << "Could not parse an IP address and port combination from" << hostnamePortString << "-"
+                        << "The parsed IP was" << address.toString() << "and the parsed port was" << port;
 
             QMetaObject::invokeMethod(this, "quit", Qt::QueuedConnection);
         } else {
@@ -135,9 +133,7 @@ void ICEClientApp::openSocket() {
     _socket->bind(QHostAddress::AnyIPv4, localPort);
     _socket->setPacketHandler([this](std::unique_ptr<udt::Packet> packet) { processPacket(std::move(packet)); });
     _socket->addUnfilteredHandler(_stunSockAddr,
-                                  [this](std::unique_ptr<udt::BasePacket> packet) {
-                                      processSTUNResponse(std::move(packet));
-                                  });
+                                  [this](std::unique_ptr<udt::BasePacket> packet) { processSTUNResponse(std::move(packet)); });
 
     if (_verbose) {
         qDebug() << "local port is" << _socket->localPort();
@@ -238,8 +234,8 @@ void ICEClientApp::stunResponseTimeout() {
     QCoreApplication::exit(stunFailureExitStatus);
 }
 
-void ICEClientApp::sendPacketToIceServer(PacketType packetType, const HifiSockAddr& iceServerSockAddr,
-                                         const QUuid& clientID, const QUuid& peerID) {
+void ICEClientApp::sendPacketToIceServer(PacketType packetType, const HifiSockAddr& iceServerSockAddr, const QUuid& clientID,
+                                         const QUuid& peerID) {
     std::unique_ptr<NLPacket> icePacket = NLPacket::create(packetType);
 
     QDataStream iceDataStream(icePacket.get());
@@ -314,7 +310,6 @@ void ICEClientApp::processSTUNResponse(std::unique_ptr<udt::BasePacket> packet) 
     }
 }
 
-
 void ICEClientApp::processPacket(std::unique_ptr<udt::Packet> packet) {
     std::unique_ptr<NLPacket> nlPacket = NLPacket::fromBase(std::move(packet));
 
@@ -365,9 +360,7 @@ void ICEClientApp::processPacket(std::unique_ptr<udt::Packet> packet) {
             qDebug() << "got packet: " << nlPacket->getType();
         }
         if (_domainServerPeerSet && _state == waitForIceReply &&
-            (senderAddr == _domainServerPeer.getLocalSocket() ||
-             senderAddr == _domainServerPeer.getPublicSocket())) {
-
+            (senderAddr == _domainServerPeer.getLocalSocket() || senderAddr == _domainServerPeer.getPublicSocket())) {
             delete _pingDomainTimer;
             _pingDomainTimer = nullptr;
 

@@ -14,8 +14,7 @@
 using namespace render;
 using namespace render::entities;
 
-GizmoEntityRenderer::GizmoEntityRenderer(const EntityItemPointer& entity) : Parent(entity)
-{
+GizmoEntityRenderer::GizmoEntityRenderer(const EntityItemPointer& entity) : Parent(entity) {
 }
 
 GizmoEntityRenderer::~GizmoEntityRenderer() {
@@ -34,9 +33,9 @@ GizmoEntityRenderer::~GizmoEntityRenderer() {
 }
 
 bool GizmoEntityRenderer::isTransparent() const {
-    bool ringTransparent = _gizmoType == GizmoType::RING && (_ringProperties.getInnerStartAlpha() < 1.0f ||
-        _ringProperties.getInnerEndAlpha() < 1.0f || _ringProperties.getOuterStartAlpha() < 1.0f ||
-        _ringProperties.getOuterEndAlpha() < 1.0f);
+    bool ringTransparent = _gizmoType == GizmoType::RING &&
+                           (_ringProperties.getInnerStartAlpha() < 1.0f || _ringProperties.getInnerEndAlpha() < 1.0f ||
+                            _ringProperties.getOuterStartAlpha() < 1.0f || _ringProperties.getOuterEndAlpha() < 1.0f);
 
     return Parent::isTransparent() || ringTransparent;
 }
@@ -65,7 +64,6 @@ void GizmoEntityRenderer::doRenderUpdateAsynchronousTyped(const TypedEntityPoint
         if (_ringProperties != ringProperties) {
             _ringProperties = ringProperties;
             dirty = true;
-
         }
     });
 
@@ -80,7 +78,6 @@ void GizmoEntityRenderer::doRenderUpdateAsynchronousTyped(const TypedEntityPoint
         const float SLICES = 180.0f;
         const float SLICE_ANGLE_RADIANS = glm::radians(FULL_CIRCLE / SLICES);
         if (_primitiveMode == PrimitiveMode::SOLID) {
-
             QVector<glm::vec3> points;
             QVector<glm::vec4> colors;
 
@@ -108,13 +105,15 @@ void GizmoEntityRenderer::doRenderUpdateAsynchronousTyped(const TypedEntityPoint
                 for (float angleRadians = startAtRadians; angleRadians < endAtRadians; angleRadians += SLICE_ANGLE_RADIANS) {
                     float range = (angleRadians - startAtRadians) / totalRange;
 
-                    points << 0.5f * glm::vec3(cosf(angleRadians) * ringProperties.getInnerRadius(), 0.0f, sinf(angleRadians) * ringProperties.getInnerRadius());
+                    points << 0.5f * glm::vec3(cosf(angleRadians) * ringProperties.getInnerRadius(), 0.0f,
+                                               sinf(angleRadians) * ringProperties.getInnerRadius());
                     colors << glm::mix(innerStartColor, innerEndColor, range);
 
                     points << 0.5f * glm::vec3(cosf(angleRadians), 0.0f, sinf(angleRadians));
                     colors << glm::mix(outerStartColor, outerEndColor, range);
                 }
-                points << 0.5f * glm::vec3(cosf(endAtRadians) * ringProperties.getInnerRadius(), 0.0f, sinf(endAtRadians) * ringProperties.getInnerRadius());
+                points << 0.5f * glm::vec3(cosf(endAtRadians) * ringProperties.getInnerRadius(), 0.0f,
+                                           sinf(endAtRadians) * ringProperties.getInnerRadius());
                 colors << innerEndColor;
 
                 points << 0.5f * glm::vec3(cosf(endAtRadians), 0.0f, sinf(endAtRadians));
@@ -142,7 +141,9 @@ void GizmoEntityRenderer::doRenderUpdateAsynchronousTyped(const TypedEntityPoint
             angleRadians = endAtRadians;
             glm::vec3 lastPoint = 0.5f * glm::vec3(cosf(angleRadians), 0.0f, sinf(angleRadians));
             points << lastPoint;
-            geometryCache->updateVertices(_ringGeometryID, points, glm::vec4(toGlm(ringProperties.getOuterStartColor()), ringProperties.getOuterStartAlpha()));
+            geometryCache->updateVertices(_ringGeometryID, points,
+                                          glm::vec4(toGlm(ringProperties.getOuterStartColor()),
+                                                    ringProperties.getOuterStartAlpha()));
         }
 
         if (ringProperties.getHasTickMarks()) {
@@ -269,7 +270,8 @@ void GizmoEntityRenderer::doRender(RenderArgs* args) {
         });
 
         bool wireframe = render::ShapeKey(args->_globalShapeKey).isWireframe() || _primitiveMode == PrimitiveMode::LINES;
-        geometryCache->bindSimpleProgram(batch, false, isTransparent(), false, wireframe, true, true, _renderLayer != RenderLayer::WORLD);
+        geometryCache->bindSimpleProgram(batch, false, isTransparent(), false, wireframe, true, true,
+                                         _renderLayer != RenderLayer::WORLD);
 
         batch.setModelTransform(transform);
 

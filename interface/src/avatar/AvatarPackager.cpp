@@ -18,8 +18,8 @@
 #include <QUrl>
 
 #include <OffscreenUi.h>
-#include "ModelSelector.h"
 #include <avatar/MarketplaceItemUploader.h>
+#include "ModelSelector.h"
 
 #include <mutex>
 #include "ui/TabletScriptingInterface.h"
@@ -33,13 +33,8 @@ AvatarPackager::AvatarPackager() {
         qRegisterMetaType<AvatarProject*>();
         qRegisterMetaType<AvatarDoctor*>();
         qRegisterMetaType<AvatarProjectStatus::AvatarProjectStatus>();
-        qmlRegisterUncreatableMetaObject(
-            AvatarProjectStatus::staticMetaObject,
-            "Hifi.AvatarPackager.AvatarProjectStatus",
-            1, 0,
-            "AvatarProjectStatus",
-            "Error: only enums"
-        );
+        qmlRegisterUncreatableMetaObject(AvatarProjectStatus::staticMetaObject, "Hifi.AvatarPackager.AvatarProjectStatus", 1, 0,
+                                         "AvatarProjectStatus", "Error: only enums");
     });
 
     recentProjectsFromVariantList(_recentProjectsSetting.get());
@@ -57,12 +52,12 @@ bool AvatarPackager::open() {
     auto tablet = dynamic_cast<TabletProxy*>(DependencyManager::get<TabletScriptingInterface>()->getTablet(SYSTEM_TABLET));
 
     if (tablet->getToolbarMode()) {
-        static const QUrl url{ "hifi/AvatarPackagerWindow.qml" };
+        static const QUrl url { "hifi/AvatarPackagerWindow.qml" };
         DependencyManager::get<OffscreenUi>()->show(url, "AvatarPackager", packageModelDialogCreated);
         return true;
     }
 
-    static const QUrl url{ "hifi/tablet/AvatarPackager.qml" };
+    static const QUrl url { "hifi/tablet/AvatarPackager.qml" };
     if (!tablet->isPathLoaded(url)) {
         tablet->getTabletSurface()->getSurfaceContext()->setContextProperty("AvatarPackagerCore", this);
         tablet->pushOntoStack(url);
@@ -85,7 +80,8 @@ void AvatarPackager::addCurrentProjectToRecentProjects() {
         _recentProjects.removeOne(removeProject);
     }
 
-    const auto newRecentProject = RecentAvatarProject(_currentAvatarProject->getProjectName(), fstPath, _currentAvatarProject->getHasErrors());
+    const auto newRecentProject = RecentAvatarProject(_currentAvatarProject->getProjectName(), fstPath,
+                                                      _currentAvatarProject->getHasErrors());
     _recentProjects.prepend(newRecentProject);
 
     while (_recentProjects.size() > MAX_RECENT_PROJECTS) {
@@ -115,10 +111,8 @@ void AvatarPackager::recentProjectsFromVariantList(QVariantList projectsVariant)
     _recentProjects.clear();
     for (const auto& projectVariant : projectsVariant) {
         auto map = projectVariant.toMap();
-        _recentProjects.append(RecentAvatarProject(
-            map.value("name").toString(),
-            map.value("path").toString(),
-            map.value("hadErrors", false).toBool()));
+        _recentProjects.append(RecentAvatarProject(map.value("name").toString(), map.value("path").toString(),
+                                                   map.value("hadErrors", false).toBool()));
     }
 }
 
@@ -133,7 +127,8 @@ AvatarProjectStatus::AvatarProjectStatus AvatarPackager::createAvatarProject(con
                                                                              const QString& avatarModelPath,
                                                                              const QString& textureFolder) {
     AvatarProjectStatus::AvatarProjectStatus status;
-    setAvatarProject(AvatarProject::createAvatarProject(projectsFolder, avatarProjectName, avatarModelPath, textureFolder, status));
+    setAvatarProject(
+        AvatarProject::createAvatarProject(projectsFolder, avatarProjectName, avatarModelPath, textureFolder, status));
     return status;
 }
 

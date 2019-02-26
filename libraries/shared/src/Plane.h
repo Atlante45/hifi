@@ -19,15 +19,15 @@
 
 class Plane {
 public:
-    Plane(const glm::vec3 &v1, const glm::vec3 &v2, const glm::vec3 &v3) { set3Points(v1, v2, v3); }
-    Plane(const glm::vec3 &normal, const glm::vec3 &point) { setNormalAndPoint(normal, point); }
+    Plane(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3) { set3Points(v1, v2, v3); }
+    Plane(const glm::vec3& normal, const glm::vec3& point) { setNormalAndPoint(normal, point); }
     Plane(float a, float b, float c, float d) { setCoefficients(a, b, c, d); }
     Plane() : _normal(0.0f), _point(0.0f), _dCoefficient(0.0f) {};
-    ~Plane() {} ;
+    ~Plane() {};
 
     // methods for defining the plane
-    void set3Points(const glm::vec3 &v1, const glm::vec3 &v2, const glm::vec3 &v3);
-    void setNormalAndPoint(const glm::vec3 &normal, const glm::vec3 &point);
+    void set3Points(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3);
+    void setNormalAndPoint(const glm::vec3& normal, const glm::vec3& point);
     void setCoefficients(float a, float b, float c, float d);
 
     // getters
@@ -37,7 +37,7 @@ public:
 
     // utilities
     void invalidate() { _normal = glm::vec3(0.0f), _dCoefficient = 1.0e6f; } // distance() never less than 10^6
-    float distance(const glm::vec3 &point) const;
+    float distance(const glm::vec3& point) const;
     void print() const;
 
 private:
@@ -45,6 +45,5 @@ private:
     glm::vec3 _point;
     float _dCoefficient;
 };
-
 
 #endif // hifi_Plane_h

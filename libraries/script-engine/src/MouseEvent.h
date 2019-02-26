@@ -21,12 +21,12 @@ class MouseEvent {
 public:
     MouseEvent();
     MouseEvent(const QMouseEvent& event);
-    
+
     static QScriptValue toScriptValue(QScriptEngine* engine, const MouseEvent& event);
     static void fromScriptValue(const QScriptValue& object, MouseEvent& event);
 
     QScriptValue toScriptValue(QScriptEngine* engine) const { return MouseEvent::toScriptValue(engine, *this); }
-    
+
     int x;
     int y;
     QString button;

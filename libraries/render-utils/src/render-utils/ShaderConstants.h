@@ -22,7 +22,7 @@
 #define RENDER_UTILS_ATTR_NORMAL_WS 3
 #define RENDER_UTILS_ATTR_TANGENT_WS 4
 
-// Model space 
+// Model space
 #define RENDER_UTILS_ATTR_POSITION_MS 5
 #define RENDER_UTILS_ATTR_NORMAL_MS 6
 
@@ -36,7 +36,6 @@
 #define RENDER_UTILS_ATTR_FADE1 9
 #define RENDER_UTILS_ATTR_FADE2 10
 #define RENDER_UTILS_ATTR_FADE3 11
-
 
 #define RENDER_UTILS_BUFFER_DEFERRED_FRAME_TRANSFORM 0
 #define RENDER_UTILS_BUFFER_LIGHT_MODEL 3
@@ -100,7 +99,7 @@
 #define RENDER_UTILS_TEXTURE_TAA_DEPTH 3
 #define RENDER_UTILS_TEXTURE_TAA_NEXT 4
 
-// Surface Geometry 
+// Surface Geometry
 #define RENDER_UTILS_BUFFER_SG_PARAMS 1
 #define RENDER_UTILS_TEXTURE_SG_DEPTH 0
 #define RENDER_UTILS_TEXTURE_SG_NORMAL 1
@@ -123,7 +122,7 @@
 #define RENDER_UTILS_UNIFORM_TEXT_COLOR 0
 #define RENDER_UTILS_UNIFORM_TEXT_OUTLINE 1
 
-// Debugging 
+// Debugging
 #define RENDER_UTILS_BUFFER_DEBUG_SKYBOX 5
 #define RENDER_UTILS_DEBUG_TEXTURE0 11
 #define RENDER_UTILS_BUFFER_DEBUG_DEFERRED_PARAMS 1
@@ -131,7 +130,8 @@
 // <!
 #include <gpu/ShaderConstants.h>
 
-namespace render_utils { namespace slot {
+namespace render_utils {
+namespace slot {
 
 namespace buffer {
 enum Buffer {
@@ -202,7 +202,8 @@ enum Texture {
 };
 } // namespace texture
 
-} } // namespace render_utils::slot
+} // namespace slot
+} // namespace render_utils
 
 // !>
 // Hack Comment

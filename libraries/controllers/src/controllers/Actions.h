@@ -23,9 +23,12 @@ enum class Action {
     TRANSLATE_X = 0,
     TRANSLATE_Y,
     TRANSLATE_Z,
-    ROTATE_X, PITCH = ROTATE_X,
-    ROTATE_Y, YAW = ROTATE_Y,
-    ROTATE_Z, ROLL = ROTATE_Z,
+    ROTATE_X,
+    PITCH = ROTATE_X,
+    ROTATE_Y,
+    YAW = ROTATE_Y,
+    ROTATE_Z,
+    ROLL = ROTATE_Z,
 
     DELTA_PITCH,
     DELTA_YAW,
@@ -183,8 +186,10 @@ enum class Action {
     NUM_ACTIONS
 };
 
-template <typename T>
-int toInt(T enumValue) { return static_cast<int>(enumValue); }
+template<typename T>
+int toInt(T enumValue) {
+    return static_cast<int>(enumValue);
+}
 
 class ActionsDevice : public QObject, public InputDevice {
     Q_OBJECT
@@ -195,9 +200,8 @@ public:
 
     EndpointPointer createEndpoint(const Input& input) const override;
     Input::NamedVector getAvailableInputs() const override;
-
 };
 
-}
+} // namespace controller
 
 #endif // hifi_StandardController_h

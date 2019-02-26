@@ -39,14 +39,17 @@ Nitpick::Nitpick(QWidget* parent) : QMainWindow(parent) {
 
     _ui.statusLabelOnDesktop->setText("");
     _ui.statusLabelOnMobile->setText("");
- 
+
     _ui.plainTextEdit->setReadOnly(true);
 
     setWindowTitle("Nitpick - v3.0.0");
 
-    clientProfiles << "VR-High" << "Desktop-High" << "Desktop-Low" << "Mobile-Touch" << "VR-Standalone";
+    clientProfiles << "VR-High"
+                   << "Desktop-High"
+                   << "Desktop-Low"
+                   << "Mobile-Touch"
+                   << "VR-Standalone";
     _ui.clientProfileComboBox->insertItems(0, clientProfiles);
-
 }
 
 Nitpick::~Nitpick() {
@@ -96,42 +99,21 @@ void Nitpick::setup() {
     if (_testRunnerDesktop) {
         delete _testRunnerDesktop;
     }
-    _testRunnerDesktop = new TestRunnerDesktop(
-        dayCheckboxes, 
-        timeEditCheckboxes, 
-        timeEdits, 
-        _ui.workingFolderRunOnDesktopLabel, 
-        _ui.checkBoxServerless, 
-        _ui.runLatestOnDesktopCheckBox, 
-        _ui.urlOnDesktopLineEdit, 
-        _ui.runNowPushbutton,
-        _ui.statusLabelOnDesktop
-    );
+    _testRunnerDesktop = new TestRunnerDesktop(dayCheckboxes, timeEditCheckboxes, timeEdits, _ui.workingFolderRunOnDesktopLabel,
+                                               _ui.checkBoxServerless, _ui.runLatestOnDesktopCheckBox, _ui.urlOnDesktopLineEdit,
+                                               _ui.runNowPushbutton, _ui.statusLabelOnDesktop);
 
     if (_testRunnerMobile) {
         delete _testRunnerMobile;
     }
-    _testRunnerMobile = new TestRunnerMobile(
-        _ui.workingFolderRunOnMobileLabel, 
-        _ui.connectDevicePushbutton, 
-        _ui.pullFolderPushbutton, 
-        _ui.detectedDeviceLabel, 
-        _ui.folderLineEdit,
-        _ui.downloadAPKPushbutton,
-        _ui.installAPKPushbutton,
-        _ui.runInterfacePushbutton,
-        _ui.runLatestOnMobileCheckBox,
-        _ui.urlOnMobileLineEdit,
-        _ui.statusLabelOnMobile
-    );
+    _testRunnerMobile = new TestRunnerMobile(_ui.workingFolderRunOnMobileLabel, _ui.connectDevicePushbutton,
+                                             _ui.pullFolderPushbutton, _ui.detectedDeviceLabel, _ui.folderLineEdit,
+                                             _ui.downloadAPKPushbutton, _ui.installAPKPushbutton, _ui.runInterfacePushbutton,
+                                             _ui.runLatestOnMobileCheckBox, _ui.urlOnMobileLineEdit, _ui.statusLabelOnMobile);
 }
 
-void Nitpick::startTestsEvaluation(const bool isRunningFromCommandLine,
-                                      const bool isRunningInAutomaticTestRun,
-                                      const QString& snapshotDirectory,
-                                      const QString& branch,
-                                      const QString& user
-) {
+void Nitpick::startTestsEvaluation(const bool isRunningFromCommandLine, const bool isRunningInAutomaticTestRun,
+                                   const QString& snapshotDirectory, const QString& branch, const QString& user) {
     _test->startTestsEvaluation(isRunningFromCommandLine, isRunningInAutomaticTestRun, snapshotDirectory, branch, user);
 }
 
@@ -269,9 +251,9 @@ void Nitpick::downloadFile(const QUrl& url) {
     ++_index;
 }
 
-void Nitpick::downloadFiles(const QStringList& URLs, const QString& directoryName, const QStringList& filenames, void *caller) {
+void Nitpick::downloadFiles(const QStringList& URLs, const QString& directoryName, const QStringList& filenames, void* caller) {
     connect(_signalMapper, SIGNAL(mapped(int)), this, SLOT(saveFile(int)));
-    
+
     _directoryName = directoryName;
     _filenames = filenames;
     _caller = caller;
@@ -285,9 +267,7 @@ void Nitpick::downloadFiles(const QStringList& URLs, const QString& directoryNam
     _ui.progressBar->setValue(0);
     _ui.progressBar->setVisible(true);
 
-    foreach (auto downloader, _downloaders) {
-        delete downloader;
-    }
+    foreach (auto downloader, _downloaders) { delete downloader; }
 
     _downloaders.clear();
     for (int i = 0; i < _numberOfFilesToDownload; ++i) {

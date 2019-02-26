@@ -22,29 +22,28 @@ namespace graphics {
 typedef gpu::BufferView::Index Index;
 typedef gpu::BufferView BufferView;
 typedef AABox Box;
-typedef std::vector< Box > Boxes;
+typedef std::vector<Box> Boxes;
 typedef glm::vec3 Vec3;
 
 class Mesh;
-using MeshPointer = std::shared_ptr< Mesh >;
-
+using MeshPointer = std::shared_ptr<Mesh>;
 
 class Mesh {
 public:
     const static Index PRIMITIVE_RESTART_INDEX = -1;
 
     typedef gpu::BufferView BufferView;
-    typedef std::vector< BufferView > BufferViews;
+    typedef std::vector<BufferView> BufferViews;
 
     typedef gpu::Stream::Slot Slot;
     typedef gpu::Stream::Format VertexFormat;
-    typedef std::map< Slot, BufferView > BufferViewMap;
+    typedef std::map<Slot, BufferView> BufferViewMap;
 
     typedef graphics::Vec3 Vec3;
 
     Mesh();
     Mesh(const Mesh& mesh);
-    Mesh& operator= (const Mesh& mesh) = default;
+    Mesh& operator=(const Mesh& mesh) = default;
     virtual ~Mesh();
 
     // Vertex buffer
@@ -102,7 +101,7 @@ public:
         LINE_STRIP,
         TRIANGLES,
         TRIANGLE_STRIP,
-        QUADS,  // NOTE: These must be translated to triangles before rendering
+        QUADS, // NOTE: These must be translated to triangles before rendering
         QUAD_STRIP,
 
         NUM_TOPOLOGIES,
@@ -116,18 +115,12 @@ public:
         Index _baseVertex;
         Topology _topology;
 
-        Part() :
-            _startIndex(0),
-            _numIndices(0),
-            _baseVertex(0),
-            _topology(TRIANGLES)
-            {}
+        Part() : _startIndex(0), _numIndices(0), _baseVertex(0), _topology(TRIANGLES) {}
         Part(Index startIndex, Index numIndices, Index baseVertex, Topology topology) :
             _startIndex(startIndex),
             _numIndices(numIndices),
             _baseVertex(baseVertex),
-            _topology(topology)
-            {}
+            _topology(topology) {}
     };
 
     void setPartBuffer(const BufferView& buffer);
@@ -143,24 +136,19 @@ public:
     static gpu::Primitive topologyToPrimitive(Topology topo) { return static_cast<gpu::Primitive>(topo); }
 
     // create a copy of this mesh after passing its vertices, normals, and indexes though the provided functions
-    MeshPointer map(std::function<glm::vec3(glm::vec3)> vertexFunc,
-                    std::function<glm::vec3(glm::vec3)> colorFunc,
-                    std::function<glm::vec3(glm::vec3)> normalFunc,
-                    std::function<uint32_t(uint32_t)> indexFunc) const;
+    MeshPointer map(std::function<glm::vec3(glm::vec3)> vertexFunc, std::function<glm::vec3(glm::vec3)> colorFunc,
+                    std::function<glm::vec3(glm::vec3)> normalFunc, std::function<uint32_t(uint32_t)> indexFunc) const;
 
-    void forEach(std::function<void(glm::vec3)> vertexFunc,
-                 std::function<void(glm::vec3)> colorFunc,
-                 std::function<void(glm::vec3)> normalFunc,
-                 std::function<void(uint32_t)> indexFunc);
+    void forEach(std::function<void(glm::vec3)> vertexFunc, std::function<void(glm::vec3)> colorFunc,
+                 std::function<void(glm::vec3)> normalFunc, std::function<void(uint32_t)> indexFunc);
 
-
-    static MeshPointer createIndexedTriangles_P3F(uint32_t numVertices, uint32_t numTriangles, const glm::vec3* vertices = nullptr, const uint32_t* indices = nullptr);
+    static MeshPointer createIndexedTriangles_P3F(uint32_t numVertices, uint32_t numTriangles,
+                                                  const glm::vec3* vertices = nullptr, const uint32_t* indices = nullptr);
 
     std::string modelName;
     std::string displayName;
 
 protected:
-
     gpu::Stream::FormatPointer _vertexFormat;
     gpu::BufferStream _vertexStream;
 
@@ -173,13 +161,10 @@ protected:
 
     void evalVertexFormat();
     void evalVertexStream();
-
 };
-
 
 class Geometry {
 public:
-
     Geometry();
     Geometry(const Geometry& geometry);
     ~Geometry();
@@ -188,12 +173,10 @@ public:
     const MeshPointer& getMesh() const { return _mesh; }
 
 protected:
-
     MeshPointer _mesh;
     BufferView _boxes;
-
 };
 
-};
+}; // namespace graphics
 
 #endif

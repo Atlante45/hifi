@@ -9,7 +9,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #include "FileUtils.h"
 
 #include <mutex>
@@ -18,11 +17,10 @@
 #include <QtCore/QDir>
 #include <QtCore/QFileInfo>
 #include <QtCore/QProcess>
-#include <QtCore/QUrl>
-#include <QtCore/QTextStream>
 #include <QtCore/QRegularExpression>
+#include <QtCore/QTextStream>
+#include <QtCore/QUrl>
 #include <QtGui/QDesktopServices>
-
 
 #include "../SharedLogging.h"
 
@@ -44,7 +42,6 @@ const QStringList& FileUtils::getFileSelectors() {
 #endif
     });
     return extraSelectors;
-
 }
 
 QString FileUtils::selectFile(const QString& path) {
@@ -56,7 +53,6 @@ QString FileUtils::selectFile(const QString& path) {
     }
     return result;
 }
-
 
 QString FileUtils::readFile(const QString& filename) {
     QFile file(filename);
@@ -71,7 +67,6 @@ QStringList FileUtils::readLines(const QString& filename, QString::SplitBehavior
 }
 
 void FileUtils::locateFile(const QString& filePath) {
-
     // adapted from
     // http://stackoverflow.com/questions/3490336/how-to-reveal-in-finder-or-show-in-explorer-with-qt
     // and
@@ -145,7 +140,6 @@ QString FileUtils::replaceDateTimeTokens(const QString& originalPath) {
     path.replace("{TIME}", now.time().toString("HHmm"));
     return path;
 }
-
 
 QString FileUtils::computeDocumentPath(const QString& originalPath) {
     // If the filename is relative, turn it into an absolute path relative to the document directory.

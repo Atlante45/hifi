@@ -12,24 +12,15 @@
 #ifndef hifi_SequenceNumberStats_h
 #define hifi_SequenceNumberStats_h
 
-#include "SharedUtil.h"
 #include "RingBufferHistory.h"
+#include "SharedUtil.h"
 #include "UUID.h"
 
 const int MAX_REASONABLE_SEQUENCE_GAP = 1000;
 
-
 class PacketStreamStats {
 public:
-    PacketStreamStats()
-        : _received(0),
-        _unreasonable(0),
-        _early(0),
-        _late(0),
-        _lost(0),
-        _recovered(0),
-        _expectedReceived(0)
-    {}
+    PacketStreamStats() : _received(0), _unreasonable(0), _early(0), _late(0), _lost(0), _recovered(0), _expectedReceived(0) {}
 
     PacketStreamStats operator-(const PacketStreamStats& rhs) const {
         PacketStreamStats diff;
@@ -69,11 +60,11 @@ public:
         int _seqDiffFromExpected;
     };
 
-
     SequenceNumberStats(int statsHistoryLength = 0, bool canDetectOutOfSync = true);
 
     void reset();
-    ArrivalInfo sequenceNumberReceived(quint16 incoming, NetworkLocalID senderID = NULL_LOCAL_ID, const bool wantExtraDebugging = false);
+    ArrivalInfo sequenceNumberReceived(quint16 incoming, NetworkLocalID senderID = NULL_LOCAL_ID,
+                                       const bool wantExtraDebugging = false);
     void pruneMissingSet(const bool wantExtraDebugging = false);
     void pushStatsToHistory() { _statsHistory.insert(_stats); }
 
@@ -101,7 +92,7 @@ private:
     PacketStreamStats _stats;
 
     NetworkLocalID _lastSenderID;
-    static const NetworkLocalID NULL_LOCAL_ID = (NetworkLocalID) 0;
+    static const NetworkLocalID NULL_LOCAL_ID = (NetworkLocalID)0;
 
     RingBufferHistory<PacketStreamStats> _statsHistory;
 

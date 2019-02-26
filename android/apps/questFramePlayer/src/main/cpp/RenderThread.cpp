@@ -10,34 +10,34 @@
 
 #include <mutex>
 
-#include <jni.h>
 #include <android/log.h>
+#include <jni.h>
 
-#include <QtCore/QFileInfo>
-#include <QtGui/QWindow>
-#include <QtGui/QImageReader>
 #include <QtAndroidExtras/QAndroidJniObject>
+#include <QtCore/QFileInfo>
+#include <QtGui/QImageReader>
+#include <QtGui/QWindow>
 
 #include <gl/QOpenGLContextWrapper.h>
 #include <gpu/FrameIO.h>
 #include <gpu/Texture.h>
 
-#include <VrApi_Types.h>
 #include <VrApi_Helpers.h>
-#include <ovr/VrHandler.h>
+#include <VrApi_Types.h>
 #include <ovr/Helpers.h>
+#include <ovr/VrHandler.h>
 
 #include <VrApi.h>
 #include <VrApi_Input.h>
 
 #include "AndroidHelper.h"
 
-struct HandController{
+struct HandController {
     ovrInputTrackedRemoteCapabilities caps {};
     ovrInputStateTrackedRemote state {};
-    ovrResult stateResult{ ovrSuccess };
+    ovrResult stateResult { ovrSuccess };
     ovrTracking tracking {};
-    ovrResult trackingResult{ ovrSuccess };
+    ovrResult trackingResult { ovrSuccess };
 
     void update(ovrMobile* session, double time = 0.0) {
         const auto& deviceId = caps.Header.DeviceID;
@@ -51,13 +51,12 @@ QAndroidJniObject __interfaceActivity;
 
 extern "C" {
 
-JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void *) {
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
     __android_log_write(ANDROID_LOG_WARN, "QQQ", __FUNCTION__);
     return JNI_VERSION_1_6;
 }
 
-JNIEXPORT void JNICALL
-Java_io_highfidelity_oculus_OculusMobileActivity_questNativeOnCreate(JNIEnv *env, jobject obj) {
+JNIEXPORT void JNICALL Java_io_highfidelity_oculus_OculusMobileActivity_questNativeOnCreate(JNIEnv* env, jobject obj) {
     __android_log_print(ANDROID_LOG_INFO, "QQQ", __FUNCTION__);
     __interfaceActivity = QAndroidJniObject(obj);
     QObject::connect(&AndroidHelper::instance(), &AndroidHelper::qtAppLoadComplete, []() {
@@ -66,23 +65,18 @@ Java_io_highfidelity_oculus_OculusMobileActivity_questNativeOnCreate(JNIEnv *env
     });
 }
 
-JNIEXPORT void
-Java_io_highfidelity_oculus_OculusMobileActivity_questOnAppAfterLoad(JNIEnv *env, jobject obj) {
+JNIEXPORT void Java_io_highfidelity_oculus_OculusMobileActivity_questOnAppAfterLoad(JNIEnv* env, jobject obj) {
     AndroidHelper::instance().moveToThread(qApp->thread());
 }
 
-JNIEXPORT void JNICALL
-Java_io_highfidelity_oculus_OculusMobileActivity_questNativeOnPause(JNIEnv *env, jobject obj) {
+JNIEXPORT void JNICALL Java_io_highfidelity_oculus_OculusMobileActivity_questNativeOnPause(JNIEnv* env, jobject obj) {
     AndroidHelper::instance().notifyEnterBackground();
 }
 
-JNIEXPORT void JNICALL
-Java_io_highfidelity_oculus_OculusMobileActivity_questNativeOnResume(JNIEnv *env, jobject obj) {
+JNIEXPORT void JNICALL Java_io_highfidelity_oculus_OculusMobileActivity_questNativeOnResume(JNIEnv* env, jobject obj) {
     AndroidHelper::instance().notifyEnterForeground();
 }
-
 }
-
 
 static const char* FRAME_FILE = "assets:/frames/20190121_1220.json";
 
@@ -131,7 +125,7 @@ void RenderThread::setup() {
     makeCurrent();
     glGenTextures(1, &_externalTexture);
     glBindTexture(GL_TEXTURE_2D, _externalTexture);
-    static const glm::u8vec4 color{ 0,1,0,0 };
+    static const glm::u8vec4 color { 0, 1, 0, 0 };
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &color);
 
     if (QFileInfo(FRAME_FILE).exists()) {
@@ -152,8 +146,8 @@ void RenderThread::shutdown() {
 
 void RenderThread::handleInput() {
     static std::once_flag once;
-    std::call_once(once, [&]{
-        withOvrMobile([&](ovrMobile* session){
+    std::call_once(once, [&] {
+        withOvrMobile([&](ovrMobile* session) {
             int deviceIndex = 0;
             ovrInputCapabilityHeader capsHeader;
             while (vrapi_EnumerateInputDevices(session, deviceIndex, &capsHeader) >= 0) {
@@ -161,7 +155,7 @@ void RenderThread::handleInput() {
                     HandController controller = {};
                     controller.caps.Header = capsHeader;
                     controller.state.Header.ControllerType = ovrControllerType_TrackedRemote;
-                    vrapi_GetInputDeviceCapabilities( session, &controller.caps.Header);
+                    vrapi_GetInputDeviceCapabilities(session, &controller.caps.Header);
                     devices.push_back(controller);
                 }
                 ++deviceIndex;
@@ -169,23 +163,23 @@ void RenderThread::handleInput() {
         });
     });
 
-    auto readResult = ovr::VrHandler::withOvrMobile([&](ovrMobile *session) {
-        for (auto &controller : devices) {
+    auto readResult = ovr::VrHandler::withOvrMobile([&](ovrMobile* session) {
+        for (auto& controller : devices) {
             controller.update(session);
         }
     });
 
     if (readResult) {
-        for (auto &controller : devices) {
-            const auto &caps = controller.caps;
+        for (auto& controller : devices) {
+            const auto& caps = controller.caps;
             if (controller.stateResult >= 0) {
-                const auto &remote = controller.state;
+                const auto& remote = controller.state;
                 if (remote.Joystick.x != 0.0f || remote.Joystick.y != 0.0f) {
                     glm::vec3 translation;
                     if (caps.ControllerCapabilities & ovrControllerCaps_LeftHand) {
-                        translation = glm::vec3{0.0f, -remote.Joystick.y, 0.0f};
+                        translation = glm::vec3 { 0.0f, -remote.Joystick.y, 0.0f };
                     } else {
-                        translation = glm::vec3{remote.Joystick.x, 0.0f, -remote.Joystick.y};
+                        translation = glm::vec3 { remote.Joystick.x, 0.0f, -remote.Joystick.y };
                     }
                     float scale = 0.1f + (1.9f * remote.GripTrigger);
                     _correction = glm::translate(glm::mat4(), translation * scale) * _correction;
@@ -206,7 +200,7 @@ void RenderThread::renderFrame() {
         // Quest
         auto frameCorrection = _correction * ovr::toGlm(tracking.HeadPose.Pose);
         _backend->setCameraCorrection(glm::inverse(frameCorrection), frame->view);
-        ovr::for_each_eye([&](ovrEye eye){
+        ovr::for_each_eye([&](ovrEye eye) {
             const auto& eyeInfo = tracking.Eye[eye];
             eyeProjections[eye] = ovr::toGlm(eyeInfo.ProjectionMatrix);
             eyeOffsets[eye] = ovr::toGlm(eyeInfo.ViewMatrix);

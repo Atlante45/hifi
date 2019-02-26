@@ -17,9 +17,9 @@
 #include <QString>
 #include <QStringList>
 
-#include <ModelEntityItem.h>
 #include <AnimationCache.h>
 #include <Model.h>
+#include <ModelEntityItem.h>
 #include <model-networking/ModelCache.h>
 
 #include "RenderableEntityItem.h"
@@ -27,9 +27,11 @@
 class Model;
 class EntityTreeRenderer;
 
-namespace render { namespace entities {
+namespace render {
+namespace entities {
 class ModelEntityRenderer;
-} }
+}
+} // namespace render
 
 // #define MODEL_ENTITY_USE_FADE_EFFECT
 class ModelEntityWrapper : public ModelEntityItem {
@@ -42,7 +44,8 @@ protected:
     ModelPointer getModel() const;
     bool isModelLoaded() const;
 
-    bool _needsInitialSimulation{ true };
+    bool _needsInitialSimulation { true };
+
 private:
     ModelPointer _model;
 };
@@ -52,6 +55,7 @@ class RenderableModelEntityItem : public ModelEntityWrapper {
 
     friend class render::entities::ModelEntityRenderer;
     using Parent = ModelEntityWrapper;
+
 public:
     static EntityItemPointer factory(const EntityItemID& entityID, const EntityItemProperties& properties);
 
@@ -60,19 +64,19 @@ public:
 
     virtual void setUnscaledDimensions(const glm::vec3& value) override;
 
-    virtual EntityItemProperties getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const override;
+    virtual EntityItemProperties getProperties(const EntityPropertyFlags& desiredProperties,
+                                               bool allowEmptyDesiredProperties) const override;
     void doInitialModelSimulation();
     void updateModelBounds();
 
     virtual bool supportsDetailedIntersection() const override;
-    virtual bool findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                        OctreeElementPointer& element, float& distance,
-                        BoxFace& face, glm::vec3& surfaceNormal,
-                        QVariantMap& extraInfo, bool precisionPicking) const override;
+    virtual bool findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction, OctreeElementPointer& element,
+                                             float& distance, BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                             bool precisionPicking) const override;
     virtual bool findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
-                        const glm::vec3& acceleration, OctreeElementPointer& element, float& parabolicDistance,
-                        BoxFace& face, glm::vec3& surfaceNormal,
-                        QVariantMap& extraInfo, bool precisionPicking) const override;
+                                                  const glm::vec3& acceleration, OctreeElementPointer& element,
+                                                  float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+                                                  QVariantMap& extraInfo, bool precisionPicking) const override;
 
     virtual void setShapeType(ShapeType type) override;
     virtual void setCompoundShapeURL(const QString& url) override;
@@ -129,7 +133,8 @@ private:
     bool _needsJointSimulation { false };
 };
 
-namespace render { namespace entities { 
+namespace render {
+namespace entities {
 
 class ModelEntityRenderer : public TypedEntityRenderer<RenderableModelEntityItem> {
     using Parent = TypedEntityRenderer<RenderableModelEntityItem>;
@@ -140,7 +145,8 @@ public:
     ModelEntityRenderer(const EntityItemPointer& entity);
     virtual scriptable::ScriptableModelBase getScriptableModel() override;
     virtual bool canReplaceModelMeshPart(int meshIndex, int partIndex) override;
-    virtual bool replaceScriptableModelMeshPart(scriptable::ScriptableModelBasePointer model, int meshIndex, int partIndex) override;
+    virtual bool replaceScriptableModelMeshPart(scriptable::ScriptableModelBasePointer model, int meshIndex,
+                                                int partIndex) override;
 
     void addMaterial(graphics::MaterialLayer material, const std::string& parentMaterialName) override;
     void removeMaterial(graphics::MaterialPointer material, const std::string& parentMaterialName) override;
@@ -159,7 +165,8 @@ protected:
     virtual bool needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const override;
     virtual bool needsRenderUpdate() const override;
     virtual void doRender(RenderArgs* args) override;
-    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) override;
+    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                const TypedEntityPointer& entity) override;
 
     render::hifi::Tag getTagMask() const override;
 
@@ -180,7 +187,7 @@ private:
     bool _texturesLoaded { false };
     int _lastKnownCurrentFrame { -1 };
 #ifdef MODEL_ENTITY_USE_FADE_EFFECT
-    bool _hasTransitioned{ false };
+    bool _hasTransitioned { false };
 #endif
 
     const void* _collisionMeshKey { nullptr };
@@ -201,6 +208,7 @@ private:
     void processMaterials();
 };
 
-} } // namespace 
+} // namespace entities
+} // namespace render
 
 #endif // hifi_RenderableModelEntityItem_h

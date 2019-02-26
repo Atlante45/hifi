@@ -21,62 +21,51 @@
 
 namespace entity {
 
-    /**jsdoc
-     * <p>A <code>Shape</code>, <code>Box</code>, or <code>Sphere</code> {@link Entities.EntityType|EntityType} may display as 
-     * one of the following geometrical shapes:</p>
-     * <table>
-     *   <thead>
-     *     <tr><th>Value</th><th>Dimensions</th><th>Notes</th></tr>
-     *   </thead>
-     *   <tbody>
-     *     <tr><td><code>"Circle"</code></td><td>2D</td><td>A circle oriented in 3D.</td></tr>
-     *     <tr><td><code>"Cube"</code></td><td>3D</td><td></td></tr>
-     *     <tr><td><code>"Cone"</code></td><td>3D</td><td></td></tr>
-     *     <tr><td><code>"Cylinder"</code></td><td>3D</td><td></td></tr>
-     *     <tr><td><code>"Dodecahedron"</code></td><td>3D</td><td></td></tr>
-     *     <tr><td><code>"Hexagon"</code></td><td>3D</td><td>A hexagonal prism.</td></tr>
-     *     <tr><td><code>"Icosahedron"</code></td><td>3D</td><td></td></tr>
-     *     <tr><td><code>"Octagon"</code></td><td>3D</td><td>An octagonal prism.</td></tr>
-     *     <tr><td><code>"Octahedron"</code></td><td>3D</td><td></td></tr>
-     *     <tr><td><code>"Quad"</code></td><td>2D</td><td>A square oriented in 3D.</td></tr>
-     *     <tr><td><code>"Sphere"</code></td><td>3D</td><td></td></tr>
-     *     <tr><td><code>"Tetrahedron"</code></td><td>3D</td><td></td></tr>
-     *     <tr><td><code>"Torus"</code></td><td>3D</td><td><em>Not implemented.</em></td></tr>
-     *     <tr><td><code>"Triangle"</code></td><td>3D</td><td>A triangular prism.</td></tr>
-     *   </tbody>
-     * </table>
-     * @typedef {string} Entities.Shape
-     */
-    static const std::array<QString, Shape::NUM_SHAPES> shapeStrings { {
-        "Triangle", 
-        "Quad", 
-        "Hexagon",
-        "Octagon",
-        "Circle",
-        "Cube", 
-        "Sphere", 
-        "Tetrahedron", 
-        "Octahedron", 
-        "Dodecahedron", 
-        "Icosahedron", 
-        "Torus",  // Not implemented yet.
-        "Cone", 
-        "Cylinder" 
-    } };
+/**jsdoc
+ * <p>A <code>Shape</code>, <code>Box</code>, or <code>Sphere</code> {@link Entities.EntityType|EntityType} may display as
+ * one of the following geometrical shapes:</p>
+ * <table>
+ *   <thead>
+ *     <tr><th>Value</th><th>Dimensions</th><th>Notes</th></tr>
+ *   </thead>
+ *   <tbody>
+ *     <tr><td><code>"Circle"</code></td><td>2D</td><td>A circle oriented in 3D.</td></tr>
+ *     <tr><td><code>"Cube"</code></td><td>3D</td><td></td></tr>
+ *     <tr><td><code>"Cone"</code></td><td>3D</td><td></td></tr>
+ *     <tr><td><code>"Cylinder"</code></td><td>3D</td><td></td></tr>
+ *     <tr><td><code>"Dodecahedron"</code></td><td>3D</td><td></td></tr>
+ *     <tr><td><code>"Hexagon"</code></td><td>3D</td><td>A hexagonal prism.</td></tr>
+ *     <tr><td><code>"Icosahedron"</code></td><td>3D</td><td></td></tr>
+ *     <tr><td><code>"Octagon"</code></td><td>3D</td><td>An octagonal prism.</td></tr>
+ *     <tr><td><code>"Octahedron"</code></td><td>3D</td><td></td></tr>
+ *     <tr><td><code>"Quad"</code></td><td>2D</td><td>A square oriented in 3D.</td></tr>
+ *     <tr><td><code>"Sphere"</code></td><td>3D</td><td></td></tr>
+ *     <tr><td><code>"Tetrahedron"</code></td><td>3D</td><td></td></tr>
+ *     <tr><td><code>"Torus"</code></td><td>3D</td><td><em>Not implemented.</em></td></tr>
+ *     <tr><td><code>"Triangle"</code></td><td>3D</td><td>A triangular prism.</td></tr>
+ *   </tbody>
+ * </table>
+ * @typedef {string} Entities.Shape
+ */
+static const std::array<QString, Shape::NUM_SHAPES> shapeStrings { { "Triangle", "Quad", "Hexagon", "Octagon", "Circle", "Cube",
+                                                                     "Sphere", "Tetrahedron", "Octahedron", "Dodecahedron",
+                                                                     "Icosahedron",
+                                                                     "Torus", // Not implemented yet.
+                                                                     "Cone", "Cylinder" } };
 
-    Shape shapeFromString(const ::QString& shapeString) {
-        for (size_t i = 0; i < shapeStrings.size(); ++i) {
-            if (shapeString.toLower() == shapeStrings[i].toLower()) {
-                return static_cast<Shape>(i);
-            }
+Shape shapeFromString(const ::QString& shapeString) {
+    for (size_t i = 0; i < shapeStrings.size(); ++i) {
+        if (shapeString.toLower() == shapeStrings[i].toLower()) {
+            return static_cast<Shape>(i);
         }
-        return Shape::Sphere;
     }
-
-    QString stringFromShape(Shape shape) {
-        return shapeStrings[shape];
-    }
+    return Shape::Sphere;
 }
+
+QString stringFromShape(Shape shape) {
+    return shapeStrings[shape];
+}
+} // namespace entity
 
 // hullShapeCalculator is a hook for external code that knows how to configure a ShapeInfo
 // for given entity::Shape and dimensions
@@ -114,14 +103,14 @@ ShapeEntityItem::ShapeEntityItem(const EntityItemID& entityItemID) : EntityItem(
     _volumeMultiplier *= PI / 6.0f;
 }
 
-EntityItemProperties ShapeEntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
-    EntityItemProperties properties = EntityItem::getProperties(desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
+EntityItemProperties ShapeEntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                                    bool allowEmptyDesiredProperties) const {
+    EntityItemProperties properties = EntityItem::getProperties(
+        desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
 
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(color, getColor);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(alpha, getAlpha);
-    withReadLock([&] {
-        _pulseProperties.getProperties(properties);
-    });
+    withReadLock([&] { _pulseProperties.getProperties(properties); });
     properties.setShape(entity::stringFromShape(getShape()));
     properties._shapeChanged = false;
 
@@ -173,8 +162,8 @@ bool ShapeEntityItem::setProperties(const EntityItemProperties& properties) {
         if (wantDebug) {
             uint64_t now = usecTimestampNow();
             int elapsed = now - getLastEdited();
-            qCDebug(entities) << "ShapeEntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                    "now=" << now << " getLastEdited()=" << getLastEdited();
+            qCDebug(entities) << "ShapeEntityItem::setProperties() AFTER update... edited AGO=" << elapsed << "now=" << now
+                              << " getLastEdited()=" << getLastEdited();
         }
         setLastEdited(properties.getLastEdited());
     }
@@ -182,10 +171,8 @@ bool ShapeEntityItem::setProperties(const EntityItemProperties& properties) {
 }
 
 int ShapeEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) {
-
+                                                      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                      bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 
@@ -193,8 +180,8 @@ int ShapeEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data,
     READ_ENTITY_PROPERTY(PROP_ALPHA, float, setAlpha);
     withWriteLock([&] {
         int bytesFromPulse = _pulseProperties.readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
-            propertyFlags, overwriteLocalData,
-            somethingChanged);
+                                                                               propertyFlags, overwriteLocalData,
+                                                                               somethingChanged);
         bytesRead += bytesFromPulse;
         dataAt += bytesFromPulse;
     });
@@ -213,45 +200,34 @@ EntityPropertyFlags ShapeEntityItem::getEntityProperties(EncodeBitstreamParams& 
 }
 
 void ShapeEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
-                                    EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount, 
-                                    OctreeElement::AppendState& appendState) const { 
-
+                                         EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
+                                         EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                         EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                         OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
     APPEND_ENTITY_PROPERTY(PROP_COLOR, getColor());
     APPEND_ENTITY_PROPERTY(PROP_ALPHA, getAlpha());
     withReadLock([&] {
         _pulseProperties.appendSubclassData(packetData, params, entityTreeElementExtraEncodeData, requestedProperties,
-            propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                                            propertyFlags, propertiesDidntFit, propertyCount, appendState);
     });
     APPEND_ENTITY_PROPERTY(PROP_SHAPE, entity::stringFromShape(getShape()));
 }
 
 void ShapeEntityItem::setColor(const glm::u8vec3& value) {
-    withWriteLock([&] {
-        _color = value;
-    });
+    withWriteLock([&] { _color = value; });
 }
 
 glm::u8vec3 ShapeEntityItem::getColor() const {
-    return resultWithReadLock<glm::u8vec3>([&] {
-        return _color;
-    });
+    return resultWithReadLock<glm::u8vec3>([&] { return _color; });
 }
 
 void ShapeEntityItem::setAlpha(float alpha) {
-    withWriteLock([&] {
-        _alpha = alpha;
-    });
+    withWriteLock([&] { _alpha = alpha; });
 }
 
 float ShapeEntityItem::getAlpha() const {
-    return resultWithReadLock<float>([&] {
-        return _alpha;
-    });
+    return resultWithReadLock<float>([&] { return _alpha; });
 }
 
 void ShapeEntityItem::setUnscaledDimensions(const glm::vec3& value) {
@@ -271,9 +247,9 @@ bool ShapeEntityItem::supportsDetailedIntersection() const {
 }
 
 bool ShapeEntityItem::findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                                                   OctreeElementPointer& element,
-                                                   float& distance, BoxFace& face, glm::vec3& surfaceNormal,
-                                                   QVariantMap& extraInfo, bool precisionPicking) const {
+                                                  OctreeElementPointer& element, float& distance, BoxFace& face,
+                                                  glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                                  bool precisionPicking) const {
     // determine the ray in the frame of the entity transformed from a unit sphere
     glm::mat4 entityToWorldMatrix = getEntityToWorldMatrix();
     glm::mat4 worldToEntityMatrix = glm::inverse(entityToWorldMatrix);
@@ -297,9 +273,9 @@ bool ShapeEntityItem::findDetailedRayIntersection(const glm::vec3& origin, const
     return false;
 }
 
-bool ShapeEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                                       OctreeElementPointer& element, float& parabolicDistance,
-                                                       BoxFace& face, glm::vec3& surfaceNormal,
+bool ShapeEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
+                                                       const glm::vec3& acceleration, OctreeElementPointer& element,
+                                                       float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
                                                        QVariantMap& extraInfo, bool precisionPicking) const {
     // determine the parabola in the frame of the entity transformed from a unit sphere
     glm::mat4 entityToWorldMatrix = getEntityToWorldMatrix();
@@ -309,12 +285,14 @@ bool ShapeEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, 
     glm::vec3 entityFrameAcceleration = glm::vec3(worldToEntityMatrix * glm::vec4(acceleration, 0.0f));
 
     // NOTE: unit sphere has center of 0,0,0 and radius of 0.5
-    if (findParabolaSphereIntersection(entityFrameOrigin, entityFrameVelocity, entityFrameAcceleration, glm::vec3(0.0f), 0.5f, parabolicDistance)) {
+    if (findParabolaSphereIntersection(entityFrameOrigin, entityFrameVelocity, entityFrameAcceleration, glm::vec3(0.0f), 0.5f,
+                                       parabolicDistance)) {
         bool success;
         glm::vec3 center = getCenterPosition(success);
         if (success) {
             // FIXME: this is only correct for uniformly scaled spheres
-            surfaceNormal = glm::normalize((origin + velocity * parabolicDistance + 0.5f * acceleration * parabolicDistance * parabolicDistance) - center);
+            surfaceNormal = glm::normalize(
+                (origin + velocity * parabolicDistance + 0.5f * acceleration * parabolicDistance * parabolicDistance) - center);
         } else {
             return false;
         }
@@ -337,41 +315,35 @@ void ShapeEntityItem::debugDump() const {
 }
 
 void ShapeEntityItem::computeShapeInfo(ShapeInfo& info) {
-
     // This will be called whenever DIRTY_SHAPE flag (set by dimension change, etc)
     // is set.
 
     const glm::vec3 entityDimensions = getScaledDimensions();
 
-    switch (_shape){
+    switch (_shape) {
         case entity::Shape::Quad:
             // Quads collide like flat Cubes
         case entity::Shape::Cube: {
             _collisionShapeType = SHAPE_TYPE_BOX;
-        }
-        break;
+        } break;
         case entity::Shape::Sphere: {
             float diameter = entityDimensions.x;
             const float MIN_DIAMETER = 0.001f;
             const float MIN_RELATIVE_SPHERICAL_ERROR = 0.001f;
-            if (diameter > MIN_DIAMETER
-                && fabsf(diameter - entityDimensions.y) / diameter < MIN_RELATIVE_SPHERICAL_ERROR
-                && fabsf(diameter - entityDimensions.z) / diameter < MIN_RELATIVE_SPHERICAL_ERROR) {
-
+            if (diameter > MIN_DIAMETER && fabsf(diameter - entityDimensions.y) / diameter < MIN_RELATIVE_SPHERICAL_ERROR &&
+                fabsf(diameter - entityDimensions.z) / diameter < MIN_RELATIVE_SPHERICAL_ERROR) {
                 _collisionShapeType = SHAPE_TYPE_SPHERE;
             } else {
                 _collisionShapeType = SHAPE_TYPE_ELLIPSOID;
             }
-        }
-        break;
+        } break;
         case entity::Shape::Circle:
             // Circles collide like flat Cylinders
         case entity::Shape::Cylinder: {
             float diameter = entityDimensions.x;
             const float MIN_DIAMETER = 0.001f;
             const float MIN_RELATIVE_SPHERICAL_ERROR = 0.001f;
-            if (diameter > MIN_DIAMETER
-                && fabsf(diameter - entityDimensions.z) / diameter < MIN_RELATIVE_SPHERICAL_ERROR) {
+            if (diameter > MIN_DIAMETER && fabsf(diameter - entityDimensions.z) / diameter < MIN_RELATIVE_SPHERICAL_ERROR) {
                 _collisionShapeType = SHAPE_TYPE_CYLINDER_Y;
             } else if (hullShapeCalculator) {
                 hullShapeCalculator(this, info);
@@ -381,8 +353,7 @@ void ShapeEntityItem::computeShapeInfo(ShapeInfo& info) {
                 // final fallback is ellipsoid
                 _collisionShapeType = SHAPE_TYPE_ELLIPSOID;
             }
-        }
-        break;
+        } break;
         case entity::Shape::Cone: {
             if (hullShapeCalculator) {
                 hullShapeCalculator(this, info);
@@ -390,8 +361,7 @@ void ShapeEntityItem::computeShapeInfo(ShapeInfo& info) {
             } else {
                 _collisionShapeType = SHAPE_TYPE_ELLIPSOID;
             }
-        }
-        break;
+        } break;
         // gons, ones, & angles built via GeometryCache::extrudePolygon
         case entity::Shape::Triangle:
         case entity::Shape::Hexagon:
@@ -402,31 +372,25 @@ void ShapeEntityItem::computeShapeInfo(ShapeInfo& info) {
             } else {
                 _collisionShapeType = SHAPE_TYPE_ELLIPSOID;
             }
-        }
-        break;
+        } break;
         // hedrons built via GeometryCache::setUpFlatShapes
         case entity::Shape::Tetrahedron:
         case entity::Shape::Octahedron:
         case entity::Shape::Dodecahedron:
         case entity::Shape::Icosahedron: {
-            if ( hullShapeCalculator ) {
+            if (hullShapeCalculator) {
                 hullShapeCalculator(this, info);
                 _collisionShapeType = SHAPE_TYPE_SIMPLE_HULL;
             } else {
                 _collisionShapeType = SHAPE_TYPE_ELLIPSOID;
             }
-        }
-        break;
+        } break;
         case entity::Shape::Torus: {
             // Not in GeometryCache::buildShapes, unsupported.
             _collisionShapeType = SHAPE_TYPE_ELLIPSOID;
-            //TODO handle this shape more correctly
-        }
-        break;
-        default: {
-            _collisionShapeType = SHAPE_TYPE_ELLIPSOID;
-        }
-        break;
+            // TODO handle this shape more correctly
+        } break;
+        default: { _collisionShapeType = SHAPE_TYPE_ELLIPSOID; } break;
     }
 
     EntityItem::computeShapeInfo(info);
@@ -438,7 +402,5 @@ ShapeType ShapeEntityItem::getShapeType() const {
 }
 
 PulsePropertyGroup ShapeEntityItem::getPulseProperties() const {
-    return resultWithReadLock<PulsePropertyGroup>([&] {
-        return _pulseProperties;
-    });
+    return resultWithReadLock<PulsePropertyGroup>([&] { return _pulseProperties; });
 }

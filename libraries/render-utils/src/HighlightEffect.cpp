@@ -19,8 +19,8 @@
 #include <gpu/Context.h>
 #include <shaders/Shaders.h>
 
-#include "GeometryCache.h"
 #include "CubeProjectedPolygon.h"
+#include "GeometryCache.h"
 
 #include "FadeEffect.h"
 
@@ -28,18 +28,20 @@
 
 using namespace render;
 namespace ru {
-    using render_utils::slot::texture::Texture;
-    using render_utils::slot::buffer::Buffer;
-}
+using render_utils::slot::buffer::Buffer;
+using render_utils::slot::texture::Texture;
+} // namespace ru
 
 namespace gr {
-    using graphics::slot::texture::Texture;
-    using graphics::slot::buffer::Buffer;
-}
+using graphics::slot::buffer::Buffer;
+using graphics::slot::texture::Texture;
+} // namespace gr
 
-#define OUTLINE_STENCIL_MASK    1
+#define OUTLINE_STENCIL_MASK 1
 
-extern void initZPassPipelines(ShapePlumber& plumber, gpu::StatePointer state, const render::ShapePipeline::BatchSetter& batchSetter, const render::ShapePipeline::ItemSetter& itemSetter);
+extern void initZPassPipelines(ShapePlumber& plumber, gpu::StatePointer state,
+                               const render::ShapePipeline::BatchSetter& batchSetter,
+                               const render::ShapePipeline::ItemSetter& itemSetter);
 
 HighlightResources::HighlightResources() {
 }
@@ -118,7 +120,11 @@ gpu::PipelinePointer DrawHighlightMask::_stencilMaskPipeline;
 gpu::PipelinePointer DrawHighlightMask::_stencilMaskFillPipeline;
 
 DrawHighlightMask::DrawHighlightMask(unsigned int highlightIndex, render::ShapePlumberPointer shapePlumber,
-    HighlightSharedParametersPointer parameters) : _highlightPassIndex(highlightIndex), _shapePlumber(shapePlumber), _sharedParameters(parameters) {}
+                                     HighlightSharedParametersPointer parameters) :
+    _highlightPassIndex(highlightIndex),
+    _shapePlumber(shapePlumber),
+    _sharedParameters(parameters) {
+}
 
 void DrawHighlightMask::run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs) {
     assert(renderContext->args);
@@ -131,13 +137,18 @@ void DrawHighlightMask::run(const render::RenderContextPointer& renderContext, c
     if (!_stencilMaskPipeline || !_stencilMaskFillPipeline) {
         gpu::StatePointer state = std::make_shared<gpu::State>();
         state->setDepthTest(true, false, gpu::LESS_EQUAL);
-        state->setStencilTest(true, 0xFF, gpu::State::StencilTest(OUTLINE_STENCIL_MASK, 0xFF, gpu::NOT_EQUAL, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_REPLACE));
+        state->setStencilTest(true, 0xFF,
+                              gpu::State::StencilTest(OUTLINE_STENCIL_MASK, 0xFF, gpu::NOT_EQUAL, gpu::State::STENCIL_OP_KEEP,
+                                                      gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_REPLACE));
         state->setColorWriteMask(false, false, false, false);
         state->setCullMode(gpu::State::CULL_FRONT);
 
         gpu::StatePointer fillState = std::make_shared<gpu::State>();
         fillState->setDepthTest(false, false, gpu::LESS_EQUAL);
-        fillState->setStencilTest(true, 0xFF, gpu::State::StencilTest(OUTLINE_STENCIL_MASK, 0xFF, gpu::NOT_EQUAL, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_REPLACE));
+        fillState->setStencilTest(true, 0xFF,
+                                  gpu::State::StencilTest(OUTLINE_STENCIL_MASK, 0xFF, gpu::NOT_EQUAL,
+                                                          gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP,
+                                                          gpu::State::STENCIL_OP_REPLACE));
         fillState->setColorWriteMask(false, false, false, false);
         fillState->setCullMode(gpu::State::CULL_FRONT);
 
@@ -163,7 +174,7 @@ void DrawHighlightMask::run(const render::RenderContextPointer& renderContext, c
         outputs = args->_viewport;
 
         // Clear the framebuffer without stereo
-        // Needs to be distinct from the other batch because using the clear call 
+        // Needs to be distinct from the other batch because using the clear call
         // while stereo is enabled triggers a warning
         gpu::doInBatch("DrawHighlightMask::run::begin", args->_context, [&](gpu::Batch& batch) {
             batch.enableStereo(false);
@@ -188,12 +199,14 @@ void DrawHighlightMask::run(const render::RenderContextPointer& renderContext, c
             batch.setProjectionJitter(jitter.x, jitter.y);
             batch.setViewTransform(viewMat);
 
-            const std::vector<ShapeKey::Builder> keys = {
-                ShapeKey::Builder(), ShapeKey::Builder().withFade(),
-                ShapeKey::Builder().withDeformed(), ShapeKey::Builder().withDeformed().withFade(),
-                ShapeKey::Builder().withDeformed().withDualQuatSkinned(), ShapeKey::Builder().withDeformed().withDualQuatSkinned().withFade(),
-                ShapeKey::Builder().withOwnPipeline(), ShapeKey::Builder().withOwnPipeline().withFade()
-            };
+            const std::vector<ShapeKey::Builder> keys = { ShapeKey::Builder(),
+                                                          ShapeKey::Builder().withFade(),
+                                                          ShapeKey::Builder().withDeformed(),
+                                                          ShapeKey::Builder().withDeformed().withFade(),
+                                                          ShapeKey::Builder().withDeformed().withDualQuatSkinned(),
+                                                          ShapeKey::Builder().withDeformed().withDualQuatSkinned().withFade(),
+                                                          ShapeKey::Builder().withOwnPipeline(),
+                                                          ShapeKey::Builder().withOwnPipeline().withFade() };
             std::vector<std::vector<ShapeKey>> sortedShapeKeys(keys.size());
 
             const int OWN_PIPELINE_INDEX = 6;
@@ -243,10 +256,11 @@ void DrawHighlightMask::run(const render::RenderContextPointer& renderContext, c
             args->_batch = nullptr;
         });
 
-        _boundsBuffer->setData(itemBounds.size() * sizeof(render::ItemBound), (const gpu::Byte*) itemBounds.data());
+        _boundsBuffer->setData(itemBounds.size() * sizeof(render::ItemBound), (const gpu::Byte*)itemBounds.data());
 
         const auto securityMargin = 2.0f;
-        const float blurPixelWidth = 2.0f * securityMargin * HighlightSharedParameters::getBlurPixelWidth(highlight._style, args->_viewport.w);
+        const float blurPixelWidth = 2.0f * securityMargin *
+                                     HighlightSharedParameters::getBlurPixelWidth(highlight._style, args->_viewport.w);
         const auto framebufferSize = resources->getSourceFrameSize();
         const glm::vec2 highlightWidth = { blurPixelWidth / framebufferSize.x, blurPixelWidth / framebufferSize.y };
 
@@ -261,7 +275,7 @@ void DrawHighlightMask::run(const render::RenderContextPointer& renderContext, c
             batch.setResourceBuffer(BOUNDS_SLOT, _boundsBuffer);
             batch.setUniformBuffer(PARAMETERS_SLOT, _outlineWidth);
             static const int NUM_VERTICES_PER_CUBE = 36;
-            batch.draw(gpu::TRIANGLES, NUM_VERTICES_PER_CUBE * (gpu::uint32) itemBounds.size(), 0);
+            batch.draw(gpu::TRIANGLES, NUM_VERTICES_PER_CUBE * (gpu::uint32)itemBounds.size(), 0);
         });
     } else {
         // Highlight rect should be null as there are no highlighted shapes
@@ -273,7 +287,8 @@ gpu::PipelinePointer DrawHighlight::_pipeline;
 gpu::PipelinePointer DrawHighlight::_pipelineFilled;
 
 DrawHighlight::DrawHighlight(unsigned int highlightIndex, HighlightSharedParametersPointer parameters) :
-    _highlightPassIndex(highlightIndex), _sharedParameters(parameters) {
+    _highlightPassIndex(highlightIndex),
+    _sharedParameters(parameters) {
 }
 
 void DrawHighlight::run(const render::RenderContextPointer& renderContext, const Inputs& inputs) {
@@ -299,16 +314,19 @@ void DrawHighlight::run(const render::RenderContextPointer& renderContext, const
                     auto& shaderParameters = _configuration.edit();
 
                     shaderParameters._outlineUnoccludedColor = highlight._style._outlineUnoccluded.color;
-                    shaderParameters._outlineUnoccludedAlpha = highlight._style._outlineUnoccluded.alpha * (highlight._style._isOutlineSmooth ? 2.0f : 1.0f);
+                    shaderParameters._outlineUnoccludedAlpha = highlight._style._outlineUnoccluded.alpha *
+                                                               (highlight._style._isOutlineSmooth ? 2.0f : 1.0f);
                     shaderParameters._outlineOccludedColor = highlight._style._outlineOccluded.color;
-                    shaderParameters._outlineOccludedAlpha = highlight._style._outlineOccluded.alpha * (highlight._style._isOutlineSmooth ? 2.0f : 1.0f);
+                    shaderParameters._outlineOccludedAlpha = highlight._style._outlineOccluded.alpha *
+                                                             (highlight._style._isOutlineSmooth ? 2.0f : 1.0f);
                     shaderParameters._fillUnoccludedColor = highlight._style._fillUnoccluded.color;
                     shaderParameters._fillUnoccludedAlpha = highlight._style._fillUnoccluded.alpha;
                     shaderParameters._fillOccludedColor = highlight._style._fillOccluded.color;
                     shaderParameters._fillOccludedAlpha = highlight._style._fillOccluded.alpha;
 
                     shaderParameters._threshold = highlight._style._isOutlineSmooth ? 1.0f : 1e-3f;
-                    shaderParameters._blurKernelSize = std::min(7, std::max(2, (int)floorf(highlight._style._outlineWidth * 3 + 0.5f)));
+                    shaderParameters._blurKernelSize = std::min(7, std::max(2, (int)floorf(highlight._style._outlineWidth * 3 +
+                                                                                           0.5f)));
                     // Size is in normalized screen height. We decide that for highlight width = 1, this is equal to 1/400.
                     auto size = highlight._style._outlineWidth / 400.0f;
                     shaderParameters._size.x = (size * framebufferSize.y) / framebufferSize.x;
@@ -415,9 +433,9 @@ void DebugHighlight::run(const render::RenderContextPointer& renderContext, cons
 }
 
 void DebugHighlight::initializePipelines() {
-    static const std::string REPLACEMENT_MARKER{ "//SOURCE_PLACEHOLDER" };
+    static const std::string REPLACEMENT_MARKER { "//SOURCE_PLACEHOLDER" };
     // Depth shader
-    static const std::string DEPTH_SHADER{ R"SHADER(
+    static const std::string DEPTH_SHADER { R"SHADER(
             vec4 getFragmentColor() {
                float Zdb = texelFetch(depthMap, ivec2(gl_FragCoord.xy), 0).x;
                Zdb = 1.0-(1.0-Zdb)*100;
@@ -425,7 +443,6 @@ void DebugHighlight::initializePipelines() {
             }
         )SHADER" };
     static const auto& vs = gpu::Shader::createVertex(shader::render_utils::vertex::debug_deferred_buffer);
-
 
     gpu::Shader::Source fragmentSource;
     fragmentSource = gpu::Shader::Source::get(shader::render_utils::fragment::debug_deferred_buffer);
@@ -489,11 +506,9 @@ void ExtractSelectionName::run(const render::RenderContextPointer& renderContext
 }
 
 DrawHighlightTask::DrawHighlightTask() {
-
 }
 
 void DrawHighlightTask::configure(const Config& config) {
-
 }
 
 void DrawHighlightTask::build(JobModel& task, const render::Varying& inputs, render::Varying& outputs) {
@@ -509,7 +524,6 @@ void DrawHighlightTask::build(JobModel& task, const render::Varying& inputs, ren
         auto state = std::make_shared<gpu::State>();
         state->setDepthTest(true, true, gpu::LESS_EQUAL);
         state->setColorWriteMask(false, false, false, false);
-
 
         auto fadeEffect = DependencyManager::get<FadeEffect>();
         initZPassPipelines(*shapePlumber, state, fadeEffect->getBatchSetter(), fadeEffect->getItemUniformSetter());
@@ -551,17 +565,21 @@ void DrawHighlightTask::build(JobModel& task, const render::Varying& inputs, ren
             stream << "HighlightEffect" << i;
             name = stream.str();
         }
-        const auto drawHighlightInputs = DrawHighlight::Inputs(deferredFrameTransform, highlightResources, sceneFrameBuffer, highlightedRect, primaryFramebuffer).asVarying();
+        const auto drawHighlightInputs = DrawHighlight::Inputs(deferredFrameTransform, highlightResources, sceneFrameBuffer,
+                                                               highlightedRect, primaryFramebuffer)
+                                             .asVarying();
         task.addJob<DrawHighlight>(name, drawHighlightInputs, i, sharedParameters);
     }
 
     // Debug highlight
-    const auto debugInputs = DebugHighlight::Inputs(highlightResources, const_cast<const render::Varying&>(highlight0Rect), jitter, primaryFramebuffer).asVarying();
+    const auto debugInputs = DebugHighlight::Inputs(highlightResources, const_cast<const render::Varying&>(highlight0Rect),
+                                                    jitter, primaryFramebuffer)
+                                 .asVarying();
     task.addJob<DebugHighlight>("HighlightDebug", debugInputs);
 }
 
 const render::Varying DrawHighlightTask::addSelectItemJobs(JobModel& task, const render::Varying& selectionName,
-                                                         const RenderFetchCullSortTask::BucketList& items) {
+                                                           const RenderFetchCullSortTask::BucketList& items) {
     const auto& opaques = items[RenderFetchCullSortTask::OPAQUE_SHAPE];
     const auto& transparents = items[RenderFetchCullSortTask::TRANSPARENT_SHAPE];
     const auto& metas = items[RenderFetchCullSortTask::META];
@@ -573,4 +591,3 @@ const render::Varying DrawHighlightTask::addSelectItemJobs(JobModel& task, const
     const auto selectItemInput = SelectItems::Inputs(transparents, selectedMetasAndOpaques, selectionName).asVarying();
     return task.addJob<SelectItems>("TransparentSelection", selectItemInput);
 }
-

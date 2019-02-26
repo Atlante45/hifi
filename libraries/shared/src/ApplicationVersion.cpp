@@ -17,9 +17,7 @@
 #include <QtCore/QRegExp>
 #include <QtCore/QStringList>
 
-ApplicationVersion::ApplicationVersion(const QString& versionString) :
-    versionString(versionString)
-{
+ApplicationVersion::ApplicationVersion(const QString& versionString) : versionString(versionString) {
     // attempt to regex out a semantic version from the string
     // handling both x.y.z and x.y formats
     QRegExp semanticRegex("([\\d]+)\\.([\\d]+)(?:\\.([\\d]+))?");

@@ -12,11 +12,11 @@
 #ifndef hifi_AudioFileWav_h
 #define hifi_AudioFileWav_h
 
-#include <QObject>
-#include <QFile>
-#include <QDataStream>
-#include <QVector>
 #include <QAudioFormat>
+#include <QDataStream>
+#include <QFile>
+#include <QObject>
+#include <QVector>
 
 class AudioFileWav : public QObject {
     Q_OBJECT

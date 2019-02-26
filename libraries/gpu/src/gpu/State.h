@@ -13,24 +13,24 @@
 
 #include "Format.h"
 
+#include <bitset>
 #include <memory>
 #include <sstream>
-#include <vector>
 #include <unordered_map>
-#include <bitset>
+#include <vector>
 
 // Why a macro and not a fancy template you will ask me ?
 // Because some of the fields are bool packed tightly in the State::Cache class
 // and it s just not good anymore for template T& variable manipulation...
-#define SET_FIELD(FIELD, PATH, value) \
-    {                                 \
-        _values.PATH = value;         \
-        if (value == DEFAULT.PATH) {  \
-            _signature.reset(FIELD);  \
-        } else {                      \
-            _signature.set(FIELD);    \
-        }                             \
-        _stamp++;                     \
+#define SET_FIELD(FIELD, PATH, value)                                                                                          \
+    {                                                                                                                          \
+        _values.PATH = value;                                                                                                  \
+        if (value == DEFAULT.PATH) {                                                                                           \
+            _signature.reset(FIELD);                                                                                           \
+        } else {                                                                                                               \
+            _signature.set(FIELD);                                                                                             \
+        }                                                                                                                      \
+        _stamp++;                                                                                                              \
     }
 
 namespace gpu {
@@ -46,8 +46,7 @@ public:
 
     typedef ::gpu::ComparisonFunction ComparisonFunction;
 
-    enum FillMode : uint8
-    {
+    enum FillMode : uint8 {
         FILL_POINT = 0,
         FILL_LINE,
         FILL_FACE,
@@ -55,8 +54,7 @@ public:
         NUM_FILL_MODES,
     };
 
-    enum CullMode : uint8
-    {
+    enum CullMode : uint8 {
         CULL_NONE = 0,
         CULL_FRONT,
         CULL_BACK,
@@ -64,8 +62,7 @@ public:
         NUM_CULL_MODES,
     };
 
-    enum StencilOp : uint16
-    {
+    enum StencilOp : uint16 {
         STENCIL_OP_KEEP = 0,
         STENCIL_OP_ZERO,
         STENCIL_OP_REPLACE,
@@ -78,8 +75,7 @@ public:
         NUM_STENCIL_OPS,
     };
 
-    enum BlendArg : uint16
-    {
+    enum BlendArg : uint16 {
         ZERO = 0,
         ONE,
         SRC_COLOR,
@@ -99,8 +95,7 @@ public:
         NUM_BLEND_ARGS,
     };
 
-    enum BlendOp : uint16
-    {
+    enum BlendOp : uint16 {
         BLEND_OP_ADD = 0,
         BLEND_OP_SUBTRACT,
         BLEND_OP_REV_SUBTRACT,
@@ -110,8 +105,7 @@ public:
         NUM_BLEND_OPS,
     };
 
-    enum ColorMask : uint8
-    {
+    enum ColorMask : uint8 {
         WRITE_NONE = 0,
         WRITE_RED = 1,
         WRITE_GREEN = 2,
@@ -122,13 +116,15 @@ public:
 
     class DepthTest {
     public:
-        uint8 writeMask{ true };
-        uint8 enabled{ false };
-        ComparisonFunction function{ LESS };
+        uint8 writeMask { true };
+        uint8 enabled { false };
+        ComparisonFunction function { LESS };
 
     public:
         DepthTest(bool enabled = false, bool writeMask = true, ComparisonFunction func = LESS) :
-            writeMask(writeMask), enabled(enabled), function(func) {}
+            writeMask(writeMask),
+            enabled(enabled),
+            function(func) {}
 
         bool isEnabled() const { return enabled != 0; }
         ComparisonFunction getFunction() const { return function; }
@@ -147,18 +143,19 @@ public:
         StencilOp failOp : 4;
         StencilOp depthFailOp : 4;
         StencilOp passOp : 4;
-        int8 reference{ 0 };
-        uint8 readMask{ 0xff };
+        int8 reference { 0 };
+        uint8 readMask { 0xff };
 
     public:
-        StencilTest(int8 reference = 0,
-                    uint8 readMask = 0xFF,
-                    ComparisonFunction func = ALWAYS,
-                    StencilOp failOp = STENCIL_OP_KEEP,
-                    StencilOp depthFailOp = STENCIL_OP_KEEP,
+        StencilTest(int8 reference = 0, uint8 readMask = 0xFF, ComparisonFunction func = ALWAYS,
+                    StencilOp failOp = STENCIL_OP_KEEP, StencilOp depthFailOp = STENCIL_OP_KEEP,
                     StencilOp passOp = STENCIL_OP_KEEP) :
             function(func),
-            failOp(failOp), depthFailOp(depthFailOp), passOp(passOp), reference(reference), readMask(readMask) {}
+            failOp(failOp),
+            depthFailOp(depthFailOp),
+            passOp(passOp),
+            reference(reference),
+            readMask(readMask) {}
 
         ComparisonFunction getFunction() const { return function; }
         StencilOp getFailOp() const { return failOp; }
@@ -182,11 +179,14 @@ public:
         uint8 backWriteMask = 0xFF;
         bool enabled : 1;
         uint8 _spare1 : 7;
-        uint8 _spare2{ 0 };
+        uint8 _spare2 { 0 };
 
     public:
         StencilActivation(bool enabled = false, uint8 frontWriteMask = 0xFF, uint8 backWriteMask = 0xFF) :
-            frontWriteMask(frontWriteMask), backWriteMask(backWriteMask), enabled(enabled), _spare1{ 0 } {}
+            frontWriteMask(frontWriteMask),
+            backWriteMask(backWriteMask),
+            enabled(enabled),
+            _spare1 { 0 } {}
 
         bool isEnabled() const { return enabled; }
         uint8 getWriteMaskFront() const { return frontWriteMask; }
@@ -211,19 +211,18 @@ public:
         BlendOp opAlpha : 4;
 
     public:
-        BlendFunction(bool enabled,
-                      BlendArg sourceColor,
-                      BlendOp operationColor,
-                      BlendArg destinationColor,
-                      BlendArg sourceAlpha,
-                      BlendOp operationAlpha,
-                      BlendArg destinationAlpha) :
+        BlendFunction(bool enabled, BlendArg sourceColor, BlendOp operationColor, BlendArg destinationColor,
+                      BlendArg sourceAlpha, BlendOp operationAlpha, BlendArg destinationAlpha) :
             enabled(enabled),
-            sourceColor(sourceColor), sourceAlpha(sourceAlpha), 
-            destColor(destinationColor), destAlpha(destinationAlpha),
-            opColor(operationColor), opAlpha(operationAlpha) {}
+            sourceColor(sourceColor),
+            sourceAlpha(sourceAlpha),
+            destColor(destinationColor),
+            destAlpha(destinationAlpha),
+            opColor(operationColor),
+            opAlpha(operationAlpha) {}
 
-        BlendFunction(bool enabled = false, BlendArg source = ONE, BlendOp operation = BLEND_OP_ADD, BlendArg destination = ZERO) :
+        BlendFunction(bool enabled = false, BlendArg source = ONE, BlendOp operation = BLEND_OP_ADD,
+                      BlendArg destination = ZERO) :
             BlendFunction(enabled, source, operation, destination, source, operation, destination) {}
 
         bool isEnabled() const { return (enabled != 0); }
@@ -246,8 +245,13 @@ public:
 
     struct Flags {
         Flags() :
-            frontFaceClockwise(false), depthClampEnable(false), scissorEnable(false), multisampleEnable(true),
-            antialisedLineEnable(true), alphaToCoverageEnable(false), _spare1(0) {}
+            frontFaceClockwise(false),
+            depthClampEnable(false),
+            scissorEnable(false),
+            multisampleEnable(true),
+            antialisedLineEnable(true),
+            alphaToCoverageEnable(false),
+            _spare1(0) {}
         bool frontFaceClockwise : 1;
         bool depthClampEnable : 1;
         bool scissorEnable : 1;
@@ -263,7 +267,8 @@ public:
     static_assert(sizeof(Flags) == sizeof(uint8), "Flags size check");
 
     // The Data class is the full explicit description of the State class fields value.
-    // Useful for having one const static called Default for reference or for the gpu::Backend to keep track of the current value
+    // Useful for having one const static called Default for reference or for the gpu::Backend to keep track of the current
+    // value
     class Data {
     public:
         float depthBias = 0.0f;
@@ -275,9 +280,9 @@ public:
         StencilTest stencilTestBack;
         uint32 sampleMask = 0xFFFFFFFF;
         BlendFunction blendFunction;
-        FillMode fillMode{ FILL_FACE };
-        CullMode cullMode{ CULL_NONE };
-        ColorMask colorWriteMask{ WRITE_ALL };
+        FillMode fillMode { FILL_FACE };
+        CullMode cullMode { CULL_NONE };
+        ColorMask colorWriteMask { WRITE_ALL };
 
         Flags flags;
     };
@@ -372,13 +377,8 @@ public:
     void setBlendFunction(BlendFunction function) { SET_FIELD(BLEND_FUNCTION, blendFunction, function); }
     const BlendFunction& getBlendFunction() const { return _values.blendFunction; }
 
-    void setBlendFunction(bool enabled,
-                          BlendArg sourceColor,
-                          BlendOp operationColor,
-                          BlendArg destinationColor,
-                          BlendArg sourceAlpha,
-                          BlendOp operationAlpha,
-                          BlendArg destinationAlpha) {
+    void setBlendFunction(bool enabled, BlendArg sourceColor, BlendOp operationColor, BlendArg destinationColor,
+                          BlendArg sourceAlpha, BlendOp operationAlpha, BlendArg destinationAlpha) {
         setBlendFunction(BlendFunction(enabled, sourceColor, operationColor, destinationColor, sourceAlpha, operationAlpha,
                                        destinationAlpha));
     }
@@ -398,8 +398,7 @@ public:
 
     // All the possible fields
     // NOTE: If you change this, you must update GLBackend::GLState::_resetStateCommands
-    enum Field
-    {
+    enum Field {
         FILL_MODE,
         CULL_MODE,
         FRONT_FACE_CLOCKWISE,
@@ -425,7 +424,7 @@ public:
 
         COLOR_WRITE_MASK,
 
-        NUM_FIELDS,  // not a valid field, just the count
+        NUM_FIELDS, // not a valid field, just the count
     };
 
     // The signature of the state tells which fields of the state are not default
@@ -440,20 +439,20 @@ public:
     State(const Data& values);
     const Data& getValues() const { return _values; }
 
-    const GPUObjectPointer gpuObject{};
+    const GPUObjectPointer gpuObject {};
 
 protected:
     State(const State& state);
     State& operator=(const State& state);
 
     Data _values;
-    Signature _signature{ 0 };
-    Stamp _stamp{ 0 };
+    Signature _signature { 0 };
+    Stamp _stamp { 0 };
 };
 
 typedef std::shared_ptr<State> StatePointer;
 typedef std::vector<StatePointer> States;
 
-};  // namespace gpu
+}; // namespace gpu
 
 #endif

@@ -17,4 +17,3 @@
 Q_DECLARE_LOGGING_CATEGORY(shared)
 
 #endif // hifi_SharedLogging_h
-

@@ -10,8 +10,8 @@
 //
 
 #include "PhysicsHelpers.h"
-#include "NumericalConstants.h"
 #include <QUuid>
+#include "NumericalConstants.h"
 
 #include "PhysicsCollisionGroups.h"
 
@@ -67,16 +67,16 @@ glm::quat computeBulletRotationStep(const glm::vec3& angularVelocity, float time
 /* end Bullet code derivation*/
 
 int32_t Physics::getDefaultCollisionMask(int32_t group) {
-    switch(group) {
-        case  BULLET_COLLISION_GROUP_STATIC:
+    switch (group) {
+        case BULLET_COLLISION_GROUP_STATIC:
             return BULLET_COLLISION_MASK_STATIC;
-        case  BULLET_COLLISION_GROUP_DYNAMIC:
+        case BULLET_COLLISION_GROUP_DYNAMIC:
             return BULLET_COLLISION_MASK_DYNAMIC;
-        case  BULLET_COLLISION_GROUP_KINEMATIC:
+        case BULLET_COLLISION_GROUP_KINEMATIC:
             return BULLET_COLLISION_MASK_KINEMATIC;
-        case  BULLET_COLLISION_GROUP_MY_AVATAR:
+        case BULLET_COLLISION_GROUP_MY_AVATAR:
             return BULLET_COLLISION_MASK_MY_AVATAR;
-        case  BULLET_COLLISION_GROUP_OTHER_AVATAR:
+        case BULLET_COLLISION_GROUP_OTHER_AVATAR:
             return BULLET_COLLISION_MASK_OTHER_AVATAR;
         case BULLET_COLLISION_GROUP_DETAILED_AVATAR:
             return BULLET_COLLISION_MASK_DETAILED_AVATAR;
@@ -97,4 +97,3 @@ void Physics::setSessionUUID(const QUuid& sessionID) {
 const QUuid& Physics::getSessionUUID() {
     return _sessionID;
 }
-

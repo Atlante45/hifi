@@ -13,9 +13,9 @@
 
 #include <QtCore/QLoggingCategory>
 
-#include <Trace.h>
 #include <Profile.h>
 #include <StatTracker.h>
+#include <Trace.h>
 
 #include "AssetClient.h"
 #include "AssetUtils.h"
@@ -24,13 +24,9 @@
 
 static const int DOWNLOAD_PROGRESS_LOG_INTERVAL_SECONDS = 5;
 
-AssetResourceRequest::AssetResourceRequest(
-    const QUrl& url,
-    const bool isObservable,
-    const qint64 callerId,
-    const QString& extra) :
-    ResourceRequest(url, isObservable, callerId, extra)
-{
+AssetResourceRequest::AssetResourceRequest(const QUrl& url, const bool isObservable, const qint64 callerId,
+                                           const QString& extra) :
+    ResourceRequest(url, isObservable, callerId, extra) {
     _lastProgressDebug = p_high_resolution_clock::now() - std::chrono::seconds(DOWNLOAD_PROGRESS_LOG_INTERVAL_SECONDS);
 }
 
@@ -39,7 +35,7 @@ AssetResourceRequest::~AssetResourceRequest() {
         if (_assetMappingRequest) {
             _assetMappingRequest->deleteLater();
         }
-        
+
         if (_assetRequest) {
             _assetRequest->deleteLater();
         }
@@ -80,9 +76,9 @@ void AssetResourceRequest::requestMappingForPath(const AssetUtils::AssetPath& pa
     _assetMappingRequest = assetClient->createGetMappingRequest(path);
 
     // make sure we'll hear about the result of the get mapping request
-    connect(_assetMappingRequest, &GetMappingRequest::finished, this, [this, path](GetMappingRequest* request){
+    connect(_assetMappingRequest, &GetMappingRequest::finished, this, [this, path](GetMappingRequest* request) {
         auto statTracker = DependencyManager::get<StatTracker>();
-        
+
         Q_ASSERT(_state == InProgress);
         Q_ASSERT(request == _assetMappingRequest);
 
@@ -213,10 +209,8 @@ void AssetResourceRequest::onDownloadProgress(qint64 bytesReceived, qint64 bytes
     // if we haven't received the full asset check if it is time to output progress to log
     // we do so every X seconds to assist with ATP download tracking
 
-    if (bytesReceived != bytesTotal
-        && now - _lastProgressDebug > std::chrono::seconds(DOWNLOAD_PROGRESS_LOG_INTERVAL_SECONDS)) {
-
+    if (bytesReceived != bytesTotal &&
+        now - _lastProgressDebug > std::chrono::seconds(DOWNLOAD_PROGRESS_LOG_INTERVAL_SECONDS)) {
         _lastProgressDebug = now;
     }
 }
-

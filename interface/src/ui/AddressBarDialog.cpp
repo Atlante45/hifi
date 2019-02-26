@@ -14,8 +14,8 @@
 
 #include <QMessageBox>
 
-#include "DependencyManager.h"
 #include "AddressManager.h"
+#include "DependencyManager.h"
 #include "DialogsManager.h"
 #include "LocationBookmarks.h"
 
@@ -23,15 +23,17 @@ HIFI_QML_DEF(AddressBarDialog)
 
 AddressBarDialog::AddressBarDialog(QQuickItem* parent) : OffscreenQmlDialog(parent) {
     auto addressManager = DependencyManager::get<AddressManager>();
-    connect(addressManager.data(), &AddressManager::lookupResultIsOffline, this, &AddressBarDialog::displayAddressOfflineMessage);
-    connect(addressManager.data(), &AddressManager::lookupResultIsNotFound, this, &AddressBarDialog::displayAddressNotFoundMessage);
-    connect(addressManager.data(), &AddressManager::goBackPossible, this, [this] (bool isPossible) {
+    connect(addressManager.data(), &AddressManager::lookupResultIsOffline, this,
+            &AddressBarDialog::displayAddressOfflineMessage);
+    connect(addressManager.data(), &AddressManager::lookupResultIsNotFound, this,
+            &AddressBarDialog::displayAddressNotFoundMessage);
+    connect(addressManager.data(), &AddressManager::goBackPossible, this, [this](bool isPossible) {
         if (isPossible != _backEnabled) {
             _backEnabled = isPossible;
             emit backEnabledChanged();
         }
     });
-    connect(addressManager.data(), &AddressManager::goForwardPossible, this, [this] (bool isPossible) {
+    connect(addressManager.data(), &AddressManager::goForwardPossible, this, [this](bool isPossible) {
         if (isPossible != _forwardEnabled) {
             _forwardEnabled = isPossible;
             emit forwardEnabledChanged();

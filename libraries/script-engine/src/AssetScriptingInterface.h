@@ -14,15 +14,15 @@
 #ifndef hifi_AssetScriptingInterface_h
 #define hifi_AssetScriptingInterface_h
 
-#include <QtCore/QObject>
-#include <QtCore/QThread>
-#include <QtScript/QScriptValue>
-#include <QtScript/QScriptable>
 #include <AssetClient.h>
-#include <NetworkAccessManager.h>
 #include <BaseAssetScriptingInterface.h>
 #include <BaseScriptEngine.h>
+#include <NetworkAccessManager.h>
+#include <QtCore/QObject>
+#include <QtCore/QThread>
 #include <QtNetwork/QNetworkDiskCache>
+#include <QtScript/QScriptValue>
+#include <QtScript/QScriptable>
 
 /**jsdoc
  * The Assets API allows you to communicate with the Asset Browser.
@@ -119,7 +119,8 @@ public:
     /**jsdoc
      * Request Asset data from the ATP Server
      * @function Assets.getAsset
-     * @param {URL|Assets.GetOptions} options An atp: style URL, hash, or relative mapped path; or an {@link Assets.GetOptions} object with request parameters
+     * @param {URL|Assets.GetOptions} options An atp: style URL, hash, or relative mapped path; or an {@link Assets.GetOptions}
+     * object with request parameters
      * @param {Assets~getAssetCallback} scope A scope callback function to receive (error, results) values
      * @param {function} [callback=undefined]
      */
@@ -180,7 +181,8 @@ public:
     /**jsdoc
      * Result value returned by {@link Assets.putAsset}.
      * @typedef {object} Assets~putAssetResult
-     * @property {string} [url] the resolved "atp:" style URL for the uploaded asset (based on .path if specified, otherwise on the resulting ATP hash)
+     * @property {string} [url] the resolved "atp:" style URL for the uploaded asset (based on .path if specified, otherwise on
+     * the resulting ATP hash)
      * @property {string} [path] the uploaded asset's resulting ATP path (or undefined if no path mapping was assigned)
      * @property {string} [hash] the uploaded asset's resulting ATP hash
      * @property {boolean} [compressed] flag indicating whether the data was compressed before upload
@@ -197,7 +199,7 @@ public:
      */
 
     Q_INVOKABLE void deleteAsset(QScriptValue options, QScriptValue scope, QScriptValue callback = QScriptValue());
-    
+
     /**jsdoc
      * @function Assets.resolveAsset
      * @param {} options
@@ -206,7 +208,7 @@ public:
      */
 
     Q_INVOKABLE void resolveAsset(QScriptValue options, QScriptValue scope, QScriptValue callback = QScriptValue());
-    
+
     /**jsdoc
      * @function Assets.decompressData
      * @param {} options
@@ -215,7 +217,7 @@ public:
      */
 
     Q_INVOKABLE void decompressData(QScriptValue options, QScriptValue scope, QScriptValue callback = QScriptValue());
-    
+
     /**jsdoc
      * @function Assets.compressData
      * @param {} options
@@ -224,14 +226,14 @@ public:
      */
 
     Q_INVOKABLE void compressData(QScriptValue options, QScriptValue scope, QScriptValue callback = QScriptValue());
-    
+
     /**jsdoc
      * @function Assets.initializeCache
      * @returns {boolean}
      */
 
     Q_INVOKABLE bool initializeCache() { return Parent::initializeCache(); }
-    
+
     /**jsdoc
      * @function Assets.canWriteCacheValue
      * @param {string} url
@@ -239,7 +241,7 @@ public:
      */
 
     Q_INVOKABLE bool canWriteCacheValue(const QUrl& url);
-    
+
     /**jsdoc
      * @function Assets.getCacheStatus
      * @param {} scope
@@ -258,7 +260,7 @@ public:
      */
 
     Q_INVOKABLE void queryCacheMeta(QScriptValue options, QScriptValue scope, QScriptValue callback = QScriptValue());
-    
+
     /**jsdoc
      * @function Assets.loadFromCache
      * @param {} options
@@ -267,7 +269,7 @@ public:
      */
 
     Q_INVOKABLE void loadFromCache(QScriptValue options, QScriptValue scope, QScriptValue callback = QScriptValue());
-    
+
     /**jsdoc
      * @function Assets.saveToCache
      * @param {} options
@@ -276,7 +278,7 @@ public:
      */
 
     Q_INVOKABLE void saveToCache(QScriptValue options, QScriptValue scope, QScriptValue callback = QScriptValue());
-    
+
     /**jsdoc
      * @function Assets.saveToCache
      * @param {} url
@@ -286,8 +288,9 @@ public:
      * @param {} [callback=undefined]
      */
 
-    Q_INVOKABLE void saveToCache(const QUrl& url, const QByteArray& data, const QVariantMap& metadata,
-                                 QScriptValue scope, QScriptValue callback = QScriptValue());
+    Q_INVOKABLE void saveToCache(const QUrl& url, const QByteArray& data, const QVariantMap& metadata, QScriptValue scope,
+                                 QScriptValue callback = QScriptValue());
+
 protected:
     QScriptValue jsBindCallback(QScriptValue scope, QScriptValue callback = QScriptValue());
     Promise jsPromiseReady(Promise promise, QScriptValue scope, QScriptValue callback = QScriptValue());

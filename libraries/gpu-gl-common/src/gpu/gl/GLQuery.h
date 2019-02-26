@@ -8,15 +8,17 @@
 #ifndef hifi_gpu_gl_GLQuery_h
 #define hifi_gpu_gl_GLQuery_h
 
-#include "GLShared.h"
 #include "GLBackend.h"
+#include "GLShared.h"
 
-namespace gpu { namespace gl {
+namespace gpu {
+namespace gl {
 
 class GLQuery : public GLObject<Query> {
     using Parent = gpu::gl::GLObject<Query>;
+
 public:
-    template <typename GLQueryType>
+    template<typename GLQueryType>
     static GLQueryType* sync(GLBackend& backend, const Query& query) {
         GLQueryType* object = Backend::getGPUObject<GLQueryType>(query);
 
@@ -31,7 +33,7 @@ public:
         return object;
     }
 
-    template <typename GLQueryType>
+    template<typename GLQueryType>
     static GLuint getId(GLBackend& backend, const QueryPointer& query) {
         if (!query) {
             return 0;
@@ -40,7 +42,7 @@ public:
         GLQuery* object = sync<GLQueryType>(backend, *query);
         if (!object) {
             return 0;
-        } 
+        }
 
         return object->_endqo;
     }
@@ -48,13 +50,15 @@ public:
     const GLuint& _endqo = { _id };
     const GLuint _beginqo = { 0 };
     GLuint64 _result { (GLuint64)0 };
-    GLuint64 _batchElapsedTime{ (GLuint64)0 };
+    GLuint64 _batchElapsedTime { (GLuint64)0 };
     std::chrono::high_resolution_clock::time_point _batchElapsedTimeBegin;
     uint64_t _profileRangeId { 0 };
     uint32_t _rangeQueryDepth { 0 };
 
 protected:
-    GLQuery(const std::weak_ptr<GLBackend>& backend, const Query& query, GLuint endId, GLuint beginId) : Parent(backend, query, endId), _beginqo(beginId) {}
+    GLQuery(const std::weak_ptr<GLBackend>& backend, const Query& query, GLuint endId, GLuint beginId) :
+        Parent(backend, query, endId),
+        _beginqo(beginId) {}
     ~GLQuery() {
         if (_id) {
             GLuint ids[2] = { _endqo, _beginqo };
@@ -63,6 +67,7 @@ protected:
     }
 };
 
-} }
+} // namespace gl
+} // namespace gpu
 
 #endif

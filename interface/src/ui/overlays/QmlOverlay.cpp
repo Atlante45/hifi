@@ -11,8 +11,8 @@
 #include <QQuickItem>
 
 #include <DependencyManager.h>
-#include <GeometryCache.h>
 #include <GLMHelpers.h>
+#include <GeometryCache.h>
 #include <OffscreenUi.h>
 #include <RegisteredMetaTypes.h>
 #include <SharedUtil.h>
@@ -26,8 +26,7 @@ QmlOverlay::QmlOverlay(const QUrl& url) {
     buildQmlElement(url);
 }
 
-QmlOverlay::QmlOverlay(const QUrl& url, const QmlOverlay* overlay)
-    : Overlay2D(overlay) {
+QmlOverlay::QmlOverlay(const QUrl& url, const QmlOverlay* overlay) : Overlay2D(overlay) {
     buildQmlElement(url);
 }
 

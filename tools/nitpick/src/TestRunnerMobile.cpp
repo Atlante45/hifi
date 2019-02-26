@@ -10,28 +10,20 @@
 #include "TestRunnerMobile.h"
 
 #include <QThread>
-#include <QtWidgets/QMessageBox>
 #include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMessageBox>
 
 #include "Nitpick.h"
 extern Nitpick* nitpick;
 
-TestRunnerMobile::TestRunnerMobile(
-    QLabel* workingFolderLabel,
-    QPushButton *connectDeviceButton,
-    QPushButton *pullFolderButton,
-    QLabel* detectedDeviceLabel,
-    QLineEdit *folderLineEdit,
-    QPushButton* downloadAPKPushbutton,
-    QPushButton* installAPKPushbutton,
-    QPushButton* runInterfacePushbutton,
-    QCheckBox* runLatest,
-    QLineEdit* url,
-    QLabel* statusLabel,
+TestRunnerMobile::TestRunnerMobile(QLabel* workingFolderLabel, QPushButton* connectDeviceButton, QPushButton* pullFolderButton,
+                                   QLabel* detectedDeviceLabel, QLineEdit* folderLineEdit, QPushButton* downloadAPKPushbutton,
+                                   QPushButton* installAPKPushbutton, QPushButton* runInterfacePushbutton, QCheckBox* runLatest,
+                                   QLineEdit* url, QLabel* statusLabel,
 
-    QObject* parent
-) : QObject(parent), _adbInterface(NULL)
-{
+                                   QObject* parent) :
+    QObject(parent),
+    _adbInterface(NULL) {
     _workingFolderLabel = workingFolderLabel;
     _connectDeviceButton = connectDeviceButton;
     _pullFolderButton = pullFolderButton;
@@ -63,14 +55,14 @@ void TestRunnerMobile::connectDevice() {
     if (!_adbInterface) {
         _adbInterface = new AdbInterface();
     }
-    
-    QString devicesFullFilename{ _workingFolder + "/devices.txt" };
+
+    QString devicesFullFilename { _workingFolder + "/devices.txt" };
     QString command = _adbInterface->getAdbCommand() + " devices -l > " + devicesFullFilename;
     system(command.toStdString().c_str());
 
     if (!QFile::exists(devicesFullFilename)) {
         QMessageBox::critical(0, "Internal error", "devicesFullFilename not found");
-        exit (-1);
+        exit(-1);
     }
 
     // Device should be in second line
@@ -79,19 +71,20 @@ void TestRunnerMobile::connectDevice() {
     QString line1 = devicesFile.readLine();
     QString line2 = devicesFile.readLine();
 
-    const QString DEVICE{ "device" };
+    const QString DEVICE { "device" };
     if (line2.contains("unauthorized")) {
         QMessageBox::critical(0, "Unauthorized device detected", "Please allow USB debugging on device");
     } else if (line2.contains(DEVICE)) {
-            // Make sure only 1 device
+        // Make sure only 1 device
         QString line3 = devicesFile.readLine();
         if (line3.contains(DEVICE)) {
             QMessageBox::critical(0, "Too many devices detected", "Tests will run only if a single device is attached");
         } else {
-            // Line looks like this: 988a1b47335239434b     device product:dream2qlteue model:SM_G955U1 device:dream2qlteue transport_id:2
+            // Line looks like this: 988a1b47335239434b     device product:dream2qlteue model:SM_G955U1 device:dream2qlteue
+            // transport_id:2
             QStringList tokens = line2.split(QRegExp("[\r\n\t ]+"));
             QString deviceID = tokens[0];
-            
+
             QString modelID = tokens[3].split(':')[1];
             QString modelName = "UKNOWN";
             if (modelNames.count(modelID) == 1) {
@@ -111,7 +104,6 @@ void TestRunnerMobile::downloadAPK() {
     downloadBuildXml((void*)this);
 }
 
-
 void TestRunnerMobile::downloadComplete() {
     if (!buildXMLDownloaded) {
         // Download of Build XML has completed
@@ -124,7 +116,6 @@ void TestRunnerMobile::downloadComplete() {
             parseBuildInformation();
 
             _installerFilename = INSTALLER_FILENAME_LATEST;
-
 
             // Replace the `exe` extension with `apk`
             _installerFilename = _installerFilename.replace(_installerFilename.length() - 3, 3, "apk");
@@ -139,7 +130,7 @@ void TestRunnerMobile::downloadComplete() {
             filenames << _installerFilename;
         }
 
-       _statusLabel->setText("Downloading installer");
+        _statusLabel->setText("Downloading installer");
 
         nitpick->downloadFiles(urls, _workingFolder, filenames, (void*)this);
     } else {
@@ -155,7 +146,8 @@ void TestRunnerMobile::installAPK() {
     }
 
     _statusLabel->setText("Installing");
-    QString command = _adbInterface->getAdbCommand() + " install -r -d " + _workingFolder + "/" + _installerFilename + " >" + _workingFolder  + "/installOutput.txt";
+    QString command = _adbInterface->getAdbCommand() + " install -r -d " + _workingFolder + "/" + _installerFilename + " >" +
+                      _workingFolder + "/installOutput.txt";
     system(command.toStdString().c_str());
     _statusLabel->setText("Installation complete");
     _runInterfacePushbutton->setEnabled(true);
@@ -182,7 +174,8 @@ void TestRunnerMobile::pullFolder() {
     }
 
     _statusLabel->setText("Pulling folder");
-    QString command = _adbInterface->getAdbCommand() + " pull " + _folderLineEdit->text() + " " + _workingFolder + _installerFilename;
+    QString command = _adbInterface->getAdbCommand() + " pull " + _folderLineEdit->text() + " " + _workingFolder +
+                      _installerFilename;
     system(command.toStdString().c_str());
     _statusLabel->setText("Pull complete");
 #endif

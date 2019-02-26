@@ -8,10 +8,10 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 #include "GameWorkload.h"
-#include "GameWorkloadRenderer.h"
 #include <ViewFrustum.h>
 #include <workload/RegionTracker.h>
 #include <workload/SpaceClassifier.h>
+#include "GameWorkloadRenderer.h"
 
 #include "PhysicsBoundary.h"
 
@@ -21,7 +21,6 @@ public:
     using Outputs = workload::RegionTracker::Outputs;
     using JobModel = workload::Task::ModelIO<WorkloadEngineBuilder, Inputs, Outputs>;
     void build(JobModel& model, const workload::Varying& in, workload::Varying& out) {
-
         const auto& inViews = in.getN<Inputs>(0);
         const auto& inTimings = in.getN<Inputs>(1);
 
@@ -40,29 +39,27 @@ public:
     }
 };
 
-GameWorkloadContext::GameWorkloadContext(const workload::SpacePointer& space,
-        const render::ScenePointer& scene,
-        const PhysicalEntitySimulationPointer& simulation): WorkloadContext(space),
-    _scene(scene), _simulation(simulation)
-{
+GameWorkloadContext::GameWorkloadContext(const workload::SpacePointer& space, const render::ScenePointer& scene,
+                                         const PhysicalEntitySimulationPointer& simulation) :
+    WorkloadContext(space),
+    _scene(scene),
+    _simulation(simulation) {
 }
 
 GameWorkloadContext::~GameWorkloadContext() {
 }
 
-
 GameWorkload::GameWorkload() :
-    _engine(std::make_shared<workload::Engine>(WorkloadEngineBuilder::JobModel::create("Workload"), std::shared_ptr<GameWorkloadContext>()))
-{
+    _engine(std::make_shared<workload::Engine>(WorkloadEngineBuilder::JobModel::create("Workload"),
+                                               std::shared_ptr<GameWorkloadContext>())) {
 }
 
 GameWorkload::~GameWorkload() {
     shutdown();
 }
 
-void GameWorkload::startup(const workload::SpacePointer& space,
-        const render::ScenePointer& scene,
-        const PhysicalEntitySimulationPointer& simulation) {
+void GameWorkload::startup(const workload::SpacePointer& space, const render::ScenePointer& scene,
+                           const PhysicalEntitySimulationPointer& simulation) {
     _engine->reset(std::make_shared<GameWorkloadContext>(space, scene, simulation));
 }
 

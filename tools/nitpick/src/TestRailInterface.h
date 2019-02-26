@@ -12,14 +12,14 @@
 #define hifi_test_testrail_interface_h
 
 #include "BusyWindow.h"
-#include "TestRailTestCasesSelectorWindow.h"
-#include "TestRailRunSelectorWindow.h"
 #include "TestRailResultsSelectorWindow.h"
+#include "TestRailRunSelectorWindow.h"
+#include "TestRailTestCasesSelectorWindow.h"
 
 #include <QDirIterator>
-#include <QtXml/QDomDocument>
 #include <QProcess>
 #include <QString>
+#include <QtXml/QDomDocument>
 
 #include "PythonInterface.h"
 
@@ -29,30 +29,19 @@ class TestRailInterface : public QObject {
 public:
     TestRailInterface();
 
-    void createTestSuiteXML(const QString& testDirectory,
-                            const QString& outputDirectory,
-                            const QString& userGitHub,
+    void createTestSuiteXML(const QString& testDirectory, const QString& outputDirectory, const QString& userGitHub,
                             const QString& branchGitHub);
 
-    void createTestSuitePython(const QString& testDirectory,
-                               const QString& outputDirectory,
-                               const QString& userGitHub,
+    void createTestSuitePython(const QString& testDirectory, const QString& outputDirectory, const QString& userGitHub,
                                const QString& branchGitHub);
 
-    QDomElement processDirectoryXML(const QString& directory,
-                                    const QString& useGitHubr,
-                                    const QString& branchGitHub,
+    QDomElement processDirectoryXML(const QString& directory, const QString& useGitHubr, const QString& branchGitHub,
                                     const QDomElement& element);
 
-    QDomElement processTestXML(const QString& fullDirectory,
-                               const QString& test,
-                               const QString& userGitHub,
-                               const QString& branchGitHub,
-                               const QDomElement& element);
+    QDomElement processTestXML(const QString& fullDirectory, const QString& test, const QString& userGitHub,
+                               const QString& branchGitHub, const QDomElement& element);
 
-    void processTestPython(const QString& fullDirectory,
-                           QTextStream& stream,
-                           const QString& userGitHub,
+    void processTestPython(const QString& fullDirectory, QTextStream& stream, const QString& userGitHub,
                            const QString& branchGitHub);
 
     void getReleasesFromTestRail();
@@ -68,9 +57,7 @@ public:
 
     void createAddTestCasesPythonScript(const QString& testDirectory, const QString& userGitHub, const QString& branchGitHub);
 
-    void processDirectoryPython(const QString& directory,
-                                QTextStream& stream,
-                                const QString& userGitHub,
+    void processDirectoryPython(const QString& directory, QTextStream& stream, const QString& userGitHub,
                                 const QString& branchGitHub);
 
     bool isAValidTestDirectory(const QString& directory);
@@ -91,10 +78,10 @@ public:
 
 private:
     // HighFidelity Interface project ID in TestRail
-    const int INTERFACE_AUTOMATION_PROJECT_ID{ 26 };
+    const int INTERFACE_AUTOMATION_PROJECT_ID { 26 };
 
     // Rendering suite ID
-    const int INTERFACE_SUITE_ID{ 1312 };
+    const int INTERFACE_SUITE_ID { 1312 };
 
     QDomDocument _document;
 
@@ -123,7 +110,7 @@ private:
     QStringList _runNames;
     std::vector<int> _runIDs;
 
-    QString TEMP_NAME{ "fgadhcUDHSFaidsfh3478JJJFSDFIUSOEIrf" };
+    QString TEMP_NAME { "fgadhcUDHSFaidsfh3478JJJFSDFIUSOEIrf" };
 
     PythonInterface* _pythonInterface;
     QString _pythonCommand;

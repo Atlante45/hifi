@@ -13,8 +13,8 @@
 #ifndef hifi_PacketReceiver_h
 #define hifi_PacketReceiver_h
 
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #include <QtCore/QMap>
 #include <QtCore/QMetaMethod>
@@ -32,19 +32,19 @@ class EntityEditPacketSender;
 class OctreePacketProcessor;
 
 namespace std {
-    template <>
-    struct hash<std::pair<HifiSockAddr, udt::Packet::MessageNumber>> {
-        size_t operator()(const std::pair<HifiSockAddr, udt::Packet::MessageNumber>& pair) const {
-            return hash<HifiSockAddr>()(pair.first) ^ hash<udt::Packet::MessageNumber>()(pair.second);
-        }
-    };
-}
+template<>
+struct hash<std::pair<HifiSockAddr, udt::Packet::MessageNumber>> {
+    size_t operator()(const std::pair<HifiSockAddr, udt::Packet::MessageNumber>& pair) const {
+        return hash<HifiSockAddr>()(pair.first) ^ hash<udt::Packet::MessageNumber>()(pair.second);
+    }
+};
+} // namespace std
 
 class PacketReceiver : public QObject {
     Q_OBJECT
 public:
     using PacketTypeList = std::vector<PacketType>;
-    
+
     PacketReceiver(QObject* parent = 0);
     PacketReceiver(const PacketReceiver&) = delete;
 
@@ -58,11 +58,11 @@ public:
     bool registerListener(PacketType type, QObject* listener, const char* slot, bool deliverPending = false);
     bool registerListenerForTypes(PacketTypeList types, QObject* listener, const char* slot);
     void unregisterListener(QObject* listener);
-    
+
     void handleVerifiedPacket(std::unique_ptr<udt::Packet> packet);
     void handleVerifiedMessagePacket(std::unique_ptr<udt::Packet> message);
     void handleMessageFailure(HifiSockAddr from, udt::Packet::MessageNumber messageNumber);
-    
+
 private:
     struct Listener {
         QPointer<QObject> object;
@@ -88,7 +88,7 @@ private:
     QSet<QObject*> _directlyConnectedObjects;
 
     std::unordered_map<std::pair<HifiSockAddr, udt::Packet::MessageNumber>, QSharedPointer<ReceivedMessage>> _pendingMessages;
-    
+
     friend class EntityEditPacketSender;
     friend class OctreePacketProcessor;
 };

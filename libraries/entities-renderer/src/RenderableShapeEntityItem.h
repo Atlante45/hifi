@@ -11,14 +11,16 @@
 
 #include "RenderableEntityItem.h"
 
-#include <procedural/Procedural.h>
 #include <ShapeEntityItem.h>
+#include <procedural/Procedural.h>
 
-namespace render { namespace entities { 
+namespace render {
+namespace entities {
 
 class ShapeEntityRenderer : public TypedEntityRenderer<ShapeEntityItem> {
     using Parent = TypedEntityRenderer<ShapeEntityItem>;
     using Pointer = std::shared_ptr<ShapeEntityRenderer>;
+
 public:
     ShapeEntityRenderer(const EntityItemPointer& entity);
 
@@ -30,7 +32,8 @@ protected:
 private:
     virtual bool needsRenderUpdate() const override;
     virtual bool needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const override;
-    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) override;
+    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                const TypedEntityPointer& entity) override;
     virtual void doRenderUpdateAsynchronousTyped(const TypedEntityPointer& entity) override;
     virtual void doRender(RenderArgs* args) override;
     virtual bool isTransparent() const override;
@@ -51,5 +54,6 @@ private:
     glm::quat _orientation;
 };
 
-} } 
+} // namespace entities
+} // namespace render
 #endif // hifi_RenderableShapeEntityItem_h

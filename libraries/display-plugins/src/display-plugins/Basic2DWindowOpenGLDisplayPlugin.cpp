@@ -12,12 +12,12 @@
 #include <mutex>
 
 #include <QScreen>
-#include <QtGui/QWindow>
 #include <QtGui/QGuiApplication>
+#include <QtGui/QWindow>
 #include <QtWidgets/QAction>
 
-#include <ui-plugins/PluginContainer.h>
 #include <PathUtils.h>
+#include <ui-plugins/PluginContainer.h>
 
 const QString Basic2DWindowOpenGLDisplayPlugin::NAME("Desktop");
 
@@ -37,11 +37,9 @@ void Basic2DWindowOpenGLDisplayPlugin::customizeContext() {
         if ((image.width() > 0) && (image.height() > 0)) {
             image = image.scaled(_virtualPadPixelSize, _virtualPadPixelSize, Qt::KeepAspectRatio);
 
-            _virtualPadStickTexture = gpu::Texture::createStrict(
-                    gpu::Element(gpu::VEC4, gpu::NUINT8, gpu::RGBA),
-                    image.width(), image.height(),
-                    gpu::Texture::MAX_NUM_MIPS,
-                    gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_MIP_LINEAR));
+            _virtualPadStickTexture = gpu::Texture::createStrict(gpu::Element(gpu::VEC4, gpu::NUINT8, gpu::RGBA), image.width(),
+                                                                 image.height(), gpu::Texture::MAX_NUM_MIPS,
+                                                                 gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_MIP_LINEAR));
             _virtualPadStickTexture->setSource("virtualPad stick");
             auto usage = gpu::Texture::Usage::Builder().withColor().withAlpha();
             _virtualPadStickTexture->setUsage(usage.build());
@@ -60,11 +58,9 @@ void Basic2DWindowOpenGLDisplayPlugin::customizeContext() {
         if ((image.width() > 0) && (image.height() > 0)) {
             image = image.scaled(_virtualPadPixelSize, _virtualPadPixelSize, Qt::KeepAspectRatio);
 
-            _virtualPadStickBaseTexture = gpu::Texture::createStrict(
-                    gpu::Element(gpu::VEC4, gpu::NUINT8, gpu::RGBA),
-                    image.width(), image.height(),
-                    gpu::Texture::MAX_NUM_MIPS,
-                    gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_MIP_LINEAR));
+            _virtualPadStickBaseTexture = gpu::Texture::createStrict(gpu::Element(gpu::VEC4, gpu::NUINT8, gpu::RGBA),
+                                                                     image.width(), image.height(), gpu::Texture::MAX_NUM_MIPS,
+                                                                     gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_MIP_LINEAR));
             _virtualPadStickBaseTexture->setSource("virtualPad base");
             auto usage = gpu::Texture::Usage::Builder().withColor().withAlpha();
             _virtualPadStickBaseTexture->setUsage(usage.build());
@@ -75,14 +71,12 @@ void Basic2DWindowOpenGLDisplayPlugin::customizeContext() {
     }
 
     if (_virtualPadButtons.size() == 0) {
-        _virtualPadButtons.append(VirtualPadButton(
-                dpi * VirtualPad::Manager::BTN_FULL_PIXELS / VirtualPad::Manager::DPI,
-                PathUtils::resourcesPath() + "images/fly.png",
-                VirtualPad::Manager::Button::JUMP));
-        _virtualPadButtons.append(VirtualPadButton(
-                dpi * VirtualPad::Manager::BTN_FULL_PIXELS / VirtualPad::Manager::DPI,
-                PathUtils::resourcesPath() + "images/handshake.png",
-                VirtualPad::Manager::Button::HANDSHAKE));
+        _virtualPadButtons.append(VirtualPadButton(dpi * VirtualPad::Manager::BTN_FULL_PIXELS / VirtualPad::Manager::DPI,
+                                                   PathUtils::resourcesPath() + "images/fly.png",
+                                                   VirtualPad::Manager::Button::JUMP));
+        _virtualPadButtons.append(VirtualPadButton(dpi * VirtualPad::Manager::BTN_FULL_PIXELS / VirtualPad::Manager::DPI,
+                                                   PathUtils::resourcesPath() + "images/handshake.png",
+                                                   VirtualPad::Manager::Button::HANDSHAKE));
     }
 #endif
     Parent::customizeContext();
@@ -98,13 +92,14 @@ bool Basic2DWindowOpenGLDisplayPlugin::internalActivate() {
     _container->setFullscreen(nullptr, true);
 #endif
     _container->addMenuItem(PluginType::DISPLAY_PLUGIN, MENU_PATH(), FULLSCREEN,
-        [this](bool clicked) {
-            if (clicked) {
-                _container->setFullscreen(getFullscreenTarget());
-            } else {
-                _container->unsetFullscreen();
-            }
-        }, true, false);
+                            [this](bool clicked) {
+                                if (clicked) {
+                                    _container->setFullscreen(getFullscreenTarget());
+                                } else {
+                                    _container->unsetFullscreen();
+                                }
+                            },
+                            true, false);
 
     return Parent::internalActivate();
 }
@@ -112,12 +107,12 @@ bool Basic2DWindowOpenGLDisplayPlugin::internalActivate() {
 void Basic2DWindowOpenGLDisplayPlugin::compositeExtra() {
 #if defined(Q_OS_ANDROID)
     auto& virtualPadManager = VirtualPad::Manager::instance();
-    if(virtualPadManager.getLeftVirtualPad()->isShown()) {
+    if (virtualPadManager.getLeftVirtualPad()->isShown()) {
         // render stick base
-        auto stickBaseTransform = DependencyManager::get<CompositorHelper>()->getPoint2DTransform(virtualPadManager.getLeftVirtualPad()->getFirstTouch(),
-                                                                                                    _virtualPadPixelSize, _virtualPadPixelSize);
-        auto stickTransform = DependencyManager::get<CompositorHelper>()->getPoint2DTransform(virtualPadManager.getLeftVirtualPad()->getCurrentTouch(),
-                                                                                              _virtualPadPixelSize, _virtualPadPixelSize);
+        auto stickBaseTransform = DependencyManager::get<CompositorHelper>()->getPoint2DTransform(
+            virtualPadManager.getLeftVirtualPad()->getFirstTouch(), _virtualPadPixelSize, _virtualPadPixelSize);
+        auto stickTransform = DependencyManager::get<CompositorHelper>()->getPoint2DTransform(
+            virtualPadManager.getLeftVirtualPad()->getCurrentTouch(), _virtualPadPixelSize, _virtualPadPixelSize);
 
         render([&](gpu::Batch& batch) {
             batch.enableStereo(false);
@@ -134,7 +129,7 @@ void Basic2DWindowOpenGLDisplayPlugin::compositeExtra() {
             batch.setModelTransform(stickTransform);
             batch.draw(gpu::TRIANGLE_STRIP, 4);
 
-            foreach(VirtualPadButton virtualPadButton, _virtualPadButtons) {
+            foreach (VirtualPadButton virtualPadButton, _virtualPadButtons) {
                 virtualPadButton.draw(batch, virtualPadManager.getButtonPosition(virtualPadButton._button));
             }
         });
@@ -150,7 +145,7 @@ bool Basic2DWindowOpenGLDisplayPlugin::isThrottled() const {
     // Don't access the menu API every single frame
     if ((presentCount() - lastCheck) > MIN_THROTTLE_CHECK_FRAMES) {
         static const QString ThrottleFPSIfNotFocus = "Throttle FPS If Not Focus"; // FIXME - this value duplicated in Menu.h
-        _isThrottled  = (!_container->isForeground() && _container->isOptionChecked(ThrottleFPSIfNotFocus));
+        _isThrottled = (!_container->isForeground() && _container->isOptionChecked(ThrottleFPSIfNotFocus));
         lastCheck = presentCount();
     }
 
@@ -164,12 +159,10 @@ QScreen* Basic2DWindowOpenGLDisplayPlugin::getFullscreenTarget() {
 
 #if defined(Q_OS_ANDROID)
 
-Basic2DWindowOpenGLDisplayPlugin::VirtualPadButton::VirtualPadButton(qreal pixelSize,
-                                                                     QString iconPath,
+Basic2DWindowOpenGLDisplayPlugin::VirtualPadButton::VirtualPadButton(qreal pixelSize, QString iconPath,
                                                                      VirtualPad::Manager::Button button) :
     _pixelSize { pixelSize },
-    _button { button }
-{
+    _button { button } {
     if (!_texture) {
         auto image = QImage(iconPath);
         if (image.format() != QImage::Format_ARGB32) {
@@ -179,11 +172,9 @@ Basic2DWindowOpenGLDisplayPlugin::VirtualPadButton::VirtualPadButton(qreal pixel
             image = image.scaled(_pixelSize, _pixelSize, Qt::KeepAspectRatio);
             image = image.mirrored();
 
-            _texture = gpu::Texture::createStrict(
-                    gpu::Element(gpu::VEC4, gpu::NUINT8, gpu::RGBA),
-                    image.width(), image.height(),
-                    gpu::Texture::MAX_NUM_MIPS,
-                    gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_MIP_LINEAR));
+            _texture = gpu::Texture::createStrict(gpu::Element(gpu::VEC4, gpu::NUINT8, gpu::RGBA), image.width(),
+                                                  image.height(), gpu::Texture::MAX_NUM_MIPS,
+                                                  gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_MIP_LINEAR));
             _texture->setSource(iconPath.toStdString());
             auto usage = gpu::Texture::Usage::Builder().withColor().withAlpha();
             _texture->setUsage(usage.build());
@@ -194,11 +185,8 @@ Basic2DWindowOpenGLDisplayPlugin::VirtualPadButton::VirtualPadButton(qreal pixel
     }
 }
 
-void Basic2DWindowOpenGLDisplayPlugin::VirtualPadButton::draw(gpu::Batch &batch,
-                                                              glm::vec2 buttonPosition) {
-    auto transform = DependencyManager::get<CompositorHelper>()->getPoint2DTransform(
-            buttonPosition,
-            _pixelSize, _pixelSize);
+void Basic2DWindowOpenGLDisplayPlugin::VirtualPadButton::draw(gpu::Batch& batch, glm::vec2 buttonPosition) {
+    auto transform = DependencyManager::get<CompositorHelper>()->getPoint2DTransform(buttonPosition, _pixelSize, _pixelSize);
     batch.setResourceTexture(0, _texture);
     batch.setModelTransform(transform);
     batch.draw(gpu::TRIANGLE_STRIP, 4);

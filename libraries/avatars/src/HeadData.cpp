@@ -13,9 +13,9 @@
 
 #include <mutex>
 
-#include <QtCore/QJsonObject>
-#include <QtCore/QJsonArray>
 #include <QVector>
+#include <QtCore/QJsonArray>
+#include <QtCore/QJsonObject>
 
 #include <GLMHelpers.h>
 #include <shared/JSONHelpers.h>
@@ -30,8 +30,7 @@ HeadData::HeadData(AvatarData* owningAvatar) :
     _blendshapeCoefficients(QVector<float>(0, 0.0f)),
     _transientBlendshapeCoefficients(QVector<float>(0, 0.0f)),
     _summedBlendshapeCoefficients(QVector<float>(0, 0.0f)),
-    _owningAvatar(owningAvatar)
-{
+    _owningAvatar(owningAvatar) {
     computeBlendshapesLookupMap();
 }
 
@@ -45,7 +44,6 @@ void HeadData::setRawOrientation(const glm::quat& q) {
     _baseYaw = euler.y;
     _baseRoll = euler.z;
 }
-
 
 glm::quat HeadData::getOrientation() const {
     return _owningAvatar->getWorldOrientation() * getRawOrientation();
@@ -70,7 +68,7 @@ void HeadData::setOrientation(const glm::quat& orientation) {
     setHeadOrientation(orientation);
 }
 
-void HeadData::computeBlendshapesLookupMap(){
+void HeadData::computeBlendshapesLookupMap() {
     for (int i = 0; i < NUM_FACESHIFT_BLENDSHAPES; i++) {
         _blendshapeLookupMap[FACESHIFT_BLENDSHAPES[i]] = i;
     }
@@ -101,8 +99,7 @@ const QVector<float>& HeadData::getSummedBlendshapeCoefficients() {
 }
 
 void HeadData::setBlendshape(QString name, float val) {
-
-    //Check to see if the named blendshape exists, and then set its value if it does
+    // Check to see if the named blendshape exists, and then set its value if it does
     auto it = _blendshapeLookupMap.find(name);
     if (it != _blendshapeLookupMap.end()) {
         if (_blendshapeCoefficients.size() <= it.value()) {
@@ -158,7 +155,7 @@ QJsonObject HeadData::toJson() const {
     auto lookat = getLookAtPosition();
     if (lookat != vec3()) {
         vec3 relativeLookAt = glm::inverse(_owningAvatar->getWorldOrientation()) *
-            (getLookAtPosition() - _owningAvatar->getWorldPosition());
+                              (getLookAtPosition() - _owningAvatar->getWorldPosition());
         headJson[JSON_AVATAR_HEAD_LOOKAT] = toJsonValue(relativeLookAt);
     }
     return headJson;

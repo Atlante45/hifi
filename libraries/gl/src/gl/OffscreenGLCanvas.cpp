@@ -9,16 +9,15 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #include "OffscreenGLCanvas.h"
 
 #include "Config.h"
 
-#include <QtCore/QProcessEnvironment>
 #include <QtCore/QDebug>
+#include <QtCore/QPointer>
+#include <QtCore/QProcessEnvironment>
 #include <QtCore/QThread>
 #include <QtCore/QThreadStorage>
-#include <QtCore/QPointer>
 #include <QtGui/QOffscreenSurface>
 #include <QtGui/QOpenGLContext>
 #include <QtGui/QOpenGLDebugLogger>
@@ -29,10 +28,7 @@
 #include "GLHelpers.h"
 #include "GLLogging.h"
 
-OffscreenGLCanvas::OffscreenGLCanvas() :
-    _context(new QOpenGLContext),
-    _offscreenSurface(new QOffscreenSurface)
-{
+OffscreenGLCanvas::OffscreenGLCanvas() : _context(new QOpenGLContext), _offscreenSurface(new QOffscreenSurface) {
     setFormat(getDefaultOpenGLSurfaceFormat());
 }
 
@@ -47,13 +43,12 @@ OffscreenGLCanvas::~OffscreenGLCanvas() {
     _offscreenSurface->destroy();
     delete _offscreenSurface;
     _offscreenSurface = nullptr;
-
 }
 
 void OffscreenGLCanvas::setFormat(const QSurfaceFormat& format) {
     _context->setFormat(format);
 }
-    
+
 bool OffscreenGLCanvas::create(QOpenGLContext* sharedContext) {
     if (nullptr != sharedContext) {
         sharedContext->doneCurrent();
@@ -122,7 +117,7 @@ void OffscreenGLCanvas::clearThreadContext() {
         return;
     }
     auto& threadContext = threadContextStorage->threadContext.localData();
-    if (this != threadContext.operator OffscreenGLCanvas *()) {
+    if (this != threadContext.operator OffscreenGLCanvas*()) {
         return;
     }
     threadContextStorage->threadContext.setLocalData(nullptr);

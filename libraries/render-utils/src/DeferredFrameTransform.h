@@ -14,8 +14,8 @@
 
 #include <gpu/Resource.h>
 
-#include <render/Forward.h>
 #include <render/DrawTask.h>
+#include <render/Forward.h>
 
 // DeferredFrameTransform is  a helper class gathering in one place the needed camera transform
 // and frame resolution needed for all the deferred rendering passes taking advantage of the Deferred buffers
@@ -30,8 +30,6 @@ public:
     UniformBufferView getFrameTransformBuffer() const { return _frameTransformBuffer; }
 
 protected:
-
-
     // Class describing the uniform buffer with the transform info common to the AO shaders
     // It s changing every frame
     class FrameTransform {
@@ -42,7 +40,7 @@ protected:
         // Depth info is { n.f, f - n, -f}
         glm::vec4 depthInfo;
         // Stereo info is { isStereoFrame, halfWidth }
-        glm::vec4 stereoInfo{ 0.0 };
+        glm::vec4 stereoInfo { 0.0 };
         // Mono proj matrix or Left and Right proj matrix going from Mono Eye space to side clip space
         glm::mat4 projection[2];
         // Inverse proj matrix or Left and Right proj matrix going from Mono Eye space to side clip space
@@ -61,18 +59,12 @@ protected:
         FrameTransform() {}
     };
     UniformBufferView _frameTransformBuffer;
-
-   
 };
 
 using DeferredFrameTransformPointer = std::shared_ptr<DeferredFrameTransform>;
 
-
-
-
 class GenerateDeferredFrameTransform {
 public:
-
     using Input = glm::vec2;
     using Output = DeferredFrameTransformPointer;
     using JobModel = render::Job::ModelIO<GenerateDeferredFrameTransform, Input, Output>;

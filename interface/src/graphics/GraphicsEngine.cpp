@@ -11,30 +11,32 @@
 
 #include <shared/GlobalAppProperties.h>
 
-#include "WorldBox.h"
 #include "LODManager.h"
+#include "WorldBox.h"
 
-#include <GeometryCache.h>
-#include <TextureCache.h>
 #include <FramebufferCache.h>
-#include <UpdateSceneTask.h>
+#include <GeometryCache.h>
 #include <RenderViewTask.h>
 #include <SecondaryCamera.h>
+#include <TextureCache.h>
+#include <UpdateSceneTask.h>
 
 #include "RenderEventHandler.h"
 
+#include <display-plugins/DisplayPlugin.h>
 #include <gpu/Batch.h>
 #include <gpu/Context.h>
 #include <gpu/gl/GLBackend.h>
-#include <display-plugins/DisplayPlugin.h>
 
 #include <display-plugins/CompositorHelper.h>
 #include <QMetaObject>
-#include "ui/Stats.h"
 #include "Application.h"
+#include "ui/Stats.h"
 
 GraphicsEngine::GraphicsEngine() {
-    const QString SPLASH_SKYBOX { "{\"ProceduralEntity\":{ \"version\":2, \"shaderUrl\":\"qrc:///shaders/splashSkybox.frag\" } }" };
+    const QString SPLASH_SKYBOX {
+        "{\"ProceduralEntity\":{ \"version\":2, \"shaderUrl\":\"qrc:///shaders/splashSkybox.frag\" } }"
+    };
     _splashScreen->parse(SPLASH_SKYBOX);
 }
 
@@ -42,11 +44,8 @@ GraphicsEngine::~GraphicsEngine() {
 }
 
 void GraphicsEngine::initializeGPU(GLWidget* glwidget) {
-
-    _renderEventHandler = new RenderEventHandler(
-        [this]() { return this->shouldPaint(); },
-        [this]() { this->render_performFrame(); }
-    );
+    _renderEventHandler = new RenderEventHandler([this]() { return this->shouldPaint(); },
+                                                 [this]() { this->render_performFrame(); });
 
     // Requires the window context, because that's what's used in the actual rendering
     // and the GPU backend will make things like the VAO which cannot be shared across
@@ -57,27 +56,26 @@ void GraphicsEngine::initializeGPU(GLWidget* glwidget) {
     _gpuContext = std::make_shared<gpu::Context>();
 
 #ifndef Q_OS_ANDROID
-    _gpuContext->pushProgramsToSync(shader::allPrograms(), [this] {
-        _programsCompiled.store(true);
-    }, 1);
+    _gpuContext->pushProgramsToSync(shader::allPrograms(), [this] { _programsCompiled.store(true); }, 1);
 #endif
 
     DependencyManager::get<TextureCache>()->setGPUContext(_gpuContext);
 }
 
 void GraphicsEngine::initializeRender(bool disableDeferred) {
-
     // Set up the render engine
     render::CullFunctor cullFunctor = LODManager::shouldRender;
     _renderEngine->addJob<UpdateSceneTask>("UpdateScene");
 #ifndef Q_OS_ANDROID
     _renderEngine->addJob<SecondaryCameraRenderTask>("SecondaryCameraJob", cullFunctor, !disableDeferred);
 #endif
-    _renderEngine->addJob<RenderViewTask>("RenderMainView", cullFunctor, !disableDeferred, render::ItemKey::TAG_BITS_0, render::ItemKey::TAG_BITS_0);
+    _renderEngine->addJob<RenderViewTask>("RenderMainView", cullFunctor, !disableDeferred, render::ItemKey::TAG_BITS_0,
+                                          render::ItemKey::TAG_BITS_0);
     _renderEngine->load();
     _renderEngine->registerScene(_renderScene);
 
-    // Now that OpenGL is initialized, we are sure we have a valid context and can create the various pipeline shaders with success.
+    // Now that OpenGL is initialized, we are sure we have a valid context and can create the various pipeline shaders with
+    // success.
     DependencyManager::get<GeometryCache>()->initializeShapePipelines();
 }
 
@@ -94,14 +92,12 @@ void GraphicsEngine::shutdown() {
 
     _gpuContext->shutdown();
 
-
     // shutdown render engine
     _renderScene = nullptr;
     _renderEngine = nullptr;
 
     _renderEventHandler->deleteLater();
 }
-
 
 void GraphicsEngine::render_runRenderFrame(RenderArgs* renderArgs) {
     PROFILE_RANGE(render, __FUNCTION__);
@@ -134,23 +130,23 @@ bool GraphicsEngine::shouldPaint() const {
     auto displayPlugin = qApp->getActiveDisplayPlugin();
 
 #ifdef DEBUG_PAINT_DELAY
-        static uint64_t paintDelaySamples{ 0 };
-        static uint64_t paintDelayUsecs{ 0 };
+    static uint64_t paintDelaySamples { 0 };
+    static uint64_t paintDelayUsecs { 0 };
 
-        paintDelayUsecs += displayPlugin->getPaintDelayUsecs();
+    paintDelayUsecs += displayPlugin->getPaintDelayUsecs();
 
-        static const int PAINT_DELAY_THROTTLE = 1000;
-        if (++paintDelaySamples % PAINT_DELAY_THROTTLE == 0) {
-            qCDebug(interfaceapp).nospace() <<
-                "Paint delay (" << paintDelaySamples << " samples): " <<
-                (float)paintDelaySamples / paintDelayUsecs << "us";
-        }
+    static const int PAINT_DELAY_THROTTLE = 1000;
+    if (++paintDelaySamples % PAINT_DELAY_THROTTLE == 0) {
+        qCDebug(interfaceapp).nospace() << "Paint delay (" << paintDelaySamples
+                                        << " samples): " << (float)paintDelaySamples / paintDelayUsecs << "us";
+    }
 #endif
 
     // Throttle if requested
-    //if (displayPlugin->isThrottled() && (_graphicsEngine._renderEventHandler->_lastTimeRendered.elapsed() < THROTTLED_SIM_FRAME_PERIOD_MS)) {
+    // if (displayPlugin->isThrottled() && (_graphicsEngine._renderEventHandler->_lastTimeRendered.elapsed() <
+    // THROTTLED_SIM_FRAME_PERIOD_MS)) {
     if (displayPlugin->isThrottled() &&
-            (static_cast<RenderEventHandler*>(_renderEventHandler)->_lastTimeRendered.elapsed() < THROTTLED_SIM_FRAME_PERIOD_MS)) {
+        (static_cast<RenderEventHandler*>(_renderEventHandler)->_lastTimeRendered.elapsed() < THROTTLED_SIM_FRAME_PERIOD_MS)) {
         return false;
     }
 
@@ -159,7 +155,8 @@ bool GraphicsEngine::shouldPaint() const {
 
 bool GraphicsEngine::checkPendingRenderEvent() {
     bool expected = false;
-    return (_renderEventHandler && static_cast<RenderEventHandler*>(_renderEventHandler)->_pendingRenderEvent.compare_exchange_strong(expected, true));
+    return (_renderEventHandler &&
+            static_cast<RenderEventHandler*>(_renderEventHandler)->_pendingRenderEvent.compare_exchange_strong(expected, true));
 }
 
 void GraphicsEngine::render_performFrame() {
@@ -188,14 +185,14 @@ void GraphicsEngine::render_performFrame() {
     }
 
     RenderArgs renderArgs;
-    glm::mat4  HMDSensorPose;
-    glm::mat4  eyeToWorld;
-    glm::mat4  sensorToWorld;
+    glm::mat4 HMDSensorPose;
+    glm::mat4 eyeToWorld;
+    glm::mat4 sensorToWorld;
     ViewFrustum viewFrustum;
 
     bool isStereo;
-    glm::mat4  stereoEyeOffsets[2];
-    glm::mat4  stereoEyeProjections[2];
+    glm::mat4 stereoEyeOffsets[2];
+    glm::mat4 stereoEyeProjections[2];
 
     {
         QMutexLocker viewLocker(&_renderArgsMutex);
@@ -222,9 +219,7 @@ void GraphicsEngine::render_performFrame() {
         getGPUContext()->beginFrame(_appRenderArgs._view, HMDSensorPose);
         // Reset the gpu::Context Stages
         // Back to the default framebuffer;
-        gpu::doInBatch("Application_render::gpuContextReset", getGPUContext(), [&](gpu::Batch& batch) {
-            batch.resetStages();
-        });
+        gpu::doInBatch("Application_render::gpuContextReset", getGPUContext(), [&](gpu::Batch& batch) { batch.resetStages(); });
 
         if (isStereo) {
             renderArgs._context->enableStereo(true);

@@ -12,9 +12,8 @@
 
 using namespace workload;
 
-
 void Transaction::reset(ProxyID id, const ProxyPayload& payload, const Owner& owner) {
-    _resetItems.emplace_back(Reset{ id, payload, owner });
+    _resetItems.emplace_back(Reset { id, payload, owner });
 }
 
 void Transaction::remove(ProxyID id) {
@@ -48,7 +47,6 @@ void Transaction::merge(const std::vector<Transaction>& transactionContainer) {
     }
 }
 
-
 void Transaction::merge(std::vector<Transaction>&& transactionContainer) {
     reserve(transactionContainer);
     auto begin = std::make_move_iterator(transactionContainer.begin());
@@ -59,18 +57,16 @@ void Transaction::merge(std::vector<Transaction>&& transactionContainer) {
     transactionContainer.clear();
 }
 
-
-template <typename T>
+template<typename T>
 void moveElements(T& target, T& source) {
     target.insert(target.end(), std::make_move_iterator(source.begin()), std::make_move_iterator(source.end()));
     source.clear();
 }
 
-template <typename T>
+template<typename T>
 void copyElements(T& target, const T& source) {
     target.insert(target.end(), source.begin(), source.end());
 }
-
 
 void Transaction::reset(const Resets& resets) {
     copyElements(_resetItems, resets);
@@ -101,9 +97,6 @@ void Transaction::clear() {
     _removedItems.clear();
     _updatedItems.clear();
 }
-
-
-
 
 Collection::Collection() {
 }
@@ -153,7 +146,6 @@ uint32_t Collection::enqueueFrame() {
 
     return ++_transactionFrameNumber;
 }
-
 
 void Collection::processTransactionQueue() {
     static TransactionFrames queuedFrames;

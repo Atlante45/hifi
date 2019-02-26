@@ -38,9 +38,7 @@ TouchEvent::TouchEvent() :
     angle(0.0f),
     deltaAngle(0.0f),
     isRotating(false),
-    rotating("none")
-{
-
+    rotating("none") {
 }
 
 TouchEvent::TouchEvent(const QTouchEvent& event) :
@@ -49,8 +47,7 @@ TouchEvent::TouchEvent(const QTouchEvent& event) :
     isPinchOpening(false),
     deltaAngle(0.0f),
     isRotating(false),
-    rotating("none")
-{
+    rotating("none") {
     initWithQTouchEvent(event);
 }
 
@@ -60,7 +57,7 @@ TouchEvent::TouchEvent(const QTouchEvent& event, const TouchEvent& other) {
 }
 
 // returns the angle (in degrees) between two points (note: 0 degrees is 'east')
-float angleBetweenPoints(const glm::vec2& a, const glm::vec2& b ) {
+float angleBetweenPoints(const glm::vec2& a, const glm::vec2& b) {
     glm::vec2 length = b - a;
     float angle = DEGREES_PER_RADIAN * std::atan2(length.y, length.x);
     if (angle < 0) {
@@ -98,16 +95,16 @@ void TouchEvent::initWithQTouchEvent(const QTouchEvent& event) {
     // after calculating the center point (average touch point), determine the maximum radius
     // also calculate the rotation angle for each point
     float maxRadius = 0.0f;
-    glm::vec2 center(x,y);
+    glm::vec2 center(x, y);
     for (int i = 0; i < touchPoints; ++i) {
         glm::vec2 touchPoint(tPoints[i].pos().x(), tPoints[i].pos().y());
-        float thisRadius = glm::distance(center,touchPoint);
+        float thisRadius = glm::distance(center, touchPoint);
         if (thisRadius > maxRadius) {
             maxRadius = thisRadius;
         }
 
         // calculate the angle for this point
-        float thisAngle = angleBetweenPoints(center,touchPoint);
+        float thisAngle = angleBetweenPoints(center, touchPoint);
         angles << thisAngle;
     }
     radius = maxRadius;
@@ -117,7 +114,7 @@ void TouchEvent::initWithQTouchEvent(const QTouchEvent& event) {
     for (int i = 0; i < touchPoints; ++i) {
         totalAngle += angles[i];
     }
-    angle = totalAngle/(float)touchPoints;
+    angle = totalAngle / (float)touchPoints;
 
     isPressed = event.touchPointStates().testFlag(Qt::TouchPointPressed);
     isMoved = event.touchPointStates().testFlag(Qt::TouchPointMoved);
@@ -185,18 +182,18 @@ void TouchEvent::calculateMetaAttributes(const TouchEvent& other) {
  * @property {number} touchPoints - Integer number of touch points.
  * @property {Vec2[]} points - The coordinates of the touch points.
  * @property {number} radius - The radius of a circle centered on their average position that encompasses the touch points.
- * @property {boolean} isPinching - <code>true</code> if the <code>radius</code> has reduced since the most recent touch event 
+ * @property {boolean} isPinching - <code>true</code> if the <code>radius</code> has reduced since the most recent touch event
  *     with a different <code>radius</code> value, otherwise <code>false</code>.
- * @property {boolean} isPinchOpening - <code>true</code> if the <code>radius</code> has increased since the most recent touch 
+ * @property {boolean} isPinchOpening - <code>true</code> if the <code>radius</code> has increased since the most recent touch
  *     event with a different <code>radius</code> value, otherwise <code>false</code>.
  * @property {number} angle - An angle calculated from the touch points, in degrees.
- * @property {number} deltaAngle - The change in the <code>angle</code> value since the previous touch event, in degrees, if 
+ * @property {number} deltaAngle - The change in the <code>angle</code> value since the previous touch event, in degrees, if
  *     the number of touch points is the same, otherwise <code>0.0</code>.
  * @property {number[]} angles - The angles of each touch point about the center of all the touch points, in degrees.
- * @property {boolean} isRotating - <code>true</code> if the <code>angle</code> of the touch event has changed since the 
+ * @property {boolean} isRotating - <code>true</code> if the <code>angle</code> of the touch event has changed since the
  *     previous touch event and the number of touch points is the same, otherwise <code>false</code>.
- * @property {string} rotating - <code>"clockwise"</code> or <code>"counterClockwise"</code> if the <code>angle</code> of the 
- *     touch event has changed since the previous touch event and the number of touch points is the same, otherwise 
+ * @property {string} rotating - <code>"clockwise"</code> or <code>"counterClockwise"</code> if the <code>angle</code> of the
+ *     touch event has changed since the previous touch event and the number of touch points is the same, otherwise
  *     <code>"none"</code>.
  *
  * @example <caption>Report the TouchEvent details when a touch event starts.</caption>

@@ -18,15 +18,14 @@ namespace controller {
 
 class RotateFilter : public Filter {
     REGISTER_FILTER_CLASS(RotateFilter);
+
 public:
     RotateFilter() = default;
     RotateFilter(glm::quat rotation) : _rotation(rotation) {}
 
     virtual AxisValue apply(AxisValue value) const override { return value; }
 
-    virtual Pose apply(Pose value) const override {
-        return value.transform(glm::mat4(glm::quat(_rotation)));
-    }
+    virtual Pose apply(Pose value) const override { return value.transform(glm::mat4(glm::quat(_rotation))); }
 
     virtual bool parseParameters(const QJsonValue& parameters) override { return parseQuatParameter(parameters, _rotation); }
 
@@ -34,6 +33,6 @@ private:
     glm::quat _rotation;
 };
 
-}
+} // namespace controller
 
 #endif

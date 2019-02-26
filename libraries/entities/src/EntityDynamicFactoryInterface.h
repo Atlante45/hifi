@@ -20,15 +20,18 @@ class EntityDynamicFactoryInterface : public QObject, public Dependency {
     Q_OBJECT
     SINGLETON_DEPENDENCY
 
- public:
-    EntityDynamicFactoryInterface() { }
-    virtual ~EntityDynamicFactoryInterface() { }
-    virtual EntityDynamicPointer factory(EntityDynamicType type,
-                                        const QUuid& id,
-                                        EntityItemPointer ownerEntity,
-                                        QVariantMap arguments) { assert(false); return nullptr; }
-    virtual EntityDynamicPointer factoryBA(EntityItemPointer ownerEntity,
-                                          QByteArray data) { assert(false); return nullptr; }
+public:
+    EntityDynamicFactoryInterface() {}
+    virtual ~EntityDynamicFactoryInterface() {}
+    virtual EntityDynamicPointer factory(EntityDynamicType type, const QUuid& id, EntityItemPointer ownerEntity,
+                                         QVariantMap arguments) {
+        assert(false);
+        return nullptr;
+    }
+    virtual EntityDynamicPointer factoryBA(EntityItemPointer ownerEntity, QByteArray data) {
+        assert(false);
+        return nullptr;
+    }
 };
 
 #endif // hifi_EntityDynamicFactoryInterface_h

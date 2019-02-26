@@ -7,17 +7,17 @@
 //
 #include "OffscreenSurface.h"
 
-#include <unordered_set>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <QtCore/QThread>
-#include <QtQml/QtQml>
-#include <QtQml/QQmlEngine>
 #include <QtQml/QQmlComponent>
+#include <QtQml/QQmlEngine>
 #include <QtQml/QQmlFileSelector>
+#include <QtQml/QtQml>
 #include <QtQuick/QQuickItem>
-#include <QtQuick/QQuickWindow>
 #include <QtQuick/QQuickRenderControl>
+#include <QtQuick/QQuickWindow>
 
 #include <GLMHelpers.h>
 
@@ -77,8 +77,7 @@ std::function<void(uint32_t, void*)> OffscreenSurface::getDiscardLambda() {
     };
 }
 
-OffscreenSurface::OffscreenSurface()
-    : _sharedObject(new impl::SharedObject()) {
+OffscreenSurface::OffscreenSurface() : _sharedObject(new impl::SharedObject()) {
 }
 
 OffscreenSurface::~OffscreenSurface() {
@@ -179,7 +178,7 @@ bool OffscreenSurface::eventFilter(QObject* originalDestination, QEvent* event) 
         case QEvent::TouchBegin:
         case QEvent::TouchUpdate:
         case QEvent::TouchEnd: {
-            QTouchEvent *originalEvent = static_cast<QTouchEvent *>(event);
+            QTouchEvent* originalEvent = static_cast<QTouchEvent*>(event);
             QEvent::Type fakeMouseEventType = QEvent::None;
             Qt::MouseButton fakeMouseButton = Qt::LeftButton;
             Qt::MouseButtons fakeMouseButtons = Qt::NoButton;
@@ -197,8 +196,10 @@ bool OffscreenSurface::eventFilter(QObject* originalDestination, QEvent* event) 
                     fakeMouseButtons = Qt::NoButton;
                     break;
             }
-            // Same case as OffscreenUi.cpp::eventFilter: touch events are always being accepted so we now use mouse events and consider one touch, touchPoints()[0].
-            QMouseEvent fakeMouseEvent(fakeMouseEventType, originalEvent->touchPoints()[0].pos(), fakeMouseButton, fakeMouseButtons, Qt::NoModifier);
+            // Same case as OffscreenUi.cpp::eventFilter: touch events are always being accepted so we now use mouse events and
+            // consider one touch, touchPoints()[0].
+            QMouseEvent fakeMouseEvent(fakeMouseEventType, originalEvent->touchPoints()[0].pos(), fakeMouseButton,
+                                       fakeMouseButtons, Qt::NoModifier);
             fakeMouseEvent.ignore();
             if (QCoreApplication::sendEvent(_sharedObject->getWindow(), &fakeMouseEvent)) {
                 /*qInfo() << __FUNCTION__ << "sent fake touch event:" << fakeMouseEvent.type()
@@ -215,7 +216,7 @@ bool OffscreenSurface::eventFilter(QObject* originalDestination, QEvent* event) 
                 if (QCoreApplication::sendEvent(window->activeFocusItem(), event)) {
                     bool eventAccepted = event->isAccepted();
                     if (event->type() == QEvent::InputMethodQuery) {
-                        QInputMethodQueryEvent *imqEvent = static_cast<QInputMethodQueryEvent *>(event);
+                        QInputMethodQueryEvent* imqEvent = static_cast<QInputMethodQueryEvent*>(event);
                         // this block disables the selection cursor in android which appears in
                         // the top-left corner of the screen
                         if (imqEvent->queries() & Qt::ImEnabled) {
@@ -282,7 +283,8 @@ void OffscreenSurface::load(const QUrl& qmlSource, bool createNewContext, const 
     loadInternal(qmlSource, createNewContext, nullptr, callback);
 }
 
-void OffscreenSurface::loadInNewContext(const QUrl& qmlSource, const QmlContextObjectCallback& callback, const QmlContextCallback& contextCallback) {
+void OffscreenSurface::loadInNewContext(const QUrl& qmlSource, const QmlContextObjectCallback& callback,
+                                        const QmlContextCallback& contextCallback) {
     loadInternal(qmlSource, true, nullptr, callback, contextCallback);
 }
 
@@ -294,12 +296,10 @@ void OffscreenSurface::load(const QString& qmlSourceFile, const QmlContextObject
     return load(QUrl(qmlSourceFile), callback);
 }
 
-void OffscreenSurface::loadInternal(const QUrl& qmlSource,
-                                    bool createNewContext,
-                                    QQuickItem* parent,
-                                    const QmlContextObjectCallback& callback,
-                                    const QmlContextCallback& contextCallback) {
-    PROFILE_RANGE_EX(app, "OffscreenSurface::loadInternal", 0xffff00ff, 0, { std::make_pair("url", qmlSource.toDisplayString()) });
+void OffscreenSurface::loadInternal(const QUrl& qmlSource, bool createNewContext, QQuickItem* parent,
+                                    const QmlContextObjectCallback& callback, const QmlContextCallback& contextCallback) {
+    PROFILE_RANGE_EX(app, "OffscreenSurface::loadInternal", 0xffff00ff, 0,
+                     { std::make_pair("url", qmlSource.toDisplayString()) });
     if (QThread::currentThread() != thread()) {
         qFatal("Called load on a non-surface thread");
     }
@@ -342,9 +342,7 @@ void OffscreenSurface::loadInternal(const QUrl& qmlSource,
     finishQmlLoad(qmlComponent, targetContext, parent, callback);
 }
 
-void OffscreenSurface::finishQmlLoad(QQmlComponent* qmlComponent,
-                                     QQmlContext* qmlContext,
-                                     QQuickItem* parent,
+void OffscreenSurface::finishQmlLoad(QQmlComponent* qmlComponent, QQmlContext* qmlContext, QQuickItem* parent,
                                      const QmlContextObjectCallback& callback) {
     PROFILE_RANGE(app, "finishQmlLoad");
     disconnect(qmlComponent, &QQmlComponent::statusChanged, this, 0);
@@ -386,7 +384,7 @@ void OffscreenSurface::finishQmlLoad(QQmlComponent* qmlComponent,
         // supporting keyboard shortcuts)
         newItem->setFlag(QQuickItem::ItemIsFocusScope, true);
 #ifdef DEBUG
-        for (auto frame : newObject->findChildren<QQuickItem *>("Frame")) {
+        for (auto frame : newObject->findChildren<QQuickItem*>("Frame")) {
             frame->setProperty("qmlFile", qmlComponent->url());
         }
 #endif

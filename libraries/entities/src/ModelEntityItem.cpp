@@ -33,8 +33,7 @@ EntityItemPointer ModelEntityItem::factory(const EntityItemID& entityID, const E
     return entity;
 }
 
-ModelEntityItem::ModelEntityItem(const EntityItemID& entityItemID) : EntityItem(entityItemID)
-{
+ModelEntityItem::ModelEntityItem(const EntityItemID& entityItemID) : EntityItem(entityItemID) {
     _lastAnimated = usecTimestampNow();
     // set the last animated when interface (re)starts
     _type = EntityTypes::Model;
@@ -43,19 +42,17 @@ ModelEntityItem::ModelEntityItem(const EntityItemID& entityItemID) : EntityItem(
 }
 
 const QString ModelEntityItem::getTextures() const {
-    return resultWithReadLock<QString>([&] {
-        return _textures;
-    });
+    return resultWithReadLock<QString>([&] { return _textures; });
 }
 
 void ModelEntityItem::setTextures(const QString& textures) {
-    withWriteLock([&] {
-        _textures = textures;
-    });
+    withWriteLock([&] { _textures = textures; });
 }
 
-EntityItemProperties ModelEntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
-    EntityItemProperties properties = EntityItem::getProperties(desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
+EntityItemProperties ModelEntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                                    bool allowEmptyDesiredProperties) const {
+    EntityItemProperties properties = EntityItem::getProperties(
+        desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
 
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(shapeType, getShapeType);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(compoundShapeURL, getCompoundShapeURL);
@@ -70,9 +67,7 @@ EntityItemProperties ModelEntityItem::getProperties(const EntityPropertyFlags& d
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(jointTranslations, getJointTranslations);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(relayParentJoints, getRelayParentJoints);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(groupCulled, getGroupCulled);
-    withReadLock([&] {
-        _animationProperties.getProperties(properties);
-    });
+    withReadLock([&] { _animationProperties.getProperties(properties); });
     return properties;
 }
 
@@ -106,8 +101,8 @@ bool ModelEntityItem::setProperties(const EntityItemProperties& properties) {
         if (wantDebug) {
             uint64_t now = usecTimestampNow();
             int elapsed = now - getLastEdited();
-            qCDebug(entities) << "ModelEntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                    "now=" << now << " getLastEdited()=" << getLastEdited();
+            qCDebug(entities) << "ModelEntityItem::setProperties() AFTER update... edited AGO=" << elapsed << "now=" << now
+                              << " getLastEdited()=" << getLastEdited();
         }
         setLastEdited(properties._lastEdited);
     }
@@ -116,10 +111,8 @@ bool ModelEntityItem::setProperties(const EntityItemProperties& properties) {
 }
 
 int ModelEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) {
-
+                                                      ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                      bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
     bool animationPropertiesChanged = false;
@@ -144,12 +137,11 @@ int ModelEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data,
     withReadLock([&] {
         animationProperties = _animationProperties;
         bytesFromAnimation = animationProperties.readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
-            propertyFlags, overwriteLocalData, animationPropertiesChanged);
+                                                                                  propertyFlags, overwriteLocalData,
+                                                                                  animationPropertiesChanged);
     });
     if (animationPropertiesChanged) {
-        withWriteLock([&] {
-            applyNewAnimationProperties(animationProperties);
-        });
+        withWriteLock([&] { applyNewAnimationProperties(animationProperties); });
         somethingChanged = true;
     }
 
@@ -180,14 +172,11 @@ EntityPropertyFlags ModelEntityItem::getEntityProperties(EncodeBitstreamParams& 
     return requestedProperties;
 }
 
-
 void ModelEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
-                                EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                EntityPropertyFlags& requestedProperties,
-                                EntityPropertyFlags& propertyFlags,
-                                EntityPropertyFlags& propertiesDidntFit,
-                                int& propertyCount, OctreeElement::AppendState& appendState) const {
-
+                                         EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
+                                         EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                         EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                         OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_SHAPE_TYPE, (uint32_t)getShapeType());
@@ -206,11 +195,9 @@ void ModelEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBit
 
     withReadLock([&] {
         _animationProperties.appendSubclassData(packetData, params, entityTreeElementExtraEncodeData, requestedProperties,
-            propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                                                propertyFlags, propertiesDidntFit, propertyCount, appendState);
     });
 }
-
-
 
 // added update function back for property fix
 void ModelEntityItem::update(const quint64& now) {
@@ -315,18 +302,14 @@ void ModelEntityItem::setCompoundShapeURL(const QString& url) {
 
 void ModelEntityItem::setAnimationURL(const QString& url) {
     _flags |= Simulation::DIRTY_UPDATEABLE;
-    withWriteLock([&] {
-        _animationProperties.setURL(url);
-    });
+    withWriteLock([&] { _animationProperties.setURL(url); });
 }
 
 void ModelEntityItem::setAnimationSettings(const QString& value) {
     // NOTE: this method only called for old bitstream format
 
     AnimationPropertyGroup animationProperties;
-    withReadLock([&] {
-        animationProperties = _animationProperties;
-    });
+    withReadLock([&] { animationProperties = _animationProperties; });
 
     // the animations setting is a JSON string that may contain various animation settings.
     // if it includes fps, currentFrame, or running, those values will be parsed out and
@@ -377,23 +360,17 @@ void ModelEntityItem::setAnimationSettings(const QString& value) {
         animationProperties.setAllowTranslation(allowTranslation);
     }
 
-    withWriteLock([&] {
-        applyNewAnimationProperties(animationProperties);
-    });
+    withWriteLock([&] { applyNewAnimationProperties(animationProperties); });
 }
 
 void ModelEntityItem::setAnimationIsPlaying(bool value) {
     _flags |= Simulation::DIRTY_UPDATEABLE;
-    withWriteLock([&] {
-        _animationProperties.setRunning(value);
-    });
+    withWriteLock([&] { _animationProperties.setRunning(value); });
 }
 
 void ModelEntityItem::setAnimationFPS(float value) {
     _flags |= Simulation::DIRTY_UPDATEABLE;
-    withWriteLock([&] {
-        _animationProperties.setFPS(value);
-    });
+    withWriteLock([&] { _animationProperties.setFPS(value); });
 }
 
 // virtual
@@ -532,43 +509,31 @@ QVector<bool> ModelEntityItem::getJointTranslationsSet() const {
     return result;
 }
 
-bool ModelEntityItem::hasModel() const { 
-    return resultWithReadLock<bool>([&] {
-        return !_modelURL.isEmpty();
-    });
+bool ModelEntityItem::hasModel() const {
+    return resultWithReadLock<bool>([&] { return !_modelURL.isEmpty(); });
 }
 bool ModelEntityItem::hasCompoundShapeURL() const {
     return !_compoundShapeURL.get().isEmpty();
 }
 
 QString ModelEntityItem::getModelURL() const {
-    return resultWithReadLock<QString>([&] {
-        return _modelURL;
-    });
+    return resultWithReadLock<QString>([&] { return _modelURL; });
 }
 
 void ModelEntityItem::setRelayParentJoints(bool relayJoints) {
-    withWriteLock([&] {
-        _relayParentJoints = relayJoints;
-    });
+    withWriteLock([&] { _relayParentJoints = relayJoints; });
 }
 
 bool ModelEntityItem::getRelayParentJoints() const {
-    return resultWithReadLock<bool>([&] {
-        return _relayParentJoints;
-    });
+    return resultWithReadLock<bool>([&] { return _relayParentJoints; });
 }
 
 void ModelEntityItem::setGroupCulled(bool value) {
-    withWriteLock([&] {
-        _groupCulled = value;
-    });
+    withWriteLock([&] { _groupCulled = value; });
 }
 
 bool ModelEntityItem::getGroupCulled() const {
-    return resultWithReadLock<bool>([&] {
-        return _groupCulled;
-    });
+    return resultWithReadLock<bool>([&] { return _groupCulled; });
 }
 
 QString ModelEntityItem::getCompoundShapeURL() const {
@@ -580,101 +545,68 @@ QString ModelEntityItem::getCollisionShapeURL() const {
 }
 
 void ModelEntityItem::setColor(const glm::u8vec3& value) {
-    withWriteLock([&] {
-        _color = value;
-    });
+    withWriteLock([&] { _color = value; });
 }
 
 glm::u8vec3 ModelEntityItem::getColor() const {
-    return resultWithReadLock<glm::u8vec3>([&] {
-        return _color;
-    });
+    return resultWithReadLock<glm::u8vec3>([&] { return _color; });
 }
 
 // Animation related items...
-AnimationPropertyGroup ModelEntityItem::getAnimationProperties() const { 
-    return resultWithReadLock<AnimationPropertyGroup>([&] {
-        return _animationProperties;
-    });
+AnimationPropertyGroup ModelEntityItem::getAnimationProperties() const {
+    return resultWithReadLock<AnimationPropertyGroup>([&] { return _animationProperties; });
 }
 
-bool ModelEntityItem::hasAnimation() const { 
-    return resultWithReadLock<bool>([&] { 
-        return !_animationProperties.getURL().isEmpty();
-    });
+bool ModelEntityItem::hasAnimation() const {
+    return resultWithReadLock<bool>([&] { return !_animationProperties.getURL().isEmpty(); });
 }
 
-QString ModelEntityItem::getAnimationURL() const { 
-    return resultWithReadLock<QString>([&] {
-        return _animationProperties.getURL();
-    });
+QString ModelEntityItem::getAnimationURL() const {
+    return resultWithReadLock<QString>([&] { return _animationProperties.getURL(); });
 }
 
 void ModelEntityItem::setAnimationCurrentFrame(float value) {
-    withWriteLock([&] {
-        _animationProperties.setCurrentFrame(value);
-    });
+    withWriteLock([&] { _animationProperties.setCurrentFrame(value); });
 }
 
 void ModelEntityItem::setAnimationAllowTranslation(bool value) {
-    withWriteLock([&] {
-        _animationProperties.setAllowTranslation(value);
-    });
+    withWriteLock([&] { _animationProperties.setAllowTranslation(value); });
 }
 
 bool ModelEntityItem::getAnimationAllowTranslation() const {
-    return resultWithReadLock<bool>([&] {
-        return _animationProperties.getAllowTranslation();
-    });
+    return resultWithReadLock<bool>([&] { return _animationProperties.getAllowTranslation(); });
 }
 
-void ModelEntityItem::setAnimationLoop(bool loop) { 
-    withWriteLock([&] {
-        _animationProperties.setLoop(loop);
-    });
+void ModelEntityItem::setAnimationLoop(bool loop) {
+    withWriteLock([&] { _animationProperties.setLoop(loop); });
 }
 
 bool ModelEntityItem::getAnimationLoop() const {
-    return resultWithReadLock<bool>([&] {
-        return _animationProperties.getLoop();
-    });
+    return resultWithReadLock<bool>([&] { return _animationProperties.getLoop(); });
 }
 
-
-void ModelEntityItem::setAnimationHold(bool hold) { 
-    withWriteLock([&] {
-        _animationProperties.setHold(hold);
-    });
+void ModelEntityItem::setAnimationHold(bool hold) {
+    withWriteLock([&] { _animationProperties.setHold(hold); });
 }
 
-bool ModelEntityItem::getAnimationHold() const { 
-    return resultWithReadLock<bool>([&] {
-        return _animationProperties.getHold();
-    });
+bool ModelEntityItem::getAnimationHold() const {
+    return resultWithReadLock<bool>([&] { return _animationProperties.getHold(); });
 }
 
-bool ModelEntityItem::getAnimationIsPlaying() const { 
-    return resultWithReadLock<bool>([&] {
-        return _animationProperties.getRunning();
-    });
+bool ModelEntityItem::getAnimationIsPlaying() const {
+    return resultWithReadLock<bool>([&] { return _animationProperties.getRunning(); });
 }
 
-float ModelEntityItem::getAnimationCurrentFrame() const { 
-    return resultWithReadLock<float>([&] {
-        return _animationProperties.getCurrentFrame();
-    });
+float ModelEntityItem::getAnimationCurrentFrame() const {
+    return resultWithReadLock<float>([&] { return _animationProperties.getCurrentFrame(); });
 }
 
 float ModelEntityItem::getAnimationFPS() const {
-    return resultWithReadLock<float>([&] {
-        return _animationProperties.getFPS();
-    });
+    return resultWithReadLock<float>([&] { return _animationProperties.getFPS(); });
 }
 
 bool ModelEntityItem::isAnimatingSomething() const {
-    return resultWithReadLock<bool>([&] {
-        return _animationProperties.isValidAndRunning();
-    });
+    return resultWithReadLock<bool>([&] { return _animationProperties.isValidAndRunning(); });
 }
 
 bool ModelEntityItem::applyNewAnimationProperties(AnimationPropertyGroup newProperties) {
@@ -686,14 +618,14 @@ bool ModelEntityItem::applyNewAnimationProperties(AnimationPropertyGroup newProp
     if ((newProperties.getFirstFrame() != _animationProperties.getFirstFrame()) ||
         (newProperties.getLastFrame() != _animationProperties.getLastFrame()) ||
         (newProperties.getRunning() && !_animationProperties.getRunning())) {
-
         // when we start interface and the property is are set then the current frame is initialized to -1
         if (_currentFrame < 0.0f) {
-            // don't reset _lastAnimated here because we need the timestamp from the ModelEntityItem constructor for when the properties were set
+            // don't reset _lastAnimated here because we need the timestamp from the ModelEntityItem constructor for when the
+            // properties were set
             _currentFrame = newProperties.getCurrentFrame();
             newProperties.setCurrentFrame(_currentFrame);
         } else {
-            _lastAnimated =  usecTimestampNow();
+            _lastAnimated = usecTimestampNow();
             _currentFrame = newProperties.getFirstFrame();
             newProperties.setCurrentFrame(newProperties.getFirstFrame());
         }
@@ -715,13 +647,9 @@ bool ModelEntityItem::applyNewAnimationProperties(AnimationPropertyGroup newProp
 }
 
 glm::vec3 ModelEntityItem::getModelScale() const {
-    return _modelScaleLock.resultWithReadLock<glm::vec3>([&] {
-        return getSNScale();
-    });
+    return _modelScaleLock.resultWithReadLock<glm::vec3>([&] { return getSNScale(); });
 }
 
 void ModelEntityItem::setModelScale(const glm::vec3& modelScale) {
-    _modelScaleLock.withWriteLock([&] {
-        setSNScale(modelScale);
-    });
+    _modelScaleLock.withWriteLock([&] { setSNScale(modelScale); });
 }

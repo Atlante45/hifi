@@ -20,57 +20,57 @@ public slots:
     static PlatformInfoScriptingInterface* getInstance();
 
     /**jsdoc
-    * Returns the Operating Sytem type
-    * @function Test.getOperatingSystemType
-    * @returns {string} "WINDOWS", "MACOS" or "UNKNOWN"
-    */
+     * Returns the Operating Sytem type
+     * @function Test.getOperatingSystemType
+     * @returns {string} "WINDOWS", "MACOS" or "UNKNOWN"
+     */
     QString getOperatingSystemType();
 
     /**jsdoc
-    * Returns the CPU brand
-    *function PlatformInfo.getCPUBrand()
-    * @returns {string} brand of CPU
-    */
+     * Returns the CPU brand
+     *function PlatformInfo.getCPUBrand()
+     * @returns {string} brand of CPU
+     */
     QString getCPUBrand();
 
     /**jsdoc
-    * Returns the number of logical CPU cores
-    *function PlatformInfo.getNumLogicalCores()
-    * @returns {int} number of logical CPU cores
-    */
+     * Returns the number of logical CPU cores
+     *function PlatformInfo.getNumLogicalCores()
+     * @returns {int} number of logical CPU cores
+     */
     unsigned int getNumLogicalCores();
 
     /**jsdoc
-    * Returns the total system memory in megabyte
-    *function PlatformInfo.getTotalSystemMemory()
-    * @returns {int} size of memory in megabytes
-    */
+     * Returns the total system memory in megabyte
+     *function PlatformInfo.getTotalSystemMemory()
+     * @returns {int} size of memory in megabytes
+     */
     int getTotalSystemMemoryMB();
 
     /**jsdoc
-    * Returns the graphics card type
-    * @function Test.getGraphicsCardType
-    * @returns {string} graphics card type
-    */
+     * Returns the graphics card type
+     * @function Test.getGraphicsCardType
+     * @returns {string} graphics card type
+     */
     QString getGraphicsCardType();
 
     /**jsdoc
-       * Returns true if Oculus Rift is connected (looks for hand controllers)
-       * @function Window.hasRift
-       * @returns {boolean} <code>true</code> if running on Windows, otherwise <code>false</code>.*/
+     * Returns true if Oculus Rift is connected (looks for hand controllers)
+     * @function Window.hasRift
+     * @returns {boolean} <code>true</code> if running on Windows, otherwise <code>false</code>.*/
     bool hasRiftControllers();
 
     /**jsdoc
-    * Returns true if HTC Vive is connected (looks for hand controllers)
-    * @function Window.hasRift
-    * @returns {boolean} <code>true</code> if running on Windows, otherwise <code>false</code>.*/
+     * Returns true if HTC Vive is connected (looks for hand controllers)
+     * @function Window.hasRift
+     * @returns {boolean} <code>true</code> if running on Windows, otherwise <code>false</code>.*/
     bool hasViveControllers();
 
     /**jsdoc
-    * Returns true if device supports 3d HTML
-    * @function Window.hasRift
-    * @returns {boolean} <code>true</code> if device supports 3d HTML, otherwise <code>false</code>.*/
+     * Returns true if device supports 3d HTML
+     * @function Window.hasRift
+     * @returns {boolean} <code>true</code> if device supports 3d HTML, otherwise <code>false</code>.*/
     bool has3DHTML();
 };
 
-#endif  // hifi_PlatformInfoScriptingInterface_h
+#endif // hifi_PlatformInfoScriptingInterface_h

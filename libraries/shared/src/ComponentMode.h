@@ -21,4 +21,3 @@ enum ComponentMode {
 };
 
 #endif // hifi_ComponentMode_h
-

@@ -22,7 +22,7 @@
 #include "SequenceNumber.h"
 
 namespace udt {
-    
+
 static const int32_t DEFAULT_SYN_INTERVAL = 10000; // 10 ms
 
 class Connection;
@@ -30,8 +30,8 @@ class Packet;
 
 class CongestionControl {
     friend class Connection;
-public:
 
+public:
     CongestionControl() = default;
     virtual ~CongestionControl() = default;
 
@@ -54,34 +54,34 @@ protected:
     virtual void setInitialSendSequenceNumber(SequenceNumber seqNum) = 0;
     void setSendCurrentSequenceNumber(SequenceNumber seqNum) { _sendCurrSeqNum = seqNum; }
     void setPacketSendPeriod(double newSendPeriod); // call this internally to ensure send period doesn't go past max bandwidth
-    
+
     double _packetSendPeriod { 1.0 }; // Packet sending period, in microseconds
     int _congestionWindowSize { 16 }; // Congestion window size, in packets
 
     std::atomic<int> _maxBandwidth { -1 }; // Maximum desired bandwidth, bits per second
-    
+
     int _mss { 0 }; // Maximum Packet Size, including all packet headers
     SequenceNumber _sendCurrSeqNum; // current maximum seq num sent out
-    
+
 private:
     CongestionControl(const CongestionControl& other) = delete;
     CongestionControl& operator=(const CongestionControl& other) = delete;
 };
-    
-    
+
 class CongestionControlVirtualFactory {
 public:
     virtual ~CongestionControlVirtualFactory() {}
-    
+
     virtual std::unique_ptr<CongestionControl> create() = 0;
 };
 
-template <class T> class CongestionControlFactory: public CongestionControlVirtualFactory {
+template<class T>
+class CongestionControlFactory : public CongestionControlVirtualFactory {
 public:
     virtual ~CongestionControlFactory() {}
     virtual std::unique_ptr<CongestionControl> create() override { return std::unique_ptr<T>(new T()); }
 };
-    
-}
+
+} // namespace udt
 
 #endif // hifi_CongestionControl_h

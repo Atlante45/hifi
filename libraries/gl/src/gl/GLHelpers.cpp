@@ -5,13 +5,13 @@
 #include "Config.h"
 
 #include <QtCore/QObject>
-#include <QtCore/QThread>
-#include <QtCore/QRegularExpression>
 #include <QtCore/QProcessEnvironment>
+#include <QtCore/QRegularExpression>
+#include <QtCore/QThread>
 
-#include <QtGui/QSurfaceFormat>
 #include <QtGui/QOpenGLContext>
 #include <QtGui/QOpenGLDebugLogger>
+#include <QtGui/QSurfaceFormat>
 
 #include "Context.h"
 
@@ -65,11 +65,12 @@ void gl::globalRelease(bool finish) {
 
 #else
 
-void gl::globalLock() {}
-void gl::globalRelease(bool finish) {}
+void gl::globalLock() {
+}
+void gl::globalRelease(bool finish) {
+}
 
 #endif
-
 
 void gl::getTargetVersion(int& major, int& minor) {
 #if defined(USE_GLES)
@@ -128,8 +129,8 @@ QJsonObject getGLContextData() {
     static std::once_flag once;
     std::call_once(once, [] {
         QString glVersion = QString((const char*)glGetString(GL_VERSION));
-        QString glslVersion = QString((const char*) glGetString(GL_SHADING_LANGUAGE_VERSION));
-        QString glVendor = QString((const char*) glGetString(GL_VENDOR));
+        QString glslVersion = QString((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
+        QString glVendor = QString((const char*)glGetString(GL_VENDOR));
         QString glRenderer = QString((const char*)glGetString(GL_RENDERER));
 
         result = QJsonObject {
@@ -153,93 +154,102 @@ bool isRenderThread() {
 #endif
 
 namespace gl {
-    void withSavedContext(const std::function<void()>& f) {
-        // Save the original GL context, because creating a QML surface will create a new context
-        QOpenGLContext * savedContext = QOpenGLContext::currentContext();
-        QSurface * savedSurface = savedContext ? savedContext->surface() : nullptr;
-        f();
-        if (savedContext) {
-            savedContext->makeCurrent(savedSurface);
-        }
-    }
-
-    bool checkGLError(const char* name) {
-        GLenum error = glGetError();
-        if (!error) {
-            return false;
-        } 
-        switch (error) {
-            case GL_INVALID_ENUM:
-                qCWarning(glLogging) << "GLBackend" << name << ": An unacceptable value is specified for an enumerated argument.The offending command is ignored and has no other side effect than to set the error flag.";
-                break;
-            case GL_INVALID_VALUE:
-                qCWarning(glLogging) << "GLBackend" << name << ": A numeric argument is out of range.The offending command is ignored and has no other side effect than to set the error flag";
-                break;
-            case GL_INVALID_OPERATION:
-                qCWarning(glLogging) << "GLBackend" << name << ": The specified operation is not allowed in the current state.The offending command is ignored and has no other side effect than to set the error flag..";
-                break;
-            case GL_INVALID_FRAMEBUFFER_OPERATION:
-                qCWarning(glLogging) << "GLBackend" << name << ": The framebuffer object is not complete.The offending command is ignored and has no other side effect than to set the error flag.";
-                break;
-            case GL_OUT_OF_MEMORY:
-                qCWarning(glLogging) << "GLBackend" << name << ": There is not enough memory left to execute the command.The state of the GL is undefined, except for the state of the error flags, after this error is recorded.";
-                break;
-#if !defined(USE_GLES)
-            case GL_STACK_UNDERFLOW:
-                qCWarning(glLogging) << "GLBackend" << name << ": An attempt has been made to perform an operation that would cause an internal stack to underflow.";
-                break;
-            case GL_STACK_OVERFLOW:
-                qCWarning(glLogging) << "GLBackend" << name << ": An attempt has been made to perform an operation that would cause an internal stack to overflow.";
-                break;
-#endif
-        }
-        return true;
-    }
-
-
-    bool checkGLErrorDebug(const char* name) {
-        // Disabling error checking macro on Android debug builds for now, 
-        // as it throws off performance testing, which must be done on 
-        // Debug builds
-#if defined(DEBUG) && !defined(Q_OS_ANDROID)
-        return checkGLError(name);
-#else
-        Q_UNUSED(name);
-        return false;
-#endif
-    }
-
-    // Enables annotation of captures made by tools like renderdoc
-    bool khrDebugEnabled() {
-        static std::once_flag once;
-        static bool khrDebug = false;
-        std::call_once(once, [&] {
-            khrDebug = nullptr != glPushDebugGroupKHR;
-        });
-        return khrDebug;
-    }
-
-    // Enables annotation of captures made by tools like renderdoc
-    bool extDebugMarkerEnabled() {
-        static std::once_flag once;
-        static bool extMarker = false;
-        std::call_once(once, [&] {
-            extMarker = nullptr != glPushGroupMarkerEXT;
-        });
-        return extMarker;
-    }
-
-    bool debugContextEnabled() {
-#if defined(Q_OS_MAC)
-        // OSX does not support GL_KHR_debug or GL_ARB_debug_output
-        static bool enableDebugLogger = false;
-#elif defined(DEBUG) || defined(USE_GLES)
-        //static bool enableDebugLogger = true;
-        static bool enableDebugLogger = false;
-#else
-        static const QString DEBUG_FLAG("HIFI_DEBUG_OPENGL");
-        static bool enableDebugLogger = QProcessEnvironment::systemEnvironment().contains(DEBUG_FLAG);
-#endif
-        return enableDebugLogger;
+void withSavedContext(const std::function<void()>& f) {
+    // Save the original GL context, because creating a QML surface will create a new context
+    QOpenGLContext* savedContext = QOpenGLContext::currentContext();
+    QSurface* savedSurface = savedContext ? savedContext->surface() : nullptr;
+    f();
+    if (savedContext) {
+        savedContext->makeCurrent(savedSurface);
     }
 }
+
+bool checkGLError(const char* name) {
+    GLenum error = glGetError();
+    if (!error) {
+        return false;
+    }
+    switch (error) {
+        case GL_INVALID_ENUM:
+            qCWarning(glLogging) << "GLBackend" << name
+                                 << ": An unacceptable value is specified for an enumerated argument.The offending command is "
+                                    "ignored and has no other side effect than to set the error flag.";
+            break;
+        case GL_INVALID_VALUE:
+            qCWarning(glLogging) << "GLBackend" << name
+                                 << ": A numeric argument is out of range.The offending command is ignored and has no other "
+                                    "side effect than to set the error flag";
+            break;
+        case GL_INVALID_OPERATION:
+            qCWarning(glLogging) << "GLBackend" << name
+                                 << ": The specified operation is not allowed in the current state.The offending command is "
+                                    "ignored and has no other side effect than to set the error flag..";
+            break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION:
+            qCWarning(glLogging) << "GLBackend" << name
+                                 << ": The framebuffer object is not complete.The offending command is ignored and has no "
+                                    "other side effect than to set the error flag.";
+            break;
+        case GL_OUT_OF_MEMORY:
+            qCWarning(glLogging) << "GLBackend" << name
+                                 << ": There is not enough memory left to execute the command.The state of the GL is "
+                                    "undefined, except for the state of the error flags, after this error is recorded.";
+            break;
+#if !defined(USE_GLES)
+        case GL_STACK_UNDERFLOW:
+            qCWarning(glLogging)
+                << "GLBackend" << name
+                << ": An attempt has been made to perform an operation that would cause an internal stack to underflow.";
+            break;
+        case GL_STACK_OVERFLOW:
+            qCWarning(glLogging)
+                << "GLBackend" << name
+                << ": An attempt has been made to perform an operation that would cause an internal stack to overflow.";
+            break;
+#endif
+    }
+    return true;
+}
+
+bool checkGLErrorDebug(const char* name) {
+    // Disabling error checking macro on Android debug builds for now,
+    // as it throws off performance testing, which must be done on
+    // Debug builds
+#if defined(DEBUG) && !defined(Q_OS_ANDROID)
+    return checkGLError(name);
+#else
+    Q_UNUSED(name);
+    return false;
+#endif
+}
+
+// Enables annotation of captures made by tools like renderdoc
+bool khrDebugEnabled() {
+    static std::once_flag once;
+    static bool khrDebug = false;
+    std::call_once(once, [&] { khrDebug = nullptr != glPushDebugGroupKHR; });
+    return khrDebug;
+}
+
+// Enables annotation of captures made by tools like renderdoc
+bool extDebugMarkerEnabled() {
+    static std::once_flag once;
+    static bool extMarker = false;
+    std::call_once(once, [&] { extMarker = nullptr != glPushGroupMarkerEXT; });
+    return extMarker;
+}
+
+bool debugContextEnabled() {
+#if defined(Q_OS_MAC)
+    // OSX does not support GL_KHR_debug or GL_ARB_debug_output
+    static bool enableDebugLogger = false;
+#elif defined(DEBUG) || defined(USE_GLES)
+    // static bool enableDebugLogger = true;
+    static bool enableDebugLogger = false;
+#else
+    static const QString DEBUG_FLAG("HIFI_DEBUG_OPENGL");
+    static bool enableDebugLogger = QProcessEnvironment::systemEnvironment().contains(DEBUG_FLAG);
+#endif
+    return enableDebugLogger;
+}
+} // namespace gl

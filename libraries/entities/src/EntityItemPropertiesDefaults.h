@@ -75,7 +75,7 @@ const float ENTITY_ITEM_MIN_VOLUME = ENTITY_ITEM_MIN_DIMENSION * ENTITY_ITEM_MIN
 
 const float ENTITY_ITEM_MAX_DENSITY = 10000.0f; // kg/m^3 density of silver
 const float ENTITY_ITEM_MIN_DENSITY = 100.0f; // kg/m^3 density of balsa wood
-const float ENTITY_ITEM_DEFAULT_DENSITY = 1000.0f;   // density of water
+const float ENTITY_ITEM_DEFAULT_DENSITY = 1000.0f; // density of water
 const float ENTITY_ITEM_DEFAULT_MASS = ENTITY_ITEM_DEFAULT_DENSITY * ENTITY_ITEM_DEFAULT_VOLUME;
 
 const glm::vec3 ENTITY_ITEM_DEFAULT_VELOCITY = ENTITY_ITEM_ZERO_VEC3;
@@ -84,8 +84,9 @@ const glm::vec3 ENTITY_ITEM_DEFAULT_GRAVITY = ENTITY_ITEM_ZERO_VEC3;
 const glm::vec3 ENTITY_ITEM_DEFAULT_ACCELERATION = ENTITY_ITEM_ZERO_VEC3;
 const float ENTITY_ITEM_MIN_DAMPING = 0.0f;
 const float ENTITY_ITEM_MAX_DAMPING = 1.0f;
-const float ENTITY_ITEM_DEFAULT_DAMPING = 0.39347f;  // approx timescale = 2.0 sec (see damping timescale formula in header)
-const float ENTITY_ITEM_DEFAULT_ANGULAR_DAMPING = 0.39347f;  // approx timescale = 2.0 sec (see damping timescale formula in header)
+const float ENTITY_ITEM_DEFAULT_DAMPING = 0.39347f; // approx timescale = 2.0 sec (see damping timescale formula in header)
+const float
+    ENTITY_ITEM_DEFAULT_ANGULAR_DAMPING = 0.39347f; // approx timescale = 2.0 sec (see damping timescale formula in header)
 
 const float ENTITY_ITEM_MIN_RESTITUTION = 0.0f;
 const float ENTITY_ITEM_MAX_RESTITUTION = 0.99f;

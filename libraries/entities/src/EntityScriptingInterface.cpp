@@ -15,40 +15,39 @@
 #include <glm/gtx/transform.hpp>
 
 #include <QFutureWatcher>
-#include <QtConcurrent/QtConcurrentRun>
-#include <QJsonObject>
-#include <QJsonDocument>
 #include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QtConcurrent/QtConcurrentRun>
 
-#include <shared/QtHelpers.h>
-#include <VariantMapToScriptValue.h>
+#include <AvatarHashMap.h>
 #include <SharedUtil.h>
 #include <SpatialParentFinder.h>
-#include <AvatarHashMap.h>
+#include <VariantMapToScriptValue.h>
+#include <shared/QtHelpers.h>
 
-#include "EntityItemID.h"
+#include <EntityScriptClient.h>
+#include <Profile.h>
 #include "EntitiesLogging.h"
 #include "EntityDynamicFactoryInterface.h"
 #include "EntityDynamicInterface.h"
+#include "EntityItemID.h"
 #include "EntitySimulation.h"
 #include "EntityTree.h"
+#include "GrabPropertyGroup.h"
 #include "LightEntityItem.h"
 #include "ModelEntityItem.h"
 #include "QVariantGLM.h"
 #include "SimulationOwner.h"
-#include "ZoneEntityItem.h"
 #include "WebEntityItem.h"
-#include <EntityScriptClient.h>
-#include <Profile.h>
-#include "GrabPropertyGroup.h"
+#include "ZoneEntityItem.h"
 
 const QString GRABBABLE_USER_DATA = "{\"grabbableKey\":{\"grabbable\":true}}";
 const QString NOT_GRABBABLE_USER_DATA = "{\"grabbableKey\":{\"grabbable\":false}}";
 
 EntityScriptingInterface::EntityScriptingInterface(bool bidOnSimulationOwnership) :
     _entityTree(nullptr),
-    _bidOnSimulationOwnership(bidOnSimulationOwnership)
-{
+    _bidOnSimulationOwnership(bidOnSimulationOwnership) {
     auto nodeList = DependencyManager::get<NodeList>();
     connect(nodeList.data(), &NodeList::isAllowedEditorChanged, this, &EntityScriptingInterface::canAdjustLocksChanged);
     connect(nodeList.data(), &NodeList::canRezChanged, this, &EntityScriptingInterface::canRezChanged);
@@ -61,8 +60,8 @@ EntityScriptingInterface::EntityScriptingInterface(bool bidOnSimulationOwnership
     packetReceiver.registerListener(PacketType::EntityScriptCallMethod, this, "handleEntityScriptCallMethodPacket");
 }
 
-void EntityScriptingInterface::queueEntityMessage(PacketType packetType,
-                                                  EntityItemID entityID, const EntityItemProperties& properties) {
+void EntityScriptingInterface::queueEntityMessage(PacketType packetType, EntityItemID entityID,
+                                                  const EntityItemProperties& properties) {
     getEntityPacketSender()->queueEditEntityMessage(packetType, _entityTree, entityID, properties);
 }
 
@@ -119,8 +118,10 @@ void EntityScriptingInterface::setEntityTree(EntityTreePointer elementTree) {
     _entityTree = elementTree;
 
     if (_entityTree) {
-        connect(_entityTree.get(), &EntityTree::addingEntityPointer, this, &EntityScriptingInterface::onAddingEntity, Qt::DirectConnection);
-        connect(_entityTree.get(), &EntityTree::deletingEntityPointer, this, &EntityScriptingInterface::onDeletingEntity, Qt::DirectConnection);
+        connect(_entityTree.get(), &EntityTree::addingEntityPointer, this, &EntityScriptingInterface::onAddingEntity,
+                Qt::DirectConnection);
+        connect(_entityTree.get(), &EntityTree::deletingEntityPointer, this, &EntityScriptingInterface::onDeletingEntity,
+                Qt::DirectConnection);
         connect(_entityTree.get(), &EntityTree::addingEntity, this, &EntityScriptingInterface::addingEntity);
         connect(_entityTree.get(), &EntityTree::deletingEntity, this, &EntityScriptingInterface::deletingEntity);
         connect(_entityTree.get(), &EntityTree::clearingEntities, this, &EntityScriptingInterface::clearingEntities);
@@ -142,30 +143,24 @@ EntityItemProperties convertPropertiesToScriptSemantics(const EntityItemProperti
     bool success;
     glm::vec3 worldPosition = SpatiallyNestable::localToWorld(entitySideProperties.getPosition(),
                                                               entitySideProperties.getParentID(),
-                                                              entitySideProperties.getParentJointIndex(),
-                                                              scalesWithParent,
+                                                              entitySideProperties.getParentJointIndex(), scalesWithParent,
                                                               success);
     glm::quat worldRotation = SpatiallyNestable::localToWorld(entitySideProperties.getRotation(),
                                                               entitySideProperties.getParentID(),
-                                                              entitySideProperties.getParentJointIndex(),
-                                                              scalesWithParent,
+                                                              entitySideProperties.getParentJointIndex(), scalesWithParent,
                                                               success);
     glm::vec3 worldVelocity = SpatiallyNestable::localToWorldVelocity(entitySideProperties.getVelocity(),
                                                                       entitySideProperties.getParentID(),
                                                                       entitySideProperties.getParentJointIndex(),
-                                                                      scalesWithParent,
-                                                                      success);
+                                                                      scalesWithParent, success);
     glm::vec3 worldAngularVelocity = SpatiallyNestable::localToWorldAngularVelocity(entitySideProperties.getAngularVelocity(),
                                                                                     entitySideProperties.getParentID(),
                                                                                     entitySideProperties.getParentJointIndex(),
-                                                                                    scalesWithParent,
-                                                                                    success);
+                                                                                    scalesWithParent, success);
     glm::vec3 worldDimensions = SpatiallyNestable::localToWorldDimensions(entitySideProperties.getDimensions(),
                                                                           entitySideProperties.getParentID(),
                                                                           entitySideProperties.getParentJointIndex(),
-                                                                          scalesWithParent,
-                                                                          success);
-
+                                                                          scalesWithParent, success);
 
     scriptSideProperties.setPosition(worldPosition);
     scriptSideProperties.setRotation(worldRotation);
@@ -175,7 +170,6 @@ EntityItemProperties convertPropertiesToScriptSemantics(const EntityItemProperti
 
     return scriptSideProperties;
 }
-
 
 // TODO: this method looks expensive and should take properties by reference, update it, and return void
 EntityItemProperties convertPropertiesFromScriptSemantics(const EntityItemProperties& scriptSideProperties,
@@ -190,8 +184,8 @@ EntityItemProperties convertPropertiesFromScriptSemantics(const EntityItemProper
     } else if (scriptSideProperties.positionChanged()) {
         glm::vec3 localPosition = SpatiallyNestable::worldToLocal(entitySideProperties.getPosition(),
                                                                   entitySideProperties.getParentID(),
-                                                                  entitySideProperties.getParentJointIndex(),
-                                                                  scalesWithParent, success);
+                                                                  entitySideProperties.getParentJointIndex(), scalesWithParent,
+                                                                  success);
         entitySideProperties.setPosition(localPosition);
     }
 
@@ -200,8 +194,8 @@ EntityItemProperties convertPropertiesFromScriptSemantics(const EntityItemProper
     } else if (scriptSideProperties.rotationChanged()) {
         glm::quat localRotation = SpatiallyNestable::worldToLocal(entitySideProperties.getRotation(),
                                                                   entitySideProperties.getParentID(),
-                                                                  entitySideProperties.getParentJointIndex(),
-                                                                  scalesWithParent, success);
+                                                                  entitySideProperties.getParentJointIndex(), scalesWithParent,
+                                                                  success);
         entitySideProperties.setRotation(localRotation);
     }
 
@@ -218,11 +212,9 @@ EntityItemProperties convertPropertiesFromScriptSemantics(const EntityItemProper
     if (scriptSideProperties.localAngularVelocityChanged()) {
         entitySideProperties.setAngularVelocity(scriptSideProperties.getLocalAngularVelocity());
     } else if (scriptSideProperties.angularVelocityChanged()) {
-        glm::vec3 localAngularVelocity =
-            SpatiallyNestable::worldToLocalAngularVelocity(entitySideProperties.getAngularVelocity(),
-                                                           entitySideProperties.getParentID(),
-                                                           entitySideProperties.getParentJointIndex(),
-                                                           scalesWithParent, success);
+        glm::vec3 localAngularVelocity = SpatiallyNestable::worldToLocalAngularVelocity(
+            entitySideProperties.getAngularVelocity(), entitySideProperties.getParentID(),
+            entitySideProperties.getParentJointIndex(), scalesWithParent, success);
         entitySideProperties.setAngularVelocity(localAngularVelocity);
     }
 
@@ -239,39 +231,32 @@ EntityItemProperties convertPropertiesFromScriptSemantics(const EntityItemProper
     return entitySideProperties;
 }
 
-
 void synchronizeSpatialKey(const GrabPropertyGroup& grabProperties, QJsonObject& grabbableKey, bool& userDataChanged) {
-    if (grabProperties.equippableLeftPositionChanged() ||
-        grabProperties.equippableRightPositionChanged() ||
-        grabProperties.equippableRightRotationChanged() ||
-        grabProperties.equippableIndicatorURLChanged() ||
-        grabProperties.equippableIndicatorScaleChanged() ||
-        grabProperties.equippableIndicatorOffsetChanged()) {
-
+    if (grabProperties.equippableLeftPositionChanged() || grabProperties.equippableRightPositionChanged() ||
+        grabProperties.equippableRightRotationChanged() || grabProperties.equippableIndicatorURLChanged() ||
+        grabProperties.equippableIndicatorScaleChanged() || grabProperties.equippableIndicatorOffsetChanged()) {
         QJsonObject spatialKey = grabbableKey["spatialKey"].toObject();
 
         if (grabProperties.equippableLeftPositionChanged()) {
             if (grabProperties.getEquippableLeftPosition() == INITIAL_LEFT_EQUIPPABLE_POSITION) {
                 spatialKey.remove("leftRelativePosition");
             } else {
-                spatialKey["leftRelativePosition"] =
-                    QJsonValue::fromVariant(vec3ToQMap(grabProperties.getEquippableLeftPosition()));
+                spatialKey["leftRelativePosition"] = QJsonValue::fromVariant(
+                    vec3ToQMap(grabProperties.getEquippableLeftPosition()));
             }
         }
         if (grabProperties.equippableRightPositionChanged()) {
             if (grabProperties.getEquippableRightPosition() == INITIAL_RIGHT_EQUIPPABLE_POSITION) {
                 spatialKey.remove("rightRelativePosition");
             } else {
-                spatialKey["rightRelativePosition"] =
-                    QJsonValue::fromVariant(vec3ToQMap(grabProperties.getEquippableRightPosition()));
+                spatialKey["rightRelativePosition"] = QJsonValue::fromVariant(
+                    vec3ToQMap(grabProperties.getEquippableRightPosition()));
             }
         }
         if (grabProperties.equippableLeftRotationChanged()) {
-            spatialKey["relativeRotation"] =
-                QJsonValue::fromVariant(quatToQMap(grabProperties.getEquippableLeftRotation()));
+            spatialKey["relativeRotation"] = QJsonValue::fromVariant(quatToQMap(grabProperties.getEquippableLeftRotation()));
         } else if (grabProperties.equippableRightRotationChanged()) {
-            spatialKey["relativeRotation"] =
-                QJsonValue::fromVariant(quatToQMap(grabProperties.getEquippableRightRotation()));
+            spatialKey["relativeRotation"] = QJsonValue::fromVariant(quatToQMap(grabProperties.getEquippableRightRotation()));
         }
 
         grabbableKey["spatialKey"] = spatialKey;
@@ -279,17 +264,11 @@ void synchronizeSpatialKey(const GrabPropertyGroup& grabProperties, QJsonObject&
     }
 }
 
-
 void synchronizeGrabbableKey(const GrabPropertyGroup& grabProperties, QJsonObject& userData, bool& userDataChanged) {
-    if (grabProperties.triggerableChanged() ||
-        grabProperties.grabbableChanged() ||
-        grabProperties.grabFollowsControllerChanged() ||
-        grabProperties.grabKinematicChanged() ||
-        grabProperties.equippableChanged() ||
-        grabProperties.equippableLeftPositionChanged() ||
-        grabProperties.equippableRightPositionChanged() ||
-        grabProperties.equippableRightRotationChanged()) {
-
+    if (grabProperties.triggerableChanged() || grabProperties.grabbableChanged() ||
+        grabProperties.grabFollowsControllerChanged() || grabProperties.grabKinematicChanged() ||
+        grabProperties.equippableChanged() || grabProperties.equippableLeftPositionChanged() ||
+        grabProperties.equippableRightPositionChanged() || grabProperties.equippableRightRotationChanged()) {
         QJsonObject grabbableKey = userData["grabbableKey"].toObject();
 
         if (grabProperties.triggerableChanged()) {
@@ -346,20 +325,16 @@ void synchronizeGrabJoints(const GrabPropertyGroup& grabProperties, QJsonObject&
     QJsonObject leftHandRotation = leftHand.size() > 1 ? leftHand[1].toObject() : QJsonObject();
 
     if (grabProperties.equippableLeftPositionChanged()) {
-        leftHandPosition =
-            QJsonValue::fromVariant(vec3ToQMap(grabProperties.getEquippableLeftPosition())).toObject();
+        leftHandPosition = QJsonValue::fromVariant(vec3ToQMap(grabProperties.getEquippableLeftPosition())).toObject();
     }
     if (grabProperties.equippableRightPositionChanged()) {
-        rightHandPosition =
-            QJsonValue::fromVariant(vec3ToQMap(grabProperties.getEquippableRightPosition())).toObject();
+        rightHandPosition = QJsonValue::fromVariant(vec3ToQMap(grabProperties.getEquippableRightPosition())).toObject();
     }
     if (grabProperties.equippableLeftRotationChanged()) {
-        leftHandRotation =
-            QJsonValue::fromVariant(quatToQMap(grabProperties.getEquippableLeftRotation())).toObject();
+        leftHandRotation = QJsonValue::fromVariant(quatToQMap(grabProperties.getEquippableLeftRotation())).toObject();
     }
     if (grabProperties.equippableRightRotationChanged()) {
-        rightHandRotation =
-            QJsonValue::fromVariant(quatToQMap(grabProperties.getEquippableRightRotation())).toObject();
+        rightHandRotation = QJsonValue::fromVariant(quatToQMap(grabProperties.getEquippableRightRotation())).toObject();
     }
 
     rightHand = QJsonArray();
@@ -373,13 +348,9 @@ void synchronizeGrabJoints(const GrabPropertyGroup& grabProperties, QJsonObject&
 }
 
 void synchronizeEquipHotspot(const GrabPropertyGroup& grabProperties, QJsonObject& userData, bool& userDataChanged) {
-    if (grabProperties.equippableLeftPositionChanged() ||
-        grabProperties.equippableRightPositionChanged() ||
-        grabProperties.equippableRightRotationChanged() ||
-        grabProperties.equippableIndicatorURLChanged() ||
-        grabProperties.equippableIndicatorScaleChanged() ||
-        grabProperties.equippableIndicatorOffsetChanged()) {
-
+    if (grabProperties.equippableLeftPositionChanged() || grabProperties.equippableRightPositionChanged() ||
+        grabProperties.equippableRightRotationChanged() || grabProperties.equippableIndicatorURLChanged() ||
+        grabProperties.equippableIndicatorScaleChanged() || grabProperties.equippableIndicatorOffsetChanged()) {
         QJsonArray equipHotspots = userData["equipHotspots"].toArray();
         QJsonObject equipHotspot = equipHotspots[0].toObject();
         QJsonObject joints = equipHotspot["joints"].toObject();
@@ -390,15 +361,13 @@ void synchronizeEquipHotspot(const GrabPropertyGroup& grabProperties, QJsonObjec
             equipHotspot["modelURL"] = grabProperties.getEquippableIndicatorURL();
         }
         if (grabProperties.equippableIndicatorScaleChanged()) {
-            QJsonObject scale =
-                QJsonValue::fromVariant(vec3ToQMap(grabProperties.getEquippableIndicatorScale())).toObject();
+            QJsonObject scale = QJsonValue::fromVariant(vec3ToQMap(grabProperties.getEquippableIndicatorScale())).toObject();
             equipHotspot["radius"] = scale;
             equipHotspot["modelScale"] = scale;
-
         }
         if (grabProperties.equippableIndicatorOffsetChanged()) {
-            equipHotspot["position"] =
-                QJsonValue::fromVariant(vec3ToQMap(grabProperties.getEquippableIndicatorOffset())).toObject();
+            equipHotspot["position"] = QJsonValue::fromVariant(vec3ToQMap(grabProperties.getEquippableIndicatorOffset()))
+                                           .toObject();
         }
 
         equipHotspot["joints"] = joints;
@@ -410,13 +379,9 @@ void synchronizeEquipHotspot(const GrabPropertyGroup& grabProperties, QJsonObjec
 }
 
 void synchronizeWearable(const GrabPropertyGroup& grabProperties, QJsonObject& userData, bool& userDataChanged) {
-    if (grabProperties.equippableLeftPositionChanged() ||
-        grabProperties.equippableRightPositionChanged() ||
-        grabProperties.equippableRightRotationChanged() ||
-        grabProperties.equippableIndicatorURLChanged() ||
-        grabProperties.equippableIndicatorScaleChanged() ||
-        grabProperties.equippableIndicatorOffsetChanged()) {
-
+    if (grabProperties.equippableLeftPositionChanged() || grabProperties.equippableRightPositionChanged() ||
+        grabProperties.equippableRightRotationChanged() || grabProperties.equippableIndicatorURLChanged() ||
+        grabProperties.equippableIndicatorScaleChanged() || grabProperties.equippableIndicatorOffsetChanged()) {
         QJsonObject wearable = userData["wearable"].toObject();
         QJsonObject joints = wearable["joints"].toObject();
 
@@ -443,7 +408,8 @@ void synchronizeEditedGrabProperties(EntityItemProperties& properties, const QSt
         if (properties.userDataChanged()) {
             userDataString = properties.getUserData().toUtf8();
         } else {
-            userDataString = previousUserdata.toUtf8();;
+            userDataString = previousUserdata.toUtf8();
+            ;
         }
         QJsonObject userData = QJsonDocument::fromJson(userDataString).object();
 
@@ -467,7 +433,6 @@ void synchronizeEditedGrabProperties(EntityItemProperties& properties, const QSt
         convertGrabUserDataToProperties(properties);
     }
 }
-
 
 QUuid EntityScriptingInterface::addEntityInternal(const EntityItemProperties& properties, entity::HostType entityHostType) {
     PROFILE_RANGE(script_entities, __FUNCTION__);
@@ -518,7 +483,8 @@ bool EntityScriptingInterface::addLocalEntityCopy(EntityItemProperties& properti
             EntityItemPointer entity = _entityTree->addEntity(id, properties, isClone);
             if (entity) {
                 if (properties.queryAACubeRelatedPropertyChanged()) {
-                    // due to parenting, the server may not know where something is in world-space, so include the bounding cube.
+                    // due to parenting, the server may not know where something is in world-space, so include the bounding
+                    // cube.
                     bool success;
                     AACube queryAACube = entity->getQueryAACube(success);
                     if (success) {
@@ -541,8 +507,8 @@ bool EntityScriptingInterface::addLocalEntityCopy(EntityItemProperties& properti
 }
 
 QUuid EntityScriptingInterface::addModelEntity(const QString& name, const QString& modelUrl, const QString& textures,
-                                                const QString& shapeType, bool dynamic, bool collisionless, bool grabbable,
-                                                const glm::vec3& position, const glm::vec3& gravity) {
+                                               const QString& shapeType, bool dynamic, bool collisionless, bool grabbable,
+                                               const glm::vec3& position, const glm::vec3& gravity) {
     _activityTracking.addedEntityCount++;
 
     EntityItemProperties properties;
@@ -578,7 +544,7 @@ QUuid EntityScriptingInterface::cloneEntity(const QUuid& entityIDToClone) {
     } else if (cloneAvatarEntity) {
         return addEntityInternal(properties, entity::HostType::AVATAR);
     } else {
-        // setLastEdited timestamp to 0 to ensure this entity gets updated with the properties 
+        // setLastEdited timestamp to 0 to ensure this entity gets updated with the properties
         // from the server-created entity, don't change this unless you know what you are doing
         properties.setLastEdited(0);
         bool success = addLocalEntityCopy(properties, newEntityID, true);
@@ -596,7 +562,8 @@ EntityItemProperties EntityScriptingInterface::getEntityProperties(const QUuid& 
     return getEntityProperties(entityID, noSpecificProperties);
 }
 
-EntityItemProperties EntityScriptingInterface::getEntityProperties(const QUuid& entityID, EntityPropertyFlags desiredProperties) {
+EntityItemProperties EntityScriptingInterface::getEntityProperties(const QUuid& entityID,
+                                                                   EntityPropertyFlags desiredProperties) {
     PROFILE_RANGE(script_entities, __FUNCTION__);
 
     bool scalesWithParent { false };
@@ -606,8 +573,7 @@ EntityItemProperties EntityScriptingInterface::getEntityProperties(const QUuid& 
             EntityItemPointer entity = _entityTree->findEntityByEntityItemID(EntityItemID(entityID));
             if (entity) {
                 scalesWithParent = entity->getScalesWithParent();
-                if (desiredProperties.getHasProperty(PROP_POSITION) ||
-                    desiredProperties.getHasProperty(PROP_ROTATION) ||
+                if (desiredProperties.getHasProperty(PROP_POSITION) || desiredProperties.getHasProperty(PROP_ROTATION) ||
                     desiredProperties.getHasProperty(PROP_LOCAL_POSITION) ||
                     desiredProperties.getHasProperty(PROP_LOCAL_ROTATION) ||
                     desiredProperties.getHasProperty(PROP_LOCAL_VELOCITY) ||
@@ -638,15 +604,13 @@ EntityItemProperties EntityScriptingInterface::getEntityProperties(const QUuid& 
     return convertPropertiesToScriptSemantics(results, scalesWithParent);
 }
 
-
 struct EntityPropertiesResult {
     EntityPropertiesResult(const EntityItemProperties& properties, bool scalesWithParent) :
         properties(properties),
-        scalesWithParent(scalesWithParent) {
-    }
+        scalesWithParent(scalesWithParent) {}
     EntityPropertiesResult() = default;
     EntityItemProperties properties;
-    bool scalesWithParent{ false };
+    bool scalesWithParent { false };
 };
 
 // Static method to make sure that we have the right script engine.
@@ -657,10 +621,13 @@ QScriptValue EntityScriptingInterface::getMultipleEntityProperties(QScriptContex
 
     auto entityScriptingInterface = DependencyManager::get<EntityScriptingInterface>();
     const auto entityIDs = qScriptValueToValue<QVector<QUuid>>(context->argument(ARGUMENT_ENTITY_IDS));
-    return entityScriptingInterface->getMultipleEntityPropertiesInternal(engine, entityIDs, context->argument(ARGUMENT_EXTENDED_DESIRED_PROPERTIES));
+    return entityScriptingInterface->getMultipleEntityPropertiesInternal(engine, entityIDs,
+                                                                         context->argument(
+                                                                             ARGUMENT_EXTENDED_DESIRED_PROPERTIES));
 }
 
-QScriptValue EntityScriptingInterface::getMultipleEntityPropertiesInternal(QScriptEngine* engine, QVector<QUuid> entityIDs, const QScriptValue& extendedDesiredProperties) {
+QScriptValue EntityScriptingInterface::getMultipleEntityPropertiesInternal(QScriptEngine* engine, QVector<QUuid> entityIDs,
+                                                                           const QScriptValue& extendedDesiredProperties) {
     PROFILE_RANGE(script_entities, __FUNCTION__);
 
     EntityPsuedoPropertyFlags psuedoPropertyFlags;
@@ -708,12 +675,12 @@ QScriptValue EntityScriptingInterface::getMultipleEntityPropertiesInternal(QScri
 
     EntityPropertyFlags desiredProperties = qScriptValueToValue<EntityPropertyFlags>(extendedDesiredProperties);
     bool needsScriptSemantics = desiredProperties.getHasProperty(PROP_POSITION) ||
-        desiredProperties.getHasProperty(PROP_ROTATION) ||
-        desiredProperties.getHasProperty(PROP_LOCAL_POSITION) ||
-        desiredProperties.getHasProperty(PROP_LOCAL_ROTATION) ||
-        desiredProperties.getHasProperty(PROP_LOCAL_VELOCITY) ||
-        desiredProperties.getHasProperty(PROP_LOCAL_ANGULAR_VELOCITY) ||
-        desiredProperties.getHasProperty(PROP_LOCAL_DIMENSIONS);
+                                desiredProperties.getHasProperty(PROP_ROTATION) ||
+                                desiredProperties.getHasProperty(PROP_LOCAL_POSITION) ||
+                                desiredProperties.getHasProperty(PROP_LOCAL_ROTATION) ||
+                                desiredProperties.getHasProperty(PROP_LOCAL_VELOCITY) ||
+                                desiredProperties.getHasProperty(PROP_LOCAL_ANGULAR_VELOCITY) ||
+                                desiredProperties.getHasProperty(PROP_LOCAL_DIMENSIONS);
     if (needsScriptSemantics) {
         // if we are explicitly getting position or rotation, we need parent information to make sense of them.
         desiredProperties.setHasProperty(PROP_PARENT_ID);
@@ -757,13 +724,13 @@ QScriptValue EntityScriptingInterface::getMultipleEntityPropertiesInternal(QScri
     quint32 i = 0;
     if (needsScriptSemantics) {
         PROFILE_RANGE(script_entities, "EntityScriptingInterface::getMultipleEntityProperties>Script Semantics");
-        foreach(const auto& result, resultProperties) {
+        foreach (const auto& result, resultProperties) {
             finalResult.setProperty(i++, convertPropertiesToScriptSemantics(result.properties, result.scalesWithParent)
-                .copyToScriptValue(engine, false, false, false, psuedoPropertyFlags));
+                                             .copyToScriptValue(engine, false, false, false, psuedoPropertyFlags));
         }
     } else {
         PROFILE_RANGE(script_entities, "EntityScriptingInterface::getMultipleEntityProperties>Skip Script Semantics");
-        foreach(const auto& result, resultProperties) {
+        foreach (const auto& result, resultProperties) {
             finalResult.setProperty(i++, result.properties.copyToScriptValue(engine, false, false, false, psuedoPropertyFlags));
         }
     }
@@ -866,9 +833,7 @@ QUuid EntityScriptingInterface::editEntity(const QUuid& id, const EntityItemProp
 
     // done reading and modifying properties --> start write
     bool updatedEntity = false;
-    _entityTree->withWriteLock([&] {
-        updatedEntity = _entityTree->updateEntity(entityID, properties);
-    });
+    _entityTree->withWriteLock([&] { updatedEntity = _entityTree->updateEntity(entityID, properties); });
 
     // FIXME: We need to figure out a better way to handle this. Allowing these edits to go through potentially
     // breaks entities that are parented.
@@ -968,7 +933,6 @@ void EntityScriptingInterface::deleteEntity(const QUuid& id) {
         _entityTree->withWriteLock([&] {
             EntityItemPointer entity = _entityTree->findEntityByEntityItemID(entityID);
             if (entity) {
-
                 auto nodeList = DependencyManager::get<NodeList>();
                 const QUuid myNodeID = nodeList->getSessionUUID();
                 if (entity->isAvatarEntity() && entity->getOwningAvatarID() != myNodeID) {
@@ -1049,7 +1013,7 @@ void EntityScriptingInterface::callEntityMethod(const QUuid& id, const QString& 
 
     std::lock_guard<std::recursive_mutex> lock(_entitiesScriptEngineLock);
     if (_entitiesScriptEngine) {
-        EntityItemID entityID{ id };
+        EntityItemID entityID { id };
         _entitiesScriptEngine->callEntityScriptMethod(entityID, method, params);
     }
 }
@@ -1059,7 +1023,8 @@ void EntityScriptingInterface::callEntityServerMethod(const QUuid& id, const QSt
     DependencyManager::get<EntityScriptClient>()->callEntityServerMethod(id, method, params);
 }
 
-void EntityScriptingInterface::callEntityClientMethod(const QUuid& clientSessionID, const QUuid& entityID, const QString& method, const QStringList& params) {
+void EntityScriptingInterface::callEntityClientMethod(const QUuid& clientSessionID, const QUuid& entityID,
+                                                      const QString& method, const QStringList& params) {
     PROFILE_RANGE(script_entities, __FUNCTION__);
     auto scriptServerServices = DependencyManager::get<EntityScriptServerServices>();
 
@@ -1071,8 +1036,8 @@ void EntityScriptingInterface::callEntityClientMethod(const QUuid& clientSession
     }
 }
 
-
-void EntityScriptingInterface::handleEntityScriptCallMethodPacket(QSharedPointer<ReceivedMessage> receivedMessage, SharedNodePointer senderNode) {
+void EntityScriptingInterface::handleEntityScriptCallMethodPacket(QSharedPointer<ReceivedMessage> receivedMessage,
+                                                                  SharedNodePointer senderNode) {
     PROFILE_RANGE(script_entities, __FUNCTION__);
 
     auto nodeList = DependencyManager::get<NodeList>();
@@ -1116,20 +1081,16 @@ QUuid EntityScriptingInterface::findClosestEntity(const glm::vec3& center, float
 
     EntityItemID result;
     if (_entityTree) {
-        unsigned int searchFilter = PickFilter::getBitMask(PickFilter::FlagBit::DOMAIN_ENTITIES) | PickFilter::getBitMask(PickFilter::FlagBit::AVATAR_ENTITIES);
-        _entityTree->withReadLock([&] {
-            result = _entityTree->evalClosestEntity(center, radius, PickFilter(searchFilter));
-        });
+        unsigned int searchFilter = PickFilter::getBitMask(PickFilter::FlagBit::DOMAIN_ENTITIES) |
+                                    PickFilter::getBitMask(PickFilter::FlagBit::AVATAR_ENTITIES);
+        _entityTree->withReadLock([&] { result = _entityTree->evalClosestEntity(center, radius, PickFilter(searchFilter)); });
     }
     return result;
 }
 
-
 void EntityScriptingInterface::dumpTree() const {
     if (_entityTree) {
-        _entityTree->withReadLock([&] {
-            _entityTree->dumpTree();
-        });
+        _entityTree->withReadLock([&] { _entityTree->dumpTree(); });
     }
 }
 
@@ -1138,10 +1099,9 @@ QVector<QUuid> EntityScriptingInterface::findEntities(const glm::vec3& center, f
 
     QVector<QUuid> result;
     if (_entityTree) {
-        unsigned int searchFilter = PickFilter::getBitMask(PickFilter::FlagBit::DOMAIN_ENTITIES) | PickFilter::getBitMask(PickFilter::FlagBit::AVATAR_ENTITIES);
-        _entityTree->withReadLock([&] {
-            _entityTree->evalEntitiesInSphere(center, radius, PickFilter(searchFilter), result);
-        });
+        unsigned int searchFilter = PickFilter::getBitMask(PickFilter::FlagBit::DOMAIN_ENTITIES) |
+                                    PickFilter::getBitMask(PickFilter::FlagBit::AVATAR_ENTITIES);
+        _entityTree->withReadLock([&] { _entityTree->evalEntitiesInSphere(center, radius, PickFilter(searchFilter), result); });
     }
     return result;
 }
@@ -1151,7 +1111,8 @@ QVector<QUuid> EntityScriptingInterface::findEntitiesInBox(const glm::vec3& corn
 
     QVector<QUuid> result;
     if (_entityTree) {
-        unsigned int searchFilter = PickFilter::getBitMask(PickFilter::FlagBit::DOMAIN_ENTITIES) | PickFilter::getBitMask(PickFilter::FlagBit::AVATAR_ENTITIES);
+        unsigned int searchFilter = PickFilter::getBitMask(PickFilter::FlagBit::DOMAIN_ENTITIES) |
+                                    PickFilter::getBitMask(PickFilter::FlagBit::AVATAR_ENTITIES);
         _entityTree->withReadLock([&] {
             AABox box(corner, dimensions);
             _entityTree->evalEntitiesInBox(box, PickFilter(searchFilter), result);
@@ -1190,47 +1151,54 @@ QVector<QUuid> EntityScriptingInterface::findEntitiesInFrustum(QVariantMap frust
         viewFrustum.calculate();
 
         if (_entityTree) {
-            unsigned int searchFilter = PickFilter::getBitMask(PickFilter::FlagBit::DOMAIN_ENTITIES) | PickFilter::getBitMask(PickFilter::FlagBit::AVATAR_ENTITIES);
-            _entityTree->withReadLock([&] {
-                _entityTree->evalEntitiesInFrustum(viewFrustum, PickFilter(searchFilter), result);
-            });
+            unsigned int searchFilter = PickFilter::getBitMask(PickFilter::FlagBit::DOMAIN_ENTITIES) |
+                                        PickFilter::getBitMask(PickFilter::FlagBit::AVATAR_ENTITIES);
+            _entityTree->withReadLock(
+                [&] { _entityTree->evalEntitiesInFrustum(viewFrustum, PickFilter(searchFilter), result); });
         }
     }
 
     return result;
 }
 
-QVector<QUuid> EntityScriptingInterface::findEntitiesByType(const QString entityType, const glm::vec3& center, float radius) const {
+QVector<QUuid> EntityScriptingInterface::findEntitiesByType(const QString entityType, const glm::vec3& center,
+                                                            float radius) const {
     EntityTypes::EntityType type = EntityTypes::getEntityTypeFromName(entityType);
 
     QVector<QUuid> result;
     if (_entityTree) {
-        unsigned int searchFilter = PickFilter::getBitMask(PickFilter::FlagBit::DOMAIN_ENTITIES) | PickFilter::getBitMask(PickFilter::FlagBit::AVATAR_ENTITIES);
-        _entityTree->withReadLock([&] {
-            _entityTree->evalEntitiesInSphereWithType(center, radius, type, PickFilter(searchFilter), result);
-        });
+        unsigned int searchFilter = PickFilter::getBitMask(PickFilter::FlagBit::DOMAIN_ENTITIES) |
+                                    PickFilter::getBitMask(PickFilter::FlagBit::AVATAR_ENTITIES);
+        _entityTree->withReadLock(
+            [&] { _entityTree->evalEntitiesInSphereWithType(center, radius, type, PickFilter(searchFilter), result); });
     }
     return result;
 }
 
-QVector<QUuid> EntityScriptingInterface::findEntitiesByName(const QString entityName, const glm::vec3& center, float radius, bool caseSensitiveSearch) const {
+QVector<QUuid> EntityScriptingInterface::findEntitiesByName(const QString entityName, const glm::vec3& center, float radius,
+                                                            bool caseSensitiveSearch) const {
     QVector<QUuid> result;
     if (_entityTree) {
         _entityTree->withReadLock([&] {
-            unsigned int searchFilter = PickFilter::getBitMask(PickFilter::FlagBit::DOMAIN_ENTITIES) | PickFilter::getBitMask(PickFilter::FlagBit::AVATAR_ENTITIES);
-            _entityTree->evalEntitiesInSphereWithName(center, radius, entityName, caseSensitiveSearch, PickFilter(searchFilter), result);
+            unsigned int searchFilter = PickFilter::getBitMask(PickFilter::FlagBit::DOMAIN_ENTITIES) |
+                                        PickFilter::getBitMask(PickFilter::FlagBit::AVATAR_ENTITIES);
+            _entityTree->evalEntitiesInSphereWithName(center, radius, entityName, caseSensitiveSearch, PickFilter(searchFilter),
+                                                      result);
         });
     }
     return result;
 }
 
 RayToEntityIntersectionResult EntityScriptingInterface::findRayIntersection(const PickRay& ray, bool precisionPicking,
-        const QScriptValue& entityIdsToInclude, const QScriptValue& entityIdsToDiscard, bool visibleOnly, bool collidableOnly) const {
+                                                                            const QScriptValue& entityIdsToInclude,
+                                                                            const QScriptValue& entityIdsToDiscard,
+                                                                            bool visibleOnly, bool collidableOnly) const {
     PROFILE_RANGE(script_entities, __FUNCTION__);
     QVector<EntityItemID> entitiesToInclude = qVectorEntityItemIDFromScriptValue(entityIdsToInclude);
     QVector<EntityItemID> entitiesToDiscard = qVectorEntityItemIDFromScriptValue(entityIdsToDiscard);
 
-    unsigned int searchFilter = PickFilter::getBitMask(PickFilter::FlagBit::DOMAIN_ENTITIES) | PickFilter::getBitMask(PickFilter::FlagBit::AVATAR_ENTITIES);
+    unsigned int searchFilter = PickFilter::getBitMask(PickFilter::FlagBit::DOMAIN_ENTITIES) |
+                                PickFilter::getBitMask(PickFilter::FlagBit::AVATAR_ENTITIES);
 
     if (!precisionPicking) {
         searchFilter = searchFilter | PickFilter::getBitMask(PickFilter::FlagBit::COARSE);
@@ -1247,24 +1215,23 @@ RayToEntityIntersectionResult EntityScriptingInterface::findRayIntersection(cons
     return evalRayIntersectionWorker(ray, Octree::Lock, PickFilter(searchFilter), entitiesToInclude, entitiesToDiscard);
 }
 
-RayToEntityIntersectionResult EntityScriptingInterface::evalRayIntersectionVector(const PickRay& ray, PickFilter searchFilter,
-        const QVector<EntityItemID>& entityIdsToInclude, const QVector<EntityItemID>& entityIdsToDiscard) {
+RayToEntityIntersectionResult EntityScriptingInterface::evalRayIntersectionVector(
+    const PickRay& ray, PickFilter searchFilter, const QVector<EntityItemID>& entityIdsToInclude,
+    const QVector<EntityItemID>& entityIdsToDiscard) {
     PROFILE_RANGE(script_entities, __FUNCTION__);
 
     return evalRayIntersectionWorker(ray, Octree::Lock, searchFilter, entityIdsToInclude, entityIdsToDiscard);
 }
 
-RayToEntityIntersectionResult EntityScriptingInterface::evalRayIntersectionWorker(const PickRay& ray,
-        Octree::lockType lockType, PickFilter searchFilter, const QVector<EntityItemID>& entityIdsToInclude,
-        const QVector<EntityItemID>& entityIdsToDiscard) const {
-
+RayToEntityIntersectionResult EntityScriptingInterface::evalRayIntersectionWorker(
+    const PickRay& ray, Octree::lockType lockType, PickFilter searchFilter, const QVector<EntityItemID>& entityIdsToInclude,
+    const QVector<EntityItemID>& entityIdsToDiscard) const {
     RayToEntityIntersectionResult result;
     if (_entityTree) {
         OctreeElementPointer element;
-        result.entityID = _entityTree->evalRayIntersection(ray.origin, ray.direction,
-            entityIdsToInclude, entityIdsToDiscard, searchFilter,
-            element, result.distance, result.face, result.surfaceNormal,
-            result.extraInfo, lockType, &result.accurate);
+        result.entityID = _entityTree->evalRayIntersection(ray.origin, ray.direction, entityIdsToInclude, entityIdsToDiscard,
+                                                           searchFilter, element, result.distance, result.face,
+                                                           result.surfaceNormal, result.extraInfo, lockType, &result.accurate);
         result.intersects = !result.entityID.isNull();
         if (result.intersects) {
             result.intersection = ray.origin + (ray.direction * result.distance);
@@ -1273,24 +1240,24 @@ RayToEntityIntersectionResult EntityScriptingInterface::evalRayIntersectionWorke
     return result;
 }
 
-ParabolaToEntityIntersectionResult EntityScriptingInterface::evalParabolaIntersectionVector(const PickParabola& parabola, PickFilter searchFilter,
-        const QVector<EntityItemID>& entityIdsToInclude, const QVector<EntityItemID>& entityIdsToDiscard) {
+ParabolaToEntityIntersectionResult EntityScriptingInterface::evalParabolaIntersectionVector(
+    const PickParabola& parabola, PickFilter searchFilter, const QVector<EntityItemID>& entityIdsToInclude,
+    const QVector<EntityItemID>& entityIdsToDiscard) {
     PROFILE_RANGE(script_entities, __FUNCTION__);
 
     return evalParabolaIntersectionWorker(parabola, Octree::Lock, searchFilter, entityIdsToInclude, entityIdsToDiscard);
 }
 
-ParabolaToEntityIntersectionResult EntityScriptingInterface::evalParabolaIntersectionWorker(const PickParabola& parabola,
-    Octree::lockType lockType, PickFilter searchFilter, const QVector<EntityItemID>& entityIdsToInclude,
-    const QVector<EntityItemID>& entityIdsToDiscard) const {
-
+ParabolaToEntityIntersectionResult EntityScriptingInterface::evalParabolaIntersectionWorker(
+    const PickParabola& parabola, Octree::lockType lockType, PickFilter searchFilter,
+    const QVector<EntityItemID>& entityIdsToInclude, const QVector<EntityItemID>& entityIdsToDiscard) const {
     ParabolaToEntityIntersectionResult result;
     if (_entityTree) {
         OctreeElementPointer element;
-        result.entityID = _entityTree->evalParabolaIntersection(parabola,
-            entityIdsToInclude, entityIdsToDiscard, searchFilter,
-            element, result.intersection, result.distance, result.parabolicDistance, result.face, result.surfaceNormal,
-            result.extraInfo, lockType, &result.accurate);
+        result.entityID = _entityTree->evalParabolaIntersection(parabola, entityIdsToInclude, entityIdsToDiscard, searchFilter,
+                                                                element, result.intersection, result.distance,
+                                                                result.parabolicDistance, result.face, result.surfaceNormal,
+                                                                result.extraInfo, lockType, &result.accurate);
         result.intersects = !result.entityID.isNull();
     }
     return result;
@@ -1328,7 +1295,8 @@ bool EntityPropertyMetadataRequest::script(EntityItemID entityID, QScriptValue h
     });
     if (!request->isStarted()) {
         request->deleteLater();
-        callScopedHandlerObject(handler, _engine->makeError("Entities Scripting Provider unavailable", "InternalError"), QScriptValue());
+        callScopedHandlerObject(handler, _engine->makeError("Entities Scripting Provider unavailable", "InternalError"),
+                                QScriptValue());
         return false;
     }
     return true;
@@ -1369,7 +1337,8 @@ bool EntityPropertyMetadataRequest::serverScripts(EntityItemID entityID, QScript
     return true;
 }
 
-bool EntityScriptingInterface::queryPropertyMetadata(const QUuid& entityID, QScriptValue property, QScriptValue scopeOrCallback, QScriptValue methodOrName) {
+bool EntityScriptingInterface::queryPropertyMetadata(const QUuid& entityID, QScriptValue property, QScriptValue scopeOrCallback,
+                                                     QScriptValue methodOrName) {
     auto name = property.toString();
     auto handler = makeScopedHandlerObject(scopeOrCallback, methodOrName);
     QPointer<BaseScriptEngine> engine = dynamic_cast<BaseScriptEngine*>(handler.engine());
@@ -1378,9 +1347,8 @@ bool EntityScriptingInterface::queryPropertyMetadata(const QUuid& entityID, QScr
         return false;
     }
 #ifdef DEBUG_ENGINE_STATE
-    connect(engine, &QObject::destroyed, this, [=]() {
-        qDebug() << "queryPropertyMetadata -- engine destroyed!" << (!engine ? "nullptr" : "engine");
-    });
+    connect(engine, &QObject::destroyed, this,
+            [=]() { qDebug() << "queryPropertyMetadata -- engine destroyed!" << (!engine ? "nullptr" : "engine"); });
 #endif
     if (!handler.property("callback").isFunction()) {
         qDebug() << "!handler.callback.isFunction" << engine;
@@ -1417,8 +1385,10 @@ bool EntityScriptingInterface::getServerScriptStatus(const QUuid& entityID, QScr
     auto client = DependencyManager::get<EntityScriptClient>();
     auto request = client->createScriptStatusRequest(entityID);
     connect(request, &GetScriptStatusRequest::finished, callback.engine(), [callback](GetScriptStatusRequest* request) mutable {
-        QString statusString = EntityScriptStatus_::valueToKey(request->getStatus());;
-        QScriptValueList args { request->getResponseReceived(), request->getIsRunning(), statusString.toLower(), request->getErrorInfo() };
+        QString statusString = EntityScriptStatus_::valueToKey(request->getStatus());
+        ;
+        QScriptValueList args { request->getResponseReceived(), request->getIsRunning(), statusString.toLower(),
+                                request->getErrorInfo() };
         callback.call(QScriptValue(), args);
         request->deleteLater();
     });
@@ -1506,9 +1476,7 @@ bool EntityScriptingInterface::polyVoxWorker(QUuid entityID, std::function<bool(
 
     auto polyVoxEntity = std::dynamic_pointer_cast<PolyVoxEntityItem>(entity);
     bool result;
-    _entityTree->withWriteLock([&] {
-        result = actor(*polyVoxEntity);
-    });
+    _entityTree->withWriteLock([&] { result = actor(*polyVoxEntity); });
     return result;
 }
 
@@ -1541,9 +1509,7 @@ bool EntityScriptingInterface::setPoints(QUuid entityID, std::function<bool(Line
     });
 
     EntityItemProperties properties;
-    _entityTree->withReadLock([&] {
-        properties = entity->getProperties();
-    });
+    _entityTree->withReadLock([&] { properties = entity->getProperties(); });
 
     properties.setLinePointsDirty();
     properties.setLastEdited(now);
@@ -1559,8 +1525,7 @@ bool EntityScriptingInterface::setVoxelSphere(const QUuid& entityID, const glm::
     });
 }
 
-bool EntityScriptingInterface::setVoxelCapsule(const QUuid& entityID,
-                                               const glm::vec3& start, const glm::vec3& end,
+bool EntityScriptingInterface::setVoxelCapsule(const QUuid& entityID, const glm::vec3& start, const glm::vec3& end,
                                                float radius, int value) {
     PROFILE_RANGE(script_entities, __FUNCTION__);
 
@@ -1580,9 +1545,7 @@ bool EntityScriptingInterface::setVoxel(const QUuid& entityID, const glm::vec3& 
 bool EntityScriptingInterface::setAllVoxels(const QUuid& entityID, int value) {
     PROFILE_RANGE(script_entities, __FUNCTION__);
 
-    return polyVoxWorker(entityID, [value](PolyVoxEntityItem& polyVoxEntity) {
-        return polyVoxEntity.setAll(value);
-    });
+    return polyVoxWorker(entityID, [value](PolyVoxEntityItem& polyVoxEntity) { return polyVoxEntity.setAll(value); });
 }
 
 bool EntityScriptingInterface::setVoxelsInCuboid(const QUuid& entityID, const glm::vec3& lowPosition,
@@ -1605,8 +1568,7 @@ bool EntityScriptingInterface::setAllPoints(const QUuid& entityID, const QVector
     EntityTypes::EntityType entityType = entity->getType();
 
     if (entityType == EntityTypes::Line) {
-        return setPoints(entityID, [points](LineEntityItem& lineEntity) -> bool
-        {
+        return setPoints(entityID, [points](LineEntityItem& lineEntity) -> bool {
             return (LineEntityItem*)lineEntity.setLinePoints(points);
         });
     }
@@ -1627,15 +1589,13 @@ bool EntityScriptingInterface::appendPoint(const QUuid& entityID, const glm::vec
     EntityTypes::EntityType entityType = entity->getType();
 
     if (entityType == EntityTypes::Line) {
-        return setPoints(entityID, [point](LineEntityItem& lineEntity) -> bool
-        {
+        return setPoints(entityID, [point](LineEntityItem& lineEntity) -> bool {
             return (LineEntityItem*)lineEntity.appendPoint(point);
         });
     }
 
     return false;
 }
-
 
 bool EntityScriptingInterface::actionWorker(const QUuid& entityID,
                                             std::function<bool(EntitySimulationPointer, EntityItemPointer)> actor) {
@@ -1677,9 +1637,7 @@ bool EntityScriptingInterface::actionWorker(const QUuid& entityID,
 
     // transmit the change
     if (doTransmit) {
-        _entityTree->withReadLock([&] {
-            properties = entity->getProperties();
-        });
+        _entityTree->withReadLock([&] { properties = entity->getProperties(); });
 
         properties.setActionDataDirty();
         auto now = usecTimestampNow();
@@ -1690,9 +1648,7 @@ bool EntityScriptingInterface::actionWorker(const QUuid& entityID,
     return doTransmit;
 }
 
-
-QUuid EntityScriptingInterface::addAction(const QString& actionTypeString,
-                                          const QUuid& entityID,
+QUuid EntityScriptingInterface::addAction(const QString& actionTypeString, const QUuid& entityID,
                                           const QVariantMap& arguments) {
     PROFILE_RANGE(script_entities, __FUNCTION__);
 
@@ -1724,7 +1680,6 @@ QUuid EntityScriptingInterface::addAction(const QString& actionTypeString,
     }
     return QUuid();
 }
-
 
 bool EntityScriptingInterface::updateAction(const QUuid& entityID, const QUuid& actionID, const QVariantMap& arguments) {
     PROFILE_RANGE(script_entities, __FUNCTION__);
@@ -1781,17 +1736,17 @@ EntityItemPointer EntityScriptingInterface::checkForTreeEntityAndTypeMatch(const
     if (!_entityTree) {
         return EntityItemPointer();
     }
-    
+
     EntityItemPointer entity = _entityTree->findEntityByEntityItemID(entityID);
     if (!entity) {
         qCDebug(entities) << "EntityScriptingInterface::checkForTreeEntityAndTypeMatch - no entity with ID" << entityID;
         return entity;
     }
-    
+
     if (entityType != EntityTypes::Unknown && entity->getType() != entityType) {
         return EntityItemPointer();
     }
-    
+
     return entity;
 }
 
@@ -1858,8 +1813,8 @@ glm::quat EntityScriptingInterface::getAbsoluteJointRotationInObjectFrame(const 
     }
 }
 
-bool EntityScriptingInterface::setAbsoluteJointTranslationInObjectFrame(const QUuid& entityID,
-                                                                        int jointIndex, glm::vec3 translation) {
+bool EntityScriptingInterface::setAbsoluteJointTranslationInObjectFrame(const QUuid& entityID, int jointIndex,
+                                                                        glm::vec3 translation) {
     if (auto entity = checkForTreeEntityAndTypeMatch(entityID, EntityTypes::Model)) {
         auto now = usecTimestampNow();
         auto modelEntity = std::dynamic_pointer_cast<ModelEntityItem>(entity);
@@ -1880,8 +1835,8 @@ bool EntityScriptingInterface::setAbsoluteJointTranslationInObjectFrame(const QU
     return false;
 }
 
-bool EntityScriptingInterface::setAbsoluteJointRotationInObjectFrame(const QUuid& entityID,
-                                                                     int jointIndex, glm::quat rotation) {
+bool EntityScriptingInterface::setAbsoluteJointRotationInObjectFrame(const QUuid& entityID, int jointIndex,
+                                                                     glm::quat rotation) {
     if (auto entity = checkForTreeEntityAndTypeMatch(entityID, EntityTypes::Model)) {
         auto now = usecTimestampNow();
         auto modelEntity = std::dynamic_pointer_cast<ModelEntityItem>(entity);
@@ -1962,8 +1917,6 @@ bool EntityScriptingInterface::setLocalJointRotation(const QUuid& entityID, int 
     return false;
 }
 
-
-
 bool EntityScriptingInterface::setLocalJointRotations(const QUuid& entityID, const QVector<glm::quat>& rotations) {
     if (auto entity = checkForTreeEntityAndTypeMatch(entityID, EntityTypes::Model)) {
         auto now = usecTimestampNow();
@@ -1989,7 +1942,6 @@ bool EntityScriptingInterface::setLocalJointRotations(const QUuid& entityID, con
     }
     return false;
 }
-
 
 bool EntityScriptingInterface::setLocalJointTranslations(const QUuid& entityID, const QVector<glm::vec3>& translations) {
     if (auto entity = checkForTreeEntityAndTypeMatch(entityID, EntityTypes::Model)) {
@@ -2017,12 +1969,10 @@ bool EntityScriptingInterface::setLocalJointTranslations(const QUuid& entityID, 
     return false;
 }
 
-bool EntityScriptingInterface::setLocalJointsData(const QUuid& entityID,
-                                                  const QVector<glm::quat>& rotations,
+bool EntityScriptingInterface::setLocalJointsData(const QUuid& entityID, const QVector<glm::quat>& rotations,
                                                   const QVector<glm::vec3>& translations) {
     // for a model with 80 joints, sending both these in one edit packet causes the packet to be too large.
-    return setLocalJointRotations(entityID, rotations) ||
-        setLocalJointTranslations(entityID, translations);
+    return setLocalJointRotations(entityID, rotations) || setLocalJointTranslations(entityID, translations);
 }
 
 int EntityScriptingInterface::getJointIndex(const QUuid& entityID, const QString& name) {
@@ -2030,9 +1980,7 @@ int EntityScriptingInterface::getJointIndex(const QUuid& entityID, const QString
         return -1;
     }
     int result;
-    _entityTree->withReadLock([&] {
-       result = _entityTree->getJointIndex(entityID, name);
-    });
+    _entityTree->withReadLock([&] { result = _entityTree->getJointIndex(entityID, name); });
     return result;
 }
 
@@ -2041,9 +1989,7 @@ QStringList EntityScriptingInterface::getJointNames(const QUuid& entityID) {
         return QStringList();
     }
     QStringList result;
-    _entityTree->withReadLock([&] {
-        result = _entityTree->getJointNames(entityID);
-    });
+    _entityTree->withReadLock([&] { result = _entityTree->getJointNames(entityID); });
     return result;
 }
 
@@ -2066,9 +2012,7 @@ QVector<QUuid> EntityScriptingInterface::getChildrenIDs(const QUuid& parentID) {
         if (!parent) {
             return;
         }
-        parent->forEachChild([&](SpatiallyNestablePointer child) {
-            result.push_back(child->getID());
-        });
+        parent->forEachChild([&](SpatiallyNestablePointer child) { result.push_back(child->getID()); });
     });
 
     return result;
@@ -2213,8 +2157,8 @@ void EntityScriptingInterface::emitScriptEvent(const EntityItemID& entityID, con
 }
 
 // TODO move this someplace that makes more sense...
-bool EntityScriptingInterface::AABoxIntersectsCapsule(const glm::vec3& low, const glm::vec3& dimensions,
-                                                      const glm::vec3& start, const glm::vec3& end, float radius) {
+bool EntityScriptingInterface::AABoxIntersectsCapsule(const glm::vec3& low, const glm::vec3& dimensions, const glm::vec3& start,
+                                                      const glm::vec3& end, float radius) {
     glm::vec3 penetration;
     AABox aaBox(low, dimensions);
     return aaBox.findCapsulePenetration(start, end, radius, penetration);
@@ -2306,11 +2250,11 @@ const EntityPropertyInfo EntityScriptingInterface::getPropertyInfo(const QString
     return propertyInfo;
 }
 
-glm::vec3 EntityScriptingInterface::worldToLocalPosition(glm::vec3 worldPosition, const QUuid& parentID,
-                                                         int parentJointIndex, bool scalesWithParent) {
+glm::vec3 EntityScriptingInterface::worldToLocalPosition(glm::vec3 worldPosition, const QUuid& parentID, int parentJointIndex,
+                                                         bool scalesWithParent) {
     bool success;
-    glm::vec3 localPosition = SpatiallyNestable::worldToLocal(worldPosition, parentID, parentJointIndex,
-                                                              scalesWithParent, success);
+    glm::vec3 localPosition = SpatiallyNestable::worldToLocal(worldPosition, parentID, parentJointIndex, scalesWithParent,
+                                                              success);
     if (success) {
         return localPosition;
     } else {
@@ -2318,11 +2262,11 @@ glm::vec3 EntityScriptingInterface::worldToLocalPosition(glm::vec3 worldPosition
     }
 }
 
-glm::quat EntityScriptingInterface::worldToLocalRotation(glm::quat worldRotation, const QUuid& parentID,
-                                                         int parentJointIndex, bool scalesWithParent) {
+glm::quat EntityScriptingInterface::worldToLocalRotation(glm::quat worldRotation, const QUuid& parentID, int parentJointIndex,
+                                                         bool scalesWithParent) {
     bool success;
-    glm::quat localRotation = SpatiallyNestable::worldToLocal(worldRotation, parentID, parentJointIndex,
-                                                              scalesWithParent, success);
+    glm::quat localRotation = SpatiallyNestable::worldToLocal(worldRotation, parentID, parentJointIndex, scalesWithParent,
+                                                              success);
     if (success) {
         return localRotation;
     } else {
@@ -2330,8 +2274,8 @@ glm::quat EntityScriptingInterface::worldToLocalRotation(glm::quat worldRotation
     }
 }
 
-glm::vec3 EntityScriptingInterface::worldToLocalVelocity(glm::vec3 worldVelocity, const QUuid& parentID,
-                                                         int parentJointIndex, bool scalesWithParent) {
+glm::vec3 EntityScriptingInterface::worldToLocalVelocity(glm::vec3 worldVelocity, const QUuid& parentID, int parentJointIndex,
+                                                         bool scalesWithParent) {
     bool success;
     glm::vec3 localVelocity = SpatiallyNestable::worldToLocalVelocity(worldVelocity, parentID, parentJointIndex,
                                                                       scalesWithParent, success);
@@ -2357,7 +2301,6 @@ glm::vec3 EntityScriptingInterface::worldToLocalAngularVelocity(glm::vec3 worldA
 
 glm::vec3 EntityScriptingInterface::worldToLocalDimensions(glm::vec3 worldDimensions, const QUuid& parentID,
                                                            int parentJointIndex, bool scalesWithParent) {
-
     bool success;
     glm::vec3 localDimensions = SpatiallyNestable::worldToLocalDimensions(worldDimensions, parentID, parentJointIndex,
                                                                           scalesWithParent, success);
@@ -2368,11 +2311,11 @@ glm::vec3 EntityScriptingInterface::worldToLocalDimensions(glm::vec3 worldDimens
     }
 }
 
-glm::vec3 EntityScriptingInterface::localToWorldPosition(glm::vec3 localPosition, const QUuid& parentID,
-                                                         int parentJointIndex, bool scalesWithParent) {
+glm::vec3 EntityScriptingInterface::localToWorldPosition(glm::vec3 localPosition, const QUuid& parentID, int parentJointIndex,
+                                                         bool scalesWithParent) {
     bool success;
-    glm::vec3 worldPosition = SpatiallyNestable::localToWorld(localPosition, parentID, parentJointIndex,
-                                                              scalesWithParent, success);
+    glm::vec3 worldPosition = SpatiallyNestable::localToWorld(localPosition, parentID, parentJointIndex, scalesWithParent,
+                                                              success);
     if (success) {
         return worldPosition;
     } else {
@@ -2380,11 +2323,11 @@ glm::vec3 EntityScriptingInterface::localToWorldPosition(glm::vec3 localPosition
     }
 }
 
-glm::quat EntityScriptingInterface::localToWorldRotation(glm::quat localRotation, const QUuid& parentID,
-                                                         int parentJointIndex, bool scalesWithParent) {
+glm::quat EntityScriptingInterface::localToWorldRotation(glm::quat localRotation, const QUuid& parentID, int parentJointIndex,
+                                                         bool scalesWithParent) {
     bool success;
-    glm::quat worldRotation = SpatiallyNestable::localToWorld(localRotation, parentID, parentJointIndex,
-                                                              scalesWithParent, success);
+    glm::quat worldRotation = SpatiallyNestable::localToWorld(localRotation, parentID, parentJointIndex, scalesWithParent,
+                                                              success);
     if (success) {
         return worldRotation;
     } else {
@@ -2392,8 +2335,8 @@ glm::quat EntityScriptingInterface::localToWorldRotation(glm::quat localRotation
     }
 }
 
-glm::vec3 EntityScriptingInterface::localToWorldVelocity(glm::vec3 localVelocity, const QUuid& parentID,
-                                                         int parentJointIndex, bool scalesWithParent) {
+glm::vec3 EntityScriptingInterface::localToWorldVelocity(glm::vec3 localVelocity, const QUuid& parentID, int parentJointIndex,
+                                                         bool scalesWithParent) {
     bool success;
     glm::vec3 worldVelocity = SpatiallyNestable::localToWorldVelocity(localVelocity, parentID, parentJointIndex,
                                                                       scalesWithParent, success);
@@ -2407,9 +2350,9 @@ glm::vec3 EntityScriptingInterface::localToWorldVelocity(glm::vec3 localVelocity
 glm::vec3 EntityScriptingInterface::localToWorldAngularVelocity(glm::vec3 localAngularVelocity, const QUuid& parentID,
                                                                 int parentJointIndex, bool scalesWithParent) {
     bool success;
-    glm::vec3 worldAngularVelocity = SpatiallyNestable::localToWorldAngularVelocity(localAngularVelocity,
-                                                                                    parentID, parentJointIndex,
-                                                                                    scalesWithParent, success);
+    glm::vec3 worldAngularVelocity = SpatiallyNestable::localToWorldAngularVelocity(localAngularVelocity, parentID,
+                                                                                    parentJointIndex, scalesWithParent,
+                                                                                    success);
     if (success) {
         return worldAngularVelocity;
     } else {

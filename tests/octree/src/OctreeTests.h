@@ -16,12 +16,12 @@
 
 class OctreeTests : public QObject {
     Q_OBJECT
-    
+
 private slots:
     // FIXME: These two tests are broken and need to be fixed / updated
     void propertyFlagsTests();
     void byteCountCodingTests();
-    
+
     // This test is fine
     void modelItemTests();
 
@@ -31,10 +31,8 @@ private slots:
 };
 
 // Helper functions
-inline QByteArray makeQByteArray (std::initializer_list<char> bytes) {
-    return QByteArray {
-        bytes.begin(), static_cast<int>(bytes.size() * sizeof(char))
-    };
+inline QByteArray makeQByteArray(std::initializer_list<char> bytes) {
+    return QByteArray { bytes.begin(), static_cast<int>(bytes.size() * sizeof(char)) };
 }
 
 #endif // hifi_OctreeTests_h

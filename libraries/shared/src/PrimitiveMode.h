@@ -25,10 +25,7 @@
  * @typedef {string} PrimitiveMode
  */
 
-enum class PrimitiveMode {
-    SOLID = 0,
-    LINES
-};
+enum class PrimitiveMode { SOLID = 0, LINES };
 
 class PrimitiveModeHelpers {
 public:
@@ -36,4 +33,3 @@ public:
 };
 
 #endif // hifi_PrimitiveMode_h
-

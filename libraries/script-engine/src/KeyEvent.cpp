@@ -25,9 +25,7 @@ KeyEvent::KeyEvent() :
     isAlt(false),
     isKeypad(false),
     isValid(false),
-    isAutoRepeat(false)
-{
-    
+    isAutoRepeat(false) {
 }
 
 KeyEvent::KeyEvent(const QKeyEvent& event) {
@@ -40,7 +38,7 @@ KeyEvent::KeyEvent(const QKeyEvent& event) {
     isKeypad = event.modifiers().testFlag(Qt::KeypadModifier);
     isValid = true;
     isAutoRepeat = event.isAutoRepeat();
-    
+
     // handle special text for special characters...
     if (key == Qt::Key_F1) {
         text = "F1";
@@ -104,7 +102,7 @@ KeyEvent::KeyEvent(const QKeyEvent& event) {
         text = "HELP";
     } else if (key == Qt::Key_CapsLock) {
         text = "CAPS LOCK";
-    } else if (key >= Qt::Key_A && key <= Qt::Key_Z && (isMeta || isControl || isAlt))  {
+    } else if (key >= Qt::Key_A && key <= Qt::Key_Z && (isMeta || isControl || isAlt)) {
         // this little bit of hackery will fix the text character keys like a-z in cases of control/alt/meta where
         // qt doesn't always give you the key characters and will sometimes give you crazy non-printable characters
         const int lowerCaseAdjust = 0x20;
@@ -118,14 +116,9 @@ KeyEvent::KeyEvent(const QKeyEvent& event) {
 }
 
 bool KeyEvent::operator==(const KeyEvent& other) const {
-    return other.key == key
-    && other.isShifted == isShifted
-    && other.isControl == isControl
-    && other.isMeta == isMeta
-    && other.isAlt == isAlt
-    && other.isKeypad == isKeypad;
+    return other.key == key && other.isShifted == isShifted && other.isControl == isControl && other.isMeta == isMeta &&
+           other.isAlt == isAlt && other.isKeypad == isKeypad;
 }
-
 
 KeyEvent::operator QKeySequence() const {
     int resultCode = 0;
@@ -134,7 +127,7 @@ KeyEvent::operator QKeySequence() const {
     } else {
         resultCode = key;
     }
-    
+
     if (isMeta) {
         resultCode |= Qt::META;
     }
@@ -153,20 +146,20 @@ KeyEvent::operator QKeySequence() const {
 /**jsdoc
  * A keyboard key event.
  * @typedef {object} KeyEvent
- * @property {number} key - The Qt keyboard code of the key pressed. For a list of keyboard codes, see 
+ * @property {number} key - The Qt keyboard code of the key pressed. For a list of keyboard codes, see
  *     <a href="http://doc.qt.io/qt-5/qt.html#Key-enum">http://doc.qt.io/qt-5/qt.html#Key-enum</a>.
- * @property {string} text - A string describing the key. For example, <code>"a"</code> for the "A" key if the Shift is not 
+ * @property {string} text - A string describing the key. For example, <code>"a"</code> for the "A" key if the Shift is not
  *     pressed, <code>"F1"</code> for the F1 key, <code>"SPACE"</code> for the space bar.
- * @property {boolean} isShifted - <code>true</code> if a Shift key was pressed when the event was generated, otherwise 
+ * @property {boolean} isShifted - <code>true</code> if a Shift key was pressed when the event was generated, otherwise
  *     <code>false</code>.
  * @property {boolean} isMeta - <code>true</code> if a meta key was pressed when the event was generated, otherwise
- *     <code>false</code>. On Windows the "meta" key is the Windows key; on OSX it is the Control (Splat) key. 
+ *     <code>false</code>. On Windows the "meta" key is the Windows key; on OSX it is the Control (Splat) key.
  * @property {boolean} isControl - <code>true</code> if a control key was pressed when the event was generated, otherwise
  *     <code>false</code>. On Windows the "control" key is the Ctrl key; on OSX it is the Command key.
- * @property {boolean} isAlt - <code>true</code> if an Alt key was pressed when the event was generated, otherwise 
+ * @property {boolean} isAlt - <code>true</code> if an Alt key was pressed when the event was generated, otherwise
  *     <code>false</code>.
  * @property {boolean} isKeypad - <code>true</code> if the key is on the numeric keypad, otherwise <code>false</code>.
- * @property {boolean} isAutoRepeat - <code>true</code> if the event is a repeat for key that is being held down, otherwise 
+ * @property {boolean} isAutoRepeat - <code>true</code> if the event is a repeat for key that is being held down, otherwise
  *     <code>false</code>.
  * @example <caption>Report the KeyEvent details for each key press.</caption>
  * Controller.keyPressEvent.connect(function (event) {
@@ -187,14 +180,13 @@ QScriptValue KeyEvent::toScriptValue(QScriptEngine* engine, const KeyEvent& even
 }
 
 void KeyEvent::fromScriptValue(const QScriptValue& object, KeyEvent& event) {
-    
     event.isValid = false; // assume the worst
     event.isMeta = object.property("isMeta").toVariant().toBool();
     event.isControl = object.property("isControl").toVariant().toBool();
     event.isAlt = object.property("isAlt").toVariant().toBool();
     event.isKeypad = object.property("isKeypad").toVariant().toBool();
     event.isAutoRepeat = object.property("isAutoRepeat").toVariant().toBool();
-    
+
     QScriptValue key = object.property("key");
     if (key.isValid()) {
         event.key = key.toVariant().toInt();
@@ -204,7 +196,7 @@ void KeyEvent::fromScriptValue(const QScriptValue& object, KeyEvent& event) {
         QScriptValue text = object.property("text");
         if (text.isValid()) {
             event.text = object.property("text").toVariant().toString();
-            
+
             // if the text is a special command, then map it here...
             // TODO: come up with more elegant solution here, a map? is there a Qt function that gives nice names for keys?
             if (event.text.toUpper() == "F1") {
@@ -281,7 +273,7 @@ void KeyEvent::fromScriptValue(const QScriptValue& object, KeyEvent& event) {
             event.isValid = true;
         }
     }
-    
+
     QScriptValue isShifted = object.property("isShifted");
     if (isShifted.isValid()) {
         event.isShifted = isShifted.toVariant().toBool();
@@ -297,17 +289,12 @@ void KeyEvent::fromScriptValue(const QScriptValue& object, KeyEvent& event) {
             }
         }
     }
-    
+
     const bool wantDebug = false;
     if (wantDebug) {
-        qCDebug(scriptengine) << "event.key=" << event.key
-        << " event.text=" << event.text
-        << " event.isShifted=" << event.isShifted
-        << " event.isControl=" << event.isControl
-        << " event.isMeta=" << event.isMeta
-        << " event.isAlt=" << event.isAlt
-        << " event.isKeypad=" << event.isKeypad
-        << " event.isAutoRepeat=" << event.isAutoRepeat;
+        qCDebug(scriptengine) << "event.key=" << event.key << " event.text=" << event.text
+                              << " event.isShifted=" << event.isShifted << " event.isControl=" << event.isControl
+                              << " event.isMeta=" << event.isMeta << " event.isAlt=" << event.isAlt
+                              << " event.isKeypad=" << event.isKeypad << " event.isAutoRepeat=" << event.isAutoRepeat;
     }
 }
-

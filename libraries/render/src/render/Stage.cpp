@@ -10,17 +10,10 @@
 //
 #include "Stage.h"
 
-
 using namespace render;
 
-
-
 Stage::~Stage() {
-
 }
 
-Stage::Stage() :
-    _name()
-{
+Stage::Stage() : _name() {
 }
-

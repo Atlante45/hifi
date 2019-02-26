@@ -8,10 +8,10 @@
 #include <StreamHelpers.h>
 #include <shaders/Shaders.h>
 
-#include "../render-utils/ShaderConstants.h"
 #include "../RenderUtilsLogging.h"
-#include "FontFamilies.h"
 #include "../StencilMaskPass.h"
+#include "../render-utils/ShaderConstants.h"
+#include "FontFamilies.h"
 
 static std::mutex fontMutex;
 
@@ -28,25 +28,17 @@ static const int VERTICES_PER_QUAD = 4; // 1 quad = 4 vertices
 struct QuadBuilder {
     TextureVertex vertices[VERTICES_PER_QUAD];
 
-    QuadBuilder(const glm::vec2& min, const glm::vec2& size,
-                const glm::vec2& texMin, const glm::vec2& texSize) {
+    QuadBuilder(const glm::vec2& min, const glm::vec2& size, const glm::vec2& texMin, const glm::vec2& texSize) {
         // min = bottomLeft
-        vertices[0] = TextureVertex(min,
-                                    texMin + glm::vec2(0.0f, texSize.y));
-        vertices[1] = TextureVertex(min + glm::vec2(size.x, 0.0f),
-                                    texMin + texSize);
-        vertices[2] = TextureVertex(min + glm::vec2(0.0f, size.y),
-                                    texMin);
-        vertices[3] = TextureVertex(min + size,
-                                    texMin + glm::vec2(texSize.x, 0.0f));
+        vertices[0] = TextureVertex(min, texMin + glm::vec2(0.0f, texSize.y));
+        vertices[1] = TextureVertex(min + glm::vec2(size.x, 0.0f), texMin + texSize);
+        vertices[2] = TextureVertex(min + glm::vec2(0.0f, size.y), texMin);
+        vertices[3] = TextureVertex(min + size, texMin + glm::vec2(texSize.x, 0.0f));
     }
     QuadBuilder(const Glyph& glyph, const glm::vec2& offset) :
-    QuadBuilder(offset + glm::vec2(glyph.offset.x, glyph.offset.y - glyph.size.y), glyph.size,
-                    glyph.texOffset, glyph.texSize) {}
-
+        QuadBuilder(offset + glm::vec2(glyph.offset.x, glyph.offset.y - glyph.size.y), glyph.size, glyph.texOffset,
+                    glyph.texSize) {}
 };
-
-
 
 static QHash<QString, Font::Pointer> LOADED_FONTS;
 
@@ -59,11 +51,10 @@ Font::Pointer Font::load(QIODevice& fontFile) {
 Font::Pointer Font::load(const QString& family) {
     std::lock_guard<std::mutex> lock(fontMutex);
     if (!LOADED_FONTS.contains(family)) {
-
-        static const QString SDFF_COURIER_PRIME_FILENAME{ ":/CourierPrime.sdff" };
-        static const QString SDFF_INCONSOLATA_MEDIUM_FILENAME{ ":/InconsolataMedium.sdff" };
-        static const QString SDFF_ROBOTO_FILENAME{ ":/Roboto.sdff" };
-        static const QString SDFF_TIMELESS_FILENAME{ ":/Timeless.sdff" };
+        static const QString SDFF_COURIER_PRIME_FILENAME { ":/CourierPrime.sdff" };
+        static const QString SDFF_INCONSOLATA_MEDIUM_FILENAME { ":/InconsolataMedium.sdff" };
+        static const QString SDFF_ROBOTO_FILENAME { ":/Roboto.sdff" };
+        static const QString SDFF_TIMELESS_FILENAME { ":/Timeless.sdff" };
 
         QString loadFilename;
 
@@ -115,7 +106,7 @@ QStringList Font::splitLines(const QString& str) const {
 
 QStringList Font::tokenizeForWrapping(const QString& str) const {
     QStringList tokens;
-    for(auto line : splitLines(str)) {
+    for (auto line : splitLines(str)) {
         if (!tokens.empty()) {
             tokens << QString('\n');
         }
@@ -126,7 +117,7 @@ QStringList Font::tokenizeForWrapping(const QString& str) const {
 
 glm::vec2 Font::computeTokenExtent(const QString& token) const {
     glm::vec2 advance(0, _fontSize);
-    foreach(QChar c, token) {
+    foreach (QChar c, token) {
         Q_ASSERT(c != '\n');
         advance.x += (c == ' ') ? _spaceWidth : getGlyph(c).d;
     }
@@ -136,9 +127,9 @@ glm::vec2 Font::computeTokenExtent(const QString& token) const {
 glm::vec2 Font::computeExtent(const QString& str) const {
     glm::vec2 extent = glm::vec2(0.0f, 0.0f);
 
-    QStringList lines{ splitLines(str) };
+    QStringList lines { splitLines(str) };
     if (!lines.empty()) {
-        for(const auto& line : lines) {
+        for (const auto& line : lines) {
             glm::vec2 tokenExtent = computeTokenExtent(line);
             extent.x = std::max(tokenExtent.x, extent.x);
         }
@@ -181,9 +172,7 @@ void Font::read(QIODevice& in) {
     // read metrics data for each character
     QVector<Glyph> glyphs(count);
     // std::for_each instead of Qt foreach because we need non-const references
-    std::for_each(glyphs.begin(), glyphs.end(), [&](Glyph& g) {
-        g.read(in);
-    });
+    std::for_each(glyphs.begin(), glyphs.end(), [&](Glyph& g) { g.read(in); });
 
     // read image data
     QImage image;
@@ -193,7 +182,7 @@ void Font::read(QIODevice& in) {
 
     _glyphs.clear();
     glm::vec2 imageSize = toGlm(image.size());
-    foreach(Glyph g, glyphs) {
+    foreach (Glyph g, glyphs) {
         // Adjust the pixel texture coordinates into UV coordinates,
         g.texSize /= imageSize;
         g.texOffset /= imageSize;
@@ -225,19 +214,18 @@ void Font::setupGPU() {
             auto state = std::make_shared<gpu::State>();
             state->setCullMode(gpu::State::CULL_BACK);
             state->setDepthTest(true, true, gpu::LESS_EQUAL);
-            state->setBlendFunction(false,
-                gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
-                gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
+            state->setBlendFunction(false, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
+                                    gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
             PrepareStencil::testMaskDrawShape(*state);
             _pipeline = gpu::Pipeline::create(program, state);
 
-            gpu::ShaderPointer programTransparent = gpu::Shader::createProgram(shader::render_utils::program::sdf_text3D_transparent);
+            gpu::ShaderPointer programTransparent = gpu::Shader::createProgram(
+                shader::render_utils::program::sdf_text3D_transparent);
             auto transparentState = std::make_shared<gpu::State>();
             transparentState->setCullMode(gpu::State::CULL_BACK);
             transparentState->setDepthTest(true, true, gpu::LESS_EQUAL);
-            transparentState->setBlendFunction(true,
-                gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
-                gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
+            transparentState->setBlendFunction(true, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
+                                               gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
             PrepareStencil::testMask(*transparentState);
             _transparentPipeline = gpu::Pipeline::create(programTransparent, transparentState);
         }
@@ -268,7 +256,7 @@ void Font::buildVertices(Font::DrawInfo& drawInfo, const QString& str, const glm
 
     // Top left of text
     glm::vec2 advance = origin;
-    foreach(const QString& token, tokenizeForWrapping(str)) {
+    foreach (const QString& token, tokenizeForWrapping(str)) {
         bool isNewLine = (token == QString('\n'));
         bool forceNewLine = false;
 
@@ -303,7 +291,7 @@ void Font::buildVertices(Font::DrawInfo& drawInfo, const QString& str, const glm
                 QuadBuilder qd(glyph, advance - glm::vec2(0.0f, _ascent));
                 drawInfo.verticesBuffer->append(qd);
                 numVertices += 4;
-                
+
                 // Sam's recommended triangle slices
                 // Triangle tri1 = { v0, v1, v3 };
                 // Triangle tri2 = { v1, v2, v3 };
@@ -330,7 +318,6 @@ void Font::buildVertices(Font::DrawInfo& drawInfo, const QString& str, const glm
                 indices[5] = verticesOffset + 3;
                 drawInfo.indicesBuffer->append(sizeof(indices), (const gpu::Byte*)indices);
                 drawInfo.indexCount += NUMBER_OF_INDICES_PER_QUAD;
-                
 
                 // Advance by glyph size
                 advance.x += glyph.d;

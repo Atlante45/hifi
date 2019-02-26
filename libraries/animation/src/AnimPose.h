@@ -11,11 +11,11 @@
 #ifndef hifi_AnimPose
 #define hifi_AnimPose
 
-#include <QtGlobal>
 #include <QDebug>
-#include <vector>
+#include <QtGlobal>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <vector>
 
 class AnimPose {
 public:
@@ -24,13 +24,16 @@ public:
 
     explicit AnimPose(const glm::quat& rotIn) : _scale(1.0f), _rot(rotIn), _trans(0.0f) {}
     AnimPose(const glm::quat& rotIn, const glm::vec3& transIn) : _scale(1.0f), _rot(rotIn), _trans(transIn) {}
-    AnimPose(const glm::vec3& scaleIn, const glm::quat& rotIn, const glm::vec3& transIn) : _scale(scaleIn), _rot(rotIn), _trans(transIn) {}
+    AnimPose(const glm::vec3& scaleIn, const glm::quat& rotIn, const glm::vec3& transIn) :
+        _scale(scaleIn),
+        _rot(rotIn),
+        _trans(transIn) {}
 
     static const AnimPose identity;
 
     glm::vec3 xformPoint(const glm::vec3& rhs) const;
-    glm::vec3 xformVector(const glm::vec3& rhs) const;  // really slow, but accurate for transforms with non-uniform scale
-    glm::vec3 xformVectorFast(const glm::vec3& rhs) const;  // faster, but does not handle non-uniform scale correctly.
+    glm::vec3 xformVector(const glm::vec3& rhs) const; // really slow, but accurate for transforms with non-uniform scale
+    glm::vec3 xformVectorFast(const glm::vec3& rhs) const; // faster, but does not handle non-uniform scale correctly.
 
     glm::vec3 operator*(const glm::vec3& rhs) const; // same as xformPoint
     AnimPose operator*(const AnimPose& rhs) const;
@@ -58,7 +61,9 @@ private:
 };
 
 inline QDebug operator<<(QDebug debug, const AnimPose& pose) {
-    debug << "AnimPose, trans = (" << pose.trans().x << pose.trans().y << pose.trans().z << "), rot = (" << pose.rot().x << pose.rot().y << pose.rot().z << pose.rot().w << "), scale = (" << pose.scale().x << pose.scale().y << pose.scale().z << ")";
+    debug << "AnimPose, trans = (" << pose.trans().x << pose.trans().y << pose.trans().z << "), rot = (" << pose.rot().x
+          << pose.rot().y << pose.rot().z << pose.rot().w << "), scale = (" << pose.scale().x << pose.scale().y
+          << pose.scale().z << ")";
     return debug;
 }
 

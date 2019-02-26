@@ -8,11 +8,7 @@
 
 #include "RenderLayer.h"
 
-const char* renderLayerNames[] = {
-    "world",
-    "front",
-    "hud"
-};
+const char* renderLayerNames[] = { "world", "front", "hud" };
 
 static const size_t RENDER_LAYER_NAMES = (sizeof(renderLayerNames) / sizeof(renderLayerNames[0]));
 

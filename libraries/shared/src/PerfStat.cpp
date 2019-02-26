@@ -36,16 +36,16 @@ PerformanceWarning::~PerformanceWarning() {
     if ((_alwaysDisplay || _renderWarningsOn) && elapsedmsec > 1) {
         if (elapsedmsec > 1000) {
             double elapsedsec = (end - _start) / 1000000.0;
-            qCDebug(shared, "%s took %.2lf seconds %s", _message, elapsedsec, (_alwaysDisplay ? "" : "WARNING!") );
+            qCDebug(shared, "%s took %.2lf seconds %s", _message, elapsedsec, (_alwaysDisplay ? "" : "WARNING!"));
         } else {
             if (_suppressShortTimings) {
                 if (elapsedmsec > 10) {
                     qCDebug(shared, "%s took %.1lf milliseconds %s", _message, elapsedmsec,
-                        (_alwaysDisplay || (elapsedmsec < 10) ? "" : "WARNING!"));
+                            (_alwaysDisplay || (elapsedmsec < 10) ? "" : "WARNING!"));
                 }
             } else {
                 qCDebug(shared, "%s took %.2lf milliseconds %s", _message, elapsedmsec,
-                    (_alwaysDisplay || (elapsedmsec < 10) ? "" : "WARNING!"));
+                        (_alwaysDisplay || (elapsedmsec < 10) ? "" : "WARNING!"));
             }
         }
     } else if (_alwaysDisplay) {
@@ -168,8 +168,7 @@ void PerformanceTimer::dumpAllTimerRecords() {
     QMapIterator<QString, PerformanceTimerRecord> i(_records);
     while (i.hasNext()) {
         i.next();
-        qCDebug(shared) << i.key() << ": average " << i.value().getAverage()
-            << " [" << i.value().getMovingAverage() << "]"
-            << "usecs over" << i.value().getCount() << "calls";
+        qCDebug(shared) << i.key() << ": average " << i.value().getAverage() << " [" << i.value().getMovingAverage() << "]"
+                        << "usecs over" << i.value().getCount() << "calls";
     }
 }

@@ -18,7 +18,6 @@ GenericThread::GenericThread() :
     _stopThread(false),
     _isThreaded(false) // assume non-threaded, must call initialize()
 {
-    
 }
 
 GenericThread::~GenericThread() {
@@ -32,7 +31,7 @@ void GenericThread::initialize(bool isThreaded, QThread::Priority priority) {
     _isThreaded = isThreaded;
     if (_isThreaded) {
         _thread = new QThread(this);
-        
+
         // match the thread name to our object name
         _thread->setObjectName(objectName());
 
@@ -44,7 +43,7 @@ void GenericThread::initialize(bool isThreaded, QThread::Priority priority) {
 
         // Starts an event loop, and emits _thread->started()
         _thread->start();
-        
+
         _thread->setPriority(priority);
     } else {
         setup();
@@ -54,7 +53,7 @@ void GenericThread::initialize(bool isThreaded, QThread::Priority priority) {
 void GenericThread::terminate() {
     if (_isThreaded) {
         _stopThread = true;
-        
+
         terminating();
 
         if (_thread) {
@@ -95,5 +94,4 @@ void GenericThread::threadRoutine() {
             _thread->quit();
         }
     }
-    
 }

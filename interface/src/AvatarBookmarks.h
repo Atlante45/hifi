@@ -15,7 +15,7 @@
 #include <DependencyManager.h>
 #include "Bookmarks.h"
 
-/**jsdoc 
+/**jsdoc
  * This API helps manage adding and deleting avatar bookmarks.
  * @namespace AvatarBookmarks
  *
@@ -25,7 +25,7 @@
  *
  */
 
-class AvatarBookmarks: public Bookmarks, public  Dependency {
+class AvatarBookmarks : public Bookmarks, public Dependency {
     Q_OBJECT
     SINGLETON_DEPENDENCY
 
@@ -35,7 +35,7 @@ public:
     Q_INVOKABLE QVariantMap getBookmark(const QString& bookmarkName);
 
 public slots:
-    /**jsdoc 
+    /**jsdoc
      * Add the current Avatar to your avatar bookmarks.
      * @function AvatarBookmarks.addBookMark
      */

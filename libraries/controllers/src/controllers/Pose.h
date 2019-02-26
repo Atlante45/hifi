@@ -18,37 +18,36 @@ class QScriptValue;
 
 namespace controller {
 
-    struct Pose {
-    public:
-        vec3 translation;
-        quat rotation;
-        vec3 velocity;
-        vec3 angularVelocity;
-        bool valid{ false };
+struct Pose {
+public:
+    vec3 translation;
+    quat rotation;
+    vec3 velocity;
+    vec3 angularVelocity;
+    bool valid { false };
 
-        Pose() {}
-        Pose(const vec3& translation, const quat& rotation,
-             const vec3& velocity = vec3(), const vec3& angularVelocity = vec3());
+    Pose() {}
+    Pose(const vec3& translation, const quat& rotation, const vec3& velocity = vec3(), const vec3& angularVelocity = vec3());
 
-        Pose(const Pose&) = default;
-        Pose& operator = (const Pose&) = default;
-        bool operator ==(const Pose& right) const;
-        bool operator !=(const Pose& right) const { return !(*this == right); }
-        bool isValid() const { return valid; }
-        vec3 getTranslation() const { return translation; }
-        quat getRotation() const { return rotation; }
-        vec3 getVelocity() const { return velocity; }
-        vec3 getAngularVelocity() const { return angularVelocity; }
-        mat4 getMatrix() const { return createMatFromQuatAndPos(rotation, translation); }
+    Pose(const Pose&) = default;
+    Pose& operator=(const Pose&) = default;
+    bool operator==(const Pose& right) const;
+    bool operator!=(const Pose& right) const { return !(*this == right); }
+    bool isValid() const { return valid; }
+    vec3 getTranslation() const { return translation; }
+    quat getRotation() const { return rotation; }
+    vec3 getVelocity() const { return velocity; }
+    vec3 getAngularVelocity() const { return angularVelocity; }
+    mat4 getMatrix() const { return createMatFromQuatAndPos(rotation, translation); }
 
-        Pose transform(const glm::mat4& mat) const;
-        Pose postTransform(const glm::mat4& mat) const;
+    Pose transform(const glm::mat4& mat) const;
+    Pose postTransform(const glm::mat4& mat) const;
 
-        static QScriptValue toScriptValue(QScriptEngine* engine, const Pose& event);
-        static void fromScriptValue(const QScriptValue& object, Pose& event);
-    };
-}
+    static QScriptValue toScriptValue(QScriptEngine* engine, const Pose& event);
+    static void fromScriptValue(const QScriptValue& object, Pose& event);
+};
+} // namespace controller
 
-//Q_DECLARE_METATYPE(controller::Pose);
+// Q_DECLARE_METATYPE(controller::Pose);
 
 #endif

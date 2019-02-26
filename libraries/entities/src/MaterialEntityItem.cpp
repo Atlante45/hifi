@@ -10,8 +10,8 @@
 
 #include "EntityItemProperties.h"
 
-#include "QJsonDocument"
 #include "QJsonArray"
+#include "QJsonDocument"
 
 EntityItemPointer MaterialEntityItem::factory(const EntityItemID& entityID, const EntityItemProperties& properties) {
     Pointer entity(new MaterialEntityItem(entityID), [](EntityItem* ptr) { ptr->deleteLater(); });
@@ -24,8 +24,10 @@ MaterialEntityItem::MaterialEntityItem(const EntityItemID& entityItemID) : Entit
     _type = EntityTypes::Material;
 }
 
-EntityItemProperties MaterialEntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
-    EntityItemProperties properties = EntityItem::getProperties(desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
+EntityItemProperties MaterialEntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                                       bool allowEmptyDesiredProperties) const {
+    EntityItemProperties properties = EntityItem::getProperties(
+        desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(materialURL, getMaterialURL);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(materialMappingMode, getMaterialMappingMode);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(priority, getPriority);
@@ -56,8 +58,8 @@ bool MaterialEntityItem::setProperties(const EntityItemProperties& properties) {
         if (wantDebug) {
             uint64_t now = usecTimestampNow();
             int elapsed = now - getLastEdited();
-            qCDebug(entities) << "MaterialEntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                    "now=" << now << " getLastEdited()=" << getLastEdited();
+            qCDebug(entities) << "MaterialEntityItem::setProperties() AFTER update... edited AGO=" << elapsed << "now=" << now
+                              << " getLastEdited()=" << getLastEdited();
         }
         setLastEdited(properties.getLastEdited());
     }
@@ -65,10 +67,8 @@ bool MaterialEntityItem::setProperties(const EntityItemProperties& properties) {
 }
 
 int MaterialEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) {
-
+                                                         ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                         bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 
@@ -100,13 +100,10 @@ EntityPropertyFlags MaterialEntityItem::getEntityProperties(EncodeBitstreamParam
 }
 
 void MaterialEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
-                                    EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount, 
-                                    OctreeElement::AppendState& appendState) const { 
-
+                                            EntityTreeElementExtraEncodeDataPointer modelTreeElementExtraEncodeData,
+                                            EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                            EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                            OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
     APPEND_ENTITY_PROPERTY(PROP_MATERIAL_URL, getMaterialURL());
     APPEND_ENTITY_PROPERTY(PROP_MATERIAL_MAPPING_MODE, (uint32_t)getMaterialMappingMode());
@@ -147,100 +144,68 @@ void MaterialEntityItem::setUnscaledDimensions(const glm::vec3& value) {
 }
 
 QString MaterialEntityItem::getMaterialURL() const {
-    return resultWithReadLock<QString>([&] {
-        return _materialURL;
-    });
+    return resultWithReadLock<QString>([&] { return _materialURL; });
 }
 
 void MaterialEntityItem::setMaterialURL(const QString& materialURL) {
-    withWriteLock([&] {
-        _materialURL = materialURL;
-    });
+    withWriteLock([&] { _materialURL = materialURL; });
 }
 
 QString MaterialEntityItem::getMaterialData() const {
-    return resultWithReadLock<QString>([&] {
-        return _materialData;
-    });
+    return resultWithReadLock<QString>([&] { return _materialData; });
 }
 
 void MaterialEntityItem::setMaterialData(const QString& materialData) {
-    withWriteLock([&] {
-        _materialData = materialData;
-    });
+    withWriteLock([&] { _materialData = materialData; });
 }
 
 MaterialMappingMode MaterialEntityItem::getMaterialMappingMode() const {
-    return resultWithReadLock<MaterialMappingMode>([&] {
-        return _materialMappingMode;
-    });
+    return resultWithReadLock<MaterialMappingMode>([&] { return _materialMappingMode; });
 }
 
 void MaterialEntityItem::setMaterialMappingMode(MaterialMappingMode mode) {
-    withWriteLock([&] {
-        _materialMappingMode = mode;
-    });
+    withWriteLock([&] { _materialMappingMode = mode; });
     setUnscaledDimensions(_desiredDimensions);
 }
 
 quint16 MaterialEntityItem::getPriority() const {
-    return resultWithReadLock<quint16>([&] {
-        return _priority;
-    });
+    return resultWithReadLock<quint16>([&] { return _priority; });
 }
 
 void MaterialEntityItem::setPriority(quint16 priority) {
-    withWriteLock([&] {
-        _priority = priority;
-    });
+    withWriteLock([&] { _priority = priority; });
 }
 
 QString MaterialEntityItem::getParentMaterialName() const {
-    return resultWithReadLock<QString>([&] {
-        return _parentMaterialName;
-    });
+    return resultWithReadLock<QString>([&] { return _parentMaterialName; });
 }
 
 void MaterialEntityItem::setParentMaterialName(const QString& parentMaterialName) {
-    withWriteLock([&] {
-        _parentMaterialName = parentMaterialName;
-    });
+    withWriteLock([&] { _parentMaterialName = parentMaterialName; });
 }
 
 glm::vec2 MaterialEntityItem::getMaterialMappingPos() const {
-    return resultWithReadLock<glm::vec2>([&] {
-        return _materialMappingPos;
-    });
+    return resultWithReadLock<glm::vec2>([&] { return _materialMappingPos; });
 }
 
 void MaterialEntityItem::setMaterialMappingPos(const glm::vec2& materialMappingPos) {
-    withWriteLock([&] {
-        _materialMappingPos = materialMappingPos;
-    });
+    withWriteLock([&] { _materialMappingPos = materialMappingPos; });
 }
 
 glm::vec2 MaterialEntityItem::getMaterialMappingScale() const {
-    return resultWithReadLock<glm::vec2>([&] {
-        return _materialMappingScale;
-    });
+    return resultWithReadLock<glm::vec2>([&] { return _materialMappingScale; });
 }
 
 void MaterialEntityItem::setMaterialMappingScale(const glm::vec2& materialMappingScale) {
-    withWriteLock([&] {
-        _materialMappingScale = materialMappingScale;
-    });
+    withWriteLock([&] { _materialMappingScale = materialMappingScale; });
 }
 
 float MaterialEntityItem::getMaterialMappingRot() const {
-    return resultWithReadLock<float>([&] {
-        return _materialMappingRot;
-    });
+    return resultWithReadLock<float>([&] { return _materialMappingRot; });
 }
 
 void MaterialEntityItem::setMaterialMappingRot(float materialMappingRot) {
-    withWriteLock([&] {
-        _materialMappingRot = materialMappingRot;
-    });
+    withWriteLock([&] { _materialMappingRot = materialMappingRot; });
 }
 
 AACube MaterialEntityItem::calculateInitialQueryAACube(bool& success) {

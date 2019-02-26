@@ -19,8 +19,8 @@
 #include <quazip5/quazipfile.h>
 #endif
 
-#include <QTimer>
 #include <QBuffer>
+#include <QTimer>
 
 #include <QFile>
 #include <QFileInfo>
@@ -30,10 +30,7 @@
 #include <QJsonObject>
 #include <QUuid>
 
-MarketplaceItemUploader::MarketplaceItemUploader(QString title,
-                                                 QString description,
-                                                 QString rootFilename,
-                                                 QUuid marketplaceID,
+MarketplaceItemUploader::MarketplaceItemUploader(QString title, QString description, QString rootFilename, QUuid marketplaceID,
                                                  QList<ProjectFilePath> filePaths) :
     _title(title),
     _description(description),
@@ -136,8 +133,8 @@ void MarketplaceItemUploader::doUploadAvatar() {
     setError(Error::Unknown);
     return;
 #else
-    QBuffer buffer{ &_fileData };
-    QuaZip zip{ &buffer };
+    QBuffer buffer { &_fileData };
+    QuaZip zip { &buffer };
     if (!zip.open(QuaZip::Mode::mdAdd)) {
         qWarning() << "Failed to open zip";
         setError(Error::Unknown);
@@ -146,15 +143,15 @@ void MarketplaceItemUploader::doUploadAvatar() {
 
     for (auto& filePath : _filePaths) {
         qWarning() << "Zipping: " << filePath.absolutePath << filePath.relativePath;
-        QFileInfo fileInfo{ filePath.absolutePath };
+        QFileInfo fileInfo { filePath.absolutePath };
 
-        QuaZipFile zipFile{ &zip };
+        QuaZipFile zipFile { &zip };
         if (!zipFile.open(QIODevice::WriteOnly, QuaZipNewInfo(filePath.relativePath))) {
             qWarning() << "Could not open zip file:" << zipFile.getZipError();
             setError(Error::Unknown);
             return;
         }
-        QFile file{ filePath.absolutePath };
+        QFile file { filePath.absolutePath };
         if (file.open(QIODevice::ReadOnly)) {
             zipFile.write(file.readAll());
         } else {
@@ -203,7 +200,7 @@ void MarketplaceItemUploader::doUploadAvatar() {
 
     QNetworkAccessManager& networkAccessManager = NetworkAccessManager::getInstance();
 
-    QNetworkReply* reply{ nullptr };
+    QNetworkReply* reply { nullptr };
     if (creating) {
         reply = networkAccessManager.post(request, jsonString.toUtf8());
     } else {

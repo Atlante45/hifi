@@ -10,8 +10,8 @@
 #include "TestRunnerDesktop.h"
 
 #include <QThread>
-#include <QtWidgets/QMessageBox>
 #include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMessageBox>
 
 #ifdef Q_OS_WIN
 // clang-format off
@@ -23,20 +23,12 @@
 #include "Nitpick.h"
 extern Nitpick* nitpick;
 
-TestRunnerDesktop::TestRunnerDesktop(
-    std::vector<QCheckBox*> dayCheckboxes,
-    std::vector<QCheckBox*> timeEditCheckboxes,
-    std::vector<QTimeEdit*> timeEdits,
-    QLabel* workingFolderLabel,
-    QCheckBox* runServerless,
-    QCheckBox* runLatest,
-    QLineEdit* url,
-    QPushButton* runNow,
-    QLabel* statusLabel,
+TestRunnerDesktop::TestRunnerDesktop(std::vector<QCheckBox*> dayCheckboxes, std::vector<QCheckBox*> timeEditCheckboxes,
+                                     std::vector<QTimeEdit*> timeEdits, QLabel* workingFolderLabel, QCheckBox* runServerless,
+                                     QCheckBox* runLatest, QLineEdit* url, QPushButton* runNow, QLabel* statusLabel,
 
-    QObject* parent
-) : QObject(parent) 
-{
+                                     QObject* parent) :
+    QObject(parent) {
     _dayCheckboxes = dayCheckboxes;
     _timeEditCheckboxes = timeEditCheckboxes;
     _timeEdits = timeEdits;
@@ -49,7 +41,7 @@ TestRunnerDesktop::TestRunnerDesktop(
 
     _installerThread = new QThread();
     _installerWorker = new InstallerWorker();
-        
+
     _installerWorker->moveToThread(_installerThread);
     _installerThread->start();
     connect(this, SIGNAL(startInstaller()), _installerWorker, SLOT(runCommand()));
@@ -89,12 +81,12 @@ void TestRunnerDesktop::setWorkingFolderAndEnableControls() {
 
     _timer = new QTimer(this);
     connect(_timer, SIGNAL(timeout()), this, SLOT(checkTime()));
-    _timer->start(30 * 1000);  //time specified in ms
-    
+    _timer->start(30 * 1000); // time specified in ms
+
 #ifdef Q_OS_MAC
     // Create MAC shell scripts
     QFile script;
-    
+
     // This script waits for a process to start
     script.setFileName(_workingFolder + "/waitForStart.sh");
     if (!script.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -102,7 +94,7 @@ void TestRunnerDesktop::setWorkingFolderAndEnableControls() {
                               "Could not open 'waitForStart.sh'");
         exit(-1);
     }
-    
+
     script.write("#!/bin/sh\n\n");
     script.write("PROCESS=\"$1\"\n");
     script.write("until (pgrep -x $PROCESS >nul)\n");
@@ -121,7 +113,7 @@ void TestRunnerDesktop::setWorkingFolderAndEnableControls() {
                               "Could not open 'waitForFinish.sh'");
         exit(-1);
     }
-    
+
     script.write("#!/bin/sh\n\n");
     script.write("PROCESS=\"$1\"\n");
     script.write("while (pgrep -x $PROCESS >nul)\n");
@@ -132,7 +124,7 @@ void TestRunnerDesktop::setWorkingFolderAndEnableControls() {
     script.write("echo \"$1\" \"finished\"\n");
     script.close();
     script.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner);
-    
+
     // Create an AppleScript to resize Interface.  This is needed so that snapshots taken
     // with the primary camera will be the correct size.
     // This will be run from a normal shell script
@@ -142,12 +134,13 @@ void TestRunnerDesktop::setWorkingFolderAndEnableControls() {
                               "Could not open 'setInterfaceSizeAndPosition.scpt'");
         exit(-1);
     }
-    
+
     script.write("set width to 960\n");
     script.write("set height to 540\n");
     script.write("set x to 100\n");
     script.write("set y to 100\n\n");
-    script.write("tell application \"System Events\" to tell application process \"interface\" to tell window 1 to set {size, position} to {{width, height}, {x, y}}\n");
+    script.write("tell application \"System Events\" to tell application process \"interface\" to tell window 1 to set {size, "
+                 "position} to {{width, height}, {x, y}}\n");
 
     script.close();
     script.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner);
@@ -158,7 +151,7 @@ void TestRunnerDesktop::setWorkingFolderAndEnableControls() {
                               "Could not open 'setInterfaceSizeAndPosition.sh'");
         exit(-1);
     }
-    
+
     script.write("#!/bin/sh\n\n");
     script.write("echo resizing interface\n");
     script.write(("osascript " + _workingFolder + "/setInterfaceSizeAndPosition.scpt\n").toStdString().c_str());
@@ -234,13 +227,14 @@ void TestRunnerDesktop::runInstaller() {
     // Qt cannot start an installation process using QProcess::start (Qt Bug 9761)
     // To allow installation, the installer is run using the `system` command
 
-    QStringList arguments{ QStringList() << QString("/S") << QString("/D=") + QDir::toNativeSeparators(_installationFolder) };
+    QStringList arguments { QStringList() << QString("/S") << QString("/D=") + QDir::toNativeSeparators(_installationFolder) };
 
     QString installerFullPath = _workingFolder + "/" + _installerFilename;
 
     QString commandLine;
 #ifdef Q_OS_WIN
-    commandLine = "\"" + QDir::toNativeSeparators(installerFullPath) + "\"" + " /S /D=" + QDir::toNativeSeparators(_installationFolder);
+    commandLine = "\"" + QDir::toNativeSeparators(installerFullPath) + "\"" +
+                  " /S /D=" + QDir::toNativeSeparators(_installationFolder);
 #elif defined Q_OS_MAC
     // Create installation shell script
     QFile script;
@@ -250,23 +244,27 @@ void TestRunnerDesktop::runInstaller() {
                               "Could not open 'install_app.sh'");
         exit(-1);
     }
-    
+
     if (!QDir().exists(_installationFolder)) {
         QDir().mkdir(_installationFolder);
     }
-    
+
     // This script installs High Fidelity.  It is run as "yes | install_app.sh... so "yes" is killed at the end
     script.write("#!/bin/sh\n\n");
     script.write("VOLUME=`hdiutil attach \"$1\" | grep Volumes | awk '{print $3}'`\n");
-    
-    QString folderName {"High Fidelity"};
+
+    QString folderName { "High Fidelity" };
     if (!_runLatest->isChecked()) {
         folderName += QString(" - ") + getPRNumberFromURL(_url->text());
     }
 
-    script.write((QString("cp -rf \"$VOLUME/") + folderName + "/interface.app\" \"" + _workingFolder + "/High_Fidelity/\"\n").toStdString().c_str());
-    script.write((QString("cp -rf \"$VOLUME/") + folderName + "/Sandbox.app\" \""   + _workingFolder + "/High_Fidelity/\"\n").toStdString().c_str());
-    
+    script.write((QString("cp -rf \"$VOLUME/") + folderName + "/interface.app\" \"" + _workingFolder + "/High_Fidelity/\"\n")
+                     .toStdString()
+                     .c_str());
+    script.write((QString("cp -rf \"$VOLUME/") + folderName + "/Sandbox.app\" \"" + _workingFolder + "/High_Fidelity/\"\n")
+                     .toStdString()
+                     .c_str());
+
     script.write("hdiutil detach \"$VOLUME\"\n");
     script.write("killall yes\n");
     script.close();
@@ -308,7 +306,7 @@ void TestRunnerDesktop::verifyInstallationSucceeded() {
 }
 
 void TestRunnerDesktop::saveExistingHighFidelityAppDataFolder() {
-    QString dataDirectory{ "NOT FOUND" };
+    QString dataDirectory { "NOT FOUND" };
 #ifdef Q_OS_WIN
     dataDirectory = qgetenv("USERPROFILE") + "\\AppData\\Roaming";
 #elif defined Q_OS_MAC
@@ -340,7 +338,8 @@ void TestRunnerDesktop::saveExistingHighFidelityAppDataFolder() {
     if (canonicalAppDataFolder.exists()) {
         copyFolder(canonicalAppDataFolder.path(), _appDataFolder.path());
     } else {
-        QMessageBox::critical(0, "Internal error", "The nitpick AppData folder cannot be found at:\n" + canonicalAppDataFolder.path());
+        QMessageBox::critical(0, "Internal error",
+                              "The nitpick AppData folder cannot be found at:\n" + canonicalAppDataFolder.path());
         exit(-1);
     }
 }
@@ -414,32 +413,31 @@ void TestRunnerDesktop::killProcesses() {
     }
 #elif defined Q_OS_MAC
     QString commandLine;
-    
-    commandLine = QString("killall interface") + "; " + _workingFolder +"/waitForFinish.sh interface";
+
+    commandLine = QString("killall interface") + "; " + _workingFolder + "/waitForFinish.sh interface";
     system(commandLine.toStdString().c_str());
-    
-    commandLine = QString("killall Sandbox") + "; " + _workingFolder +"/waitForFinish.sh Sandbox";
+
+    commandLine = QString("killall Sandbox") + "; " + _workingFolder + "/waitForFinish.sh Sandbox";
     system(commandLine.toStdString().c_str());
-    
-    commandLine = QString("killall Console") + "; " + _workingFolder +"/waitForFinish.sh Console";
+
+    commandLine = QString("killall Console") + "; " + _workingFolder + "/waitForFinish.sh Console";
     system(commandLine.toStdString().c_str());
 #endif
 }
 
 void TestRunnerDesktop::startLocalServerProcesses() {
     QString commandLine;
-    
+
 #ifdef Q_OS_WIN
-    commandLine =
-        "start \"domain-server.exe\" \"" + QDir::toNativeSeparators(_installationFolder) + "\\domain-server.exe\"";
+    commandLine = "start \"domain-server.exe\" \"" + QDir::toNativeSeparators(_installationFolder) + "\\domain-server.exe\"";
     system(commandLine.toStdString().c_str());
 
-    commandLine =
-        "start \"assignment-client.exe\" \"" + QDir::toNativeSeparators(_installationFolder) + "\\assignment-client.exe\" -n 6";
+    commandLine = "start \"assignment-client.exe\" \"" + QDir::toNativeSeparators(_installationFolder) +
+                  "\\assignment-client.exe\" -n 6";
     system(commandLine.toStdString().c_str());
 
 #elif defined Q_OS_MAC
-    commandLine = "open \"" +_installationFolder + "/Sandbox.app\"";
+    commandLine = "open \"" + _installationFolder + "/Sandbox.app\"";
     system(commandLine.toStdString().c_str());
 #endif
 
@@ -456,11 +454,11 @@ void TestRunnerDesktop::runInterfaceWithTestScript() {
         url = "hifi://localhost";
     }
 
-    QString deleteScript =
-        QString("https://raw.githubusercontent.com/") + _user + "/hifi_tests/" + _branch + "/tests/utils/deleteNearbyEntities.js";
+    QString deleteScript = QString("https://raw.githubusercontent.com/") + _user + "/hifi_tests/" + _branch +
+                           "/tests/utils/deleteNearbyEntities.js";
 
-    QString testScript =
-        QString("https://raw.githubusercontent.com/") + _user + "/hifi_tests/" + _branch + "/tests/testRecursive.js";
+    QString testScript = QString("https://raw.githubusercontent.com/") + _user + "/hifi_tests/" + _branch +
+                         "/tests/testRecursive.js";
 
     QString commandLine;
 #ifdef Q_OS_WIN
@@ -468,22 +466,19 @@ void TestRunnerDesktop::runInterfaceWithTestScript() {
     // First, run script to delete any entities in test area
     // Note that this will run to completion before continuing
     exeFile = QString("\"") + QDir::toNativeSeparators(_installationFolder) + "\\interface.exe\"";
-    commandLine = "start /wait \"\" " + exeFile +
-        " --url " + url +
-        " --no-updater" +
-        " --no-login-suggestion"
-        " --testScript " + deleteScript + " quitWhenFinished";
+    commandLine = "start /wait \"\" " + exeFile + " --url " + url + " --no-updater" +
+                  " --no-login-suggestion"
+                  " --testScript " +
+                  deleteScript + " quitWhenFinished";
 
     system(commandLine.toStdString().c_str());
 
     // Now run the test suite
     exeFile = QString("\"") + QDir::toNativeSeparators(_installationFolder) + "\\interface.exe\"";
-    commandLine = exeFile +
-    " --url " + url +
-    " --no-updater" +
-    " --no-login-suggestion"
-    " --testScript " + testScript + " quitWhenFinished" +
-    " --testResultsLocation " + _snapshotFolder;
+    commandLine = exeFile + " --url " + url + " --no-updater" +
+                  " --no-login-suggestion"
+                  " --testScript " +
+                  testScript + " quitWhenFinished" + " --testResultsLocation " + _snapshotFolder;
 
     _interfaceWorker->setCommandLine(commandLine);
     emit startInterface();
@@ -495,33 +490,29 @@ void TestRunnerDesktop::runInterfaceWithTestScript() {
                               "Could not open 'runInterfaceTests.sh'");
         exit(-1);
     }
-    
+
     script.write("#!/bin/sh\n\n");
-    
+
     // First, run script to delete any entities in test area
-    commandLine =
-    "open -W \"" +_installationFolder + "/interface.app\" --args" +
-    " --url " + url +
-    " --no-updater" +
-    " --no-login-suggestion"
-    " --testScript " + deleteScript + " quitWhenFinished\n";
-    
+    commandLine = "open -W \"" + _installationFolder + "/interface.app\" --args" + " --url " + url + " --no-updater" +
+                  " --no-login-suggestion"
+                  " --testScript " +
+                  deleteScript + " quitWhenFinished\n";
+
     script.write(commandLine.toStdString().c_str());
-    
+
     // On The Mac, we need to resize Interface.  The Interface window opens a few seconds after the process
     // has started.
     // Before starting interface, start a process that will resize interface 10s after it opens
-    commandLine = _workingFolder +"/waitForStart.sh interface && sleep 10 && " + _workingFolder +"/setInterfaceSizeAndPosition.sh &\n";
+    commandLine = _workingFolder + "/waitForStart.sh interface && sleep 10 && " + _workingFolder +
+                  "/setInterfaceSizeAndPosition.sh &\n";
     script.write(commandLine.toStdString().c_str());
 
-    commandLine =
-        "open \"" +_installationFolder + "/interface.app\" --args" +
-        " --url " + url +
-        " --no-updater" +
-        " --no-login-suggestion"
-        " --testScript " + testScript + " quitWhenFinished" +
-        " --testResultsLocation " + _snapshotFolder +
-        " && " + _workingFolder +"/waitForFinish.sh interface\n";
+    commandLine = "open \"" + _installationFolder + "/interface.app\" --args" + " --url " + url + " --no-updater" +
+                  " --no-login-suggestion"
+                  " --testScript " +
+                  testScript + " quitWhenFinished" + " --testResultsLocation " + _snapshotFolder + " && " + _workingFolder +
+                  "/waitForFinish.sh interface\n";
 
     script.write(commandLine.toStdString().c_str());
 
@@ -533,21 +524,23 @@ void TestRunnerDesktop::runInterfaceWithTestScript() {
 
     emit startInterface();
 #endif
-    
+
     // Helpful for debugging
     appendLog(commandLine);
 }
 
 void TestRunnerDesktop::interfaceExecutionComplete() {
-    QFileInfo testCompleted(QDir::toNativeSeparators(_snapshotFolder) +"/tests_completed.txt");
+    QFileInfo testCompleted(QDir::toNativeSeparators(_snapshotFolder) + "/tests_completed.txt");
     if (!testCompleted.exists()) {
-        QMessageBox::critical(0, "Tests not completed", "Interface seems to have crashed before completion of the test scripts\nExisting images will be evaluated");
+        QMessageBox::critical(
+            0, "Tests not completed",
+            "Interface seems to have crashed before completion of the test scripts\nExisting images will be evaluated");
     }
 
     evaluateResults();
 
     killProcesses();
-    
+
     // The High Fidelity AppData folder will be restored after evaluation has completed
 }
 
@@ -591,9 +584,9 @@ void TestRunnerDesktop::addBuildNumberToResults(const QString& zippedFolderName)
     }
 
     if (!QFile::rename(zippedFolderName, augmentedFilename)) {
-        QMessageBox::critical(0, "Internal error: " + QString(__FILE__) + ":" + QString::number(__LINE__), "Could not rename '" + zippedFolderName + "' to '" + augmentedFilename);
+        QMessageBox::critical(0, "Internal error: " + QString(__FILE__) + ":" + QString::number(__LINE__),
+                              "Could not rename '" + zippedFolderName + "' to '" + augmentedFilename);
         exit(-1);
-    
     }
 }
 
@@ -621,8 +614,8 @@ void TestRunnerDesktop::copyFolder(const QString& source, const QString& destina
                 throw("Could not create destination folder '" + destination + "'");
             }
 
-            QStringList fileNames =
-                QDir(source).entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
+            QStringList fileNames = QDir(source).entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden |
+                                                           QDir::System);
 
             foreach (const QString& fileName, fileNames) {
                 copyFolder(QString(source + "/" + fileName), QString(destination + "/" + fileName));
@@ -651,7 +644,7 @@ void TestRunnerDesktop::checkTime() {
     }
 
     // Check the time
-    bool timeToRun{ false };
+    bool timeToRun { false };
 
     for (size_t i = 0; i < std::min(_timeEditCheckboxes.size(), _timeEdits.size()); ++i) {
         if (_timeEditCheckboxes[i]->isChecked() && (_timeEdits[i]->time().hour() == now.time().hour()) &&
@@ -672,9 +665,13 @@ QString TestRunnerDesktop::getPRNumberFromURL(const QString& url) {
         QStringList filenameParts = urlParts[urlParts.size() - 1].split("-");
         if (filenameParts.size() <= 3) {
 #ifdef Q_OS_WIN
-            throw "URL not in expected format, should look like `https://deployment.highfidelity.com/jobs/pr-build/label%3Dwindows/13023/HighFidelity-Beta-Interface-PR14006-be76c43.exe`";
+            throw "URL not in expected format, should look like "
+                  "`https://deployment.highfidelity.com/jobs/pr-build/label%3Dwindows/13023/"
+                  "HighFidelity-Beta-Interface-PR14006-be76c43.exe`";
 #elif defined Q_OS_MAC
-            throw "URL not in expected format, should look like `https://deployment.highfidelity.com/jobs/pr-build/label%3Dwindows/13023/HighFidelity-Beta-Interface-PR14006-be76c43.dmg`";
+            throw "URL not in expected format, should look like "
+                  "`https://deployment.highfidelity.com/jobs/pr-build/label%3Dwindows/13023/"
+                  "HighFidelity-Beta-Interface-PR14006-be76c43.dmg`";
 #endif
         }
         return filenameParts[filenameParts.size() - 2];

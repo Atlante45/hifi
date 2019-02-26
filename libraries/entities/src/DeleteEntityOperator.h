@@ -46,6 +46,7 @@ public:
     virtual bool postRecursion(const OctreeElementPointer& element) override;
 
     const RemovedEntities& getEntities() const { return _entitiesToDelete; }
+
 private:
     EntityTreePointer _tree;
     RemovedEntities _entitiesToDelete;

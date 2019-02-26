@@ -19,7 +19,6 @@
 using namespace task;
 
 JobConfig::~JobConfig() {
-    
 }
 
 void JobConfig::setEnabled(bool enable) {
@@ -80,7 +79,7 @@ void TaskConfig::refresh() {
 }
 
 TaskConfig* TaskConfig::getRootConfig(const std::string& jobPath, std::string& jobName) const {
-    TaskConfig* root = const_cast<TaskConfig*> (this);
+    TaskConfig* root = const_cast<TaskConfig*>(this);
 
     std::list<std::string> tokens;
     std::size_t pos = 0, sepPos;
@@ -100,8 +99,7 @@ TaskConfig* TaskConfig::getRootConfig(const std::string& jobPath, std::string& j
 
     if (tokens.empty()) {
         return root;
-    }
-    else {
+    } else {
         while (tokens.size() > 1) {
             auto taskName = tokens.front();
             tokens.pop_front();
@@ -121,11 +119,10 @@ JobConfig* TaskConfig::getJobConfig(const std::string& jobPath) const {
 
     if (!root) {
         return nullptr;
-    } 
+    }
     if (jobName.empty()) {
         return root;
     } else {
-
         auto found = root->findChild<JobConfig*>((jobName.empty() ? QString() : QString(jobName.c_str())));
         if (!found) {
             return nullptr;

@@ -12,8 +12,9 @@
 
 namespace controller {
 
-CompositeEndpoint::CompositeEndpoint(Endpoint::Pointer first, Endpoint::Pointer second)
-    : Endpoint(Input::INVALID_INPUT), Pair(first, second) {
+CompositeEndpoint::CompositeEndpoint(Endpoint::Pointer first, Endpoint::Pointer second) :
+    Endpoint(Input::INVALID_INPUT),
+    Pair(first, second) {
     if (first->getInput().device == UserInputMapper::STANDARD_DEVICE &&
         second->getInput().device == UserInputMapper::STANDARD_DEVICE) {
         this->_input.device = UserInputMapper::STANDARD_DEVICE;
@@ -43,4 +44,4 @@ void CompositeEndpoint::apply(AxisValue newValue, const Pointer& source) {
     // Composites are read only
 }
 
-}
+} // namespace controller

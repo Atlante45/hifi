@@ -12,16 +12,15 @@
 #include <glm/gtx/transform.hpp>
 
 #include <BaseScriptEngine.h>
-#include <QtScript/QScriptValue>
 #include <RegisteredMetaTypes.h>
 #include <graphics/BufferViewHelpers.h>
-#include <graphics/GpuHelpers.h>
 #include <graphics/Geometry.h>
+#include <graphics/GpuHelpers.h>
+#include <QtScript/QScriptValue>
 
 #include "Forward.h"
 #include "GraphicsScriptingUtil.h"
 #include "OBJWriter.h"
-
 
 QString scriptable::ScriptableMeshPart::toOBJ() {
     if (!getMeshPointer()) {
@@ -34,7 +33,6 @@ QString scriptable::ScriptableMeshPart::toOBJ() {
     }
     return writeOBJToString({ getMeshPointer() });
 }
-
 
 bool scriptable::ScriptableMeshPart::isValidIndex(glm::uint32 vertexIndex, const QString& attributeName) const {
     return isValid() && parentMesh->isValidIndex(vertexIndex, attributeName);
@@ -54,7 +52,8 @@ QVariantMap scriptable::ScriptableMeshPart::getVertexAttributes(glm::uint32 vert
     return parentMesh->getVertexAttributes(vertexIndex);
 }
 
-bool scriptable::ScriptableMeshPart::setVertexProperty(glm::uint32 vertexIndex, const QString& attributeName, const QVariant& value) {
+bool scriptable::ScriptableMeshPart::setVertexProperty(glm::uint32 vertexIndex, const QString& attributeName,
+                                                       const QVariant& value) {
     if (!isValidIndex(vertexIndex, attributeName)) {
         return false;
     }
@@ -88,24 +87,26 @@ glm::uint32 scriptable::ScriptableMeshPart::updateVertexAttributes(QScriptValue 
     return isValid() ? parentMesh->updateVertexAttributes(_callback) : 0;
 }
 
-bool scriptable::ScriptableMeshPart::replaceMeshPartData(scriptable::ScriptableMeshPartPointer src, const QVector<QString>& attributeNames) {
+bool scriptable::ScriptableMeshPart::replaceMeshPartData(scriptable::ScriptableMeshPartPointer src,
+                                                         const QVector<QString>& attributeNames) {
     auto target = getMeshPointer();
     auto source = src ? src->getMeshPointer() : nullptr;
     if (!target || !source) {
         if (context()) {
-            context()->throwError("ScriptableMeshPart::replaceMeshData -- expected dest and src to be valid mesh proxy pointers");
+            context()->throwError(
+                "ScriptableMeshPart::replaceMeshData -- expected dest and src to be valid mesh proxy pointers");
         } else {
-            qCWarning(graphics_scripting) << "ScriptableMeshPart::replaceMeshData -- expected dest and src to be valid mesh proxy pointers";
+            qCWarning(graphics_scripting)
+                << "ScriptableMeshPart::replaceMeshData -- expected dest and src to be valid mesh proxy pointers";
         }
         return false;
     }
 
     QVector<QString> attributes = attributeNames.isEmpty() ? src->parentMesh->getAttributeNames() : attributeNames;
 
-    qCInfo(graphics_scripting) << "ScriptableMeshPart::replaceMeshData -- " <<
-        "source:" << QString::fromStdString(source->displayName) <<
-        "target:" << QString::fromStdString(target->displayName) <<
-        "attributes:" << attributes;
+    qCInfo(graphics_scripting) << "ScriptableMeshPart::replaceMeshData -- "
+                               << "source:" << QString::fromStdString(source->displayName)
+                               << "target:" << QString::fromStdString(target->displayName) << "attributes:" << attributes;
 
     // remove attributes only found on target mesh, unless user has explicitly specified the relevant attribute names
     if (attributeNames.isEmpty()) {
@@ -142,19 +143,21 @@ bool scriptable::ScriptableMeshPart::replaceMeshPartData(scriptable::ScriptableM
         } else {
 #ifdef SCRIPTABLE_MESH_DEBUG
             if (before.getNumElements() == 0) {
-                qCInfo(graphics_scripting) << "ScriptableMeshPart::replaceMeshData target buffer is empty -- adding" << a << slot;
+                qCInfo(graphics_scripting) << "ScriptableMeshPart::replaceMeshData target buffer is empty -- adding" << a
+                                           << slot;
             } else {
-                qCInfo(graphics_scripting) << "ScriptableMeshPart::replaceMeshData target buffer exists -- updating" << a << slot;
+                qCInfo(graphics_scripting) << "ScriptableMeshPart::replaceMeshData target buffer exists -- updating" << a
+                                           << slot;
             }
 #endif
             target->addAttribute(slot, buffer_helpers::clone(input));
         }
 #ifdef SCRIPTABLE_MESH_DEBUG
         auto& after = target->getAttributeBuffer(slot);
-        qCInfo(graphics_scripting) << "ScriptableMeshPart::replaceMeshData" << a << slot << before.getNumElements() << " -> " << after.getNumElements();
+        qCInfo(graphics_scripting) << "ScriptableMeshPart::replaceMeshData" << a << slot << before.getNumElements() << " -> "
+                                   << after.getNumElements();
 #endif
     }
-
 
     return true;
 }
@@ -166,11 +169,11 @@ bool scriptable::ScriptableMeshPart::dedupeVertices(float epsilon) {
     }
     auto positions = mesh->getVertexBuffer();
     auto numPositions = positions.getNumElements();
-    const auto epsilon2 = epsilon*epsilon;
+    const auto epsilon2 = epsilon * epsilon;
 
     QVector<glm::vec3> uniqueVerts;
     uniqueVerts.reserve((int)numPositions);
-    QMap<glm::uint32,glm::uint32> remapIndices;
+    QMap<glm::uint32, glm::uint32> remapIndices;
 
     for (glm::uint32 i = 0; i < numPositions; i++) {
         const glm::uint32 numUnique = uniqueVerts.size();
@@ -224,8 +227,10 @@ bool scriptable::ScriptableMeshPart::dedupeVertices(float epsilon) {
         glm::uint32 numElements = (glm::uint32)view.getNumElements();
         for (glm::uint32 i = 0; i < numElements; i++) {
             glm::uint32 fromVertexIndex = i;
-            glm::uint32 toVertexIndex = remapIndices.contains(fromVertexIndex) ? remapIndices[fromVertexIndex] : fromVertexIndex;
-            buffer_helpers::setValue<QVariant>(newView, toVertexIndex, buffer_helpers::getValue<QVariant>(view, fromVertexIndex, "dedupe"));
+            glm::uint32 toVertexIndex = remapIndices.contains(fromVertexIndex) ? remapIndices[fromVertexIndex]
+                                                                               : fromVertexIndex;
+            buffer_helpers::setValue<QVariant>(newView, toVertexIndex,
+                                               buffer_helpers::getValue<QVariant>(view, fromVertexIndex, "dedupe"));
         }
         mesh->addAttribute(slot, newView);
     }
@@ -237,7 +242,7 @@ bool scriptable::ScriptableMeshPart::removeAttribute(const QString& attributeNam
 }
 
 glm::uint32 scriptable::ScriptableMeshPart::addAttribute(const QString& attributeName, const QVariant& defaultValue) {
-    return isValid() ? parentMesh->addAttribute(attributeName, defaultValue): 0;
+    return isValid() ? parentMesh->addAttribute(attributeName, defaultValue) : 0;
 }
 
 glm::uint32 scriptable::ScriptableMeshPart::fillAttribute(const QString& attributeName, const QVariant& value) {
@@ -254,7 +259,7 @@ QVector<glm::uint32> scriptable::ScriptableMeshPart::findNearbyPartVertexIndices
     auto numIndices = getNumIndices();
     auto vertexBuffer = mesh->getVertexBuffer();
     auto indexBuffer = mesh->getIndexBuffer();
-    const auto epsilon2 = epsilon*epsilon;
+    const auto epsilon2 = epsilon * epsilon;
 
     for (glm::uint32 i = 0; i < numIndices; i++) {
         auto vertexIndex = buffer_helpers::getValue<glm::uint32>(indexBuffer, offset + i);
@@ -322,9 +327,10 @@ QVariantMap scriptable::ScriptableMeshPart::transform(const glm::mat4& transform
     return {};
 }
 
-
-scriptable::ScriptableMeshPart::ScriptableMeshPart(scriptable::ScriptableMeshPointer parentMesh, int partIndex)
-    : QObject(), parentMesh(parentMesh), partIndex(partIndex)  {
+scriptable::ScriptableMeshPart::ScriptableMeshPart(scriptable::ScriptableMeshPointer parentMesh, int partIndex) :
+    QObject(),
+    parentMesh(parentMesh),
+    partIndex(partIndex) {
     setObjectName(QString("%1.part[%2]").arg(parentMesh ? parentMesh->objectName() : "").arg(partIndex));
 }
 
@@ -338,7 +344,7 @@ QVector<glm::uint32> scriptable::ScriptableMeshPart::getIndices() const {
     return QVector<glm::uint32>();
 }
 
-bool scriptable::ScriptableMeshPart::setFirstVertexIndex( glm::uint32 vertexIndex) {
+bool scriptable::ScriptableMeshPart::setFirstVertexIndex(glm::uint32 vertexIndex) {
     if (!isValidIndex(vertexIndex)) {
         return false;
     }
@@ -347,7 +353,7 @@ bool scriptable::ScriptableMeshPart::setFirstVertexIndex( glm::uint32 vertexInde
     return true;
 }
 
-bool scriptable::ScriptableMeshPart::setBaseVertexIndex( glm::uint32 vertexIndex) {
+bool scriptable::ScriptableMeshPart::setBaseVertexIndex(glm::uint32 vertexIndex) {
     if (!isValidIndex(vertexIndex)) {
         return false;
     }
@@ -356,7 +362,7 @@ bool scriptable::ScriptableMeshPart::setBaseVertexIndex( glm::uint32 vertexIndex
     return true;
 }
 
-bool scriptable::ScriptableMeshPart::setLastVertexIndex( glm::uint32 vertexIndex) {
+bool scriptable::ScriptableMeshPart::setLastVertexIndex(glm::uint32 vertexIndex) {
     if (!isValidIndex(vertexIndex) || vertexIndex <= getFirstVertexIndex()) {
         return false;
     }
@@ -371,8 +377,11 @@ bool scriptable::ScriptableMeshPart::setIndices(const QVector<glm::uint32>& indi
     }
     glm::uint32 len = indices.size();
     if (len != getNumIndices()) {
-        context()->throwError(QString("setIndices: currently new indicies must be assign 1:1 across old indicies (indicies.size()=%1, numIndices=%2)")
-                              .arg(len).arg(getNumIndices()));
+        context()->throwError(
+            QString(
+                "setIndices: currently new indicies must be assign 1:1 across old indicies (indicies.size()=%1, numIndices=%2)")
+                .arg(len)
+                .arg(getNumIndices()));
         return false;
     }
     auto mesh = getMeshPointer();
@@ -408,39 +417,45 @@ bool scriptable::ScriptableMeshPart::setTopology(graphics::Mesh::Topology topolo
     auto& part = getMeshPointer()->getPartBuffer().edit<graphics::Mesh::Part>(partIndex);
     switch (topology) {
 #ifdef DEV_BUILD
-    case graphics::Mesh::Topology::POINTS:
-    case graphics::Mesh::Topology::LINES:
+        case graphics::Mesh::Topology::POINTS:
+        case graphics::Mesh::Topology::LINES:
 #endif
-    case graphics::Mesh::Topology::TRIANGLES:
-        part._topology = topology;
-        return true;
-    default:
-        context()->throwError("changing topology to " + graphics::toString(topology) + " is not yet supported");
-        return false;
+        case graphics::Mesh::Topology::TRIANGLES:
+            part._topology = topology;
+            return true;
+        default:
+            context()->throwError("changing topology to " + graphics::toString(topology) + " is not yet supported");
+            return false;
     }
 }
 
 glm::uint32 scriptable::ScriptableMeshPart::getTopologyLength() const {
-    switch(getTopology()) {
-    case graphics::Mesh::Topology::POINTS: return 1;
-    case graphics::Mesh::Topology::LINES: return 2;
-    case graphics::Mesh::Topology::TRIANGLES: return 3;
-    case graphics::Mesh::Topology::QUADS: return 4;
-    default: qCDebug(graphics_scripting) << "getTopologyLength -- unrecognized topology" << getTopology();
+    switch (getTopology()) {
+        case graphics::Mesh::Topology::POINTS:
+            return 1;
+        case graphics::Mesh::Topology::LINES:
+            return 2;
+        case graphics::Mesh::Topology::TRIANGLES:
+            return 3;
+        case graphics::Mesh::Topology::QUADS:
+            return 4;
+        default:
+            qCDebug(graphics_scripting) << "getTopologyLength -- unrecognized topology" << getTopology();
     }
     return 0;
 }
 
 QVector<glm::uint32> scriptable::ScriptableMeshPart::getFace(glm::uint32 faceIndex) const {
     switch (getTopology()) {
-    case graphics::Mesh::Topology::POINTS:
-    case graphics::Mesh::Topology::LINES:
-    case graphics::Mesh::Topology::TRIANGLES:
-    case graphics::Mesh::Topology::QUADS:
-        if (faceIndex < getNumFaces()) {
-            return getIndices().mid(faceIndex * getTopologyLength(), getTopologyLength());
-        }
-    default: return QVector<glm::uint32>();
+        case graphics::Mesh::Topology::POINTS:
+        case graphics::Mesh::Topology::LINES:
+        case graphics::Mesh::Topology::TRIANGLES:
+        case graphics::Mesh::Topology::QUADS:
+            if (faceIndex < getNumFaces()) {
+                return getIndices().mid(faceIndex * getTopologyLength(), getTopologyLength());
+            }
+        default:
+            return QVector<glm::uint32>();
     }
 }
 

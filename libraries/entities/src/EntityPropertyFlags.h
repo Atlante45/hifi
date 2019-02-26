@@ -32,8 +32,8 @@ enum EntityPropertyList {
     PROP_REGISTRATION_POINT,
     PROP_CREATED,
     PROP_LAST_EDITED_BY,
-    PROP_ENTITY_HOST_TYPE,            // not sent over the wire
-    PROP_OWNING_AVATAR_ID,            // not sent over the wire
+    PROP_ENTITY_HOST_TYPE, // not sent over the wire
+    PROP_OWNING_AVATAR_ID, // not sent over the wire
     PROP_PARENT_ID,
     PROP_PARENT_JOINT_INDEX,
     PROP_QUERY_AA_CUBE,
@@ -162,8 +162,8 @@ enum EntityPropertyList {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // WARNING! Do not add props here unless you intentionally mean to reuse PROP_DERIVED_X indexes
     //
-    // These properties intentionally reuse the enum values for other properties which will never overlap with each other. We do this so that we don't have to expand
-    // the size of the properties bitflags mask
+    // These properties intentionally reuse the enum values for other properties which will never overlap with each other. We do
+    // this so that we don't have to expand the size of the properties bitflags mask
     //
     // Only add properties here that are only used by one subclass.  Otherwise, they should go above to prevent collisions
 

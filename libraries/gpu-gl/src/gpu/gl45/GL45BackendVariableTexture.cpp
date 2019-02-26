@@ -9,13 +9,13 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-#include "GL45Backend.h"
-#include <mutex>
 #include <algorithm>
 #include <condition_variable>
-#include <unordered_set>
-#include <unordered_map>
 #include <glm/gtx/component_wise.hpp>
+#include <mutex>
+#include <unordered_map>
+#include <unordered_set>
+#include "GL45Backend.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QThread>
@@ -30,7 +30,8 @@ using namespace gpu::gl45;
 using GL45Texture = GL45Backend::GL45Texture;
 using GL45VariableAllocationTexture = GL45Backend::GL45VariableAllocationTexture;
 
-GL45VariableAllocationTexture::GL45VariableAllocationTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture) : GL45Texture(backend, texture) {
+GL45VariableAllocationTexture::GL45VariableAllocationTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture) :
+    GL45Texture(backend, texture) {
 }
 
 GL45VariableAllocationTexture::~GL45VariableAllocationTexture() {
@@ -47,31 +48,32 @@ const GL45Texture::Bindless& GL45VariableAllocationTexture::getBindless() const 
 }
 #endif
 
-Size GL45VariableAllocationTexture::copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset, GLenum internalFormat, GLenum format, GLenum type, Size sourceSize, const void* sourcePointer) const {
+Size GL45VariableAllocationTexture::copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset,
+                                                                GLenum internalFormat, GLenum format, GLenum type,
+                                                                Size sourceSize, const void* sourcePointer) const {
     Size amountCopied = 0;
-    amountCopied = Parent::copyMipFaceLinesFromTexture(mip, face, size, yOffset, internalFormat, format, type, sourceSize, sourcePointer);
+    amountCopied = Parent::copyMipFaceLinesFromTexture(mip, face, size, yOffset, internalFormat, format, type, sourceSize,
+                                                       sourcePointer);
     return amountCopied;
 }
 
-
-void copyTexGPUMem(const gpu::Texture& texture, GLenum texTarget, GLuint srcId, GLuint destId, uint16_t numMips, uint16_t srcMipOffset, uint16_t destMipOffset, uint16_t populatedMips) {
+void copyTexGPUMem(const gpu::Texture& texture, GLenum texTarget, GLuint srcId, GLuint destId, uint16_t numMips,
+                   uint16_t srcMipOffset, uint16_t destMipOffset, uint16_t populatedMips) {
     for (uint16_t mip = populatedMips; mip < numMips; ++mip) {
         auto mipDimensions = texture.evalMipDimensions(mip);
         uint16_t targetMip = mip - destMipOffset;
         uint16_t sourceMip = mip - srcMipOffset;
         auto faces = GLTexture::getFaceCount(texTarget);
         for (uint8_t face = 0; face < faces; ++face) {
-            glCopyImageSubData(
-                srcId, texTarget, sourceMip, 0, 0, face,
-                destId, texTarget, targetMip, 0, 0, face,
-                mipDimensions.x, mipDimensions.y, 1
-                );
+            glCopyImageSubData(srcId, texTarget, sourceMip, 0, 0, face, destId, texTarget, targetMip, 0, 0, face,
+                               mipDimensions.x, mipDimensions.y, 1);
             (void)CHECK_GL_ERROR();
         }
     }
 }
 
-void GL45VariableAllocationTexture::copyTextureMipsInGPUMem(GLuint srcId, GLuint destId, uint16_t srcMipOffset, uint16_t destMipOffset, uint16_t populatedMips) {
+void GL45VariableAllocationTexture::copyTextureMipsInGPUMem(GLuint srcId, GLuint destId, uint16_t srcMipOffset,
+                                                            uint16_t destMipOffset, uint16_t populatedMips) {
     uint16_t numMips = _gpuObject.getNumMips();
     copyTexGPUMem(_gpuObject, _target, srcId, destId, numMips, srcMipOffset, destMipOffset, populatedMips);
 }
@@ -79,7 +81,8 @@ void GL45VariableAllocationTexture::copyTextureMipsInGPUMem(GLuint srcId, GLuint
 // Managed size resource textures
 using GL45ResourceTexture = GL45Backend::GL45ResourceTexture;
 
-GL45ResourceTexture::GL45ResourceTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture) : GL45VariableAllocationTexture(backend, texture) {
+GL45ResourceTexture::GL45ResourceTexture(const std::weak_ptr<GLBackend>& backend, const Texture& texture) :
+    GL45VariableAllocationTexture(backend, texture) {
     auto mipLevels = texture.getNumMips();
     _allocatedMip = mipLevels;
     _maxAllocatedMip = _populatedMip = mipLevels;
@@ -267,7 +270,7 @@ void GL45ResourceTexture::populateTransferQueue(TransferQueue& pendingTransfers)
             // For compressed format, regions must be a multiple of the 4x4 tiles, so enforce 4 lines as the minimum block
             auto mipSize = _gpuObject.getStoredMipFaceSize(sourceMip, face);
             const auto lines = mipDimensions.y;
-            const uint32_t BLOCK_NUM_LINES{ 4 };
+            const uint32_t BLOCK_NUM_LINES { 4 };
             const auto numBlocks = (lines + (BLOCK_NUM_LINES - 1)) / BLOCK_NUM_LINES;
             auto bytesPerBlock = mipSize / numBlocks;
             Q_ASSERT(0 == (mipSize % lines));

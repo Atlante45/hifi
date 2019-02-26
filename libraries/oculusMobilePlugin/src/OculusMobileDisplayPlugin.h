@@ -12,8 +12,8 @@
 #include <EGL/egl.h>
 
 #include <QTimer>
-#include <QtPlatformHeaders/QEGLNativeContext>
 #include <QtAndroidExtras/QAndroidJniObject>
+#include <QtPlatformHeaders/QEGLNativeContext>
 
 #include <gl/Context.h>
 #include <ovr/VrHandler.h>
@@ -24,6 +24,7 @@ typedef struct ANativeWindow ANativeWindow;
 
 class OculusMobileDisplayPlugin : public HmdDisplayPlugin, public ovr::VrHandler {
     using Parent = HmdDisplayPlugin;
+
 public:
     OculusMobileDisplayPlugin();
     virtual ~OculusMobileDisplayPlugin();
@@ -60,7 +61,6 @@ protected:
     bool alwaysPresent() const override { return true; }
 
     static const char* NAME;
-    mutable gl::Context* _mainContext{ nullptr };
+    mutable gl::Context* _mainContext { nullptr };
     uint32_t _readFbo;
 };
-

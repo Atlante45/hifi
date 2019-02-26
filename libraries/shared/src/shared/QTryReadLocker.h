@@ -19,34 +19,29 @@ public:
     QTryReadLocker(QReadWriteLock* readWriteLock);
     QTryReadLocker(QReadWriteLock* readWriteLock, int timeout);
     ~QTryReadLocker();
-    
+
     bool isLocked() const;
-    
+
     void unlock();
     bool tryRelock();
     bool tryRelock(int timeout);
-    
+
     QReadWriteLock* readWriteLock() const;
-    
+
 private:
     Q_DISABLE_COPY(QTryReadLocker)
     quintptr _val;
 };
 
 // Implementation
-inline QTryReadLocker::QTryReadLocker(QReadWriteLock* areadWriteLock) :
-    _val(reinterpret_cast<quintptr>(areadWriteLock))
-{
-    Q_ASSERT_X((_val & quintptr(1u)) == quintptr(0),
-               "QTryReadLocker", "QTryReadLocker pointer is misaligned");
+inline QTryReadLocker::QTryReadLocker(QReadWriteLock* areadWriteLock) : _val(reinterpret_cast<quintptr>(areadWriteLock)) {
+    Q_ASSERT_X((_val & quintptr(1u)) == quintptr(0), "QTryReadLocker", "QTryReadLocker pointer is misaligned");
     tryRelock();
 }
 
 inline QTryReadLocker::QTryReadLocker(QReadWriteLock* areadWriteLock, int timeout) :
-    _val(reinterpret_cast<quintptr>(areadWriteLock))
-{
-    Q_ASSERT_X((_val & quintptr(1u)) == quintptr(0),
-               "QTryReadLocker", "QTryReadLocker pointer is misaligned");
+    _val(reinterpret_cast<quintptr>(areadWriteLock)) {
+    Q_ASSERT_X((_val & quintptr(1u)) == quintptr(0), "QTryReadLocker", "QTryReadLocker pointer is misaligned");
     tryRelock(timeout);
 }
 

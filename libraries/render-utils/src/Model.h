@@ -13,31 +13,31 @@
 #define hifi_Model_h
 
 #include <QBitArray>
+#include <QMutex>
 #include <QObject>
 #include <QUrl>
-#include <QMutex>
 
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
-#include <functional>
 
 #include <AABox.h>
 #include <DependencyManager.h>
+#include <DualQuaternion.h>
 #include <GeometryUtil.h>
+#include <SpatiallyNestable.h>
+#include <Transform.h>
+#include <TriangleSet.h>
 #include <gpu/Batch.h>
+#include <graphics-scripting/Forward.h>
 #include <render/Forward.h>
 #include <render/Scene.h>
-#include <graphics-scripting/Forward.h>
-#include <Transform.h>
-#include <SpatiallyNestable.h>
-#include <TriangleSet.h>
-#include <DualQuaternion.h>
 
-#include "RenderHifi.h"
 #include "GeometryCache.h"
-#include "TextureCache.h"
-#include "Rig.h"
 #include "PrimitiveMode.h"
+#include "RenderHifi.h"
+#include "Rig.h"
+#include "TextureCache.h"
 
 // Use dual quaternion skinning!
 // Must match define in Skinning.slh
@@ -49,10 +49,10 @@ class QScriptEngine;
 class ViewFrustum;
 
 namespace render {
-    class Scene;
-    class Transaction;
-    typedef unsigned int ItemID;
-}
+class Scene;
+class Transaction;
+typedef unsigned int ItemID;
+} // namespace render
 class MeshPartPayload;
 class ModelMeshPartPayload;
 class ModelRenderLocations;
@@ -67,7 +67,11 @@ using ModelWeakPointer = std::weak_ptr<Model>;
 
 struct SortedTriangleSet {
     SortedTriangleSet(float distance, TriangleSet* triangleSet, int partIndex, int shapeID, int subMeshIndex) :
-        distance(distance), triangleSet(triangleSet), partIndex(partIndex), shapeID(shapeID), subMeshIndex(subMeshIndex) {}
+        distance(distance),
+        triangleSet(triangleSet),
+        partIndex(partIndex),
+        shapeID(shapeID),
+        subMeshIndex(subMeshIndex) {}
 
     float distance;
     TriangleSet* triangleSet;
@@ -87,14 +91,14 @@ struct BlendshapeOffsetUnpacked {
 };
 
 using BlendshapeOffset = BlendshapeOffsetPacked;
-using BlendShapeOperator = std::function<void(int, const QVector<BlendshapeOffset>&, const QVector<int>&, const render::ItemIDs&)>;
+using BlendShapeOperator = std::function<void(int, const QVector<BlendshapeOffset>&, const QVector<int>&,
+                                              const render::ItemIDs&)>;
 
 /// A generic 3D model displaying geometry loaded from a URL.
 class Model : public QObject, public std::enable_shared_from_this<Model>, public scriptable::ModelProvider {
     Q_OBJECT
 
 public:
-
     typedef RenderArgs::RenderMode RenderMode;
 
     static void setAbstractViewStateInterface(AbstractViewStateInterface* viewState) { _viewState = viewState; }
@@ -126,27 +130,24 @@ public:
 
     void setHifiRenderLayer(render::hifi::Layer layer, const render::ScenePointer& scene = nullptr);
 
-    // Access the current RenderItemKey Global Flags used by the model and applied to the render items  representing the parts of the model.
+    // Access the current RenderItemKey Global Flags used by the model and applied to the render items  representing the parts
+    // of the model.
     const render::ItemKey getRenderItemKeyGlobalFlags() const;
 
     bool needsFixupInScene() const;
 
     bool needsReload() const { return _needsReload; }
-    bool addToScene(const render::ScenePointer& scene,
-                    render::Transaction& transaction) {
+    bool addToScene(const render::ScenePointer& scene, render::Transaction& transaction) {
         auto getters = render::Item::Status::Getters(0);
         return addToScene(scene, transaction, getters);
     }
-    bool addToScene(const render::ScenePointer& scene,
-                    render::Transaction& transaction,
+    bool addToScene(const render::ScenePointer& scene, render::Transaction& transaction,
                     BlendShapeOperator modelBlendshapeOperator) {
         auto getters = render::Item::Status::Getters(0);
         return addToScene(scene, transaction, getters, modelBlendshapeOperator);
     }
-    bool addToScene(const render::ScenePointer& scene,
-                    render::Transaction& transaction,
-                    render::Item::Status::Getters& statusGetters,
-                    BlendShapeOperator modelBlendshapeOperator = nullptr);
+    bool addToScene(const render::ScenePointer& scene, render::Transaction& transaction,
+                    render::Item::Status::Getters& statusGetters, BlendShapeOperator modelBlendshapeOperator = nullptr);
     void removeFromScene(const render::ScenePointer& scene, render::Transaction& transaction);
     bool isRenderable() const;
 
@@ -177,13 +178,22 @@ public:
     /// Returns a reference to the shared geometry.
     const Geometry::Pointer& getGeometry() const { return _renderGeometry; }
 
-    const QVariantMap getTextures() const { assert(isLoaded()); return _renderGeometry->getTextures(); }
+    const QVariantMap getTextures() const {
+        assert(isLoaded());
+        return _renderGeometry->getTextures();
+    }
     Q_INVOKABLE virtual void setTextures(const QVariantMap& textures);
 
     /// Provided as a convenience, will crash if !isLoaded()
     // And so that getHFMModel() isn't chained everywhere
-    const HFMModel& getHFMModel() const { assert(isLoaded()); return _renderGeometry->getHFMModel(); }
-    const MaterialMapping& getMaterialMapping() const { assert(isLoaded()); return _renderGeometry->getMaterialMapping(); }
+    const HFMModel& getHFMModel() const {
+        assert(isLoaded());
+        return _renderGeometry->getHFMModel();
+    }
+    const MaterialMapping& getMaterialMapping() const {
+        assert(isLoaded());
+        return _renderGeometry->getMaterialMapping();
+    }
 
     bool isActive() const { return isLoaded(); }
 
@@ -200,11 +210,12 @@ public:
     void setJointTranslation(int index, bool valid, const glm::vec3& translation, float priority);
 
     bool findRayIntersectionAgainstSubMeshes(const glm::vec3& origin, const glm::vec3& direction, float& distance,
-                                             BoxFace& face, glm::vec3& surfaceNormal,
-                                             QVariantMap& extraInfo, bool pickAgainstTriangles = false, bool allowBackface = false);
-    bool findParabolaIntersectionAgainstSubMeshes(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                                  float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
-                                                  QVariantMap& extraInfo, bool pickAgainstTriangles = false, bool allowBackface = false);
+                                             BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                             bool pickAgainstTriangles = false, bool allowBackface = false);
+    bool findParabolaIntersectionAgainstSubMeshes(const glm::vec3& origin, const glm::vec3& velocity,
+                                                  const glm::vec3& acceleration, float& parabolicDistance, BoxFace& face,
+                                                  glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                                  bool pickAgainstTriangles = false, bool allowBackface = false);
 
     void setOffset(const glm::vec3& offset);
     const glm::vec3& getOffset() const { return _offset; }
@@ -214,11 +225,9 @@ public:
     bool getScaleToFit() const { return _scaleToFit; } /// is scale to fit enabled
 
     void setSnapModelToCenter(bool snapModelToCenter) {
-        setSnapModelToRegistrationPoint(snapModelToCenter, glm::vec3(0.5f,0.5f,0.5f));
+        setSnapModelToRegistrationPoint(snapModelToCenter, glm::vec3(0.5f, 0.5f, 0.5f));
     };
-    bool getSnapModelToCenter() {
-        return _snapModelToRegistrationPoint && _registrationPoint == glm::vec3(0.5f,0.5f,0.5f);
-    }
+    bool getSnapModelToCenter() { return _snapModelToRegistrationPoint && _registrationPoint == glm::vec3(0.5f, 0.5f, 0.5f); }
 
     /// Returns the number of joint states in the model.
     int getJointStateCount() const { return (int)_rig.getJointStateCount(); }
@@ -276,7 +285,7 @@ public:
     int getBlendshapeCoefficientsNum() const { return _blendshapeCoefficients.size(); }
     float getBlendshapeCoefficient(int index) const {
         return ((index < 0) && (index >= _blendshapeCoefficients.size())) ? 0.0f : _blendshapeCoefficients.at(index);
-     }
+    }
 
     Rig& getRig() { return _rig; }
     const Rig& getRig() const { return _rig; }
@@ -326,6 +335,7 @@ public:
             _scale.w = cauterizationAmount;
             _cauterizedPosition = glm::vec4(cauterizedPosition, 1.0f);
         }
+
     protected:
         glm::vec4 _scale { 1.0f, 1.0f, 1.0f, 0.0f };
         DualQuaternion _dq;
@@ -351,7 +361,8 @@ public:
 
     Q_INVOKABLE MeshProxyList getMeshes() const;
     virtual scriptable::ScriptableModelBase getScriptableModel() override;
-    virtual bool replaceScriptableModelMeshPart(scriptable::ScriptableModelBasePointer model, int meshIndex, int partIndex) override;
+    virtual bool replaceScriptableModelMeshPart(scriptable::ScriptableModelBasePointer model, int meshIndex,
+                                                int partIndex) override;
 
     void scaleToFit();
     bool getUseDualQuaternionSkinning() const { return _useDualQuaternionSkinning; }
@@ -373,9 +384,9 @@ signals:
     void rigReset();
 
 protected:
-
     std::unordered_map<unsigned int, quint16> _priorityMap; // only used for materialMapping
-    std::unordered_map<unsigned int, std::vector<graphics::MaterialLayer>> _materialMapping; // generated during applyMaterialMapping
+    std::unordered_map<unsigned int, std::vector<graphics::MaterialLayer>>
+        _materialMapping; // generated during applyMaterialMapping
     void applyMaterialMapping();
 
     void setBlendshapeCoefficients(const QVector<float>& coefficients) { _blendshapeCoefficients = coefficients; }
@@ -428,9 +439,7 @@ protected:
     virtual void updateRig(float deltaTime, glm::mat4 parentTransform);
 
     /// Allow sub classes to force invalidating the bboxes
-    void invalidCalculatedMeshBoxes() {
-        _triangleSetsValid = false;
-    }
+    void invalidCalculatedMeshBoxes() { _triangleSetsValid = false; }
 
     // hook for derived classes to be notified when setUrl invalidates the current model.
     virtual void onInvalidate() {};
@@ -445,7 +454,7 @@ protected:
     int _blendNumber { 0 };
     bool _blendshapeOffsetsInitialized { false };
 
-    mutable QMutex _mutex{ QMutex::Recursive };
+    mutable QMutex _mutex { QMutex::Recursive };
 
     bool _overrideModelTransform { false };
     bool _triangleSetsValid { false };
@@ -473,7 +482,7 @@ protected:
     bool _needsFixupInScene { true }; // needs to be removed/re-added to scene
     bool _needsReload { true };
     bool _needsUpdateClusterMatrices { true };
-    QVariantMap _pendingTextures { };
+    QVariantMap _pendingTextures {};
 
     friend class ModelMeshPartPayload;
     Rig _rig;
@@ -492,15 +501,17 @@ protected:
     int _renderInfoDrawCalls { 0 };
     int _renderInfoHasTransparent { false };
 
-    // This Render ItemKey Global Flags capture the Model wide global set of flags that should be communicated to all the render items representing the Model.
-    // The flags concerned are:
-    //  - isVisible: if true the Model is visible globally in the scene, regardless of the other flags in the item keys (tags or layer or shadow caster).
+    // This Render ItemKey Global Flags capture the Model wide global set of flags that should be communicated to all the render
+    // items representing the Model. The flags concerned are:
+    //  - isVisible: if true the Model is visible globally in the scene, regardless of the other flags in the item keys (tags or
+    //  layer or shadow caster).
     //  - TagBits: the view mask defined through the TagBits telling in which view the Model is rendered if visible.
     //  - Layer: In which Layer this Model lives.
     //  - CastShadow: if true and visible and rendered in the view, the Model cast shadows if in a Light volume casting shadows.
-    //  - CullGroup: if true, the render items representing the parts of the Model are culled by a single Meta render item that knows about them, they are not culled individually.
+    //  - CullGroup: if true, the render items representing the parts of the Model are culled by a single Meta render item that
+    //  knows about them, they are not culled individually.
     //               For this to work, a Meta RI must exists and knows about the RIs of this Model.
-    //  
+    //
     render::ItemKey _renderItemKeyGlobalFlags;
 
     bool shouldInvalidatePayloadShapeKey(int meshIndex);
@@ -525,14 +536,14 @@ class ModelBlender : public QObject, public Dependency {
     SINGLETON_DEPENDENCY
 
 public:
-
     /// Adds the specified model to the list requiring vertex blends.
     void noteRequiresBlend(ModelPointer model);
 
     bool shouldComputeBlendshapes() { return _computeBlendshapes; }
 
 public slots:
-    void setBlendedVertices(ModelPointer model, int blendNumber, QVector<BlendshapeOffset> blendshapeOffsets, QVector<int> blendedMeshSizes);
+    void setBlendedVertices(ModelPointer model, int blendNumber, QVector<BlendshapeOffset> blendshapeOffsets,
+                            QVector<int> blendedMeshSizes);
     void setComputeBlendshapes(bool computeBlendshapes) { _computeBlendshapes = computeBlendshapes; }
 
 private:
@@ -549,6 +560,5 @@ private:
 
     bool _computeBlendshapes { true };
 };
-
 
 #endif // hifi_Model_h

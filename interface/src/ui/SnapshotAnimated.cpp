@@ -11,11 +11,11 @@
 
 #include "SnapshotAnimated.h"
 
+#include <QtConcurrent/QtConcurrentRun>
 #include <QtCore/QDateTime>
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtGui/QImage>
-#include <QtConcurrent/QtConcurrentRun>
 
 #include <plugins/DisplayPlugin.h>
 
@@ -32,11 +32,11 @@ float SnapshotAnimated::aspectRatio;
 QSharedPointer<WindowScriptingInterface> SnapshotAnimated::snapshotAnimatedDM;
 GifWriter SnapshotAnimated::snapshotAnimatedGifWriter;
 
-
 Setting::Handle<bool> SnapshotAnimated::alsoTakeAnimatedSnapshot("alsoTakeAnimatedSnapshot", true);
 Setting::Handle<float> SnapshotAnimated::snapshotAnimatedDuration("snapshotAnimatedDuration", SNAPSNOT_ANIMATED_DURATION_SECS);
 
-void SnapshotAnimated::saveSnapshotAnimated(QString pathStill, float aspectRatio, Application* app, QSharedPointer<WindowScriptingInterface> dm) {
+void SnapshotAnimated::saveSnapshotAnimated(QString pathStill, float aspectRatio, Application* app,
+                                            QSharedPointer<WindowScriptingInterface> dm) {
     // If we're not in the middle of capturing an animated snapshot...
     if (SnapshotAnimated::snapshotAnimatedFirstFrameTimestamp == 0) {
         SnapshotAnimated::snapshotAnimatedTimer = new QTimer();
@@ -79,16 +79,19 @@ void SnapshotAnimated::captureFrames() {
             // If this is an intermediate or the final frame...
         } else {
             // Push the current frame delay onto the vector
-            SnapshotAnimated::snapshotAnimatedFrameDelayVector.append(round(((float)(QDateTime::currentMSecsSinceEpoch() - SnapshotAnimated::snapshotAnimatedTimestamp)) / 10));
+            SnapshotAnimated::snapshotAnimatedFrameDelayVector.append(
+                round(((float)(QDateTime::currentMSecsSinceEpoch() - SnapshotAnimated::snapshotAnimatedTimestamp)) / 10));
             // Record the current frame timestamp
             SnapshotAnimated::snapshotAnimatedTimestamp = QDateTime::currentMSecsSinceEpoch();
 
             // If that was the last frame...
-            if ((SnapshotAnimated::snapshotAnimatedTimestamp - SnapshotAnimated::snapshotAnimatedFirstFrameTimestamp) >= (SnapshotAnimated::snapshotAnimatedDuration.get() * MSECS_PER_SECOND)) {
+            if ((SnapshotAnimated::snapshotAnimatedTimestamp - SnapshotAnimated::snapshotAnimatedFirstFrameTimestamp) >=
+                (SnapshotAnimated::snapshotAnimatedDuration.get() * MSECS_PER_SECOND)) {
                 SnapshotAnimated::snapshotAnimatedTimerRunning = false;
 
                 // Notify the user that we're processing the snapshot
-                // This also pops up the "Share" dialog. The unprocessed GIF will be visualized as a loading icon until processingGifCompleted() is called.
+                // This also pops up the "Share" dialog. The unprocessed GIF will be visualized as a loading icon until
+                // processingGifCompleted() is called.
                 emit SnapshotAnimated::snapshotAnimatedDM->processingGifStarted(SnapshotAnimated::snapshotStillPath);
 
                 // Kick off the thread that'll pack the frames into the GIF
@@ -121,12 +124,9 @@ void SnapshotAnimated::processFrames() {
 
     // Create the GIF from the temporary files
     // Write out the header and beginning of the GIF file
-    if (!GifBegin(
-        &(SnapshotAnimated::snapshotAnimatedGifWriter),
-        qPrintable(SnapshotAnimated::snapshotAnimatedPath),
-        width,
-        height,
-        1)) { // "1" means "yes there is a delay" with this GifCreator library.
+    if (!GifBegin(&(SnapshotAnimated::snapshotAnimatedGifWriter), qPrintable(SnapshotAnimated::snapshotAnimatedPath), width,
+                  height,
+                  1)) { // "1" means "yes there is a delay" with this GifCreator library.
 
         // We should never, ever get here. If we do, that means that writing a still JPG to the filesystem
         // has succeeded, but that writing the tiny header to a GIF file in the same directory failed.
@@ -139,17 +139,16 @@ void SnapshotAnimated::processFrames() {
     }
     for (int itr = 0; itr < SnapshotAnimated::snapshotAnimatedFrameVector.size(); itr++) {
         // Write each frame to the GIF
-        GifWriteFrame(&(SnapshotAnimated::snapshotAnimatedGifWriter),
-            (uint8_t*)SnapshotAnimated::snapshotAnimatedFrameVector[itr].convertToFormat(QImage::Format_RGBA8888).bits(),
-            width,
-            height,
-            SnapshotAnimated::snapshotAnimatedFrameDelayVector[itr]);
+        GifWriteFrame(
+            &(SnapshotAnimated::snapshotAnimatedGifWriter),
+            (uint8_t*)SnapshotAnimated::snapshotAnimatedFrameVector[itr].convertToFormat(QImage::Format_RGBA8888).bits(), width,
+            height, SnapshotAnimated::snapshotAnimatedFrameDelayVector[itr]);
     }
     // Write out the end of the GIF
     GifEnd(&(SnapshotAnimated::snapshotAnimatedGifWriter));
 
     SnapshotAnimated::clearTempVariables();
-    
+
     // Update the "Share" dialog with the processed GIF.
     emit SnapshotAnimated::snapshotAnimatedDM->processingGifCompleted(SnapshotAnimated::snapshotAnimatedPath);
 }

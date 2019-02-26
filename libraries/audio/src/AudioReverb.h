@@ -12,38 +12,37 @@
 #include <stdint.h>
 
 typedef struct ReverbParameters {
+    float sampleRate; // [24000, 48000] Hz
+    float bandwidth; // [20, 24000] Hz
 
-    float sampleRate;       // [24000, 48000] Hz
-    float bandwidth;        // [20, 24000] Hz
+    float preDelay; // [0, 333] ms
+    float lateDelay; // [0, 166] ms
 
-    float preDelay;         // [0, 333] ms
-    float lateDelay;        // [0, 166] ms
+    float reverbTime; // [0.1, 100] seconds
 
-    float reverbTime;       // [0.1, 100] seconds
+    float earlyDiffusion; // [0, 100] percent
+    float lateDiffusion; // [0, 100] percent
 
-    float earlyDiffusion;   // [0, 100] percent
-    float lateDiffusion;    // [0, 100] percent
+    float roomSize; // [0, 100] percent
+    float density; // [0, 100] percent
 
-    float roomSize;         // [0, 100] percent
-    float density;          // [0, 100] percent
+    float bassMult; // [0.1, 10] ratio
+    float bassFreq; // [10, 500] Hz
+    float highGain; // [-24, 0] dB
+    float highFreq; // [1000, 12000] Hz
 
-    float bassMult;         // [0.1, 10] ratio
-    float bassFreq;         // [10, 500] Hz
-    float highGain;         // [-24, 0] dB
-    float highFreq;         // [1000, 12000] Hz
+    float modRate; // [0.1, 10] Hz
+    float modDepth; // [0, 100] percent
 
-    float modRate;          // [0.1, 10] Hz
-    float modDepth;         // [0, 100] percent
+    float earlyGain; // [-96, +24] dB
+    float lateGain; // [-96, +24] dB
 
-    float earlyGain;        // [-96, +24] dB
-    float lateGain;         // [-96, +24] dB
+    float earlyMixLeft; // [0, 100] percent
+    float earlyMixRight; // [0, 100] percent
+    float lateMixLeft; // [0, 100] percent
+    float lateMixRight; // [0, 100] percent
 
-    float earlyMixLeft;     // [0, 100] percent
-    float earlyMixRight;    // [0, 100] percent
-    float lateMixLeft;      // [0, 100] percent
-    float lateMixRight;     // [0, 100] percent
-
-    float wetDryMix;        // [0, 100] percent
+    float wetDryMix; // [0, 100] percent
 
 } ReverbParameters;
 
@@ -54,8 +53,8 @@ public:
     AudioReverb(float sampleRate);
     ~AudioReverb();
 
-    void setParameters(ReverbParameters *p);
-    void getParameters(ReverbParameters *p);
+    void setParameters(ReverbParameters* p);
+    void getParameters(ReverbParameters* p);
     void reset();
 
     // deinterleaved float input/output (native format)
@@ -68,7 +67,7 @@ public:
     void render(const float* input, float* output, int numFrames);
 
 private:
-    ReverbImpl *_impl;
+    ReverbImpl* _impl;
     ReverbParameters _params;
 
     float* _inout[2];

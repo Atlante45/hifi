@@ -25,7 +25,6 @@ AvatarActionFarGrab::~AvatarActionFarGrab() {
 #endif
 }
 
-
 QByteArray AvatarActionFarGrab::serialize() const {
     QByteArray serializedActionArguments;
     QDataStream dataStream(&serializedActionArguments, QIODevice::WriteOnly);

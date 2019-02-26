@@ -14,11 +14,11 @@
 
 #include <memory>
 
+#include <QDir>
+#include <QProcess>
 #include <QtCore/QDebug>
 #include <QtCore/QObject>
 #include <QtCore/QRunnable>
-#include <QDir>
-#include <QProcess>
 
 #include <AssetUtils.h>
 
@@ -40,7 +40,7 @@ signals:
     void bakeComplete(QString assetHash, QString assetPath, QString tempOutputDir, QVector<QString> outputFiles);
     void bakeFailed(QString assetHash, QString assetPath, QString errors);
     void bakeAborted(QString assetHash, QString assetPath);
-    
+
 private:
     std::atomic<bool> _isBaking { false };
     AssetUtils::AssetHash _assetHash;

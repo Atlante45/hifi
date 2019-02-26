@@ -12,26 +12,27 @@
 #define hifi_gpu_gl_GLBackend_h
 
 #include <assert.h>
-#include <functional>
-#include <memory>
+#include <array>
 #include <bitset>
+#include <functional>
+#include <list>
+#include <memory>
 #include <queue>
 #include <utility>
-#include <list>
-#include <array>
 
 #include <QtCore/QLoggingCategory>
 
 #include <gl/Config.h>
 #include <gl/GLShaders.h>
 
-#include <gpu/Forward.h>
 #include <gpu/Context.h>
+#include <gpu/Forward.h>
 
 #include "GLShared.h"
 
 // Different versions for the stereo drawcall
-// Current preferred is  "instanced" which draw the shape twice but instanced and rely on clipping plane to draw left/right side only
+// Current preferred is  "instanced" which draw the shape twice but instanced and rely on clipping plane to draw left/right side
+// only
 #if defined(USE_GLES) && !defined(HAVE_EXT_clip_cull_distance)
 #define GPU_STEREO_TECHNIQUE_DOUBLED_SIMPLE
 #else
@@ -54,7 +55,8 @@
 #define GPU_STEREO_CAMERA_BUFFER
 #endif
 
-namespace gpu { namespace gl {
+namespace gpu {
+namespace gl {
 
 class GLBackend : public Backend, public std::enable_shared_from_this<GLBackend> {
     // Context Backend static interface required
@@ -108,8 +110,7 @@ public:
 
     // This is the ugly "download the pixels to sysmem for taking a snapshot"
     // Just avoid using it, it's ugly and will break performances
-    virtual void downloadFramebuffer(const FramebufferPointer& srcFramebuffer,
-                                     const Vec4i& region,
+    virtual void downloadFramebuffer(const FramebufferPointer& srcFramebuffer, const Vec4i& region,
                                      QImage& destImage) final override;
 
     // this is the maximum numeber of available input buffers
@@ -227,8 +228,7 @@ public:
     virtual void do_setStateAntialiasedLineEnable(bool enable) final;
     virtual void do_setStateDepthBias(Vec2 bias) final;
     virtual void do_setStateDepthTest(State::DepthTest test) final;
-    virtual void do_setStateStencil(State::StencilActivation activation,
-                                    State::StencilTest frontTest,
+    virtual void do_setStateStencil(State::StencilActivation activation, State::StencilTest frontTest,
                                     State::StencilTest backTest) final;
     virtual void do_setStateAlphaToCoverageEnable(bool enable) final;
     virtual void do_setStateSampleMask(uint32 mask) final;
@@ -247,7 +247,7 @@ public:
     virtual GLBuffer* syncGPUObject(const Buffer& buffer) = 0;
     virtual GLTexture* syncGPUObject(const TexturePointer& texture);
     virtual GLQuery* syncGPUObject(const Query& query) = 0;
-    //virtual bool isTextureReady(const TexturePointer& texture);
+    // virtual bool isTextureReady(const TexturePointer& texture);
 
     virtual void releaseBuffer(GLuint id, Size size) const;
     virtual void releaseExternalTexture(GLuint id, const Texture::ExternalRecycler& recycler) const;
@@ -274,9 +274,9 @@ protected:
     virtual bool supportsBindless() const { return false; }
 
     static const size_t INVALID_OFFSET = (size_t)-1;
-    bool _inRenderTransferPass{ false };
-    int _currentDraw{ -1 };
-    
+    bool _inRenderTransferPass { false };
+    int _currentDraw { -1 };
+
     struct FrameTrash {
         GLsync fence = nullptr;
         std::list<std::pair<GLuint, Size>> buffersTrash;
@@ -286,7 +286,7 @@ protected:
         std::list<GLuint> shadersTrash;
         std::list<GLuint> programsTrash;
         std::list<GLuint> queriesTrash;
-        
+
         void swap(FrameTrash& other) {
             buffersTrash.swap(other.buffersTrash);
             texturesTrash.swap(other.texturesTrash);
@@ -296,10 +296,10 @@ protected:
             programsTrash.swap(other.programsTrash);
             queriesTrash.swap(other.queriesTrash);
         }
-        
+
         void cleanup();
     };
-    
+
     mutable Mutex _trashMutex;
     mutable FrameTrash _currentFrameTrash;
     mutable std::list<FrameTrash> _previousFrameTrashes;
@@ -322,36 +322,36 @@ protected:
     virtual void updateInput() = 0;
 
     struct InputStageState {
-        bool _invalidFormat{ true };
-        bool _lastUpdateStereoState{ false };
-        bool _hadColorAttribute{ true };
-        FormatReference _format{ GPU_REFERENCE_INIT_VALUE };
+        bool _invalidFormat { true };
+        bool _lastUpdateStereoState { false };
+        bool _hadColorAttribute { true };
+        FormatReference _format { GPU_REFERENCE_INIT_VALUE };
         std::string _formatKey;
 
         typedef std::bitset<MAX_NUM_ATTRIBUTES> ActivationCache;
-        ActivationCache _attributeActivation{ 0 };
+        ActivationCache _attributeActivation { 0 };
 
         typedef std::bitset<MAX_NUM_INPUT_BUFFERS> BuffersState;
 
-        BuffersState _invalidBuffers{ 0 };
-        BuffersState _attribBindingBuffers{ 0 };
+        BuffersState _invalidBuffers { 0 };
+        BuffersState _attribBindingBuffers { 0 };
 
-        std::array<BufferReference, MAX_NUM_INPUT_BUFFERS> _buffers{};
-        std::array<Offset, MAX_NUM_INPUT_BUFFERS> _bufferOffsets{};
-        std::array<Offset, MAX_NUM_INPUT_BUFFERS> _bufferStrides{};
-        std::array<GLuint, MAX_NUM_INPUT_BUFFERS> _bufferVBOs{};
+        std::array<BufferReference, MAX_NUM_INPUT_BUFFERS> _buffers {};
+        std::array<Offset, MAX_NUM_INPUT_BUFFERS> _bufferOffsets {};
+        std::array<Offset, MAX_NUM_INPUT_BUFFERS> _bufferStrides {};
+        std::array<GLuint, MAX_NUM_INPUT_BUFFERS> _bufferVBOs {};
 
-        glm::vec4 _colorAttribute{ 0.0f };
+        glm::vec4 _colorAttribute { 0.0f };
 
-        BufferReference _indexBuffer{};
-        Offset _indexBufferOffset{ 0 };
-        Type _indexBufferType{ UINT32 };
+        BufferReference _indexBuffer {};
+        Offset _indexBufferOffset { 0 };
+        Type _indexBufferType { UINT32 };
 
-        BufferReference _indirectBuffer{};
-        Offset _indirectBufferOffset{ 0 };
-        Offset _indirectBufferStride{ 0 };
+        BufferReference _indirectBuffer {};
+        Offset _indirectBufferOffset { 0 };
+        Offset _indirectBufferStride { 0 };
 
-        GLuint _defaultVAO{ 0 };
+        GLuint _defaultVAO { 0 };
     } _input;
 
     virtual void initTransform() = 0;
@@ -377,7 +377,7 @@ protected:
         struct Cameras {
             TransformCamera _cams[2];
 
-            Cameras(){};
+            Cameras() {};
             Cameras(const TransformCamera& cam) { memcpy(_cams, &cam, sizeof(TransformCamera)); };
             Cameras(const TransformCamera& camL, const TransformCamera& camR) {
                 memcpy(_cams, &camL, sizeof(TransformCamera));
@@ -396,32 +396,32 @@ protected:
 
         mutable std::map<std::string, GLvoid*> _drawCallInfoOffsets;
 
-        GLuint _objectBuffer{ 0 };
-        GLuint _cameraBuffer{ 0 };
-        GLuint _drawCallInfoBuffer{ 0 };
-        GLuint _objectBufferTexture{ 0 };
-        size_t _cameraUboSize{ 0 };
-        bool _viewIsCamera{ false };
-        bool _skybox{ false };
+        GLuint _objectBuffer { 0 };
+        GLuint _cameraBuffer { 0 };
+        GLuint _drawCallInfoBuffer { 0 };
+        GLuint _objectBufferTexture { 0 };
+        size_t _cameraUboSize { 0 };
+        bool _viewIsCamera { false };
+        bool _skybox { false };
         Transform _view;
         CameraCorrection _correction;
-        bool _viewCorrectionEnabled{ true };
+        bool _viewCorrectionEnabled { true };
 
         Mat4 _projection;
-        Vec4i _viewport{ 0, 0, 1, 1 };
-        Vec2 _depthRange{ 0.0f, 1.0f };
-        Vec2 _projectionJitter{ 0.0f, 0.0f };
-        bool _invalidView{ false };
-        bool _invalidProj{ false };
-        bool _invalidViewport{ false };
+        Vec4i _viewport { 0, 0, 1, 1 };
+        Vec2 _depthRange { 0.0f, 1.0f };
+        Vec2 _projectionJitter { 0.0f, 0.0f };
+        bool _invalidView { false };
+        bool _invalidProj { false };
+        bool _invalidViewport { false };
 
-        bool _enabledDrawcallInfoBuffer{ false };
+        bool _enabledDrawcallInfoBuffer { false };
 
         using Pair = std::pair<size_t, size_t>;
         using List = std::list<Pair>;
         List _cameraOffsets;
         mutable List::const_iterator _camerasItr;
-        mutable size_t _currentCameraOffset{ INVALID_OFFSET };
+        mutable size_t _currentCameraOffset { INVALID_OFFSET };
 
         void preUpdate(size_t commandIndex, const StereoState& stereo, Vec2u framebufferSize);
         void update(size_t commandIndex, const StereoState& stereo) const;
@@ -432,9 +432,9 @@ protected:
 
     struct UniformStageState {
         struct BufferState {
-            BufferReference buffer{};
-            GLintptr offset{ 0 };
-            GLsizeiptr size{ 0 };
+            BufferReference buffer {};
+            GLintptr offset { 0 };
+            GLsizeiptr size { 0 };
 
             BufferState& operator=(const BufferState& other) = delete;
             void reset() {
@@ -475,15 +475,15 @@ protected:
 
     struct ResourceStageState {
         struct TextureState {
-            TextureReference _texture{};
+            TextureReference _texture {};
             GLenum _target;
         };
-        std::array<BufferReference, MAX_NUM_RESOURCE_BUFFERS> _buffers{};
-        std::array<TextureState, MAX_NUM_RESOURCE_TEXTURES> _textures{};
+        std::array<BufferReference, MAX_NUM_RESOURCE_BUFFERS> _buffers {};
+        std::array<TextureState, MAX_NUM_RESOURCE_TEXTURES> _textures {};
         int findEmptyTextureSlot() const;
     } _resource;
 
-    size_t _commandIndex{ 0 };
+    size_t _commandIndex { 0 };
 
     // Standard update pipeline check that the current Program and current State or good to go for a
     void updatePipeline();
@@ -494,22 +494,23 @@ protected:
     void resetPipelineStage();
 
     struct PipelineStageState {
-        PipelineReference _pipeline{};
+        PipelineReference _pipeline {};
 
-        GLuint _program{ 0 };
-        bool _cameraCorrection{ false };
-        GLShader* _programShader{ nullptr };
-        bool _invalidProgram{ false };
+        GLuint _program { 0 };
+        bool _cameraCorrection { false };
+        GLShader* _programShader { nullptr };
+        bool _invalidProgram { false };
 
-        BufferView _cameraCorrectionBuffer{ gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(CameraCorrection), nullptr)) };
-        BufferView _cameraCorrectionBufferIdentity{ gpu::BufferView(
+        BufferView _cameraCorrectionBuffer { gpu::BufferView(
+            std::make_shared<gpu::Buffer>(sizeof(CameraCorrection), nullptr)) };
+        BufferView _cameraCorrectionBufferIdentity { gpu::BufferView(
             std::make_shared<gpu::Buffer>(sizeof(CameraCorrection), nullptr)) };
 
-        State::Data _stateCache{ State::DEFAULT };
-        State::Signature _stateSignatureCache{ 0 };
+        State::Data _stateCache { State::DEFAULT };
+        State::Signature _stateSignatureCache { 0 };
 
-        GLState* _state{ nullptr };
-        bool _invalidState{ false };
+        GLState* _state { nullptr };
+        bool _invalidState { false };
 
         PipelineStageState() {
             _cameraCorrectionBuffer.edit<CameraCorrection>() = CameraCorrection();
@@ -523,9 +524,9 @@ protected:
     virtual GLShader* compileBackendProgram(const Shader& program, const Shader::CompilationHandler& handler);
     virtual GLShader* compileBackendShader(const Shader& shader, const Shader::CompilationHandler& handler);
 
-    // For a program, this will return a string containing all the source files (without any 
-    // backend headers or defines).  For a vertex, fragment or geometry shader, this will 
-    // return the fully customized shader with all the version and backend specific 
+    // For a program, this will return a string containing all the source files (without any
+    // backend headers or defines).  For a vertex, fragment or geometry shader, this will
+    // return the fully customized shader with all the version and backend specific
     // preprocessor directives
     // The program string returned can be used as a key for a cache of shader binaries
     // The shader strings can be reliably sent to the low level `compileShader` functions
@@ -546,13 +547,13 @@ protected:
     void resetOutputStage();
 
     struct OutputStageState {
-        FramebufferReference _framebuffer{};
-        GLuint _drawFBO{ 0 };
+        FramebufferReference _framebuffer {};
+        GLuint _drawFBO { 0 };
     } _output;
 
     void resetQueryStage();
     struct QueryStageState {
-        uint32_t _rangeQueryDepth{ 0 };
+        uint32_t _rangeQueryDepth { 0 };
     } _queryStage;
 
     void resetStages();
@@ -571,13 +572,13 @@ protected:
     virtual void killShaderBinaryCache();
 
     struct TextureManagementStageState {
-        bool _sparseCapable{ false };
+        bool _sparseCapable { false };
         GLTextureTransferEnginePointer _transferEngine;
     } _textureManagement;
     virtual void initTextureManagementStage();
     virtual void killTextureManagementStage();
 
-    GLuint _mipGenerationFramebufferId{ 0 };
+    GLuint _mipGenerationFramebufferId { 0 };
 
     typedef void (GLBackend::*CommandCall)(const Batch&, size_t);
     static CommandCall _commandCalls[Batch::NUM_COMMANDS];
@@ -586,6 +587,7 @@ protected:
     friend class GLShader;
 };
 
-}}  // namespace gpu::gl
+} // namespace gl
+} // namespace gpu
 
 #endif

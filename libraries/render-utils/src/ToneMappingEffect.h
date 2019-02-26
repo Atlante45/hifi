@@ -15,11 +15,10 @@
 #include <DependencyManager.h>
 #include <NumericalConstants.h>
 
-#include <gpu/Resource.h>
 #include <gpu/Pipeline.h>
-#include <render/Forward.h>
+#include <gpu/Resource.h>
 #include <render/DrawTask.h>
-
+#include <render/Forward.h>
 
 class ToneMappingEffect {
 public:
@@ -42,7 +41,6 @@ public:
     ToneCurve getToneCurve() const { return (ToneCurve)_parametersBuffer.get<Parameters>()._toneCurve; }
 
 private:
-
     gpu::PipelinePointer _blitLightBuffer;
 
     // Class describing the uniform buffer with all the parameters common to the tone mapping shaders
@@ -66,15 +64,21 @@ class ToneMappingConfig : public render::Job::Config {
     Q_OBJECT
     Q_PROPERTY(float exposure MEMBER exposure WRITE setExposure);
     Q_PROPERTY(int curve MEMBER curve WRITE setCurve);
+
 public:
     ToneMappingConfig() : render::Job::Config(true) {}
 
-    void setExposure(float newExposure) { exposure = newExposure; emit dirty(); }
-    void setCurve(int newCurve) { curve = std::max((int)ToneMappingEffect::None, std::min((int)ToneMappingEffect::Filmic, newCurve)); emit dirty(); }
+    void setExposure(float newExposure) {
+        exposure = newExposure;
+        emit dirty();
+    }
+    void setCurve(int newCurve) {
+        curve = std::max((int)ToneMappingEffect::None, std::min((int)ToneMappingEffect::Filmic, newCurve));
+        emit dirty();
+    }
 
-
-    float exposure{ 0.0f };
-    int curve{ ToneMappingEffect::Gamma22 };
+    float exposure { 0.0f };
+    int curve { ToneMappingEffect::Gamma22 };
 signals:
     void dirty();
 };

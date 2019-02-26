@@ -9,40 +9,69 @@
 //
 
 #include "AnimOverlay.h"
-#include "AnimUtil.h"
 #include <queue>
+#include "AnimUtil.h"
 
 AnimOverlay::AnimOverlay(const QString& id, BoneSet boneSet, float alpha) :
-    AnimNode(AnimNode::Type::Overlay, id), _boneSet(boneSet), _alpha(alpha) {
+    AnimNode(AnimNode::Type::Overlay, id),
+    _boneSet(boneSet),
+    _alpha(alpha) {
 }
 
 AnimOverlay::~AnimOverlay() {
-
 }
 
 void AnimOverlay::buildBoneSet(BoneSet boneSet) {
     assert(_skeleton);
     switch (boneSet) {
-    case FullBodyBoneSet: buildFullBodyBoneSet(); break;
-    case UpperBodyBoneSet: buildUpperBodyBoneSet(); break;
-    case LowerBodyBoneSet: buildLowerBodyBoneSet(); break;
-    case LeftArmBoneSet: buildLeftArmBoneSet(); break;
-    case RightArmBoneSet: buildRightArmBoneSet(); break;
-    case AboveTheHeadBoneSet: buildAboveTheHeadBoneSet(); break;
-    case BelowTheHeadBoneSet: buildBelowTheHeadBoneSet(); break;
-    case HeadOnlyBoneSet: buildHeadOnlyBoneSet(); break;
-    case SpineOnlyBoneSet: buildSpineOnlyBoneSet(); break;
-    case LeftHandBoneSet: buildLeftHandBoneSet(); break;
-    case RightHandBoneSet: buildRightHandBoneSet(); break;
-    case HipsOnlyBoneSet: buildHipsOnlyBoneSet(); break;
-    case BothFeetBoneSet: buildBothFeetBoneSet(); break;
-    default:
-    case EmptyBoneSet: buildEmptyBoneSet(); break;
+        case FullBodyBoneSet:
+            buildFullBodyBoneSet();
+            break;
+        case UpperBodyBoneSet:
+            buildUpperBodyBoneSet();
+            break;
+        case LowerBodyBoneSet:
+            buildLowerBodyBoneSet();
+            break;
+        case LeftArmBoneSet:
+            buildLeftArmBoneSet();
+            break;
+        case RightArmBoneSet:
+            buildRightArmBoneSet();
+            break;
+        case AboveTheHeadBoneSet:
+            buildAboveTheHeadBoneSet();
+            break;
+        case BelowTheHeadBoneSet:
+            buildBelowTheHeadBoneSet();
+            break;
+        case HeadOnlyBoneSet:
+            buildHeadOnlyBoneSet();
+            break;
+        case SpineOnlyBoneSet:
+            buildSpineOnlyBoneSet();
+            break;
+        case LeftHandBoneSet:
+            buildLeftHandBoneSet();
+            break;
+        case RightHandBoneSet:
+            buildRightHandBoneSet();
+            break;
+        case HipsOnlyBoneSet:
+            buildHipsOnlyBoneSet();
+            break;
+        case BothFeetBoneSet:
+            buildBothFeetBoneSet();
+            break;
+        default:
+        case EmptyBoneSet:
+            buildEmptyBoneSet();
+            break;
     }
 }
 
-const AnimPoseVec& AnimOverlay::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) {
-
+const AnimPoseVec& AnimOverlay::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                         AnimVariantMap& triggersOut) {
     // lookup parameters from animVars, using current instance variables as defaults.
     // NOTE: switching bonesets can be an expensive operation, let's try to avoid it.
     auto prevBoneSet = _boneSet;
@@ -72,11 +101,11 @@ const AnimPoseVec& AnimOverlay::evaluate(const AnimVariantMap& animVars, const A
     return _poses;
 }
 
-template <typename Func>
+template<typename Func>
 void for_each_child_joint(AnimSkeleton::ConstPointer skeleton, int startJoint, Func f) {
     std::queue<int> q;
     q.push(startJoint);
-    while(q.size() > 0) {
+    while (q.size() > 0) {
         int jointIndex = q.front();
         for (int i = 0; i < skeleton->getNumJoints(); i++) {
             if (jointIndex == skeleton->getParentIndex(i)) {
@@ -100,9 +129,7 @@ void AnimOverlay::buildUpperBodyBoneSet() {
     assert(_skeleton);
     buildEmptyBoneSet();
     int spineJoint = _skeleton->nameToJointIndex("Spine");
-    for_each_child_joint(_skeleton, spineJoint, [&](int i) {
-        _boneSetVec[i] = 1.0f;
-    });
+    for_each_child_joint(_skeleton, spineJoint, [&](int i) { _boneSetVec[i] = 1.0f; });
 }
 
 void AnimOverlay::buildLowerBodyBoneSet() {
@@ -111,9 +138,7 @@ void AnimOverlay::buildLowerBodyBoneSet() {
     int hipsJoint = _skeleton->nameToJointIndex("Hips");
     int spineJoint = _skeleton->nameToJointIndex("Spine");
     _boneSetVec.resize(_skeleton->getNumJoints());
-    for_each_child_joint(_skeleton, spineJoint, [&](int i) {
-        _boneSetVec[i] = 0.0f;
-    });
+    for_each_child_joint(_skeleton, spineJoint, [&](int i) { _boneSetVec[i] = 0.0f; });
     _boneSetVec[hipsJoint] = 0.0f;
 }
 
@@ -121,36 +146,28 @@ void AnimOverlay::buildLeftArmBoneSet() {
     assert(_skeleton);
     buildEmptyBoneSet();
     int leftShoulderJoint = _skeleton->nameToJointIndex("LeftShoulder");
-    for_each_child_joint(_skeleton, leftShoulderJoint, [&](int i) {
-        _boneSetVec[i] = 1.0f;
-    });
+    for_each_child_joint(_skeleton, leftShoulderJoint, [&](int i) { _boneSetVec[i] = 1.0f; });
 }
 
 void AnimOverlay::buildRightArmBoneSet() {
     assert(_skeleton);
     buildEmptyBoneSet();
     int rightShoulderJoint = _skeleton->nameToJointIndex("RightShoulder");
-    for_each_child_joint(_skeleton, rightShoulderJoint, [&](int i) {
-        _boneSetVec[i] = 1.0f;
-    });
+    for_each_child_joint(_skeleton, rightShoulderJoint, [&](int i) { _boneSetVec[i] = 1.0f; });
 }
 
 void AnimOverlay::buildAboveTheHeadBoneSet() {
     assert(_skeleton);
     buildEmptyBoneSet();
     int headJoint = _skeleton->nameToJointIndex("Head");
-    for_each_child_joint(_skeleton, headJoint, [&](int i) {
-        _boneSetVec[i] = 1.0f;
-    });
+    for_each_child_joint(_skeleton, headJoint, [&](int i) { _boneSetVec[i] = 1.0f; });
 }
 
 void AnimOverlay::buildBelowTheHeadBoneSet() {
     assert(_skeleton);
     buildFullBodyBoneSet();
     int headJoint = _skeleton->nameToJointIndex("Head");
-    for_each_child_joint(_skeleton, headJoint, [&](int i) {
-        _boneSetVec[i] = 0.0f;
-    });
+    for_each_child_joint(_skeleton, headJoint, [&](int i) { _boneSetVec[i] = 0.0f; });
 }
 
 void AnimOverlay::buildHeadOnlyBoneSet() {
@@ -179,18 +196,14 @@ void AnimOverlay::buildLeftHandBoneSet() {
     assert(_skeleton);
     buildEmptyBoneSet();
     int handJoint = _skeleton->nameToJointIndex("LeftHand");
-    for_each_child_joint(_skeleton, handJoint, [&](int i) {
-        _boneSetVec[i] = 1.0f;
-    });
+    for_each_child_joint(_skeleton, handJoint, [&](int i) { _boneSetVec[i] = 1.0f; });
 }
 
 void AnimOverlay::buildRightHandBoneSet() {
     assert(_skeleton);
     buildEmptyBoneSet();
     int handJoint = _skeleton->nameToJointIndex("RightHand");
-    for_each_child_joint(_skeleton, handJoint, [&](int i) {
-        _boneSetVec[i] = 1.0f;
-    });
+    for_each_child_joint(_skeleton, handJoint, [&](int i) { _boneSetVec[i] = 1.0f; });
 }
 
 void AnimOverlay::buildHipsOnlyBoneSet() {
@@ -204,15 +217,10 @@ void AnimOverlay::buildBothFeetBoneSet() {
     assert(_skeleton);
     buildEmptyBoneSet();
     int rightFoot = _skeleton->nameToJointIndex("RightFoot");
-    for_each_child_joint(_skeleton, rightFoot, [&](int i) {
-        _boneSetVec[i] = 1.0f;
-    });
+    for_each_child_joint(_skeleton, rightFoot, [&](int i) { _boneSetVec[i] = 1.0f; });
     int leftFoot = _skeleton->nameToJointIndex("LeftFoot");
-    for_each_child_joint(_skeleton, leftFoot, [&](int i) {
-        _boneSetVec[i] = 1.0f;
-    });
+    for_each_child_joint(_skeleton, leftFoot, [&](int i) { _boneSetVec[i] = 1.0f; });
 }
-
 
 // for AnimDebugDraw rendering
 const AnimPoseVec& AnimOverlay::getPosesInternal() const {

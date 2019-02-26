@@ -31,7 +31,7 @@ struct PageManager {
     using Pages = std::vector<Size>;
 
     Vector _pages;
-    uint8 _flags{ 0 };
+    uint8 _flags { 0 };
     const Size _pageSize;
 
     PageManager(Size pageSize = DEFAULT_PAGE_SIZE);
@@ -52,6 +52,6 @@ struct PageManager {
     bool getNextTransferBlock(Size& outOffset, Size& outSize, Size& currentPage);
 };
 
-};
+}; // namespace gpu
 
 #endif

@@ -12,14 +12,14 @@
 #ifndef hifi_CharacterRayResult_h
 #define hifi_CharacterRayResult_h
 
-#include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
+#include <btBulletDynamicsCommon.h>
 
 class CharacterGhostObject;
 
 class CharacterRayResult : public btCollisionWorld::ClosestRayResultCallback {
 public:
-    CharacterRayResult (const CharacterGhostObject* character);
+    CharacterRayResult(const CharacterGhostObject* character);
 
     virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace) override;
 

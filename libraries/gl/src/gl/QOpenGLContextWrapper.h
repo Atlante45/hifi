@@ -37,7 +37,6 @@ public:
     using NativeContextPointer = std::shared_ptr<QGLNativeContext>;
     static Pointer currentContextWrapper();
 
-
     QOpenGLContextWrapper();
     QOpenGLContextWrapper(QOpenGLContext* context);
     virtual ~QOpenGLContextWrapper();
@@ -54,11 +53,8 @@ public:
     static QOpenGLContext* currentContext();
     static uint32_t currentContextVersion();
 
-    QOpenGLContext* getContext() {
-        return _context;
-    }
+    QOpenGLContext* getContext() { return _context; }
 
-    
 private:
     bool _ownContext { false };
     QOpenGLContext* _context { nullptr };

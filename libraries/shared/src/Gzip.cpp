@@ -17,7 +17,7 @@ const int GZIP_WINDOWS_BIT = 31;
 const int GZIP_CHUNK_SIZE = 4096;
 const int DEFAULT_MEM_LEVEL = 8;
 
-bool gunzip(QByteArray source, QByteArray &destination) {
+bool gunzip(QByteArray source, QByteArray& destination) {
     destination.clear();
     if (source.length() == 0) {
         return true;
@@ -36,7 +36,7 @@ bool gunzip(QByteArray source, QByteArray &destination) {
         return false;
     }
 
-    char *sourceData = source.data();
+    char* sourceData = source.data();
     int sourceDataLength = source.length();
 
     for (;;) {
@@ -88,7 +88,7 @@ bool gunzip(QByteArray source, QByteArray &destination) {
     return status == Z_STREAM_END;
 }
 
-bool gzip(QByteArray source, QByteArray &destination, int compressionLevel) {
+bool gzip(QByteArray source, QByteArray& destination, int compressionLevel) {
     destination.clear();
     if (source.length() == 0) {
         return true;
@@ -102,16 +102,12 @@ bool gzip(QByteArray source, QByteArray &destination, int compressionLevel) {
     strm.next_in = Z_NULL;
     strm.avail_in = 0;
 
-    int status = deflateInit2(&strm,
-                              qMax(Z_DEFAULT_COMPRESSION, qMin(9, compressionLevel)),
-                              Z_DEFLATED,
-                              GZIP_WINDOWS_BIT,
-                              DEFAULT_MEM_LEVEL,
-                              Z_DEFAULT_STRATEGY);
+    int status = deflateInit2(&strm, qMax(Z_DEFAULT_COMPRESSION, qMin(9, compressionLevel)), Z_DEFLATED, GZIP_WINDOWS_BIT,
+                              DEFAULT_MEM_LEVEL, Z_DEFAULT_STRATEGY);
     if (status != Z_OK) {
         return false;
     }
-    char *sourceData = source.data();
+    char* sourceData = source.data();
     int sourceDataLength = source.length();
 
     for (;;) {

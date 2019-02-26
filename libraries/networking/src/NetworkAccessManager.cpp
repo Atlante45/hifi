@@ -13,8 +13,8 @@
 
 #include <QThreadStorage>
 
-#include "AtpReply.h"
 #include <QtNetwork/QNetworkProxy>
+#include "AtpReply.h"
 
 QThreadStorage<QNetworkAccessManager*> networkAccessManagers;
 
@@ -22,15 +22,15 @@ QNetworkAccessManager& NetworkAccessManager::getInstance() {
     if (!networkAccessManagers.hasLocalData()) {
         networkAccessManagers.setLocalData(new QNetworkAccessManager());
     }
-    
+
     return *networkAccessManagers.localData();
 }
 
 QNetworkReply* NetworkAccessManager::createRequest(Operation operation, const QNetworkRequest& request, QIODevice* device) {
     if (request.url().scheme() == "atp" && operation == GetOperation) {
         return new AtpReply(request.url());
-        //auto url = request.url().toString();
-        //return QNetworkAccessManager::createRequest(operation, request, device);
+        // auto url = request.url().toString();
+        // return QNetworkAccessManager::createRequest(operation, request, device);
     } else {
         return QNetworkAccessManager::createRequest(operation, request, device);
     }

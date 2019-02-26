@@ -18,14 +18,12 @@
 #include <AABox.h>
 #include <AACube.h>
 
-float calculateRenderAccuracy(const glm::vec3& position,
-        const AABox& bounds,
-        float octreeSizeScale,
-        int boundaryLevelAdjust) {
+float calculateRenderAccuracy(const glm::vec3& position, const AABox& bounds, float octreeSizeScale, int boundaryLevelAdjust) {
     float largestDimension = bounds.getLargestDimension();
 
     const float maxScale = (float)TREE_SCALE;
-    float visibleDistanceAtMaxScale = boundaryDistanceForRenderLevel(boundaryLevelAdjust, octreeSizeScale) / OCTREE_TO_MESH_RATIO;
+    float visibleDistanceAtMaxScale = boundaryDistanceForRenderLevel(boundaryLevelAdjust, octreeSizeScale) /
+                                      OCTREE_TO_MESH_RATIO;
 
     static std::once_flag once;
     static QMap<float, float> shouldRenderTable;
@@ -66,7 +64,8 @@ float boundaryDistanceForRenderLevel(unsigned int renderLevel, float voxelSizeSc
 
 float getPerspectiveAccuracyAngleTan(float octreeSizeScale, int boundaryLevelAdjust) {
     const float maxScale = (float)TREE_SCALE;
-    float visibleDistanceAtMaxScale = boundaryDistanceForRenderLevel(boundaryLevelAdjust, octreeSizeScale) / OCTREE_TO_MESH_RATIO;
+    float visibleDistanceAtMaxScale = boundaryDistanceForRenderLevel(boundaryLevelAdjust, octreeSizeScale) /
+                                      OCTREE_TO_MESH_RATIO;
     return (maxScale / visibleDistanceAtMaxScale);
 }
 
@@ -77,5 +76,6 @@ float getPerspectiveAccuracyAngle(float octreeSizeScale, int boundaryLevelAdjust
 float getOrthographicAccuracySize(float octreeSizeScale, int boundaryLevelAdjust) {
     // Smallest visible element is 1cm
     const float smallestSize = 0.01f;
-    return (smallestSize * MAX_VISIBILITY_DISTANCE_FOR_UNIT_ELEMENT) / boundaryDistanceForRenderLevel(boundaryLevelAdjust, octreeSizeScale);
+    return (smallestSize * MAX_VISIBILITY_DISTANCE_FOR_UNIT_ELEMENT) /
+           boundaryDistanceForRenderLevel(boundaryLevelAdjust, octreeSizeScale);
 }

@@ -12,24 +12,18 @@
 #ifndef hifi_MediaTypeLibrary_h
 #define hifi_MediaTypeLibrary_h
 
-#include <vector>
-#include <string>
 #include <functional>
 #include <mutex>
+#include <string>
+#include <vector>
 
 #include "HifiTypes.h"
 
 // A short sequence of bytes, typically at the beginning of the file, which identifies the file format
 class FileSignature {
 public:
-    FileSignature(const std::string& bytes, int byteOffset) :
-        bytes(bytes),
-        byteOffset(byteOffset) {
-    }
-    FileSignature(const FileSignature& fileSignature) :
-        bytes(fileSignature.bytes),
-        byteOffset(fileSignature.byteOffset) {
-    }
+    FileSignature(const std::string& bytes, int byteOffset) : bytes(bytes), byteOffset(byteOffset) {}
+    FileSignature(const FileSignature& fileSignature) : bytes(fileSignature.bytes), byteOffset(fileSignature.byteOffset) {}
 
     std::string bytes;
     int byteOffset;
@@ -38,16 +32,13 @@ public:
 // A named file extension with a list of known ways to positively identify the file type
 class MediaType {
 public:
-    MediaType(const std::string& name) :
-        name(name) {
-    }
+    MediaType(const std::string& name) : name(name) {}
     MediaType() {};
     MediaType(const MediaType& mediaType) :
         name(mediaType.name),
         extensions(mediaType.extensions),
         webMediaTypes(mediaType.webMediaTypes),
-        fileSignatures(mediaType.fileSignatures) {
-    }
+        fileSignatures(mediaType.fileSignatures) {}
 
     static MediaType NONE;
 
@@ -73,13 +64,10 @@ public:
 
 protected:
     ID nextID { 1 };
-    
+
     class Entry {
     public:
-        Entry(const ID& id, const MediaType& mediaType) :
-            id(id),
-            mediaType(mediaType) {
-        }
+        Entry(const ID& id, const MediaType& mediaType) : id(id), mediaType(mediaType) {}
         ID id;
         MediaType mediaType;
     };

@@ -35,7 +35,7 @@ public:
     void init(); // called after creation to set up some virtual items
     virtual PacketType getMyPacketType() const = 0;
 
-    void resetOctreePacket();  // resets octree packet to after "V" header
+    void resetOctreePacket(); // resets octree packet to after "V" header
 
     void writeToPacket(const unsigned char* buffer, unsigned int bytes); // writes to end of packet
 

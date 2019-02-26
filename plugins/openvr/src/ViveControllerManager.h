@@ -13,22 +13,22 @@
 #define hifi__ViveControllerManager
 
 #include <QObject>
-#include <unordered_set>
-#include <vector>
 #include <map>
+#include <unordered_set>
 #include <utility>
+#include <vector>
 
 #include <GLMHelpers.h>
-#include <graphics/Geometry.h>
-#include <gpu/Texture.h>
 #include <controllers/InputDevice.h>
+#include <gpu/Texture.h>
+#include <graphics/Geometry.h>
 #include <plugins/InputPlugin.h>
 #include "OpenVrHelpers.h"
 
 using PuckPosePair = std::pair<uint32_t, controller::Pose>;
 
 namespace vr {
-    class IVRSystem;
+class IVRSystem;
 }
 
 class ViveControllerManager : public InputPlugin {
@@ -60,12 +60,7 @@ public:
     virtual void saveSettings() const override;
     virtual void loadSettings() override;
 
-    enum class OutOfRangeDataStrategy {
-        None,
-        Freeze,
-        Drop,
-        DropAfterDelay
-    };
+    enum class OutOfRangeDataStrategy { None, Freeze, Drop, DropAfterDelay };
 
 private:
     class InputDevice : public controller::InputDevice {
@@ -92,29 +87,34 @@ private:
         glm::mat4 calculateDefaultToReferenceForHmd(const controller::InputCalibrationData& inputCalibration);
         void updateCalibratedLimbs(const controller::InputCalibrationData& inputCalibration);
         bool checkForCalibrationEvent();
-        void handleHandController(float deltaTime, uint32_t deviceIndex, const controller::InputCalibrationData& inputCalibrationData, bool isLeftHand);
+        void handleHandController(float deltaTime, uint32_t deviceIndex,
+                                  const controller::InputCalibrationData& inputCalibrationData, bool isLeftHand);
         void handleHmd(uint32_t deviceIndex, const controller::InputCalibrationData& inputCalibrationData);
         void handleTrackedObject(uint32_t deviceIndex, const controller::InputCalibrationData& inputCalibrationData);
         void handleButtonEvent(float deltaTime, uint32_t button, bool pressed, bool touched, bool isLeftHand);
         void handleAxisEvent(float deltaTime, uint32_t axis, float x, float y, bool isLeftHand);
         void handlePoseEvent(float deltaTime, const controller::InputCalibrationData& inputCalibrationData, const mat4& mat,
                              const vec3& linearVelocity, const vec3& angularVelocity, bool isLeftHand);
-        void handleHeadPoseEvent(const controller::InputCalibrationData& inputCalibrationData, const mat4& mat, const vec3& linearVelocity,
-                                 const vec3& angularVelocity);
+        void handleHeadPoseEvent(const controller::InputCalibrationData& inputCalibrationData, const mat4& mat,
+                                 const vec3& linearVelocity, const vec3& angularVelocity);
         void partitionTouchpad(int sButton, int xAxis, int yAxis, int centerPsuedoButton, int xPseudoButton, int yPseudoButton);
         void printDeviceTrackingResultChange(uint32_t deviceIndex);
         void setConfigFromString(const QString& value);
         bool configureHead(const glm::mat4& defaultToReferenceMat, const controller::InputCalibrationData& inputCalibration);
         bool configureHands(const glm::mat4& defaultToReferenceMat, const controller::InputCalibrationData& inputCalibration);
         bool configureBody(const glm::mat4& defaultToReferenceMat, const controller::InputCalibrationData& inputCalibration);
-        void calibrateLeftHand(const glm::mat4& defaultToReferenceMat, const controller::InputCalibrationData& inputCalibration, PuckPosePair& handPair);
-        void calibrateRightHand(const glm::mat4& defaultToReferenceMat, const controller::InputCalibrationData& inputCalibration, PuckPosePair& handPair);
+        void calibrateLeftHand(const glm::mat4& defaultToReferenceMat, const controller::InputCalibrationData& inputCalibration,
+                               PuckPosePair& handPair);
+        void calibrateRightHand(const glm::mat4& defaultToReferenceMat,
+                                const controller::InputCalibrationData& inputCalibration, PuckPosePair& handPair);
         void calibrateFeet(const glm::mat4& defaultToReferenceMat, const controller::InputCalibrationData& inputCalibration);
-        void calibrateFoot(const glm::mat4& defaultToReferenceMat, const controller::InputCalibrationData& inputCalibration, PuckPosePair& footPair, bool isLeftFoot);
+        void calibrateFoot(const glm::mat4& defaultToReferenceMat, const controller::InputCalibrationData& inputCalibration,
+                           PuckPosePair& footPair, bool isLeftFoot);
         void calibrateHips(const glm::mat4& defaultToReferenceMat, const controller::InputCalibrationData& inputCalibration);
         void calibrateChest(const glm::mat4& defaultToReferenceMat, const controller::InputCalibrationData& inputCalibration);
-        void calibrateShoulders(const glm::mat4& defaultToReferenceMat, const controller::InputCalibrationData& inputCalibration,
-                                int firstShoulderIndex, int secondShoulderIndex);
+        void calibrateShoulders(const glm::mat4& defaultToReferenceMat,
+                                const controller::InputCalibrationData& inputCalibration, int firstShoulderIndex,
+                                int secondShoulderIndex);
         void calibrateHead(const glm::mat4& defaultToReferenceMat, const controller::InputCalibrationData& inputCalibration);
         void calibrateFromHandController(const controller::InputCalibrationData& inputCalibrationData);
         void calibrateFromUI(const controller::InputCalibrationData& inputCalibrationData);
@@ -126,7 +126,7 @@ private:
             glm::vec2 process(float deltaTime, const glm::vec2& stick) {
                 // Use a timer to prevent the stick going to back to zero.
                 // This to work around the noisy touch pad that will flash back to zero breifly
-                const float ZERO_HYSTERESIS_PERIOD = 0.2f;  // 200 ms
+                const float ZERO_HYSTERESIS_PERIOD = 0.2f; // 200 ms
                 if (glm::length(stick) == 0.0f) {
                     if (_timer <= 0.0f) {
                         return glm::vec2(0.0f, 0.0f);
@@ -140,28 +140,16 @@ private:
                     return stick;
                 }
             }
+
         protected:
             float _timer { 0.0f };
             glm::vec2 _stick { 0.0f, 0.0f };
         };
-        enum class Config {
-            None,
-            Feet,
-            FeetAndHips,
-            FeetHipsAndChest,
-            FeetHipsAndShoulders,
-            FeetHipsChestAndShoulders
-        };
+        enum class Config { None, Feet, FeetAndHips, FeetHipsAndChest, FeetHipsAndShoulders, FeetHipsChestAndShoulders };
 
-        enum class HeadConfig {
-            HMD,
-            Puck
-        };
+        enum class HeadConfig { HMD, Puck };
 
-        enum class HandConfig {
-            HandController,
-            Pucks
-        };
+        enum class HandConfig { HandController, Pucks };
 
         Config _config { Config::None };
         Config _preferedConfig { Config::None };
@@ -169,7 +157,7 @@ private:
         HandConfig _handConfig { HandConfig::HandController };
         FilteredStick _filteredLeftStick;
         FilteredStick _filteredRightStick;
-        std::string _headsetName {""};
+        std::string _headsetName { "" };
         OutOfRangeDataStrategy _outOfRangeDataStrategy { OutOfRangeDataStrategy::Drop };
 
         std::vector<PuckPosePair> _validTrackedObjects;
@@ -180,8 +168,11 @@ private:
         PoseData _lastSimPoseData;
         // perform an action when the InputDevice mutex is acquired.
         using Locker = std::unique_lock<std::recursive_mutex>;
-        template <typename F>
-        void withLock(F&& f) { Locker locker(_lock); f(); }
+        template<typename F>
+        void withLock(F&& f) {
+            Locker locker(_lock);
+            f();
+        }
 
         int _trackedControllers { 0 };
         vr::IVRSystem*& _system;

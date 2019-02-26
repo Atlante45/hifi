@@ -10,24 +10,21 @@
 //
 
 #include "EntityItemID.h"
-#include <QtCore/QObject>
 #include <QDebug>
+#include <QtCore/QObject>
 
 #include <BufferParser.h>
-#include <udt/PacketHeaders.h>
 #include <UUID.h>
+#include <udt/PacketHeaders.h>
 
 #include "RegisteredMetaTypes.h"
 
 int entityItemIDTypeID = qRegisterMetaType<EntityItemID>();
 
-EntityItemID::EntityItemID() : QUuid()
-{
+EntityItemID::EntityItemID() : QUuid() {
 }
 
-
-EntityItemID::EntityItemID(const QUuid& id) : QUuid(id)
-{
+EntityItemID::EntityItemID(const QUuid& id) : QUuid(id) {
 }
 
 // EntityItemID::EntityItemID(const EntityItemID& other) : QUuid(other)
@@ -42,15 +39,15 @@ EntityItemID EntityItemID::readEntityItemIDFromBuffer(const unsigned char* data,
     return result;
 }
 
-QScriptValue EntityItemID::toScriptValue(QScriptEngine* engine) const { 
-    return EntityItemIDtoScriptValue(engine, *this); 
+QScriptValue EntityItemID::toScriptValue(QScriptEngine* engine) const {
+    return EntityItemIDtoScriptValue(engine, *this);
 }
 
 QScriptValue EntityItemIDtoScriptValue(QScriptEngine* engine, const EntityItemID& id) {
     return quuidToScriptValue(engine, id);
 }
 
-void EntityItemIDfromScriptValue(const QScriptValue &object, EntityItemID& id) {
+void EntityItemIDfromScriptValue(const QScriptValue& object, EntityItemID& id) {
     quuidFromScriptValue(object, id);
 }
 
@@ -69,4 +66,6 @@ QVector<EntityItemID> qVectorEntityItemIDFromScriptValue(const QScriptValue& arr
     return newVector;
 }
 
-size_t std::hash<EntityItemID>::operator()(const EntityItemID& id) const { return qHash(id); }
+size_t std::hash<EntityItemID>::operator()(const EntityItemID& id) const {
+    return qHash(id);
+}

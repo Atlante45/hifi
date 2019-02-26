@@ -13,12 +13,12 @@
 #define hifi_SendAssetTask_h
 
 #include <QtCore/QByteArray>
+#include <QtCore/QRunnable>
 #include <QtCore/QSharedPointer>
 #include <QtCore/QString>
-#include <QtCore/QRunnable>
 
-#include "AssetUtils.h"
 #include "AssetServer.h"
+#include "AssetUtils.h"
 #include "Node.h"
 
 class NLPacket;

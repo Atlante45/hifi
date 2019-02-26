@@ -12,9 +12,9 @@
 #ifndef hifi_TouchscreenDevice_h
 #define hifi_TouchscreenDevice_h
 
+#include <QtGui/qtouchdevice.h>
 #include <controllers/InputDevice.h>
 #include "InputPlugin.h"
-#include <QtGui/qtouchdevice.h>
 
 class QTouchEvent;
 class QGestureEvent;
@@ -22,7 +22,6 @@ class QGestureEvent;
 class TouchscreenDevice : public InputPlugin {
     Q_OBJECT
 public:
-
     enum TouchAxisChannel {
         TOUCH_AXIS_X_POS = 0,
         TOUCH_AXIS_X_NEG,
@@ -50,10 +49,10 @@ public:
     static const char* NAME;
 
 protected:
-
     class InputDevice : public controller::InputDevice {
     public:
         InputDevice() : controller::InputDevice("Touchscreen") {}
+
     private:
         // Device functions
         virtual controller::Input::NamedVector getAvailableInputs() const override;

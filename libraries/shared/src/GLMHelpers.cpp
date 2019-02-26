@@ -17,30 +17,30 @@
 
 #include "NumericalConstants.h"
 
-const vec3 Vectors::UNIT_X{ 1.0f, 0.0f, 0.0f };
-const vec3 Vectors::UNIT_Y{ 0.0f, 1.0f, 0.0f };
-const vec3 Vectors::UNIT_Z{ 0.0f, 0.0f, 1.0f };
-const vec3 Vectors::UNIT_NEG_X{ -1.0f, 0.0f, 0.0f };
-const vec3 Vectors::UNIT_NEG_Y{ 0.0f, -1.0f, 0.0f };
-const vec3 Vectors::UNIT_NEG_Z{ 0.0f, 0.0f, -1.0f };
-const vec3 Vectors::UNIT_XY{ glm::normalize(UNIT_X + UNIT_Y) };
-const vec3 Vectors::UNIT_XZ{ glm::normalize(UNIT_X + UNIT_Z) };
-const vec3 Vectors::UNIT_YZ{ glm::normalize(UNIT_Y + UNIT_Z) };
-const vec3 Vectors::UNIT_XYZ{ glm::normalize(UNIT_X + UNIT_Y + UNIT_Z) };
-const vec3 Vectors::MAX{ FLT_MAX };
-const vec3 Vectors::MIN{ -FLT_MAX };
-const vec3 Vectors::ZERO{ 0.0f };
-const vec3 Vectors::ONE{ 1.0f };
-const vec3 Vectors::TWO{ 2.0f };
-const vec3 Vectors::HALF{ 0.5f };
+const vec3 Vectors::UNIT_X { 1.0f, 0.0f, 0.0f };
+const vec3 Vectors::UNIT_Y { 0.0f, 1.0f, 0.0f };
+const vec3 Vectors::UNIT_Z { 0.0f, 0.0f, 1.0f };
+const vec3 Vectors::UNIT_NEG_X { -1.0f, 0.0f, 0.0f };
+const vec3 Vectors::UNIT_NEG_Y { 0.0f, -1.0f, 0.0f };
+const vec3 Vectors::UNIT_NEG_Z { 0.0f, 0.0f, -1.0f };
+const vec3 Vectors::UNIT_XY { glm::normalize(UNIT_X + UNIT_Y) };
+const vec3 Vectors::UNIT_XZ { glm::normalize(UNIT_X + UNIT_Z) };
+const vec3 Vectors::UNIT_YZ { glm::normalize(UNIT_Y + UNIT_Z) };
+const vec3 Vectors::UNIT_XYZ { glm::normalize(UNIT_X + UNIT_Y + UNIT_Z) };
+const vec3 Vectors::MAX { FLT_MAX };
+const vec3 Vectors::MIN { -FLT_MAX };
+const vec3 Vectors::ZERO { 0.0f };
+const vec3 Vectors::ONE { 1.0f };
+const vec3 Vectors::TWO { 2.0f };
+const vec3 Vectors::HALF { 0.5f };
 const vec3& Vectors::RIGHT = Vectors::UNIT_X;
 const vec3& Vectors::UP = Vectors::UNIT_Y;
 const vec3& Vectors::FRONT = Vectors::UNIT_NEG_Z;
 
-const quat Quaternions::IDENTITY{ 1.0f, 0.0f, 0.0f, 0.0f };
-const quat Quaternions::X_180{ 0.0f, 1.0f, 0.0f, 0.0f };
-const quat Quaternions::Y_180{ 0.0f, 0.0f, 1.0f, 0.0f };
-const quat Quaternions::Z_180{ 0.0f, 0.0f, 0.0f, 1.0f };
+const quat Quaternions::IDENTITY { 1.0f, 0.0f, 0.0f, 0.0f };
+const quat Quaternions::X_180 { 0.0f, 1.0f, 0.0f, 0.0f };
+const quat Quaternions::Y_180 { 0.0f, 0.0f, 1.0f, 0.0f };
+const quat Quaternions::Z_180 { 0.0f, 0.0f, 0.0f, 1.0f };
 
 const mat4 Matrices::IDENTITY { glm::mat4() };
 const mat4 Matrices::X_180 { createMatFromQuatAndPos(Quaternions::X_180, Vectors::ZERO) };
@@ -81,8 +81,8 @@ glm::quat safeMix(const glm::quat& q1, const glm::quat& q2, float proportion) {
 // Allows sending of fixed-point numbers: radix 1 makes 15.1 number, radix 8 makes 8.8 number, etc
 int packFloatScalarToSignedTwoByteFixed(unsigned char* buffer, float scalar, int radix) {
     using FixedType = int16_t;
-    FixedType twoByteFixed = (FixedType) glm::clamp(scalar * (1 << radix), (float)std::numeric_limits<FixedType>::min(),
-        (float)std::numeric_limits<FixedType>::max());
+    FixedType twoByteFixed = (FixedType)glm::clamp(scalar * (1 << radix), (float)std::numeric_limits<FixedType>::min(),
+                                                   (float)std::numeric_limits<FixedType>::max());
     memcpy(buffer, &twoByteFixed, sizeof(FixedType));
     return sizeof(FixedType);
 }
@@ -104,9 +104,9 @@ int packFloatVec3ToSignedTwoByteFixed(unsigned char* destBuffer, const glm::vec3
 
 int unpackFloatVec3FromSignedTwoByteFixed(const unsigned char* sourceBuffer, glm::vec3& destination, int radix) {
     const unsigned char* startPosition = sourceBuffer;
-    sourceBuffer += unpackFloatScalarFromSignedTwoByteFixed((int16_t*) sourceBuffer, &(destination.x), radix);
-    sourceBuffer += unpackFloatScalarFromSignedTwoByteFixed((int16_t*) sourceBuffer, &(destination.y), radix);
-    sourceBuffer += unpackFloatScalarFromSignedTwoByteFixed((int16_t*) sourceBuffer, &(destination.z), radix);
+    sourceBuffer += unpackFloatScalarFromSignedTwoByteFixed((int16_t*)sourceBuffer, &(destination.x), radix);
+    sourceBuffer += unpackFloatScalarFromSignedTwoByteFixed((int16_t*)sourceBuffer, &(destination.y), radix);
+    sourceBuffer += unpackFloatScalarFromSignedTwoByteFixed((int16_t*)sourceBuffer, &(destination.z), radix);
     return sourceBuffer - startPosition;
 }
 
@@ -122,7 +122,7 @@ int packFloatAngleToTwoByte(unsigned char* buffer, float degrees) {
 int unpackFloatAngleFromTwoByte(const uint16_t* byteAnglePointer, float* destinationPointer) {
     uint16_t twoByteAngle;
     memcpy(&twoByteAngle, byteAnglePointer, sizeof(uint16_t));
-    *destinationPointer = (twoByteAngle / (float) std::numeric_limits<uint16_t>::max()) * 360.0f - 180.0f;
+    *destinationPointer = (twoByteAngle / (float)std::numeric_limits<uint16_t>::max()) * 360.0f - 180.0f;
     return sizeof(uint16_t);
 }
 
@@ -143,10 +143,10 @@ int unpackOrientationQuatFromBytes(const unsigned char* buffer, glm::quat& quatO
     uint16_t quatParts[4];
     memcpy(&quatParts, buffer, sizeof(quatParts));
 
-    quatOutput.x = ((quatParts[0] / (float) std::numeric_limits<uint16_t>::max()) * 2.0f) - 1.0f;
-    quatOutput.y = ((quatParts[1] / (float) std::numeric_limits<uint16_t>::max()) * 2.0f) - 1.0f;
-    quatOutput.z = ((quatParts[2] / (float) std::numeric_limits<uint16_t>::max()) * 2.0f) - 1.0f;
-    quatOutput.w = ((quatParts[3] / (float) std::numeric_limits<uint16_t>::max()) * 2.0f) - 1.0f;
+    quatOutput.x = ((quatParts[0] / (float)std::numeric_limits<uint16_t>::max()) * 2.0f) - 1.0f;
+    quatOutput.y = ((quatParts[1] / (float)std::numeric_limits<uint16_t>::max()) * 2.0f) - 1.0f;
+    quatOutput.z = ((quatParts[2] / (float)std::numeric_limits<uint16_t>::max()) * 2.0f) - 1.0f;
+    quatOutput.w = ((quatParts[3] / (float)std::numeric_limits<uint16_t>::max()) * 2.0f) - 1.0f;
 
     return sizeof(quatParts);
 }
@@ -155,7 +155,6 @@ int unpackOrientationQuatFromBytes(const unsigned char* buffer, glm::quat& quatO
 #define LO_BYTE(x) (uint8_t)(0xff & x)
 
 int packOrientationQuatToSixBytes(unsigned char* buffer, const glm::quat& quatInput) {
-
     // find largest component
     uint8_t largestComponent = 0;
     for (int i = 1; i < 4; i++) {
@@ -199,7 +198,6 @@ int packOrientationQuatToSixBytes(unsigned char* buffer, const glm::quat& quatIn
 }
 
 int unpackOrientationQuatFromSixBytes(const unsigned char* buffer, glm::quat& quatOutput) {
-
     uint16_t components[3];
     components[0] = ((uint16_t)(0x7f & buffer[0]) << 8) | buffer[1];
     components[1] = ((uint16_t)(0x7f & buffer[2]) << 8) | buffer[3];
@@ -217,7 +215,8 @@ int unpackOrientationQuatFromSixBytes(const unsigned char* buffer, glm::quat& qu
     }
 
     // missingComponent is always negative.
-    float missingComponent = -sqrtf(1.0f - floatComponents[0] * floatComponents[0] - floatComponents[1] * floatComponents[1] - floatComponents[2] * floatComponents[2]);
+    float missingComponent = -sqrtf(1.0f - floatComponents[0] * floatComponents[0] - floatComponents[1] * floatComponents[1] -
+                                    floatComponents[2] * floatComponents[2]);
 
     for (int i = 0, j = 0; i < 4; i++) {
         if (i != largestComponent) {
@@ -246,24 +245,16 @@ glm::vec3 safeEulerAngles(const glm::quat& q) {
     glm::vec3 eulers;
     if (sy < 1.0f - EPSILON) {
         if (sy > -1.0f + EPSILON) {
-            eulers = glm::vec3(
-                               atan2f(q.y * q.z + q.x * q.w, 0.5f - (q.x * q.x + q.y * q.y)),
-                               asinf(sy),
+            eulers = glm::vec3(atan2f(q.y * q.z + q.x * q.w, 0.5f - (q.x * q.x + q.y * q.y)), asinf(sy),
                                atan2f(q.x * q.y + q.z * q.w, 0.5f - (q.y * q.y + q.z * q.z)));
 
         } else {
             // not a unique solution; x + z = atan2(-m21, m11)
-            eulers = glm::vec3(
-                               0.0f,
-                               - PI_OVER_TWO,
-                               atan2f(q.x * q.w - q.y * q.z, 0.5f - (q.x * q.x + q.z * q.z)));
+            eulers = glm::vec3(0.0f, -PI_OVER_TWO, atan2f(q.x * q.w - q.y * q.z, 0.5f - (q.x * q.x + q.z * q.z)));
         }
     } else {
         // not a unique solution; x - z = atan2(-m21, m11)
-        eulers = glm::vec3(
-                           0.0f,
-                           PI_OVER_TWO,
-                           -atan2f(q.x * q.w - q.y * q.z, 0.5f - (q.x * q.x + q.z * q.z)));
+        eulers = glm::vec3(0.0f, PI_OVER_TWO, -atan2f(q.x * q.w - q.y * q.z, 0.5f - (q.x * q.x + q.z * q.z)));
     }
 
     // adjust so that z, rather than y, is in [-pi/2, pi/2]
@@ -340,8 +331,9 @@ void setTranslation(glm::mat4& matrix, const glm::vec3& translation) {
 glm::quat extractRotation(const glm::mat4& matrix, bool assumeOrthogonal) {
     // uses the iterative polar decomposition algorithm described by Ken Shoemake at
     // http://www.cs.wisc.edu/graphics/Courses/838-s2002/Papers/polar-decomp.pdf
-    // code adapted from Clyde, https://github.com/threerings/clyde/blob/master/core/src/main/java/com/threerings/math/Matrix4f.java
-    // start with the contents of the upper 3x3 portion of the matrix
+    // code adapted from Clyde,
+    // https://github.com/threerings/clyde/blob/master/core/src/main/java/com/threerings/math/Matrix4f.java start with the
+    // contents of the upper 3x3 portion of the matrix
     glm::mat3 upper = glm::mat3(matrix);
     if (!assumeOrthogonal) {
         for (int i = 0; i < 10; i++) {
@@ -373,8 +365,9 @@ glm::quat extractRotation(const glm::mat4& matrix, bool assumeOrthogonal) {
             // compute the difference; if it's small enough, we're done
             glm::mat3 diff = upper - previous;
             if (diff[0][0] * diff[0][0] + diff[1][0] * diff[1][0] + diff[2][0] * diff[2][0] + diff[0][1] * diff[0][1] +
-                diff[1][1] * diff[1][1] + diff[2][1] * diff[2][1] + diff[0][2] * diff[0][2] + diff[1][2] * diff[1][2] +
-                diff[2][2] * diff[2][2] < EPSILON) {
+                    diff[1][1] * diff[1][1] + diff[2][1] * diff[2][1] + diff[0][2] * diff[0][2] + diff[1][2] * diff[1][2] +
+                    diff[2][2] * diff[2][2] <
+                EPSILON) {
                 break;
             }
         }
@@ -386,8 +379,7 @@ glm::quat extractRotation(const glm::mat4& matrix, bool assumeOrthogonal) {
     float y2 = fabs(1.0f - upper[0][0] + upper[1][1] - upper[2][2]);
     float z2 = fabs(1.0f - upper[0][0] - upper[1][1] + upper[2][2]);
     float w2 = fabs(1.0f + upper[0][0] + upper[1][1] + upper[2][2]);
-    return glm::normalize(glm::quat(0.5f * sqrtf(w2),
-                                    0.5f * sqrtf(x2) * (upper[1][2] >= upper[2][1] ? 1.0f : -1.0f),
+    return glm::normalize(glm::quat(0.5f * sqrtf(w2), 0.5f * sqrtf(x2) * (upper[1][2] >= upper[2][1] ? 1.0f : -1.0f),
                                     0.5f * sqrtf(y2) * (upper[2][0] >= upper[0][2] ? 1.0f : -1.0f),
                                     0.5f * sqrtf(z2) * (upper[0][1] >= upper[1][0] ? 1.0f : -1.0f)));
 }
@@ -423,8 +415,8 @@ QByteArray createByteArray(const glm::vec3& vector) {
 }
 
 QByteArray createByteArray(const glm::quat& quat) {
-    return QByteArray::number(quat.x) + ',' + QByteArray::number(quat.y) + "," + QByteArray::number(quat.z) + ","
-        + QByteArray::number(quat.w);
+    return QByteArray::number(quat.x) + ',' + QByteArray::number(quat.y) + "," + QByteArray::number(quat.z) + "," +
+           QByteArray::number(quat.w);
 }
 
 bool isSimilarOrientation(const glm::quat& orientionA, const glm::quat& orientionB, float similarEnough) {
@@ -472,15 +464,15 @@ ivec4 toGlm(const QRect& rect) {
     return ivec4(rect.x(), rect.y(), rect.width(), rect.height());
 }
 
-QMatrix4x4 fromGlm(const glm::mat4 & m) {
-  return QMatrix4x4(&m[0][0]).transposed();
+QMatrix4x4 fromGlm(const glm::mat4& m) {
+    return QMatrix4x4(&m[0][0]).transposed();
 }
 
-QSize fromGlm(const glm::ivec2 & v) {
+QSize fromGlm(const glm::ivec2& v) {
     return QSize(v.x, v.y);
 }
 
-QRectF glmToRect(const glm::vec2 & pos, const glm::vec2 & size) {
+QRectF glmToRect(const glm::vec2& pos, const glm::vec2& size) {
     QRectF result(pos.x, pos.y, size.x, size.y);
     return result;
 }
@@ -497,16 +489,14 @@ glm::mat4 createMatFromScaleQuatAndPos(const glm::vec3& scale, const glm::quat& 
     glm::vec3 xAxis = rot * glm::vec3(scale.x, 0.0f, 0.0f);
     glm::vec3 yAxis = rot * glm::vec3(0.0f, scale.y, 0.0f);
     glm::vec3 zAxis = rot * glm::vec3(0.0f, 0.0f, scale.z);
-    return glm::mat4(glm::vec4(xAxis, 0.0f), glm::vec4(yAxis, 0.0f),
-                     glm::vec4(zAxis, 0.0f), glm::vec4(trans, 1.0f));
+    return glm::mat4(glm::vec4(xAxis, 0.0f), glm::vec4(yAxis, 0.0f), glm::vec4(zAxis, 0.0f), glm::vec4(trans, 1.0f));
 }
 
 glm::mat4 createMatFromScale(const glm::vec3& scale) {
     glm::vec3 xAxis = glm::vec3(scale.x, 0.0f, 0.0f);
     glm::vec3 yAxis = glm::vec3(0.0f, scale.y, 0.0f);
     glm::vec3 zAxis = glm::vec3(0.0f, 0.0f, scale.z);
-    return glm::mat4(glm::vec4(xAxis, 0.0f), glm::vec4(yAxis, 0.0f),
-                     glm::vec4(zAxis, 0.0f), glm::vec4(Vectors::ZERO, 1.0f));
+    return glm::mat4(glm::vec4(xAxis, 0.0f), glm::vec4(yAxis, 0.0f), glm::vec4(zAxis, 0.0f), glm::vec4(Vectors::ZERO, 1.0f));
 }
 
 // cancel out roll
@@ -533,7 +523,8 @@ glm::mat4 cancelOutRollAndPitch(const glm::mat4& m) {
     glm::vec3 zAxis = glm::vec3(m[2]);
 
     // cancel out the roll and pitch
-    glm::vec3 newZ = (zAxis.x == 0.0f && zAxis.z == 0.0f) ? vec3(1.0f, 0.0f, 0.0f) : glm::normalize(vec3(zAxis.x, 0.0f, zAxis.z));
+    glm::vec3 newZ = (zAxis.x == 0.0f && zAxis.z == 0.0f) ? vec3(1.0f, 0.0f, 0.0f)
+                                                          : glm::normalize(vec3(zAxis.x, 0.0f, zAxis.z));
     glm::vec3 newX = glm::cross(vec3(0.0f, 1.0f, 0.0f), newZ);
     glm::vec3 newY = glm::cross(newZ, newX);
 
@@ -561,9 +552,8 @@ glm::vec3 transformVectorFull(const glm::mat4& m, const glm::vec3& v) {
     return glm::inverse(glm::transpose(rot)) * v;
 }
 
-void generateBasisVectors(const glm::vec3& primaryAxis, const glm::vec3& secondaryAxis,
-                          glm::vec3& uAxisOut, glm::vec3& vAxisOut, glm::vec3& wAxisOut) {
-
+void generateBasisVectors(const glm::vec3& primaryAxis, const glm::vec3& secondaryAxis, glm::vec3& uAxisOut,
+                          glm::vec3& vAxisOut, glm::vec3& wAxisOut) {
     // primaryAxis & secondaryAxis must not be zero.
 #ifndef NDEBUG
     const float MIN_LENGTH_SQUARED = 1.0e-6f;

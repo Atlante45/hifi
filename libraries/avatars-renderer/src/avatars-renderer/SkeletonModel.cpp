@@ -11,13 +11,13 @@
 
 #include "SkeletonModel.h"
 
-#include <glm/gtx/transform.hpp>
 #include <QMultiMap>
+#include <glm/gtx/transform.hpp>
 
-#include <recording/Deck.h>
-#include <DebugDraw.h>
 #include <AnimDebugDraw.h>
 #include <CharacterController.h>
+#include <DebugDraw.h>
+#include <recording/Deck.h>
 
 #include "Avatar.h"
 #include "Logging.h"
@@ -29,8 +29,7 @@ SkeletonModel::SkeletonModel(Avatar* owningAvatar, QObject* parent) :
     _boundingCapsuleRadius(0.0f),
     _boundingCapsuleHeight(0.0f),
     _defaultEyeModelPosition(glm::vec3(0.0f, 0.0f, 0.0f)),
-    _headClipDistance(DEFAULT_NEAR_CLIP)
-{
+    _headClipDistance(DEFAULT_NEAR_CLIP) {
     // SkeletonModels, and by extention Avatars, use Dual Quaternion skinning.
     _useDualQuaternionSkinning = true;
 
@@ -338,7 +337,8 @@ void SkeletonModel::computeBoundingShape() {
 void SkeletonModel::renderBoundingCollisionShapes(RenderArgs* args, gpu::Batch& batch, float scale, float alpha) {
     auto geometryCache = DependencyManager::get<GeometryCache>();
     // draw a blue sphere at the capsule top point
-    glm::vec3 topPoint = _translation + getRotation() * (scale * (_boundingCapsuleLocalOffset + (0.5f * _boundingCapsuleHeight) * Vectors::UNIT_Y));
+    glm::vec3 topPoint = _translation + getRotation() * (scale * (_boundingCapsuleLocalOffset +
+                                                                  (0.5f * _boundingCapsuleHeight) * Vectors::UNIT_Y));
 
     batch.setModelTransform(Transform().setTranslation(topPoint).postScale(scale * _boundingCapsuleRadius));
     geometryCache->renderSolidSphereInstance(args, batch, glm::vec4(0.6f, 0.6f, 0.8f, alpha));
@@ -364,4 +364,3 @@ bool SkeletonModel::hasSkeleton() {
 
 void SkeletonModel::onInvalidate() {
 }
-

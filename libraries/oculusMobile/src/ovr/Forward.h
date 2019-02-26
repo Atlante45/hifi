@@ -6,12 +6,12 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 #pragma once
-#include <mutex>
 #include <functional>
+#include <mutex>
 
 namespace ovr {
-    using Mutex = std::mutex;
-    using Condition = std::condition_variable;
-    using Lock = std::unique_lock<Mutex>;
-    using Task = std::function<void()>;
-}
+using Mutex = std::mutex;
+using Condition = std::condition_variable;
+using Lock = std::unique_lock<Mutex>;
+using Task = std::function<void()>;
+} // namespace ovr

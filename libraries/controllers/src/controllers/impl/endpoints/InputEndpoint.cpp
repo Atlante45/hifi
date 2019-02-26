@@ -47,4 +47,3 @@ Pose InputEndpoint::pose() {
     _read = true;
     return peekPose();
 }
-

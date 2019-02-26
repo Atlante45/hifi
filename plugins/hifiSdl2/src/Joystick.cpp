@@ -18,12 +18,11 @@ const float CONTROLLER_THRESHOLD = 0.3f;
 const float MAX_AXIS = 32768.0f;
 
 Joystick::Joystick(SDL_JoystickID instanceId, SDL_GameController* sdlGameController) :
-        InputDevice("GamePad"),
+    InputDevice("GamePad"),
     _sdlGameController(sdlGameController),
     _sdlJoystick(SDL_GameControllerGetJoystick(_sdlGameController)),
     _sdlHaptic(SDL_HapticOpenFromJoystick(_sdlJoystick)),
-    _instanceId(instanceId)
-{
+    _instanceId(instanceId) {
     if (!_sdlHaptic) {
         qDebug() << "SDL Haptic Open Failure: " << QString(SDL_GetError());
     } else {
@@ -58,7 +57,7 @@ void Joystick::focusOutEvent() {
 };
 
 void Joystick::handleAxisEvent(const SDL_ControllerAxisEvent& event) {
-    SDL_GameControllerAxis axis = (SDL_GameControllerAxis) event.axis;
+    SDL_GameControllerAxis axis = (SDL_GameControllerAxis)event.axis;
     _axisStateMap[makeInput((controller::StandardAxisChannel)axis).getChannel()].value = (float)event.value / MAX_AXIS;
 }
 

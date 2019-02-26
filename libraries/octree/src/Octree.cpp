@@ -11,9 +11,9 @@
 
 #include "Octree.h"
 
-#include <cstring>
-#include <cstdio>
 #include <cmath>
+#include <cstdio>
+#include <cstring>
 #include <fstream> // to load voxels from file
 
 #include <QDataStream>
@@ -21,46 +21,43 @@
 #include <QEventLoop>
 #include <QFile>
 #include <QFileInfo>
-#include <QNetworkRequest>
-#include <QNetworkReply>
-#include <QNetworkAccessManager>
-#include <QVector>
-#include <QFile>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonArray>
-#include <QFileInfo>
-#include <QSaveFile>
-#include <QString>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
+#include <QSaveFile>
+#include <QString>
+#include <QVector>
 
 #include <GeometryUtil.h>
 #include <Gzip.h>
 #include <LogHandler.h>
 #include <NetworkAccessManager.h>
 #include <OctalCode.h>
-#include <udt/PacketHeaders.h>
+#include <PathUtils.h>
 #include <ResourceManager.h>
 #include <SharedUtil.h>
-#include <PathUtils.h>
 #include <ViewFrustum.h>
+#include <udt/PacketHeaders.h>
 
 #include "OctreeConstants.h"
+#include "OctreeEntitiesFileParser.h"
 #include "OctreeLogging.h"
 #include "OctreeQueryNode.h"
 #include "OctreeUtils.h"
-#include "OctreeEntitiesFileParser.h"
 
-QVector<QString> PERSIST_EXTENSIONS = {"json", "json.gz"};
+QVector<QString> PERSIST_EXTENSIONS = { "json", "json.gz" };
 
 Octree::Octree(bool shouldReaverage) :
     _rootElement(NULL),
     _isDirty(true),
     _shouldReaverage(shouldReaverage),
     _isViewing(false),
-    _isServer(false)
-{
+    _isServer(false) {
 }
 
 Octree::~Octree() {
@@ -75,8 +72,8 @@ void Octree::recurseTreeWithOperation(const RecurseOctreeOperation& operation, v
 }
 
 // Recurses voxel element with an operation function
-void Octree::recurseElementWithOperation(const OctreeElementPointer& element, const RecurseOctreeOperation& operation, void* extraData,
-                        int recursionCount) {
+void Octree::recurseElementWithOperation(const OctreeElementPointer& element, const RecurseOctreeOperation& operation,
+                                         void* extraData, int recursionCount) {
     if (recursionCount > DANGEROUSLY_DEEP_RECURSION) {
         HIFI_FCDEBUG(octree(), "Octree::recurseElementWithOperation() reached DANGEROUSLY_DEEP_RECURSION, bailing!");
         return;
@@ -92,13 +89,15 @@ void Octree::recurseElementWithOperation(const OctreeElementPointer& element, co
     }
 }
 
-void Octree::recurseTreeWithOperationSorted(const RecurseOctreeOperation& operation, const RecurseOctreeSortingOperation& sortingOperation, void* extraData) {
+void Octree::recurseTreeWithOperationSorted(const RecurseOctreeOperation& operation,
+                                            const RecurseOctreeSortingOperation& sortingOperation, void* extraData) {
     recurseElementWithOperationSorted(_rootElement, operation, sortingOperation, extraData);
 }
 
 // Recurses voxel element with an operation function, calling operation on its children in a specific order
 bool Octree::recurseElementWithOperationSorted(const OctreeElementPointer& element, const RecurseOctreeOperation& operation,
-                                               const RecurseOctreeSortingOperation& sortingOperation, void* extraData, int recursionCount) {
+                                               const RecurseOctreeSortingOperation& sortingOperation, void* extraData,
+                                               int recursionCount) {
     if (recursionCount > DANGEROUSLY_DEEP_RECURSION) {
         HIFI_FCDEBUG(octree(), "Octree::recurseElementWithOperationSorted() reached DANGEROUSLY_DEEP_RECURSION, bailing!");
         // If we go too deep, we want to keep searching other paths
@@ -126,7 +125,8 @@ bool Octree::recurseElementWithOperationSorted(const OctreeElementPointer& eleme
     for (auto it = sortedChildren.begin(); it != sortedChildren.end(); ++it) {
         const SortedChild& sortedChild = *it;
         // Our children were sorted, so if one hits something, we don't need to check the others
-        if (!recurseElementWithOperationSorted(sortedChild.second, operation, sortingOperation, extraData, recursionCount + 1)) {
+        if (!recurseElementWithOperationSorted(sortedChild.second, operation, sortingOperation, extraData,
+                                               recursionCount + 1)) {
             return false;
         }
     }
@@ -139,8 +139,8 @@ void Octree::recurseTreeWithOperator(RecurseOctreeOperator* operatorObject) {
     recurseElementWithOperator(_rootElement, operatorObject);
 }
 
-bool Octree::recurseElementWithOperator(const OctreeElementPointer& element,
-                                        RecurseOctreeOperator* operatorObject, int recursionCount) {
+bool Octree::recurseElementWithOperator(const OctreeElementPointer& element, RecurseOctreeOperator* operatorObject,
+                                        int recursionCount) {
     if (recursionCount > DANGEROUSLY_DEEP_RECURSION) {
         HIFI_FCDEBUG(octree(), "Octree::recurseElementWithOperator() reached DANGEROUSLY_DEEP_RECURSION, bailing!");
         return false;
@@ -167,7 +167,6 @@ bool Octree::recurseElementWithOperator(const OctreeElementPointer& element,
     return operatorObject->postRecursion(element);
 }
 
-
 OctreeElementPointer Octree::nodeForOctalCode(const OctreeElementPointer& ancestorElement, const unsigned char* needleCode,
                                               OctreeElementPointer* parentOfFoundElement) const {
     // special case for NULL octcode
@@ -182,7 +181,6 @@ OctreeElementPointer Octree::nodeForOctalCode(const OctreeElementPointer& ancest
 
         if (childElement) {
             if (*childElement->getOctalCode() == *needleCode) {
-
                 // If the caller asked for the parent, then give them that too...
                 if (parentOfFoundElement) {
                     *parentOfFoundElement = ancestorElement;
@@ -206,7 +204,6 @@ OctreeElementPointer Octree::nodeForOctalCode(const OctreeElementPointer& ancest
 // returns the element created!
 OctreeElementPointer Octree::createMissingElement(const OctreeElementPointer& lastParentElement,
                                                   const unsigned char* codeToReach, int recursionCount) {
-
     if (recursionCount > DANGEROUSLY_DEEP_RECURSION) {
         HIFI_FCDEBUG(octree(), "Octree::createMissingElement() reached DANGEROUSLY_DEEP_RECURSION, bailing!");
         return lastParentElement;
@@ -232,7 +229,6 @@ OctreeElementPointer Octree::createMissingElement(const OctreeElementPointer& la
 
 int Octree::readElementData(const OctreeElementPointer& destinationElement, const unsigned char* nodeData, int bytesAvailable,
                             ReadBitstreamToTreeParams& args) {
-
     int bytesLeftToRead = bytesAvailable;
     int bytesRead = 0;
 
@@ -240,15 +236,16 @@ int Octree::readElementData(const OctreeElementPointer& destinationElement, cons
     const unsigned char ALL_CHILDREN_ASSUMED_TO_EXIST = 0xFF;
 
     if ((size_t)bytesLeftToRead < sizeof(unsigned char)) {
-        qCDebug(octree) << "UNEXPECTED: readElementData() only had " << bytesLeftToRead << " bytes. "
-                    "Not enough for meaningful data.";
+        qCDebug(octree) << "UNEXPECTED: readElementData() only had " << bytesLeftToRead
+                        << " bytes. "
+                           "Not enough for meaningful data.";
         return bytesAvailable; // assume we read the entire buffer...
     }
 
     if (destinationElement->getScale() < SCALE_AT_DANGEROUSLY_DEEP_RECURSION) {
         qCDebug(octree) << "UNEXPECTED: readElementData() destination element is unreasonably small ["
-                << destinationElement->getScale() << " meters] "
-                << " Discarding " << bytesAvailable << " remaining bytes.";
+                        << destinationElement->getScale() << " meters] "
+                        << " Discarding " << bytesAvailable << " remaining bytes.";
         return bytesAvailable; // assume we read the entire buffer...
     }
 
@@ -284,12 +281,13 @@ int Octree::readElementData(const OctreeElementPointer& destinationElement, cons
     unsigned char childrenInTreeMask = ALL_CHILDREN_ASSUMED_TO_EXIST;
     unsigned char childInBufferMask = 0;
     int bytesForMasks = args.includeExistsBits ? sizeof(childrenInTreeMask) + sizeof(childInBufferMask)
-                                                : sizeof(childInBufferMask);
+                                               : sizeof(childInBufferMask);
 
     if (bytesLeftToRead < bytesForMasks) {
         if (bytesLeftToRead > 0) {
-            qCDebug(octree) << "UNEXPECTED: readElementDataFromBuffer() only had " << bytesLeftToRead << " bytes before masks. "
-                        "Not enough for meaningful data.";
+            qCDebug(octree) << "UNEXPECTED: readElementDataFromBuffer() only had " << bytesLeftToRead
+                            << " bytes before masks. "
+                               "Not enough for meaningful data.";
         }
         return bytesAvailable; // assume we read the entire buffer...
     }
@@ -336,7 +334,7 @@ int Octree::readElementData(const OctreeElementPointer& destinationElement, cons
     }
 
     // if this is the root, and there is more data to read, allow it to read it's element data...
-    if (destinationElement == _rootElement  && rootElementHasData() && bytesLeftToRead > 0) {
+    if (destinationElement == _rootElement && rootElementHasData() && bytesLeftToRead > 0) {
         // tell the element to read the subsequent data
         int rootDataSize = _rootElement->readElementDataFromBuffer(nodeData + bytesRead, bytesLeftToRead, args);
         bytesRead += rootDataSize;
@@ -345,8 +343,7 @@ int Octree::readElementData(const OctreeElementPointer& destinationElement, cons
     return bytesRead;
 }
 
-void Octree::readBitstreamToTree(const unsigned char * bitstream, uint64_t bufferSizeBytes,
-                                 ReadBitstreamToTreeParams& args) {
+void Octree::readBitstreamToTree(const unsigned char* bitstream, uint64_t bufferSizeBytes, ReadBitstreamToTreeParams& args) {
     int bytesRead = 0;
     const unsigned char* bitstreamAt = bitstream;
 
@@ -360,19 +357,19 @@ void Octree::readBitstreamToTree(const unsigned char * bitstream, uint64_t buffe
     // if there are more bytes after that, it's assumed to be another root relative tree
 
     while (bitstreamAt < bitstream + bufferSizeBytes) {
-        OctreeElementPointer bitstreamRootElement = nodeForOctalCode(args.destinationElement,
-                                                                     (unsigned char *)bitstreamAt, NULL);
+        OctreeElementPointer bitstreamRootElement = nodeForOctalCode(args.destinationElement, (unsigned char*)bitstreamAt,
+                                                                     NULL);
         int numberOfThreeBitSectionsInStream = numberOfThreeBitSectionsInCode(bitstreamAt, bufferSizeBytes);
         if (numberOfThreeBitSectionsInStream > UNREASONABLY_DEEP_RECURSION) {
             HIFI_FCDEBUG(octree(), "UNEXPECTED: parsing of the octal code would make UNREASONABLY_DEEP_RECURSION... "
-                        "numberOfThreeBitSectionsInStream:" << numberOfThreeBitSectionsInStream <<
-                        "This buffer is corrupt. Returning.");
+                                   "numberOfThreeBitSectionsInStream:"
+                                       << numberOfThreeBitSectionsInStream << "This buffer is corrupt. Returning.");
             return;
         }
 
         if (numberOfThreeBitSectionsInStream == OVERFLOWED_OCTCODE_BUFFER) {
             qCDebug(octree) << "UNEXPECTED: parsing of the octal code would overflow the buffer. "
-                        "This buffer is corrupt. Returning.";
+                               "This buffer is corrupt. Returning.";
             return;
         }
 
@@ -380,10 +377,9 @@ void Octree::readBitstreamToTree(const unsigned char * bitstream, uint64_t buffe
 
         // if the octal code returned is not on the same level as the code being searched for, we have OctreeElements to create
         if (numberOfThreeBitSectionsInStream != numberOfThreeBitSectionsFromNode) {
-
             // Note: we need to create this element relative to root, because we're assuming that the bitstream for the initial
             // octal code is always relative to root!
-            bitstreamRootElement = createMissingElement(args.destinationElement, (unsigned char*) bitstreamAt);
+            bitstreamRootElement = createMissingElement(args.destinationElement, (unsigned char*)bitstreamAt);
             if (bitstreamRootElement->isDirty()) {
                 _isDirty = true;
             }
@@ -394,7 +390,7 @@ void Octree::readBitstreamToTree(const unsigned char * bitstream, uint64_t buffe
         int theseBytesRead = 0;
         theseBytesRead += (int)octalCodeBytes;
         int lowerLevelBytes = readElementData(bitstreamRootElement, bitstreamAt + octalCodeBytes,
-                                       bufferSizeBytes - (bytesRead + (int)octalCodeBytes), args);
+                                              bufferSizeBytes - (bytesRead + (int)octalCodeBytes), args);
 
         theseBytesRead += lowerLevelBytes;
 
@@ -452,7 +448,7 @@ void Octree::reaverageOctreeElements(OctreeElementPointer startElement) {
 }
 
 OctreeElementPointer Octree::getOctreeElementAt(float x, float y, float z, float s) const {
-    unsigned char* octalCode = pointToOctalCode(x,y,z,s);
+    unsigned char* octalCode = pointToOctalCode(x, y, z, s);
     OctreeElementPointer element = nodeForOctalCode(_rootElement, octalCode, NULL);
     if (*element->getOctalCode() != *octalCode) {
         element = NULL;
@@ -462,13 +458,12 @@ OctreeElementPointer Octree::getOctreeElementAt(float x, float y, float z, float
 }
 
 OctreeElementPointer Octree::getOctreeEnclosingElementAt(float x, float y, float z, float s) const {
-    unsigned char* octalCode = pointToOctalCode(x,y,z,s);
+    unsigned char* octalCode = pointToOctalCode(x, y, z, s);
     OctreeElementPointer element = nodeForOctalCode(_rootElement, octalCode, NULL);
 
     delete[] octalCode; // cleanup memory
     return element;
 }
-
 
 OctreeElementPointer Octree::getOrCreateChildElementAt(float x, float y, float z, float s) {
     return getRoot()->getOrCreateChildElementAt(x, y, z, s);
@@ -477,8 +472,6 @@ OctreeElementPointer Octree::getOrCreateChildElementAt(float x, float y, float z
 OctreeElementPointer Octree::getOrCreateChildElementContaining(const AACube& box) {
     return getRoot()->getOrCreateChildElementContaining(box);
 }
-
-
 
 class SphereArgs {
 public:
@@ -511,24 +504,20 @@ bool findSpherePenetrationOp(const OctreeElementPointer& element, void* extraDat
     return false;
 }
 
-bool Octree::findSpherePenetration(const glm::vec3& center, float radius, glm::vec3& penetration,
-                    void** penetratedObject, Octree::lockType lockType, bool* accurateResult) {
-
-    SphereArgs args = {
-        center,
-        radius,
-        penetration,
-        false,
-        NULL };
+bool Octree::findSpherePenetration(const glm::vec3& center, float radius, glm::vec3& penetration, void** penetratedObject,
+                                   Octree::lockType lockType, bool* accurateResult) {
+    SphereArgs args = { center, radius, penetration, false, NULL };
     penetration = glm::vec3(0.0f, 0.0f, 0.0f);
 
     bool requireLock = lockType == Octree::Lock;
-    bool lockResult = withReadLock([&]{
-        recurseTreeWithOperation(findSpherePenetrationOp, &args);
-        if (penetratedObject) {
-            *penetratedObject = args.penetratedObject;
-        }
-    }, requireLock);
+    bool lockResult = withReadLock(
+        [&] {
+            recurseTreeWithOperation(findSpherePenetrationOp, &args);
+            if (penetratedObject) {
+                *penetratedObject = args.penetratedObject;
+            }
+        },
+        requireLock);
 
     if (accurateResult) {
         *accurateResult = lockResult; // if user asked to accuracy or result, let them know this is accurate
@@ -580,8 +569,8 @@ uint qHash(const glm::vec3& point) {
     const quint64 MAX_SCALED_COMPONENT = 2097152; // 2^21
     const float RESOLUTION_PER_METER = 1024.0f; // 2^10
     return qHash((quint64)(point.x * RESOLUTION_PER_METER) % MAX_SCALED_COMPONENT +
-        (((quint64)(point.y * RESOLUTION_PER_METER)) % MAX_SCALED_COMPONENT << BITS_PER_COMPONENT) +
-        (((quint64)(point.z * RESOLUTION_PER_METER)) % MAX_SCALED_COMPONENT << 2 * BITS_PER_COMPONENT));
+                 (((quint64)(point.y * RESOLUTION_PER_METER)) % MAX_SCALED_COMPONENT << BITS_PER_COMPONENT) +
+                 (((quint64)(point.z * RESOLUTION_PER_METER)) % MAX_SCALED_COMPONENT << 2 * BITS_PER_COMPONENT));
 }
 
 bool findContentInCubeOp(const OctreeElementPointer& element, void* extraData) {
@@ -604,17 +593,13 @@ bool findContentInCubeOp(const OctreeElementPointer& element, void* extraData) {
     return false;
 }
 
-bool Octree::findCapsulePenetration(const glm::vec3& start, const glm::vec3& end, float radius,
-                    glm::vec3& penetration, Octree::lockType lockType, bool* accurateResult) {
-
+bool Octree::findCapsulePenetration(const glm::vec3& start, const glm::vec3& end, float radius, glm::vec3& penetration,
+                                    Octree::lockType lockType, bool* accurateResult) {
     CapsuleArgs args = { start, end, radius, penetration, false };
     penetration = glm::vec3(0.0f, 0.0f, 0.0f);
 
-
     bool requireLock = lockType == Octree::Lock;
-    bool lockResult = withReadLock([&]{
-        recurseTreeWithOperation(findCapsulePenetrationOp, &args);
-    }, requireLock);
+    bool lockResult = withReadLock([&] { recurseTreeWithOperation(findCapsulePenetrationOp, &args); }, requireLock);
 
     if (accurateResult) {
         *accurateResult = lockResult; // if user asked to accuracy or result, let them know this is accurate
@@ -624,7 +609,7 @@ bool Octree::findCapsulePenetration(const glm::vec3& start, const glm::vec3& end
 }
 
 bool Octree::findContentInCube(const AACube& cube, CubeList& cubes) {
-    return withTryReadLock([&]{
+    return withTryReadLock([&] {
         ContentArgs args = { cube, &cubes };
         recurseTreeWithOperation(findContentInCubeOp, &args);
     });
@@ -658,9 +643,7 @@ OctreeElementPointer Octree::getElementEnclosingPoint(const glm::vec3& point, Oc
     args.element = NULL;
 
     bool requireLock = lockType == Octree::Lock;
-    bool lockResult = withReadLock([&]{
-        recurseTreeWithOperation(getElementEnclosingOperation, (void*)&args);
-    }, requireLock);
+    bool lockResult = withReadLock([&] { recurseTreeWithOperation(getElementEnclosingOperation, (void*)&args); }, requireLock);
 
     if (accurateResult) {
         *accurateResult = lockResult; // if user asked to accuracy or result, let them know this is accurate
@@ -718,7 +701,8 @@ QString getMarketplaceID(const QString& urlString) {
     // a regex for the this is a PITA as there are several valid versions of uuids, and so
     // lets strip out the uuid (if any) and try to create a UUID from the string, relying on
     // QT to parse it
-    static const QRegularExpression re("^http:\\/\\/mpassets.highfidelity.com\\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})-v[\\d]+\\/.*");
+    static const QRegularExpression re(
+        "^http:\\/\\/mpassets.highfidelity.com\\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})-v[\\d]+\\/.*");
     QRegularExpressionMatch match = re.match(urlString);
     if (match.hasMatch()) {
         QString matched = match.captured(1);
@@ -731,17 +715,13 @@ QString getMarketplaceID(const QString& urlString) {
     return QString();
 }
 
-bool Octree::readFromURL(
-    const QString& urlString,
-    const bool isObservable,
-    const qint64 callerId
-) {
+bool Octree::readFromURL(const QString& urlString, const bool isObservable, const qint64 callerId) {
     QString trimmedUrl = urlString.trimmed();
     QString marketplaceID = getMarketplaceID(trimmedUrl);
     qDebug() << "!!!!! going to createResourceRequest " << callerId;
     auto request = std::unique_ptr<ResourceRequest>(
-        DependencyManager::get<ResourceManager>()->createResourceRequest(
-            this, trimmedUrl, isObservable, callerId, "Octree::readFromURL"));
+        DependencyManager::get<ResourceManager>()->createResourceRequest(this, trimmedUrl, isObservable, callerId,
+                                                                         "Octree::readFromURL"));
 
     if (!request) {
         return false;
@@ -770,19 +750,14 @@ bool Octree::readFromURL(
     return readFromStream(data.size(), inputStream, marketplaceID);
 }
 
-
-bool Octree::readFromStream(
-    uint64_t streamLength,
-    QDataStream& inputStream,
-    const QString& marketplaceID
-) {
+bool Octree::readFromStream(uint64_t streamLength, QDataStream& inputStream, const QString& marketplaceID) {
     // decide if this is binary SVO or JSON-formatted SVO
-    QIODevice *device = inputStream.device();
+    QIODevice* device = inputStream.device();
     char firstChar;
     device->getChar(&firstChar);
     device->ungetChar(firstChar);
 
-    if (firstChar == (char) PacketType::EntityData) {
+    if (firstChar == (char)PacketType::EntityData) {
         qCWarning(octree) << "Reading from binary SVO no longer supported";
         return false;
     } else {
@@ -790,7 +765,6 @@ bool Octree::readFromStream(
         return readJSONFromStream(streamLength, inputStream, marketplaceID);
     }
 }
-
 
 namespace {
 // hack to get the marketplace id into the entities.  We will create a way to get this from a hash of
@@ -811,13 +785,10 @@ QVariantMap addMarketplaceIDToDocumentEntities(QVariantMap& doc, const QString& 
     return doc;
 }
 
-}  // Unnamed namepsace
+} // namespace
 const int READ_JSON_BUFFER_SIZE = 2048;
 
-bool Octree::readJSONFromStream(
-    uint64_t streamLength,
-    QDataStream& inputStream,
-    const QString& marketplaceID /*=""*/
+bool Octree::readJSONFromStream(uint64_t streamLength, QDataStream& inputStream, const QString& marketplaceID /*=""*/
 ) {
     // if the data is gzipped we may not have a useful bytesAvailable() result, so just keep reading until
     // we get an eof.  Leave streamLength parameter for consistency.
@@ -884,7 +855,7 @@ bool Octree::toJSONDocument(QJsonDocument* doc, const OctreeElementPointer& elem
     // include the "bitstream" version
     PacketType expectedType = expectedDataPacketType();
     PacketVersion expectedVersion = versionForPacketType(expectedType);
-    entityDescription["Version"] = (int) expectedVersion;
+    entityDescription["Version"] = (int)expectedVersion;
 
     // store the entity data
     bool entityDescriptionSuccess = writeToMap(entityDescription, top, true, true);
@@ -892,7 +863,6 @@ bool Octree::toJSONDocument(QJsonDocument* doc, const OctreeElementPointer& elem
         qCritical("Failed to convert Entities to QVariantMap while saving to json.");
         return false;
     }
-
 
     bool noEntities = entityDescription["Entities"].toList().empty();
     QJsonDocument jsonDocTree = QJsonDocument::fromVariant(entityDescription);
@@ -923,7 +893,9 @@ bool Octree::toJSONString(QString& jsonString, const OctreeElementPointer& eleme
     PacketType expectedType = expectedDataPacketType();
     PacketVersion expectedVersion = versionForPacketType(expectedType);
 
-    jsonString += QString("\n    ],\n  \"Id\": \"%1\",\n  \"Version\": %2\n}\n").arg(_persistID.toString()).arg((int)expectedVersion);
+    jsonString += QString("\n    ],\n  \"Id\": \"%1\",\n  \"Version\": %2\n}\n")
+                      .arg(_persistID.toString())
+                      .arg((int)expectedVersion);
 
     return true;
 }

@@ -12,10 +12,10 @@
 #ifndef hifi_AvatarData_h
 #define hifi_AvatarData_h
 
-#include <string>
+#include <inttypes.h>
 #include <memory>
 #include <queue>
-#include <inttypes.h>
+#include <string>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -25,15 +25,15 @@
 #include <QElapsedTimer>
 #include <QHash>
 #include <QObject>
+#include <QReadWriteLock>
 #include <QRect>
 #include <QStringList>
 #include <QUrl>
 #include <QUuid>
 #include <QVariantMap>
 #include <QVector>
-#include <QtScript/QScriptable>
 #include <QtScript/QScriptValueIterator>
-#include <QReadWriteLock>
+#include <QtScript/QScriptable>
 
 #include <AvatarConstants.h>
 #include <JointData.h>
@@ -75,13 +75,10 @@ const int MAX_NUM_AVATAR_ENTITIES = 42;
 const quint32 AVATAR_MOTION_ACTION_MOTOR_ENABLED = 1U << 0;
 const quint32 AVATAR_MOTION_SCRIPTED_MOTOR_ENABLED = 1U << 1;
 
-const quint32 AVATAR_MOTION_DEFAULTS =
-        AVATAR_MOTION_ACTION_MOTOR_ENABLED |
-        AVATAR_MOTION_SCRIPTED_MOTOR_ENABLED;
+const quint32 AVATAR_MOTION_DEFAULTS = AVATAR_MOTION_ACTION_MOTOR_ENABLED | AVATAR_MOTION_SCRIPTED_MOTOR_ENABLED;
 
 // these bits will be expanded as features are exposed
-const quint32 AVATAR_MOTION_SCRIPTABLE_BITS =
-        AVATAR_MOTION_SCRIPTED_MOTOR_ENABLED;
+const quint32 AVATAR_MOTION_SCRIPTABLE_BITS = AVATAR_MOTION_SCRIPTED_MOTOR_ENABLED;
 
 // Bitset of state flags - we store the key state, hand state, Faceshift, eye tracking, and existence of
 // referential data in this bit set. The hand state is an octal, but is split into two sections to maintain
@@ -112,7 +109,6 @@ const int PROCEDURAL_EYE_FACE_MOVEMENT = 9; // 10th bit
 const int PROCEDURAL_BLINK_FACE_MOVEMENT = 10; // 11th bit
 const int COLLIDE_WITH_OTHER_AVATARS = 11; // 12th bit
 
-
 const char HAND_STATE_NULL = 0;
 const char LEFT_HAND_POINTING_FLAG = 1;
 const char RIGHT_HAND_POINTING_FLAG = 2;
@@ -126,196 +122,190 @@ using SmallFloat = uint16_t; // a compressed float with less precision, user def
 
 namespace AvatarDataPacket {
 
-    // NOTE: every time AvatarData is sent from mixer to client, it also includes the GUIID for the session
-    // this is 16bytes of data at 45hz that's 5.76kbps
-    // it might be nice to use a dictionary to compress that
+// NOTE: every time AvatarData is sent from mixer to client, it also includes the GUIID for the session
+// this is 16bytes of data at 45hz that's 5.76kbps
+// it might be nice to use a dictionary to compress that
 
-    // Packet State Flags - we store the details about the existence of other records in this bitset:
-    // AvatarGlobalPosition, Avatar face tracker, eye tracking, and existence of
-    using HasFlags = uint16_t;
-    const HasFlags PACKET_HAS_AVATAR_GLOBAL_POSITION   = 1U << 0;
-    const HasFlags PACKET_HAS_AVATAR_BOUNDING_BOX      = 1U << 1;
-    const HasFlags PACKET_HAS_AVATAR_ORIENTATION       = 1U << 2;
-    const HasFlags PACKET_HAS_AVATAR_SCALE             = 1U << 3;
-    const HasFlags PACKET_HAS_LOOK_AT_POSITION         = 1U << 4;
-    const HasFlags PACKET_HAS_AUDIO_LOUDNESS           = 1U << 5;
-    const HasFlags PACKET_HAS_SENSOR_TO_WORLD_MATRIX   = 1U << 6;
-    const HasFlags PACKET_HAS_ADDITIONAL_FLAGS         = 1U << 7;
-    const HasFlags PACKET_HAS_PARENT_INFO              = 1U << 8;
-    const HasFlags PACKET_HAS_AVATAR_LOCAL_POSITION    = 1U << 9;
-    const HasFlags PACKET_HAS_FACE_TRACKER_INFO        = 1U << 10;
-    const HasFlags PACKET_HAS_JOINT_DATA               = 1U << 11;
-    const HasFlags PACKET_HAS_JOINT_DEFAULT_POSE_FLAGS = 1U << 12;
-    const HasFlags PACKET_HAS_GRAB_JOINTS              = 1U << 13;
-    const size_t AVATAR_HAS_FLAGS_SIZE = 2;
+// Packet State Flags - we store the details about the existence of other records in this bitset:
+// AvatarGlobalPosition, Avatar face tracker, eye tracking, and existence of
+using HasFlags = uint16_t;
+const HasFlags PACKET_HAS_AVATAR_GLOBAL_POSITION = 1U << 0;
+const HasFlags PACKET_HAS_AVATAR_BOUNDING_BOX = 1U << 1;
+const HasFlags PACKET_HAS_AVATAR_ORIENTATION = 1U << 2;
+const HasFlags PACKET_HAS_AVATAR_SCALE = 1U << 3;
+const HasFlags PACKET_HAS_LOOK_AT_POSITION = 1U << 4;
+const HasFlags PACKET_HAS_AUDIO_LOUDNESS = 1U << 5;
+const HasFlags PACKET_HAS_SENSOR_TO_WORLD_MATRIX = 1U << 6;
+const HasFlags PACKET_HAS_ADDITIONAL_FLAGS = 1U << 7;
+const HasFlags PACKET_HAS_PARENT_INFO = 1U << 8;
+const HasFlags PACKET_HAS_AVATAR_LOCAL_POSITION = 1U << 9;
+const HasFlags PACKET_HAS_FACE_TRACKER_INFO = 1U << 10;
+const HasFlags PACKET_HAS_JOINT_DATA = 1U << 11;
+const HasFlags PACKET_HAS_JOINT_DEFAULT_POSE_FLAGS = 1U << 12;
+const HasFlags PACKET_HAS_GRAB_JOINTS = 1U << 13;
+const size_t AVATAR_HAS_FLAGS_SIZE = 2;
 
-    using SixByteQuat = uint8_t[6];
-    using SixByteTrans = uint8_t[6];
+using SixByteQuat = uint8_t[6];
+using SixByteTrans = uint8_t[6];
 
-    // NOTE: AvatarDataPackets start with a uint16_t sequence number that is not reflected in the Header structure.
+// NOTE: AvatarDataPackets start with a uint16_t sequence number that is not reflected in the Header structure.
 
-    PACKED_BEGIN struct Header {
-        HasFlags packetHasFlags;        // state flags, indicated which additional records are included in the packet
-    } PACKED_END;
-    const size_t HEADER_SIZE = 2;
-    static_assert(sizeof(Header) == HEADER_SIZE, "AvatarDataPacket::Header size doesn't match.");
+PACKED_BEGIN struct Header {
+    HasFlags packetHasFlags; // state flags, indicated which additional records are included in the packet
+} PACKED_END;
+const size_t HEADER_SIZE = 2;
+static_assert(sizeof(Header) == HEADER_SIZE, "AvatarDataPacket::Header size doesn't match.");
 
-    PACKED_BEGIN struct AvatarGlobalPosition {
-        float globalPosition[3];          // avatar's position
-    } PACKED_END;
-    const size_t AVATAR_GLOBAL_POSITION_SIZE = 12;
-    static_assert(sizeof(AvatarGlobalPosition) == AVATAR_GLOBAL_POSITION_SIZE, "AvatarDataPacket::AvatarGlobalPosition size doesn't match.");
+PACKED_BEGIN struct AvatarGlobalPosition {
+    float globalPosition[3]; // avatar's position
+} PACKED_END;
+const size_t AVATAR_GLOBAL_POSITION_SIZE = 12;
+static_assert(sizeof(AvatarGlobalPosition) == AVATAR_GLOBAL_POSITION_SIZE,
+              "AvatarDataPacket::AvatarGlobalPosition size doesn't match.");
 
-    PACKED_BEGIN struct AvatarBoundingBox {
-        float avatarDimensions[3];        // avatar's bounding box in world space units, but relative to the position.
-        float boundOriginOffset[3];       // offset from the position of the avatar to the origin of the bounding box
-    } PACKED_END;
-    const size_t AVATAR_BOUNDING_BOX_SIZE = 24;
-    static_assert(sizeof(AvatarBoundingBox) == AVATAR_BOUNDING_BOX_SIZE, "AvatarDataPacket::AvatarBoundingBox size doesn't match.");
+PACKED_BEGIN struct AvatarBoundingBox {
+    float avatarDimensions[3]; // avatar's bounding box in world space units, but relative to the position.
+    float boundOriginOffset[3]; // offset from the position of the avatar to the origin of the bounding box
+} PACKED_END;
+const size_t AVATAR_BOUNDING_BOX_SIZE = 24;
+static_assert(sizeof(AvatarBoundingBox) == AVATAR_BOUNDING_BOX_SIZE, "AvatarDataPacket::AvatarBoundingBox size doesn't match.");
 
-    PACKED_BEGIN struct AvatarOrientation {
-        SixByteQuat avatarOrientation;      // encodeded and compressed by packOrientationQuatToSixBytes()
-    } PACKED_END;
-    const size_t AVATAR_ORIENTATION_SIZE = 6;
-    static_assert(sizeof(AvatarOrientation) == AVATAR_ORIENTATION_SIZE, "AvatarDataPacket::AvatarOrientation size doesn't match.");
+PACKED_BEGIN struct AvatarOrientation {
+    SixByteQuat avatarOrientation; // encodeded and compressed by packOrientationQuatToSixBytes()
+} PACKED_END;
+const size_t AVATAR_ORIENTATION_SIZE = 6;
+static_assert(sizeof(AvatarOrientation) == AVATAR_ORIENTATION_SIZE, "AvatarDataPacket::AvatarOrientation size doesn't match.");
 
-    PACKED_BEGIN struct AvatarScale {
-        SmallFloat scale;                 // avatar's scale, compressed by packFloatRatioToTwoByte()
-    } PACKED_END;
-    const size_t AVATAR_SCALE_SIZE = 2;
-    static_assert(sizeof(AvatarScale) == AVATAR_SCALE_SIZE, "AvatarDataPacket::AvatarScale size doesn't match.");
+PACKED_BEGIN struct AvatarScale {
+    SmallFloat scale; // avatar's scale, compressed by packFloatRatioToTwoByte()
+} PACKED_END;
+const size_t AVATAR_SCALE_SIZE = 2;
+static_assert(sizeof(AvatarScale) == AVATAR_SCALE_SIZE, "AvatarDataPacket::AvatarScale size doesn't match.");
 
-    PACKED_BEGIN struct LookAtPosition {
-        float lookAtPosition[3];          // world space position that eyes are focusing on.
-                                          // FIXME - unless the person has an eye tracker, this is simulated...
-                                          //    a) maybe we can just have the client calculate this
-                                          //    b) at distance this will be hard to discern and can likely be
-                                          //       descimated or dropped completely
-                                          //
-                                          // POTENTIAL SAVINGS - 12 bytes
-    } PACKED_END;
-    const size_t LOOK_AT_POSITION_SIZE = 12;
-    static_assert(sizeof(LookAtPosition) == LOOK_AT_POSITION_SIZE, "AvatarDataPacket::LookAtPosition size doesn't match.");
+PACKED_BEGIN struct LookAtPosition {
+    float lookAtPosition[3]; // world space position that eyes are focusing on.
+                             // FIXME - unless the person has an eye tracker, this is simulated...
+                             //    a) maybe we can just have the client calculate this
+                             //    b) at distance this will be hard to discern and can likely be
+                             //       descimated or dropped completely
+                             //
+                             // POTENTIAL SAVINGS - 12 bytes
+} PACKED_END;
+const size_t LOOK_AT_POSITION_SIZE = 12;
+static_assert(sizeof(LookAtPosition) == LOOK_AT_POSITION_SIZE, "AvatarDataPacket::LookAtPosition size doesn't match.");
 
-    PACKED_BEGIN struct AudioLoudness {
-        uint8_t audioLoudness;            // current loudness of microphone compressed with packFloatGainToByte()
-    } PACKED_END;
-    const size_t AUDIO_LOUDNESS_SIZE = 1;
-    static_assert(sizeof(AudioLoudness) == AUDIO_LOUDNESS_SIZE, "AvatarDataPacket::AudioLoudness size doesn't match.");
+PACKED_BEGIN struct AudioLoudness {
+    uint8_t audioLoudness; // current loudness of microphone compressed with packFloatGainToByte()
+} PACKED_END;
+const size_t AUDIO_LOUDNESS_SIZE = 1;
+static_assert(sizeof(AudioLoudness) == AUDIO_LOUDNESS_SIZE, "AvatarDataPacket::AudioLoudness size doesn't match.");
 
-    PACKED_BEGIN struct SensorToWorldMatrix {
-        // FIXME - these 20 bytes are only used by viewers if my avatar has "attachments"
-        // we could save these bytes if no attachments are active.
-        //
-        // POTENTIAL SAVINGS - 20 bytes
+PACKED_BEGIN struct SensorToWorldMatrix {
+    // FIXME - these 20 bytes are only used by viewers if my avatar has "attachments"
+    // we could save these bytes if no attachments are active.
+    //
+    // POTENTIAL SAVINGS - 20 bytes
 
-        SixByteQuat sensorToWorldQuat;     // 6 byte compressed quaternion part of sensor to world matrix
-        uint16_t sensorToWorldScale;      // uniform scale of sensor to world matrix
-        float sensorToWorldTrans[3];      // fourth column of sensor to world matrix
-                                          // FIXME - sensorToWorldTrans might be able to be better compressed if it was
-                                          // relative to the avatar position.
-    } PACKED_END;
-    const size_t SENSOR_TO_WORLD_SIZE = 20;
-    static_assert(sizeof(SensorToWorldMatrix) == SENSOR_TO_WORLD_SIZE, "AvatarDataPacket::SensorToWorldMatrix size doesn't match.");
+    SixByteQuat sensorToWorldQuat; // 6 byte compressed quaternion part of sensor to world matrix
+    uint16_t sensorToWorldScale; // uniform scale of sensor to world matrix
+    float sensorToWorldTrans[3]; // fourth column of sensor to world matrix
+                                 // FIXME - sensorToWorldTrans might be able to be better compressed if it was
+                                 // relative to the avatar position.
+} PACKED_END;
+const size_t SENSOR_TO_WORLD_SIZE = 20;
+static_assert(sizeof(SensorToWorldMatrix) == SENSOR_TO_WORLD_SIZE, "AvatarDataPacket::SensorToWorldMatrix size doesn't match.");
 
-    PACKED_BEGIN struct AdditionalFlags {
-        uint16_t flags;                    // additional flags: hand state, key state, eye tracking
-    } PACKED_END;
-    const size_t ADDITIONAL_FLAGS_SIZE = 2;
-    static_assert(sizeof(AdditionalFlags) == ADDITIONAL_FLAGS_SIZE, "AvatarDataPacket::AdditionalFlags size doesn't match.");
+PACKED_BEGIN struct AdditionalFlags {
+    uint16_t flags; // additional flags: hand state, key state, eye tracking
+} PACKED_END;
+const size_t ADDITIONAL_FLAGS_SIZE = 2;
+static_assert(sizeof(AdditionalFlags) == ADDITIONAL_FLAGS_SIZE, "AvatarDataPacket::AdditionalFlags size doesn't match.");
 
-    // only present if HAS_REFERENTIAL flag is set in AvatarInfo.flags
-    PACKED_BEGIN struct ParentInfo {
-        uint8_t parentUUID[16];       // rfc 4122 encoded
-        uint16_t parentJointIndex;
-    } PACKED_END;
-    const size_t PARENT_INFO_SIZE = 18;
-    static_assert(sizeof(ParentInfo) == PARENT_INFO_SIZE, "AvatarDataPacket::ParentInfo size doesn't match.");
+// only present if HAS_REFERENTIAL flag is set in AvatarInfo.flags
+PACKED_BEGIN struct ParentInfo {
+    uint8_t parentUUID[16]; // rfc 4122 encoded
+    uint16_t parentJointIndex;
+} PACKED_END;
+const size_t PARENT_INFO_SIZE = 18;
+static_assert(sizeof(ParentInfo) == PARENT_INFO_SIZE, "AvatarDataPacket::ParentInfo size doesn't match.");
 
-    // will only ever be included if the avatar has a parent but can change independent of changes to parent info
-    // and so we keep it a separate record
-    PACKED_BEGIN struct AvatarLocalPosition {
-        float localPosition[3];           // parent frame translation of the avatar
-    } PACKED_END;
-    const size_t AVATAR_LOCAL_POSITION_SIZE = 12;
-    static_assert(sizeof(AvatarLocalPosition) == AVATAR_LOCAL_POSITION_SIZE, "AvatarDataPacket::AvatarLocalPosition size doesn't match.");
+// will only ever be included if the avatar has a parent but can change independent of changes to parent info
+// and so we keep it a separate record
+PACKED_BEGIN struct AvatarLocalPosition {
+    float localPosition[3]; // parent frame translation of the avatar
+} PACKED_END;
+const size_t AVATAR_LOCAL_POSITION_SIZE = 12;
+static_assert(sizeof(AvatarLocalPosition) == AVATAR_LOCAL_POSITION_SIZE,
+              "AvatarDataPacket::AvatarLocalPosition size doesn't match.");
 
-    const size_t MAX_CONSTANT_HEADER_SIZE = HEADER_SIZE +
-        AVATAR_GLOBAL_POSITION_SIZE +
-        AVATAR_BOUNDING_BOX_SIZE +
-        AVATAR_ORIENTATION_SIZE +
-        AVATAR_SCALE_SIZE +
-        LOOK_AT_POSITION_SIZE +
-        AUDIO_LOUDNESS_SIZE +
-        SENSOR_TO_WORLD_SIZE +
-        ADDITIONAL_FLAGS_SIZE +
-        PARENT_INFO_SIZE +
-        AVATAR_LOCAL_POSITION_SIZE;
+const size_t MAX_CONSTANT_HEADER_SIZE = HEADER_SIZE + AVATAR_GLOBAL_POSITION_SIZE + AVATAR_BOUNDING_BOX_SIZE +
+                                        AVATAR_ORIENTATION_SIZE + AVATAR_SCALE_SIZE + LOOK_AT_POSITION_SIZE +
+                                        AUDIO_LOUDNESS_SIZE + SENSOR_TO_WORLD_SIZE + ADDITIONAL_FLAGS_SIZE + PARENT_INFO_SIZE +
+                                        AVATAR_LOCAL_POSITION_SIZE;
 
+// variable length structure follows
 
-    // variable length structure follows
+// only present if IS_FACE_TRACKER_CONNECTED flag is set in AvatarInfo.flags
+PACKED_BEGIN struct FaceTrackerInfo {
+    float leftEyeBlink;
+    float rightEyeBlink;
+    float averageLoudness;
+    float browAudioLift;
+    uint8_t numBlendshapeCoefficients;
+    // float blendshapeCoefficients[numBlendshapeCoefficients];
+} PACKED_END;
+const size_t FACE_TRACKER_INFO_SIZE = 17;
+static_assert(sizeof(FaceTrackerInfo) == FACE_TRACKER_INFO_SIZE, "AvatarDataPacket::FaceTrackerInfo size doesn't match.");
+size_t maxFaceTrackerInfoSize(size_t numBlendshapeCoefficients);
 
-    // only present if IS_FACE_TRACKER_CONNECTED flag is set in AvatarInfo.flags
-    PACKED_BEGIN struct FaceTrackerInfo {
-        float leftEyeBlink;
-        float rightEyeBlink;
-        float averageLoudness;
-        float browAudioLift;
-        uint8_t numBlendshapeCoefficients;
-        // float blendshapeCoefficients[numBlendshapeCoefficients];
-    } PACKED_END;
-    const size_t FACE_TRACKER_INFO_SIZE = 17;
-    static_assert(sizeof(FaceTrackerInfo) == FACE_TRACKER_INFO_SIZE, "AvatarDataPacket::FaceTrackerInfo size doesn't match.");
-    size_t maxFaceTrackerInfoSize(size_t numBlendshapeCoefficients);
+/*
+struct JointData {
+    uint8_t numJoints;
+    uint8_t rotationValidityBits[ceil(numJoints / 8)];     // one bit per joint, if true then a compressed rotation follows.
+    SixByteQuat rotation[numValidRotations];               // encodeded and compressed by packOrientationQuatToSixBytes()
+    uint8_t translationValidityBits[ceil(numJoints / 8)];  // one bit per joint, if true then a compressed translation follows.
+    float maxTranslationDimension;                         // used to normalize fixed point translation values.
+    SixByteTrans translation[numValidTranslations];        // normalized and compressed by packFloatVec3ToSignedTwoByteFixed()
+    SixByteQuat leftHandControllerRotation;
+    SixByteTrans leftHandControllerTranslation;
+    SixByteQuat rightHandControllerRotation;
+    SixByteTrans rightHandControllerTranslation;
+};
+*/
+size_t maxJointDataSize(size_t numJoints, bool hasGrabJoints);
+size_t minJointDataSize(size_t numJoints);
 
-    /*
-    struct JointData {
-        uint8_t numJoints;
-        uint8_t rotationValidityBits[ceil(numJoints / 8)];     // one bit per joint, if true then a compressed rotation follows.
-        SixByteQuat rotation[numValidRotations];               // encodeded and compressed by packOrientationQuatToSixBytes()
-        uint8_t translationValidityBits[ceil(numJoints / 8)];  // one bit per joint, if true then a compressed translation follows.
-        float maxTranslationDimension;                         // used to normalize fixed point translation values.
-        SixByteTrans translation[numValidTranslations];        // normalized and compressed by packFloatVec3ToSignedTwoByteFixed()
-        SixByteQuat leftHandControllerRotation;
-        SixByteTrans leftHandControllerTranslation;
-        SixByteQuat rightHandControllerRotation;
-        SixByteTrans rightHandControllerTranslation;
-    };
-    */
-    size_t maxJointDataSize(size_t numJoints, bool hasGrabJoints);
-    size_t minJointDataSize(size_t numJoints);
+/*
+struct JointDefaultPoseFlags {
+   uint8_t numJoints;
+   uint8_t rotationIsDefaultPoseBits[ceil(numJoints / 8)];
+   uint8_t translationIsDefaultPoseBits[ceil(numJoints / 8)];
+};
+*/
+size_t maxJointDefaultPoseFlagsSize(size_t numJoints);
 
-    /*
-    struct JointDefaultPoseFlags {
-       uint8_t numJoints;
-       uint8_t rotationIsDefaultPoseBits[ceil(numJoints / 8)];
-       uint8_t translationIsDefaultPoseBits[ceil(numJoints / 8)];
-    };
-    */
-    size_t maxJointDefaultPoseFlagsSize(size_t numJoints);
+PACKED_BEGIN struct FarGrabJoints {
+    float leftFarGrabPosition[3]; // left controller far-grab joint position
+    float leftFarGrabRotation[4]; // left controller far-grab joint rotation
+    float rightFarGrabPosition[3]; // right controller far-grab joint position
+    float rightFarGrabRotation[4]; // right controller far-grab joint rotation
+    float mouseFarGrabPosition[3]; // mouse far-grab joint position
+    float mouseFarGrabRotation[4]; // mouse far-grab joint rotation
+} PACKED_END;
+const size_t FAR_GRAB_JOINTS_SIZE = 84;
+static_assert(sizeof(FarGrabJoints) == FAR_GRAB_JOINTS_SIZE, "AvatarDataPacket::FarGrabJoints size doesn't match.");
 
-    PACKED_BEGIN struct FarGrabJoints {
-        float leftFarGrabPosition[3]; // left controller far-grab joint position
-        float leftFarGrabRotation[4]; // left controller far-grab joint rotation
-        float rightFarGrabPosition[3]; // right controller far-grab joint position
-        float rightFarGrabRotation[4]; // right controller far-grab joint rotation
-        float mouseFarGrabPosition[3]; // mouse far-grab joint position
-        float mouseFarGrabRotation[4]; // mouse far-grab joint rotation
-    } PACKED_END;
-    const size_t FAR_GRAB_JOINTS_SIZE = 84;
-    static_assert(sizeof(FarGrabJoints) == FAR_GRAB_JOINTS_SIZE, "AvatarDataPacket::FarGrabJoints size doesn't match.");
+static const size_t MIN_BULK_PACKET_SIZE = NUM_BYTES_RFC4122_UUID + HEADER_SIZE;
+static const size_t FAUX_JOINTS_SIZE = 2 * (sizeof(SixByteQuat) + sizeof(SixByteTrans));
 
-    static const size_t MIN_BULK_PACKET_SIZE = NUM_BYTES_RFC4122_UUID + HEADER_SIZE;
-    static const size_t FAUX_JOINTS_SIZE = 2 * (sizeof(SixByteQuat) + sizeof(SixByteTrans));
-
-    struct SendStatus {
-        HasFlags itemFlags { 0 };
-        bool sendUUID { false };
-        int rotationsSent { 0 };  // ie: index of next unsent joint
-        int translationsSent { 0 };
-        operator bool() { return itemFlags == 0; }
-    };
-}
+struct SendStatus {
+    HasFlags itemFlags { 0 };
+    bool sendUUID { false };
+    int rotationsSent { 0 }; // ie: index of next unsent joint
+    int translationsSent { 0 };
+    operator bool() { return itemFlags == 0; }
+};
+} // namespace AvatarDataPacket
 
 const float MAX_AUDIO_LOUDNESS = 1000.0f; // close enough for mouth animation
 
@@ -357,11 +347,7 @@ const float AVATAR_TRANSIT_FRAMES_PER_SECOND = 30.0f;
 const float AVATAR_PRE_TRANSIT_FRAME_COUNT = 10.0f;
 const float AVATAR_POST_TRANSIT_FRAME_COUNT = 27.0f;
 
-enum KeyState {
-    NO_KEY_DOWN = 0,
-    INSERT_KEY_DOWN,
-    DELETE_KEY_DOWN
-};
+enum KeyState { NO_KEY_DOWN = 0, INSERT_KEY_DOWN, DELETE_KEY_DOWN };
 
 enum KillAvatarReason : uint8_t {
     NoReason = 0,
@@ -433,11 +419,13 @@ class AvatarData : public QObject, public SpatiallyNestable {
     Q_PROPERTY(float audioAverageLoudness READ getAudioAverageLoudness WRITE setAudioAverageLoudness)
 
     Q_PROPERTY(QString displayName READ getDisplayName WRITE setDisplayName NOTIFY displayNameChanged)
-    // sessionDisplayName is sanitized, defaulted version displayName that is defined by the AvatarMixer rather than by Interface clients.
-    // The result is unique among all avatars present at the time.
-    Q_PROPERTY(QString sessionDisplayName READ getSessionDisplayName WRITE setSessionDisplayName NOTIFY sessionDisplayNameChanged)
+    // sessionDisplayName is sanitized, defaulted version displayName that is defined by the AvatarMixer rather than by
+    // Interface clients. The result is unique among all avatars present at the time.
+    Q_PROPERTY(
+        QString sessionDisplayName READ getSessionDisplayName WRITE setSessionDisplayName NOTIFY sessionDisplayNameChanged)
     Q_PROPERTY(bool lookAtSnappingEnabled MEMBER _lookAtSnappingEnabled NOTIFY lookAtSnappingChanged)
-    Q_PROPERTY(QString skeletonModelURL READ getSkeletonModelURLFromScript WRITE setSkeletonModelURLFromScript NOTIFY skeletonModelURLChanged)
+    Q_PROPERTY(QString skeletonModelURL READ getSkeletonModelURLFromScript WRITE setSkeletonModelURLFromScript NOTIFY
+                   skeletonModelURLChanged)
     Q_PROPERTY(QVector<AttachmentData> attachmentData READ getAttachmentData WRITE setAttachmentData)
 
     Q_PROPERTY(QStringList jointNames READ getJointNames)
@@ -468,20 +456,15 @@ public:
     glm::vec3 getHandPosition() const;
     void setHandPosition(const glm::vec3& handPosition);
 
-    typedef enum {
-        NoData,
-        PALMinimum,
-        MinimumData,
-        CullSmallData,
-        IncludeSmallData,
-        SendAllData
-    } AvatarDataDetail;
+    typedef enum { NoData, PALMinimum, MinimumData, CullSmallData, IncludeSmallData, SendAllData } AvatarDataDetail;
 
     virtual QByteArray toByteArrayStateful(AvatarDataDetail dataDetail, bool dropFaceTracking = false);
 
-    virtual QByteArray toByteArray(AvatarDataDetail dataDetail, quint64 lastSentTime, const QVector<JointData>& lastSentJointData,
-        AvatarDataPacket::SendStatus& sendStatus, bool dropFaceTracking, bool distanceAdjust, glm::vec3 viewerPosition,
-        QVector<JointData>* sentJointDataOut, int maxDataSize = 0, AvatarDataRate* outboundDataRateOut = nullptr) const;
+    virtual QByteArray toByteArray(AvatarDataDetail dataDetail, quint64 lastSentTime,
+                                   const QVector<JointData>& lastSentJointData, AvatarDataPacket::SendStatus& sendStatus,
+                                   bool dropFaceTracking, bool distanceAdjust, glm::vec3 viewerPosition,
+                                   QVector<JointData>* sentJointDataOut, int maxDataSize = 0,
+                                   AvatarDataRate* outboundDataRateOut = nullptr) const;
 
     virtual void doneEncoding(bool cullSmallChanges);
 
@@ -617,7 +600,7 @@ public:
 
     /**jsdoc
      * @function MyAvatar.getHandState
-     * @returns {string} 
+     * @returns {string}
      */
     Q_INVOKABLE char getHandState() const { return _handState; }
 
@@ -631,10 +614,10 @@ public:
 
     /**jsdoc
      * Set a specific joint's rotation and position relative to its parent.
-     * <p>Setting joint data completely overrides/replaces all motion from the default animation system including inverse 
-     * kinematics, but just for the specified joint. So for example, if you were to procedurally manipulate the finger joints, 
-     * the avatar's hand and head would still do inverse kinematics properly. However, as soon as you start to manipulate 
-     * joints in the inverse kinematics chain, the inverse kinematics might not function as you expect. For example, if you set 
+     * <p>Setting joint data completely overrides/replaces all motion from the default animation system including inverse
+     * kinematics, but just for the specified joint. So for example, if you were to procedurally manipulate the finger joints,
+     * the avatar's hand and head would still do inverse kinematics properly. However, as soon as you start to manipulate
+     * joints in the inverse kinematics chain, the inverse kinematics might not function as you expect. For example, if you set
      * the rotation of the elbow, the hand inverse kinematics position won't end up in the right place.</p>
      * @function MyAvatar.setJointData
      * @param {number} index - The index of the joint.
@@ -659,10 +642,10 @@ public:
 
     /**jsdoc
      * Set a specific joint's rotation relative to its parent.
-     * <p>Setting joint data completely overrides/replaces all motion from the default animation system including inverse 
-     * kinematics, but just for the specified joint. So for example, if you were to procedurally manipulate the finger joints, 
-     * the avatar's hand and head would still do inverse kinematics properly. However, as soon as you start to manipulate 
-     * joints in the inverse kinematics chain, the inverse kinematics might not function as you expect. For example, if you set 
+     * <p>Setting joint data completely overrides/replaces all motion from the default animation system including inverse
+     * kinematics, but just for the specified joint. So for example, if you were to procedurally manipulate the finger joints,
+     * the avatar's hand and head would still do inverse kinematics properly. However, as soon as you start to manipulate
+     * joints in the inverse kinematics chain, the inverse kinematics might not function as you expect. For example, if you set
      * the rotation of the elbow, the hand inverse kinematics position won't end up in the right place.</p>
      * @function MyAvatar.setJointRotation
      * @param {number} index - The index of the joint.
@@ -672,10 +655,10 @@ public:
 
     /**jsdoc
      * Set a specific joint's translation relative to its parent.
-     * <p>Setting joint data completely overrides/replaces all motion from the default animation system including inverse 
-     * kinematics, but just for the specified joint. So for example, if you were to procedurally manipulate the finger joints, 
-     * the avatar's hand and head would still do inverse kinematics properly. However, as soon as you start to manipulate 
-     * joints in the inverse kinematics chain, the inverse kinematics might not function as you expect. For example, if you set 
+     * <p>Setting joint data completely overrides/replaces all motion from the default animation system including inverse
+     * kinematics, but just for the specified joint. So for example, if you were to procedurally manipulate the finger joints,
+     * the avatar's hand and head would still do inverse kinematics properly. However, as soon as you start to manipulate
+     * joints in the inverse kinematics chain, the inverse kinematics might not function as you expect. For example, if you set
      * the rotation of the elbow, the hand inverse kinematics position won't end up in the right place.</p>
      * @function MyAvatar.setJointTranslation
      * @param {number} index - The index of the joint.
@@ -684,7 +667,7 @@ public:
     Q_INVOKABLE virtual void setJointTranslation(int index, const glm::vec3& translation);
 
     /**jsdoc
-     * Clear joint translations and rotations set by script for a specific joint. This restores all motion from the default 
+     * Clear joint translations and rotations set by script for a specific joint. This restores all motion from the default
      * animation system including inverse kinematics for that joint.
      * <p>Note: This is slightly faster than the function variation that specifies the joint name.</p>
      * @function MyAvatar.clearJointData
@@ -695,12 +678,12 @@ public:
     /**jsdoc
      * @function MyAvatar.isJointDataValid
      * @param {number} index
-     * @returns {boolean} 
+     * @returns {boolean}
      */
     Q_INVOKABLE bool isJointDataValid(int index) const;
 
     /**jsdoc
-     * Get the rotation of a joint relative to its parent. For information on the joint hierarchy used, see 
+     * Get the rotation of a joint relative to its parent. For information on the joint hierarchy used, see
      * <a href="https://docs.highfidelity.com/create-and-explore/avatars/avatar-standards">Avatar Standards</a>.
      * @function MyAvatar.getJointRotation
      * @param {number} index - The index of the joint.
@@ -709,7 +692,7 @@ public:
     Q_INVOKABLE virtual glm::quat getJointRotation(int index) const;
 
     /**jsdoc
-     * Get the translation of a joint relative to its parent. For information on the joint hierarchy used, see 
+     * Get the translation of a joint relative to its parent. For information on the joint hierarchy used, see
      * <a href="https://docs.highfidelity.com/create-and-explore/avatars/avatar-standards">Avatar Standards</a>.
      * @function MyAvatar.getJointTranslation
      * @param {number} index - The index of the joint.
@@ -719,10 +702,10 @@ public:
 
     /**jsdoc
      * Set a specific joint's rotation and position relative to its parent.
-     * <p>Setting joint data completely overrides/replaces all motion from the default animation system including inverse 
-     * kinematics, but just for the specified joint. So for example, if you were to procedurally manipulate the finger joints, 
-     * the avatar's hand and head would still do inverse kinematics properly. However, as soon as you start to manipulate 
-     * joints in the inverse kinematics chain, the inverse kinematics might not function as you expect. For example, if you set 
+     * <p>Setting joint data completely overrides/replaces all motion from the default animation system including inverse
+     * kinematics, but just for the specified joint. So for example, if you were to procedurally manipulate the finger joints,
+     * the avatar's hand and head would still do inverse kinematics properly. However, as soon as you start to manipulate
+     * joints in the inverse kinematics chain, the inverse kinematics might not function as you expect. For example, if you set
      * the rotation of the elbow, the hand inverse kinematics position won't end up in the right place.</p>
      * @function MyAvatar.setJointData
      * @param {string} name - The name of the joint.
@@ -733,10 +716,10 @@ public:
 
     /**jsdoc
      * Set a specific joint's rotation relative to its parent.
-     * <p>Setting joint data completely overrides/replaces all motion from the default animation system including inverse 
-     * kinematics, but just for the specified joint. So for example, if you were to procedurally manipulate the finger joints, 
-     * the avatar's hand and head would still do inverse kinematics properly. However, as soon as you start to manipulate 
-     * joints in the inverse kinematics chain, the inverse kinematics might not function as you expect. For example, if you set 
+     * <p>Setting joint data completely overrides/replaces all motion from the default animation system including inverse
+     * kinematics, but just for the specified joint. So for example, if you were to procedurally manipulate the finger joints,
+     * the avatar's hand and head would still do inverse kinematics properly. However, as soon as you start to manipulate
+     * joints in the inverse kinematics chain, the inverse kinematics might not function as you expect. For example, if you set
      * the rotation of the elbow, the hand inverse kinematics position won't end up in the right place.</p>
      * @function MyAvatar.setJointRotation
      * @param {string} name - The name of the joint.
@@ -764,20 +747,20 @@ public:
 
     /**jsdoc
      * Set a specific joint's translation relative to its parent.
-     * <p>Setting joint data completely overrides/replaces all motion from the default animation system including inverse 
-     * kinematics, but just for the specified joint. So for example, if you were to procedurally manipulate the finger joints, 
-     * the avatar's hand and head would still do inverse kinematics properly. However, as soon as you start to manipulate 
-     * joints in the inverse kinematics chain, the inverse kinematics might not function as you expect. For example, if you set 
+     * <p>Setting joint data completely overrides/replaces all motion from the default animation system including inverse
+     * kinematics, but just for the specified joint. So for example, if you were to procedurally manipulate the finger joints,
+     * the avatar's hand and head would still do inverse kinematics properly. However, as soon as you start to manipulate
+     * joints in the inverse kinematics chain, the inverse kinematics might not function as you expect. For example, if you set
      * the rotation of the elbow, the hand inverse kinematics position won't end up in the right place.</p>
      * @function MyAvatar.setJointTranslation
      * @param {string} name - The name of the joint.
      * @param {Vec3} translation - The translation of the joint relative to its parent.
-     * @example <caption>Stretch your avatar's neck. Depending on the avatar you are using, you will either see a gap between 
+     * @example <caption>Stretch your avatar's neck. Depending on the avatar you are using, you will either see a gap between
      * the head and body or you will see the neck stretched.<br />
      * <img alt="Avatar with neck stretched" src="https://docs.highfidelity.com/images/stretched-neck.png" /></caption>
      * // Stretch your avatar's neck.
      * MyAvatar.setJointTranslation("Neck", { x: 0, y: 25, z: 0 });
-     * 
+     *
      * // Restore your avatar's neck after 5s.
      * Script.setTimeout(function () {
      *     MyAvatar.clearJointData("Neck");
@@ -786,7 +769,7 @@ public:
     Q_INVOKABLE virtual void setJointTranslation(const QString& name, const glm::vec3& translation);
 
     /**jsdoc
-     * Clear joint translations and rotations set by script for a specific joint. This restores all motion from the default 
+     * Clear joint translations and rotations set by script for a specific joint. This restores all motion from the default
      * animation system including inverse kinematics for that joint.
      * <p>Note: This is slightly slower than the function variation that specifies the joint index.</p>
      * @function MyAvatar.clearJointData
@@ -805,12 +788,12 @@ public:
     /**jsdoc
      * @function MyAvatar.isJointDataValid
      * @param {string} name
-     * @returns {boolean} 
+     * @returns {boolean}
      */
     Q_INVOKABLE virtual bool isJointDataValid(const QString& name) const;
 
     /**jsdoc
-     * Get the rotation of a joint relative to its parent. For information on the joint hierarchy used, see 
+     * Get the rotation of a joint relative to its parent. For information on the joint hierarchy used, see
      * <a href="https://docs.highfidelity.com/create-and-explore/avatars/avatar-standards">Avatar Standards</a>.
      * @function MyAvatar.getJointRotation
      * @param {string} name - The name of the joint.
@@ -821,7 +804,7 @@ public:
     Q_INVOKABLE virtual glm::quat getJointRotation(const QString& name) const;
 
     /**jsdoc
-     * Get the translation of a joint relative to its parent. For information on the joint hierarchy used, see 
+     * Get the translation of a joint relative to its parent. For information on the joint hierarchy used, see
      * <a href="https://docs.highfidelity.com/create-and-explore/avatars/avatar-standards">Avatar Standards</a>.
      * @function MyAvatar.getJointTranslation
      * @param {number} name - The name of the joint.
@@ -834,7 +817,7 @@ public:
     /**jsdoc
      * Get the rotations of all joints in the current avatar. Each joint's rotation is relative to its parent joint.
      * @function MyAvatar.getJointRotations
-     * @returns {Quat[]} The rotations of all joints relative to each's parent. The values are in the same order as the array 
+     * @returns {Quat[]} The rotations of all joints relative to each's parent. The values are in the same order as the array
      * returned by {@link MyAvatar.getJointNames} or {@link Avatar.getJointNames}.
      * @example <caption>Report the rotations of all your avatar's joints.</caption>
      * print(JSON.stringify(MyAvatar.getJointRotations()));
@@ -843,7 +826,7 @@ public:
 
     /**jsdoc
      * @function MyAvatar.getJointTranslations
-     * @returns {Vec3[]} 
+     * @returns {Vec3[]}
      */
     Q_INVOKABLE virtual QVector<glm::vec3> getJointTranslations() const;
 
@@ -855,7 +838,7 @@ public:
      * joints in the inverse kinematics chain, the inverse kinematics might not function as you expect. For example, if you set
      * the rotation of the elbow, the hand inverse kinematics position won't end up in the right place.</p>
      * @function MyAvatar.setJointRotations
-     * @param {Quat[]} jointRotations - The rotations for all joints in the avatar. The values are in the same order as the 
+     * @param {Quat[]} jointRotations - The rotations for all joints in the avatar. The values are in the same order as the
      * array returned by {@link MyAvatar.getJointNames} or {@link Avatar.getJointNames}.
      * @example <caption>Set your avatar to its default T-pose then rotate its right arm.<br />
      * <img alt="Avatar in T-pose" src="https://docs.highfidelity.com/images/armpose.png" /></caption>
@@ -868,7 +851,7 @@ public:
      * }
      *
      * // Get all join rotations.
-     * var jointRotations = MyAvatar.getJointRotations(); 
+     * var jointRotations = MyAvatar.getJointRotations();
      *
      * // Update the rotation of the right arm in the array.
      * jointRotations[MyAvatar.getJointIndex("RightArm")] = { x: 0.47, y: 0.22, z: -0.02, w: 0.87 };
@@ -882,7 +865,7 @@ public:
      * }, 5000);
      */
     Q_INVOKABLE virtual void setJointRotations(const QVector<glm::quat>& jointRotations);
-    
+
     /**jsdoc
      * @function MyAvatar.setJointTranslations
      * @param {Vec3[]} translations
@@ -890,7 +873,7 @@ public:
     Q_INVOKABLE virtual void setJointTranslations(const QVector<glm::vec3>& jointTranslations);
 
     /**jsdoc
-     * Clear all joint translations and rotations that have been set by script. This restores all motion from the default 
+     * Clear all joint translations and rotations that have been set by script. This restores all motion from the default
      * animation system including inverse kinematics for all joints.
      * @function MyAvatar.clearJointsData
      * @example <caption>Set your avatar to it's default T-pose for a while.</caption>
@@ -910,7 +893,7 @@ public:
     Q_INVOKABLE virtual void clearJointsData();
 
     /**jsdoc
-     * Get the joint index for a named joint. The joint index value is the position of the joint in the array returned by 
+     * Get the joint index for a named joint. The joint index value is the position of the joint in the array returned by
      * {@link MyAvatar.getJointNames} or {@link Avatar.getJointNames}.
      * @function MyAvatar.getJointIndex
      * @param {string} name - The name of the joint.
@@ -930,7 +913,6 @@ public:
      */
     Q_INVOKABLE virtual QStringList getJointNames() const;
 
-
     /**jsdoc
      * @function MyAvatar.setBlendshape
      * @param {string} name
@@ -938,10 +920,9 @@ public:
      */
     Q_INVOKABLE void setBlendshape(QString name, float val) { _headData->setBlendshape(name, val); }
 
-
     /**jsdoc
      * @function MyAvatar.getAttachmentsVariant
-     * @returns {object} 
+     * @returns {object}
      */
     // FIXME: Can this name be improved? Can it be deprecated?
     Q_INVOKABLE virtual QVariantList getAttachmentsVariant() const;
@@ -968,7 +949,6 @@ public:
      */
     Q_INVOKABLE virtual void clearAvatarEntity(const QUuid& entityID, bool requiresRemovalFromTree = true);
 
-
     /**jsdoc
      * @function MyAvatar.setForceFaceTrackerConnected
      * @param {boolean} connected
@@ -990,19 +970,21 @@ public:
     };
 
     // identityChanged returns true if identity has changed, false otherwise.
-    // identityChanged returns true if identity has changed, false otherwise. Similarly for displayNameChanged and skeletonModelUrlChange.
+    // identityChanged returns true if identity has changed, false otherwise. Similarly for displayNameChanged and
+    // skeletonModelUrlChange.
     void processAvatarIdentity(QDataStream& packetStream, bool& identityChanged, bool& displayNameChanged);
 
     qint64 packTrait(AvatarTraits::TraitType traitType, ExtendedIODevice& destination,
                      AvatarTraits::TraitVersion traitVersion = AvatarTraits::NULL_TRAIT_VERSION);
     qint64 packTraitInstance(AvatarTraits::TraitType traitType, AvatarTraits::TraitInstanceID instanceID,
-                             ExtendedIODevice& destination, AvatarTraits::TraitVersion traitVersion = AvatarTraits::NULL_TRAIT_VERSION);
+                             ExtendedIODevice& destination,
+                             AvatarTraits::TraitVersion traitVersion = AvatarTraits::NULL_TRAIT_VERSION);
 
     void prepareResetTraitInstances();
 
     void processTrait(AvatarTraits::TraitType traitType, QByteArray traitBinaryData);
-    void processTraitInstance(AvatarTraits::TraitType traitType,
-                              AvatarTraits::TraitInstanceID instanceID, QByteArray traitBinaryData);
+    void processTraitInstance(AvatarTraits::TraitType traitType, AvatarTraits::TraitInstanceID instanceID,
+                              QByteArray traitBinaryData);
     void processDeletedTraitInstance(AvatarTraits::TraitType traitType, AvatarTraits::TraitInstanceID instanceID);
 
     QByteArray identityByteArray(bool setIsReplicated = false) const;
@@ -1034,11 +1016,12 @@ public:
     Q_INVOKABLE virtual QVector<AttachmentData> getAttachmentData() const;
 
     /**jsdoc
-     * Set all models currently attached to your avatar. For example, if you retrieve attachment data using 
-     * {@link MyAvatar.getAttachmentData} or {@link Avatar.getAttachmentData}, make changes to it, and then want to update your avatar's attachments per the 
-     * changed data. You can also remove all attachments by using setting <code>attachmentData</code> to <code>null</code>.
+     * Set all models currently attached to your avatar. For example, if you retrieve attachment data using
+     * {@link MyAvatar.getAttachmentData} or {@link Avatar.getAttachmentData}, make changes to it, and then want to update your
+     * avatar's attachments per the changed data. You can also remove all attachments by using setting
+     * <code>attachmentData</code> to <code>null</code>.
      * @function MyAvatar.setAttachmentData
-     * @param {AttachmentData[]} attachmentData - The attachment data defining the models to have attached to your avatar. Use 
+     * @param {AttachmentData[]} attachmentData - The attachment data defining the models to have attached to your avatar. Use
      *     <code>null</code> to remove all attachments.
      * @example <caption>Remove a hat attachment if your avatar is wearing it.</caption>
      * var hatURL = "https://s3.amazonaws.com/hifi-public/tony/cowboy-hat.fbx";
@@ -1055,21 +1038,21 @@ public:
     Q_INVOKABLE virtual void setAttachmentData(const QVector<AttachmentData>& attachmentData);
 
     /**jsdoc
-     * Attach a model to your avatar. For example, you can give your avatar a hat to wear, a guitar to hold, or a surfboard to 
+     * Attach a model to your avatar. For example, you can give your avatar a hat to wear, a guitar to hold, or a surfboard to
      * stand on.
-     * <p>Note: Attached models are models only; they are not entities and can not be manipulated using the {@link Entities} API. 
-     * Nor can you use this function to attach an entity (such as a sphere or a box) to your avatar.</p>
+     * <p>Note: Attached models are models only; they are not entities and can not be manipulated using the {@link Entities}
+     * API. Nor can you use this function to attach an entity (such as a sphere or a box) to your avatar.</p>
      * @function MyAvatar.attach
      * @param {string} modelURL - The URL of the model to attach. Models can be .FBX or .OBJ format.
-     * @param {string} [jointName=""] - The name of the avatar joint (see {@link MyAvatar.getJointNames} or {@link Avatar.getJointNames}) to attach the model 
-     *     to.
+     * @param {string} [jointName=""] - The name of the avatar joint (see {@link MyAvatar.getJointNames} or {@link
+     * Avatar.getJointNames}) to attach the model to.
      * @param {Vec3} [translation=Vec3.ZERO] - The offset to apply to the model relative to the joint position.
      * @param {Quat} [rotation=Quat.IDENTITY] - The rotation to apply to the model relative to the joint orientation.
      * @param {number} [scale=1.0] - The scale to apply to the model.
-     * @param {boolean} [isSoft=false] -  If the model has a skeleton, set this to <code>true</code> so that the bones of the 
-     *     attached model's skeleton are be rotated to fit the avatar's current pose. <code>isSoft</code> is used, for example, 
+     * @param {boolean} [isSoft=false] -  If the model has a skeleton, set this to <code>true</code> so that the bones of the
+     *     attached model's skeleton are be rotated to fit the avatar's current pose. <code>isSoft</code> is used, for example,
      *     to have clothing that moves with the avatar.<br />
-     *     If <code>true</code>, the <code>translation</code>, <code>rotation</code>, and <code>scale</code> parameters are 
+     *     If <code>true</code>, the <code>translation</code>, <code>rotation</code>, and <code>scale</code> parameters are
      *     ignored.
      * @param {boolean} [allowDuplicates=false]
      * @param {boolean} [useSaved=true]
@@ -1092,14 +1075,14 @@ public:
      */
     Q_INVOKABLE virtual void attach(const QString& modelURL, const QString& jointName = QString(),
                                     const glm::vec3& translation = glm::vec3(), const glm::quat& rotation = glm::quat(),
-                                    float scale = 1.0f, bool isSoft = false,
-                                    bool allowDuplicates = false, bool useSaved = true);
+                                    float scale = 1.0f, bool isSoft = false, bool allowDuplicates = false,
+                                    bool useSaved = true);
 
     /**jsdoc
      * Detach the most recently attached instance of a particular model from either a specific joint or any joint.
      * @function MyAvatar.detachOne
      * @param {string} modelURL - The URL of the model to detach.
-     * @param {string} [jointName=""] - The name of the joint to detach the model from. If <code>""</code>, then the most 
+     * @param {string} [jointName=""] - The name of the joint to detach the model from. If <code>""</code>, then the most
      *     recently attached model is removed from which ever joint it was attached to.
      */
     Q_INVOKABLE virtual void detachOne(const QString& modelURL, const QString& jointName = QString());
@@ -1108,7 +1091,7 @@ public:
      * Detach all instances of a particular model from either a specific joint or all joints.
      * @function MyAvatar.detachAll
      * @param {string} modelURL - The URL of the model to detach.
-     * @param {string} [jointName=""] - The name of the joint to detach the model from. If <code>""</code>, then the model is 
+     * @param {string} [jointName=""] - The name of the joint to detach the model from. If <code>""</code>, then the model is
      *     detached from all joints.
      */
     Q_INVOKABLE virtual void detachAll(const QString& modelURL, const QString& jointName = QString());
@@ -1132,12 +1115,14 @@ public:
     void fromJson(const QJsonObject& json, bool useFrameSkeleton = true);
 
     glm::vec3 getClientGlobalPosition() const { return _globalPosition; }
-    AABox getGlobalBoundingBox() const { return AABox(_globalPosition + _globalBoundingBoxOffset - _globalBoundingBoxDimensions, _globalBoundingBoxDimensions); }
+    AABox getGlobalBoundingBox() const {
+        return AABox(_globalPosition + _globalBoundingBoxOffset - _globalBoundingBoxDimensions, _globalBoundingBoxDimensions);
+    }
     AABox getDefaultBubbleBox() const;
 
     /**jsdoc
      * @function MyAvatar.getAvatarEntityData
-     * @returns {object} 
+     * @returns {object}
      */
     Q_INVOKABLE virtual AvatarEntityMap getAvatarEntityData() const;
 
@@ -1152,44 +1137,43 @@ public:
 
     /**jsdoc
      * @function MyAvatar.getSensorToWorldMatrix
-     * @returns {Mat4} 
+     * @returns {Mat4}
      */
     // thread safe
     Q_INVOKABLE glm::mat4 getSensorToWorldMatrix() const;
 
     /**jsdoc
      * @function MyAvatar.getSensorToWorldScale
-     * @returns {number} 
+     * @returns {number}
      */
     // thread safe
     Q_INVOKABLE float getSensorToWorldScale() const;
 
     /**jsdoc
      * @function MyAvatar.getControllerLeftHandMatrix
-     * @returns {Mat4} 
+     * @returns {Mat4}
      */
     // thread safe
     Q_INVOKABLE glm::mat4 getControllerLeftHandMatrix() const;
 
     /**jsdoc
      * @function MyAvatar.getControllerRightHandMatrix
-     * @returns {Mat4} 
+     * @returns {Mat4}
      */
     // thread safe
     Q_INVOKABLE glm::mat4 getControllerRightHandMatrix() const;
 
-
     /**jsdoc
      * @function MyAvatar.getDataRate
      * @param {string} [rateName=""]
-     * @returns {number} 
+     * @returns {number}
      */
     Q_INVOKABLE float getDataRate(const QString& rateName = QString("")) const;
 
     /**jsdoc
      * @function MyAvatar.getUpdateRate
      * @param {string} [rateName=""]
-     * @returns {number} 
+     * @returns {number}
      */
     Q_INVOKABLE float getUpdateRate(const QString& rateName = QString("")) const;
 
@@ -1210,7 +1194,9 @@ public:
     static float _avatarSortCoefficientCenter;
     static float _avatarSortCoefficientAge;
 
-    bool getIdentityDataChanged() const { return _identityDataChanged; } // has the identity data changed since the last time sendIdentityPacket() was called
+    bool getIdentityDataChanged() const {
+        return _identityDataChanged;
+    } // has the identity data changed since the last time sendIdentityPacket() was called
     void markIdentityDataChanged() { _identityDataChanged = true; }
 
     void pushIdentitySequenceNumber() { ++_identitySequenceNumber; };
@@ -1225,7 +1211,7 @@ public:
     void setReplicaIndex(int replicaIndex) { _replicaIndex = replicaIndex; }
     int getReplicaIndex() { return _replicaIndex; }
 
-    static const float DEFAULT_BUBBLE_SCALE;  /* = 2.4 */
+    static const float DEFAULT_BUBBLE_SCALE; /* = 2.4 */
     AABox computeBubbleBox(float bubbleScale = DEFAULT_BUBBLE_SCALE) const;
 
     void setIsNewAvatar(bool isNewAvatar) { _isNewAvatar = isNewAvatar; }
@@ -1267,7 +1253,7 @@ signals:
 
 public slots:
 
-/**jsdoc
+    /**jsdoc
      * @function MyAvatar.sendAvatarDataPacket
      * @param {boolean} [sendAll=false]
      */
@@ -1296,14 +1282,14 @@ public slots:
     /**jsdoc
      * @function MyAvatar.getAbsoluteJointRotationInObjectFrame
      * @param {number} index
-     * @returns {Quat} 
+     * @returns {Quat}
      */
     virtual glm::quat getAbsoluteJointRotationInObjectFrame(int index) const override;
 
     /**jsdoc
      * @function MyAvatar.getAbsoluteJointTranslationInObjectFrame
      * @param {number} index
-     * @returns {Vec3} 
+     * @returns {Vec3}
      */
     virtual glm::vec3 getAbsoluteJointTranslationInObjectFrame(int index) const override;
 
@@ -1319,13 +1305,13 @@ public slots:
      * @function MyAvatar.setAbsoluteJointTranslationInObjectFrame
      * @param {number} index
      * @param {Vec3} translation
-     * @returns {boolean} 
+     * @returns {boolean}
      */
     virtual bool setAbsoluteJointTranslationInObjectFrame(int index, const glm::vec3& translation) override { return false; }
 
     /**jsdoc
      * @function MyAvatar.getTargetScale
-     * @returns {number} 
+     * @returns {number}
      */
     float getTargetScale() const { return _targetScale; } // why is this a slot?
 
@@ -1352,20 +1338,18 @@ protected:
     bool hasParent() const { return !getParentID().isNull(); }
     bool hasFaceTracker() const { return _headData ? _headData->_isFaceTrackerConnected : false; }
 
-    qint64 packAvatarEntityTraitInstance(AvatarTraits::TraitType traitType,
-                                         AvatarTraits::TraitInstanceID traitInstanceID,
+    qint64 packAvatarEntityTraitInstance(AvatarTraits::TraitType traitType, AvatarTraits::TraitInstanceID traitInstanceID,
                                          ExtendedIODevice& destination, AvatarTraits::TraitVersion traitVersion);
-    qint64 packGrabTraitInstance(AvatarTraits::TraitType traitType,
-                                 AvatarTraits::TraitInstanceID traitInstanceID,
+    qint64 packGrabTraitInstance(AvatarTraits::TraitType traitType, AvatarTraits::TraitInstanceID traitInstanceID,
                                  ExtendedIODevice& destination, AvatarTraits::TraitVersion traitVersion);
 
     // isReplicated will be true on downstream Avatar Mixers and their clients, but false on the upstream "master"
     // Audio Mixer that the replicated avatar is connected to.
-    bool _isReplicated{ false };
+    bool _isReplicated { false };
 
     glm::vec3 _handPosition;
     virtual const QString& getSessionDisplayNameForTransport() const { return _sessionDisplayName; }
-    virtual void maybeUpdateSessionDisplayNameFromTransport(const QString& sessionDisplayName) { } // No-op in AvatarMixer
+    virtual void maybeUpdateSessionDisplayNameFromTransport(const QString& sessionDisplayName) {} // No-op in AvatarMixer
 
     // Body scale
     float _targetScale;
@@ -1391,7 +1375,7 @@ protected:
     QVector<AttachmentData> _attachmentData;
     QVector<AttachmentData> _oldAttachmentData;
     QString _displayName;
-    QString _sessionDisplayName { };
+    QString _sessionDisplayName {};
     bool _lookAtSnappingEnabled { true };
 
     quint64 _errorLogExpiry; ///< time in future when to log an error
@@ -1419,7 +1403,7 @@ protected:
     quint64 _additionalFlagsChanged { 0 };
     quint64 _parentChanged { 0 };
 
-    quint64  _lastToByteArray { 0 }; // tracks the last time we did a toByteArray
+    quint64 _lastToByteArray { 0 }; // tracks the last time we did a toByteArray
 
     // Some rate data for incoming data in bytes
     RateCounter<> _parseBufferRate;
@@ -1482,7 +1466,7 @@ protected:
     ThreadSafeValueCache<glm::mat4> _farGrabLeftMatrixCache { glm::mat4() };
     ThreadSafeValueCache<glm::mat4> _farGrabMouseMatrixCache { glm::mat4() };
 
-    ThreadSafeValueCache<QVariantMap> _collisionCapsuleCache{ QVariantMap() };
+    ThreadSafeValueCache<QVariantMap> _collisionCapsuleCache { QVariantMap() };
 
     int getFauxJointIndex(const QString& name) const;
 
@@ -1502,7 +1486,7 @@ protected:
     // null unless MyAvatar or ScriptableAvatar sending traits data to mixer
     std::unique_ptr<ClientTraitsHandler, LaterDeleter> _clientTraitsHandler;
 
-    template <typename T, typename F>
+    template<typename T, typename F>
     T readLockWithNamedJointIndex(const QString& name, const T& defaultValue, F f) const {
         int index = getFauxJointIndex(name);
         QReadLocker readLock(&_jointDataLock);
@@ -1515,12 +1499,12 @@ protected:
         return f(index);
     }
 
-    template <typename T, typename F>
+    template<typename T, typename F>
     T readLockWithNamedJointIndex(const QString& name, F f) const {
         return readLockWithNamedJointIndex(name, T(), f);
     }
 
-    template <typename F>
+    template<typename F>
     void writeLockWithNamedJointIndex(const QString& name, F f) {
         int index = getFauxJointIndex(name);
         QWriteLocker writeLock(&_jointDataLock);
@@ -1541,7 +1525,7 @@ private:
     static QUrl _defaultFullAvatarModelUrl;
     // privatize the copy constructor and assignment operator so they cannot be called
     AvatarData(const AvatarData&);
-    AvatarData& operator= (const AvatarData&);
+    AvatarData& operator=(const AvatarData&);
 };
 Q_DECLARE_METATYPE(AvatarData*)
 
@@ -1585,7 +1569,6 @@ class AttachmentDataObject : public QObject, protected QScriptable {
     Q_PROPERTY(bool isSoft READ getIsSoft WRITE setIsSoft)
 
 public:
-
     Q_INVOKABLE void setModelURL(const QString& modelURL);
     Q_INVOKABLE QString getModelURL() const;
 

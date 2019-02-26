@@ -28,58 +28,53 @@
 
 #include "ParticleEffectEntityItem.h"
 
-#include <glm/gtx/transform.hpp>
 #include <QtCore/QJsonDocument>
+#include <glm/gtx/transform.hpp>
 
 #include <ByteCountCoding.h>
 #include <GeometryUtil.h>
 #include <Interpolate.h>
 
-#include "EntityTree.h"
-#include "EntityTreeElement.h"
 #include "EntitiesLogging.h"
 #include "EntityScriptingInterface.h"
+#include "EntityTree.h"
+#include "EntityTreeElement.h"
 
 using namespace particle;
 
-template <typename T>
+template<typename T>
 bool operator==(const Range<T>& a, const Range<T>& b) {
     return (a.start == b.start && a.finish == b.finish);
 }
 
-template <typename T>
+template<typename T>
 bool operator==(const Gradient<T>& a, const Gradient<T>& b) {
     return (a.target == b.target && a.spread == b.spread);
 }
 
-template <typename T>
+template<typename T>
 bool operator==(const RangeGradient<T>& a, const RangeGradient<T>& b) {
     return (a.gradient == b.gradient && a.range == b.range);
 }
 
-template <typename T>
+template<typename T>
 bool operator!=(const Range<T>& a, const Range<T>& b) {
     return !(a == b);
 }
 
-template <typename T>
+template<typename T>
 bool operator!=(const Gradient<T>& a, const Gradient<T>& b) {
     return !(a == b);
 }
 
-template <typename T>
+template<typename T>
 bool operator!=(const RangeGradient<T>& a, const RangeGradient<T>& b) {
     return !(a == b);
 }
 
 bool operator==(const EmitProperties& a, const EmitProperties& b) {
-    return 
-        (a.rate == b.rate) &&
-        (a.speed == b.speed) &&
-        (a.acceleration == b.acceleration) &&
-        (a.orientation == b.orientation) &&
-        (a.dimensions == b.dimensions) &&
-        (a.shouldTrail == b.shouldTrail);
+    return (a.rate == b.rate) && (a.speed == b.speed) && (a.acceleration == b.acceleration) &&
+           (a.orientation == b.orientation) && (a.dimensions == b.dimensions) && (a.shouldTrail == b.shouldTrail);
 }
 
 bool operator!=(const EmitProperties& a, const EmitProperties& b) {
@@ -87,19 +82,10 @@ bool operator!=(const EmitProperties& a, const EmitProperties& b) {
 }
 
 bool operator==(const Properties& a, const Properties& b) {
-    return
-        (a.color == b.color) &&
-        (a.alpha == b.alpha) &&
-        (a.radiusStart == b.radiusStart) &&
-        (a.radius == b.radius) &&
-        (a.spin == b.spin) &&
-        (a.rotateWithEntity == b.rotateWithEntity) &&
-        (a.lifespan == b.lifespan) &&
-        (a.maxParticles == b.maxParticles) &&
-        (a.emission == b.emission) &&
-        (a.polar == b.polar) &&
-        (a.azimuth == b.azimuth) &&
-        (a.textures == b.textures);
+    return (a.color == b.color) && (a.alpha == b.alpha) && (a.radiusStart == b.radiusStart) && (a.radius == b.radius) &&
+           (a.spin == b.spin) && (a.rotateWithEntity == b.rotateWithEntity) && (a.lifespan == b.lifespan) &&
+           (a.maxParticles == b.maxParticles) && (a.emission == b.emission) && (a.polar == b.polar) &&
+           (a.azimuth == b.azimuth) && (a.textures == b.textures);
 }
 
 bool operator!=(const Properties& a, const Properties& b) {
@@ -112,37 +98,38 @@ bool Properties::valid() const {
         return false;
     }
 
-    return
-        (alpha.gradient.target == glm::clamp(alpha.gradient.target, MINIMUM_ALPHA, MAXIMUM_ALPHA)) &&
-        (alpha.range.start == glm::clamp(alpha.range.start, MINIMUM_ALPHA, MAXIMUM_ALPHA)) &&
-        (alpha.range.finish == glm::clamp(alpha.range.finish, MINIMUM_ALPHA, MAXIMUM_ALPHA)) &&
-        (alpha.gradient.spread == glm::clamp(alpha.gradient.spread, MINIMUM_ALPHA, MAXIMUM_ALPHA)) &&
-        (radiusStart == glm::clamp(radiusStart, MINIMUM_EMIT_RADIUS_START, MAXIMUM_EMIT_RADIUS_START)) &&
-        (radius.gradient.target == glm::clamp(radius.gradient.target, MINIMUM_PARTICLE_RADIUS, MAXIMUM_PARTICLE_RADIUS)) &&
-        (radius.range.start == glm::clamp(radius.range.start, MINIMUM_PARTICLE_RADIUS, MAXIMUM_PARTICLE_RADIUS)) &&
-        (radius.range.finish == glm::clamp(radius.range.finish, MINIMUM_PARTICLE_RADIUS, MAXIMUM_PARTICLE_RADIUS)) &&
-        (radius.gradient.spread == glm::clamp(radius.gradient.spread, MINIMUM_PARTICLE_RADIUS, MAXIMUM_PARTICLE_RADIUS)) &&
-        (spin.gradient.target == glm::clamp(spin.gradient.target, MINIMUM_PARTICLE_SPIN, MAXIMUM_PARTICLE_SPIN)) &&
-        (spin.range.start == glm::clamp(spin.range.start, MINIMUM_PARTICLE_SPIN, MAXIMUM_PARTICLE_SPIN)) &&
-        (spin.range.finish == glm::clamp(spin.range.finish, MINIMUM_PARTICLE_SPIN, MAXIMUM_PARTICLE_SPIN)) &&
-        (spin.gradient.spread == glm::clamp(spin.gradient.spread, MINIMUM_PARTICLE_SPIN, MAXIMUM_PARTICLE_SPIN)) &&
-        (lifespan == glm::clamp(lifespan, MINIMUM_LIFESPAN, MAXIMUM_LIFESPAN)) &&
-        (maxParticles == glm::clamp(maxParticles, MINIMUM_MAX_PARTICLES, MAXIMUM_MAX_PARTICLES)) &&
-        (emission.rate == glm::clamp(emission.rate, MINIMUM_EMIT_RATE, MAXIMUM_EMIT_RATE)) &&
-        (emission.speed.target == glm::clamp(emission.speed.target, MINIMUM_EMIT_SPEED, MAXIMUM_EMIT_SPEED)) &&
-        (emission.speed.spread == glm::clamp(emission.speed.spread, MINIMUM_EMIT_SPEED, MAXIMUM_EMIT_SPEED)) &&
-        (emission.acceleration.target == glm::clamp(emission.acceleration.target, vec3(MINIMUM_EMIT_ACCELERATION), vec3(MAXIMUM_EMIT_ACCELERATION))) &&
-        (emission.acceleration.spread == glm::clamp(emission.acceleration.spread, vec3(MINIMUM_ACCELERATION_SPREAD), vec3(MAXIMUM_ACCELERATION_SPREAD)) &&
-        (emission.dimensions == glm::clamp(emission.dimensions, vec3(MINIMUM_EMIT_DIMENSION), vec3(MAXIMUM_EMIT_DIMENSION))) &&
-        (polar.start == glm::clamp(polar.start, MINIMUM_POLAR, MAXIMUM_POLAR)) &&
-        (polar.finish == glm::clamp(polar.finish, MINIMUM_POLAR, MAXIMUM_POLAR)) &&
-        (azimuth.start == glm::clamp(azimuth.start, MINIMUM_AZIMUTH, MAXIMUM_AZIMUTH)) &&
-        (azimuth.finish == glm::clamp(azimuth.finish, MINIMUM_AZIMUTH, MAXIMUM_AZIMUTH)));
+    return (alpha.gradient.target == glm::clamp(alpha.gradient.target, MINIMUM_ALPHA, MAXIMUM_ALPHA)) &&
+           (alpha.range.start == glm::clamp(alpha.range.start, MINIMUM_ALPHA, MAXIMUM_ALPHA)) &&
+           (alpha.range.finish == glm::clamp(alpha.range.finish, MINIMUM_ALPHA, MAXIMUM_ALPHA)) &&
+           (alpha.gradient.spread == glm::clamp(alpha.gradient.spread, MINIMUM_ALPHA, MAXIMUM_ALPHA)) &&
+           (radiusStart == glm::clamp(radiusStart, MINIMUM_EMIT_RADIUS_START, MAXIMUM_EMIT_RADIUS_START)) &&
+           (radius.gradient.target == glm::clamp(radius.gradient.target, MINIMUM_PARTICLE_RADIUS, MAXIMUM_PARTICLE_RADIUS)) &&
+           (radius.range.start == glm::clamp(radius.range.start, MINIMUM_PARTICLE_RADIUS, MAXIMUM_PARTICLE_RADIUS)) &&
+           (radius.range.finish == glm::clamp(radius.range.finish, MINIMUM_PARTICLE_RADIUS, MAXIMUM_PARTICLE_RADIUS)) &&
+           (radius.gradient.spread == glm::clamp(radius.gradient.spread, MINIMUM_PARTICLE_RADIUS, MAXIMUM_PARTICLE_RADIUS)) &&
+           (spin.gradient.target == glm::clamp(spin.gradient.target, MINIMUM_PARTICLE_SPIN, MAXIMUM_PARTICLE_SPIN)) &&
+           (spin.range.start == glm::clamp(spin.range.start, MINIMUM_PARTICLE_SPIN, MAXIMUM_PARTICLE_SPIN)) &&
+           (spin.range.finish == glm::clamp(spin.range.finish, MINIMUM_PARTICLE_SPIN, MAXIMUM_PARTICLE_SPIN)) &&
+           (spin.gradient.spread == glm::clamp(spin.gradient.spread, MINIMUM_PARTICLE_SPIN, MAXIMUM_PARTICLE_SPIN)) &&
+           (lifespan == glm::clamp(lifespan, MINIMUM_LIFESPAN, MAXIMUM_LIFESPAN)) &&
+           (maxParticles == glm::clamp(maxParticles, MINIMUM_MAX_PARTICLES, MAXIMUM_MAX_PARTICLES)) &&
+           (emission.rate == glm::clamp(emission.rate, MINIMUM_EMIT_RATE, MAXIMUM_EMIT_RATE)) &&
+           (emission.speed.target == glm::clamp(emission.speed.target, MINIMUM_EMIT_SPEED, MAXIMUM_EMIT_SPEED)) &&
+           (emission.speed.spread == glm::clamp(emission.speed.spread, MINIMUM_EMIT_SPEED, MAXIMUM_EMIT_SPEED)) &&
+           (emission.acceleration.target ==
+            glm::clamp(emission.acceleration.target, vec3(MINIMUM_EMIT_ACCELERATION), vec3(MAXIMUM_EMIT_ACCELERATION))) &&
+           (emission.acceleration.spread == glm::clamp(emission.acceleration.spread, vec3(MINIMUM_ACCELERATION_SPREAD),
+                                                       vec3(MAXIMUM_ACCELERATION_SPREAD)) &&
+            (emission.dimensions ==
+             glm::clamp(emission.dimensions, vec3(MINIMUM_EMIT_DIMENSION), vec3(MAXIMUM_EMIT_DIMENSION))) &&
+            (polar.start == glm::clamp(polar.start, MINIMUM_POLAR, MAXIMUM_POLAR)) &&
+            (polar.finish == glm::clamp(polar.finish, MINIMUM_POLAR, MAXIMUM_POLAR)) &&
+            (azimuth.start == glm::clamp(azimuth.start, MINIMUM_AZIMUTH, MAXIMUM_AZIMUTH)) &&
+            (azimuth.finish == glm::clamp(azimuth.finish, MINIMUM_AZIMUTH, MAXIMUM_AZIMUTH)));
 }
 
 bool Properties::emitting() const {
     return emission.rate > 0.0f && lifespan > 0.0f && polar.start <= polar.finish;
-    
 }
 
 uint64_t Properties::emitIntervalUsecs() const {
@@ -159,59 +146,50 @@ EntityItemPointer ParticleEffectEntityItem::factory(const EntityItemID& entityID
 }
 
 // our non-pure virtual subclass for now...
-ParticleEffectEntityItem::ParticleEffectEntityItem(const EntityItemID& entityItemID) :
-    EntityItem(entityItemID)
-{
+ParticleEffectEntityItem::ParticleEffectEntityItem(const EntityItemID& entityItemID) : EntityItem(entityItemID) {
     _type = EntityTypes::ParticleEffect;
     _visuallyReady = false;
 }
 
 void ParticleEffectEntityItem::setAlpha(float alpha) {
-    withWriteLock([&] {
-        _particleProperties.alpha.gradient.target  = glm::clamp(alpha, MINIMUM_ALPHA, MAXIMUM_ALPHA);
-    });
+    withWriteLock([&] { _particleProperties.alpha.gradient.target = glm::clamp(alpha, MINIMUM_ALPHA, MAXIMUM_ALPHA); });
 }
 
 void ParticleEffectEntityItem::setAlphaStart(float alphaStart) {
     withWriteLock([&] {
-        _particleProperties.alpha.range.start = glm::isnan(alphaStart) ? alphaStart : glm::clamp(alphaStart, MINIMUM_ALPHA, MAXIMUM_ALPHA);
+        _particleProperties.alpha.range.start = glm::isnan(alphaStart) ? alphaStart
+                                                                       : glm::clamp(alphaStart, MINIMUM_ALPHA, MAXIMUM_ALPHA);
     });
 }
 
 void ParticleEffectEntityItem::setAlphaFinish(float alphaFinish) {
     withWriteLock([&] {
-        _particleProperties.alpha.range.finish = glm::isnan(alphaFinish) ? alphaFinish : glm::clamp(alphaFinish, MINIMUM_ALPHA, MAXIMUM_ALPHA);
+        _particleProperties.alpha.range.finish = glm::isnan(alphaFinish)
+                                                     ? alphaFinish
+                                                     : glm::clamp(alphaFinish, MINIMUM_ALPHA, MAXIMUM_ALPHA);
     });
 }
 
 void ParticleEffectEntityItem::setAlphaSpread(float alphaSpread) {
-    withWriteLock([&] {
-        _particleProperties.alpha.gradient.spread = glm::clamp(alphaSpread, MINIMUM_ALPHA, MAXIMUM_ALPHA);
-    });
+    withWriteLock([&] { _particleProperties.alpha.gradient.spread = glm::clamp(alphaSpread, MINIMUM_ALPHA, MAXIMUM_ALPHA); });
 }
 
 void ParticleEffectEntityItem::setLifespan(float lifespan) {
     lifespan = glm::clamp(lifespan, MINIMUM_LIFESPAN, MAXIMUM_LIFESPAN);
     if (lifespan != _particleProperties.lifespan) {
-        withWriteLock([&] {
-            _particleProperties.lifespan = lifespan;
-        });
+        withWriteLock([&] { _particleProperties.lifespan = lifespan; });
         computeAndUpdateDimensions();
     }
 }
 
 void ParticleEffectEntityItem::setEmitRate(float emitRate) {
-    withWriteLock([&] {
-        _particleProperties.emission.rate = glm::clamp(emitRate, MINIMUM_EMIT_RATE, MAXIMUM_EMIT_RATE);
-    });
+    withWriteLock([&] { _particleProperties.emission.rate = glm::clamp(emitRate, MINIMUM_EMIT_RATE, MAXIMUM_EMIT_RATE); });
 }
 
 void ParticleEffectEntityItem::setEmitSpeed(float emitSpeed) {
     emitSpeed = glm::clamp(emitSpeed, MINIMUM_EMIT_SPEED, MAXIMUM_EMIT_SPEED);
     if (emitSpeed != _particleProperties.emission.speed.target) {
-        withWriteLock([&] { 
-            _particleProperties.emission.speed.target = emitSpeed; 
-        });
+        withWriteLock([&] { _particleProperties.emission.speed.target = emitSpeed; });
         computeAndUpdateDimensions();
     }
 }
@@ -219,9 +197,7 @@ void ParticleEffectEntityItem::setEmitSpeed(float emitSpeed) {
 void ParticleEffectEntityItem::setSpeedSpread(float speedSpread) {
     speedSpread = glm::clamp(speedSpread, MINIMUM_EMIT_SPEED, MAXIMUM_EMIT_SPEED);
     if (speedSpread != _particleProperties.emission.speed.spread) {
-        withWriteLock([&] { 
-            _particleProperties.emission.speed.spread = speedSpread;
-        });
+        withWriteLock([&] { _particleProperties.emission.speed.spread = speedSpread; });
         computeAndUpdateDimensions();
     }
 }
@@ -229,9 +205,7 @@ void ParticleEffectEntityItem::setSpeedSpread(float speedSpread) {
 void ParticleEffectEntityItem::setEmitOrientation(const glm::quat& emitOrientation_) {
     auto emitOrientation = glm::normalize(emitOrientation_);
     if (emitOrientation != _particleProperties.emission.orientation) {
-        withWriteLock([&] {
-            _particleProperties.emission.orientation = emitOrientation;
-        });
+        withWriteLock([&] { _particleProperties.emission.orientation = emitOrientation; });
         computeAndUpdateDimensions();
     }
 }
@@ -239,9 +213,7 @@ void ParticleEffectEntityItem::setEmitOrientation(const glm::quat& emitOrientati
 void ParticleEffectEntityItem::setEmitDimensions(const glm::vec3& emitDimensions_) {
     auto emitDimensions = glm::clamp(emitDimensions_, vec3(MINIMUM_EMIT_DIMENSION), vec3(MAXIMUM_EMIT_DIMENSION));
     if (emitDimensions != _particleProperties.emission.dimensions) {
-        withWriteLock([&] { 
-            _particleProperties.emission.dimensions = emitDimensions;
-        });
+        withWriteLock([&] { _particleProperties.emission.dimensions = emitDimensions; });
         computeAndUpdateDimensions();
     }
 }
@@ -253,45 +225,34 @@ void ParticleEffectEntityItem::setEmitRadiusStart(float emitRadiusStart) {
 }
 
 void ParticleEffectEntityItem::setPolarStart(float polarStart) {
-    withWriteLock([&] {
-        _particleProperties.polar.start = glm::clamp(polarStart, MINIMUM_POLAR, MAXIMUM_POLAR);
-    });
+    withWriteLock([&] { _particleProperties.polar.start = glm::clamp(polarStart, MINIMUM_POLAR, MAXIMUM_POLAR); });
 }
 
 void ParticleEffectEntityItem::setPolarFinish(float polarFinish) {
-    withWriteLock([&] {
-        _particleProperties.polar.finish = glm::clamp(polarFinish, MINIMUM_POLAR, MAXIMUM_POLAR);
-    });
+    withWriteLock([&] { _particleProperties.polar.finish = glm::clamp(polarFinish, MINIMUM_POLAR, MAXIMUM_POLAR); });
 }
 
 void ParticleEffectEntityItem::setAzimuthStart(float azimuthStart) {
-    withWriteLock([&] {
-        _particleProperties.azimuth.start = glm::clamp(azimuthStart, MINIMUM_AZIMUTH, MAXIMUM_AZIMUTH);
-    });
+    withWriteLock([&] { _particleProperties.azimuth.start = glm::clamp(azimuthStart, MINIMUM_AZIMUTH, MAXIMUM_AZIMUTH); });
 }
 
 void ParticleEffectEntityItem::setAzimuthFinish(float azimuthFinish) {
-    withWriteLock([&] {
-        _particleProperties.azimuth.finish = glm::clamp(azimuthFinish, MINIMUM_AZIMUTH, MAXIMUM_AZIMUTH);
-    });
+    withWriteLock([&] { _particleProperties.azimuth.finish = glm::clamp(azimuthFinish, MINIMUM_AZIMUTH, MAXIMUM_AZIMUTH); });
 }
 
 void ParticleEffectEntityItem::setEmitAcceleration(const glm::vec3& emitAcceleration_) {
     auto emitAcceleration = glm::clamp(emitAcceleration_, vec3(MINIMUM_EMIT_ACCELERATION), vec3(MAXIMUM_EMIT_ACCELERATION));
     if (emitAcceleration != _particleProperties.emission.acceleration.target) {
-        withWriteLock([&] {
-            _particleProperties.emission.acceleration.target = emitAcceleration;
-        });
+        withWriteLock([&] { _particleProperties.emission.acceleration.target = emitAcceleration; });
         computeAndUpdateDimensions();
     }
 }
 
-void ParticleEffectEntityItem::setAccelerationSpread(const glm::vec3& accelerationSpread_){
-    auto accelerationSpread = glm::clamp(accelerationSpread_, vec3(MINIMUM_ACCELERATION_SPREAD), vec3(MAXIMUM_ACCELERATION_SPREAD));
+void ParticleEffectEntityItem::setAccelerationSpread(const glm::vec3& accelerationSpread_) {
+    auto accelerationSpread = glm::clamp(accelerationSpread_, vec3(MINIMUM_ACCELERATION_SPREAD),
+                                         vec3(MAXIMUM_ACCELERATION_SPREAD));
     if (accelerationSpread != _particleProperties.emission.acceleration.spread) {
-        withWriteLock([&] {
-            _particleProperties.emission.acceleration.spread = accelerationSpread;
-        });
+        withWriteLock([&] { _particleProperties.emission.acceleration.spread = accelerationSpread; });
         computeAndUpdateDimensions();
     }
 }
@@ -299,29 +260,25 @@ void ParticleEffectEntityItem::setAccelerationSpread(const glm::vec3& accelerati
 void ParticleEffectEntityItem::setParticleRadius(float particleRadius) {
     particleRadius = glm::clamp(particleRadius, MINIMUM_PARTICLE_RADIUS, MAXIMUM_PARTICLE_RADIUS);
     if (particleRadius != _particleProperties.radius.gradient.target) {
-        withWriteLock([&] {
-            _particleProperties.radius.gradient.target = particleRadius;
-        });
+        withWriteLock([&] { _particleProperties.radius.gradient.target = particleRadius; });
         computeAndUpdateDimensions();
     }
 }
 
 void ParticleEffectEntityItem::setRadiusStart(float radiusStart) {
-    radiusStart = glm::isnan(radiusStart) ? radiusStart : glm::clamp(radiusStart, MINIMUM_PARTICLE_RADIUS, MAXIMUM_PARTICLE_RADIUS);
+    radiusStart = glm::isnan(radiusStart) ? radiusStart
+                                          : glm::clamp(radiusStart, MINIMUM_PARTICLE_RADIUS, MAXIMUM_PARTICLE_RADIUS);
     if (radiusStart != _particleProperties.radius.range.start) {
-        withWriteLock([&] {
-            _particleProperties.radius.range.start = radiusStart;
-        });
+        withWriteLock([&] { _particleProperties.radius.range.start = radiusStart; });
         computeAndUpdateDimensions();
     }
 }
 
 void ParticleEffectEntityItem::setRadiusFinish(float radiusFinish) {
-    radiusFinish = glm::isnan(radiusFinish) ? radiusFinish : glm::clamp(radiusFinish, MINIMUM_PARTICLE_RADIUS, MAXIMUM_PARTICLE_RADIUS);
+    radiusFinish = glm::isnan(radiusFinish) ? radiusFinish
+                                            : glm::clamp(radiusFinish, MINIMUM_PARTICLE_RADIUS, MAXIMUM_PARTICLE_RADIUS);
     if (radiusFinish != _particleProperties.radius.range.finish) {
-        withWriteLock([&] {
-            _particleProperties.radius.range.finish = radiusFinish;
-        });
+        withWriteLock([&] { _particleProperties.radius.range.finish = radiusFinish; });
         computeAndUpdateDimensions();
     }
 }
@@ -329,9 +286,7 @@ void ParticleEffectEntityItem::setRadiusFinish(float radiusFinish) {
 void ParticleEffectEntityItem::setRadiusSpread(float radiusSpread) {
     radiusSpread = glm::clamp(radiusSpread, MINIMUM_PARTICLE_RADIUS, MAXIMUM_PARTICLE_RADIUS);
     if (radiusSpread != _particleProperties.radius.gradient.spread) {
-        withWriteLock([&] {
-            _particleProperties.radius.gradient.spread = radiusSpread;
-        });
+        withWriteLock([&] { _particleProperties.radius.gradient.spread = radiusSpread; });
         computeAndUpdateDimensions();
     }
 }
@@ -339,53 +294,43 @@ void ParticleEffectEntityItem::setRadiusSpread(float radiusSpread) {
 void ParticleEffectEntityItem::setParticleSpin(float particleSpin) {
     particleSpin = glm::clamp(particleSpin, MINIMUM_PARTICLE_SPIN, MAXIMUM_PARTICLE_SPIN);
     if (particleSpin != _particleProperties.spin.gradient.target) {
-        withWriteLock([&] {
-            _particleProperties.spin.gradient.target = particleSpin;
-        });
+        withWriteLock([&] { _particleProperties.spin.gradient.target = particleSpin; });
     }
 }
 
 void ParticleEffectEntityItem::setSpinStart(float spinStart) {
-    spinStart =
-        glm::isnan(spinStart) ? spinStart : glm::clamp(spinStart, MINIMUM_PARTICLE_SPIN, MAXIMUM_PARTICLE_SPIN);
+    spinStart = glm::isnan(spinStart) ? spinStart : glm::clamp(spinStart, MINIMUM_PARTICLE_SPIN, MAXIMUM_PARTICLE_SPIN);
     if (spinStart != _particleProperties.spin.range.start) {
-        withWriteLock([&] {
-            _particleProperties.spin.range.start = spinStart;
-        });
+        withWriteLock([&] { _particleProperties.spin.range.start = spinStart; });
     }
 }
 
 void ParticleEffectEntityItem::setSpinFinish(float spinFinish) {
-    spinFinish =
-        glm::isnan(spinFinish) ? spinFinish : glm::clamp(spinFinish, MINIMUM_PARTICLE_SPIN, MAXIMUM_PARTICLE_SPIN);
+    spinFinish = glm::isnan(spinFinish) ? spinFinish : glm::clamp(spinFinish, MINIMUM_PARTICLE_SPIN, MAXIMUM_PARTICLE_SPIN);
     if (spinFinish != _particleProperties.spin.range.finish) {
-        withWriteLock([&] {
-            _particleProperties.spin.range.finish = spinFinish;
-        });
+        withWriteLock([&] { _particleProperties.spin.range.finish = spinFinish; });
     }
 }
 
 void ParticleEffectEntityItem::setSpinSpread(float spinSpread) {
     spinSpread = glm::clamp(spinSpread, MINIMUM_PARTICLE_SPIN, MAXIMUM_PARTICLE_SPIN);
     if (spinSpread != _particleProperties.spin.gradient.spread) {
-        withWriteLock([&] {
-            _particleProperties.spin.gradient.spread = spinSpread;
-        });
+        withWriteLock([&] { _particleProperties.spin.gradient.spread = spinSpread; });
     }
 }
 
 void ParticleEffectEntityItem::computeAndUpdateDimensions() {
     particle::Properties particleProperties;
-    withReadLock([&] {
-        particleProperties = _particleProperties;
-    });
-    const float time = particleProperties.lifespan * 1.1f; // add 10% extra time to account for incremental timer accumulation error
+    withReadLock([&] { particleProperties = _particleProperties; });
+    const float time = particleProperties.lifespan *
+                       1.1f; // add 10% extra time to account for incremental timer accumulation error
 
     glm::vec3 direction = particleProperties.emission.orientation * Vectors::UNIT_Z;
     glm::vec3 velocity = particleProperties.emission.speed.target * direction;
     glm::vec3 velocitySpread = particleProperties.emission.speed.spread * direction;
     glm::vec3 maxVelocity = glm::abs(velocity) + velocitySpread;
-    glm::vec3 maxAccleration = glm::abs(particleProperties.emission.acceleration.target) + particleProperties.emission.acceleration.spread;
+    glm::vec3 maxAccleration = glm::abs(particleProperties.emission.acceleration.target) +
+                               particleProperties.emission.acceleration.spread;
     float maxRadius = particleProperties.radius.gradient.target;
     if (!glm::isnan(particleProperties.radius.range.start)) {
         maxRadius = glm::max(maxRadius, particleProperties.radius.range.start);
@@ -393,28 +338,28 @@ void ParticleEffectEntityItem::computeAndUpdateDimensions() {
     if (!glm::isnan(particleProperties.radius.range.finish)) {
         maxRadius = glm::max(maxRadius, particleProperties.radius.range.finish);
     }
-    glm::vec3 maxDistance = 0.5f * particleProperties.emission.dimensions + time * maxVelocity + (0.5f * time * time) * maxAccleration + vec3(maxRadius + particleProperties.radius.gradient.spread);
+    glm::vec3 maxDistance = 0.5f * particleProperties.emission.dimensions + time * maxVelocity +
+                            (0.5f * time * time) * maxAccleration + vec3(maxRadius + particleProperties.radius.gradient.spread);
     if (isNaN(maxDistance)) {
         qCWarning(entities) << "Bad particle data";
         return;
     }
 
     float maxDistanceValue = glm::compMax(maxDistance);
-    //times 2 because dimensions are diameters not radii
+    // times 2 because dimensions are diameters not radii
     glm::vec3 dims(2.0f * maxDistanceValue);
     EntityItem::setScaledDimensions(dims);
 }
 
-
-EntityItemProperties ParticleEffectEntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
-    EntityItemProperties properties = EntityItem::getProperties(desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
+EntityItemProperties ParticleEffectEntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                                             bool allowEmptyDesiredProperties) const {
+    EntityItemProperties properties = EntityItem::getProperties(
+        desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
 
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(shapeType, getShapeType);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(color, getColor);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(alpha, getAlpha);
-    withReadLock([&] {
-        _pulseProperties.getProperties(properties);
-    });
+    withReadLock([&] { _pulseProperties.getProperties(properties); });
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(textures, getTextures);
 
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(maxParticles, getMaxParticles);
@@ -517,8 +462,8 @@ bool ParticleEffectEntityItem::setProperties(const EntityItemProperties& propert
         if (wantDebug) {
             uint64_t now = usecTimestampNow();
             int elapsed = now - getLastEdited();
-            qCDebug(entities) << "ParticleEffectEntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                "now=" << now << " getLastEdited()=" << getLastEdited();
+            qCDebug(entities) << "ParticleEffectEntityItem::setProperties() AFTER update... edited AGO=" << elapsed
+                              << "now=" << now << " getLastEdited()=" << getLastEdited();
         }
         setLastEdited(properties.getLastEdited());
     }
@@ -526,16 +471,13 @@ bool ParticleEffectEntityItem::setProperties(const EntityItemProperties& propert
 }
 
 void ParticleEffectEntityItem::setColor(const glm::u8vec3& value) {
-    withWriteLock([&] {
-        _particleProperties.color.gradient.target = value;
-    });
+    withWriteLock([&] { _particleProperties.color.gradient.target = value; });
 }
 
 int ParticleEffectEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
                                                                ReadBitstreamToTreeParams& args,
                                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
                                                                bool& somethingChanged) {
-
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 
@@ -544,8 +486,8 @@ int ParticleEffectEntityItem::readEntitySubclassDataFromBuffer(const unsigned ch
     READ_ENTITY_PROPERTY(PROP_ALPHA, float, setAlpha);
     withWriteLock([&] {
         int bytesFromPulse = _pulseProperties.readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
-            propertyFlags, overwriteLocalData,
-            somethingChanged);
+                                                                               propertyFlags, overwriteLocalData,
+                                                                               somethingChanged);
         bytesRead += bytesFromPulse;
         dataAt += bytesFromPulse;
     });
@@ -648,19 +590,16 @@ EntityPropertyFlags ParticleEffectEntityItem::getEntityProperties(EncodeBitstrea
 
 void ParticleEffectEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                                   EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                                  EntityPropertyFlags& requestedProperties,
-                                                  EntityPropertyFlags& propertyFlags,
-                                                  EntityPropertyFlags& propertiesDidntFit,
-                                                  int& propertyCount,
+                                                  EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                                  EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                                                   OctreeElement::AppendState& appendState) const {
-
     bool successPropertyFits = true;
     APPEND_ENTITY_PROPERTY(PROP_SHAPE_TYPE, (uint32_t)getShapeType());
     APPEND_ENTITY_PROPERTY(PROP_COLOR, getColor());
     APPEND_ENTITY_PROPERTY(PROP_ALPHA, getAlpha());
     withReadLock([&] {
         _pulseProperties.appendSubclassData(packetData, params, entityTreeElementExtraEncodeData, requestedProperties,
-            propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                                            propertyFlags, propertiesDidntFit, propertyCount, appendState);
     });
     APPEND_ENTITY_PROPERTY(PROP_TEXTURES, getTextures());
 
@@ -708,10 +647,8 @@ void ParticleEffectEntityItem::appendSubclassData(OctreePacketData* packetData, 
 void ParticleEffectEntityItem::debugDump() const {
     quint64 now = usecTimestampNow();
     qCDebug(entities) << "PA EFFECT EntityItem id:" << getEntityItemID() << "---------------------------------------------";
-    qCDebug(entities) << "                  color:" <<
-        _particleProperties.color.gradient.target.r << "," <<
-        _particleProperties.color.gradient.target.g << "," <<
-        _particleProperties.color.gradient.target.b;
+    qCDebug(entities) << "                  color:" << _particleProperties.color.gradient.target.r << ","
+                      << _particleProperties.color.gradient.target.g << "," << _particleProperties.color.gradient.target.b;
     qCDebug(entities) << "               position:" << debugTreeVector(getWorldPosition());
     qCDebug(entities) << "             dimensions:" << debugTreeVector(getScaledDimensions());
     qCDebug(entities) << "          getLastEdited:" << debugTime(getLastEdited(), now);
@@ -727,49 +664,36 @@ void ParticleEffectEntityItem::setShapeType(ShapeType type) {
 }
 
 void ParticleEffectEntityItem::setMaxParticles(quint32 maxParticles) {
-    withWriteLock([&] {
-        _particleProperties.maxParticles = glm::clamp(maxParticles, MINIMUM_MAX_PARTICLES, MAXIMUM_MAX_PARTICLES);
-    });
+    withWriteLock(
+        [&] { _particleProperties.maxParticles = glm::clamp(maxParticles, MINIMUM_MAX_PARTICLES, MAXIMUM_MAX_PARTICLES); });
 }
 
 void ParticleEffectEntityItem::setTextures(const QString& textures) {
-    withWriteLock([&] {
-        _particleProperties.textures = textures;
-    });
+    withWriteLock([&] { _particleProperties.textures = textures; });
 }
 
 void ParticleEffectEntityItem::setColorStart(const vec3& colorStart) {
-    withWriteLock([&] {
-        _particleProperties.color.range.start = colorStart;
-    });
+    withWriteLock([&] { _particleProperties.color.range.start = colorStart; });
 }
 
 void ParticleEffectEntityItem::setColorFinish(const vec3& colorFinish) {
-    withWriteLock([&] {
-        _particleProperties.color.range.finish = colorFinish;
-    });
+    withWriteLock([&] { _particleProperties.color.range.finish = colorFinish; });
 }
 
 void ParticleEffectEntityItem::setColorSpread(const glm::u8vec3& value) {
-    withWriteLock([&] {
-        _particleProperties.color.gradient.spread = value;
-    });
+    withWriteLock([&] { _particleProperties.color.gradient.spread = value; });
 }
 
 void ParticleEffectEntityItem::setEmitterShouldTrail(bool emitterShouldTrail) {
-    withWriteLock([&] {
-        _particleProperties.emission.shouldTrail = emitterShouldTrail;
-    });
+    withWriteLock([&] { _particleProperties.emission.shouldTrail = emitterShouldTrail; });
 }
 
 void ParticleEffectEntityItem::setRotateWithEntity(bool rotateWithEntity) {
-    withWriteLock([&] {
-        _particleProperties.rotateWithEntity = rotateWithEntity;
-    });
+    withWriteLock([&] { _particleProperties.rotateWithEntity = rotateWithEntity; });
 }
 
 particle::Properties ParticleEffectEntityItem::getParticleProperties() const {
-    particle::Properties result;  
+    particle::Properties result;
     withReadLock([&] {
         result = _particleProperties;
 
@@ -804,11 +728,9 @@ particle::Properties ParticleEffectEntityItem::getParticleProperties() const {
         qCWarning(entities) << "failed validation";
     }
 
-    return result; 
+    return result;
 }
 
 PulsePropertyGroup ParticleEffectEntityItem::getPulseProperties() const {
-    return resultWithReadLock<PulsePropertyGroup>([&] {
-        return _pulseProperties;
-    });
+    return resultWithReadLock<PulsePropertyGroup>([&] { return _pulseProperties; });
 }

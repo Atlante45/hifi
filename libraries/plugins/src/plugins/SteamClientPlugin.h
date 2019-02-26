@@ -9,14 +9,13 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef hifi_SteamClientPlugin_h
 #define hifi_SteamClientPlugin_h
 
 #include <functional>
 
-#include <QtCore/QObject>
 #include <QtCore/QByteArray>
+#include <QtCore/QObject>
 
 using Ticket = QByteArray;
 using TicketRequestCallback = std::function<void(Ticket)>;
@@ -69,7 +68,11 @@ public slots:
     /**jsdoc
      * @function Steam.openInviteOverlay
      */
-    void openInviteOverlay() const { if (_plugin) { _plugin->openInviteOverlay(); } }
+    void openInviteOverlay() const {
+        if (_plugin) {
+            _plugin->openInviteOverlay();
+        }
+    }
 
 private:
     SteamClientPlugin* _plugin;

@@ -19,7 +19,7 @@ class CharacterGhostShape : public btConvexHullShape {
 public:
     CharacterGhostShape(const btConvexHullShape* shape);
 
-    virtual void getAabb (const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const override;
+    virtual void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const override;
 };
 
 #endif // hifi_CharacterGhostShape_h

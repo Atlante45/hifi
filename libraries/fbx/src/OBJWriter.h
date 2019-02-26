@@ -12,10 +12,9 @@
 #ifndef hifi_objwriter_h
 #define hifi_objwriter_h
 
-
-#include <QString>
-#include <QList>
 #include <graphics/Geometry.h>
+#include <QList>
+#include <QString>
 
 using MeshPointer = std::shared_ptr<graphics::Mesh>;
 

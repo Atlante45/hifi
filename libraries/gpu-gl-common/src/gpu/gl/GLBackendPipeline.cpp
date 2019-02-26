@@ -8,15 +8,15 @@
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
-#include "GLBackend.h"
-#include <gpu/TextureTable.h>
 #include <gpu/ShaderConstants.h>
+#include <gpu/TextureTable.h>
+#include "GLBackend.h"
 
-#include "GLShared.h"
+#include "GLBuffer.h"
 #include "GLPipeline.h"
 #include "GLShader.h"
+#include "GLShared.h"
 #include "GLState.h"
-#include "GLBuffer.h"
 #include "GLTexture.h"
 
 using namespace gpu;
@@ -49,10 +49,10 @@ void GLBackend::do_setPipeline(const Batch& batch, size_t paramOffset) {
             return;
         }
 
-            // check the program cache
-            // pick the program version
-            // check the program cache
-            // pick the program version
+        // check the program cache
+        // pick the program version
+        // check the program cache
+        // pick the program version
 #ifdef GPU_STEREO_CAMERA_BUFFER
         GLuint glprogram = pipelineObject->_program->getProgram(getShaderVariant());
 #else
@@ -82,9 +82,9 @@ void GLBackend::do_setPipeline(const Batch& batch, size_t paramOffset) {
         if (_pipeline._cameraCorrection) {
             // Invalidate uniform buffer cache slot
             _uniform._buffers[gpu::slot::buffer::CameraCorrection].reset();
-            auto& cameraCorrectionBuffer = _transform._viewCorrectionEnabled ?
-                _pipeline._cameraCorrectionBuffer._buffer : 
-                _pipeline._cameraCorrectionBufferIdentity._buffer;
+            auto& cameraCorrectionBuffer = _transform._viewCorrectionEnabled
+                                               ? _pipeline._cameraCorrectionBuffer._buffer
+                                               : _pipeline._cameraCorrectionBufferIdentity._buffer;
             // Because we don't sync Buffers in the bindUniformBuffer, let s force this buffer synced
             getBufferID(*cameraCorrectionBuffer);
             bindUniformBuffer(gpu::slot::buffer::CameraCorrection, cameraCorrectionBuffer, 0, sizeof(CameraCorrection));
@@ -141,7 +141,7 @@ void GLBackend::resetPipelineStage() {
 void GLBackend::releaseUniformBuffer(uint32_t slot) {
     auto& bufferState = _uniform._buffers[slot];
     if (valid(bufferState.buffer)) {
-        glBindBufferBase(GL_UNIFORM_BUFFER, slot, 0);  // RELEASE
+        glBindBufferBase(GL_UNIFORM_BUFFER, slot, 0); // RELEASE
         (void)CHECK_GL_ERROR();
     }
     bufferState.reset();
@@ -158,7 +158,6 @@ void GLBackend::bindUniformBuffer(uint32_t slot, const BufferPointer& buffer, GL
         releaseUniformBuffer(slot);
         return;
     }
-
 
     auto& currentBufferState = _uniform._buffers[slot];
     // check cache before thinking
@@ -178,7 +177,6 @@ void GLBackend::bindUniformBuffer(uint32_t slot, const BufferPointer& buffer, GL
         releaseUniformBuffer(slot);
         return;
     }
-
 }
 
 void GLBackend::do_setUniformBuffer(const Batch& batch, size_t paramOffset) {
@@ -200,7 +198,7 @@ void GLBackend::releaseResourceTexture(uint32_t slot) {
     auto& textureState = _resource._textures[slot];
     if (valid(textureState._texture)) {
         glActiveTexture(GL_TEXTURE0 + slot);
-        glBindTexture(textureState._target, 0);  // RELEASE
+        glBindTexture(textureState._target, 0); // RELEASE
         (void)CHECK_GL_ERROR();
         reset(textureState._texture);
     }
@@ -241,7 +239,7 @@ void GLBackend::do_setResourceBuffer(const Batch& batch, size_t paramOffset) {
     // If successful bind then cache it
     if (bindResourceBuffer(slot, resourceBuffer)) {
         assign(_resource._buffers[slot], resourceBuffer);
-    } else {  // else clear slot and cache
+    } else { // else clear slot and cache
         releaseResourceBuffer(slot);
         return;
     }
@@ -276,8 +274,8 @@ void GLBackend::do_setResourceFramebufferSwapChainTexture(const Batch& batch, si
         return;
     }
 
-    auto swapChain =
-        std::static_pointer_cast<FramebufferSwapChain>(batch._swapChains.get(batch._params[paramOffset + 0]._uint));
+    auto swapChain = std::static_pointer_cast<FramebufferSwapChain>(
+        batch._swapChains.get(batch._params[paramOffset + 0]._uint));
 
     if (!swapChain) {
         releaseResourceTexture(slot);

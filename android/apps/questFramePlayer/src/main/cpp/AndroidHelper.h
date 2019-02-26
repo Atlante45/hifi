@@ -9,15 +9,15 @@
 #ifndef hifi_Android_Helper_h
 #define hifi_Android_Helper_h
 
-#include <QtCore/QObject>
-#include <QtCore/QMap>
-#include <QtCore/QUrl>
 #include <QtCore/QEventLoop>
+#include <QtCore/QMap>
+#include <QtCore/QObject>
+#include <QtCore/QUrl>
 
 class AndroidHelper : public QObject {
     Q_OBJECT
 public:
-    AndroidHelper(AndroidHelper const&)  = delete;
+    AndroidHelper(AndroidHelper const&) = delete;
     void operator=(AndroidHelper const&) = delete;
 
     static AndroidHelper& instance() {
@@ -28,7 +28,6 @@ public:
     void notifyLoadComplete();
     void notifyEnterForeground();
     void notifyEnterBackground();
-
 
 signals:
     void qtAppLoadComplete();

@@ -16,8 +16,7 @@
 EntityScriptServerLogDialog::EntityScriptServerLogDialog(QWidget* parent) : BaseLogDialog(parent) {
     setWindowTitle("Entity Script Server Log");
 
-
     auto client = DependencyManager::get<EntityScriptServerLogClient>();
-    QObject::connect(client.data(), &EntityScriptServerLogClient::receivedNewLogLines,
-                     this, &EntityScriptServerLogDialog::appendLogLine);
+    QObject::connect(client.data(), &EntityScriptServerLogClient::receivedNewLogLines, this,
+                     &EntityScriptServerLogDialog::appendLogLine);
 }

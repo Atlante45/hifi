@@ -14,19 +14,17 @@
 #include <QRunnable>
 #include <QThreadPool>
 
-#include <shared/QtHelpers.h>
-#include <Trace.h>
-#include <StatTracker.h>
 #include <Profile.h>
+#include <StatTracker.h>
+#include <Trace.h>
+#include <shared/QtHelpers.h>
 
-#include "AnimationLogging.h"
 #include <FBXSerializer.h>
+#include "AnimationLogging.h"
 
 int animationPointerMetaTypeId = qRegisterMetaType<AnimationPointer>();
 
-AnimationCache::AnimationCache(QObject* parent) :
-    ResourceCache(parent)
-{
+AnimationCache::AnimationCache(QObject* parent) : ResourceCache(parent) {
     const qint64 ANIMATION_DEFAULT_UNUSED_MAX_SIZE = 50 * BYTES_PER_MEGABYTES;
     setUnusedResourceCacheSize(ANIMATION_DEFAULT_UNUSED_MAX_SIZE);
     setObjectName("AnimationCache");
@@ -44,9 +42,7 @@ QSharedPointer<Resource> AnimationCache::createResourceCopy(const QSharedPointer
     return QSharedPointer<Resource>(new Animation(*resource.staticCast<Animation>()), &Resource::deleter);
 }
 
-AnimationReader::AnimationReader(const QUrl& url, const QByteArray& data) :
-    _url(url),
-    _data(data) {
+AnimationReader::AnimationReader(const QUrl& url, const QByteArray& data) : _url(url), _data(data) {
     DependencyManager::get<StatTracker>()->incrementStat("PendingProcessing");
 }
 
@@ -96,15 +92,12 @@ bool Animation::isLoaded() const {
 QStringList Animation::getJointNames() const {
     if (QThread::currentThread() != thread()) {
         QStringList result;
-        BLOCKING_INVOKE_METHOD(const_cast<Animation*>(this), "getJointNames",
-            Q_RETURN_ARG(QStringList, result));
+        BLOCKING_INVOKE_METHOD(const_cast<Animation*>(this), "getJointNames", Q_RETURN_ARG(QStringList, result));
         return result;
     }
     QStringList names;
     if (_hfmModel) {
-        foreach (const HFMJoint& joint, _hfmModel->joints) {
-            names.append(joint.name);
-        }
+        foreach (const HFMJoint& joint, _hfmModel->joints) { names.append(joint.name); }
     }
     return names;
 }
@@ -112,8 +105,7 @@ QStringList Animation::getJointNames() const {
 QVector<HFMAnimationFrame> Animation::getFrames() const {
     if (QThread::currentThread() != thread()) {
         QVector<HFMAnimationFrame> result;
-        BLOCKING_INVOKE_METHOD(const_cast<Animation*>(this), "getFrames",
-            Q_RETURN_ARG(QVector<HFMAnimationFrame>, result));
+        BLOCKING_INVOKE_METHOD(const_cast<Animation*>(this), "getFrames", Q_RETURN_ARG(QVector<HFMAnimationFrame>, result));
         return result;
     }
     if (_hfmModel) {
@@ -146,4 +138,3 @@ void Animation::animationParseError(int error, QString str) {
     emit failed(QNetworkReply::UnknownContentError);
     finishedLoading(false);
 }
-

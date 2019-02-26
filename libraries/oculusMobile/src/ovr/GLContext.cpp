@@ -9,8 +9,8 @@
 #include "GLContext.h"
 
 #include <array>
-#include <vector>
 #include <mutex>
+#include <vector>
 
 #include <android/log.h>
 
@@ -20,26 +20,18 @@
 
 using namespace ovr;
 
-static void* getGlProcessAddress(const char *namez) {
+static void* getGlProcessAddress(const char* namez) {
     auto result = eglGetProcAddress(namez);
     return (void*)result;
 }
 
-
 void GLContext::initModule() {
     static std::once_flag once;
-    std::call_once(once, [&]{
-        gladLoadGLES2Loader(getGlProcessAddress);
-    });
+    std::call_once(once, [&] { gladLoadGLES2Loader(getGlProcessAddress); });
 }
 
-void APIENTRY debugMessageCallback(GLenum source,
-                                   GLenum type,
-                                   GLuint id,
-                                   GLenum severity,
-                                   GLsizei length,
-                                   const GLchar* message,
-                                   const void* userParam) {
+void APIENTRY debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                                   const GLchar* message, const void* userParam) {
     if (type == GL_DEBUG_TYPE_PERFORMANCE_KHR) {
         return;
     }
@@ -75,7 +67,7 @@ EGLConfig GLContext::findConfig(EGLDisplay display) {
         memcpy(configs.data(), configsBuffer, sizeof(EGLConfig) * numConfigs);
     }
 
-    std::vector<std::pair<EGLint, EGLint>> configAttribs{
+    std::vector<std::pair<EGLint, EGLint>> configAttribs {
         { EGL_RED_SIZE, 8 },   { EGL_GREEN_SIZE, 8 },   { EGL_BLUE_SIZE, 8 }, { EGL_ALPHA_SIZE, 8 },
         { EGL_DEPTH_SIZE, 0 }, { EGL_STENCIL_SIZE, 0 }, { EGL_SAMPLES, 0 },
     };
@@ -93,12 +85,12 @@ EGLConfig GLContext::findConfig(EGLDisplay display) {
     };
 
     auto matchConfig = [&](EGLConfig config) {
-        if (!matchAttribFlags(config, { EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR})) {
+        if (!matchAttribFlags(config, { EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR })) {
             return false;
         }
         // The pbuffer config also needs to be compatible with normal window rendering
         // so it can share textures with the window context.
-        if (!matchAttribFlags(config, { EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT})) {
+        if (!matchAttribFlags(config, { EGL_SURFACE_TYPE, EGL_WINDOW_BIT | EGL_PBUFFER_BIT })) {
             return false;
         }
 
@@ -110,7 +102,6 @@ EGLConfig GLContext::findConfig(EGLDisplay display) {
 
         return true;
     };
-
 
     for (const auto& config : configs) {
         if (matchConfig(config)) {

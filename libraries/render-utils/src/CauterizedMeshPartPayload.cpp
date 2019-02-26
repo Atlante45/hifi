@@ -18,8 +18,10 @@
 
 using namespace render;
 
-CauterizedMeshPartPayload::CauterizedMeshPartPayload(ModelPointer model, int meshIndex, int partIndex, int shapeIndex, const Transform& transform, const Transform& offsetTransform)
-    : ModelMeshPartPayload(model, meshIndex, partIndex, shapeIndex, transform, offsetTransform) {}
+CauterizedMeshPartPayload::CauterizedMeshPartPayload(ModelPointer model, int meshIndex, int partIndex, int shapeIndex,
+                                                     const Transform& transform, const Transform& offsetTransform) :
+    ModelMeshPartPayload(model, meshIndex, partIndex, shapeIndex, transform, offsetTransform) {
+}
 
 void CauterizedMeshPartPayload::updateClusterBuffer(const std::vector<glm::mat4>& clusterMatrices,
                                                     const std::vector<glm::mat4>& cauterizedClusterMatrices) {
@@ -28,25 +30,29 @@ void CauterizedMeshPartPayload::updateClusterBuffer(const std::vector<glm::mat4>
     if (cauterizedClusterMatrices.size() > 1) {
         if (!_cauterizedClusterBuffer) {
             _cauterizedClusterBuffer = std::make_shared<gpu::Buffer>(cauterizedClusterMatrices.size() * sizeof(glm::mat4),
-                (const gpu::Byte*) cauterizedClusterMatrices.data());
+                                                                     (const gpu::Byte*)cauterizedClusterMatrices.data());
         } else {
             _cauterizedClusterBuffer->setSubData(0, cauterizedClusterMatrices.size() * sizeof(glm::mat4),
-                (const gpu::Byte*) cauterizedClusterMatrices.data());
+                                                 (const gpu::Byte*)cauterizedClusterMatrices.data());
         }
     }
 }
 
-void CauterizedMeshPartPayload::updateClusterBuffer(const std::vector<Model::TransformDualQuaternion>& clusterDualQuaternions,
-                                                    const std::vector<Model::TransformDualQuaternion>& cauterizedClusterDualQuaternions) {
+void CauterizedMeshPartPayload::updateClusterBuffer(
+    const std::vector<Model::TransformDualQuaternion>& clusterDualQuaternions,
+    const std::vector<Model::TransformDualQuaternion>& cauterizedClusterDualQuaternions) {
     ModelMeshPartPayload::updateClusterBuffer(clusterDualQuaternions);
 
     if (cauterizedClusterDualQuaternions.size() > 1) {
         if (!_cauterizedClusterBuffer) {
-            _cauterizedClusterBuffer = std::make_shared<gpu::Buffer>(cauterizedClusterDualQuaternions.size() * sizeof(Model::TransformDualQuaternion),
-                (const gpu::Byte*) cauterizedClusterDualQuaternions.data());
+            _cauterizedClusterBuffer = std::make_shared<gpu::Buffer>(cauterizedClusterDualQuaternions.size() *
+                                                                         sizeof(Model::TransformDualQuaternion),
+                                                                     (const gpu::Byte*)cauterizedClusterDualQuaternions.data());
         } else {
-            _cauterizedClusterBuffer->setSubData(0, cauterizedClusterDualQuaternions.size() * sizeof(Model::TransformDualQuaternion),
-                (const gpu::Byte*) cauterizedClusterDualQuaternions.data());
+            _cauterizedClusterBuffer->setSubData(0,
+                                                 cauterizedClusterDualQuaternions.size() *
+                                                     sizeof(Model::TransformDualQuaternion),
+                                                 (const gpu::Byte*)cauterizedClusterDualQuaternions.data());
         }
     }
 }
@@ -56,7 +62,9 @@ void CauterizedMeshPartPayload::updateTransformForCauterizedMesh(const Transform
 }
 
 void CauterizedMeshPartPayload::bindTransform(gpu::Batch& batch, RenderArgs::RenderMode renderMode) const {
-    bool useCauterizedMesh = (renderMode != RenderArgs::RenderMode::SHADOW_RENDER_MODE && renderMode != RenderArgs::RenderMode::SECONDARY_CAMERA_RENDER_MODE) && _enableCauterization;
+    bool useCauterizedMesh = (renderMode != RenderArgs::RenderMode::SHADOW_RENDER_MODE &&
+                              renderMode != RenderArgs::RenderMode::SECONDARY_CAMERA_RENDER_MODE) &&
+                             _enableCauterization;
     if (useCauterizedMesh) {
         if (_cauterizedClusterBuffer) {
             batch.setUniformBuffer(graphics::slot::buffer::Skinning, _cauterizedClusterBuffer);
@@ -66,4 +74,3 @@ void CauterizedMeshPartPayload::bindTransform(gpu::Batch& batch, RenderArgs::Ren
         ModelMeshPartPayload::bindTransform(batch, renderMode);
     }
 }
-

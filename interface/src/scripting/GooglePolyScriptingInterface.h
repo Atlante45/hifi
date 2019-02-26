@@ -12,10 +12,10 @@
 #ifndef hifi_GooglePolyScriptingInterface_h
 #define hifi_GooglePolyScriptingInterface_h
 
-#include <QObject>
 #include <DependencyManager.h>
+#include <QObject>
 
-/**jsdoc 
+/**jsdoc
  * The GooglePoly API allows you to interact with Google Poly models direct from inside High Fidelity.
  * @namespace GooglePoly
  *
@@ -110,7 +110,6 @@ private:
     QByteArray getHTTPRequest(const QUrl& url);
     QVariant parseJSON(const QUrl& url, int fileType);
     int getRandIntInRange(int length);
-
 };
 
 #endif // hifi_GooglePolyScriptingInterface_h

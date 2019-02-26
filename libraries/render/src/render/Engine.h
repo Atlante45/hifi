@@ -21,87 +21,89 @@
 
 namespace render {
 
+class RenderContext : public task::JobContext {
+public:
+    RenderContext() : task::JobContext() {}
+    virtual ~RenderContext() {}
 
+    RenderArgs* args;
+    ScenePointer _scene;
+};
+using RenderContextPointer = std::shared_ptr<RenderContext>;
 
-    class RenderContext : public task::JobContext {
-    public:
-        RenderContext() : task::JobContext() {}
-        virtual ~RenderContext() {}
+Task_DeclareCategoryTimeProfilerClass(RenderTimeProfiler, trace_render);
 
-        RenderArgs* args;
-        ScenePointer _scene;
-    };
-    using RenderContextPointer = std::shared_ptr<RenderContext>;
-
-    Task_DeclareCategoryTimeProfilerClass(RenderTimeProfiler, trace_render);
-
-    Task_DeclareTypeAliases(RenderContext, RenderTimeProfiler)
+Task_DeclareTypeAliases(RenderContext, RenderTimeProfiler)
 
     // Versions of the COnfig integrating a gpu & batch timer
     class GPUJobConfig : public JobConfig {
-        Q_OBJECT
-            Q_PROPERTY(double gpuRunTime READ getGPURunTime)
-            Q_PROPERTY(double batchRunTime READ getBatchRunTime)
+    Q_OBJECT
+    Q_PROPERTY(double gpuRunTime READ getGPURunTime)
+    Q_PROPERTY(double batchRunTime READ getBatchRunTime)
 
-            double _msGPURunTime { 0.0 };
-        double _msBatchRunTime { 0.0 };
-    public:
-        using Persistent = PersistentConfig<GPUJobConfig>;
+    double _msGPURunTime { 0.0 };
+    double _msBatchRunTime { 0.0 };
 
-        GPUJobConfig() = default;
-        GPUJobConfig(bool enabled) : JobConfig(enabled) {}
+public:
+    using Persistent = PersistentConfig<GPUJobConfig>;
 
-        // Running Time measurement on GPU and for Batch execution
-        void setGPUBatchRunTime(double msGpuTime, double msBatchTime) { _msGPURunTime = msGpuTime; _msBatchRunTime = msBatchTime; }
-        double getGPURunTime() const { return _msGPURunTime; }
-        double getBatchRunTime() const { return _msBatchRunTime; }
-    };
+    GPUJobConfig() = default;
+    GPUJobConfig(bool enabled) : JobConfig(enabled) {}
 
-    class GPUTaskConfig : public TaskConfig {
-        Q_OBJECT
-        Q_PROPERTY(double gpuRunTime READ getGPURunTime)
-        Q_PROPERTY(double batchRunTime READ getBatchRunTime)
+    // Running Time measurement on GPU and for Batch execution
+    void setGPUBatchRunTime(double msGpuTime, double msBatchTime) {
+        _msGPURunTime = msGpuTime;
+        _msBatchRunTime = msBatchTime;
+    }
+    double getGPURunTime() const { return _msGPURunTime; }
+    double getBatchRunTime() const { return _msBatchRunTime; }
+};
 
-        double _msGPURunTime { 0.0 };
-        double _msBatchRunTime { 0.0 };
-    public:
+class GPUTaskConfig : public TaskConfig {
+    Q_OBJECT
+    Q_PROPERTY(double gpuRunTime READ getGPURunTime)
+    Q_PROPERTY(double batchRunTime READ getBatchRunTime)
 
-        using Persistent = PersistentConfig<GPUTaskConfig>;
+    double _msGPURunTime { 0.0 };
+    double _msBatchRunTime { 0.0 };
 
+public:
+    using Persistent = PersistentConfig<GPUTaskConfig>;
 
-        GPUTaskConfig() = default;
-        GPUTaskConfig(bool enabled) : TaskConfig(enabled) {}
+    GPUTaskConfig() = default;
+    GPUTaskConfig(bool enabled) : TaskConfig(enabled) {}
 
-        // Running Time measurement on GPU and for Batch execution
-        void setGPUBatchRunTime(double msGpuTime, double msBatchTime) { _msGPURunTime = msGpuTime; _msBatchRunTime = msBatchTime; }
-        double getGPURunTime() const { return _msGPURunTime; }
-        double getBatchRunTime() const { return _msBatchRunTime; }
-    };
+    // Running Time measurement on GPU and for Batch execution
+    void setGPUBatchRunTime(double msGpuTime, double msBatchTime) {
+        _msGPURunTime = msGpuTime;
+        _msBatchRunTime = msBatchTime;
+    }
+    double getGPURunTime() const { return _msGPURunTime; }
+    double getBatchRunTime() const { return _msBatchRunTime; }
+};
 
+// The render engine holds all render tasks, and is itself a render task.
+// State flows through tasks to jobs via the render and scene contexts -
+// the engine should not be known from its jobs.
+class RenderEngine : public Engine {
+public:
+    RenderEngine();
+    ~RenderEngine() = default;
 
-    // The render engine holds all render tasks, and is itself a render task.
-    // State flows through tasks to jobs via the render and scene contexts -
-    // the engine should not be known from its jobs.
-    class RenderEngine : public Engine {
-    public:
+    // Load any persisted settings, and set up the presets
+    // This should be run after adding all jobs, and before building ui
+    void load();
 
-        RenderEngine();
-        ~RenderEngine() = default;
+    // Register the scene
+    void registerScene(const ScenePointer& scene) { _context->_scene = scene; }
 
-        // Load any persisted settings, and set up the presets
-        // This should be run after adding all jobs, and before building ui
-        void load();
+    // acces the RenderContext
+    RenderContextPointer getRenderContext() const { return _context; }
 
-        // Register the scene
-        void registerScene(const ScenePointer& scene) { _context->_scene = scene; }
+protected:
+};
+using EnginePointer = std::shared_ptr<RenderEngine>;
 
-        // acces the RenderContext
-        RenderContextPointer getRenderContext() const { return _context; }
-
-    protected:
-    };
-    using EnginePointer = std::shared_ptr<RenderEngine>;
-
-}
+} // namespace render
 
 #endif // hifi_render_Engine_h

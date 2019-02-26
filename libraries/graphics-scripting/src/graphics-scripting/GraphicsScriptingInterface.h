@@ -11,18 +11,18 @@
 #ifndef hifi_GraphicsScriptingInterface_h
 #define hifi_GraphicsScriptingInterface_h
 
-#include <QtCore/QObject>
 #include <QUrl>
+#include <QtCore/QObject>
 
 #include <QtScript/QScriptEngine>
 #include <QtScript/QScriptable>
 
-#include "ScriptableMesh.h"
 #include <DependencyManager.h>
-
+#include "ScriptableMesh.h"
 
 /**jsdoc
- * The experimental Graphics API <em>(experimental)</em> lets you query and manage certain graphics-related structures (like underlying meshes and textures) from scripting.
+ * The experimental Graphics API <em>(experimental)</em> lets you query and manage certain graphics-related structures (like
+ * underlying meshes and textures) from scripting.
  * @namespace Graphics
  *
  * @hifi-interface
@@ -100,7 +100,6 @@ private:
     scriptable::MeshPointer getMeshPointer(scriptable::ScriptableMeshPointer meshProxy);
     scriptable::MeshPointer getMeshPointer(scriptable::ScriptableMesh& meshProxy);
     scriptable::MeshPointer getMeshPointer(const scriptable::ScriptableMesh& meshProxy);
-
 };
 
 Q_DECLARE_METATYPE(glm::uint32)

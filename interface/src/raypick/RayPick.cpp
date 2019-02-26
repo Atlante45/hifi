@@ -8,11 +8,11 @@
 #include "RayPick.h"
 
 #include "Application.h"
+#include "DependencyManager.h"
 #include "EntityScriptingInterface.h"
+#include "PickManager.h"
 #include "avatar/AvatarManager.h"
 #include "scripting/HMDScriptingInterface.h"
-#include "DependencyManager.h"
-#include "PickManager.h"
 
 PickRay RayPick::getMathematicalPick() const {
     if (!parentTransform) {
@@ -32,19 +32,21 @@ PickResultPointer RayPick::getEntityIntersection(const PickRay& pick) {
         searchFilter.setFlag(PickFilter::PRECISE, false);
     }
 
-    RayToEntityIntersectionResult entityRes =
-        DependencyManager::get<EntityScriptingInterface>()->evalRayIntersectionVector(pick, searchFilter,
-            getIncludeItemsAs<EntityItemID>(), getIgnoreItemsAs<EntityItemID>());
+    RayToEntityIntersectionResult entityRes = DependencyManager::get<EntityScriptingInterface>()->evalRayIntersectionVector(
+        pick, searchFilter, getIncludeItemsAs<EntityItemID>(), getIgnoreItemsAs<EntityItemID>());
     if (entityRes.intersects) {
         IntersectionType type = IntersectionType::ENTITY;
         if (getFilter().doesPickLocalEntities()) {
             EntityPropertyFlags desiredProperties;
             desiredProperties += PROP_ENTITY_HOST_TYPE;
-            if (DependencyManager::get<EntityScriptingInterface>()->getEntityProperties(entityRes.entityID, desiredProperties).getEntityHostType() == entity::HostType::LOCAL) {
+            if (DependencyManager::get<EntityScriptingInterface>()
+                    ->getEntityProperties(entityRes.entityID, desiredProperties)
+                    .getEntityHostType() == entity::HostType::LOCAL) {
                 type = IntersectionType::LOCAL_ENTITY;
             }
         }
-        return std::make_shared<RayPickResult>(type, entityRes.entityID, entityRes.distance, entityRes.intersection, pick, entityRes.surfaceNormal, entityRes.extraInfo);
+        return std::make_shared<RayPickResult>(type, entityRes.entityID, entityRes.distance, entityRes.intersection, pick,
+                                               entityRes.surfaceNormal, entityRes.extraInfo);
     } else {
         return std::make_shared<RayPickResult>(pick.toVariantMap());
     }
@@ -52,16 +54,19 @@ PickResultPointer RayPick::getEntityIntersection(const PickRay& pick) {
 
 PickResultPointer RayPick::getAvatarIntersection(const PickRay& pick) {
     bool precisionPicking = !(getFilter().isCoarse() || DependencyManager::get<PickManager>()->getForceCoarsePicking());
-    RayToAvatarIntersectionResult avatarRes = DependencyManager::get<AvatarManager>()->findRayIntersectionVector(pick, getIncludeItemsAs<EntityItemID>(), getIgnoreItemsAs<EntityItemID>(), precisionPicking);
+    RayToAvatarIntersectionResult avatarRes = DependencyManager::get<AvatarManager>()->findRayIntersectionVector(
+        pick, getIncludeItemsAs<EntityItemID>(), getIgnoreItemsAs<EntityItemID>(), precisionPicking);
     if (avatarRes.intersects) {
-        return std::make_shared<RayPickResult>(IntersectionType::AVATAR, avatarRes.avatarID, avatarRes.distance, avatarRes.intersection, pick, avatarRes.surfaceNormal, avatarRes.extraInfo);
+        return std::make_shared<RayPickResult>(IntersectionType::AVATAR, avatarRes.avatarID, avatarRes.distance,
+                                               avatarRes.intersection, pick, avatarRes.surfaceNormal, avatarRes.extraInfo);
     } else {
         return std::make_shared<RayPickResult>(pick.toVariantMap());
     }
 }
 
 PickResultPointer RayPick::getHUDIntersection(const PickRay& pick) {
-    glm::vec3 hudRes = DependencyManager::get<HMDScriptingInterface>()->calculateRayUICollisionPoint(pick.origin, pick.direction);
+    glm::vec3 hudRes = DependencyManager::get<HMDScriptingInterface>()->calculateRayUICollisionPoint(pick.origin,
+                                                                                                     pick.direction);
     return std::make_shared<RayPickResult>(IntersectionType::HUD, QUuid(), glm::distance(pick.origin, hudRes), hudRes, pick);
 }
 
@@ -77,7 +82,8 @@ Transform RayPick::getResultTransform() const {
     return transform;
 }
 
-glm::vec3 RayPick::intersectRayWithXYPlane(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& point, const glm::quat& rotation, const glm::vec3& registration) {
+glm::vec3 RayPick::intersectRayWithXYPlane(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& point,
+                                           const glm::quat& rotation, const glm::vec3& registration) {
     // TODO: take into account registration
     glm::vec3 n = rotation * Vectors::FRONT;
     float t = glm::dot(n, point - origin) / glm::dot(n, direction);
@@ -89,7 +95,8 @@ glm::vec3 RayPick::intersectRayWithEntityXYPlane(const QUuid& entityID, const gl
     return intersectRayWithXYPlane(origin, direction, props.getPosition(), props.getRotation(), props.getRegistrationPoint());
 }
 
-glm::vec2 RayPick::projectOntoXYPlane(const glm::vec3& worldPos, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& dimensions, const glm::vec3& registrationPoint, bool unNormalized) {
+glm::vec2 RayPick::projectOntoXYPlane(const glm::vec3& worldPos, const glm::vec3& position, const glm::quat& rotation,
+                                      const glm::vec3& dimensions, const glm::vec3& registrationPoint, bool unNormalized) {
     glm::quat invRot = glm::inverse(rotation);
     glm::vec3 localPos = invRot * (worldPos - position);
 
@@ -109,5 +116,6 @@ glm::vec2 RayPick::projectOntoEntityXYPlane(const QUuid& entityID, const glm::ve
     desiredProperties += PROP_DIMENSIONS;
     desiredProperties += PROP_REGISTRATION_POINT;
     auto props = DependencyManager::get<EntityScriptingInterface>()->getEntityProperties(entityID, desiredProperties);
-    return projectOntoXYPlane(worldPos, props.getPosition(), props.getRotation(), props.getDimensions(), props.getRegistrationPoint(), unNormalized);
+    return projectOntoXYPlane(worldPos, props.getPosition(), props.getRotation(), props.getDimensions(),
+                              props.getRegistrationPoint(), unNormalized);
 }

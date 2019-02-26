@@ -11,9 +11,9 @@
 #ifndef hifi_gpu_Framebuffer_h
 #define hifi_gpu_Framebuffer_h
 
-#include "Texture.h"
-#include "ResourceSwapChain.h"
 #include <memory>
+#include "ResourceSwapChain.h"
+#include "Texture.h"
 
 class Transform; // Texcood transform util
 
@@ -66,7 +66,6 @@ protected:
 };
 typedef std::shared_ptr<Swapchain> SwapchainPointer;
 
-
 class Framebuffer {
 public:
     enum BufferMask {
@@ -91,7 +90,8 @@ public:
     static Framebuffer* create(const SwapchainPointer& swapchain);
     static Framebuffer* create(const std::string& name);
     static Framebuffer* create(const std::string& name, const Format& colorBufferFormat, uint16 width, uint16 height);
-    static Framebuffer* create(const std::string& name, const Format& colorBufferFormat, const Format& depthStencilBufferFormat, uint16 width, uint16 height);
+    static Framebuffer* create(const std::string& name, const Format& colorBufferFormat, const Format& depthStencilBufferFormat,
+                               uint16 width, uint16 height);
     static Framebuffer* createShadowmap(uint16 width);
 
     bool isSwapchain() const;
@@ -115,7 +115,6 @@ public:
     uint32 getDepthStencilBufferSubresource() const;
     Format getDepthStencilBufferFormat() const;
 
-
     // Properties
     Masks getBufferMask() const { return _bufferMask; }
     bool isEmpty() const { return (_bufferMask == 0); }
@@ -133,11 +132,11 @@ public:
     const std::string& getName() const { return _name; }
     void setName(const std::string& name) { _name = name; }
 
-    float getAspectRatio() const { return getWidth() / (float) getHeight() ; }
+    float getAspectRatio() const { return getWidth() / (float)getHeight(); }
 
 #if !defined(Q_OS_ANDROID)
-    static const uint32 MAX_NUM_RENDER_BUFFERS = 8; 
-#else    
+    static const uint32 MAX_NUM_RENDER_BUFFERS = 8;
+#else
     static const uint32 MAX_NUM_RENDER_BUFFERS = 4;
 #endif
     static uint32 getMaxNumRenderBuffers() { return MAX_NUM_RENDER_BUFFERS; }
@@ -147,10 +146,14 @@ public:
     Stamp getDepthStamp() const { return _depthStamp; }
     const std::vector<Stamp>& getColorStamps() const { return _colorStamps; }
 
-    static glm::vec4 evalSubregionTexcoordTransformCoefficients(const glm::ivec2& sourceSurface, const glm::ivec2& destRegionSize, const glm::ivec2& destRegionOffset = glm::ivec2(0));
-    static glm::vec4 evalSubregionTexcoordTransformCoefficients(const glm::ivec2& sourceSurface, const glm::ivec4& destViewport);
+    static glm::vec4 evalSubregionTexcoordTransformCoefficients(const glm::ivec2& sourceSurface,
+                                                                const glm::ivec2& destRegionSize,
+                                                                const glm::ivec2& destRegionOffset = glm::ivec2(0));
+    static glm::vec4 evalSubregionTexcoordTransformCoefficients(const glm::ivec2& sourceSurface,
+                                                                const glm::ivec4& destViewport);
 
-    static Transform evalSubregionTexcoordTransform(const glm::ivec2& sourceSurface, const glm::ivec2& destRegionSize, const glm::ivec2& destRegionOffset = glm::ivec2(0));
+    static Transform evalSubregionTexcoordTransform(const glm::ivec2& sourceSurface, const glm::ivec2& destRegionSize,
+                                                    const glm::ivec2& destRegionOffset = glm::ivec2(0));
     static Transform evalSubregionTexcoordTransform(const glm::ivec2& sourceSurface, const glm::ivec4& destViewport);
 
 protected:
@@ -183,6 +186,6 @@ typedef std::shared_ptr<Framebuffer> FramebufferPointer;
 typedef ResourceSwapChain<Framebuffer> FramebufferSwapChain;
 typedef std::shared_ptr<FramebufferSwapChain> FramebufferSwapChainPointer;
 
-}
+} // namespace gpu
 
 #endif

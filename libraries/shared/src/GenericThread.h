@@ -14,9 +14,9 @@
 #ifndef hifi_GenericThread_h
 #define hifi_GenericThread_h
 
-#include <QtCore/QObject>
 #include <QMutex>
 #include <QThread>
+#include <QtCore/QObject>
 
 /// A basic generic "thread" class. Handles a single thread of control within the application. Can operate in non-threaded
 /// mode but caller must regularly call threadRoutine() method.
@@ -33,7 +33,7 @@ public:
     /// Call to stop the thread
     void terminate();
 
-    virtual void terminating() { }; // lets your subclass know we're terminating, and it should respond appropriately
+    virtual void terminating() {}; // lets your subclass know we're terminating, and it should respond appropriately
 
     bool isThreaded() const { return _isThreaded; }
 
@@ -51,7 +51,6 @@ signals:
     void finished();
 
 protected:
-
     /// Locks all the resources of the thread.
     void lock() { _mutex.lock(); }
 

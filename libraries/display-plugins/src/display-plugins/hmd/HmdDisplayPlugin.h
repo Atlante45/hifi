@@ -11,8 +11,8 @@
 
 #include <array>
 
-#include <QtGlobal>
 #include <Transform.h>
+#include <QtGlobal>
 
 #include <gpu/Format.h>
 #include <gpu/Stream.h>
@@ -23,6 +23,7 @@
 class HmdDisplayPlugin : public OpenGLDisplayPlugin {
     Q_OBJECT
     using Parent = OpenGLDisplayPlugin;
+
 public:
     ~HmdDisplayPlugin();
     bool isHmd() const override final { return true; }
@@ -38,13 +39,14 @@ public:
 
     virtual glm::mat4 getHeadPose() const override;
 
-    bool wantVsync() const override {
-        return false;
-    }
+    bool wantVsync() const override { return false; }
 
     float stutterRate() const override;
 
-    virtual bool onDisplayTextureReset() override { _clearPreviewFlag = true; return true; };
+    virtual bool onDisplayTextureReset() override {
+        _clearPreviewFlag = true;
+        return true;
+    };
 
     void pluginUpdate() override {};
 
@@ -89,6 +91,7 @@ protected:
     RateCounter<> _stutterRate;
 
     bool _disablePreview { true };
+
 private:
     ivec4 getViewportForSourceSize(const uvec2& size) const;
     float getLeftCenterPixel() const;
@@ -110,7 +113,7 @@ private:
         struct Uniforms {
             float alpha { 1.0f };
         } uniforms;
-        
+
         struct Vertex {
             vec3 pos;
             vec2 uv;

@@ -30,7 +30,8 @@ public:
 
     void shutdown();
 
-    void addAbsolutePoses(const std::string& key, AnimSkeleton::ConstPointer skeleton, const AnimPoseVec& poses, const AnimPose& rootPose, const glm::vec4& color);
+    void addAbsolutePoses(const std::string& key, AnimSkeleton::ConstPointer skeleton, const AnimPoseVec& poses,
+                          const AnimPose& rootPose, const glm::vec4& color);
     void removeAbsolutePoses(const std::string& key);
 
     void update();
@@ -38,7 +39,7 @@ public:
 protected:
     std::shared_ptr<AnimDebugDrawData> _animDebugDrawData;
     std::shared_ptr<AnimDebugDrawPayload> _animDebugDrawPayload;
-    render::ItemID _itemID{ render::Item::INVALID_ITEM_ID };
+    render::ItemID _itemID { render::Item::INVALID_ITEM_ID };
 
     static gpu::PipelinePointer _pipeline;
 

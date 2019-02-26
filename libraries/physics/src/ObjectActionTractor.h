@@ -27,9 +27,8 @@ public:
     virtual QByteArray serialize() const override;
     virtual void deserialize(QByteArray serializedArguments) override;
 
-    virtual bool getTarget(float deltaTimeStep, glm::quat& rotation, glm::vec3& position,
-                           glm::vec3& linearVelocity, glm::vec3& angularVelocity,
-                           float& linearTimeScale, float& angularTimeScale);
+    virtual bool getTarget(float deltaTimeStep, glm::quat& rotation, glm::vec3& position, glm::vec3& linearVelocity,
+                           glm::vec3& angularVelocity, float& linearTimeScale, float& angularTimeScale);
 
 protected:
     static const uint16_t tractorVersion;

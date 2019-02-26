@@ -15,8 +15,8 @@
 #include <gpu/Pipeline.h>
 #include <render/RenderFetchCullSortTask.h>
 #include "AssembleLightingStageTask.h"
-#include "LightingModel.h"
 #include "LightClusters.h"
+#include "LightingModel.h"
 #include "RenderShadowTask.h"
 
 class DrawDeferredConfig : public render::Job::Config {
@@ -31,31 +31,31 @@ public:
         emit newStats();
     }
 
-    int maxDrawn{ -1 };
+    int maxDrawn { -1 };
 
 signals:
     void newStats();
     void dirty();
 
 protected:
-    int _numDrawn{ 0 };
+    int _numDrawn { 0 };
 };
 
 class DrawDeferred {
 public:
-    using Inputs = render::VaryingSet7<render::ItemBounds, HazeStage::FramePointer, LightStage::FramePointer, LightingModelPointer, LightClustersPointer, LightStage::ShadowFramePointer, glm::vec2>;
+    using Inputs = render::VaryingSet7<render::ItemBounds, HazeStage::FramePointer, LightStage::FramePointer,
+                                       LightingModelPointer, LightClustersPointer, LightStage::ShadowFramePointer, glm::vec2>;
     using Config = DrawDeferredConfig;
     using JobModel = render::Job::ModelI<DrawDeferred, Inputs, Config>;
 
-    DrawDeferred(render::ShapePlumberPointer shapePlumber)
-        : _shapePlumber{ shapePlumber } {}
+    DrawDeferred(render::ShapePlumberPointer shapePlumber) : _shapePlumber { shapePlumber } {}
 
     void configure(const Config& config) { _maxDrawn = config.maxDrawn; }
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs);
 
 protected:
     render::ShapePlumberPointer _shapePlumber;
-    int _maxDrawn;  // initialized by Config
+    int _maxDrawn; // initialized by Config
 };
 
 class DrawStateSortConfig : public render::Job::Config {
@@ -70,15 +70,15 @@ public:
         emit numDrawnChanged();
     }
 
-    int maxDrawn{ -1 };
-    bool stateSort{ true };
+    int maxDrawn { -1 };
+    bool stateSort { true };
 
 signals:
     void numDrawnChanged();
     void dirty();
 
 protected:
-    int numDrawn{ 0 };
+    int numDrawn { 0 };
 };
 
 class DrawStateSortDeferred {
@@ -88,9 +88,7 @@ public:
     using Config = DrawStateSortConfig;
     using JobModel = render::Job::ModelI<DrawStateSortDeferred, Inputs, Config>;
 
-    DrawStateSortDeferred(render::ShapePlumberPointer shapePlumber)
-        : _shapePlumber{ shapePlumber } {
-    }
+    DrawStateSortDeferred(render::ShapePlumberPointer shapePlumber) : _shapePlumber { shapePlumber } {}
 
     void configure(const Config& config) {
         _maxDrawn = config.maxDrawn;
@@ -100,7 +98,7 @@ public:
 
 protected:
     render::ShapePlumberPointer _shapePlumber;
-    int _maxDrawn;  // initialized by Config
+    int _maxDrawn; // initialized by Config
     bool _stateSort;
 };
 
@@ -125,11 +123,11 @@ class RenderDeferredTaskConfig : public render::Task::Config {
     Q_PROPERTY(bool debugFade MEMBER debugFade NOTIFY dirty)
     Q_PROPERTY(float debugFadePercent MEMBER debugFadePercent NOTIFY dirty)
 public:
-    float fadeScale{ 0.5f };
-    float fadeDuration{ 3.0f };
-    float resolutionScale{ 1.f };
-    float debugFadePercent{ 0.f };
-    bool debugFade{ false };
+    float fadeScale { 0.5f };
+    float fadeDuration { 3.0f };
+    float resolutionScale { 1.f };
+    float debugFadePercent { 0.f };
+    bool debugFade { false };
 
 signals:
     void dirty();
@@ -137,7 +135,8 @@ signals:
 
 class RenderDeferredTask {
 public:
-    using Input = render::VaryingSet4<RenderFetchCullSortTask::Output, LightingModelPointer, AssembleLightingStageTask::Output, RenderShadowTask::Output>;
+    using Input = render::VaryingSet4<RenderFetchCullSortTask::Output, LightingModelPointer, AssembleLightingStageTask::Output,
+                                      RenderShadowTask::Output>;
     using Config = RenderDeferredTaskConfig;
     using JobModel = render::Task::ModelI<RenderDeferredTask, Input, Config>;
 
@@ -149,4 +148,4 @@ public:
 private:
 };
 
-#endif  // hifi_RenderDeferredTask_h
+#endif // hifi_RenderDeferredTask_h

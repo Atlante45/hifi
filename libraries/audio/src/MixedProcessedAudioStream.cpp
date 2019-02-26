@@ -12,9 +12,10 @@
 #include "MixedProcessedAudioStream.h"
 #include "AudioLogging.h"
 
-MixedProcessedAudioStream::MixedProcessedAudioStream(int numFramesCapacity, int numStaticJitterFrames)
-    : InboundAudioStream(AudioConstants::STEREO, AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL,
-        numFramesCapacity, numStaticJitterFrames) {}
+MixedProcessedAudioStream::MixedProcessedAudioStream(int numFramesCapacity, int numStaticJitterFrames) :
+    InboundAudioStream(AudioConstants::STEREO, AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL, numFramesCapacity,
+                       numStaticJitterFrames) {
+}
 
 void MixedProcessedAudioStream::outputFormatChanged(int sampleRate, int channelCount) {
     _outputSampleRate = sampleRate;
@@ -48,7 +49,8 @@ int MixedProcessedAudioStream::lostAudioData(int numPackets) {
         emit processSamples(decodedBuffer, outputBuffer);
 
         _ringBuffer.writeData(outputBuffer.data(), outputBuffer.size());
-        qCDebug(audiostream, "Wrote %d samples to buffer (%d available)", outputBuffer.size() / (int)sizeof(int16_t), getSamplesAvailable());
+        qCDebug(audiostream, "Wrote %d samples to buffer (%d available)", outputBuffer.size() / (int)sizeof(int16_t),
+                getSamplesAvailable());
     }
     return 0;
 }
@@ -67,17 +69,18 @@ int MixedProcessedAudioStream::parseAudioData(PacketType type, const QByteArray&
     emit processSamples(decodedBuffer, outputBuffer);
 
     _ringBuffer.writeData(outputBuffer.data(), outputBuffer.size());
-    qCDebug(audiostream, "Wrote %d samples to buffer (%d available)", outputBuffer.size() / (int)sizeof(int16_t), getSamplesAvailable());
+    qCDebug(audiostream, "Wrote %d samples to buffer (%d available)", outputBuffer.size() / (int)sizeof(int16_t),
+            getSamplesAvailable());
 
     return packetAfterStreamProperties.size();
 }
 
 int MixedProcessedAudioStream::networkToDeviceFrames(int networkFrames) {
     return ((quint64)networkFrames * _outputChannelCount * _outputSampleRate) /
-        (quint64)(AudioConstants::STEREO * AudioConstants::SAMPLE_RATE);
+           (quint64)(AudioConstants::STEREO * AudioConstants::SAMPLE_RATE);
 }
 
 int MixedProcessedAudioStream::deviceToNetworkFrames(int deviceFrames) {
     return (quint64)deviceFrames * (quint64)(AudioConstants::STEREO * AudioConstants::SAMPLE_RATE) /
-        (_outputSampleRate * _outputChannelCount);
+           (_outputSampleRate * _outputChannelCount);
 }

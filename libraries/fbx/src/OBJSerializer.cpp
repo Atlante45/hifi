@@ -14,25 +14,25 @@
 
 #include "OBJSerializer.h"
 
-#include <ctype.h>  // .obj files are not locale-specific. The C/ASCII charset applies.
-#include <sstream> 
+#include <ctype.h> // .obj files are not locale-specific. The C/ASCII charset applies.
+#include <sstream>
 
 #include <QtCore/QBuffer>
-#include <QtCore/QIODevice>
 #include <QtCore/QEventLoop>
+#include <QtCore/QIODevice>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 
-#include <shared/NsightHelpers.h>
 #include <NetworkAccessManager.h>
 #include <ResourceManager.h>
+#include <shared/NsightHelpers.h>
 
-#include "FBXSerializer.h"
 #include <hfm/ModelFormatLogging.h>
 #include <shared/PlatformHacks.h>
+#include "FBXSerializer.h"
 
-QHash<QString, float> COMMENT_SCALE_HINTS = {{"This file uses centimeters as units", 1.0f / 100.0f},
-                                             {"This file uses millimeters as units", 1.0f / 1000.0f}};
+QHash<QString, float> COMMENT_SCALE_HINTS = { { "This file uses centimeters as units", 1.0f / 100.0f },
+                                              { "This file uses millimeters as units", 1.0f / 1000.0f } };
 
 const QString SMART_DEFAULT_MATERIAL_NAME = "High Fidelity smart default material name";
 
@@ -49,7 +49,7 @@ T& checked_at(QVector<T>& vector, int i) {
     }
     return vector[i];
 }
-}
+} // namespace
 
 OBJTokenizer::OBJTokenizer(QIODevice* device) : _device(device), _pushedBackToken(-1) {
 }
@@ -174,7 +174,6 @@ glm::vec2 OBJTokenizer::getVec2() {
     return v;
 }
 
-
 void setMeshPartDefaults(HFMMeshPart& meshPart, QString materialID) {
     meshPart.materialID = materialID;
 }
@@ -182,7 +181,8 @@ void setMeshPartDefaults(HFMMeshPart& meshPart, QString materialID) {
 // OBJFace
 //    NOTE (trent, 7/20/17): The vertexColors vector being passed-in isn't necessary here, but I'm just
 //                         pairing it with the vertices vector for consistency.
-bool OBJFace::add(const QByteArray& vertexIndex, const QByteArray& textureIndex, const QByteArray& normalIndex, const QVector<glm::vec3>& vertices, const QVector<glm::vec3>& vertexColors) {
+bool OBJFace::add(const QByteArray& vertexIndex, const QByteArray& textureIndex, const QByteArray& normalIndex,
+                  const QVector<glm::vec3>& vertices, const QVector<glm::vec3>& vertexColors) {
     bool ok;
     int index = vertexIndex.toInt(&ok);
     if (!ok) {
@@ -238,7 +238,7 @@ void OBJFace::addFrom(const OBJFace* face, int index) { // add using data from f
     }
 }
 
-bool OBJSerializer::isValidTexture(const QByteArray &filename) {
+bool OBJSerializer::isValidTexture(const QByteArray& filename) {
     if (_url.isEmpty()) {
         return false;
     }
@@ -254,27 +254,25 @@ void OBJSerializer::parseMaterialLibrary(QIODevice* device) {
     while (true) {
         switch (tokenizer.nextToken()) {
             case OBJTokenizer::COMMENT_TOKEN:
-                #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
                 qCDebug(modelformat) << "OBJSerializer MTLLIB comment:" << tokenizer.getComment();
-                #endif
+#endif
                 break;
             case OBJTokenizer::DATUM_TOKEN:
                 break;
             default:
                 materials[matName] = currentMaterial;
-                #ifdef WANT_DEBUG
-                qCDebug(modelformat) << 
-                                     "OBJSerializer Last material illumination model:" << currentMaterial.illuminationModel <<
-                                     " shininess:" << currentMaterial.shininess << 
-                                     " opacity:" << currentMaterial.opacity <<
-                                     " diffuse color:" << currentMaterial.diffuseColor << 
-                                     " specular color:" << currentMaterial.specularColor << 
-                                     " emissive color:" << currentMaterial.emissiveColor << 
-                                     " diffuse texture:" << currentMaterial.diffuseTextureFilename << 
-                                     " specular texture:" << currentMaterial.specularTextureFilename << 
-                                     " emissive texture:" << currentMaterial.emissiveTextureFilename << 
-                                     " bump texture:" << currentMaterial.bumpTextureFilename <<
-                                     " opacity texture:" << currentMaterial.opacityTextureFilename;
+#ifdef WANT_DEBUG
+                qCDebug(modelformat) << "OBJSerializer Last material illumination model:" << currentMaterial.illuminationModel
+                                     << " shininess:" << currentMaterial.shininess << " opacity:" << currentMaterial.opacity
+                                     << " diffuse color:" << currentMaterial.diffuseColor
+                                     << " specular color:" << currentMaterial.specularColor
+                                     << " emissive color:" << currentMaterial.emissiveColor
+                                     << " diffuse texture:" << currentMaterial.diffuseTextureFilename
+                                     << " specular texture:" << currentMaterial.specularTextureFilename
+                                     << " emissive texture:" << currentMaterial.emissiveTextureFilename
+                                     << " bump texture:" << currentMaterial.bumpTextureFilename
+                                     << " opacity texture:" << currentMaterial.opacityTextureFilename;
 #endif
                 return;
         }
@@ -286,9 +284,9 @@ void OBJSerializer::parseMaterialLibrary(QIODevice* device) {
             materials[matName] = currentMaterial;
             matName = tokenizer.getDatum();
             currentMaterial = materials[matName];
-            #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
             qCDebug(modelformat) << "OBJSerializer Starting new material definition " << matName;
-            #endif
+#endif
             currentMaterial.diffuseTextureFilename = "";
             currentMaterial.emissiveTextureFilename = "";
             currentMaterial.specularTextureFilename = "";
@@ -298,11 +296,11 @@ void OBJSerializer::parseMaterialLibrary(QIODevice* device) {
         } else if (token == "Ns") {
             currentMaterial.shininess = tokenizer.getFloat();
         } else if (token == "Ni") {
-            #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
             qCDebug(modelformat) << "OBJSerializer Ignoring material Ni " << tokenizer.getFloat();
-            #else
+#else
             tokenizer.getFloat();
-            #endif
+#endif
         } else if (token == "d") {
             currentMaterial.opacity = tokenizer.getFloat();
         } else if (token == "Tr") {
@@ -310,39 +308,41 @@ void OBJSerializer::parseMaterialLibrary(QIODevice* device) {
         } else if (token == "illum") {
             currentMaterial.illuminationModel = tokenizer.getFloat();
         } else if (token == "Tf") {
-            #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
             qCDebug(modelformat) << "OBJSerializer Ignoring material Tf " << tokenizer.getVec3();
-            #else
+#else
             tokenizer.getVec3();
-            #endif
+#endif
         } else if (token == "Ka") {
-            #ifdef WANT_DEBUG
-            qCDebug(modelformat) << "OBJSerializer Ignoring material Ka " << tokenizer.getVec3();;
-            #else
+#ifdef WANT_DEBUG
+            qCDebug(modelformat) << "OBJSerializer Ignoring material Ka " << tokenizer.getVec3();
+            ;
+#else
             tokenizer.getVec3();
-            #endif
+#endif
         } else if (token == "Kd") {
             currentMaterial.diffuseColor = tokenizer.getVec3();
         } else if (token == "Ke") {
             currentMaterial.emissiveColor = tokenizer.getVec3();
         } else if (token == "Ks") {
             currentMaterial.specularColor = tokenizer.getVec3();
-        } else if ((token == "map_Kd") || (token == "map_Ke") || (token == "map_Ks") || (token == "map_bump") || (token == "bump") || (token == "map_d")) {
+        } else if ((token == "map_Kd") || (token == "map_Ke") || (token == "map_Ks") || (token == "map_bump") ||
+                   (token == "bump") || (token == "map_d")) {
             const QByteArray textureLine = tokenizer.getLineAsDatum();
             QByteArray filename;
             OBJMaterialTextureOptions textureOptions;
             parseTextureLine(textureLine, filename, textureOptions);
             if (filename.endsWith(".tga")) {
-                #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
                 qCDebug(modelformat) << "OBJSerializer WARNING: currently ignoring tga texture " << filename << " in " << _url;
-                #endif
+#endif
                 break;
             }
             if (token == "map_Kd") {
                 currentMaterial.diffuseTextureFilename = filename;
             } else if (token == "map_Ke") {
                 currentMaterial.emissiveTextureFilename = filename;
-            } else if (token == "map_Ks" ) {
+            } else if (token == "map_Ks") {
                 currentMaterial.specularTextureFilename = filename;
             } else if ((token == "map_bump") || (token == "bump")) {
                 currentMaterial.bumpTextureFilename = filename;
@@ -352,85 +352,88 @@ void OBJSerializer::parseMaterialLibrary(QIODevice* device) {
             }
         }
     }
-} 
+}
 
-void OBJSerializer::parseTextureLine(const QByteArray& textureLine, QByteArray& filename, OBJMaterialTextureOptions& textureOptions) {
+void OBJSerializer::parseTextureLine(const QByteArray& textureLine, QByteArray& filename,
+                                     OBJMaterialTextureOptions& textureOptions) {
     // Texture options reference http://paulbourke.net/dataformats/mtl/
     // and https://wikivisually.com/wiki/Material_Template_Library
 
     std::istringstream iss(textureLine.toStdString());
-    const std::vector<std::string> parser(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
+    const std::vector<std::string> parser(std::istream_iterator<std::string> { iss }, std::istream_iterator<std::string>());
 
     uint i = 0;
     while (i < parser.size()) {
         if (i + 1 < parser.size() && parser[i][0] == '-') {
             const std::string& option = parser[i++];
             if (option == "-blendu" || option == "-blendv") {
-                #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
                 const std::string& onoff = parser[i++];
                 qCDebug(modelformat) << "OBJSerializer WARNING: Ignoring texture option" << option.c_str() << onoff.c_str();
-                #endif
+#endif
             } else if (option == "-bm") {
                 const std::string& bm = parser[i++];
                 textureOptions.bumpMultiplier = std::stof(bm);
             } else if (option == "-boost") {
-                #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
                 const std::string& boost = parser[i++];
                 float boostFloat = std::stof(boost);
                 qCDebug(modelformat) << "OBJSerializer WARNING: Ignoring texture option" << option.c_str() << boost.c_str();
-                #endif
+#endif
             } else if (option == "-cc") {
-                #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
                 const std::string& onoff = parser[i++];
                 qCDebug(modelformat) << "OBJSerializer WARNING: Ignoring texture option" << option.c_str() << onoff.c_str();
-                #endif
+#endif
             } else if (option == "-clamp") {
-                #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
                 const std::string& onoff = parser[i++];
                 qCDebug(modelformat) << "OBJSerializer WARNING: Ignoring texture option" << option.c_str() << onoff.c_str();
-                #endif
+#endif
             } else if (option == "-imfchan") {
-                #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
                 const std::string& imfchan = parser[i++];
                 qCDebug(modelformat) << "OBJSerializer WARNING: Ignoring texture option" << option.c_str() << imfchan.c_str();
-                #endif
+#endif
             } else if (option == "-mm") {
                 if (i + 1 < parser.size()) {
-                    #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
                     const std::string& mmBase = parser[i++];
                     const std::string& mmGain = parser[i++];
                     float mmBaseFloat = std::stof(mmBase);
                     float mmGainFloat = std::stof(mmGain);
-                    qCDebug(modelformat) << "OBJSerializer WARNING: Ignoring texture option" << option.c_str() << mmBase.c_str() << mmGain.c_str();
-                    #endif
+                    qCDebug(modelformat) << "OBJSerializer WARNING: Ignoring texture option" << option.c_str() << mmBase.c_str()
+                                         << mmGain.c_str();
+#endif
                 }
             } else if (option == "-o" || option == "-s" || option == "-t") {
                 if (i + 2 < parser.size()) {
-                    #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
                     const std::string& u = parser[i++];
                     const std::string& v = parser[i++];
                     const std::string& w = parser[i++];
                     float uFloat = std::stof(u);
                     float vFloat = std::stof(v);
                     float wFloat = std::stof(w);
-                    qCDebug(modelformat) << "OBJSerializer WARNING: Ignoring texture option" << option.c_str() << u.c_str() << v.c_str() << w.c_str();
-                    #endif
+                    qCDebug(modelformat) << "OBJSerializer WARNING: Ignoring texture option" << option.c_str() << u.c_str()
+                                         << v.c_str() << w.c_str();
+#endif
                 }
             } else if (option == "-texres") {
-                #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
                 const std::string& texres = parser[i++];
                 float texresFloat = std::stof(texres);
                 qCDebug(modelformat) << "OBJSerializer WARNING: Ignoring texture option" << option.c_str() << texres.c_str();
-                #endif
+#endif
             } else if (option == "-type") {
-                #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
                 const std::string& type = parser[i++];
                 qCDebug(modelformat) << "OBJSerializer WARNING: Ignoring texture option" << option.c_str() << type.c_str();
-                #endif
+#endif
             } else if (option[0] == '-') {
-                #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
                 qCDebug(modelformat) << "OBJSerializer WARNING: Ignoring unsupported texture option" << option.c_str();
-                #endif
+#endif
             }
         } else { // assume filename at end when no more options
             std::string filenameString = parser[i++];
@@ -443,8 +446,8 @@ void OBJSerializer::parseTextureLine(const QByteArray& textureLine, QByteArray& 
 }
 
 std::tuple<bool, QByteArray> requestData(QUrl& url) {
-    auto request = DependencyManager::get<ResourceManager>()->createResourceRequest(
-        nullptr, url, true, -1, "(OBJSerializer) requestData");
+    auto request = DependencyManager::get<ResourceManager>()->createResourceRequest(nullptr, url, true, -1,
+                                                                                    "(OBJSerializer) requestData");
 
     if (!request) {
         return std::make_tuple(false, QByteArray());
@@ -462,15 +465,12 @@ std::tuple<bool, QByteArray> requestData(QUrl& url) {
     }
 }
 
-
 QNetworkReply* request(QUrl& url, bool isTest) {
     if (!qApp) {
         return nullptr;
     }
-    bool aboutToQuit{ false };
-    auto connection = QObject::connect(qApp, &QCoreApplication::aboutToQuit, [&] {
-        aboutToQuit = true;
-    });
+    bool aboutToQuit { false };
+    auto connection = QObject::connect(qApp, &QCoreApplication::aboutToQuit, [&] { aboutToQuit = true; });
     QNetworkAccessManager& networkAccessManager = NetworkAccessManager::getInstance();
     QNetworkRequest netRequest(url);
     netRequest.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
@@ -481,15 +481,14 @@ QNetworkReply* request(QUrl& url, bool isTest) {
     }
     QEventLoop loop; // Create an event loop that will quit when we get the finished signal
     QObject::connect(netReply, SIGNAL(finished()), &loop, SLOT(quit()));
-    loop.exec();                    // Nothing is going to happen on this whole run thread until we get this
+    loop.exec(); // Nothing is going to happen on this whole run thread until we get this
 
     QObject::disconnect(connection);
-    return netReply;                // trying to sync later on.
+    return netReply; // trying to sync later on.
 }
 
-
-bool OBJSerializer::parseOBJGroup(OBJTokenizer& tokenizer, const QVariantHash& mapping, HFMModel& hfmModel,
-                              float& scaleGuess, bool combineParts) {
+bool OBJSerializer::parseOBJGroup(OBJTokenizer& tokenizer, const QVariantHash& mapping, HFMModel& hfmModel, float& scaleGuess,
+                                  bool combineParts) {
     FaceGroup faces;
     HFMMesh& mesh = hfmModel.meshes[0];
     mesh.parts.append(HFMMeshPart());
@@ -523,7 +522,7 @@ bool OBJSerializer::parseOBJGroup(OBJTokenizer& tokenizer, const QVariantHash& m
             break;
         }
         QByteArray token = tokenizer.getDatum();
-        //qCDebug(modelformat) << token;
+        // qCDebug(modelformat) << token;
         // we don't support separate objects in the same file, so treat "o" the same as "g".
         if (token == "g" || token == "o") {
             if (sawG) {
@@ -556,9 +555,9 @@ bool OBJSerializer::parseOBJGroup(OBJTokenizer& tokenizer, const QVariantHash& m
                 if (combineParts) {
                     currentMaterialName = nextName;
                 }
-                #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
                 qCDebug(modelformat) << "OBJSerializer new current material:" << currentMaterialName;
-                #endif
+#endif
             }
         } else if (token == "v") {
             glm::vec3 vertex;
@@ -627,15 +626,13 @@ bool OBJSerializer::parseOBJGroup(OBJTokenizer& tokenizer, const QVariantHash& m
                     }
                 }
                 const QByteArray noData {};
-                face.add(parts[0], (parts.count() > 1) ? parts[1] : noData, (parts.count() > 2) ? parts[2] : noData,
-                         vertices, vertexColors);
+                face.add(parts[0], (parts.count() > 1) ? parts[1] : noData, (parts.count() > 2) ? parts[2] : noData, vertices,
+                         vertexColors);
                 face.groupName = currentGroup;
                 face.materialName = currentMaterialName;
             }
             originalFaceCountForDebugging++;
-            foreach(OBJFace face, face.triangulate()) {
-                faces.append(face);
-            }
+            foreach (OBJFace face, face.triangulate()) { faces.append(face); }
         } else {
             // something we don't (yet) care about
             // qCDebug(modelformat) << "OBJ parser is skipping a line with" << token;
@@ -681,7 +678,8 @@ HFMModel::Pointer OBJSerializer::read(const QByteArray& data, const QVariantHash
     try {
         // call parseOBJGroup as long as it's returning true.  Each successful call will
         // add a new meshPart to the model's single mesh.
-        while (parseOBJGroup(tokenizer, mapping, hfmModel, scaleGuess, combineParts)) {}
+        while (parseOBJGroup(tokenizer, mapping, hfmModel, scaleGuess, combineParts)) {
+        }
 
         HFMMesh& mesh = hfmModel.meshes[0];
         mesh.meshIndex = 0;
@@ -699,10 +697,7 @@ HFMModel::Pointer OBJSerializer::read(const QByteArray& data, const QVariantHash
 
         HFMCluster cluster;
         cluster.jointIndex = 0;
-        cluster.inverseBindMatrix = glm::mat4(1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1);
+        cluster.inverseBindMatrix = glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
         mesh.clusters.append(cluster);
 
         QMap<QString, int> materialMeshIdMap;
@@ -711,18 +706,24 @@ HFMModel::Pointer OBJSerializer::read(const QByteArray& data, const QVariantHash
             HFMMeshPart& meshPart = mesh.parts[i];
             FaceGroup faceGroup = faceGroups[meshPartCount];
             bool specifiesUV = false;
-            foreach(OBJFace face, faceGroup) {
-                // Go through all of the OBJ faces and determine the number of different materials necessary (each different material will be a unique mesh).
-                // NOTE (trent/mittens 3/30/17): this seems hardcore wasteful and is slowed down a bit by iterating through the face group twice, but it's the best way I've thought of to hack multi-material support in an OBJ into this pipeline.
+            foreach (OBJFace face, faceGroup) {
+                // Go through all of the OBJ faces and determine the number of different materials necessary (each different
+                // material will be a unique mesh). NOTE (trent/mittens 3/30/17): this seems hardcore wasteful and is slowed
+                // down a bit by iterating through the face group twice, but it's the best way I've thought of to hack
+                // multi-material support in an OBJ into this pipeline.
                 if (!materialMeshIdMap.contains(face.materialName)) {
                     // Create a new HFMMesh for this material mapping.
                     materialMeshIdMap.insert(face.materialName, materialMeshIdMap.count());
 
                     hfmMeshParts.append(HFMMeshPart());
                     HFMMeshPart& meshPartNew = hfmMeshParts.last();
-                    meshPartNew.quadIndices = QVector<int>(meshPart.quadIndices);                    // Copy over quad indices [NOTE (trent/mittens, 4/3/17): Likely unnecessary since they go unused anyway].
-                    meshPartNew.quadTrianglesIndices = QVector<int>(meshPart.quadTrianglesIndices); // Copy over quad triangulated indices [NOTE (trent/mittens, 4/3/17): Likely unnecessary since they go unused anyway].
-                    meshPartNew.triangleIndices = QVector<int>(meshPart.triangleIndices);            // Copy over triangle indices.
+                    meshPartNew.quadIndices = QVector<int>(
+                        meshPart.quadIndices); // Copy over quad indices [NOTE (trent/mittens, 4/3/17): Likely unnecessary since
+                                               // they go unused anyway].
+                    meshPartNew.quadTrianglesIndices = QVector<int>(
+                        meshPart.quadTrianglesIndices); // Copy over quad triangulated indices [NOTE (trent/mittens, 4/3/17):
+                                                        // Likely unnecessary since they go unused anyway].
+                    meshPartNew.triangleIndices = QVector<int>(meshPart.triangleIndices); // Copy over triangle indices.
 
                     // Do some of the material logic (which previously lived below) now.
                     // All the faces in the same group will have the same name and material.
@@ -730,7 +731,7 @@ HFMModel::Pointer OBJSerializer::read(const QByteArray& data, const QVariantHash
                     if (groupMaterialName.isEmpty() && specifiesUV) {
 #ifdef WANT_DEBUG
                         qCDebug(modelformat) << "OBJSerializer WARNING: " << url
-                            << " needs a texture that isn't specified. Using default mechanism.";
+                                             << " needs a texture that isn't specified. Using default mechanism.";
 #endif
                         groupMaterialName = SMART_DEFAULT_MATERIAL_NAME;
                     }
@@ -759,8 +760,9 @@ HFMModel::Pointer OBJSerializer::read(const QByteArray& data, const QVariantHash
         for (int i = 0, meshPartCount = 0; i < unmodifiedMeshPartCount; i++, meshPartCount++) {
             FaceGroup faceGroup = faceGroups[meshPartCount];
 
-            // Now that each mesh has been created with its own unique material mappings, fill them with data (vertex data is duplicated, face data is not).
-            foreach(OBJFace face, faceGroup) {
+            // Now that each mesh has been created with its own unique material mappings, fill them with data (vertex data is
+            // duplicated, face data is not).
+            foreach (OBJFace face, faceGroup) {
                 HFMMeshPart& meshPart = mesh.parts[materialMeshIdMap[face.materialName]];
 
                 glm::vec3 v0 = checked_at(vertices, face.vertexIndices[0]);
@@ -803,7 +805,7 @@ HFMModel::Pointer OBJSerializer::read(const QByteArray& data, const QVariantHash
                     n0 = checked_at(normals, face.normalIndices[0]);
                     n1 = checked_at(normals, face.normalIndices[1]);
                     n2 = checked_at(normals, face.normalIndices[2]);
-                } else { 
+                } else {
                     // generate normals from triangle plane if not provided
                     n0 = n1 = n2 = glm::cross(v1 - v0, v2 - v0);
                 }
@@ -813,10 +815,9 @@ HFMModel::Pointer OBJSerializer::read(const QByteArray& data, const QVariantHash
                 mesh.normals.append(n2);
 
                 if (face.textureUVIndices.count()) {
-                    mesh.texCoords <<
-                        checked_at(textureUVs, face.textureUVIndices[0]) <<
-                        checked_at(textureUVs, face.textureUVIndices[1]) <<
-                        checked_at(textureUVs, face.textureUVIndices[2]);
+                    mesh.texCoords << checked_at(textureUVs, face.textureUVIndices[0])
+                                   << checked_at(textureUVs, face.textureUVIndices[1])
+                                   << checked_at(textureUVs, face.textureUVIndices[2]);
                 } else {
                     glm::vec2 corner(0.0f, 1.0f);
                     mesh.texCoords << corner << corner << corner;
@@ -825,18 +826,19 @@ HFMModel::Pointer OBJSerializer::read(const QByteArray& data, const QVariantHash
         }
 
         mesh.meshExtents.reset();
-        foreach(const glm::vec3& vertex, mesh.vertices) {
+        foreach (const glm::vec3& vertex, mesh.vertices) {
             mesh.meshExtents.addPoint(vertex);
             hfmModel.meshExtents.addPoint(vertex);
         }
 
         // hfmDebugDump(hfmModel);
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         qCDebug(modelformat) << "OBJSerializer fail: " << e.what();
     }
 
     QString queryPart = _url.query();
-    bool suppressMaterialsHack = queryPart.contains("hifiusemat"); // If this appears in query string, don't fetch mtl even if used.
+    bool suppressMaterialsHack = queryPart.contains(
+        "hifiusemat"); // If this appears in query string, don't fetch mtl even if used.
     OBJMaterial& preDefinedMaterial = materials[SMART_DEFAULT_MATERIAL_NAME];
     preDefinedMaterial.used = true;
     if (suppressMaterialsHack) {
@@ -861,9 +863,9 @@ HFMModel::Pointer OBJSerializer::read(const QByteArray& data, const QVariantHash
         }
 
         if (!textName.isEmpty()) {
-            #ifdef WANT_DEBUG
+#ifdef WANT_DEBUG
             qCDebug(modelformat) << "OBJSerializer found a default texture: " << textName;
-            #endif
+#endif
             preDefinedMaterial.diffuseTextureFilename = textName;
         }
         materials[SMART_DEFAULT_MATERIAL_NAME] = preDefinedMaterial;
@@ -891,11 +893,8 @@ HFMModel::Pointer OBJSerializer::read(const QByteArray& data, const QVariantHash
         if (!objMaterial.used) {
             continue;
         }
-        hfmModel.materials[materialID] = HFMMaterial(objMaterial.diffuseColor,
-                                                     objMaterial.specularColor,
-                                                     objMaterial.emissiveColor,
-                                                     objMaterial.shininess,
-                                                     objMaterial.opacity);
+        hfmModel.materials[materialID] = HFMMaterial(objMaterial.diffuseColor, objMaterial.specularColor,
+                                                     objMaterial.emissiveColor, objMaterial.shininess, objMaterial.opacity);
         HFMMaterial& hfmMaterial = hfmModel.materials[materialID];
         hfmMaterial.materialID = materialID;
         hfmMaterial._material = std::make_shared<graphics::Material>();
@@ -930,7 +929,7 @@ HFMModel::Pointer OBJSerializer::read(const QByteArray& data, const QVariantHash
         bool applyNonMetallic = false;
         bool fresnelOn = false;
 
-        // Illumination model reference http://paulbourke.net/dataformats/mtl/ 
+        // Illumination model reference http://paulbourke.net/dataformats/mtl/
         switch (objMaterial.illuminationModel) {
             case 0: // Color on and Ambient off
                 // We don't support ambient = do nothing?
@@ -974,7 +973,7 @@ HFMModel::Pointer OBJSerializer::read(const QByteArray& data, const QVariantHash
             case 10: // Casts shadows onto invisible surfaces
                 // Do nothing?
                 break;
-        }      
+        }
 
         if (applyTransparency) {
             hfmMaterial.opacity = std::max(hfmMaterial.opacity, ILLUMINATION_MODEL_MIN_OPACITY);
@@ -1023,18 +1022,19 @@ void hfmDebugDump(const HFMModel& hfmModel) {
         foreach (HFMMeshPart meshPart, mesh.parts) {
             qCDebug(modelformat) << "        quadIndices.count() =" << meshPart.quadIndices.count();
             qCDebug(modelformat) << "        triangleIndices.count() =" << meshPart.triangleIndices.count();
-   /*
-            qCDebug(modelformat) << "        diffuseColor =" << meshPart.diffuseColor << "mat =" << meshPart._material->getDiffuse();
-            qCDebug(modelformat) << "        specularColor =" << meshPart.specularColor << "mat =" << meshPart._material->getMetallic();
-            qCDebug(modelformat) << "        emissiveColor =" << meshPart.emissiveColor << "mat =" << meshPart._material->getEmissive();
-            qCDebug(modelformat) << "        emissiveParams =" << meshPart.emissiveParams;
-            qCDebug(modelformat) << "        gloss =" << meshPart.shininess << "mat =" << meshPart._material->getRoughness();
-            qCDebug(modelformat) << "        opacity =" << meshPart.opacity << "mat =" << meshPart._material->getOpacity();
-            */
+            /*
+                     qCDebug(modelformat) << "        diffuseColor =" << meshPart.diffuseColor << "mat =" <<
+               meshPart._material->getDiffuse(); qCDebug(modelformat) << "        specularColor =" << meshPart.specularColor <<
+               "mat =" << meshPart._material->getMetallic(); qCDebug(modelformat) << "        emissiveColor =" <<
+               meshPart.emissiveColor << "mat =" << meshPart._material->getEmissive(); qCDebug(modelformat) << " emissiveParams
+               =" << meshPart.emissiveParams; qCDebug(modelformat) << "        gloss =" << meshPart.shininess << "mat =" <<
+               meshPart._material->getRoughness(); qCDebug(modelformat) << "        opacity =" << meshPart.opacity << "mat =" <<
+               meshPart._material->getOpacity();
+                     */
             qCDebug(modelformat) << "        materialID =" << meshPart.materialID;
-      /*      qCDebug(modelformat) << "        diffuse texture =" << meshPart.diffuseTexture.filename;
-            qCDebug(modelformat) << "        specular texture =" << meshPart.specularTexture.filename;
-            */
+            /*      qCDebug(modelformat) << "        diffuse texture =" << meshPart.diffuseTexture.filename;
+                  qCDebug(modelformat) << "        specular texture =" << meshPart.specularTexture.filename;
+                  */
         }
         qCDebug(modelformat) << "    clusters.count() =" << mesh.clusters.count();
         foreach (HFMCluster cluster, mesh.clusters) {
@@ -1047,7 +1047,6 @@ void hfmDebugDump(const HFMModel& hfmModel) {
     qCDebug(modelformat) << "  joints.count() =" << hfmModel.joints.count();
 
     foreach (HFMJoint joint, hfmModel.joints) {
-
         qCDebug(modelformat) << "    parentIndex" << joint.parentIndex;
         qCDebug(modelformat) << "    distanceToParent" << joint.distanceToParent;
         qCDebug(modelformat) << "    translation" << joint.translation;

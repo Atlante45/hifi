@@ -14,19 +14,19 @@
 #include <QtScript/QScriptContext>
 #include <QtScript/QScriptEngine>
 
-#include <QtQuick/QQuickItem>
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlEngine>
+#include <QtQuick/QQuickItem>
 
-#include <QtWebSockets/QWebSocketServer>
-#include <QtWebSockets/QWebSocket>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
+#include <QtWebSockets/QWebSocket>
+#include <QtWebSockets/QWebSocketServer>
 
 #include <shared/QtHelpers.h>
 #include "OffscreenUi.h"
-#include "ui/types/HFWebEngineProfile.h"
 #include "ui/types/FileTypeProfile.h"
+#include "ui/types/HFWebEngineProfile.h"
 
 static const char* const SOURCE_PROPERTY = "source";
 static const char* const TITLE_PROPERTY = "title";
@@ -60,14 +60,12 @@ QVariantMap QmlWindowClass::parseArguments(QScriptContext* context) {
     QUrl url { properties[SOURCE_PROPERTY].toString() };
     // If the passed URL doesn't correspond to a known scheme, assume it's a local file path
     if (url.scheme() != "http" && url.scheme() != "https" && url.scheme() != "file" && url.scheme() != "about" &&
-            url.scheme() != "atp" && url.scheme() != "qrc") {
+        url.scheme() != "atp" && url.scheme() != "qrc") {
         properties[SOURCE_PROPERTY] = QUrl::fromLocalFile(url.toString()).toString();
     }
 
     return properties;
 }
-
-
 
 // Method called by Qt scripts to create a new web window in the overlay
 QScriptValue QmlWindowClass::internal_constructor(QScriptContext* context, QScriptEngine* engine, bool restricted) {
@@ -86,7 +84,6 @@ QScriptValue QmlWindowClass::internal_constructor(QScriptContext* context, QScri
 }
 
 QmlWindowClass::QmlWindowClass(bool restricted) : _restricted(restricted) {
-
 }
 
 /**jsdoc
@@ -120,7 +117,7 @@ void QmlWindowClass::initQml(QVariantMap properties) {
         object->setProperty(OFFSCREEN_VISIBILITY_PROPERTY, visible);
         object->setProperty(SOURCE_PROPERTY, _source);
 
-        const QMetaObject *metaObject = _qmlWindow->metaObject();
+        const QMetaObject* metaObject = _qmlWindow->metaObject();
         // Forward messages received from QML on to the script
         connect(_qmlWindow, SIGNAL(sendToScript(QVariant)), this, SLOT(qmlToScript(const QVariant&)), Qt::QueuedConnection);
         connect(_qmlWindow, SIGNAL(visibleChanged()), this, SIGNAL(visibleChanged()), Qt::QueuedConnection);
@@ -134,7 +131,7 @@ void QmlWindowClass::initQml(QVariantMap properties) {
 
     auto contextInitLambda = [&](QQmlContext* context) {
 #if !defined(Q_OS_ANDROID)
-        // If the restricted flag is on, override the FileTypeProfile and HFWebEngineProfile objects in the 
+        // If the restricted flag is on, override the FileTypeProfile and HFWebEngineProfile objects in the
         // QML surface root context with local ones
         qDebug() << "Context initialization lambda";
         if (_restricted) {
@@ -264,7 +261,6 @@ glm::vec2 QmlWindowClass::getPosition() {
 
     return toGlm(asQuickItem()->position());
 }
-
 
 void QmlWindowClass::setPosition(const glm::vec2& position) {
     if (QThread::currentThread() != thread()) {

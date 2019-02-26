@@ -11,8 +11,8 @@
 #include "TestRailInterface.h"
 #include "Test.h"
 
-#include <quazip5/quazip.h>
 #include <quazip5/JlCompress.h>
+#include <quazip5/quazip.h>
 
 #include <QDateTime>
 #include <QFile>
@@ -270,9 +270,7 @@ bool TestRailInterface::isAValidTestDirectory(const QString& directory) {
     return false;
 }
 
-void TestRailInterface::processDirectoryPython(const QString& directory,
-                                               QTextStream& stream,
-                                               const QString& userGitHub,
+void TestRailInterface::processDirectoryPython(const QString& directory, QTextStream& stream, const QString& userGitHub,
                                                const QString& branchGitHub) {
     // Loop over all entries in directory
     QDirIterator it(directory);
@@ -307,8 +305,7 @@ void TestRailInterface::processDirectoryPython(const QString& directory,
 // Each node and leaf have an ID and a parent ID.
 // Therefore, the tree is built top-down, using a stack to store the IDs of each node
 //
-void TestRailInterface::createAddTestCasesPythonScript(const QString& testDirectory,
-                                                       const QString& userGitHub,
+void TestRailInterface::createAddTestCasesPythonScript(const QString& testDirectory, const QString& userGitHub,
                                                        const QString& branchGitHub) {
     QString filename = _outputDirectory + "/addTestCases.py";
     if (QFile::exists(filename)) {
@@ -348,8 +345,8 @@ void TestRailInterface::createAddTestCasesPythonScript(const QString& testDirect
 
     if (QMessageBox::Yes == QMessageBox(QMessageBox::Information, "Python script has been created",
                                         "Do you want to run the script and update TestRail?",
-                                        QMessageBox::Yes | QMessageBox::No).exec()
-    ) {
+                                        QMessageBox::Yes | QMessageBox::No)
+                                .exec()) {
         QProcess* process = new QProcess();
 
         connect(process, &QProcess::started, this, [=]() { _busyWindow.exec(); });
@@ -361,7 +358,7 @@ void TestRailInterface::createAddTestCasesPythonScript(const QString& testDirect
         QStringList parameters = QStringList() << _outputDirectory + "/addTestCases.py";
         process->start(_pythonCommand, parameters);
 #elif defined Q_OS_MAC
-        QStringList parameters = QStringList() << "-c" <<  _pythonCommand + " " + _outputDirectory + "/addTestCases.py";
+        QStringList parameters = QStringList() << "-c" << _pythonCommand + " " + _outputDirectory + "/addTestCases.py";
         process->start("sh", parameters);
 #endif
     }
@@ -461,7 +458,8 @@ void TestRailInterface::addRun() {
     // We now loop over each section in the set and collect the cases into an array
     stream << "cases = []\n";
     stream << "for section_id in relevantSections:\n";
-    stream << "\tcases = cases + client.send_get('get_cases/" + _projectID + "&suite_id=" + _suiteID + "&section_id=' + str(section_id))\n\n";
+    stream << "\tcases = cases + client.send_get('get_cases/" + _projectID + "&suite_id=" + _suiteID +
+                  "&section_id=' + str(section_id))\n\n";
 
     // To create a run we need an array of the relevant case ids
     stream << "case_ids = []\n";
@@ -479,8 +477,8 @@ void TestRailInterface::addRun() {
 
     if (QMessageBox::Yes == QMessageBox(QMessageBox::Information, "Python script has been created",
                                         "Do you want to run the script and update TestRail?",
-                                        QMessageBox::Yes | QMessageBox::No).exec()
-    ) {
+                                        QMessageBox::Yes | QMessageBox::No)
+                                .exec()) {
         QProcess* process = new QProcess();
         connect(process, &QProcess::started, this, [=]() { _busyWindow.exec(); });
         connect(process, SIGNAL(finished(int)), process, SLOT(deleteLater()));
@@ -491,7 +489,7 @@ void TestRailInterface::addRun() {
         QStringList parameters = QStringList() << _outputDirectory + "/addRun.py";
         process->start(_pythonCommand, parameters);
 #elif defined Q_OS_MAC
-        QStringList parameters = QStringList() << "-c" <<  _pythonCommand + " " + _outputDirectory + "/addRun.py";
+        QStringList parameters = QStringList() << "-c" << _pythonCommand + " " + _outputDirectory + "/addRun.py";
         process->start("sh", parameters);
 #endif
     }
@@ -520,8 +518,8 @@ void TestRailInterface::updateRunWithResults() {
 
     // It is assumed that all the tests that haven't failed have passed
     // The failed tests are read, formatted and inserted into a set
-    //      A failure named 'Failure_1--tests.content.entity.material.apply.avatars.00000' is formatted to 'content/entity/material/apply/avatars'
-    //      This is the name of the test in TestRail
+    //      A failure named 'Failure_1--tests.content.entity.material.apply.avatars.00000' is formatted to
+    //      'content/entity/material/apply/avatars' This is the name of the test in TestRail
     //
     //      A success is named `Success_<n>-tests. ...
     stream << "from os import listdir\n";
@@ -531,11 +529,11 @@ void TestRailInterface::updateRunWithResults() {
     QDir dir(_outputDirectory + "/" + TEMP_NAME);
     if (dir.exists()) {
         stream << "for entry in listdir('" + _outputDirectory + "/" + TEMP_NAME + "'):\n";
-        
+
         // skip over successes
         stream << "\tif entry.split('_')[0] == 'Success':\n";
         stream << "\t\tcontinue\n";
-        
+
         stream << "\tparts = entry.split('--tests.')[1].split('.')\n";
         stream << "\tfailed_test = parts[0]\n";
         stream << "\tfor i in range(1, len(parts) - 1):\n";
@@ -588,8 +586,8 @@ void TestRailInterface::updateRunWithResults() {
 
     if (QMessageBox::Yes == QMessageBox(QMessageBox::Information, "Python script has been created",
                                         "Do you want to run the script and update TestRail?",
-                                        QMessageBox::Yes | QMessageBox::No).exec()
-    ) {
+                                        QMessageBox::Yes | QMessageBox::No)
+                                .exec()) {
         QProcess* process = new QProcess();
         connect(process, &QProcess::started, this, [=]() { _busyWindow.exec(); });
         connect(process, SIGNAL(finished(int)), process, SLOT(deleteLater()));
@@ -600,7 +598,7 @@ void TestRailInterface::updateRunWithResults() {
         QStringList parameters = QStringList() << _outputDirectory + "/updateRunWithResults.py";
         process->start(_pythonCommand, parameters);
 #elif defined Q_OS_MAC
-        QStringList parameters = QStringList() << "-c" <<  _pythonCommand + " " + _outputDirectory + "/updateRunWithResults.py";
+        QStringList parameters = QStringList() << "-c" << _pythonCommand + " " + _outputDirectory + "/updateRunWithResults.py";
         process->start("sh", parameters);
 #endif
     }
@@ -754,9 +752,11 @@ void TestRailInterface::getReleasesFromTestRail() {
     stream << "\t\trelease_string = case_field['configs'][0]['options']['items']\n\n";
 
     // The list read from TestRail looks like this:
-    //      '0,< RC65\n1,RC65\n2,RC66\n3,RC67\n4,RC68\n5,RC69\n6,v0.70.0\n7,v0.71.0\n8,v0.72.0\n9,v0.73.0\n10,v0.74.0\n11,v0.75.0\n12,v0.76.0\n13,v0.77.0\n14,v0.78.0\n15,v0.79.0'
+    //      '0,<
+    //      RC65\n1,RC65\n2,RC66\n3,RC67\n4,RC68\n5,RC69\n6,v0.70.0\n7,v0.71.0\n8,v0.72.0\n9,v0.73.0\n10,v0.74.0\n11,v0.75.0\n12,v0.76.0\n13,v0.77.0\n14,v0.78.0\n15,v0.79.0'
     // Splitting on newline gives an array:
-    //      ['0,< RC65', '1,RC65', '2,RC66', '3,RC67', '4,RC68', '5,RC69', '6,v0.70.0', '7,v0.71.0', '8,v0.72.0', '9,v0.73.0', '10,v0.74.0', '11,v0.75.0', '12,v0.76.0', '13,v0.77.0', '14,v0.78.0', '15,v0.79.0']
+    //      ['0,< RC65', '1,RC65', '2,RC66', '3,RC67', '4,RC68', '5,RC69', '6,v0.70.0', '7,v0.71.0', '8,v0.72.0', '9,v0.73.0',
+    //      '10,v0.74.0', '11,v0.75.0', '12,v0.76.0', '13,v0.77.0', '14,v0.78.0', '15,v0.79.0']
     // Each element consists of an index and a string, separated by a comma.
     // We just need the strings
     stream << "file = open('" + _outputDirectory + "/releases.txt', 'w')\n\n";
@@ -778,15 +778,13 @@ void TestRailInterface::getReleasesFromTestRail() {
     QStringList parameters = QStringList() << filename;
     process->start(_pythonCommand, parameters);
 #elif defined Q_OS_MAC
-    QStringList parameters = QStringList() << "-c" <<  _pythonCommand + " " + filename;
+    QStringList parameters = QStringList() << "-c" << _pythonCommand + " " + filename;
     process->start("sh", parameters);
 #endif
 }
 
-void TestRailInterface::createTestSuitePython(const QString& testDirectory,
-                                              const QString& outputDirectory,
-                                              const QString& userGitHub,
-                                              const QString& branchGitHub) {
+void TestRailInterface::createTestSuitePython(const QString& testDirectory, const QString& outputDirectory,
+                                              const QString& userGitHub, const QString& branchGitHub) {
     _testDirectory = testDirectory;
     _outputDirectory = outputDirectory;
     _userGitHub = userGitHub;
@@ -803,10 +801,8 @@ void TestRailInterface::createTestSuitePython(const QString& testDirectory,
     getReleasesFromTestRail();
 }
 
-void TestRailInterface::createTestSuiteXML(const QString& testDirectory,
-                                           const QString& outputDirectory,
-                                           const QString& userGitHub,
-                                           const QString& branchGitHub) {
+void TestRailInterface::createTestSuiteXML(const QString& testDirectory, const QString& outputDirectory,
+                                           const QString& userGitHub, const QString& branchGitHub) {
     _outputDirectory = outputDirectory;
 
     QDomProcessingInstruction instruction = _document.createProcessingInstruction("xml", "version='1.0' encoding='UTF-8'");
@@ -832,7 +828,7 @@ void TestRailInterface::createTestSuiteXML(const QString& testDirectory,
     root.appendChild(topLevelSection);
 
     // Write to file
-    const QString testRailsFilename{ _outputDirectory + "/TestRailSuite.xml" };
+    const QString testRailsFilename { _outputDirectory + "/TestRailSuite.xml" };
     QFile file(testRailsFilename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::critical(0, "Internal error: " + QString(__FILE__) + ":" + QString::number(__LINE__),
@@ -848,10 +844,8 @@ void TestRailInterface::createTestSuiteXML(const QString& testDirectory,
     QMessageBox::information(0, "Success", "TestRail XML file has been created");
 }
 
-QDomElement TestRailInterface::processDirectoryXML(const QString& directory,
-                                                   const QString& userGitHub,
-                                                   const QString& branchGitHub,
-                                                   const QDomElement& element) {
+QDomElement TestRailInterface::processDirectoryXML(const QString& directory, const QString& userGitHub,
+                                                   const QString& branchGitHub, const QDomElement& element) {
     QDomElement result = element;
 
     // Loop over all entries in directory
@@ -890,11 +884,8 @@ QDomElement TestRailInterface::processDirectoryXML(const QString& directory,
     return result;
 }
 
-QDomElement TestRailInterface::processTestXML(const QString& fullDirectory,
-                                              const QString& test,
-                                              const QString& userGitHub,
-                                              const QString& branchGitHub,
-                                              const QDomElement& element) {
+QDomElement TestRailInterface::processTestXML(const QString& fullDirectory, const QString& test, const QString& userGitHub,
+                                              const QString& branchGitHub, const QDomElement& element) {
     QDomElement result = element;
 
     QDomElement caseElement = _document.createElement("case");
@@ -916,7 +907,7 @@ QDomElement TestRailInterface::processTestXML(const QString& fullDirectory,
     }
 
     ++i;
-    QString title{ words[i] };
+    QString title { words[i] };
     for (++i; i < words.length() - 1; ++i) {
         title += "/" + words[i];
     }
@@ -1011,9 +1002,7 @@ QDomElement TestRailInterface::processTestXML(const QString& fullDirectory,
     return result;
 }
 
-void TestRailInterface::processTestPython(const QString& fullDirectory,
-                                          QTextStream& stream,
-                                          const QString& userGitHub,
+void TestRailInterface::processTestPython(const QString& fullDirectory, QTextStream& stream, const QString& userGitHub,
                                           const QString& branchGitHub) {
     // The name of the test is derived from the full path.
     // The first term is the first word after "tests"
@@ -1030,7 +1019,7 @@ void TestRailInterface::processTestPython(const QString& fullDirectory,
     }
 
     ++i;
-    QString title{ words[i] };
+    QString title { words[i] };
     for (++i; i < words.length() - 1; ++i) {
         title += " / " + words[i];
     }
@@ -1040,8 +1029,8 @@ void TestRailInterface::processTestPython(const QString& fullDirectory,
 
     stream << "section_id = parent_ids.peek()\n";
 
-    QString testMDName =
-        QString("https://github.com/") + userGitHub + "/hifi_tests/blob/" + branchGitHub + pathToTestMD + "/test.md ";
+    QString testMDName = QString("https://github.com/") + userGitHub + "/hifi_tests/blob/" + branchGitHub + pathToTestMD +
+                         "/test.md ";
 
     QString testContent = QString("Execute instructions in [THIS TEST](") + testMDName + ")";
     QString testExpected = QString("Refer to the expected result in the linked description.");
@@ -1102,7 +1091,7 @@ void TestRailInterface::getTestSectionsFromTestRail() {
     QStringList parameters = QStringList() << filename;
     process->start(_pythonCommand, parameters);
 #elif defined Q_OS_MAC
-    QStringList parameters = QStringList() << "-c" <<  _pythonCommand + " " + filename;
+    QStringList parameters = QStringList() << "-c" << _pythonCommand + " " + filename;
     process->start("sh", parameters);
 #endif
 }
@@ -1146,7 +1135,7 @@ void TestRailInterface::getRunsFromTestRail() {
     QStringList parameters = QStringList() << filename;
     process->start(_pythonCommand, parameters);
 #elif defined Q_OS_MAC
-    QStringList parameters = QStringList() << "-c" <<  _pythonCommand + " " + filename;
+    QStringList parameters = QStringList() << "-c" << _pythonCommand + " " + filename;
     process->start("sh", parameters);
 #endif
 }

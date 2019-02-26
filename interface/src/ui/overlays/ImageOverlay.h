@@ -17,7 +17,7 @@
 
 class ImageOverlay : public QmlOverlay {
     Q_OBJECT
-    
+
 public:
     static QString const TYPE;
     virtual QString getType() const override { return TYPE; }
@@ -25,9 +25,8 @@ public:
 
     ImageOverlay();
     ImageOverlay(const ImageOverlay* imageOverlay);
-    
+
     virtual ImageOverlay* createClone() const override;
 };
 
- 
 #endif // hifi_ImageOverlay_h

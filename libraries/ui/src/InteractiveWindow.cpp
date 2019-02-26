@@ -11,17 +11,17 @@
 
 #include "InteractiveWindow.h"
 
-#include <QtQml/QQmlContext>
 #include <QtCore/QThread>
 #include <QtGui/QGuiApplication>
+#include <QtQml/QQmlContext>
 #include <QtQuick/QQuickWindow>
 
 #include <DependencyManager.h>
 #include <RegisteredMetaTypes.h>
 
+#include "MainWindow.h"
 #include "OffscreenUi.h"
 #include "shared/QtHelpers.h"
-#include "MainWindow.h"
 
 #ifdef Q_OS_WIN
 #include <WinUser.h>
@@ -41,7 +41,12 @@ static const char* const INTERACTIVE_WINDOW_VISIBLE_PROPERTY = "interactiveWindo
 static const char* const EVENT_BRIDGE_PROPERTY = "eventBridge";
 static const char* const PRESENTATION_MODE_PROPERTY = "presentationMode";
 
-static const QStringList KNOWN_SCHEMES = QStringList() << "http" << "https" << "file" << "about" << "atp" << "qrc";
+static const QStringList KNOWN_SCHEMES = QStringList() << "http"
+                                                       << "https"
+                                                       << "file"
+                                                       << "about"
+                                                       << "atp"
+                                                       << "qrc";
 
 void registerInteractiveWindowMetaType(QScriptEngine* engine) {
     qScriptRegisterMetaType(engine, interactiveWindowPointerToScriptValue, interactiveWindowPointerFromScriptValue);
@@ -96,11 +101,12 @@ InteractiveWindow::InteractiveWindow(const QString& sourceUrl, const QVariantMap
 
 #ifdef Q_OS_WIN
         connect(object, SIGNAL(nativeWindowChanged()), this, SLOT(parentNativeWindowToMainWindow()), Qt::QueuedConnection);
-        connect(object, SIGNAL(interactiveWindowVisibleChanged()), this, SLOT(parentNativeWindowToMainWindow()), Qt::QueuedConnection);
+        connect(object, SIGNAL(interactiveWindowVisibleChanged()), this, SLOT(parentNativeWindowToMainWindow()),
+                Qt::QueuedConnection);
         connect(object, SIGNAL(presentationModeChanged()), this, SLOT(parentNativeWindowToMainWindow()), Qt::QueuedConnection);
 #endif
 
-        QUrl sourceURL{ sourceUrl };
+        QUrl sourceURL { sourceUrl };
         // If the passed URL doesn't correspond to a known scheme, assume it's a local file path
         if (!KNOWN_SCHEMES.contains(sourceURL.scheme(), Qt::CaseInsensitive)) {
             sourceURL = QUrl::fromLocalFile(sourceURL.toString()).toString();
@@ -281,8 +287,7 @@ void InteractiveWindow::setTitle(const QString& title) {
 int InteractiveWindow::getPresentationMode() const {
     if (QThread::currentThread() != thread()) {
         int result;
-        BLOCKING_INVOKE_METHOD(const_cast<InteractiveWindow*>(this), "getPresentationMode",
-            Q_RETURN_ARG(int, result));
+        BLOCKING_INVOKE_METHOD(const_cast<InteractiveWindow*>(this), "getPresentationMode", Q_RETURN_ARG(int, result));
         return result;
     }
 

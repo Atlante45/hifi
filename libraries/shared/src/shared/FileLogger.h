@@ -12,8 +12,8 @@
 #ifndef hifi_FileLogger_h
 #define hifi_FileLogger_h
 
-#include "AbstractLoggerInterface.h"
 #include "../GenericQueueThread.h"
+#include "AbstractLoggerInterface.h"
 
 #include <QtCore/QFile>
 
@@ -38,7 +38,5 @@ private:
     const QString _fileName;
     friend class FilePersistThread;
 };
-
-
 
 #endif // hifi_FileLogger_h

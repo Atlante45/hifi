@@ -18,6 +18,7 @@ namespace controller {
 
 class TranslateFilter : public Filter {
     REGISTER_FILTER_CLASS(TranslateFilter);
+
 public:
     TranslateFilter() = default;
     TranslateFilter(glm::vec3 translate) : _translate(translate) {}
@@ -30,6 +31,6 @@ private:
     glm::vec3 _translate { 0.0f };
 };
 
-}
+} // namespace controller
 
 #endif

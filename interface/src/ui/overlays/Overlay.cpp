@@ -15,16 +15,10 @@
 
 #include "Application.h"
 
-Overlay::Overlay() :
-    _renderItemID(render::Item::INVALID_ITEM_ID),
-    _visible(true)
-{
+Overlay::Overlay() : _renderItemID(render::Item::INVALID_ITEM_ID), _visible(true) {
 }
 
-Overlay::Overlay(const Overlay* overlay) :
-    _renderItemID(render::Item::INVALID_ITEM_ID),
-    _visible(overlay->_visible)
-{
+Overlay::Overlay(const Overlay* overlay) : _renderItemID(render::Item::INVALID_ITEM_ID), _visible(overlay->_visible) {
 }
 
 void Overlay::setProperties(const QVariantMap& properties) {

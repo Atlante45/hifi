@@ -9,7 +9,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef hifi_networking_ResourceScriptingInterface_h
 #define hifi_networking_ResourceScriptingInterface_h
 
@@ -19,7 +18,7 @@
 
 /**jsdoc
  * @namespace Resources
- * 
+ *
  * @hifi-interface
  * @hifi-client-entity
  * @hifi-avatar
@@ -30,7 +29,6 @@
 class ResourceScriptingInterface : public QObject, public Dependency {
     Q_OBJECT
 public:
-
     /**jsdoc
      * @function Resources.overrideUrlPrefix
      * @param {string} prefix
@@ -42,10 +40,7 @@ public:
      * @function Resources.restoreUrlPrefix
      * @param {string} prefix
      */
-    Q_INVOKABLE void restoreUrlPrefix(const QString& prefix) {
-        overrideUrlPrefix(prefix, "");
-    }
+    Q_INVOKABLE void restoreUrlPrefix(const QString& prefix) { overrideUrlPrefix(prefix, ""); }
 };
-
 
 #endif

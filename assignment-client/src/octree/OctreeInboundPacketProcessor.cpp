@@ -14,8 +14,8 @@
 #include <limits>
 
 #include <NumericalConstants.h>
-#include <udt/PacketHeaders.h>
 #include <PerfStat.h>
+#include <udt/PacketHeaders.h>
 
 #include "OctreeServer.h"
 #include "OctreeServerConsts.h"
@@ -32,8 +32,7 @@ OctreeInboundPacketProcessor::OctreeInboundPacketProcessor(OctreeServer* myServe
     _totalElementsInPacket(0),
     _totalPackets(0),
     _lastNackTime(usecTimestampNow()),
-    _shuttingDown(false)
-{
+    _shuttingDown(false) {
 }
 
 void OctreeInboundPacketProcessor::resetStats() {
@@ -85,26 +84,22 @@ void OctreeInboundPacketProcessor::processPacket(QSharedPointer<ReceivedMessage>
     bool debugProcessPacket = _myServer->wantsVerboseDebug();
 
     if (debugProcessPacket) {
-        qDebug("OctreeInboundPacketProcessor::processPacket() payload=%p payloadLength=%lld",
-               message->getRawMessage(),
+        qDebug("OctreeInboundPacketProcessor::processPacket() payload=%p payloadLength=%lld", message->getRawMessage(),
                message->getSize());
     }
 
     // Ask our tree subclass if it can handle the incoming packet...
     PacketType packetType = message->getType();
-    
+
     if (packetType == PacketType::ChallengeOwnership) {
-        _myServer->getOctree()->withWriteLock([&] {
-            _myServer->getOctree()->processChallengeOwnershipPacket(*message, sendingNode);
-        });
+        _myServer->getOctree()->withWriteLock(
+            [&] { _myServer->getOctree()->processChallengeOwnershipPacket(*message, sendingNode); });
     } else if (packetType == PacketType::ChallengeOwnershipRequest) {
-        _myServer->getOctree()->withWriteLock([&] {
-            _myServer->getOctree()->processChallengeOwnershipRequestPacket(*message, sendingNode);
-        });
+        _myServer->getOctree()->withWriteLock(
+            [&] { _myServer->getOctree()->processChallengeOwnershipRequestPacket(*message, sendingNode); });
     } else if (packetType == PacketType::ChallengeOwnershipReply) {
-        _myServer->getOctree()->withWriteLock([&] {
-            _myServer->getOctree()->processChallengeOwnershipReplyPacket(*message, sendingNode);
-        });
+        _myServer->getOctree()->withWriteLock(
+            [&] { _myServer->getOctree()->processChallengeOwnershipReplyPacket(*message, sendingNode); });
     } else if (_myServer->getOctree()->handlesEditPacketType(packetType)) {
         PerformanceWarning warn(debugProcessPacket, "processPacket KNOWN TYPE", debugProcessPacket);
         _receivedPacketCount++;
@@ -114,7 +109,7 @@ void OctreeInboundPacketProcessor::processPacket(QSharedPointer<ReceivedMessage>
 
         quint64 sentAt;
         message->readPrimitive(&sentAt);
-        
+
         quint64 arrivedAt = usecTimestampNow();
         if (sentAt > arrivedAt) {
             if (debugProcessPacket || _myServer->wantsDebugReceiving()) {
@@ -130,15 +125,14 @@ void OctreeInboundPacketProcessor::processPacket(QSharedPointer<ReceivedMessage>
         quint64 lockWaitTime = 0;
 
         if (debugProcessPacket || _myServer->wantsDebugReceiving()) {
-            qDebug() << "PROCESSING THREAD: got '" << packetType << "' packet - " << _receivedPacketCount << " command from client";
+            qDebug() << "PROCESSING THREAD: got '" << packetType << "' packet - " << _receivedPacketCount
+                     << " command from client";
             qDebug() << "    receivedBytes=" << message->getSize();
             qDebug() << "         sequence=" << sequence;
             qDebug() << "           sentAt=" << sentAt << " usecs";
             qDebug() << "        arrivedAt=" << arrivedAt << " usecs";
             qDebug() << "      transitTime=" << transitTime << " usecs";
             qDebug() << "      sendingNode->getClockSkewUsec()=" << sendingNode->getClockSkewUsec() << " usecs";
-
-
         }
 
         if (debugProcessPacket) {
@@ -152,11 +146,10 @@ void OctreeInboundPacketProcessor::processPacket(QSharedPointer<ReceivedMessage>
                 qDebug() << "    ----- UNEXPECTED ---- got a packet without any edit details!!!! --------";
             }
         }
-        
-        const unsigned char* editData = nullptr;
-        
-        while (message->getBytesLeftToRead() > 0) {
 
+        const unsigned char* editData = nullptr;
+
+        while (message->getBytesLeftToRead() > 0) {
             editData = reinterpret_cast<const unsigned char*>(message->getRawMessage() + message->getPosition());
 
             int maxSize = message->getBytesLeftToRead();
@@ -167,21 +160,20 @@ void OctreeInboundPacketProcessor::processPacket(QSharedPointer<ReceivedMessage>
                 qDebug("OctreeInboundPacketProcessor::processPacket() %hhu "
                        "payload=%p payloadLength=%lld editData=%p payloadPosition=%lld maxSize=%d",
                        (unsigned char)packetType, message->getRawMessage(), message->getSize(), editData,
-                        message->getPosition(), maxSize);
+                       message->getPosition(), maxSize);
             }
 
             quint64 startProcess, startLock = usecTimestampNow();
             int editDataBytesRead;
             _myServer->getOctree()->withWriteLock([&] {
                 startProcess = usecTimestampNow();
-                editDataBytesRead =
-                    _myServer->getOctree()->processEditPacketData(*message, editData, maxSize, sendingNode);
+                editDataBytesRead = _myServer->getOctree()->processEditPacketData(*message, editData, maxSize, sendingNode);
             });
             quint64 endProcess = usecTimestampNow();
 
             if (debugProcessPacket) {
                 qDebug() << "OctreeInboundPacketProcessor::processPacket() after processEditPacketData()..."
-                    << "editDataBytesRead=" << editDataBytesRead;
+                         << "editDataBytesRead=" << editDataBytesRead;
             }
 
             editsInPacket++;
@@ -198,7 +190,6 @@ void OctreeInboundPacketProcessor::processPacket(QSharedPointer<ReceivedMessage>
                 qDebug() << "    AFTER processEditPacketData payload position=" << message->getPosition();
                 qDebug() << "    AFTER processEditPacketData payload size=" << message->getSize();
             }
-
         }
 
         if (debugProcessPacket) {
@@ -226,8 +217,7 @@ void OctreeInboundPacketProcessor::processPacket(QSharedPointer<ReceivedMessage>
 }
 
 void OctreeInboundPacketProcessor::trackInboundPacket(const QUuid& nodeUUID, unsigned short int sequence, quint64 transitTime,
-            int editsInPacket, quint64 processTime, quint64 lockWaitTime) {
-
+                                                      int editsInPacket, quint64 processTime, quint64 lockWaitTime) {
     _totalTransitTime += transitTime;
     _totalProcessTime += processTime;
     _totalLockWaitTime += lockWaitTime;
@@ -262,10 +252,9 @@ int OctreeInboundPacketProcessor::sendNackPackets() {
 
     NodeToSenderStatsMapIterator i = _singleSenderStats.begin();
     while (i != _singleSenderStats.end()) {
-
         QUuid nodeUUID = i.key();
         SingleSenderStats nodeStats = i.value();
-        
+
         // check if this node is still alive.  Remove its stats if it's dead.
         if (!isAlive(nodeUUID)) {
             i = _singleSenderStats.erase(i);
@@ -311,7 +300,7 @@ int OctreeInboundPacketProcessor::sendNackPackets() {
             // send the list of nack packets
             totalBytesSent += nodeList->sendPacketList(std::move(nackPacketList), *destinationNode);
         }
-        
+
         ++i;
     }
 
@@ -321,21 +310,17 @@ int OctreeInboundPacketProcessor::sendNackPackets() {
     return packetsSent;
 }
 
-
-SingleSenderStats::SingleSenderStats()
-    : _totalTransitTime(0),
+SingleSenderStats::SingleSenderStats() :
+    _totalTransitTime(0),
     _totalProcessTime(0),
     _totalLockWaitTime(0),
     _totalElementsInPacket(0),
     _totalPackets(0),
-    _incomingEditSequenceNumberStats()
-{
-
+    _incomingEditSequenceNumberStats() {
 }
 
-void SingleSenderStats::trackInboundPacket(unsigned short int incomingSequence, quint64 transitTime,
-    int editsInPacket, quint64 processTime, quint64 lockWaitTime) {
-
+void SingleSenderStats::trackInboundPacket(unsigned short int incomingSequence, quint64 transitTime, int editsInPacket,
+                                           quint64 processTime, quint64 lockWaitTime) {
     // track sequence number
     _incomingEditSequenceNumberStats.sequenceNumberReceived(incomingSequence);
 

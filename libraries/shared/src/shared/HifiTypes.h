@@ -12,14 +12,14 @@
 #ifndef hifi_HifiTypes_h
 #define hifi_HifiTypes_h
 
+#include <QUrl>
 #include <QVarLengthArray>
 #include <QVariant>
-#include <QUrl>
 
 namespace hifi {
-    using ByteArray = QByteArray;
-    using VariantHash = QVariantHash;
-    using URL = QUrl;
-};
+using ByteArray = QByteArray;
+using VariantHash = QVariantHash;
+using URL = QUrl;
+}; // namespace hifi
 
 #endif // hifi_HifiTypes_h

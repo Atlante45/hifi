@@ -11,35 +11,33 @@
 
 #include "ShapePipeline.h"
 
-#include <PerfStat.h>
+#include <../render-utils/src/render-utils/ShaderConstants.h>
 #include <DependencyManager.h>
+#include <PerfStat.h>
 #include <gpu/ShaderConstants.h>
 #include <graphics/ShaderConstants.h>
-#include <../render-utils/src/render-utils/ShaderConstants.h>
 
 #include "Logging.h"
-
 
 using namespace render;
 
 namespace ru {
-    using render_utils::slot::texture::Texture;
-    using render_utils::slot::buffer::Buffer;
-}
+using render_utils::slot::buffer::Buffer;
+using render_utils::slot::texture::Texture;
+} // namespace ru
 
 namespace gr {
-    using graphics::slot::texture::Texture;
-    using graphics::slot::buffer::Buffer;
-}
+using graphics::slot::buffer::Buffer;
+using graphics::slot::texture::Texture;
+} // namespace gr
 
 ShapePipeline::CustomFactoryMap ShapePipeline::_globalCustomFactoryMap;
 
-ShapePipeline::CustomKey ShapePipeline::registerCustomShapePipelineFactory(CustomFactory factory) {  
-    ShapePipeline::CustomKey custom = (ShapePipeline::CustomKey) _globalCustomFactoryMap.size() + 1;
+ShapePipeline::CustomKey ShapePipeline::registerCustomShapePipelineFactory(CustomFactory factory) {
+    ShapePipeline::CustomKey custom = (ShapePipeline::CustomKey)_globalCustomFactoryMap.size() + 1;
     _globalCustomFactoryMap[custom] = factory;
-    return custom;  
+    return custom;
 }
-
 
 void ShapePipeline::prepare(gpu::Batch& batch, RenderArgs* args) {
     if (_batchSetter) {
@@ -53,7 +51,6 @@ void ShapePipeline::prepareShapeItem(RenderArgs* args, const ShapeKey& key, cons
     }
 }
 
-
 ShapeKey::Filter::Builder::Builder() {
     _mask.set(OWN_PIPELINE);
     _mask.set(INVALID);
@@ -64,7 +61,7 @@ void ShapePlumber::addPipelineHelper(const Filter& filter, ShapeKey key, int bit
     if (bit < (int)ShapeKey::FlagBit::NUM_FLAGS) {
         addPipelineHelper(filter, key, bit + 1, pipeline);
         if (!filter._mask[bit]) {
-            // Toggle bits set as insignificant in filter._mask 
+            // Toggle bits set as insignificant in filter._mask
             key._flags.flip(bit);
             addPipelineHelper(filter, key, bit + 1, pipeline);
         }
@@ -79,13 +76,13 @@ void ShapePlumber::addPipelineHelper(const Filter& filter, ShapeKey key, int bit
 }
 
 void ShapePlumber::addPipeline(const Key& key, const gpu::ShaderPointer& program, const gpu::StatePointer& state,
-        BatchSetter batchSetter, ItemSetter itemSetter) {
-    addPipeline(Filter{key}, program, state, batchSetter, itemSetter);
+                               BatchSetter batchSetter, ItemSetter itemSetter) {
+    addPipeline(Filter { key }, program, state, batchSetter, itemSetter);
 }
 
 void ShapePlumber::addPipeline(const Filter& filter, const gpu::ShaderPointer& program, const gpu::StatePointer& state,
-        BatchSetter batchSetter, ItemSetter itemSetter) {
-    ShapeKey key{ filter._flags };
+                               BatchSetter batchSetter, ItemSetter itemSetter) {
+    ShapeKey key { filter._flags };
     const auto& reflection = program->getReflection();
     auto locations = std::make_shared<Locations>();
     locations->albedoTextureUnit = reflection.validTexture(graphics::slot::texture::MaterialAlbedo);
@@ -107,8 +104,10 @@ void ShapePlumber::addPipeline(const Filter& filter, const gpu::ShaderPointer& p
     locations->hazeParameterBufferUnit = reflection.validUniformBuffer(render_utils::slot::buffer::HazeParams);
     if (key.isTranslucent()) {
         locations->lightClusterGridBufferUnit = reflection.validUniformBuffer(render_utils::slot::buffer::LightClusterGrid);
-        locations->lightClusterContentBufferUnit = reflection.validUniformBuffer(render_utils::slot::buffer::LightClusterContent);
-        locations->lightClusterFrustumBufferUnit = reflection.validUniformBuffer(render_utils::slot::buffer::LightClusterFrustumGrid);
+        locations->lightClusterContentBufferUnit = reflection.validUniformBuffer(
+            render_utils::slot::buffer::LightClusterContent);
+        locations->lightClusterFrustumBufferUnit = reflection.validUniformBuffer(
+            render_utils::slot::buffer::LightClusterFrustumGrid);
     }
 
     {
@@ -138,11 +137,12 @@ const ShapePipelinePointer ShapePlumber::pickPipeline(RenderArgs* args, const Ke
 
                     return pickPipeline(args, key);
                 } else {
-                    qCDebug(renderlogging) << "ShapePlumber::Couldn't find a custom pipeline factory for " << key.getCustom() << " key is: " << key;
+                    qCDebug(renderlogging) << "ShapePlumber::Couldn't find a custom pipeline factory for " << key.getCustom()
+                                           << " key is: " << key;
                 }
             }
 
-           _missingKeys.insert(key);
+            _missingKeys.insert(key);
             qCDebug(renderlogging) << "ShapePlumber::Couldn't find a pipeline for" << key;
         }
         return PipelinePointer(nullptr);

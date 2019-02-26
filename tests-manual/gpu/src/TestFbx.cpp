@@ -32,7 +32,6 @@ struct MyVertex {
         vertexFormat->setAttribute(gpu::Stream::NORMAL, 0, NORMAL_ELEMENT, offsetof(MyVertex, normal));
         return vertexFormat;
     }
-
 };
 
 struct Part {
@@ -42,18 +41,17 @@ struct Part {
 };
 
 struct DrawElementsIndirectCommand {
-    uint  count { 0 };
-    uint  instanceCount { 1 };
-    uint  firstIndex { 0 };
-    uint  baseVertex { 0 };
-    uint  baseInstance { 0 };
+    uint count { 0 };
+    uint instanceCount { 1 };
+    uint firstIndex { 0 };
+    uint baseVertex { 0 };
+    uint baseInstance { 0 };
 };
-
 
 class FileDownloader : public QObject {
     Q_OBJECT
 public:
-    explicit FileDownloader(QUrl imageUrl, QObject *parent = 0) : QObject(parent) {
+    explicit FileDownloader(QUrl imageUrl, QObject* parent = 0) : QObject(parent) {
         connect(&m_WebCtrl, SIGNAL(finished(QNetworkReply*)), this, SLOT(fileDownloaded(QNetworkReply*)));
         QNetworkRequest request(imageUrl);
         request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
@@ -62,9 +60,7 @@ public:
 
     virtual ~FileDownloader() {}
 
-    const QByteArray& downloadedData() const {
-        return m_DownloadedData;
-    }
+    const QByteArray& downloadedData() const { return m_DownloadedData; }
 
 signals:
     void downloaded();
@@ -81,17 +77,15 @@ private:
     QByteArray m_DownloadedData;
 };
 
-
 static const QUrl TEST_ASSET = QString("https://s3.amazonaws.com/DreamingContent/assets/models/tardis/console.fbx");
 static const mat4 TEST_ASSET_TRANSFORM = glm::translate(mat4(), vec3(0, -1.5f, 0)) * glm::scale(mat4(), vec3(0.01f));
-//static const QUrl TEST_ASSET = QString("https://s3.amazonaws.com/DreamingContent/assets/simple/SimpleMilitary/Models/Vehicles/tank_02_c.fbx");
-//static const mat4 TEST_ASSET_TRANSFORM = glm::translate(mat4(), vec3(0, -0.5f, 0)) * glm::scale(mat4(), vec3(0.1f));
+// static const QUrl TEST_ASSET =
+// QString("https://s3.amazonaws.com/DreamingContent/assets/simple/SimpleMilitary/Models/Vehicles/tank_02_c.fbx"); static const
+// mat4 TEST_ASSET_TRANSFORM = glm::translate(mat4(), vec3(0, -0.5f, 0)) * glm::scale(mat4(), vec3(0.1f));
 
 TestFbx::TestFbx(const render::ShapePlumberPointer& shapePlumber) : _shapePlumber(shapePlumber) {
     FileDownloader* downloader = new FileDownloader(TEST_ASSET, qApp);
-    QObject::connect(downloader, &FileDownloader::downloaded, [this, downloader] {
-        parseFbx(downloader->downloadedData());
-    });
+    QObject::connect(downloader, &FileDownloader::downloaded, [this, downloader] { parseFbx(downloader->downloadedData()); });
 }
 
 bool TestFbx::isReady() const {
@@ -143,7 +137,7 @@ void TestFbx::parseFbx(const QByteArray& fbxData) {
             }
             size_t triangles = (indices.size() - partIndirect.firstIndex);
             Q_ASSERT(0 == (triangles % 3));
-            //triangles /= 3;
+            // triangles /= 3;
             partIndirect.count = (uint)triangles;
             parts.push_back(partIndirect);
         }
@@ -153,7 +147,7 @@ void TestFbx::parseFbx(const QByteArray& fbxData) {
             MyVertex vertex;
             vertex.position = mesh.vertices[(int)i];
             vec3 n = mesh.normals[(int)i];
-            vertex.normal = n; 
+            vertex.normal = n;
             vertex.texCoords = mesh.texCoords[(int)i];
             vertex.color = toCompactColor(vec4(color, 1));
             vertices.push_back(vertex);
@@ -167,12 +161,13 @@ void TestFbx::parseFbx(const QByteArray& fbxData) {
 
 void TestFbx::renderTest(size_t testId, RenderArgs* args) {
     gpu::Batch& batch = *(args->_batch);
-    //pipeline->pipeline
+    // pipeline->pipeline
     if (_partCount) {
         for (size_t i = 0; i < _partCount; ++i) {
             batch.setModelTransform(TEST_ASSET_TRANSFORM * _partTransforms[i]);
             batch.setupNamedCalls(__FUNCTION__, [this](gpu::Batch& batch, gpu::Batch::NamedBatchData&) {
-                RenderArgs args; args._batch = &batch;
+                RenderArgs args;
+                args._batch = &batch;
                 _shapePlumber->pickPipeline(&args, render::ShapeKey());
                 batch.setInputBuffer(0, _vertexBuffer, 0, sizeof(MyVertex));
                 batch.setIndexBuffer(gpu::UINT16, _indexBuffer, 0);

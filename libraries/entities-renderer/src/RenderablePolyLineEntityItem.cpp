@@ -13,10 +13,10 @@
 #include <ParticleEffectEntityItem.h>
 
 #include <GeometryCache.h>
-#include <StencilMaskPass.h>
-#include <TextureCache.h>
 #include <PathUtils.h>
 #include <PerfStat.h>
+#include <StencilMaskPass.h>
+#include <TextureCache.h>
 #include <shaders/Shaders.h>
 
 #include "paintStroke_Shared.slh"
@@ -50,9 +50,8 @@ void PolyLineEntityRenderer::buildPipeline() {
         state->setCullMode(gpu::State::CullMode::CULL_NONE);
         state->setDepthTest(true, true, gpu::LESS_EQUAL);
         PrepareStencil::testMask(*state);
-        state->setBlendFunction(true,
-            gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
-            gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
+        state->setBlendFunction(true, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
+                                gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
         _pipeline = gpu::Pipeline::create(program, state);
     }
     {
@@ -60,9 +59,8 @@ void PolyLineEntityRenderer::buildPipeline() {
         state->setCullMode(gpu::State::CullMode::CULL_NONE);
         state->setDepthTest(true, false, gpu::LESS_EQUAL);
         PrepareStencil::testMask(*state);
-        state->setBlendFunction(true,
-            gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
-            gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
+        state->setBlendFunction(true, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
+                                gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
         _glowPipeline = gpu::Pipeline::create(program, state);
     }
 }
@@ -80,9 +78,7 @@ ShapeKey PolyLineEntityRenderer::getShapeKey() {
 }
 
 bool PolyLineEntityRenderer::needsRenderUpdate() const {
-    bool textureLoadedChanged = resultWithReadLock<bool>([&] {
-        return (!_textureLoaded && _texture && _texture->isLoaded());
-    });
+    bool textureLoadedChanged = resultWithReadLock<bool>([&] { return (!_textureLoaded && _texture && _texture->isLoaded()); });
 
     if (textureLoadedChanged) {
         return true;
@@ -92,16 +88,9 @@ bool PolyLineEntityRenderer::needsRenderUpdate() const {
 }
 
 bool PolyLineEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const {
-    return (
-        entity->pointsChanged() ||
-        entity->widthsChanged() ||
-        entity->normalsChanged() ||
-        entity->texturesChanged() ||
-        entity->colorsChanged() ||
-        _isUVModeStretch != entity->getIsUVModeStretch() ||
-        _glow != entity->getGlow() ||
-        _faceCamera != entity->getFaceCamera()
-    );
+    return (entity->pointsChanged() || entity->widthsChanged() || entity->normalsChanged() || entity->texturesChanged() ||
+            entity->colorsChanged() || _isUVModeStretch != entity->getIsUVModeStretch() || _glow != entity->getGlow() ||
+            _faceCamera != entity->getFaceCamera());
 }
 
 void PolyLineEntityRenderer::doRenderUpdateAsynchronousTyped(const TypedEntityPointer& entity) {
@@ -162,7 +151,8 @@ void PolyLineEntityRenderer::doRenderUpdateAsynchronousTyped(const TypedEntityPo
         _colors = entity->getStrokeColors();
         _color = toGlm(entity->getColor());
     }
-    if (_isUVModeStretch != isUVModeStretch || pointsChanged || widthsChanged || normalsChanged || colorsChanged || textureChanged || faceCameraChanged) {
+    if (_isUVModeStretch != isUVModeStretch || pointsChanged || widthsChanged || normalsChanged || colorsChanged ||
+        textureChanged || faceCameraChanged) {
         _isUVModeStretch = isUVModeStretch;
         updateGeometry();
     }
@@ -204,8 +194,8 @@ void PolyLineEntityRenderer::updateGeometry() {
                 accumulatedDistance += glm::distance(point, _points[i - 1]);
 
                 if (doesStrokeWidthVary) {
-                    //If the stroke varies along the line the texture will stretch more or less depending on the speed
-                    //because it looks better than using the same method as below
+                    // If the stroke varies along the line the texture will stretch more or less depending on the speed
+                    // because it looks better than using the same method as below
                     accumulatedStrokeWidth += width;
                     float increaseValue = 1;
                     if (accumulatedStrokeWidth != 0) {
@@ -248,12 +238,13 @@ void PolyLineEntityRenderer::updateGeometry() {
             }
         }
 
-        PolylineVertex vertex = { glm::vec4(point, uCoord), glm::vec4(color, 1.0f), glm::vec4(normal, 0.0f), glm::vec4(binormal, 0.5f * width) };
+        PolylineVertex vertex = { glm::vec4(point, uCoord), glm::vec4(color, 1.0f), glm::vec4(normal, 0.0f),
+                                  glm::vec4(binormal, 0.5f * width) };
         vertices.push_back(vertex);
     }
 
     _numVertices = vertices.size();
-    _polylineGeometryBuffer->setData(vertices.size() * sizeof(PolylineVertex), (const gpu::Byte*) vertices.data());
+    _polylineGeometryBuffer->setData(vertices.size() * sizeof(PolylineVertex), (const gpu::Byte*)vertices.data());
 }
 
 void PolyLineEntityRenderer::updateData() {
@@ -276,7 +267,8 @@ void PolyLineEntityRenderer::doRender(RenderArgs* args) {
 
     batch.setPipeline(_glow ? _glowPipeline : _pipeline);
     batch.setModelTransform(_renderTransform);
-    batch.setResourceTexture(0, _textureLoaded ? _texture->getGPUTexture() : DependencyManager::get<TextureCache>()->getWhiteTexture());
+    batch.setResourceTexture(0, _textureLoaded ? _texture->getGPUTexture()
+                                               : DependencyManager::get<TextureCache>()->getWhiteTexture());
     batch.setResourceBuffer(0, _polylineGeometryBuffer);
     batch.setUniformBuffer(0, _polylineDataBuffer);
     batch.draw(gpu::TRIANGLE_STRIP, (gpu::uint32)(2 * _numVertices), 0);

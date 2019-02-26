@@ -5,12 +5,12 @@
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
-#include "FrameIO.h"
-#include "Frame.h"
-#include "Batch.h"
-#include "TextureTable.h"
 #include <nlohmann/json.hpp>
 #include <unordered_map>
+#include "Batch.h"
+#include "Frame.h"
+#include "FrameIO.h"
+#include "TextureTable.h"
 
 #include "FrameIOKeys.h"
 
@@ -35,7 +35,7 @@ public:
 
     Serializer(const std::string& basename, const TextureCapturer& capturer) : basename(basename), textureCapturer(capturer) {}
 
-    template <typename T>
+    template<typename T>
     static uint32_t getGlobalIndex(const T& value, std::unordered_map<T, uint32_t>& map) {
         if (map.count(value) == 0) {
             uint32_t result = (uint32_t)map.size();
@@ -45,7 +45,7 @@ public:
         return map[value];
     }
 
-    template <typename T>
+    template<typename T>
     static json serializePointerCache(const typename Batch::Cache<T>::Vector& cache, std::unordered_map<T, uint32_t>& map) {
         json result = json::array();
         const auto count = cache._items.size();
@@ -57,7 +57,7 @@ public:
         return result;
     }
 
-    template <typename T, typename TT = const T&>
+    template<typename T, typename TT = const T&>
     static json serializeDataCache(const typename Batch::Cache<T>::Vector& cache,
                                    std::function<TT(const T&)> f = [](const T& t) -> TT { return t; }) {
         json result = json::array();
@@ -70,7 +70,7 @@ public:
         return result;
     }
 
-    template <typename T, typename TT = const T&>
+    template<typename T, typename TT = const T&>
     static json writeVector(const std::vector<T>& v,
                             const std::function<TT(const T&)>& f = [](const T& t) -> TT { return t; }) {
         auto node = json::array();
@@ -80,19 +80,19 @@ public:
         return node;
     }
 
-    template <typename T>
+    template<typename T>
     static json writeNumericVector(const std::vector<T>& v) {
         return writeVector<T, const T&>(v);
     }
 
-    template <typename T>
+    template<typename T>
     static json writeUintVector(const std::vector<T>& v) {
         return writeVector<T, const uint32_t&>(v, [](const T& t) -> const uint32_t& {
             return reinterpret_cast<const uint32_t&>(t);
         });
     }
 
-    template <size_t N = 1>
+    template<size_t N = 1>
     static json writeFloatArray(const float* f) {
         json result = json::array();
         for (size_t i = 0; i < N; ++i) {
@@ -101,7 +101,7 @@ public:
         return result;
     }
 
-    template <typename T>
+    template<typename T>
     static std::vector<T> mapToVector(const std::unordered_map<T, uint32_t>& map) {
         std::vector<T> result;
         result.resize(map.size());
@@ -114,7 +114,7 @@ public:
         return result;
     }
 
-    template <typename T, typename F>
+    template<typename T, typename F>
     std::function<json(const T&)> memberWriter(F f) {
         return std::bind(f, this, std::placeholders::_1);
     }
@@ -155,7 +155,7 @@ public:
     static const TextureView DEFAULT_TEXTURE_VIEW;
     static const Sampler DEFAULT_SAMPLER;
 
-    template <typename T, typename F>
+    template<typename T, typename F>
     void serializeMap(json& frameNode, const char* key, const std::unordered_map<T, uint32_t>& map, F f) {
         auto& node = frameNode[key] = json::array();
         for (const auto& item : mapToVector(map)) {
@@ -168,7 +168,7 @@ void writeFrame(const std::string& filename, const FramePointer& frame, const Te
     Serializer(filename, capturer).writeFrame(*frame);
 }
 
-}  // namespace gpu
+} // namespace gpu
 
 using namespace gpu;
 
@@ -266,8 +266,8 @@ json Serializer::writeBatch(const Batch& batch) {
     }
 
     if (0 != batch._transforms.size()) {
-        batchNode[keys::transforms] =
-            serializeDataCache<Transform, json>(batch._transforms, [](const Transform& t) { return writeTransform(t); });
+        batchNode[keys::transforms] = serializeDataCache<Transform, json>(batch._transforms,
+                                                                          [](const Transform& t) { return writeTransform(t); });
     }
     if (0 != batch._profileRanges.size()) {
         batchNode[keys::profileRanges] = serializeDataCache<std::string>(batch._profileRanges);
@@ -454,7 +454,7 @@ json Serializer::writeFramebuffer(const FramebufferPointer& framebufferPointer) 
         }
     }
 
-    //SwapchainPointer _swapchain;
+    // SwapchainPointer _swapchain;
     return result;
 }
 
@@ -495,19 +495,19 @@ json Serializer::writeFormat(const Stream::FormatPointer& formatPointer) {
     return result;
 }
 
-#define SET_IF_NOT_DEFAULT(FIELD) \
-    if (value.FIELD != DEFAULT.FIELD) { \
-        result[keys::FIELD] = value.FIELD; \
+#define SET_IF_NOT_DEFAULT(FIELD)                                                                                              \
+    if (value.FIELD != DEFAULT.FIELD) {                                                                                        \
+        result[keys::FIELD] = value.FIELD;                                                                                     \
     }
 
-#define SET_IF_NOT_DEFAULT_(FIELD) \
-    if (value._##FIELD != DEFAULT._##FIELD) { \
-        result[keys::FIELD] = value._##FIELD; \
+#define SET_IF_NOT_DEFAULT_(FIELD)                                                                                             \
+    if (value._##FIELD != DEFAULT._##FIELD) {                                                                                  \
+        result[keys::FIELD] = value._##FIELD;                                                                                  \
     }
 
-#define SET_IF_NOT_DEFAULT_TRANSFORM(FIELD, TRANSFORM) \
-    if (value.FIELD != DEFAULT.FIELD) { \
-        result[keys::FIELD] = TRANSFORM(value.FIELD); \
+#define SET_IF_NOT_DEFAULT_TRANSFORM(FIELD, TRANSFORM)                                                                         \
+    if (value.FIELD != DEFAULT.FIELD) {                                                                                        \
+        result[keys::FIELD] = TRANSFORM(value.FIELD);                                                                          \
     }
 
 static json writeBlendFunction(const State::BlendFunction& value) {
@@ -544,7 +544,6 @@ static json writeDepthTest(const State::DepthTest& value) {
     SET_IF_NOT_DEFAULT(function);
     return result;
 }
-
 
 static json writeStereoState(const StereoState& value) {
     static const StereoState DEFAULT;
@@ -737,8 +736,8 @@ json Serializer::writeCapturableTextures(const Frame& frame) {
                 default:
                     break;
             }
-        });  // for each command
-    }        // for each batch
+        }); // for each command
+    } // for each batch
 
     for (const auto& entry : textureMap) {
         const auto& texturePointer = entry.first;

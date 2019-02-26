@@ -10,18 +10,17 @@
 //
 #pragma once
 
-#include <memory>
 #include <map>
+#include <memory>
 #include <unordered_set>
 
 #include <QtCore/QString>
 
 #include "AxisValue.h"
-#include "Pose.h"
-#include "Input.h"
-#include "StandardControls.h"
 #include "DeviceProxy.h"
-
+#include "Input.h"
+#include "Pose.h"
+#include "StandardControls.h"
 
 // Event types for each controller
 const unsigned int CONTROLLER_0_EVENT = 1500U;
@@ -46,21 +45,17 @@ using EndpointPointer = std::shared_ptr<Endpoint>;
  * </table>
  * @typedef {number} Controller.Hand
  */
-enum Hand {
-    LEFT = 0,
-    RIGHT,
-    BOTH
-};
+enum Hand { LEFT = 0, RIGHT, BOTH };
 
 /**jsdoc
- * <p>The <code>Controller.Hardware</code> object has properties representing standard and hardware-specific controller and 
- * computer outputs, plus predefined actions on Interface and the user's avatar. <em>Read-only.</em> The outputs can be mapped 
- * to actions or functions in a {@link RouteObject} mapping. Additionally, hardware-specific controller outputs can be mapped 
- * to standard controller outputs. 
- * 
- * <p>Controllers typically implement a subset of the {@link Controller.Standard} controls, plus they may implement some extras. 
- * Some common controllers are included in the table. You can see the outputs provided by these and others by 
- * viewing their {@link Controller.MappingJSON|MappingJSON} files at 
+ * <p>The <code>Controller.Hardware</code> object has properties representing standard and hardware-specific controller and
+ * computer outputs, plus predefined actions on Interface and the user's avatar. <em>Read-only.</em> The outputs can be mapped
+ * to actions or functions in a {@link RouteObject} mapping. Additionally, hardware-specific controller outputs can be mapped
+ * to standard controller outputs.
+ *
+ * <p>Controllers typically implement a subset of the {@link Controller.Standard} controls, plus they may implement some extras.
+ * Some common controllers are included in the table. You can see the outputs provided by these and others by
+ * viewing their {@link Controller.MappingJSON|MappingJSON} files at
  * <a href="https://github.com/highfidelity/hifi/tree/master/interface/resources/controllers">
  * https://github.com/highfidelity/hifi/tree/master/interface/resources/controllers</a>.</p>
  *
@@ -70,7 +65,7 @@ enum Hand {
  *   </thead>
  *   <tbody>
  *     <tr><td><code>Controller.Hardware.Actions</code></td><td>object</td><td>Synonym for {@link Controller.Actions}.</td></tr>
- *     <tr><td><code>Controller.Hardware.Application</code></td><td>object</td><td>Interface state outputs. See 
+ *     <tr><td><code>Controller.Hardware.Application</code></td><td>object</td><td>Interface state outputs. See
  *       {@link Controller.Hardware-Application}.</td></tr>
  *     <tr><td><code>Controller.Hardware.Keyboard</code></td><td>object</td><td>Keyboard, mouse, and touch pad outputs. See
  *       {@link Controller.Hardware-Keyboard}.</td></tr>
@@ -136,7 +131,7 @@ public:
     Input::NamedPair makePair(StandardButtonChannel button, const QString& name) const;
     Input::NamedPair makePair(StandardAxisChannel button, const QString& name) const;
     Input::NamedPair makePair(StandardPoseChannel button, const QString& name) const;
-    
+
 protected:
     friend class UserInputMapper;
 
@@ -154,4 +149,4 @@ protected:
     PoseStateMap _poseStateMap;
 };
 
-}
+} // namespace controller

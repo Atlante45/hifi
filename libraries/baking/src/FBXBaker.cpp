@@ -37,7 +37,7 @@
 #include "FBXToJSON.h"
 #endif
 
-void FBXBaker::bake() {    
+void FBXBaker::bake() {
     qDebug() << "FBXBaker" << _modelURL << "bake starting";
 
     // setup the output folder for the results of this bake
@@ -104,10 +104,11 @@ void FBXBaker::loadSourceFBX() {
         // load up the local file
         QFile localFBX { _modelURL.toLocalFile() };
 
-        qDebug() << "Local file url: " << _modelURL << _modelURL.toString() << _modelURL.toLocalFile() << ", copying to: " << _originalModelFilePath;
+        qDebug() << "Local file url: " << _modelURL << _modelURL.toString() << _modelURL.toLocalFile()
+                 << ", copying to: " << _originalModelFilePath;
 
         if (!localFBX.exists()) {
-            //QMessageBox::warning(this, "Could not find " + _fbxURL.toString(), "");
+            // QMessageBox::warning(this, "Could not find " + _fbxURL.toString(), "");
             handleError("Could not find " + _modelURL.toString());
             return;
         }
@@ -155,7 +156,8 @@ void FBXBaker::handleFBXNetworkReply() {
 
         if (!copyOfOriginal.open(QIODevice::WriteOnly)) {
             // add an error to the error list for this FBX stating that a duplicate of the original FBX could not be made
-            handleError("Could not create copy of " + _modelURL.toString() + " (Failed to open " + _originalModelFilePath + ")");
+            handleError("Could not create copy of " + _modelURL.toString() + " (Failed to open " + _originalModelFilePath +
+                        ")");
             return;
         }
         if (copyOfOriginal.write(requestReply->readAll()) == -1) {
@@ -230,19 +232,18 @@ void FBXBaker::rewriteAndBakeSceneModels() {
         if (rootChild.name == "Objects") {
             for (FBXNode& objectChild : rootChild.children) {
                 if (objectChild.name == "Geometry") {
-
                     // TODO Pull this out of _hfmModel instead so we don't have to reprocess it
                     auto extractedMesh = FBXSerializer::extractMesh(objectChild, meshIndex, false);
-                    
+
                     // Callback to get MaterialID
                     GetMaterialIDCallback materialIDcallback = [&extractedMesh](int partIndex) {
                         return extractedMesh.partMaterialTextures[partIndex].first;
                     };
-                    
+
                     // Compress mesh information and store in dracoMeshNode
                     FBXNode dracoMeshNode;
                     bool success = compressMesh(extractedMesh.mesh, hasDeformers, dracoMeshNode, materialIDcallback);
-                    
+
                     // if bake fails - return, if there were errors and continue, if there were warnings.
                     if (!success) {
                         if (hasErrors()) {
@@ -255,19 +256,11 @@ void FBXBaker::rewriteAndBakeSceneModels() {
 
                         static const std::vector<QString> nodeNamesToDelete {
                             // Node data that is packed into the draco mesh
-                            "Vertices",
-                            "PolygonVertexIndex",
-                            "LayerElementNormal",
-                            "LayerElementColor",
-                            "LayerElementUV",
-                            "LayerElementMaterial",
-                            "LayerElementTexture",
+                            "Vertices", "PolygonVertexIndex", "LayerElementNormal", "LayerElementColor", "LayerElementUV",
+                            "LayerElementMaterial", "LayerElementTexture",
 
                             // Node data that we don't support
-                            "Edges",
-                            "LayerElementTangent",
-                            "LayerElementBinormal",
-                            "LayerElementSmoothing"
+                            "Edges", "LayerElementTangent", "LayerElementBinormal", "LayerElementSmoothing"
                         };
                         auto& children = objectChild.children;
                         auto it = children.begin();
@@ -281,7 +274,7 @@ void FBXBaker::rewriteAndBakeSceneModels() {
                             }
                         }
                     }
-                }  // Geometry Object
+                } // Geometry Object
 
             } // foreach root child
         }
@@ -312,14 +305,11 @@ void FBXBaker::rewriteAndBakeSceneTextures() {
 
     // enumerate the children of the root node
     for (FBXNode& rootChild : _rootNode.children) {
-
         if (rootChild.name == "Objects") {
-
             // enumerate the objects
             auto object = rootChild.children.begin();
             while (object != rootChild.children.end()) {
                 if (object->name == "Texture") {
-
                     // double check that we didn't get an abort while baking the last texture
                     if (shouldStop()) {
                         return;
@@ -327,10 +317,9 @@ void FBXBaker::rewriteAndBakeSceneTextures() {
 
                     // enumerate the texture children
                     for (FBXNode& textureChild : object->children) {
-
                         if (textureChild.name == "RelativeFilename") {
                             QString hfmTextureFileName { textureChild.properties.at(0).toString() };
-                            
+
                             // grab the ID for this texture so we can figure out the
                             // texture type from the loaded materials
                             auto textureID { object->properties[0].toString() };
@@ -339,7 +328,8 @@ void FBXBaker::rewriteAndBakeSceneTextures() {
                             // Compress the texture information and return the new filename to be added into the FBX scene
                             auto bakedTextureFile = compressTexture(hfmTextureFileName, textureType);
 
-                            // If no errors or warnings have occurred during texture compression add the filename to the FBX scene
+                            // If no errors or warnings have occurred during texture compression add the filename to the FBX
+                            // scene
                             if (!bakedTextureFile.isNull()) {
                                 textureChild.properties[0] = bakedTextureFile;
                             } else {

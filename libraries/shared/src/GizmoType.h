@@ -34,4 +34,3 @@ public:
 };
 
 #endif // hifi_GizmoType_h
-

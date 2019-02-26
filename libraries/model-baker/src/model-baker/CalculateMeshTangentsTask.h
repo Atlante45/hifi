@@ -14,8 +14,8 @@
 
 #include <hfm/HFM.h>
 
-#include "Engine.h"
 #include "BakerTypes.h"
+#include "Engine.h"
 
 // Calculate mesh tangents if not already present in the mesh
 class CalculateMeshTangentsTask {

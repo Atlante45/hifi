@@ -21,7 +21,6 @@ QOpenGLContextWrapper::Pointer QOpenGLContextWrapper::currentContextWrapper() {
     return std::make_shared<QOpenGLContextWrapper>(QOpenGLContext::currentContext());
 }
 
-
 QOpenGLContextWrapper::NativeContextPointer QOpenGLContextWrapper::getNativeContext() const {
     QOpenGLContextWrapper::NativeContextPointer result;
     auto nativeHandle = _context->nativeHandle();
@@ -31,7 +30,6 @@ QOpenGLContextWrapper::NativeContextPointer QOpenGLContextWrapper::getNativeCont
     }
     return result;
 }
-
 
 uint32_t QOpenGLContextWrapper::currentContextVersion() {
     QOpenGLContext* context = QOpenGLContext::currentContext();
@@ -43,16 +41,15 @@ uint32_t QOpenGLContextWrapper::currentContextVersion() {
     return version;
 }
 
-
 QOpenGLContext* QOpenGLContextWrapper::currentContext() {
     return QOpenGLContext::currentContext();
 }
 
-QOpenGLContextWrapper::QOpenGLContextWrapper() :
-    _ownContext(true), _context(new QOpenGLContext) { }
+QOpenGLContextWrapper::QOpenGLContextWrapper() : _ownContext(true), _context(new QOpenGLContext) {
+}
 
-QOpenGLContextWrapper::QOpenGLContextWrapper(QOpenGLContext* context) :
-    _context(context) { }
+QOpenGLContextWrapper::QOpenGLContextWrapper(QOpenGLContext* context) : _context(context) {
+}
 
 QOpenGLContextWrapper::~QOpenGLContextWrapper() {
     if (_ownContext) {
@@ -92,4 +89,3 @@ bool isCurrentContext(QOpenGLContext* context) {
 void QOpenGLContextWrapper::moveToThread(QThread* thread) {
     _context->moveToThread(thread);
 }
-

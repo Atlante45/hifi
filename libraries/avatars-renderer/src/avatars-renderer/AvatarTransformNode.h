@@ -14,7 +14,8 @@
 
 class AvatarTransformNode : public BaseNestableTransformNode<Avatar> {
 public:
-    AvatarTransformNode(std::weak_ptr<Avatar> spatiallyNestable, int jointIndex) : BaseNestableTransformNode(spatiallyNestable, jointIndex) {};
+    AvatarTransformNode(std::weak_ptr<Avatar> spatiallyNestable, int jointIndex) :
+        BaseNestableTransformNode(spatiallyNestable, jointIndex) {};
 };
 
 #endif // hifi_AvatarTransformNode_h

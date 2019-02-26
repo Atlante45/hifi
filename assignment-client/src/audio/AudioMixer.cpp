@@ -18,29 +18,29 @@
 #include <QtCore/QJsonObject>
 #include <QtCore/QJsonValue>
 
+#include <CPUDetect.h>
 #include <LogHandler.h>
 #include <NetworkAccessManager.h>
-#include <NodeList.h>
 #include <Node.h>
+#include <NodeList.h>
 #include <OctreeConstants.h>
-#include <plugins/PluginManager.h>
-#include <plugins/CodecPlugin.h>
-#include <udt/PacketHeaders.h>
 #include <SharedUtil.h>
 #include <StDev.h>
 #include <UUID.h>
-#include <CPUDetect.h>
+#include <plugins/CodecPlugin.h>
+#include <plugins/PluginManager.h>
+#include <udt/PacketHeaders.h>
 
-#include "AudioLogging.h"
 #include "AudioHelpers.h"
-#include "AudioRingBuffer.h"
+#include "AudioLogging.h"
 #include "AudioMixerClientData.h"
+#include "AudioRingBuffer.h"
 #include "AvatarAudioStream.h"
 #include "InjectedAudioStream.h"
 
 using namespace std;
 
-static const float DEFAULT_ATTENUATION_PER_DOUBLING_IN_DISTANCE = 0.5f;    // attenuation = -6dB * log2(distance)
+static const float DEFAULT_ATTENUATION_PER_DOUBLING_IN_DISTANCE = 0.5f; // attenuation = -6dB * log2(distance)
 static const int DISABLE_STATIC_JITTER_FRAMES = -1;
 static const float DEFAULT_NOISE_MUTING_THRESHOLD = 1.0f;
 static const QString AUDIO_MIXER_LOGGING_TARGET_NAME = "audio-mixer";
@@ -48,19 +48,16 @@ static const QString AUDIO_ENV_GROUP_KEY = "audio_env";
 static const QString AUDIO_BUFFER_GROUP_KEY = "audio_buffer";
 static const QString AUDIO_THREADING_GROUP_KEY = "audio_threading";
 
-int AudioMixer::_numStaticJitterFrames{ DISABLE_STATIC_JITTER_FRAMES };
-float AudioMixer::_noiseMutingThreshold{ DEFAULT_NOISE_MUTING_THRESHOLD };
-float AudioMixer::_attenuationPerDoublingInDistance{ DEFAULT_ATTENUATION_PER_DOUBLING_IN_DISTANCE };
-map<QString, shared_ptr<CodecPlugin>> AudioMixer::_availableCodecs{ };
-QStringList AudioMixer::_codecPreferenceOrder{};
+int AudioMixer::_numStaticJitterFrames { DISABLE_STATIC_JITTER_FRAMES };
+float AudioMixer::_noiseMutingThreshold { DEFAULT_NOISE_MUTING_THRESHOLD };
+float AudioMixer::_attenuationPerDoublingInDistance { DEFAULT_ATTENUATION_PER_DOUBLING_IN_DISTANCE };
+map<QString, shared_ptr<CodecPlugin>> AudioMixer::_availableCodecs {};
+QStringList AudioMixer::_codecPreferenceOrder {};
 vector<AudioMixer::ZoneDescription> AudioMixer::_audioZones;
 vector<AudioMixer::ZoneSettings> AudioMixer::_zoneSettings;
 vector<AudioMixer::ReverbSettings> AudioMixer::_zoneReverbSettings;
 
-AudioMixer::AudioMixer(ReceivedMessage& message) :
-    ThreadedAssignment(message)
-{
-
+AudioMixer::AudioMixer(ReceivedMessage& message) : ThreadedAssignment(message) {
     // Always clear settings first
     // This prevents previous assignment settings from sticking around
     clearDomainSettings();
@@ -77,42 +74,29 @@ AudioMixer::AudioMixer(ReceivedMessage& message) :
 
     auto codecPlugins = pluginManager->getCodecPlugins();
     for_each(codecPlugins.cbegin(), codecPlugins.cend(),
-        [&](const CodecPluginPointer& codec) {
-            _availableCodecs[codec->getName()] = codec;
-        });
+             [&](const CodecPluginPointer& codec) { _availableCodecs[codec->getName()] = codec; });
 
     auto nodeList = DependencyManager::get<NodeList>();
     auto& packetReceiver = nodeList->getPacketReceiver();
 
     // packets whose consequences are limited to their own node can be parallelized
-    packetReceiver.registerListenerForTypes({
-            PacketType::MicrophoneAudioNoEcho,
-            PacketType::MicrophoneAudioWithEcho,
-            PacketType::InjectAudio,
-            PacketType::AudioStreamStats,
-            PacketType::SilentAudioFrame,
-            PacketType::NegotiateAudioFormat,
-            PacketType::MuteEnvironment,
-            PacketType::NodeIgnoreRequest,
-            PacketType::RadiusIgnoreRequest,
-            PacketType::RequestsDomainListData,
-            PacketType::PerAvatarGainSet,
-            PacketType::AudioSoloRequest },
-            this, "queueAudioPacket");
+    packetReceiver.registerListenerForTypes({ PacketType::MicrophoneAudioNoEcho, PacketType::MicrophoneAudioWithEcho,
+                                              PacketType::InjectAudio, PacketType::AudioStreamStats,
+                                              PacketType::SilentAudioFrame, PacketType::NegotiateAudioFormat,
+                                              PacketType::MuteEnvironment, PacketType::NodeIgnoreRequest,
+                                              PacketType::RadiusIgnoreRequest, PacketType::RequestsDomainListData,
+                                              PacketType::PerAvatarGainSet, PacketType::AudioSoloRequest },
+                                            this, "queueAudioPacket");
 
     // packets whose consequences are global should be processed on the main thread
     packetReceiver.registerListener(PacketType::MuteEnvironment, this, "handleMuteEnvironmentPacket");
     packetReceiver.registerListener(PacketType::NodeMuteRequest, this, "handleNodeMuteRequestPacket");
     packetReceiver.registerListener(PacketType::KillAvatar, this, "handleKillAvatarPacket");
 
-    packetReceiver.registerListenerForTypes({
-        PacketType::ReplicatedMicrophoneAudioNoEcho,
-        PacketType::ReplicatedMicrophoneAudioWithEcho,
-        PacketType::ReplicatedInjectAudio,
-        PacketType::ReplicatedSilentAudioFrame
-    },
-        this, "queueReplicatedAudioPacket"
-    );
+    packetReceiver.registerListenerForTypes({ PacketType::ReplicatedMicrophoneAudioNoEcho,
+                                              PacketType::ReplicatedMicrophoneAudioWithEcho, PacketType::ReplicatedInjectAudio,
+                                              PacketType::ReplicatedSilentAudioFrame },
+                                            this, "queueReplicatedAudioPacket");
 
     connect(nodeList.data(), &NodeList::nodeKilled, this, &AudioMixer::handleNodeKilled);
 }
@@ -136,9 +120,8 @@ void AudioMixer::queueReplicatedAudioPacket(QSharedPointer<ReceivedMessage> mess
     // Node ID is now part of user data, since replicated audio packets are non-sourced.
     QUuid nodeID = QUuid::fromRfc4122(message->readWithoutCopy(NUM_BYTES_RFC4122_UUID));
 
-    auto replicatedNode = nodeList->addOrUpdateNode(nodeID, NodeType::Agent,
-                                                    message->getSenderSockAddr(), message->getSenderSockAddr(),
-                                                    Node::NULL_LOCAL_ID, true, true);
+    auto replicatedNode = nodeList->addOrUpdateNode(nodeID, NodeType::Agent, message->getSenderSockAddr(),
+                                                    message->getSenderSockAddr(), Node::NULL_LOCAL_ID, true, true);
     replicatedNode->setLastHeardMicrostamp(usecTimestampNow());
 
     // construct a "fake" audio received message from the byte array and packet list information
@@ -174,9 +157,8 @@ void AudioMixer::handleMuteEnvironmentPacket(QSharedPointer<ReceivedMessage> mes
         newPacket->writePrimitive(position);
         newPacket->writePrimitive(radius);
 
-        nodeList->eachNode([&](const SharedNodePointer& node){
-            if (node->getType() == NodeType::Agent && node->getActiveSocket() &&
-                node->getLinkedData() && node != sendingNode) {
+        nodeList->eachNode([&](const SharedNodePointer& node) {
+            if (node->getType() == NodeType::Agent && node->getActiveSocket() && node->getLinkedData() && node != sendingNode) {
                 nodeList->sendUnreliablePacket(*newPacket, *node);
             }
         });
@@ -196,14 +178,13 @@ const pair<QString, CodecPluginPointer> AudioMixer::negotiateCodec(vector<QStrin
             // choose the preferred, available codec
             if (preference >= 0 && preference < minPreference) {
                 minPreference = preference;
-                selectedCodecName  = codec;
+                selectedCodecName = codec;
             }
         }
     }
 
     return make_pair(selectedCodecName, _availableCodecs[selectedCodecName]);
 }
-
 
 void AudioMixer::handleNodeMuteRequestPacket(QSharedPointer<ReceivedMessage> packet, SharedNodePointer sendingNode) {
     auto nodeList = DependencyManager::get<NodeList>();
@@ -299,7 +280,7 @@ void AudioMixer::sendStatsPacket() {
     addTiming(_eventsTiming, "events");
 
 #ifdef HIFI_AUDIO_MIXER_DEBUG
-    timingStats["ns_per_mix"] = (_stats.totalMixes > 0) ?  (float)(_stats.mixTime / _stats.totalMixes) : 0;
+    timingStats["ns_per_mix"] = (_stats.totalMixes > 0) ? (float)(_stats.mixTime / _stats.totalMixes) : 0;
 #endif
 
     // call it "avg_..." to keep it higher in the display, sorted alphabetically
@@ -362,7 +343,6 @@ void AudioMixer::sendStatsPacket() {
 }
 
 void AudioMixer::run() {
-
     qCDebug(audio) << "Waiting for connection to domain to request settings from domain-server.";
 
     // wait until we have the domain-server settings, otherwise we bail
@@ -389,10 +369,8 @@ void AudioMixer::start() {
     auto nodeList = DependencyManager::get<NodeList>();
 
     // prepare the NodeList
-    nodeList->addSetOfNodeTypesToNodeInterestSet({
-        NodeType::Agent, NodeType::EntityScriptServer,
-        NodeType::UpstreamAudioMixer, NodeType::DownstreamAudioMixer
-    });
+    nodeList->addSetOfNodeTypesToNodeInterestSet(
+        { NodeType::Agent, NodeType::EntityScriptServer, NodeType::UpstreamAudioMixer, NodeType::DownstreamAudioMixer });
     nodeList->linkedDataCreateCallback = [&](Node* node) { getOrCreateClientData(node); };
 
     // parse out any AudioMixer settings
@@ -462,7 +440,6 @@ void AudioMixer::start() {
         ++frame;
         ++_numStatFrames;
 
-
         if (_isFinished) {
             // alert qt eventing that this is finished
             QCoreApplication::sendPostedEvents(this, QEvent::DeferredDelete);
@@ -523,13 +500,13 @@ void AudioMixer::throttle(chrono::microseconds duration, int frame) {
             _throttlingRatio += THROTTLE_RATE * proportionalTerm;
             _throttlingRatio = min(_throttlingRatio, 1.0f);
             qCDebug(audio) << "audio-mixer is struggling (" << _trailingMixRatio << "mix/sleep) - throttling"
-                << _throttlingRatio << "of streams";
+                           << _throttlingRatio << "of streams";
         } else if (_throttlingRatio > 0.0f && _trailingMixRatio <= BACKOFF_TARGET) {
             int proportionalTerm = 1 + (TARGET - _trailingMixRatio) / 0.2f;
             _throttlingRatio -= BACKOFF_RATE * proportionalTerm;
             _throttlingRatio = max(_throttlingRatio, 0.0f);
             qCDebug(audio) << "audio-mixer is recovering (" << _trailingMixRatio << "mix/sleep) - throttling"
-                << _throttlingRatio << "of streams";
+                           << _throttlingRatio << "of streams";
         }
     }
 }
@@ -570,7 +547,7 @@ void AudioMixer::parseSettingsObject(const QJsonObject& settingsObject) {
             qCWarning(audio) << "Throttle backoff target cannot be higher than throttle start target. Using default values.";
         } else if (settingsThrottleBackoff < 0.0f || settingsThrottleStart > 1.0f) {
             qCWarning(audio) << "Throttle start and backoff targets must be greater than or equal to 0.0"
-                << "and lesser than or equal to 1.0. Using default values.";
+                             << "and lesser than or equal to 1.0. Using default values.";
         } else {
             _throttleStartTarget = settingsThrottleStart;
             _throttleBackoffTarget = settingsThrottleBackoff;
@@ -602,7 +579,8 @@ void AudioMixer::parseSettingsObject(const QJsonObject& settingsObject) {
 
         // check for deprecated audio settings
         auto deprecationNotice = [](const QString& setting, const QString& value) {
-            qInfo().nospace() << "[DEPRECATION NOTICE] " << setting << "(" << value << ") has been deprecated, and has no effect";
+            qInfo().nospace() << "[DEPRECATION NOTICE] " << setting << "(" << value
+                              << ") has been deprecated, and has no effect";
         };
         bool ok;
 
@@ -618,14 +596,22 @@ void AudioMixer::parseSettingsObject(const QJsonObject& settingsObject) {
             deprecationNotice(WINDOW_STARVE_THRESHOLD_JSON_KEY, QString::number(windowStarveThreshold));
         }
 
-        const QString WINDOW_SECONDS_FOR_DESIRED_CALC_ON_TOO_MANY_STARVES_JSON_KEY = "window_seconds_for_desired_calc_on_too_many_starves";
-        int windowSecondsForDesiredCalcOnTooManyStarves = audioBufferGroupObject[WINDOW_SECONDS_FOR_DESIRED_CALC_ON_TOO_MANY_STARVES_JSON_KEY].toString().toInt(&ok);
-        if (ok && windowSecondsForDesiredCalcOnTooManyStarves != InboundAudioStream::WINDOW_SECONDS_FOR_DESIRED_CALC_ON_TOO_MANY_STARVES) {
-            deprecationNotice(WINDOW_SECONDS_FOR_DESIRED_CALC_ON_TOO_MANY_STARVES_JSON_KEY, QString::number(windowSecondsForDesiredCalcOnTooManyStarves));
+        const QString WINDOW_SECONDS_FOR_DESIRED_CALC_ON_TOO_MANY_STARVES_JSON_KEY = "window_seconds_for_desired_calc_on_too_"
+                                                                                     "many_starves";
+        int windowSecondsForDesiredCalcOnTooManyStarves = audioBufferGroupObject
+                                                              [WINDOW_SECONDS_FOR_DESIRED_CALC_ON_TOO_MANY_STARVES_JSON_KEY]
+                                                                  .toString()
+                                                                  .toInt(&ok);
+        if (ok && windowSecondsForDesiredCalcOnTooManyStarves !=
+                      InboundAudioStream::WINDOW_SECONDS_FOR_DESIRED_CALC_ON_TOO_MANY_STARVES) {
+            deprecationNotice(WINDOW_SECONDS_FOR_DESIRED_CALC_ON_TOO_MANY_STARVES_JSON_KEY,
+                              QString::number(windowSecondsForDesiredCalcOnTooManyStarves));
         }
 
         const QString WINDOW_SECONDS_FOR_DESIRED_REDUCTION_JSON_KEY = "window_seconds_for_desired_reduction";
-        int windowSecondsForDesiredReduction = audioBufferGroupObject[WINDOW_SECONDS_FOR_DESIRED_REDUCTION_JSON_KEY].toString().toInt(&ok);
+        int windowSecondsForDesiredReduction = audioBufferGroupObject[WINDOW_SECONDS_FOR_DESIRED_REDUCTION_JSON_KEY]
+                                                   .toString()
+                                                   .toInt(&ok);
         if (ok && windowSecondsForDesiredReduction != InboundAudioStream::WINDOW_SECONDS_FOR_DESIRED_REDUCTION) {
             deprecationNotice(WINDOW_SECONDS_FOR_DESIRED_REDUCTION_JSON_KEY, QString::number(windowSecondsForDesiredReduction));
         }
@@ -691,7 +677,6 @@ void AudioMixer::parseSettingsObject(const QJsonObject& settingsObject) {
 
                 if (zoneObject.contains(X_MIN) && zoneObject.contains(X_MAX) && zoneObject.contains(Y_MIN) &&
                     zoneObject.contains(Y_MAX) && zoneObject.contains(Z_MIN) && zoneObject.contains(Z_MAX)) {
-
                     float xMin, xMax, yMin, yMax, zMin, zMax;
                     bool ok, allOk = true;
                     xMin = zoneObject.value(X_MIN).toString().toFloat(&ok);
@@ -712,7 +697,8 @@ void AudioMixer::parseSettingsObject(const QJsonObject& settingsObject) {
                         glm::vec3 dimensions(xMax - xMin, yMax - yMin, zMax - zMin);
                         AABox zoneAABox(corner, dimensions);
                         _audioZones.push_back({ zoneName, zoneAABox });
-                        qCDebug(audio) << "Added zone:" << zoneName << "(corner:" << corner << ", dimensions:" << dimensions << ")";
+                        qCDebug(audio) << "Added zone:" << zoneName << "(corner:" << corner << ", dimensions:" << dimensions
+                                       << ")";
                     }
                 }
             }
@@ -728,10 +714,8 @@ void AudioMixer::parseSettingsObject(const QJsonObject& settingsObject) {
             for (int i = 0; i < coefficients.count(); ++i) {
                 QJsonObject coefficientObject = coefficients[i].toObject();
 
-                if (coefficientObject.contains(SOURCE) &&
-                    coefficientObject.contains(LISTENER) &&
+                if (coefficientObject.contains(SOURCE) && coefficientObject.contains(LISTENER) &&
                     coefficientObject.contains(COEFFICIENT)) {
-
                     auto itSource = find_if(begin(_audioZones), end(_audioZones), [&](const ZoneDescription& description) {
                         return description.name == coefficientObject.value(SOURCE).toString();
                     });
@@ -742,11 +726,7 @@ void AudioMixer::parseSettingsObject(const QJsonObject& settingsObject) {
                     bool ok;
                     float coefficient = coefficientObject.value(COEFFICIENT).toString().toFloat(&ok);
 
-
-                    if (ok && coefficient <= 1.0f &&
-                        itSource != end(_audioZones) &&
-                        itListener != end(_audioZones)) {
-
+                    if (ok && coefficient <= 1.0f && itSource != end(_audioZones) && itListener != end(_audioZones)) {
                         ZoneSettings settings;
                         settings.source = itSource - begin(_audioZones);
                         settings.listener = itListener - begin(_audioZones);
@@ -769,10 +749,7 @@ void AudioMixer::parseSettingsObject(const QJsonObject& settingsObject) {
             for (int i = 0; i < reverb.count(); ++i) {
                 QJsonObject reverbObject = reverb[i].toObject();
 
-                if (reverbObject.contains(ZONE) &&
-                    reverbObject.contains(REVERB_TIME) &&
-                    reverbObject.contains(WET_LEVEL)) {
-
+                if (reverbObject.contains(ZONE) && reverbObject.contains(REVERB_TIME) && reverbObject.contains(WET_LEVEL)) {
                     bool okReverbTime, okWetLevel;
                     auto itZone = find_if(begin(_audioZones), end(_audioZones), [&](const ZoneDescription& description) {
                         return description.name == reverbObject.value(ZONE).toString();

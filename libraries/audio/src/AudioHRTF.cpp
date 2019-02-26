@@ -11,9 +11,9 @@
 
 #include "AudioHRTF.h"
 
+#include <assert.h>
 #include <math.h>
 #include <string.h>
-#include <assert.h>
 
 #include "AudioHRTFData.h"
 
@@ -26,10 +26,10 @@
 #endif
 
 #ifndef MAX
-#define MAX(a,b)    (((a) > (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 #ifndef MIN
-#define MIN(a,b)    (((a) < (b)) ? (a) : (b))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
 //
@@ -40,36 +40,36 @@
 // Valimaki, Laakso. "Elimination of Transients in Time-Varying Allpass Fractional Delay Filters"
 //
 ALIGN32 static const float crossfadeTable[HRTF_BLOCK] = {
-    1.0000000000f, 1.0000000000f, 1.0000000000f, 1.0000000000f, 1.0000000000f, 1.0000000000f, 1.0000000000f, 1.0000000000f, 
-    0.9999545513f, 0.9998182135f, 0.9995910114f, 0.9992729863f, 0.9988641959f, 0.9983647147f, 0.9977746334f, 0.9970940592f, 
-    0.9963231160f, 0.9954619438f, 0.9945106993f, 0.9934695553f, 0.9923387012f, 0.9911183425f, 0.9898087010f, 0.9884100149f, 
-    0.9869225384f, 0.9853465419f, 0.9836823120f, 0.9819301512f, 0.9800903780f, 0.9781633270f, 0.9761493483f, 0.9740488082f, 
-    0.9718620885f, 0.9695895868f, 0.9672317161f, 0.9647889052f, 0.9622615981f, 0.9596502542f, 0.9569553484f, 0.9541773705f, 
-    0.9513168255f, 0.9483742335f, 0.9453501294f, 0.9422450630f, 0.9390595988f, 0.9357943158f, 0.9324498078f, 0.9290266826f, 
-    0.9255255626f, 0.9219470843f, 0.9182918983f, 0.9145606690f, 0.9107540747f, 0.9068728075f, 0.9029175730f, 0.8988890902f, 
-    0.8947880914f, 0.8906153223f, 0.8863715413f, 0.8820575200f, 0.8776740426f, 0.8732219061f, 0.8687019198f, 0.8641149055f, 
-    0.8594616970f, 0.8547431402f, 0.8499600930f, 0.8451134248f, 0.8402040169f, 0.8352327617f, 0.8302005629f, 0.8251083354f, 
-    0.8199570049f, 0.8147475079f, 0.8094807915f, 0.8041578130f, 0.7987795403f, 0.7933469510f, 0.7878610328f, 0.7823227830f, 
-    0.7767332084f, 0.7710933251f, 0.7654041585f, 0.7596667428f, 0.7538821211f, 0.7480513449f, 0.7421754743f, 0.7362555775f, 
-    0.7302927306f, 0.7242880178f, 0.7182425305f, 0.7121573680f, 0.7060336363f, 0.6998724488f, 0.6936749255f, 0.6874421931f, 
-    0.6811753847f, 0.6748756396f, 0.6685441031f, 0.6621819261f, 0.6557902652f, 0.6493702826f, 0.6429231452f, 0.6364500251f, 
-    0.6299520991f, 0.6234305485f, 0.6168865589f, 0.6103213199f, 0.6037360251f, 0.5971318716f, 0.5905100601f, 0.5838717943f, 
-    0.5772182810f, 0.5705507299f, 0.5638703530f, 0.5571783649f, 0.5504759820f, 0.5437644228f, 0.5370449075f, 0.5303186576f, 
-    0.5235868960f, 0.5168508463f, 0.5101117333f, 0.5033707820f, 0.4966292180f, 0.4898882667f, 0.4831491537f, 0.4764131040f, 
-    0.4696813424f, 0.4629550925f, 0.4562355772f, 0.4495240180f, 0.4428216351f, 0.4361296470f, 0.4294492701f, 0.4227817190f, 
-    0.4161282057f, 0.4094899399f, 0.4028681284f, 0.3962639749f, 0.3896786801f, 0.3831134411f, 0.3765694515f, 0.3700479009f, 
-    0.3635499749f, 0.3570768548f, 0.3506297174f, 0.3442097348f, 0.3378180739f, 0.3314558969f, 0.3251243604f, 0.3188246153f, 
-    0.3125578069f, 0.3063250745f, 0.3001275512f, 0.2939663637f, 0.2878426320f, 0.2817574695f, 0.2757119822f, 0.2697072694f, 
-    0.2637444225f, 0.2578245257f, 0.2519486551f, 0.2461178789f, 0.2403332572f, 0.2345958415f, 0.2289066749f, 0.2232667916f, 
-    0.2176772170f, 0.2121389672f, 0.2066530490f, 0.2012204597f, 0.1958421870f, 0.1905192085f, 0.1852524921f, 0.1800429951f, 
-    0.1748916646f, 0.1697994371f, 0.1647672383f, 0.1597959831f, 0.1548865752f, 0.1500399070f, 0.1452568598f, 0.1405383030f, 
-    0.1358850945f, 0.1312980802f, 0.1267780939f, 0.1223259574f, 0.1179424800f, 0.1136284587f, 0.1093846777f, 0.1052119086f, 
-    0.1011109098f, 0.0970824270f, 0.0931271925f, 0.0892459253f, 0.0854393310f, 0.0817081017f, 0.0780529157f, 0.0744744374f, 
-    0.0709733174f, 0.0675501922f, 0.0642056842f, 0.0609404012f, 0.0577549370f, 0.0546498706f, 0.0516257665f, 0.0486831745f, 
-    0.0458226295f, 0.0430446516f, 0.0403497458f, 0.0377384019f, 0.0352110948f, 0.0327682839f, 0.0304104132f, 0.0281379115f, 
-    0.0259511918f, 0.0238506517f, 0.0218366730f, 0.0199096220f, 0.0180698488f, 0.0163176880f, 0.0146534581f, 0.0130774616f, 
-    0.0115899851f, 0.0101912990f, 0.0088816575f, 0.0076612988f, 0.0065304447f, 0.0054893007f, 0.0045380562f, 0.0036768840f, 
-    0.0029059408f, 0.0022253666f, 0.0016352853f, 0.0011358041f, 0.0007270137f, 0.0004089886f, 0.0001817865f, 0.0000454487f, 
+    1.0000000000f, 1.0000000000f, 1.0000000000f, 1.0000000000f, 1.0000000000f, 1.0000000000f, 1.0000000000f, 1.0000000000f,
+    0.9999545513f, 0.9998182135f, 0.9995910114f, 0.9992729863f, 0.9988641959f, 0.9983647147f, 0.9977746334f, 0.9970940592f,
+    0.9963231160f, 0.9954619438f, 0.9945106993f, 0.9934695553f, 0.9923387012f, 0.9911183425f, 0.9898087010f, 0.9884100149f,
+    0.9869225384f, 0.9853465419f, 0.9836823120f, 0.9819301512f, 0.9800903780f, 0.9781633270f, 0.9761493483f, 0.9740488082f,
+    0.9718620885f, 0.9695895868f, 0.9672317161f, 0.9647889052f, 0.9622615981f, 0.9596502542f, 0.9569553484f, 0.9541773705f,
+    0.9513168255f, 0.9483742335f, 0.9453501294f, 0.9422450630f, 0.9390595988f, 0.9357943158f, 0.9324498078f, 0.9290266826f,
+    0.9255255626f, 0.9219470843f, 0.9182918983f, 0.9145606690f, 0.9107540747f, 0.9068728075f, 0.9029175730f, 0.8988890902f,
+    0.8947880914f, 0.8906153223f, 0.8863715413f, 0.8820575200f, 0.8776740426f, 0.8732219061f, 0.8687019198f, 0.8641149055f,
+    0.8594616970f, 0.8547431402f, 0.8499600930f, 0.8451134248f, 0.8402040169f, 0.8352327617f, 0.8302005629f, 0.8251083354f,
+    0.8199570049f, 0.8147475079f, 0.8094807915f, 0.8041578130f, 0.7987795403f, 0.7933469510f, 0.7878610328f, 0.7823227830f,
+    0.7767332084f, 0.7710933251f, 0.7654041585f, 0.7596667428f, 0.7538821211f, 0.7480513449f, 0.7421754743f, 0.7362555775f,
+    0.7302927306f, 0.7242880178f, 0.7182425305f, 0.7121573680f, 0.7060336363f, 0.6998724488f, 0.6936749255f, 0.6874421931f,
+    0.6811753847f, 0.6748756396f, 0.6685441031f, 0.6621819261f, 0.6557902652f, 0.6493702826f, 0.6429231452f, 0.6364500251f,
+    0.6299520991f, 0.6234305485f, 0.6168865589f, 0.6103213199f, 0.6037360251f, 0.5971318716f, 0.5905100601f, 0.5838717943f,
+    0.5772182810f, 0.5705507299f, 0.5638703530f, 0.5571783649f, 0.5504759820f, 0.5437644228f, 0.5370449075f, 0.5303186576f,
+    0.5235868960f, 0.5168508463f, 0.5101117333f, 0.5033707820f, 0.4966292180f, 0.4898882667f, 0.4831491537f, 0.4764131040f,
+    0.4696813424f, 0.4629550925f, 0.4562355772f, 0.4495240180f, 0.4428216351f, 0.4361296470f, 0.4294492701f, 0.4227817190f,
+    0.4161282057f, 0.4094899399f, 0.4028681284f, 0.3962639749f, 0.3896786801f, 0.3831134411f, 0.3765694515f, 0.3700479009f,
+    0.3635499749f, 0.3570768548f, 0.3506297174f, 0.3442097348f, 0.3378180739f, 0.3314558969f, 0.3251243604f, 0.3188246153f,
+    0.3125578069f, 0.3063250745f, 0.3001275512f, 0.2939663637f, 0.2878426320f, 0.2817574695f, 0.2757119822f, 0.2697072694f,
+    0.2637444225f, 0.2578245257f, 0.2519486551f, 0.2461178789f, 0.2403332572f, 0.2345958415f, 0.2289066749f, 0.2232667916f,
+    0.2176772170f, 0.2121389672f, 0.2066530490f, 0.2012204597f, 0.1958421870f, 0.1905192085f, 0.1852524921f, 0.1800429951f,
+    0.1748916646f, 0.1697994371f, 0.1647672383f, 0.1597959831f, 0.1548865752f, 0.1500399070f, 0.1452568598f, 0.1405383030f,
+    0.1358850945f, 0.1312980802f, 0.1267780939f, 0.1223259574f, 0.1179424800f, 0.1136284587f, 0.1093846777f, 0.1052119086f,
+    0.1011109098f, 0.0970824270f, 0.0931271925f, 0.0892459253f, 0.0854393310f, 0.0817081017f, 0.0780529157f, 0.0744744374f,
+    0.0709733174f, 0.0675501922f, 0.0642056842f, 0.0609404012f, 0.0577549370f, 0.0546498706f, 0.0516257665f, 0.0486831745f,
+    0.0458226295f, 0.0430446516f, 0.0403497458f, 0.0377384019f, 0.0352110948f, 0.0327682839f, 0.0304104132f, 0.0281379115f,
+    0.0259511918f, 0.0238506517f, 0.0218366730f, 0.0199096220f, 0.0180698488f, 0.0163176880f, 0.0146534581f, 0.0130774616f,
+    0.0115899851f, 0.0101912990f, 0.0088816575f, 0.0076612988f, 0.0065304447f, 0.0054893007f, 0.0045380562f, 0.0036768840f,
+    0.0029059408f, 0.0022253666f, 0.0016352853f, 0.0011358041f, 0.0007270137f, 0.0004089886f, 0.0001817865f, 0.0000454487f,
 };
 
 //
@@ -81,14 +81,14 @@ ALIGN32 static const float crossfadeTable[HRTF_BLOCK] = {
 //
 static const int NAZIMUTH = 8;
 static const float azimuthTable[NAZIMUTH][3] = {
-    {  0.018719007f,  0.097263971f, 0.080748954f },     // [-4pi/4,-3pi/4]
-    {  0.066995833f,  0.319754290f, 0.336963269f },     // [-3pi/4,-2pi/4]
-    { -0.066989851f, -0.101178847f, 0.006359474f },     // [-2pi/4,-1pi/4]
-    { -0.018727343f, -0.020357568f, 0.040065626f },     // [-1pi/4,-0pi/4]
-    { -0.005519051f, -0.018744412f, 0.040065629f },     // [ 0pi/4, 1pi/4]
-    { -0.001201296f, -0.025103593f, 0.042396711f },     // [ 1pi/4, 2pi/4]
-    {  0.001198959f, -0.032642381f, 0.048316220f },     // [ 2pi/4, 3pi/4]
-    {  0.005519640f, -0.053424870f, 0.073296888f },     // [ 3pi/4, 4pi/4]
+    { 0.018719007f, 0.097263971f, 0.080748954f }, // [-4pi/4,-3pi/4]
+    { 0.066995833f, 0.319754290f, 0.336963269f }, // [-3pi/4,-2pi/4]
+    { -0.066989851f, -0.101178847f, 0.006359474f }, // [-2pi/4,-1pi/4]
+    { -0.018727343f, -0.020357568f, 0.040065626f }, // [-1pi/4,-0pi/4]
+    { -0.005519051f, -0.018744412f, 0.040065629f }, // [ 0pi/4, 1pi/4]
+    { -0.001201296f, -0.025103593f, 0.042396711f }, // [ 1pi/4, 2pi/4]
+    { 0.001198959f, -0.032642381f, 0.048316220f }, // [ 2pi/4, 3pi/4]
+    { 0.005519640f, -0.053424870f, 0.073296888f }, // [ 3pi/4, 4pi/4]
 };
 
 //
@@ -99,18 +99,19 @@ static const float azimuthTable[NAZIMUTH][3] = {
 //
 // Loosely based on data from S. Spagnol, "Distance rendering and perception of nearby virtual sound sources
 // with a near-field filter model,” Applied Acoustics (2017)
-// 
+//
 static const int NNEARFIELD = 9;
-static const float nearFieldTable[NNEARFIELD][3] = {    // { b0, b1, a1 }
-    { 0.008410604f, -0.000262748f, -0.991852144f },     // gain = 1/256
-    { 0.016758914f, -0.000529590f, -0.983770676f },     // gain = 1/128
-    { 0.033270607f, -0.001075350f, -0.967804743f },     // gain = 1/64
-    { 0.065567740f, -0.002213762f, -0.936646021f },     // gain = 1/32
-    { 0.127361554f, -0.004667324f, -0.877305769f },     // gain = 1/16
-    { 0.240536414f, -0.010201827f, -0.769665412f },     // gain = 1/8
-    { 0.430858205f, -0.023243052f, -0.592384847f },     // gain = 1/4
-    { 0.703238106f, -0.054157913f, -0.350919807f },     // gain = 1/2
-    { 1.000000000f, -0.123144711f, -0.123144711f },     // gain = 1/1
+static const float nearFieldTable[NNEARFIELD][3] = {
+    // { b0, b1, a1 }
+    { 0.008410604f, -0.000262748f, -0.991852144f }, // gain = 1/256
+    { 0.016758914f, -0.000529590f, -0.983770676f }, // gain = 1/128
+    { 0.033270607f, -0.001075350f, -0.967804743f }, // gain = 1/64
+    { 0.065567740f, -0.002213762f, -0.936646021f }, // gain = 1/32
+    { 0.127361554f, -0.004667324f, -0.877305769f }, // gain = 1/16
+    { 0.240536414f, -0.010201827f, -0.769665412f }, // gain = 1/8
+    { 0.430858205f, -0.023243052f, -0.592384847f }, // gain = 1/4
+    { 0.703238106f, -0.054157913f, -0.350919807f }, // gain = 1/2
+    { 1.000000000f, -0.123144711f, -0.123144711f }, // gain = 1/1
 };
 
 //
@@ -127,30 +128,31 @@ static const float nearFieldTable[NNEARFIELD][3] = {    // { b0, b1, a1 }
 // 10km -> -3dB @ 0.1kHz
 //
 static const int NLOWPASS = 64;
-static const float lowpassTable[NLOWPASS][5] = {    // { b0, b1, b2, a1, a2 }
+static const float lowpassTable[NLOWPASS][5] = {
+    // { b0, b1, b2, a1, a2 }
     // distance = 1
-    { 0.999772371f, 1.399489756f,  0.454495527f,  1.399458985f, 0.454298669f },
-    { 0.999631480f, 1.357609808f,  0.425210203f,  1.357549905f, 0.424901586f },
-    { 0.999405154f, 1.311503050f,  0.394349994f,  1.311386830f, 0.393871368f },
-    { 0.999042876f, 1.260674595f,  0.361869089f,  1.260450057f, 0.361136504f },
+    { 0.999772371f, 1.399489756f, 0.454495527f, 1.399458985f, 0.454298669f },
+    { 0.999631480f, 1.357609808f, 0.425210203f, 1.357549905f, 0.424901586f },
+    { 0.999405154f, 1.311503050f, 0.394349994f, 1.311386830f, 0.393871368f },
+    { 0.999042876f, 1.260674595f, 0.361869089f, 1.260450057f, 0.361136504f },
     // distance = 2
-    { 0.998465222f, 1.204646525f,  0.327757118f,  1.204214978f, 0.326653886f },
-    { 0.997548106f, 1.143019308f,  0.292064663f,  1.142195387f, 0.290436690f },
-    { 0.996099269f, 1.075569152f,  0.254941286f,  1.074009405f, 0.252600301f },
-    { 0.993824292f, 1.002389610f,  0.216688640f,  0.999469185f, 0.213433357f },
+    { 0.998465222f, 1.204646525f, 0.327757118f, 1.204214978f, 0.326653886f },
+    { 0.997548106f, 1.143019308f, 0.292064663f, 1.142195387f, 0.290436690f },
+    { 0.996099269f, 1.075569152f, 0.254941286f, 1.074009405f, 0.252600301f },
+    { 0.993824292f, 1.002389610f, 0.216688640f, 0.999469185f, 0.213433357f },
     // distance = 4
-    { 0.990280170f, 0.924075266f,  0.177827150f,  0.918684864f, 0.173497723f },
-    { 0.984818279f, 0.841917936f,  0.139164195f,  0.832151968f, 0.133748443f },
-    { 0.976528670f, 0.758036513f,  0.101832398f,  0.740761682f, 0.095635899f },
-    { 0.964216485f, 0.675305244f,  0.067243474f,  0.645654855f, 0.061110348f },
+    { 0.990280170f, 0.924075266f, 0.177827150f, 0.918684864f, 0.173497723f },
+    { 0.984818279f, 0.841917936f, 0.139164195f, 0.832151968f, 0.133748443f },
+    { 0.976528670f, 0.758036513f, 0.101832398f, 0.740761682f, 0.095635899f },
+    { 0.964216485f, 0.675305244f, 0.067243474f, 0.645654855f, 0.061110348f },
     // distance = 8
-    { 0.946463038f, 0.596943020f,  0.036899688f,  0.547879974f, 0.032425772f },
-    { 0.921823868f, 0.525770189f,  0.012060451f,  0.447952111f, 0.011702396f },
-    { 0.890470015f, 0.463334299f, -0.001227816f,  0.347276405f, 0.005300092f },
-    { 0.851335343f, 0.407521164f, -0.009353968f,  0.241900234f, 0.007602305f },
+    { 0.946463038f, 0.596943020f, 0.036899688f, 0.547879974f, 0.032425772f },
+    { 0.921823868f, 0.525770189f, 0.012060451f, 0.447952111f, 0.011702396f },
+    { 0.890470015f, 0.463334299f, -0.001227816f, 0.347276405f, 0.005300092f },
+    { 0.851335343f, 0.407521164f, -0.009353968f, 0.241900234f, 0.007602305f },
     // distance = 16
-    { 0.804237360f, 0.358139558f, -0.014293332f,  0.130934213f, 0.017149373f },
-    { 0.750073259f, 0.314581568f, -0.016625381f,  0.014505388f, 0.033524057f },
+    { 0.804237360f, 0.358139558f, -0.014293332f, 0.130934213f, 0.017149373f },
+    { 0.750073259f, 0.314581568f, -0.016625381f, 0.014505388f, 0.033524057f },
     { 0.690412072f, 0.275936128f, -0.017054561f, -0.106682490f, 0.055976129f },
     { 0.627245545f, 0.241342015f, -0.016246850f, -0.231302564f, 0.083643275f },
     // distance = 32
@@ -222,9 +224,9 @@ static const float TWOPI = 6.283185307f;
 #include <emmintrin.h>
 
 // 1 channel input, 4 channel output
-static void FIR_1x4_SSE(float* src, float* dst0, float* dst1, float* dst2, float* dst3, float coef[4][HRTF_TAPS], int numFrames) {
-
-    float* coef0 = coef[0] + HRTF_TAPS - 1;     // process backwards
+static void FIR_1x4_SSE(float* src, float* dst0, float* dst1, float* dst2, float* dst3, float coef[4][HRTF_TAPS],
+                        int numFrames) {
+    float* coef0 = coef[0] + HRTF_TAPS - 1; // process backwards
     float* coef1 = coef[1] + HRTF_TAPS - 1;
     float* coef2 = coef[2] + HRTF_TAPS - 1;
     float* coef3 = coef[3] + HRTF_TAPS - 1;
@@ -232,41 +234,39 @@ static void FIR_1x4_SSE(float* src, float* dst0, float* dst1, float* dst2, float
     assert(numFrames % 4 == 0);
 
     for (int i = 0; i < numFrames; i += 4) {
-
         __m128 acc0 = _mm_setzero_ps();
         __m128 acc1 = _mm_setzero_ps();
         __m128 acc2 = _mm_setzero_ps();
         __m128 acc3 = _mm_setzero_ps();
 
-        float* ps = &src[i - HRTF_TAPS + 1];    // process forwards
+        float* ps = &src[i - HRTF_TAPS + 1]; // process forwards
 
         static_assert(HRTF_TAPS % 4 == 0, "HRTF_TAPS must be a multiple of 4");
 
         for (int k = 0; k < HRTF_TAPS; k += 4) {
+            __m128 x0 = _mm_loadu_ps(&ps[k + 0]);
+            acc0 = _mm_add_ps(acc0, _mm_mul_ps(_mm_load1_ps(&coef0[-k - 0]), x0));
+            acc1 = _mm_add_ps(acc1, _mm_mul_ps(_mm_load1_ps(&coef1[-k - 0]), x0));
+            acc2 = _mm_add_ps(acc2, _mm_mul_ps(_mm_load1_ps(&coef2[-k - 0]), x0));
+            acc3 = _mm_add_ps(acc3, _mm_mul_ps(_mm_load1_ps(&coef3[-k - 0]), x0));
 
-            __m128 x0 = _mm_loadu_ps(&ps[k+0]);
-            acc0 = _mm_add_ps(acc0, _mm_mul_ps(_mm_load1_ps(&coef0[-k-0]), x0));
-            acc1 = _mm_add_ps(acc1, _mm_mul_ps(_mm_load1_ps(&coef1[-k-0]), x0));
-            acc2 = _mm_add_ps(acc2, _mm_mul_ps(_mm_load1_ps(&coef2[-k-0]), x0));
-            acc3 = _mm_add_ps(acc3, _mm_mul_ps(_mm_load1_ps(&coef3[-k-0]), x0));
+            __m128 x1 = _mm_loadu_ps(&ps[k + 1]);
+            acc0 = _mm_add_ps(acc0, _mm_mul_ps(_mm_load1_ps(&coef0[-k - 1]), x1));
+            acc1 = _mm_add_ps(acc1, _mm_mul_ps(_mm_load1_ps(&coef1[-k - 1]), x1));
+            acc2 = _mm_add_ps(acc2, _mm_mul_ps(_mm_load1_ps(&coef2[-k - 1]), x1));
+            acc3 = _mm_add_ps(acc3, _mm_mul_ps(_mm_load1_ps(&coef3[-k - 1]), x1));
 
-            __m128 x1 = _mm_loadu_ps(&ps[k+1]);
-            acc0 = _mm_add_ps(acc0, _mm_mul_ps(_mm_load1_ps(&coef0[-k-1]), x1));
-            acc1 = _mm_add_ps(acc1, _mm_mul_ps(_mm_load1_ps(&coef1[-k-1]), x1));
-            acc2 = _mm_add_ps(acc2, _mm_mul_ps(_mm_load1_ps(&coef2[-k-1]), x1));
-            acc3 = _mm_add_ps(acc3, _mm_mul_ps(_mm_load1_ps(&coef3[-k-1]), x1));
+            __m128 x2 = _mm_loadu_ps(&ps[k + 2]);
+            acc0 = _mm_add_ps(acc0, _mm_mul_ps(_mm_load1_ps(&coef0[-k - 2]), x2));
+            acc1 = _mm_add_ps(acc1, _mm_mul_ps(_mm_load1_ps(&coef1[-k - 2]), x2));
+            acc2 = _mm_add_ps(acc2, _mm_mul_ps(_mm_load1_ps(&coef2[-k - 2]), x2));
+            acc3 = _mm_add_ps(acc3, _mm_mul_ps(_mm_load1_ps(&coef3[-k - 2]), x2));
 
-            __m128 x2 = _mm_loadu_ps(&ps[k+2]);
-            acc0 = _mm_add_ps(acc0, _mm_mul_ps(_mm_load1_ps(&coef0[-k-2]), x2));
-            acc1 = _mm_add_ps(acc1, _mm_mul_ps(_mm_load1_ps(&coef1[-k-2]), x2));
-            acc2 = _mm_add_ps(acc2, _mm_mul_ps(_mm_load1_ps(&coef2[-k-2]), x2));
-            acc3 = _mm_add_ps(acc3, _mm_mul_ps(_mm_load1_ps(&coef3[-k-2]), x2));
-
-            __m128 x3 = _mm_loadu_ps(&ps[k+3]);
-            acc0 = _mm_add_ps(acc0, _mm_mul_ps(_mm_load1_ps(&coef0[-k-3]), x3));
-            acc1 = _mm_add_ps(acc1, _mm_mul_ps(_mm_load1_ps(&coef1[-k-3]), x3));
-            acc2 = _mm_add_ps(acc2, _mm_mul_ps(_mm_load1_ps(&coef2[-k-3]), x3));
-            acc3 = _mm_add_ps(acc3, _mm_mul_ps(_mm_load1_ps(&coef3[-k-3]), x3));
+            __m128 x3 = _mm_loadu_ps(&ps[k + 3]);
+            acc0 = _mm_add_ps(acc0, _mm_mul_ps(_mm_load1_ps(&coef0[-k - 3]), x3));
+            acc1 = _mm_add_ps(acc1, _mm_mul_ps(_mm_load1_ps(&coef1[-k - 3]), x3));
+            acc2 = _mm_add_ps(acc2, _mm_mul_ps(_mm_load1_ps(&coef2[-k - 3]), x3));
+            acc3 = _mm_add_ps(acc3, _mm_mul_ps(_mm_load1_ps(&coef3[-k - 3]), x3));
         }
 
         _mm_storeu_ps(&dst0[i], acc0);
@@ -278,11 +278,9 @@ static void FIR_1x4_SSE(float* src, float* dst0, float* dst1, float* dst2, float
 
 // 4 channel planar to interleaved
 static void interleave_4x4_SSE(float* src0, float* src1, float* src2, float* src3, float* dst, int numFrames) {
-
     assert(numFrames % 4 == 0);
 
     for (int i = 0; i < numFrames; i += 4) {
-
         __m128 x0 = _mm_loadu_ps(&src0[i]);
         __m128 x1 = _mm_loadu_ps(&src1[i]);
         __m128 x2 = _mm_loadu_ps(&src2[i]);
@@ -299,17 +297,16 @@ static void interleave_4x4_SSE(float* src0, float* src1, float* src2, float* src
         x2 = _mm_movelh_ps(t1, t3);
         x3 = _mm_movehl_ps(t3, t1);
 
-        _mm_storeu_ps(&dst[4*i+0], x0);
-        _mm_storeu_ps(&dst[4*i+4], x1);
-        _mm_storeu_ps(&dst[4*i+8], x2);
-        _mm_storeu_ps(&dst[4*i+12], x3);
+        _mm_storeu_ps(&dst[4 * i + 0], x0);
+        _mm_storeu_ps(&dst[4 * i + 4], x1);
+        _mm_storeu_ps(&dst[4 * i + 8], x2);
+        _mm_storeu_ps(&dst[4 * i + 12], x3);
     }
 }
 
 // process 2 cascaded biquads on 4 channels (interleaved)
 // biquads computed in parallel, by adding one sample of delay
 static void biquad2_4x4_SSE(float* src, float* dst, float coef[5][8], float state[3][8], int numFrames) {
-
     // enable flush-to-zero mode to prevent denormals
     unsigned int ftz = _MM_GET_FLUSH_ZERO_MODE();
     _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
@@ -338,9 +335,8 @@ static void biquad2_4x4_SSE(float* src, float* dst, float coef[5][8], float stat
     __m128 a21 = _mm_loadu_ps(&coef[4][4]);
 
     for (int i = 0; i < numFrames; i++) {
-
-        __m128 x00 = _mm_loadu_ps(&src[4*i]);
-        __m128 x01 = y00;   // first biquad output
+        __m128 x00 = _mm_loadu_ps(&src[4 * i]);
+        __m128 x01 = y00; // first biquad output
 
         // transposed Direct Form II
         y00 = _mm_add_ps(w10, _mm_mul_ps(x00, b00));
@@ -358,7 +354,7 @@ static void biquad2_4x4_SSE(float* src, float* dst, float coef[5][8], float stat
         w20 = _mm_sub_ps(w20, _mm_mul_ps(y00, a20));
         w21 = _mm_sub_ps(w21, _mm_mul_ps(y01, a21));
 
-        _mm_storeu_ps(&dst[4*i], y01);  // second biquad output
+        _mm_storeu_ps(&dst[4 * i], y01); // second biquad output
     }
 
     // save state
@@ -374,20 +370,18 @@ static void biquad2_4x4_SSE(float* src, float* dst, float coef[5][8], float stat
 
 // crossfade 4 inputs into 2 outputs with accumulation (interleaved)
 static void crossfade_4x2_SSE(float* src, float* dst, const float* win, int numFrames) {
-
     assert(numFrames % 4 == 0);
 
     for (int i = 0; i < numFrames; i += 4) {
-
         __m128 f0 = _mm_loadu_ps(&win[i]);
 
-        __m128 x0 = _mm_loadu_ps(&src[4*i+0]);
-        __m128 x1 = _mm_loadu_ps(&src[4*i+4]);
-        __m128 x2 = _mm_loadu_ps(&src[4*i+8]);
-        __m128 x3 = _mm_loadu_ps(&src[4*i+12]);
+        __m128 x0 = _mm_loadu_ps(&src[4 * i + 0]);
+        __m128 x1 = _mm_loadu_ps(&src[4 * i + 4]);
+        __m128 x2 = _mm_loadu_ps(&src[4 * i + 8]);
+        __m128 x3 = _mm_loadu_ps(&src[4 * i + 12]);
 
-        __m128 y0 = _mm_loadu_ps(&dst[2*i+0]);
-        __m128 y1 = _mm_loadu_ps(&dst[2*i+4]);
+        __m128 y0 = _mm_loadu_ps(&dst[2 * i + 0]);
+        __m128 y1 = _mm_loadu_ps(&dst[2 * i + 4]);
 
         // deinterleave (4x4 matrix transpose)
         __m128 t0 = _mm_unpacklo_ps(x0, x1);
@@ -414,21 +408,19 @@ static void crossfade_4x2_SSE(float* src, float* dst, const float* win, int numF
         y0 = _mm_add_ps(y0, x0);
         y1 = _mm_add_ps(y1, x1);
 
-        _mm_storeu_ps(&dst[2*i+0], y0);
-        _mm_storeu_ps(&dst[2*i+4], y1);
+        _mm_storeu_ps(&dst[2 * i + 0], y0);
+        _mm_storeu_ps(&dst[2 * i + 4], y1);
     }
 }
 
 // linear interpolation with gain
 static void interpolate_SSE(const float* src0, const float* src1, float* dst, float frac, float gain) {
-
     __m128 f0 = _mm_set1_ps(gain * (1.0f - frac));
     __m128 f1 = _mm_set1_ps(gain * frac);
 
     static_assert(HRTF_TAPS % 4 == 0, "HRTF_TAPS must be a multiple of 4");
 
     for (int k = 0; k < HRTF_TAPS; k += 4) {
-
         __m128 x0 = _mm_loadu_ps(&src0[k]);
         __m128 x1 = _mm_loadu_ps(&src1[k]);
 
@@ -476,12 +468,11 @@ static void interpolate(const float* src0, const float* src1, float* dst, float 
     (*f)(src0, src1, dst, frac, gain); // dispatch
 }
 
-#else   // portable reference code
+#else // portable reference code
 
 // 1 channel input, 4 channel output
 static void FIR_1x4(float* src, float* dst0, float* dst1, float* dst2, float* dst3, float coef[4][HRTF_TAPS], int numFrames) {
-
-    float* coef0 = coef[0] + HRTF_TAPS - 1;     // process backwards
+    float* coef0 = coef[0] + HRTF_TAPS - 1; // process backwards
     float* coef1 = coef[1] + HRTF_TAPS - 1;
     float* coef2 = coef[2] + HRTF_TAPS - 1;
     float* coef3 = coef[3] + HRTF_TAPS - 1;
@@ -489,76 +480,87 @@ static void FIR_1x4(float* src, float* dst0, float* dst1, float* dst2, float* ds
     assert(numFrames % 4 == 0);
 
     for (int i = 0; i < numFrames; i += 4) {
+        dst0[i + 0] = 0.0f;
+        dst0[i + 1] = 0.0f;
+        dst0[i + 2] = 0.0f;
+        dst0[i + 3] = 0.0f;
 
-        dst0[i+0] = 0.0f;
-        dst0[i+1] = 0.0f;
-        dst0[i+2] = 0.0f;
-        dst0[i+3] = 0.0f;
+        dst1[i + 0] = 0.0f;
+        dst1[i + 1] = 0.0f;
+        dst1[i + 2] = 0.0f;
+        dst1[i + 3] = 0.0f;
 
-        dst1[i+0] = 0.0f;
-        dst1[i+1] = 0.0f;
-        dst1[i+2] = 0.0f;
-        dst1[i+3] = 0.0f;
+        dst2[i + 0] = 0.0f;
+        dst2[i + 1] = 0.0f;
+        dst2[i + 2] = 0.0f;
+        dst2[i + 3] = 0.0f;
 
-        dst2[i+0] = 0.0f;
-        dst2[i+1] = 0.0f;
-        dst2[i+2] = 0.0f;
-        dst2[i+3] = 0.0f;
+        dst3[i + 0] = 0.0f;
+        dst3[i + 1] = 0.0f;
+        dst3[i + 2] = 0.0f;
+        dst3[i + 3] = 0.0f;
 
-        dst3[i+0] = 0.0f;
-        dst3[i+1] = 0.0f;
-        dst3[i+2] = 0.0f;
-        dst3[i+3] = 0.0f;
-
-        float* ps = &src[i - HRTF_TAPS + 1];    // process forwards
+        float* ps = &src[i - HRTF_TAPS + 1]; // process forwards
 
         static_assert(HRTF_TAPS % 4 == 0, "HRTF_TAPS must be a multiple of 4");
 
         for (int k = 0; k < HRTF_TAPS; k += 4) {
-
             // channel 0
-            dst0[i+0] += coef0[-k-0] * ps[k+0] + coef0[-k-1] * ps[k+1] + coef0[-k-2] * ps[k+2] + coef0[-k-3] * ps[k+3];
-            dst0[i+1] += coef0[-k-0] * ps[k+1] + coef0[-k-1] * ps[k+2] + coef0[-k-2] * ps[k+3] + coef0[-k-3] * ps[k+4];
-            dst0[i+2] += coef0[-k-0] * ps[k+2] + coef0[-k-1] * ps[k+3] + coef0[-k-2] * ps[k+4] + coef0[-k-3] * ps[k+5];
-            dst0[i+3] += coef0[-k-0] * ps[k+3] + coef0[-k-1] * ps[k+4] + coef0[-k-2] * ps[k+5] + coef0[-k-3] * ps[k+6];
+            dst0[i + 0] += coef0[-k - 0] * ps[k + 0] + coef0[-k - 1] * ps[k + 1] + coef0[-k - 2] * ps[k + 2] +
+                           coef0[-k - 3] * ps[k + 3];
+            dst0[i + 1] += coef0[-k - 0] * ps[k + 1] + coef0[-k - 1] * ps[k + 2] + coef0[-k - 2] * ps[k + 3] +
+                           coef0[-k - 3] * ps[k + 4];
+            dst0[i + 2] += coef0[-k - 0] * ps[k + 2] + coef0[-k - 1] * ps[k + 3] + coef0[-k - 2] * ps[k + 4] +
+                           coef0[-k - 3] * ps[k + 5];
+            dst0[i + 3] += coef0[-k - 0] * ps[k + 3] + coef0[-k - 1] * ps[k + 4] + coef0[-k - 2] * ps[k + 5] +
+                           coef0[-k - 3] * ps[k + 6];
 
             // channel 1
-            dst1[i+0] += coef1[-k-0] * ps[k+0] + coef1[-k-1] * ps[k+1] + coef1[-k-2] * ps[k+2] + coef1[-k-3] * ps[k+3];
-            dst1[i+1] += coef1[-k-0] * ps[k+1] + coef1[-k-1] * ps[k+2] + coef1[-k-2] * ps[k+3] + coef1[-k-3] * ps[k+4];
-            dst1[i+2] += coef1[-k-0] * ps[k+2] + coef1[-k-1] * ps[k+3] + coef1[-k-2] * ps[k+4] + coef1[-k-3] * ps[k+5];
-            dst1[i+3] += coef1[-k-0] * ps[k+3] + coef1[-k-1] * ps[k+4] + coef1[-k-2] * ps[k+5] + coef1[-k-3] * ps[k+6];
+            dst1[i + 0] += coef1[-k - 0] * ps[k + 0] + coef1[-k - 1] * ps[k + 1] + coef1[-k - 2] * ps[k + 2] +
+                           coef1[-k - 3] * ps[k + 3];
+            dst1[i + 1] += coef1[-k - 0] * ps[k + 1] + coef1[-k - 1] * ps[k + 2] + coef1[-k - 2] * ps[k + 3] +
+                           coef1[-k - 3] * ps[k + 4];
+            dst1[i + 2] += coef1[-k - 0] * ps[k + 2] + coef1[-k - 1] * ps[k + 3] + coef1[-k - 2] * ps[k + 4] +
+                           coef1[-k - 3] * ps[k + 5];
+            dst1[i + 3] += coef1[-k - 0] * ps[k + 3] + coef1[-k - 1] * ps[k + 4] + coef1[-k - 2] * ps[k + 5] +
+                           coef1[-k - 3] * ps[k + 6];
 
             // channel 2
-            dst2[i+0] += coef2[-k-0] * ps[k+0] + coef2[-k-1] * ps[k+1] + coef2[-k-2] * ps[k+2] + coef2[-k-3] * ps[k+3];
-            dst2[i+1] += coef2[-k-0] * ps[k+1] + coef2[-k-1] * ps[k+2] + coef2[-k-2] * ps[k+3] + coef2[-k-3] * ps[k+4];
-            dst2[i+2] += coef2[-k-0] * ps[k+2] + coef2[-k-1] * ps[k+3] + coef2[-k-2] * ps[k+4] + coef2[-k-3] * ps[k+5];
-            dst2[i+3] += coef2[-k-0] * ps[k+3] + coef2[-k-1] * ps[k+4] + coef2[-k-2] * ps[k+5] + coef2[-k-3] * ps[k+6];
+            dst2[i + 0] += coef2[-k - 0] * ps[k + 0] + coef2[-k - 1] * ps[k + 1] + coef2[-k - 2] * ps[k + 2] +
+                           coef2[-k - 3] * ps[k + 3];
+            dst2[i + 1] += coef2[-k - 0] * ps[k + 1] + coef2[-k - 1] * ps[k + 2] + coef2[-k - 2] * ps[k + 3] +
+                           coef2[-k - 3] * ps[k + 4];
+            dst2[i + 2] += coef2[-k - 0] * ps[k + 2] + coef2[-k - 1] * ps[k + 3] + coef2[-k - 2] * ps[k + 4] +
+                           coef2[-k - 3] * ps[k + 5];
+            dst2[i + 3] += coef2[-k - 0] * ps[k + 3] + coef2[-k - 1] * ps[k + 4] + coef2[-k - 2] * ps[k + 5] +
+                           coef2[-k - 3] * ps[k + 6];
 
             // channel 3
-            dst3[i+0] += coef3[-k-0] * ps[k+0] + coef3[-k-1] * ps[k+1] + coef3[-k-2] * ps[k+2] + coef3[-k-3] * ps[k+3];
-            dst3[i+1] += coef3[-k-0] * ps[k+1] + coef3[-k-1] * ps[k+2] + coef3[-k-2] * ps[k+3] + coef3[-k-3] * ps[k+4];
-            dst3[i+2] += coef3[-k-0] * ps[k+2] + coef3[-k-1] * ps[k+3] + coef3[-k-2] * ps[k+4] + coef3[-k-3] * ps[k+5];
-            dst3[i+3] += coef3[-k-0] * ps[k+3] + coef3[-k-1] * ps[k+4] + coef3[-k-2] * ps[k+5] + coef3[-k-3] * ps[k+6];
+            dst3[i + 0] += coef3[-k - 0] * ps[k + 0] + coef3[-k - 1] * ps[k + 1] + coef3[-k - 2] * ps[k + 2] +
+                           coef3[-k - 3] * ps[k + 3];
+            dst3[i + 1] += coef3[-k - 0] * ps[k + 1] + coef3[-k - 1] * ps[k + 2] + coef3[-k - 2] * ps[k + 3] +
+                           coef3[-k - 3] * ps[k + 4];
+            dst3[i + 2] += coef3[-k - 0] * ps[k + 2] + coef3[-k - 1] * ps[k + 3] + coef3[-k - 2] * ps[k + 4] +
+                           coef3[-k - 3] * ps[k + 5];
+            dst3[i + 3] += coef3[-k - 0] * ps[k + 3] + coef3[-k - 1] * ps[k + 4] + coef3[-k - 2] * ps[k + 5] +
+                           coef3[-k - 3] * ps[k + 6];
         }
     }
 }
 
 // 4 channel planar to interleaved
 static void interleave_4x4(float* src0, float* src1, float* src2, float* src3, float* dst, int numFrames) {
-
     for (int i = 0; i < numFrames; i++) {
-
-        dst[4*i+0] = src0[i];
-        dst[4*i+1] = src1[i];
-        dst[4*i+2] = src2[i];
-        dst[4*i+3] = src3[i];
+        dst[4 * i + 0] = src0[i];
+        dst[4 * i + 1] = src1[i];
+        dst[4 * i + 2] = src2[i];
+        dst[4 * i + 3] = src3[i];
     }
 }
 
 // process 2 cascaded biquads on 4 channels (interleaved)
 // biquads are computed in parallel, by adding one sample of delay
 static void biquad2_4x4(float* src, float* dst, float coef[5][8], float state[3][8], int numFrames) {
-
     // restore state
     float y00 = state[0][0];
     float w10 = state[1][0];
@@ -643,12 +645,11 @@ static void biquad2_4x4(float* src, float* dst, float coef[5][8], float state[3]
     float a27 = coef[4][7];
 
     for (int i = 0; i < numFrames; i++) {
-
         // first biquad input
-        float x00 = src[4*i+0] + 1.0e-20f;    // prevent denormals
-        float x01 = src[4*i+1] + 1.0e-20f;
-        float x02 = src[4*i+2] + 1.0e-20f;
-        float x03 = src[4*i+3] + 1.0e-20f;
+        float x00 = src[4 * i + 0] + 1.0e-20f; // prevent denormals
+        float x01 = src[4 * i + 1] + 1.0e-20f;
+        float x02 = src[4 * i + 2] + 1.0e-20f;
+        float x03 = src[4 * i + 3] + 1.0e-20f;
         // second biquad input is previous output
         float x04 = y00;
         float x05 = y01;
@@ -689,10 +690,10 @@ static void biquad2_4x4(float* src, float* dst, float coef[5][8], float state[3]
         w17 = b17 * x07 - a17 * y07 + w27;
         w27 = b27 * x07 - a27 * y07;
 
-        dst[4*i+0] = y04;   // second biquad output
-        dst[4*i+1] = y05;
-        dst[4*i+2] = y06;
-        dst[4*i+3] = y07;
+        dst[4 * i + 0] = y04; // second biquad output
+        dst[4 * i + 1] = y05;
+        dst[4 * i + 2] = y06;
+        dst[4 * i + 3] = y07;
     }
 
     // save state
@@ -727,19 +728,16 @@ static void biquad2_4x4(float* src, float* dst, float coef[5][8], float state[3]
 
 // crossfade 4 inputs into 2 outputs with accumulation (interleaved)
 static void crossfade_4x2(float* src, float* dst, const float* win, int numFrames) {
-
     for (int i = 0; i < numFrames; i++) {
-
         float frac = win[i];
 
-        dst[2*i+0] += src[4*i+2] + frac * (src[4*i+0] - src[4*i+2]);
-        dst[2*i+1] += src[4*i+3] + frac * (src[4*i+1] - src[4*i+3]);
+        dst[2 * i + 0] += src[4 * i + 2] + frac * (src[4 * i + 0] - src[4 * i + 2]);
+        dst[2 * i + 1] += src[4 * i + 3] + frac * (src[4 * i + 1] - src[4 * i + 3]);
     }
 }
 
 // linear interpolation with gain
 static void interpolate(const float* src0, const float* src1, float* dst, float frac, float gain) {
-
     float f0 = gain * (1.0f - frac);
     float f1 = gain * frac;
 
@@ -752,7 +750,6 @@ static void interpolate(const float* src0, const float* src1, float* dst, float 
 
 // design a 2nd order Thiran allpass
 static void ThiranBiquad(float f, float& b0, float& b1, float& b2, float& a1, float& a2) {
-
     a1 = -2.0f * (f - 2.0f) / (f + 1.0f);
     a2 = ((f - 1.0f) * (f - 2.0f)) / ((f + 1.0f) * (f + 2.0f));
     b0 = a2;
@@ -762,20 +759,21 @@ static void ThiranBiquad(float f, float& b0, float& b1, float& b2, float& a1, fl
 
 // split x into exponent and fraction (0.0f to 1.0f)
 static void splitf(float x, int& expn, float& frac) {
-
-    union { float f; int i; } mant, bits = { x };
+    union {
+        float f;
+        int i;
+    } mant, bits = { x };
     const int IEEE754_MANT_BITS = 23;
     const int IEEE754_EXPN_BIAS = 127;
 
     mant.i = bits.i & ((1 << IEEE754_MANT_BITS) - 1);
     mant.i |= (IEEE754_EXPN_BIAS << IEEE754_MANT_BITS);
-    
+
     frac = mant.f - 1.0f;
     expn = (bits.i >> IEEE754_MANT_BITS) - IEEE754_EXPN_BIAS;
 }
 
 static void distanceBiquad(float distance, float& b0, float& b1, float& b2, float& a1, float& a2) {
-
     //
     // Computed from a lookup table quantized to distance = 2^(N/4)
     // and reconstructed by piecewise linear interpolation.
@@ -783,7 +781,7 @@ static void distanceBiquad(float distance, float& b0, float& b1, float& b2, floa
     //
 
     float x = distance;
-    x = MIN(x, 1<<30);
+    x = MIN(x, 1 << 30);
     x *= x;
     x *= x; // x = distance^4
 
@@ -796,22 +794,22 @@ static void distanceBiquad(float distance, float& b0, float& b1, float& b2, floa
     if (e < 0) {
         e = 0;
         frac = 0.0f;
-    } 
-    if (e > NLOWPASS-2) {
-        e = NLOWPASS-2;
+    }
+    if (e > NLOWPASS - 2) {
+        e = NLOWPASS - 2;
         frac = 1.0f;
     }
     assert(frac >= 0.0f);
     assert(frac <= 1.0f);
-    assert(e+0 >= 0);
-    assert(e+1 < NLOWPASS);
+    assert(e + 0 >= 0);
+    assert(e + 1 < NLOWPASS);
 
     // piecewise linear interpolation
-    b0 = lowpassTable[e+0][0] + frac * (lowpassTable[e+1][0] - lowpassTable[e+0][0]);
-    b1 = lowpassTable[e+0][1] + frac * (lowpassTable[e+1][1] - lowpassTable[e+0][1]);
-    b2 = lowpassTable[e+0][2] + frac * (lowpassTable[e+1][2] - lowpassTable[e+0][2]);
-    a1 = lowpassTable[e+0][3] + frac * (lowpassTable[e+1][3] - lowpassTable[e+0][3]);
-    a2 = lowpassTable[e+0][4] + frac * (lowpassTable[e+1][4] - lowpassTable[e+0][4]);
+    b0 = lowpassTable[e + 0][0] + frac * (lowpassTable[e + 1][0] - lowpassTable[e + 0][0]);
+    b1 = lowpassTable[e + 0][1] + frac * (lowpassTable[e + 1][1] - lowpassTable[e + 0][1]);
+    b2 = lowpassTable[e + 0][2] + frac * (lowpassTable[e + 1][2] - lowpassTable[e + 0][2]);
+    a1 = lowpassTable[e + 0][3] + frac * (lowpassTable[e + 1][3] - lowpassTable[e + 0][3]);
+    a2 = lowpassTable[e + 0][4] + frac * (lowpassTable[e + 1][4] - lowpassTable[e + 0][4]);
 }
 
 //
@@ -819,7 +817,6 @@ static void distanceBiquad(float distance, float& b0, float& b1, float& b2, floa
 // D. Brungart, "Auditory parallax effects in the HRTF for nearby sources," IEEE WASPAA (1999).
 //
 static void nearFieldAzimuthCorrection(float azimuth, float distance, float& azimuthL, float& azimuthR) {
-
 #ifdef HRTF_AZIMUTH_EXACT
     float dx = distance * cosf(azimuth);
     float dy = distance * sinf(azimuth);
@@ -834,11 +831,11 @@ static void nearFieldAzimuthCorrection(float azimuth, float distance, float& azi
     float fy = (HRTF_AZIMUTH_REF - distance) / distance;
 
     float x0 = +azimuth;
-    float x1 = -azimuth;    // compute using symmetry
+    float x1 = -azimuth; // compute using symmetry
 
-    const float RAD_TO_INDEX = 1.2732394f;  // 8/(2*pi), rounded down
+    const float RAD_TO_INDEX = 1.2732394f; // 8/(2*pi), rounded down
     int k0 = (int)(RAD_TO_INDEX * x0 + 4.0f);
-    int k1 = (NAZIMUTH-1) - k0;
+    int k1 = (NAZIMUTH - 1) - k0;
     assert(k0 >= 0);
     assert(k1 >= 0);
     assert(k0 < NAZIMUTH);
@@ -859,11 +856,10 @@ static void nearFieldAzimuthCorrection(float azimuth, float distance, float& azi
 // Approximate the near-field DC gain correction at each ear.
 //
 static void nearFieldGainCorrection(float azimuth, float distance, float& gainL, float& gainR) {
-
     // normalized distance factor = [0,1] as distance = [HRTF_NEARFIELD_MAX,HRTF_HEAD_RADIUS]
     assert(distance < HRTF_NEARFIELD_MAX);
     assert(distance > HRTF_HEAD_RADIUS);
-	float d = (HRTF_NEARFIELD_MAX - distance) * (1.0f / (HRTF_NEARFIELD_MAX - HRTF_HEAD_RADIUS));
+    float d = (HRTF_NEARFIELD_MAX - distance) * (1.0f / (HRTF_NEARFIELD_MAX - HRTF_HEAD_RADIUS));
 
     // angle of incidence at each ear
     float angleL = azimuth + HALFPI;
@@ -896,7 +892,6 @@ static void nearFieldGainCorrection(float azimuth, float distance, float& gainL,
 // A. Kan, "Distance Variation Function for simulation of near-field virtual auditory space," IEEE ICASSP (2006)
 //
 static void nearFieldFilter(float gain, float& b0, float& b1, float& a1) {
-
     //
     // Computed from a lookup table quantized to gain = 2^(-N)
     // and reconstructed by piecewise linear interpolation.
@@ -908,28 +903,27 @@ static void nearFieldFilter(float gain, float& b0, float& b1, float& a1) {
     splitf(gain, e, frac);
 
     // clamp to table limits
-    e += NNEARFIELD-1;
+    e += NNEARFIELD - 1;
     if (e < 0) {
         e = 0;
         frac = 0.0f;
-    } 
-    if (e > NNEARFIELD-2) {
-        e = NNEARFIELD-2;
+    }
+    if (e > NNEARFIELD - 2) {
+        e = NNEARFIELD - 2;
         frac = 1.0f;
     }
     assert(frac >= 0.0f);
     assert(frac <= 1.0f);
-    assert(e+0 >= 0);
-    assert(e+1 < NNEARFIELD);
+    assert(e + 0 >= 0);
+    assert(e + 1 < NNEARFIELD);
 
     // piecewise linear interpolation
-    b0 = nearFieldTable[e+0][0] + frac * (nearFieldTable[e+1][0] - nearFieldTable[e+0][0]);
-    b1 = nearFieldTable[e+0][1] + frac * (nearFieldTable[e+1][1] - nearFieldTable[e+0][1]);
-    a1 = nearFieldTable[e+0][2] + frac * (nearFieldTable[e+1][2] - nearFieldTable[e+0][2]);
+    b0 = nearFieldTable[e + 0][0] + frac * (nearFieldTable[e + 1][0] - nearFieldTable[e + 0][0]);
+    b1 = nearFieldTable[e + 0][1] + frac * (nearFieldTable[e + 1][1] - nearFieldTable[e + 0][1]);
+    a1 = nearFieldTable[e + 0][2] + frac * (nearFieldTable[e + 1][2] - nearFieldTable[e + 0][2]);
 }
 
 static void azimuthToIndex(float azimuth, int& index0, int& index1, float& frac) {
-
     // convert from radians to table units
     azimuth *= (HRTF_AZIMUTHS / TWOPI);
 
@@ -955,9 +949,8 @@ static void azimuthToIndex(float azimuth, int& index0, int& index1, float& frac)
 }
 
 // compute new filters for a given azimuth, distance and gain
-static void setFilters(float firCoef[4][HRTF_TAPS], float bqCoef[5][8], int delay[4], 
-                       int index, float azimuth, float distance, float gain, int channel) {
-
+static void setFilters(float firCoef[4][HRTF_TAPS], float bqCoef[5][8], int delay[4], int index, float azimuth, float distance,
+                       float gain, int channel) {
     if (azimuth > PI) {
         azimuth -= TWOPI;
     }
@@ -990,8 +983,8 @@ static void setFilters(float firCoef[4][HRTF_TAPS], float bqCoef[5][8], int dela
     azimuthToIndex(azimuth, az0, az1, frac);
 
     // interpolate FIR
-    interpolate(ir_table_table[index][azL0][0], ir_table_table[index][azL1][0], firCoef[channel+0], fracL, gain * gainL);
-    interpolate(ir_table_table[index][azR0][1], ir_table_table[index][azR1][1], firCoef[channel+1], fracR, gain * gainR);
+    interpolate(ir_table_table[index][azL0][0], ir_table_table[index][azL1][0], firCoef[channel + 0], fracL, gain * gainL);
+    interpolate(ir_table_table[index][azR0][1], ir_table_table[index][azR1][1], firCoef[channel + 1], fracR, gain * gainR);
 
     // interpolate ITD
     float itd = (1.0f - frac) * itd_table_table[index][az0] + frac * itd_table_table[index][az1];
@@ -1013,93 +1006,88 @@ static void setFilters(float firCoef[4][HRTF_TAPS], float bqCoef[5][8], int dela
 
     // positive ITD means left channel is delayed
     if (itd >= 0.0f) {
-
         // left (contralateral) = 2 + itdi + itdf
-        bqCoef[0][channel+0] = b0;
-        bqCoef[1][channel+0] = b1;
-        bqCoef[2][channel+0] = b2;
-        bqCoef[3][channel+0] = a1;
-        bqCoef[4][channel+0] = a2;
-        delay[channel+0] = itdi;
+        bqCoef[0][channel + 0] = b0;
+        bqCoef[1][channel + 0] = b1;
+        bqCoef[2][channel + 0] = b2;
+        bqCoef[3][channel + 0] = a1;
+        bqCoef[4][channel + 0] = a2;
+        delay[channel + 0] = itdi;
 
         // right (ipsilateral) = 2
-        bqCoef[0][channel+1] = 0.0f;
-        bqCoef[1][channel+1] = 0.0f;
-        bqCoef[2][channel+1] = 1.0f;
-        bqCoef[3][channel+1] = 0.0f;
-        bqCoef[4][channel+1] = 0.0f;
-        delay[channel+1] = 0;
+        bqCoef[0][channel + 1] = 0.0f;
+        bqCoef[1][channel + 1] = 0.0f;
+        bqCoef[2][channel + 1] = 1.0f;
+        bqCoef[3][channel + 1] = 0.0f;
+        bqCoef[4][channel + 1] = 0.0f;
+        delay[channel + 1] = 0;
 
     } else {
-
         // left (ipsilateral) = 2
-        bqCoef[0][channel+0] = 0.0f;
-        bqCoef[1][channel+0] = 0.0f;
-        bqCoef[2][channel+0] = 1.0f;
-        bqCoef[3][channel+0] = 0.0f;
-        bqCoef[4][channel+0] = 0.0f;
-        delay[channel+0] = 0;
+        bqCoef[0][channel + 0] = 0.0f;
+        bqCoef[1][channel + 0] = 0.0f;
+        bqCoef[2][channel + 0] = 1.0f;
+        bqCoef[3][channel + 0] = 0.0f;
+        bqCoef[4][channel + 0] = 0.0f;
+        delay[channel + 0] = 0;
 
         // right (contralateral) = 2 + itdi + itdf
-        bqCoef[0][channel+1] = b0;
-        bqCoef[1][channel+1] = b1;
-        bqCoef[2][channel+1] = b2;
-        bqCoef[3][channel+1] = a1;
-        bqCoef[4][channel+1] = a2;
-        delay[channel+1] = itdi;
+        bqCoef[0][channel + 1] = b0;
+        bqCoef[1][channel + 1] = b1;
+        bqCoef[2][channel + 1] = b2;
+        bqCoef[3][channel + 1] = a1;
+        bqCoef[4][channel + 1] = a2;
+        delay[channel + 1] = itdi;
     }
 
     //
     // Second biquad implements the near-field or distance filter.
     //
     if (distance < HRTF_NEARFIELD_MAX) {
-
         nearFieldFilter(gainL, b0, b1, a1);
 
-        bqCoef[0][channel+4] = b0;
-        bqCoef[1][channel+4] = b1;
-        bqCoef[2][channel+4] = 0.0f;
-        bqCoef[3][channel+4] = a1;
-        bqCoef[4][channel+4] = 0.0f;
+        bqCoef[0][channel + 4] = b0;
+        bqCoef[1][channel + 4] = b1;
+        bqCoef[2][channel + 4] = 0.0f;
+        bqCoef[3][channel + 4] = a1;
+        bqCoef[4][channel + 4] = 0.0f;
 
         nearFieldFilter(gainR, b0, b1, a1);
 
-        bqCoef[0][channel+5] = b0;
-        bqCoef[1][channel+5] = b1;
-        bqCoef[2][channel+5] = 0.0f;
-        bqCoef[3][channel+5] = a1;
-        bqCoef[4][channel+5] = 0.0f;
+        bqCoef[0][channel + 5] = b0;
+        bqCoef[1][channel + 5] = b1;
+        bqCoef[2][channel + 5] = 0.0f;
+        bqCoef[3][channel + 5] = a1;
+        bqCoef[4][channel + 5] = 0.0f;
 
     } else {
-
         distanceBiquad(distance, b0, b1, b2, a1, a2);
 
-        bqCoef[0][channel+4] = b0;
-        bqCoef[1][channel+4] = b1;
-        bqCoef[2][channel+4] = b2;
-        bqCoef[3][channel+4] = a1;
-        bqCoef[4][channel+4] = a2;
+        bqCoef[0][channel + 4] = b0;
+        bqCoef[1][channel + 4] = b1;
+        bqCoef[2][channel + 4] = b2;
+        bqCoef[3][channel + 4] = a1;
+        bqCoef[4][channel + 4] = a2;
 
-        bqCoef[0][channel+5] = b0;
-        bqCoef[1][channel+5] = b1;
-        bqCoef[2][channel+5] = b2;
-        bqCoef[3][channel+5] = a1;
-        bqCoef[4][channel+5] = a2;
+        bqCoef[0][channel + 5] = b0;
+        bqCoef[1][channel + 5] = b1;
+        bqCoef[2][channel + 5] = b2;
+        bqCoef[3][channel + 5] = a1;
+        bqCoef[4][channel + 5] = a2;
     }
 }
 
 void AudioHRTF::render(int16_t* input, float* output, int index, float azimuth, float distance, float gain, int numFrames) {
-
     assert(index >= 0);
     assert(index < HRTF_TABLES);
     assert(numFrames == HRTF_BLOCK);
 
-    ALIGN32 float in[HRTF_TAPS + HRTF_BLOCK];               // mono
-    ALIGN32 float firCoef[4][HRTF_TAPS];                    // 4-channel
-    ALIGN32 float firBuffer[4][HRTF_DELAY + HRTF_BLOCK];    // 4-channel
-    ALIGN32 float bqCoef[5][8];                             // 4-channel (interleaved)
-    ALIGN32 float bqBuffer[4 * HRTF_BLOCK];                 // 4-channel (interleaved)
-    int delay[4];                                           // 4-channel (interleaved)
+    ALIGN32 float in[HRTF_TAPS + HRTF_BLOCK]; // mono
+    ALIGN32 float firCoef[4][HRTF_TAPS]; // 4-channel
+    ALIGN32 float firBuffer[4][HRTF_DELAY + HRTF_BLOCK]; // 4-channel
+    ALIGN32 float bqCoef[5][8]; // 4-channel (interleaved)
+    ALIGN32 float bqBuffer[4 * HRTF_BLOCK]; // 4-channel (interleaved)
+    int delay[4]; // 4-channel (interleaved)
 
     // apply global and local gain adjustment
     gain *= _gainAdjust;
@@ -1117,7 +1105,7 @@ void AudioHRTF::render(int16_t* input, float* output, int index, float azimuth, 
 
     // convert mono input to float
     for (int i = 0; i < HRTF_BLOCK; i++) {
-        in[HRTF_TAPS+i] = (float)input[i] * (1/32768.0f);
+        in[HRTF_TAPS + i] = (float)input[i] * (1 / 32768.0f);
     }
 
     // FIR state update
@@ -1125,12 +1113,8 @@ void AudioHRTF::render(int16_t* input, float* output, int index, float azimuth, 
     memcpy(_firState, &in[HRTF_BLOCK], HRTF_TAPS * sizeof(float));
 
     // process old/new FIR
-    FIR_1x4(&in[HRTF_TAPS], 
-            &firBuffer[L0][HRTF_DELAY], 
-            &firBuffer[R0][HRTF_DELAY], 
-            &firBuffer[L1][HRTF_DELAY], 
-            &firBuffer[R1][HRTF_DELAY], 
-            firCoef, HRTF_BLOCK);
+    FIR_1x4(&in[HRTF_TAPS], &firBuffer[L0][HRTF_DELAY], &firBuffer[R0][HRTF_DELAY], &firBuffer[L1][HRTF_DELAY],
+            &firBuffer[R1][HRTF_DELAY], firCoef, HRTF_BLOCK);
 
     // delay state update
     memcpy(firBuffer[L0], _delayState[L0], HRTF_DELAY * sizeof(float));
@@ -1138,17 +1122,14 @@ void AudioHRTF::render(int16_t* input, float* output, int index, float azimuth, 
     memcpy(firBuffer[L1], _delayState[L1], HRTF_DELAY * sizeof(float));
     memcpy(firBuffer[R1], _delayState[R1], HRTF_DELAY * sizeof(float));
 
-    memcpy(_delayState[L0], &firBuffer[L1][HRTF_BLOCK], HRTF_DELAY * sizeof(float));  // new state becomes old
-    memcpy(_delayState[R0], &firBuffer[R1][HRTF_BLOCK], HRTF_DELAY * sizeof(float));  // new state becomes old
+    memcpy(_delayState[L0], &firBuffer[L1][HRTF_BLOCK], HRTF_DELAY * sizeof(float)); // new state becomes old
+    memcpy(_delayState[R0], &firBuffer[R1][HRTF_BLOCK], HRTF_DELAY * sizeof(float)); // new state becomes old
     memcpy(_delayState[L1], &firBuffer[L1][HRTF_BLOCK], HRTF_DELAY * sizeof(float));
     memcpy(_delayState[R1], &firBuffer[R1][HRTF_BLOCK], HRTF_DELAY * sizeof(float));
 
     // interleave with old/new integer delay
-    interleave_4x4(&firBuffer[L0][HRTF_DELAY] - delay[L0],
-                   &firBuffer[R0][HRTF_DELAY] - delay[R0],
-                   &firBuffer[L1][HRTF_DELAY] - delay[L1],
-                   &firBuffer[R1][HRTF_DELAY] - delay[R1],
-                   bqBuffer, HRTF_BLOCK);
+    interleave_4x4(&firBuffer[L0][HRTF_DELAY] - delay[L0], &firBuffer[R0][HRTF_DELAY] - delay[R0],
+                   &firBuffer[L1][HRTF_DELAY] - delay[L1], &firBuffer[R1][HRTF_DELAY] - delay[R1], bqBuffer, HRTF_BLOCK);
 
     // process old/new biquads
     biquad2_4x4(bqBuffer, bqBuffer, bqCoef, _bqState, HRTF_BLOCK);

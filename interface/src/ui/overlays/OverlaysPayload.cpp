@@ -11,23 +11,27 @@
 #include "Overlay.h"
 
 namespace render {
-    template <> const ItemKey payloadGetKey(const Overlay::Pointer& overlay) {
-        return overlay->getKey();
-    }
-    template <> const Item::Bound payloadGetBound(const Overlay::Pointer& overlay) {
-        return overlay->getBounds();
-    }
-    template <> void payloadRender(const Overlay::Pointer& overlay, RenderArgs* args) {
-        if (args) {
-            overlay->render(args);
-        }
-    }
-    template <> const ShapeKey shapeGetShapeKey(const Overlay::Pointer& overlay) {
-        return overlay->getShapeKey();
-    }
-
-    template <> uint32_t metaFetchMetaSubItems(const Overlay::Pointer& overlay, ItemIDs& subItems) {
-        return overlay->fetchMetaSubItems(subItems);
+template<>
+const ItemKey payloadGetKey(const Overlay::Pointer& overlay) {
+    return overlay->getKey();
+}
+template<>
+const Item::Bound payloadGetBound(const Overlay::Pointer& overlay) {
+    return overlay->getBounds();
+}
+template<>
+void payloadRender(const Overlay::Pointer& overlay, RenderArgs* args) {
+    if (args) {
+        overlay->render(args);
     }
 }
+template<>
+const ShapeKey shapeGetShapeKey(const Overlay::Pointer& overlay) {
+    return overlay->getShapeKey();
+}
 
+template<>
+uint32_t metaFetchMetaSubItems(const Overlay::Pointer& overlay, ItemIDs& subItems) {
+    return overlay->fetchMetaSubItems(subItems);
+}
+} // namespace render

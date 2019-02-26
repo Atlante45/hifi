@@ -19,9 +19,7 @@
 
 #include "OvenMainWindow.h"
 
-ResultsWindow::ResultsWindow(QWidget* parent) :
-    QWidget(parent)
-{
+ResultsWindow::ResultsWindow(QWidget* parent) : QWidget(parent) {
     // add a title to this window to identify it
     setWindowTitle("High Fidelity Oven - Bake Results");
 
@@ -41,7 +39,7 @@ void ResultsWindow::setupUI() {
     _resultsTable = new QTableWidget(0, 2, this);
 
     // add the header to the table widget
-    _resultsTable->setHorizontalHeaderLabels({"File", "Status"});
+    _resultsTable->setHorizontalHeaderLabels({ "File", "Status" });
 
     // add that table widget to the vertical box layout, so we can make it stretch to the size of the parent
     resultsLayout->insertWidget(0, _resultsTable);

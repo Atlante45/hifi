@@ -14,9 +14,9 @@
 
 #include <QDebug>
 
+#include <DependencyManager.h>
 #include <SettingHandle.h>
 #include <SettingManager.h>
-#include <DependencyManager.h>
 
 #ifdef Q_OS_WIN
 // clang-format off
@@ -29,7 +29,7 @@
 #include <IOKit/IOBSD.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/storage/IOMedia.h>
-#endif //Q_OS_MAC
+#endif // Q_OS_MAC
 
 static const QString FALLBACK_FINGERPRINT_KEY = "fallbackFingerprint";
 
@@ -38,22 +38,23 @@ QUuid FingerprintUtils::_machineFingerprint { QUuid() };
 QString FingerprintUtils::getMachineFingerprintString() {
     QString uuidString;
 #ifdef Q_OS_LINUX
-    // sadly need to be root to get smbios guid from linux, so 
+    // sadly need to be root to get smbios guid from linux, so
     // for now lets do nothing.
-#endif //Q_OS_LINUX
+#endif // Q_OS_LINUX
 
 #ifdef Q_OS_MAC
     io_registry_entry_t ioRegistryRoot = IORegistryEntryFromPath(kIOMasterPortDefault, "IOService:/");
-    CFStringRef uuidCf = (CFStringRef) IORegistryEntryCreateCFProperty(ioRegistryRoot, CFSTR(kIOPlatformUUIDKey), kCFAllocatorDefault, 0);
+    CFStringRef uuidCf = (CFStringRef)IORegistryEntryCreateCFProperty(ioRegistryRoot, CFSTR(kIOPlatformUUIDKey),
+                                                                      kCFAllocatorDefault, 0);
     IOObjectRelease(ioRegistryRoot);
     uuidString = QString::fromCFString(uuidCf);
-    CFRelease(uuidCf); 
+    CFRelease(uuidCf);
     qCDebug(networking) << "Mac serial number: " << uuidString;
-#endif //Q_OS_MAC
+#endif // Q_OS_MAC
 
 #ifdef Q_OS_WIN
     HKEY cryptoKey;
-    
+
     // try and open the key that contains the machine GUID
     if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Cryptography", 0, KEY_READ, &cryptoKey) == ERROR_SUCCESS) {
         DWORD type;
@@ -68,8 +69,8 @@ QString FingerprintUtils::getMachineFingerprintString() {
                 // retrieve the machine GUID and return that as our UUID string
                 std::string machineGUID(guidSize / sizeof(char), '\0');
 
-                if (RegQueryValueEx(cryptoKey, MACHINE_GUID_KEY, NULL, NULL,
-                                    reinterpret_cast<LPBYTE>(&machineGUID[0]), &guidSize) == ERROR_SUCCESS) {
+                if (RegQueryValueEx(cryptoKey, MACHINE_GUID_KEY, NULL, NULL, reinterpret_cast<LPBYTE>(&machineGUID[0]),
+                                    &guidSize) == ERROR_SUCCESS) {
                     uuidString = QString::fromStdString(machineGUID);
                 }
             }
@@ -78,14 +79,12 @@ QString FingerprintUtils::getMachineFingerprintString() {
         RegCloseKey(cryptoKey);
     }
 
-#endif //Q_OS_WIN
+#endif // Q_OS_WIN
 
     return uuidString;
-
 }
 
 QUuid FingerprintUtils::getMachineFingerprint() {
-
     if (_machineFingerprint.isNull()) {
         QString uuidString = getMachineFingerprintString();
 
@@ -118,4 +117,3 @@ QUuid FingerprintUtils::getMachineFingerprint() {
 
     return _machineFingerprint;
 }
-

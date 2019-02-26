@@ -11,9 +11,7 @@
 
 #include "OvenGUIApplication.h"
 
-OvenGUIApplication::OvenGUIApplication(int argc, char* argv[]) :
-    QApplication(argc, argv)
-{
+OvenGUIApplication::OvenGUIApplication(int argc, char* argv[]) : QApplication(argc, argv) {
     // setup the GUI
     _mainWindow.show();
 }

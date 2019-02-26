@@ -15,11 +15,9 @@
 #include <gpu/Batch.h>
 #include <render/Forward.h>
 
-#include <render/Item.h>
 #include <GeometryCache.h>
+#include <render/Item.h>
 #include "Menu.h"
-
-
 
 class WorldBoxRenderData {
 public:
@@ -29,15 +27,16 @@ public:
     int _val = 0;
     static render::ItemID _item; // unique WorldBoxRenderData
 
-
-
     static void renderWorldBox(RenderArgs* args, gpu::Batch& batch);
 };
 
 namespace render {
-    template <> const ItemKey payloadGetKey(const WorldBoxRenderData::Pointer& stuff);
-    template <> const Item::Bound payloadGetBound(const WorldBoxRenderData::Pointer& stuff);
-    template <> void payloadRender(const WorldBoxRenderData::Pointer& stuff, RenderArgs* args);
-}
+template<>
+const ItemKey payloadGetKey(const WorldBoxRenderData::Pointer& stuff);
+template<>
+const Item::Bound payloadGetBound(const WorldBoxRenderData::Pointer& stuff);
+template<>
+void payloadRender(const WorldBoxRenderData::Pointer& stuff, RenderArgs* args);
+} // namespace render
 
 #endif // hifi_WorldBox_h

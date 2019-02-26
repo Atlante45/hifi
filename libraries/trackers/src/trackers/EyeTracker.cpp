@@ -13,8 +13,8 @@
 
 #include <SharedUtil.h>
 
-#include "Logging.h"
 #include <OctreeConstants.h>
+#include "Logging.h"
 
 #ifdef HAVE_IVIEWHMD
 char* HIGH_FIDELITY_EYE_TRACKER_CALIBRATION = "HighFidelityEyeTrackerCalibration";
@@ -23,7 +23,7 @@ char* HIGH_FIDELITY_EYE_TRACKER_CALIBRATION = "HighFidelityEyeTrackerCalibration
 #ifdef HAVE_IVIEWHMD
 static void CALLBACK eyeTrackerCallback(smi_CallbackDataStruct* data) {
     auto eyeTracker = DependencyManager::get<EyeTracker>();
-    if (eyeTracker) {  // Guard against a few callbacks that continue to be received after smi_quit().
+    if (eyeTracker) { // Guard against a few callbacks that continue to be received after smi_quit().
         eyeTracker->processData(data);
     }
 }
@@ -61,20 +61,20 @@ void EyeTracker::processData(smi_CallbackDataStruct* data) {
         // - z is forwards
 
         // Plane
-        smi_Vec3d point = sample->gazeBasePoint;  // mm
+        smi_Vec3d point = sample->gazeBasePoint; // mm
         smi_Vec3d direction = sample->gazeDirection;
         glm::vec3 planePoint = glm::vec3(-point.x, point.y, -point.z) / 1000.0f;
         glm::vec3 planeNormal = glm::vec3(-direction.z, 0.0f, direction.x);
         glm::vec3 monocularDirection = glm::vec3(-direction.x, direction.y, -direction.z);
 
         // Left eye
-        point = sample->left.gazeBasePoint;  // mm
+        point = sample->left.gazeBasePoint; // mm
         direction = sample->left.gazeDirection;
         glm::vec3 leftLinePoint = glm::vec3(-point.x, point.y, -point.z) / 1000.0f;
         glm::vec3 leftLineDirection = glm::vec3(-direction.x, direction.y, -direction.z);
 
         // Right eye
-        point = sample->right.gazeBasePoint;  // mm
+        point = sample->right.gazeBasePoint; // mm
         direction = sample->right.gazeDirection;
         glm::vec3 rightLinePoint = glm::vec3(-point.x, point.y, -point.z) / 1000.0f;
         glm::vec3 rightLineDirection = glm::vec3(-direction.x, direction.y, -direction.z);
@@ -90,8 +90,8 @@ void EyeTracker::processData(smi_CallbackDataStruct* data) {
         } else {
             float leftDistance = glm::dot(planePoint - leftLinePoint, planeNormal) / leftLinePlaneDotProduct;
             float rightDistance = glm::dot(planePoint - rightLinePoint, planeNormal) / rightLinePlaneDotProduct;
-            if (leftDistance <= 0.0f || rightDistance <= 0.0f 
-                || leftDistance > (float)TREE_SCALE || rightDistance > (float)TREE_SCALE) {
+            if (leftDistance <= 0.0f || rightDistance <= 0.0f || leftDistance > (float)TREE_SCALE ||
+                rightDistance > (float)TREE_SCALE) {
                 lookAtPosition = monocularDirection * (float)TREE_SCALE;
             } else {
                 glm::vec3 leftIntersectionPoint = leftLinePoint + leftDistance * leftLineDirection;
@@ -118,7 +118,7 @@ void EyeTracker::init() {
 
 #ifdef HAVE_IVIEWHMD
 int EyeTracker::startStreaming(bool simulate) {
-    return smi_startStreaming(simulate);  // This call blocks execution.
+    return smi_startStreaming(simulate); // This call blocks execution.
 }
 #endif
 
@@ -142,18 +142,18 @@ void EyeTracker::onStreamStarted() {
     }
 
     if (_isStreaming) {
-       // Automatically load calibration if one has been saved.
-       QString availableCalibrations = QString(smi_getAvailableCalibrations());
-       if (availableCalibrations.contains(HIGH_FIDELITY_EYE_TRACKER_CALIBRATION)) {
-           result = smi_loadCalibration(HIGH_FIDELITY_EYE_TRACKER_CALIBRATION);
-           if (result != SMI_RET_SUCCESS) {
-               qCWarning(interfaceapp) << "Eye Tracker: Error loading calibration:" << smiReturnValueToString(result);
-               OffscreenUi::asyncWarning(nullptr, "Eye Tracker Error", "Error loading calibration"
-                   + smiReturnValueToString(result));
-           } else {
-               qCDebug(interfaceapp) << "Eye Tracker: Loaded calibration";
-           }
-       }
+        // Automatically load calibration if one has been saved.
+        QString availableCalibrations = QString(smi_getAvailableCalibrations());
+        if (availableCalibrations.contains(HIGH_FIDELITY_EYE_TRACKER_CALIBRATION)) {
+            result = smi_loadCalibration(HIGH_FIDELITY_EYE_TRACKER_CALIBRATION);
+            if (result != SMI_RET_SUCCESS) {
+                qCWarning(interfaceapp) << "Eye Tracker: Error loading calibration:" << smiReturnValueToString(result);
+                OffscreenUi::asyncWarning(nullptr, "Eye Tracker Error",
+                                          "Error loading calibration" + smiReturnValueToString(result));
+            } else {
+                qCDebug(interfaceapp) << "Eye Tracker: Loaded calibration";
+            }
+        }
     }
 }
 #endif
@@ -180,7 +180,7 @@ void EyeTracker::setEnabled(bool enabled, bool simulate) {
 #ifdef HAVE_IVIEWHMD
     qCDebug(interfaceapp) << "Eye Tracker: Set enabled =" << enabled << ", simulate =" << simulate;
 
-    // There is no smi_stopStreaming() method and after an smi_quit(), streaming cannot be restarted (at least not for 
+    // There is no smi_stopStreaming() method and after an smi_quit(), streaming cannot be restarted (at least not for
     // simulated data). So keep streaming once started in case tracking is re-enabled after stopping.
 
     // Try to stop streaming if changing whether simulating or not.
@@ -210,13 +210,12 @@ void EyeTracker::reset() {
 }
 
 bool EyeTracker::isTracking() const {
-    static const quint64 ACTIVE_TIMEOUT_USECS = 2000000;  // 2 secs
+    static const quint64 ACTIVE_TIMEOUT_USECS = 2000000; // 2 secs
     return _isEnabled && (usecTimestampNow() - _lastProcessDataTimestamp < ACTIVE_TIMEOUT_USECS);
 }
 
 #ifdef HAVE_IVIEWHMD
 void EyeTracker::calibrate(int points) {
-
     if (!_isStreaming) {
         qCWarning(interfaceapp) << "Eye Tracker: Cannot calibrate because not streaming";
         return;
@@ -251,7 +250,7 @@ void EyeTracker::calibrate(int points) {
     calibrationHMDStruct->foregroundColor->blue = 1.0;
     calibrationHMDStruct->foregroundColor->green = 1.0;
     calibrationHMDStruct->foregroundColor->red = 1.0;
-    
+
     int result = smi_setupCalibration(calibrationHMDStruct);
     if (result != SMI_RET_SUCCESS) {
         qCWarning(interfaceapp) << "Eye Tracker: Error setting up calibration:" << smiReturnValueToString(result);
@@ -263,7 +262,7 @@ void EyeTracker::calibrate(int points) {
         } else {
             result = smi_saveCalibration(HIGH_FIDELITY_EYE_TRACKER_CALIBRATION);
             if (result != SMI_RET_SUCCESS) {
-               qCWarning(interfaceapp) << "Eye Tracker: Error saving calibration:" << smiReturnValueToString(result);
+                qCWarning(interfaceapp) << "Eye Tracker: Error saving calibration:" << smiReturnValueToString(result);
             }
         }
     }
@@ -276,8 +275,7 @@ void EyeTracker::calibrate(int points) {
 
 #ifdef HAVE_IVIEWHMD
 QString EyeTracker::smiReturnValueToString(int value) {
-    switch (value)
-    {
+    switch (value) {
         case smi_ErrorReturnValue::SMI_ERROR_NO_CALLBACK_SET:
             return "No callback set";
         case smi_ErrorReturnValue::SMI_ERROR_CONNECTING_TO_HMD:
@@ -293,9 +291,9 @@ QString EyeTracker::smiReturnValueToString(int value) {
         case smi_ErrorReturnValue::SMI_ERROR_OCULUS_RUNTIME_NOT_SUPPORTED:
             return "Oculus runtime not supported";
         case smi_ErrorReturnValue::SMI_ERROR_FILE_NOT_FOUND:
-           return "File not found";
+            return "File not found";
         case smi_ErrorReturnValue::SMI_ERROR_FILE_EMPTY:
-           return "File empty";
+            return "File empty";
         case smi_ErrorReturnValue::SMI_ERROR_UNKNOWN:
             return "Unknown error";
         default:

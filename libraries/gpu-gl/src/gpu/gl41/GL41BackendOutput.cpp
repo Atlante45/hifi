@@ -15,7 +15,8 @@
 #include <gpu/gl/GLFramebuffer.h>
 #include <gpu/gl/GLTexture.h>
 
-namespace gpu { namespace gl41 { 
+namespace gpu {
+namespace gl41 {
 
 class GL41Framebuffer : public gl::GLFramebuffer {
     using Parent = gl::GLFramebuffer;
@@ -24,6 +25,7 @@ class GL41Framebuffer : public gl::GLFramebuffer {
         glGenFramebuffers(1, &result);
         return result;
     }
+
 public:
     void update() override {
         GLint currentFBO = -1;
@@ -34,23 +36,12 @@ public:
         if (_gpuObject.getColorStamps() != _colorStamps) {
             if (_gpuObject.hasColor()) {
                 _colorBuffers.clear();
-                static const GLenum colorAttachments[] = {
-                    GL_COLOR_ATTACHMENT0,
-                    GL_COLOR_ATTACHMENT1,
-                    GL_COLOR_ATTACHMENT2,
-                    GL_COLOR_ATTACHMENT3,
-                    GL_COLOR_ATTACHMENT4,
-                    GL_COLOR_ATTACHMENT5,
-                    GL_COLOR_ATTACHMENT6,
-                    GL_COLOR_ATTACHMENT7,
-                    GL_COLOR_ATTACHMENT8,
-                    GL_COLOR_ATTACHMENT9,
-                    GL_COLOR_ATTACHMENT10,
-                    GL_COLOR_ATTACHMENT11,
-                    GL_COLOR_ATTACHMENT12,
-                    GL_COLOR_ATTACHMENT13,
-                    GL_COLOR_ATTACHMENT14,
-                    GL_COLOR_ATTACHMENT15 };
+                static const GLenum colorAttachments[] = { GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1,  GL_COLOR_ATTACHMENT2,
+                                                           GL_COLOR_ATTACHMENT3,  GL_COLOR_ATTACHMENT4,  GL_COLOR_ATTACHMENT5,
+                                                           GL_COLOR_ATTACHMENT6,  GL_COLOR_ATTACHMENT7,  GL_COLOR_ATTACHMENT8,
+                                                           GL_COLOR_ATTACHMENT9,  GL_COLOR_ATTACHMENT10, GL_COLOR_ATTACHMENT11,
+                                                           GL_COLOR_ATTACHMENT12, GL_COLOR_ATTACHMENT13, GL_COLOR_ATTACHMENT14,
+                                                           GL_COLOR_ATTACHMENT15 };
 
                 int unit = 0;
                 auto backend = _backend.lock();
@@ -58,16 +49,18 @@ public:
                     surface = b._texture;
                     if (surface) {
                         Q_ASSERT(TextureUsageType::RENDERBUFFER == surface->getUsageType());
-                        gltexture = backend->syncGPUObject(surface); 
+                        gltexture = backend->syncGPUObject(surface);
                     } else {
                         gltexture = nullptr;
                     }
 
                     if (gltexture) {
                         if (gltexture->_target == GL_TEXTURE_2D) {
-                            glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[unit], GL_TEXTURE_2D, gltexture->_texture, 0);
+                            glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[unit], GL_TEXTURE_2D, gltexture->_texture,
+                                                   0);
                         } else if (gltexture->_target == GL_TEXTURE_2D_MULTISAMPLE) {
-                            glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[unit], GL_TEXTURE_2D_MULTISAMPLE, gltexture->_texture, 0);
+                            glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[unit], GL_TEXTURE_2D_MULTISAMPLE,
+                                                   gltexture->_texture, 0);
                         } else {
                             glFramebufferTextureLayer(GL_FRAMEBUFFER, colorAttachments[unit], gltexture->_texture, 0,
                                                       b._subresource);
@@ -112,7 +105,6 @@ public:
             _depthStamp = _gpuObject.getDepthStamp();
         }
 
-
         // Last but not least, define where we draw
         if (!_colorBuffers.empty()) {
             glDrawBuffers((GLsizei)_colorBuffers.size(), _colorBuffers.data());
@@ -131,10 +123,9 @@ public:
         checkStatus();
     }
 
-
 public:
-    GL41Framebuffer(const std::weak_ptr<gl::GLBackend>& backend, const gpu::Framebuffer& framebuffer)
-        : Parent(backend, framebuffer, allocate()) { }
+    GL41Framebuffer(const std::weak_ptr<gl::GLBackend>& backend, const gpu::Framebuffer& framebuffer) :
+        Parent(backend, framebuffer, allocate()) {}
 };
 
 gl::GLFramebuffer* GL41Backend::syncGPUObject(const Framebuffer& framebuffer) {
@@ -168,9 +159,7 @@ void GL41Backend::do_blit(const Batch& batch, size_t paramOffset) {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, getFramebufferID(srcframebuffer));
 
     // Blit!
-    glBlitFramebuffer(srcvp.x, srcvp.y, srcvp.z, srcvp.w, 
-        dstvp.x, dstvp.y, dstvp.z, dstvp.w,
-        GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    glBlitFramebuffer(srcvp.x, srcvp.y, srcvp.z, srcvp.w, dstvp.x, dstvp.y, dstvp.z, dstvp.w, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
     // Always clean the read fbo to 0
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
@@ -180,8 +169,8 @@ void GL41Backend::do_blit(const Batch& batch, size_t paramOffset) {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _output._drawFBO);
     }
 
-    (void) CHECK_GL_ERROR();
+    (void)CHECK_GL_ERROR();
 }
 
-
-} }
+} // namespace gl41
+} // namespace gpu

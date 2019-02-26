@@ -12,11 +12,12 @@
 #ifndef hifi_RenderablePolyLineEntityItem_h
 #define hifi_RenderablePolyLineEntityItem_h
 
-#include "RenderableEntityItem.h"
 #include <PolyLineEntityItem.h>
 #include <TextureCache.h>
+#include "RenderableEntityItem.h"
 
-namespace render { namespace entities {
+namespace render {
+namespace entities {
 
 class PolyLineEntityRenderer : public TypedEntityRenderer<PolyLineEntityItem> {
     using Parent = TypedEntityRenderer<PolyLineEntityItem>;
@@ -62,6 +63,7 @@ protected:
     static gpu::PipelinePointer _glowPipeline;
 };
 
-} } // namespace 
+} // namespace entities
+} // namespace render
 
 #endif // hifi_RenderablePolyLineEntityItem_h

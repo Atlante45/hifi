@@ -11,14 +11,13 @@
 
 #include "CharacterGhostObject.h"
 
-#include <stdint.h>
 #include <assert.h>
+#include <stdint.h>
 
 #include <PhysicsHelpers.h>
 
-#include "CharacterRayResult.h"
 #include "CharacterGhostShape.h"
-
+#include "CharacterRayResult.h"
 
 CharacterGhostObject::~CharacterGhostObject() {
     removeFromWorld();
@@ -65,9 +64,7 @@ void CharacterGhostObject::setCollisionWorld(btCollisionWorld* world) {
     }
 }
 
-bool CharacterGhostObject::rayTest(const btVector3& start,
-        const btVector3& end,
-        CharacterRayResult& result) const {
+bool CharacterGhostObject::rayTest(const btVector3& start, const btVector3& end, CharacterRayResult& result) const {
     if (_world && _inWorld) {
         btGhostObject::rayTest(start, end, result);
     }

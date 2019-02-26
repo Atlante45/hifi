@@ -1,7 +1,7 @@
 #include <QApplication>
+#include <QFileSystemModel>
 #include <QQmlApplicationEngine>
 #include <QtWebEngine>
-#include <QFileSystemModel>
 
 QString getRelativeDir(const QString& relativePath = ".") {
     QDir path(__FILE__);
@@ -31,7 +31,7 @@ void addImportPath(QQmlApplicationEngine& engine, const QString& relativePath, b
     engine.addImportPath(resolvedPath);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
     app.setOrganizationName("Some Company");
     app.setOrganizationDomain("somecompany.com");

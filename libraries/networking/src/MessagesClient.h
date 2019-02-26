@@ -9,12 +9,11 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef hifi_MessagesClient_h
 #define hifi_MessagesClient_h
 
-#include <QString>
 #include <QByteArray>
+#include <QString>
 
 #include <DependencyManager.h>
 
@@ -24,10 +23,10 @@
 #include "ReceivedMessage.h"
 
 /**jsdoc
- * <p>The Messages API enables text and data to be sent between scripts over named "channels". A channel can have an arbitrary 
+ * <p>The Messages API enables text and data to be sent between scripts over named "channels". A channel can have an arbitrary
  * name to help separate messaging between different sets of scripts.</p>
  *
- * <p><strong>Note:</strong> If you want to call a function in another script, you should use one of the following rather than 
+ * <p><strong>Note:</strong> If you want to call a function in another script, you should use one of the following rather than
  * sending a message:</p>
  * <ul>
  *   <li>{@link Entities.callEntityClientMethod}</li>
@@ -48,7 +47,7 @@ class MessagesClient : public QObject, public Dependency {
     Q_OBJECT
 public:
     MessagesClient();
-    
+
     void startThread();
 
     /**jsdoc
@@ -56,10 +55,10 @@ public:
      * @function Messages.sendMessage
      * @param {string} channel - The channel to send the message on.
      * @param {string} message - The message to send.
-     * @param {boolean} [localOnly=false] - If <code>false</code> then the message is sent to all Interface, client entity, 
+     * @param {boolean} [localOnly=false] - If <code>false</code> then the message is sent to all Interface, client entity,
      *     server entity, and assignment client scripts in the domain.<br />
-     *     If <code>true</code> then: if sent from an Interface or client entity script it is received by all Interface and 
-     *     client entity scripts; if sent from a server entity script it is received by all entity server scripts; and if sent 
+     *     If <code>true</code> then: if sent from an Interface or client entity script it is received by all Interface and
+     *     client entity scripts; if sent from a server entity script it is received by all entity server scripts; and if sent
      *     from an assignment client script it is received only by that same assignment client script.
      * @example <caption>Send and receive a message.</caption>
      * // Receiving script.
@@ -91,7 +90,7 @@ public:
 
     /**jsdoc
      * Send a text message locally on a channel.
-     * This is the same as calling {@link Messages.sendMessage|sendMessage} with <code>localOnly</code> set to 
+     * This is the same as calling {@link Messages.sendMessage|sendMessage} with <code>localOnly</code> set to
      * <code>true</code>.
      * @function Messages.sendLocalMessage
      * @param {string} channel - The channel to send the message on.
@@ -103,7 +102,7 @@ public:
      * Send a data message on a channel.
      * @function Messages.sendData
      * @param {string} channel - The channel to send the data on.
-     * @param {object} data - The data to send. The data is handled as a byte stream, for example as may be provided via a 
+     * @param {object} data - The data to send. The data is handled as a byte stream, for example as may be provided via a
      *     JavaScript <code>Int8Array</code> object.
      * @param {boolean} [localOnly=false] - If <code>false</code> then the message is sent to all Interface, client entity,
      *     server entity, and assignment client scripts in the domain.<br />
@@ -145,10 +144,10 @@ public:
      * Messages.sendData(channelName, int8data.buffer);
      */
     Q_INVOKABLE void sendData(QString channel, QByteArray data, bool localOnly = false);
-    
+
     /**jsdoc
-     * Subscribe the scripting environment &mdash; Interface, the entity script server, or assignment client instance &mdash; 
-     * to receive messages on a specific channel. Note that, for example, if there are two Interface scripts that subscribe to 
+     * Subscribe the scripting environment &mdash; Interface, the entity script server, or assignment client instance &mdash;
+     * to receive messages on a specific channel. Note that, for example, if there are two Interface scripts that subscribe to
      * different channels, both scripts will receive messages on both channels.
      * @function Messages.subscribe
      * @param {string} channel - The channel to subscribe to.
@@ -162,8 +161,8 @@ public:
      */
     Q_INVOKABLE void unsubscribe(QString channel);
 
-    static void decodeMessagesPacket(QSharedPointer<ReceivedMessage> receivedMessage, QString& channel, 
-                                           bool& isText, QString& message, QByteArray& data, QUuid& senderID);
+    static void decodeMessagesPacket(QSharedPointer<ReceivedMessage> receivedMessage, QString& channel, bool& isText,
+                                     QString& message, QByteArray& data, QUuid& senderID);
 
     static std::unique_ptr<NLPacketList> encodeMessagesPacket(QString channel, QString message, QUuid senderID);
     static std::unique_ptr<NLPacketList> encodeMessagesDataPacket(QString channel, QByteArray data, QUuid senderID);
@@ -172,11 +171,11 @@ signals:
     /**jsdoc
      * Triggered when the a text message is received.
      * @function Messages.messageReceived
-     * @param {string} channel - The channel that the message was sent on. You can use this to filter out messages not relevant 
+     * @param {string} channel - The channel that the message was sent on. You can use this to filter out messages not relevant
      *     to your script.
      * @param {string} message - The message received.
-     * @param {Uuid} senderID - The UUID of the sender: the user's session UUID if sent by an Interface or client entity 
-     *     script, the UUID of the entity script server if sent by a server entity script, or the UUID of the assignment client 
+     * @param {Uuid} senderID - The UUID of the sender: the user's session UUID if sent by an Interface or client entity
+     *     script, the UUID of the entity script server if sent by a server entity script, or the UUID of the assignment client
      *     instance if sent by an assignment client script.
      * @param {boolean} localOnly - <code>true</code> if the message was sent with <code>localOnly = true</code>.
      * @returns {Signal}
@@ -188,7 +187,7 @@ signals:
      * @function Messages.dataReceived
      * @param {string} channel - The channel that the message was sent on. You can use this to filter out messages not relevant
      *     to your script.
-     * @param {object} data - The data received. The data is handled as a byte stream, for example as may be used by a 
+     * @param {object} data - The data received. The data is handled as a byte stream, for example as may be used by a
      *     JavaScript <code>Int8Array</code> object.
      * @param {Uuid} senderID - The UUID of the sender: the user's session UUID if sent by an Interface or client entity
      *     script, the UUID of the entity script server if sent by a server entity script, or the UUID of the assignment client

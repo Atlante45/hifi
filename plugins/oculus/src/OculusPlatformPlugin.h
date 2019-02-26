@@ -35,8 +35,8 @@ private:
     static QString NAME;
     NonceUserIDCallback _nonceUserIDCallback;
     QString _nonce;
-    bool _nonceChanged{ false };
-    bool _userIDChanged{ false };
+    bool _nonceChanged { false };
+    bool _userIDChanged { false };
     QString _user;
     ovrID _userID;
     ovrSession _session;

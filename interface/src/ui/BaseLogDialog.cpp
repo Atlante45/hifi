@@ -14,8 +14,8 @@
 #include <QDir>
 #include <QLineEdit>
 #include <QPlainTextEdit>
-#include <QTextCursor>
 #include <QPushButton>
+#include <QTextCursor>
 
 #include <PathUtils.h>
 

@@ -14,25 +14,25 @@
 #ifndef RENDER_UTILS_SSAO_SHARED_H
 #define RENDER_UTILS_SSAO_SHARED_H
 
-#define SSAO_USE_QUAD_SPLIT	1
+#define SSAO_USE_QUAD_SPLIT 1
 #define SSAO_BILATERAL_BLUR_USE_NORMAL 0
 
 #define SSAO_DEPTH_KEY_SCALE 300.0
 
 #if SSAO_USE_QUAD_SPLIT
-#define SSAO_SPLIT_LOG2_COUNT  2
+#define SSAO_SPLIT_LOG2_COUNT 2
 #else
-#define SSAO_SPLIT_LOG2_COUNT  0
+#define SSAO_SPLIT_LOG2_COUNT 0
 #endif
-#define SSAO_SPLIT_COUNT  (1 << SSAO_SPLIT_LOG2_COUNT)
+#define SSAO_SPLIT_COUNT (1 << SSAO_SPLIT_LOG2_COUNT)
 
 // glsl / C++ compatible source as interface for ambient occlusion
 #ifdef __cplusplus
-#   define SSAO_VEC4 glm::vec4
-#   define SSAO_MAT4 glm::mat4
+#define SSAO_VEC4 glm::vec4
+#define SSAO_MAT4 glm::mat4
 #else
-#   define SSAO_VEC4 vec4
-#   define SSAO_MAT4 mat4
+#define SSAO_VEC4 vec4
+#define SSAO_MAT4 mat4
 #endif
 
 struct AmbientOcclusionParams {

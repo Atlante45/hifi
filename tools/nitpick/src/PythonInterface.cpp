@@ -20,16 +20,14 @@ QString PythonInterface::getPythonCommand() {
         if (!pythonPath.isNull()) {
             _pythonCommand = pythonPath + _pythonExe;
         } else {
-            QMessageBox::critical(0, "python.exe not found",
-                "Please verify that pyton.exe is in the PATH");
+            QMessageBox::critical(0, "python.exe not found", "Please verify that pyton.exe is in the PATH");
             exit(-1);
         }
     }
 #elif defined Q_OS_MAC
     _pythonCommand = "/usr/local/bin/python3";
     if (!QFile::exists(_pythonCommand)) {
-        QMessageBox::critical(0, "python not found",
-            "python3 not found at " + _pythonCommand);
+        QMessageBox::critical(0, "python not found", "python3 not found at " + _pythonCommand);
         exit(-1);
     }
 #endif

@@ -27,7 +27,7 @@ class DomainBakeWidget : public BakeWidget {
 
 public:
     DomainBakeWidget(QWidget* parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
-    
+
 private slots:
     void chooseFileButtonClicked();
     void chooseOutputDirButtonClicked();

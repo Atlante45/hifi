@@ -8,16 +8,16 @@
 //
 
 #include "AnimTests.h"
-#include <AnimNodeLoader.h>
-#include <AnimClip.h>
-#include <AnimBlendLinear.h>
-#include <AnimationLogging.h>
-#include <AnimVariant.h>
-#include <AnimExpression.h>
-#include <AnimUtil.h>
-#include <NodeList.h>
-#include <AddressManager.h>
 #include <AccountManager.h>
+#include <AddressManager.h>
+#include <AnimBlendLinear.h>
+#include <AnimClip.h>
+#include <AnimExpression.h>
+#include <AnimNodeLoader.h>
+#include <AnimUtil.h>
+#include <AnimVariant.h>
+#include <AnimationLogging.h>
+#include <NodeList.h>
 #include <ResourceManager.h>
 #include <ResourceRequestObserver.h>
 #include <StatTracker.h>
@@ -40,7 +40,7 @@ void AnimTests::initTestCase() {
 }
 
 void AnimTests::cleanupTestCase() {
-    //DependencyManager::destroy<AnimationCache>();
+    // DependencyManager::destroy<AnimationCache>();
     DependencyManager::get<ResourceManager>()->cleanup();
 }
 
@@ -93,7 +93,8 @@ void AnimTests::testClipEvaulate() {
     // does it loop?
     triggers.clearMap();
     clip.evaluate(vars, context, framesToSec(12.0f), triggers);
-    QCOMPARE_WITH_ABS_ERROR(clip._frame, 3.0f, TEST_EPSILON);  // Note: frame 3 and not 4, because extra frame between start and end.
+    QCOMPARE_WITH_ABS_ERROR(clip._frame, 3.0f,
+                            TEST_EPSILON); // Note: frame 3 and not 4, because extra frame between start and end.
 
     // did we receive a loop trigger?
     QVERIFY(triggers.hasKey("myClipNodeOnLoop"));
@@ -147,9 +148,10 @@ void AnimTests::testClipEvaulateWithVars() {
 }
 
 void AnimTests::testLoader() {
-    auto url = QUrl("https://gist.githubusercontent.com/hyperlogic/756e6b7018c96c9778dba4ffb959c3c7/raw/4b37f10c9d2636608916208ba7b415c1a3f842ff/test.json");
-    // NOTE: This will warn about missing "test01.fbx", "test02.fbx", etc. if the resource loading code doesn't handle relative pathnames!
-    // However, the test will proceed.
+    auto url = QUrl("https://gist.githubusercontent.com/hyperlogic/756e6b7018c96c9778dba4ffb959c3c7/raw/"
+                    "4b37f10c9d2636608916208ba7b415c1a3f842ff/test.json");
+    // NOTE: This will warn about missing "test01.fbx", "test02.fbx", etc. if the resource loading code doesn't handle relative
+    // pathnames! However, the test will proceed.
     AnimNodeLoader loader(url);
 
     const int timeout = 1000;
@@ -260,7 +262,6 @@ void AnimTests::testVariant() {
 }
 
 void AnimTests::testAccumulateTime() {
-
     float startFrame = 0.0f;
     float endFrame = 10.0f;
     float timeScale = 1.0f;
@@ -306,8 +307,7 @@ void AnimTests::testAccumulateTime() {
 }
 
 void AnimTests::testAccumulateTimeWithParameters(float startFrame, float endFrame, float timeScale) const {
-
-    float dt = (1.0f / 30.0f) / timeScale;  // sec
+    float dt = (1.0f / 30.0f) / timeScale; // sec
     QString id = "testNode";
     AnimVariantMap triggers;
     bool loopFlag = false;
@@ -384,32 +384,22 @@ void AnimTests::testAnimPose() {
         glm::vec3(-2.0f, -0.5f, -1.5f),
     };
 
-    std::vector<glm::quat> rotVec = {
-        glm::quat(),
-        ROT_X_90,
-        ROT_Y_180,
-        ROT_Z_30,
-        ROT_X_90 * ROT_Y_180 * ROT_Z_30,
-        -ROT_Y_180
-    };
+    std::vector<glm::quat> rotVec = { glm::quat(), ROT_X_90, ROT_Y_180, ROT_Z_30, ROT_X_90 * ROT_Y_180 * ROT_Z_30, -ROT_Y_180 };
 
-    std::vector<glm::vec3> transVec = {
-        glm::vec3(),
-        glm::vec3(10.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 5.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 7.5f),
-        glm::vec3(10.0f, 5.0f, 7.5f),
-        glm::vec3(-10.0f, 5.0f, 7.5f),
-        glm::vec3(10.0f, -5.0f, 7.5f),
-        glm::vec3(10.0f, 5.0f, -7.5f)
-    };
+    std::vector<glm::vec3> transVec = { glm::vec3(),
+                                        glm::vec3(10.0f, 0.0f, 0.0f),
+                                        glm::vec3(0.0f, 5.0f, 0.0f),
+                                        glm::vec3(0.0f, 0.0f, 7.5f),
+                                        glm::vec3(10.0f, 5.0f, 7.5f),
+                                        glm::vec3(-10.0f, 5.0f, 7.5f),
+                                        glm::vec3(10.0f, -5.0f, 7.5f),
+                                        glm::vec3(10.0f, 5.0f, -7.5f) };
 
     const float TEST_EPSILON = 0.001f;
 
     for (auto& scale : scaleVec) {
         for (auto& rot : rotVec) {
             for (auto& trans : transVec) {
-
                 // build a matrix the old fashioned way.
                 glm::mat4 scaleMat = glm::scale(glm::mat4(), scale);
                 glm::mat4 rotTransMat = createMatFromQuatAndPos(rot, trans);
@@ -427,7 +417,6 @@ void AnimTests::testAnimPose() {
     for (auto& scale : scaleVec) {
         for (auto& rot : rotVec) {
             for (auto& trans : transVec) {
-
                 // build a matrix the old fashioned way.
                 glm::mat4 scaleMat = glm::scale(glm::mat4(), scale);
                 glm::mat4 rotTransMat = createMatFromQuatAndPos(rot, trans);
@@ -492,7 +481,6 @@ void AnimTests::testExpressionTokenizer() {
 }
 
 void AnimTests::testExpressionParser() {
-
     auto vars = AnimVariantMap();
     vars.set("f", false);
     vars.set("t", true);
@@ -587,9 +575,9 @@ void AnimTests::testExpressionParser() {
     }
 }
 
-#define TEST_BOOL_EXPR(EXPR)                                \
-    result = AnimExpression( #EXPR ).evaluate(vars);        \
-    QVERIFY(result.type == AnimExpression::OpCode::Bool);   \
+#define TEST_BOOL_EXPR(EXPR)                                                                                                   \
+    result = AnimExpression(#EXPR).evaluate(vars);                                                                             \
+    QVERIFY(result.type == AnimExpression::OpCode::Bool);                                                                      \
     QVERIFY(result.intVal == (int)(EXPR))
 
 void AnimTests::testExpressionEvaluator() {
@@ -673,5 +661,3 @@ void AnimTests::testExpressionEvaluator() {
     TEST_BOOL_EXPR(!!!(t) && (!!f || true));
     TEST_BOOL_EXPR(!(true && f) && true);
 }
-
-

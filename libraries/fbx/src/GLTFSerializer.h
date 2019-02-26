@@ -12,15 +12,14 @@
 #ifndef hifi_GLTFSerializer_h
 #define hifi_GLTFSerializer_h
 
+#include <hfm/HFMSerializer.h>
+#include <hfm/ModelFormatLogging.h>
 #include <memory.h>
 #include <QtNetwork/QNetworkReply>
-#include <hfm/ModelFormatLogging.h>
-#include <hfm/HFMSerializer.h>
-
 
 struct GLTFAsset {
     QString generator;
-    QString version; //required
+    QString version; // required
     QString copyright;
     QMap<QString, bool> defined;
     void dump() {
@@ -108,15 +107,7 @@ struct GLTFMeshPrimitivesTarget {
 };
 
 namespace GLTFMeshPrimitivesRenderingMode {
-    enum Values {
-        POINTS = 0,
-        LINES,
-        LINE_LOOP,
-        LINE_STRIP,
-        TRIANGLES,
-        TRIANGLE_STRIP,
-        TRIANGLE_FAN
-    };
+enum Values { POINTS = 0, LINES, LINE_LOOP, LINE_STRIP, TRIANGLES, TRIANGLE_STRIP, TRIANGLE_FAN };
 }
 
 struct GLTFMeshPrimitiveAttr {
@@ -125,9 +116,7 @@ struct GLTFMeshPrimitiveAttr {
     void dump() {
         QList<QString> keys = values.keys();
         qCDebug(modelformat) << "values: ";
-        foreach(auto k, keys) {
-            qCDebug(modelformat) << k << ": " << values[k];
-        }
+        foreach (auto k, keys) { qCDebug(modelformat) << k << ": " << values[k]; }
     }
 };
 
@@ -135,7 +124,7 @@ struct GLTFMeshPrimitive {
     GLTFMeshPrimitiveAttr attributes;
     int indices;
     int material;
-    int mode{ GLTFMeshPrimitivesRenderingMode::TRIANGLES };
+    int mode { GLTFMeshPrimitivesRenderingMode::TRIANGLES };
     QVector<GLTFMeshPrimitiveAttr> targets;
     QMap<QString, bool> defined;
     void dump() {
@@ -154,7 +143,8 @@ struct GLTFMeshPrimitive {
         }
         if (defined["targets"]) {
             qCDebug(modelformat) << "targets: ";
-            foreach(auto t, targets) t.dump();
+            foreach (auto t, targets)
+                t.dump();
         }
     }
 };
@@ -170,7 +160,8 @@ struct GLTFMesh {
         }
         if (defined["primitives"]) {
             qCDebug(modelformat) << "primitives: ";
-            foreach(auto prim, primitives) prim.dump();
+            foreach (auto prim, primitives)
+                prim.dump();
         }
         if (defined["weights"]) {
             qCDebug(modelformat) << "weights: " << weights;
@@ -181,15 +172,12 @@ struct GLTFMesh {
 // BufferViews
 
 namespace GLTFBufferViewTarget {
-    enum Values {
-        ARRAY_BUFFER = 34962,
-        ELEMENT_ARRAY_BUFFER = 34963
-    };
+enum Values { ARRAY_BUFFER = 34962, ELEMENT_ARRAY_BUFFER = 34963 };
 }
 
 struct GLTFBufferView {
-    int buffer; //required
-    int byteLength; //required
+    int buffer; // required
+    int byteLength; // required
     int byteOffset { 0 };
     int target;
     QMap<QString, bool> defined;
@@ -212,7 +200,7 @@ struct GLTFBufferView {
 // Buffers
 
 struct GLTFBuffer {
-    int byteLength; //required
+    int byteLength; // required
     QString uri;
     QByteArray blob;
     QMap<QString, bool> defined;
@@ -224,29 +212,26 @@ struct GLTFBuffer {
             qCDebug(modelformat) << "uri: " << uri;
         }
         if (defined["blob"]) {
-            qCDebug(modelformat) << "blob: " << "DEFINED";
+            qCDebug(modelformat) << "blob: "
+                                 << "DEFINED";
         }
     }
 };
 
 // Samplers
 namespace GLTFSamplerFilterType {
-    enum Values {
-        NEAREST = 9728,
-        LINEAR = 9729,
-        NEAREST_MIPMAP_NEAREST = 9984,
-        LINEAR_MIPMAP_NEAREST = 9985,
-        NEAREST_MIPMAP_LINEAR = 9986,
-        LINEAR_MIPMAP_LINEAR = 9987
-    };
+enum Values {
+    NEAREST = 9728,
+    LINEAR = 9729,
+    NEAREST_MIPMAP_NEAREST = 9984,
+    LINEAR_MIPMAP_NEAREST = 9985,
+    NEAREST_MIPMAP_LINEAR = 9986,
+    LINEAR_MIPMAP_LINEAR = 9987
+};
 }
 
 namespace GLTFSamplerWrapType {
-    enum Values {
-        CLAMP_TO_EDGE = 33071,
-        MIRRORED_REPEAT = 33648,
-        REPEAT = 10497
-    };
+enum Values { CLAMP_TO_EDGE = 33071, MIRRORED_REPEAT = 33648, REPEAT = 10497 };
 }
 
 struct GLTFSampler {
@@ -275,9 +260,9 @@ struct GLTFSampler {
 
 struct GLTFCameraPerspective {
     double aspectRatio;
-    double yfov; //required
+    double yfov; // required
     double zfar;
-    double znear; //required
+    double znear; // required
     QMap<QString, bool> defined;
     void dump() {
         if (defined["zfar"]) {
@@ -296,10 +281,10 @@ struct GLTFCameraPerspective {
 };
 
 struct GLTFCameraOrthographic {
-    double zfar; //required
-    double znear; //required
-    double xmag; //required
-    double ymag; //required
+    double zfar; // required
+    double znear; // required
+    double xmag; // required
+    double ymag; // required
     QMap<QString, bool> defined;
     void dump() {
         if (defined["zfar"]) {
@@ -318,17 +303,14 @@ struct GLTFCameraOrthographic {
 };
 
 namespace GLTFCameraTypes {
-    enum Values {
-        ORTHOGRAPHIC = 0,
-        PERSPECTIVE
-    };
+enum Values { ORTHOGRAPHIC = 0, PERSPECTIVE };
 }
 
 struct GLTFCamera {
     QString name;
-    GLTFCameraPerspective perspective;  //required (or)
-    GLTFCameraOrthographic orthographic;  //required (or)
-    int type; 
+    GLTFCameraPerspective perspective; // required (or)
+    GLTFCameraOrthographic orthographic; // required (or)
+    int type;
     QMap<QString, bool> defined;
     void dump() {
         if (defined["name"]) {
@@ -349,16 +331,13 @@ struct GLTFCamera {
 // Images
 
 namespace GLTFImageMimetype {
-    enum Values {
-        JPEG = 0,
-        PNG
-    };
+enum Values { JPEG = 0, PNG };
 };
 
 struct GLTFImage {
-    QString uri;  //required (or)
+    QString uri; // required (or)
     int mimeType;
-    int bufferView;   //required (or)
+    int bufferView; // required (or)
     QMap<QString, bool> defined;
     void dump() {
         if (defined["mimeType"]) {
@@ -402,11 +381,7 @@ struct GLTFpbrMetallicRoughness {
 };
 
 namespace GLTFMaterialAlphaMode {
-    enum Values {
-        OPAQUE = 0,
-        MASK,
-        BLEND
-    };
+enum Values { OPAQUE = 0, MASK, BLEND };
 };
 
 struct GLTFMaterial {
@@ -445,33 +420,18 @@ struct GLTFMaterial {
 // Accesors
 
 namespace GLTFAccessorType {
-    enum Values {
-        SCALAR = 0,
-        VEC2,
-        VEC3,
-        VEC4,
-        MAT2,
-        MAT3,
-        MAT4
-    };
+enum Values { SCALAR = 0, VEC2, VEC3, VEC4, MAT2, MAT3, MAT4 };
 }
 namespace GLTFAccessorComponentType {
-    enum Values {
-        BYTE = 5120,
-        UNSIGNED_BYTE = 5121,
-        SHORT = 5122,
-        UNSIGNED_SHORT = 5123,
-        UNSIGNED_INT = 5125,
-        FLOAT = 5126
-    };
+enum Values { BYTE = 5120, UNSIGNED_BYTE = 5121, SHORT = 5122, UNSIGNED_SHORT = 5123, UNSIGNED_INT = 5125, FLOAT = 5126 };
 }
 struct GLTFAccessor {
     int bufferView;
     int byteOffset { 0 };
-    int componentType; //required
-    int count; //required
-    int type; //required
-    bool normalized{ false };
+    int componentType; // required
+    int count; // required
+    int type; // required
+    bool normalized { false };
     QVector<double> max;
     QVector<double> min;
     QMap<QString, bool> defined;
@@ -496,15 +456,11 @@ struct GLTFAccessor {
         }
         if (defined["max"]) {
             qCDebug(modelformat) << "max: ";
-            foreach(float m, max) {
-                qCDebug(modelformat) << m;
-            }
+            foreach (float m, max) { qCDebug(modelformat) << m; }
         }
         if (defined["min"]) {
             qCDebug(modelformat) << "min: ";
-            foreach(float m, min) {
-                qCDebug(modelformat) << m;
-            }
+            foreach (float m, min) { qCDebug(modelformat) << m; }
         }
     }
 };
@@ -512,11 +468,7 @@ struct GLTFAccessor {
 // Animation
 
 namespace GLTFChannelTargetPath {
-    enum Values {
-        TRANSLATION = 0,
-        ROTATION,
-        SCALE
-    };
+enum Values { TRANSLATION = 0, ROTATION, SCALE };
 }
 
 struct GLTFChannelTarget {
@@ -548,9 +500,7 @@ struct GLTFChannel {
 };
 
 namespace GLTFAnimationSamplerInterpolation {
-    enum Values{
-        LINEAR = 0
-    };
+enum Values { LINEAR = 0 };
 }
 
 struct GLTFAnimationSampler {
@@ -577,10 +527,12 @@ struct GLTFAnimation {
     QMap<QString, bool> defined;
     void dump() {
         if (defined["channels"]) {
-            foreach(auto channel, channels) channel.dump();
+            foreach (auto channel, channels)
+                channel.dump();
         }
         if (defined["samplers"]) {
-            foreach(auto sampler, samplers) sampler.dump();
+            foreach (auto sampler, samplers)
+                sampler.dump();
         }
     }
 };
@@ -595,7 +547,8 @@ struct GLTFScene {
         }
         if (defined["nodes"]) {
             qCDebug(modelformat) << "nodes: ";
-            foreach(int node, nodes) qCDebug(modelformat) << node;
+            foreach (int node, nodes)
+                qCDebug(modelformat) << node;
         }
     }
 };
@@ -614,7 +567,8 @@ struct GLTFSkin {
         }
         if (defined["joints"]) {
             qCDebug(modelformat) << "joints: ";
-            foreach(int joint, joints) qCDebug(modelformat) << joint;
+            foreach (int joint, joints)
+                qCDebug(modelformat) << joint;
         }
     }
 };
@@ -658,43 +612,56 @@ struct GLTFFile {
             qCDebug(modelformat) << "scene: " << scene;
         }
         if (defined["accessors"]) {
-            foreach(auto acc, accessors) acc.dump();
+            foreach (auto acc, accessors)
+                acc.dump();
         }
         if (defined["animations"]) {
-            foreach(auto ani, animations) ani.dump();
+            foreach (auto ani, animations)
+                ani.dump();
         }
         if (defined["bufferviews"]) {
-            foreach(auto bv, bufferviews) bv.dump();
+            foreach (auto bv, bufferviews)
+                bv.dump();
         }
         if (defined["buffers"]) {
-            foreach(auto b, buffers) b.dump();
+            foreach (auto b, buffers)
+                b.dump();
         }
         if (defined["cameras"]) {
-            foreach(auto c, cameras) c.dump();
+            foreach (auto c, cameras)
+                c.dump();
         }
         if (defined["images"]) {
-            foreach(auto i, images) i.dump();
+            foreach (auto i, images)
+                i.dump();
         }
         if (defined["materials"]) {
-            foreach(auto mat, materials) mat.dump();
+            foreach (auto mat, materials)
+                mat.dump();
         }
         if (defined["meshes"]) {
-            foreach(auto mes, meshes) mes.dump();
+            foreach (auto mes, meshes)
+                mes.dump();
         }
         if (defined["nodes"]) {
-            foreach(auto nod, nodes) nod.dump();
+            foreach (auto nod, nodes)
+                nod.dump();
         }
         if (defined["samplers"]) {
-            foreach(auto sa, samplers) sa.dump();
+            foreach (auto sa, samplers)
+                sa.dump();
         }
         if (defined["scenes"]) {
-            foreach(auto sc, scenes) sc.dump();
+            foreach (auto sc, scenes)
+                sc.dump();
         }
         if (defined["skins"]) {
-            foreach(auto sk, nodes) sk.dump();
+            foreach (auto sk, nodes)
+                sk.dump();
         }
         if (defined["textures"]) {
-            foreach(auto tex, textures) tex.dump();
+            foreach (auto tex, textures)
+                tex.dump();
         }
     }
 };
@@ -706,6 +673,7 @@ public:
     std::unique_ptr<hfm::Serializer::Factory> getFactory() const override;
 
     HFMModel::Pointer read(const QByteArray& data, const QVariantHash& mapping, const QUrl& url = QUrl()) override;
+
 private:
     GLTFFile _file;
     QUrl _url;
@@ -715,26 +683,21 @@ private:
 
     bool buildGeometry(HFMModel& hfmModel, const QUrl& url);
     bool parseGLTF(const QByteArray& data);
-    
-    bool getStringVal(const QJsonObject& object, const QString& fieldname, 
-                      QString& value, QMap<QString, bool>&  defined);
-    bool getBoolVal(const QJsonObject& object, const QString& fieldname, 
-                    bool& value, QMap<QString, bool>&  defined);
-    bool getIntVal(const QJsonObject& object, const QString& fieldname, 
-                   int& value, QMap<QString, bool>&  defined);
-    bool getDoubleVal(const QJsonObject& object, const QString& fieldname, 
-                      double& value, QMap<QString, bool>&  defined);
-    bool getObjectVal(const QJsonObject& object, const QString& fieldname, 
-                      QJsonObject& value, QMap<QString, bool>&  defined);
-    bool getIntArrayVal(const QJsonObject& object, const QString& fieldname, 
-                        QVector<int>& values, QMap<QString, bool>&  defined);
-    bool getDoubleArrayVal(const QJsonObject& object, const QString& fieldname, 
-                           QVector<double>& values, QMap<QString, bool>&  defined);
-    bool getObjectArrayVal(const QJsonObject& object, const QString& fieldname, 
-                           QJsonArray& objects, QMap<QString, bool>& defined);
+
+    bool getStringVal(const QJsonObject& object, const QString& fieldname, QString& value, QMap<QString, bool>& defined);
+    bool getBoolVal(const QJsonObject& object, const QString& fieldname, bool& value, QMap<QString, bool>& defined);
+    bool getIntVal(const QJsonObject& object, const QString& fieldname, int& value, QMap<QString, bool>& defined);
+    bool getDoubleVal(const QJsonObject& object, const QString& fieldname, double& value, QMap<QString, bool>& defined);
+    bool getObjectVal(const QJsonObject& object, const QString& fieldname, QJsonObject& value, QMap<QString, bool>& defined);
+    bool getIntArrayVal(const QJsonObject& object, const QString& fieldname, QVector<int>& values,
+                        QMap<QString, bool>& defined);
+    bool getDoubleArrayVal(const QJsonObject& object, const QString& fieldname, QVector<double>& values,
+                           QMap<QString, bool>& defined);
+    bool getObjectArrayVal(const QJsonObject& object, const QString& fieldname, QJsonArray& objects,
+                           QMap<QString, bool>& defined);
 
     QByteArray setGLBChunks(const QByteArray& data);
-    
+
     int getMaterialAlphaMode(const QString& type);
     int getAccessorType(const QString& type);
     int getAnimationSamplerInterpolation(const QString& interpolation);
@@ -742,8 +705,7 @@ private:
     int getImageMimeType(const QString& mime);
     int getMeshPrimitiveRenderingMode(const QString& type);
 
-    bool getIndexFromObject(const QJsonObject& object, const QString& field, 
-                            int& outidx, QMap<QString, bool>& defined);
+    bool getIndexFromObject(const QJsonObject& object, const QString& field, int& outidx, QMap<QString, bool>& defined);
 
     bool setAsset(const QJsonObject& object);
     bool addAccessor(const QJsonObject& object);
@@ -763,23 +725,21 @@ private:
     bool readBinary(const QString& url, QByteArray& outdata);
 
     template<typename T, typename L>
-    bool readArray(const QByteArray& bin, int byteOffset, int count, 
-                   QVector<L>& outarray, int accessorType);
-    
-    template<typename T>
-    bool addArrayOfType(const QByteArray& bin, int byteOffset, int count, 
-                        QVector<T>& outarray, int accessorType, int componentType);
+    bool readArray(const QByteArray& bin, int byteOffset, int count, QVector<L>& outarray, int accessorType);
 
-    void retriangulate(const QVector<int>& in_indices, const QVector<glm::vec3>& in_vertices, 
-                       const QVector<glm::vec3>& in_normals, QVector<int>& out_indices, 
-                       QVector<glm::vec3>& out_vertices, QVector<glm::vec3>& out_normals);
+    template<typename T>
+    bool addArrayOfType(const QByteArray& bin, int byteOffset, int count, QVector<T>& outarray, int accessorType,
+                        int componentType);
+
+    void retriangulate(const QVector<int>& in_indices, const QVector<glm::vec3>& in_vertices,
+                       const QVector<glm::vec3>& in_normals, QVector<int>& out_indices, QVector<glm::vec3>& out_vertices,
+                       QVector<glm::vec3>& out_normals);
 
     std::tuple<bool, QByteArray> requestData(QUrl& url);
     QByteArray requestEmbeddedData(const QString& url);
 
     QNetworkReply* request(QUrl& url, bool isTest);
     bool doesResourceExist(const QString& url);
-
 
     void setHFMMaterial(HFMMaterial& fbxmat, const GLTFMaterial& material);
     HFMTexture getHFMTexture(const GLTFTexture& texture);

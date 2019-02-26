@@ -8,7 +8,6 @@
 
 #include "Preferences.h"
 
-
 void Preferences::addPreference(Preference* preference) {
     preference->setParent(this);
 
@@ -18,12 +17,12 @@ void Preferences::addPreference(Preference* preference) {
     if (!_categories.contains(category)) {
         _categories.append(category);
     }
-    
+
     QVariantList categoryPreferences;
     // FIXME is there an easier way to do this with less copying?
     if (_preferencesByCategory.contains(category)) {
         categoryPreferences = qvariant_cast<QVariantList>(_preferencesByCategory[category]);
-    } 
+    }
     categoryPreferences.append(QVariant::fromValue(preference));
     _preferencesByCategory[category] = categoryPreferences;
 }

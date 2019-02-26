@@ -17,7 +17,7 @@
 #include <shared/FileCache.h>
 
 namespace ktx {
-    class KTX;
+class KTX;
 }
 
 class KTXFile;

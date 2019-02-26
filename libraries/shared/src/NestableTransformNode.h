@@ -12,7 +12,7 @@
 
 #include "SpatiallyNestable.h"
 
-template <typename T>
+template<typename T>
 class BaseNestableTransformNode : public TransformNode {
 public:
     BaseNestableTransformNode(std::weak_ptr<T> spatiallyNestable, int jointIndex) :
@@ -53,7 +53,8 @@ protected:
 
 class NestableTransformNode : public BaseNestableTransformNode<SpatiallyNestable> {
 public:
-    NestableTransformNode(std::weak_ptr<SpatiallyNestable> spatiallyNestable, int jointIndex) : BaseNestableTransformNode(spatiallyNestable, jointIndex) {};
+    NestableTransformNode(std::weak_ptr<SpatiallyNestable> spatiallyNestable, int jointIndex) :
+        BaseNestableTransformNode(spatiallyNestable, jointIndex) {};
 };
 
 #endif // hifi_NestableTransformNode_h

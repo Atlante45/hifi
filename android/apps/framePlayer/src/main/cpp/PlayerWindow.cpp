@@ -30,15 +30,12 @@ PlayerWindow::PlayerWindow() {
 
     // Start the UI
     _surface.resize(size());
-    connect(&_surface, &hifi::qml::OffscreenSurface::rootContextCreated, this, [](QQmlContext* context){
-        context->setContextProperty("FRAMES_FOLDER", "file:assets:/frames");
-    });
+    connect(&_surface, &hifi::qml::OffscreenSurface::rootContextCreated, this,
+            [](QQmlContext* context) { context->setContextProperty("FRAMES_FOLDER", "file:assets:/frames"); });
     _surface.load("qrc:///qml/main.qml");
 
     // Connect the UI handler
-    QObject::connect(_surface.getRootItem(), SIGNAL(loadFile(QString)),
-        this, SLOT(loadFile(QString))
-    );
+    QObject::connect(_surface.getRootItem(), SIGNAL(loadFile(QString)), this, SLOT(loadFile(QString)));
 
     // Turn on UI input events
     installEventFilter(&_surface);

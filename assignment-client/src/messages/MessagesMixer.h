@@ -34,7 +34,7 @@ private slots:
     void handleMessagesUnsubscribe(QSharedPointer<ReceivedMessage> message, SharedNodePointer senderNode);
 
 private:
-    QHash<QString,QSet<QUuid>> _channelSubscribers;
+    QHash<QString, QSet<QUuid>> _channelSubscribers;
 };
 
 #endif // hifi_MessagesMixer_h

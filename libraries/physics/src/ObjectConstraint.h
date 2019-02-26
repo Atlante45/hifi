@@ -13,12 +13,11 @@
 #ifndef hifi_ObjectConstraint_h
 #define hifi_ObjectConstraint_h
 
-#include <QUuid>
 #include <btBulletDynamicsCommon.h>
+#include <QUuid>
 #include "ObjectDynamic.h"
 
-class ObjectConstraint : public ObjectDynamic
-{
+class ObjectConstraint : public ObjectDynamic {
 public:
     ObjectConstraint(EntityDynamicType type, const QUuid& id, EntityItemPointer ownerEntity);
     virtual ~ObjectConstraint() {}

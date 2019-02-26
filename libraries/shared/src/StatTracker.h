@@ -8,9 +8,9 @@
 
 #pragma once
 
+#include <QtCore/QSet>
 #include <QtCore/QString>
 #include <QtCore/QVariant>
-#include <QtCore/QSet>
 #include <QtCore/QVariantMap>
 
 #include <mutex>
@@ -28,6 +28,7 @@ public:
     void updateStat(const QString& name, int64_t mod);
     void incrementStat(const QString& name);
     void decrementStat(const QString& name);
+
 private:
     using Mutex = std::mutex;
     using Lock = std::lock_guard<Mutex>;
@@ -37,12 +38,9 @@ private:
 
 class CounterStat {
 public:
-    CounterStat(QString name) : _name(name) {
-        DependencyManager::get<StatTracker>()->incrementStat(_name);
-    }    
-    ~CounterStat() {
-        DependencyManager::get<StatTracker>()->decrementStat(_name);
-    }    
+    CounterStat(QString name) : _name(name) { DependencyManager::get<StatTracker>()->incrementStat(_name); }
+    ~CounterStat() { DependencyManager::get<StatTracker>()->decrementStat(_name); }
+
 private:
     QString _name;
 };

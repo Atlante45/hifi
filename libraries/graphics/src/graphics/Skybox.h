@@ -17,7 +17,9 @@
 
 class ViewFrustum;
 
-namespace gpu { class Batch; }
+namespace gpu {
+class Batch;
+}
 
 namespace graphics {
 
@@ -28,9 +30,9 @@ public:
     typedef gpu::BufferView UniformBufferView;
 
     Skybox();
-    Skybox& operator= (const Skybox& skybox);
+    Skybox& operator=(const Skybox& skybox);
     virtual ~Skybox() {};
- 
+
     void setColor(const Color& color);
     const Color getColor() const { return _schemaBuffer.get<Schema>().color; }
 
@@ -63,10 +65,10 @@ protected:
     gpu::TexturePointer _cubemap;
     glm::quat _orientation;
 
-    bool _empty{ true };
+    bool _empty { true };
 };
 typedef std::shared_ptr<Skybox> SkyboxPointer;
 
-};
+}; // namespace graphics
 
-#endif //hifi_model_Skybox_h
+#endif // hifi_model_Skybox_h

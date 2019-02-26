@@ -8,16 +8,16 @@
 
 #pragma once
 
-#include <QtGui/QWindow>
 #include <QtCore/QTime>
+#include <QtGui/QWindow>
 
 #include <GLMHelpers.h>
 #include <gl/QOpenGLContextWrapper.h>
 #include <gpu/Forward.h>
 
 #include <DeferredLightingEffect.h>
-#include <render/ShapePipeline.h>
 #include <render/Engine.h>
+#include <render/ShapePipeline.h>
 
 #define DEFERRED_LIGHTING
 
@@ -31,7 +31,7 @@ protected:
 #ifdef DEFERRED_LIGHTING
     // Prepare the ShapePipelines
     render::ShapePlumberPointer _shapePlumber { std::make_shared<render::ShapePlumber>() };
-    render::RenderContextPointer _renderContext{ std::make_shared<render::RenderContext>() };
+    render::RenderContextPointer _renderContext { std::make_shared<render::RenderContext>() };
     gpu::PipelinePointer _opaquePipeline;
     graphics::LightPointer _light { std::make_shared<graphics::Light>() };
 
@@ -62,4 +62,3 @@ private:
     void draw();
     void resizeEvent(QResizeEvent* ev) override;
 };
-

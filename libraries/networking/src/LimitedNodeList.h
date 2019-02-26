@@ -28,8 +28,8 @@
 #include <QtCore/QReadWriteLock>
 #include <QtCore/QSet>
 #include <QtCore/QSharedMemory>
-#include <QtNetwork/QUdpSocket>
 #include <QtNetwork/QHostAddress>
+#include <QtNetwork/QUdpSocket>
 
 #include <TBBHelpers.h>
 
@@ -37,15 +37,15 @@
 #include <SharedUtil.h>
 
 #include "DomainHandler.h"
-#include "Node.h"
 #include "NLPacket.h"
 #include "NLPacketList.h"
+#include "Node.h"
 #include "PacketReceiver.h"
 #include "ReceivedMessage.h"
+#include "UUIDHasher.h"
 #include "udt/ControlPacket.h"
 #include "udt/PacketHeaders.h"
 #include "udt/Socket.h"
-#include "UUIDHasher.h"
 
 const int INVALID_PORT = -1;
 
@@ -75,17 +75,16 @@ typedef tbb::concurrent_unordered_map<QUuid, SharedNodePointer, UUIDHasher> Node
 
 typedef quint8 PingType_t;
 namespace PingType {
-    const PingType_t Agnostic = 0;
-    const PingType_t Local = 1;
-    const PingType_t Public = 2;
-    const PingType_t Symmetric = 3;
-}
+const PingType_t Agnostic = 0;
+const PingType_t Local = 1;
+const PingType_t Public = 2;
+const PingType_t Symmetric = 3;
+} // namespace PingType
 
 class LimitedNodeList : public QObject, public Dependency {
     Q_OBJECT
     SINGLETON_DEPENDENCY
 public:
-
     enum ConnectionStep {
         LookupAddress = 1,
         HandleAddress,
@@ -117,8 +116,12 @@ public:
     bool isAllowedEditor() const { return _permissions.can(NodePermissions::Permission::canAdjustLocks); }
     bool getThisNodeCanRez() const { return _permissions.can(NodePermissions::Permission::canRezPermanentEntities); }
     bool getThisNodeCanRezTmp() const { return _permissions.can(NodePermissions::Permission::canRezTemporaryEntities); }
-    bool getThisNodeCanRezCertified() const { return _permissions.can(NodePermissions::Permission::canRezPermanentCertifiedEntities); }
-    bool getThisNodeCanRezTmpCertified() const { return _permissions.can(NodePermissions::Permission::canRezTemporaryCertifiedEntities); }
+    bool getThisNodeCanRezCertified() const {
+        return _permissions.can(NodePermissions::Permission::canRezPermanentCertifiedEntities);
+    }
+    bool getThisNodeCanRezTmpCertified() const {
+        return _permissions.can(NodePermissions::Permission::canRezTemporaryCertifiedEntities);
+    }
     bool getThisNodeCanWriteAssets() const { return _permissions.can(NodePermissions::Permission::canWriteToAssetServer); }
     bool getThisNodeCanKick() const { return _permissions.can(NodePermissions::Permission::canKick); }
     bool getThisNodeCanReplaceContent() const { return _permissions.can(NodePermissions::Permission::canReplaceDomainContent); }
@@ -131,9 +134,18 @@ public:
     PacketReceiver& getPacketReceiver() { return *_packetReceiver; }
 
     virtual bool isDomainServer() const { return true; }
-    virtual QUuid getDomainUUID() const { assert(false); return QUuid(); }
-    virtual Node::LocalID getDomainLocalID() const { assert(false); return Node::NULL_LOCAL_ID; }
-    virtual HifiSockAddr getDomainSockAddr() const { assert(false); return HifiSockAddr(); }
+    virtual QUuid getDomainUUID() const {
+        assert(false);
+        return QUuid();
+    }
+    virtual Node::LocalID getDomainLocalID() const {
+        assert(false);
+        return Node::NULL_LOCAL_ID;
+    }
+    virtual HifiSockAddr getDomainSockAddr() const {
+        assert(false);
+        return HifiSockAddr();
+    }
 
     // use sendUnreliablePacket to send an unreliable packet (that you do not need to move)
     // either to a node (via its active socket) or to a manual sockaddr
@@ -148,7 +160,7 @@ public:
     // either to a node's active socket or to a manual sockaddr
     qint64 sendUnreliableUnorderedPacketList(NLPacketList& packetList, const Node& destinationNode);
     qint64 sendUnreliableUnorderedPacketList(NLPacketList& packetList, const HifiSockAddr& sockAddr,
-        HMACAuth* hmacAuth = nullptr);
+                                             HMACAuth* hmacAuth = nullptr);
 
     // use sendPacketList to send reliable packet lists (ordered or unordered) to a node's active socket
     // or to a manual sock addr
@@ -157,15 +169,18 @@ public:
 
     std::function<void(Node*)> linkedDataCreateCallback;
 
-    size_t size() const { QReadLocker readLock(&_nodeMutex); return _nodeHash.size(); }
+    size_t size() const {
+        QReadLocker readLock(&_nodeMutex);
+        return _nodeHash.size();
+    }
 
     SharedNodePointer nodeWithUUID(const QUuid& nodeUUID);
     SharedNodePointer nodeWithLocalID(Node::LocalID localID) const;
 
-    SharedNodePointer addOrUpdateNode(const QUuid& uuid, NodeType_t nodeType,
-                                      const HifiSockAddr& publicSocket, const HifiSockAddr& localSocket,
-                                      Node::LocalID localID = Node::NULL_LOCAL_ID, bool isReplicated = false,
-                                      bool isUpstream = false, const QUuid& connectionSecret = QUuid(),
+    SharedNodePointer addOrUpdateNode(const QUuid& uuid, NodeType_t nodeType, const HifiSockAddr& publicSocket,
+                                      const HifiSockAddr& localSocket, Node::LocalID localID = Node::NULL_LOCAL_ID,
+                                      bool isReplicated = false, bool isUpstream = false,
+                                      const QUuid& connectionSecret = QUuid(),
                                       const NodePermissions& permissions = DEFAULT_AGENT_PERMISSIONS);
 
     static bool parseSTUNResponse(udt::BasePacket* packet, QHostAddress& newPublicAddress, uint16_t& newPublicPort);
@@ -201,9 +216,7 @@ public:
     //   This allows multiple threads (i.e. a thread pool) to share a lock
     //   without deadlocking when a dying node attempts to acquire a write lock
     template<typename NestedNodeLambda>
-    void nestedEach(NestedNodeLambda functor,
-                    int* lockWaitOut = nullptr,
-                    int* nodeTransformOut = nullptr,
+    void nestedEach(NestedNodeLambda functor, int* lockWaitOut = nullptr, int* nodeTransformOut = nullptr,
                     int* functorOut = nullptr) {
         auto start = usecTimestampNow();
         {
@@ -218,9 +231,8 @@ public:
             // and then back insert all the nodes found
             std::vector<SharedNodePointer> nodes;
             nodes.reserve(_nodeHash.size());
-            std::transform(_nodeHash.cbegin(), _nodeHash.cend(), std::back_inserter(nodes), [&](const NodeHash::value_type& it) {
-                return it.second;
-            });
+            std::transform(_nodeHash.cbegin(), _nodeHash.cend(), std::back_inserter(nodes),
+                           [&](const NodeHash::value_type& it) { return it.second; });
             auto endTransform = usecTimestampNow();
             if (nodeTransformOut) {
                 *nodeTransformOut = (endTransform - endLock);
@@ -291,15 +303,19 @@ public:
     void putLocalPortIntoSharedMemory(const QString key, QObject* parent, quint16 localPort);
     bool getLocalServerPortFromSharedMemory(const QString key, quint16& localPort);
 
-    const QMap<quint64, ConnectionStep> getLastConnectionTimes() const
-        { QReadLocker readLock(&_connectionTimeLock); return _lastConnectionTimes; }
+    const QMap<quint64, ConnectionStep> getLastConnectionTimes() const {
+        QReadLocker readLock(&_connectionTimeLock);
+        return _lastConnectionTimes;
+    }
     void flagTimeForConnectionStep(ConnectionStep connectionStep);
 
     udt::Socket::StatsVector sampleStatsForAllConnections() { return _nodeSocket.sampleStatsForAllConnections(); }
 
     void setConnectionMaxBandwidth(int maxBandwidth) { _nodeSocket.setConnectionMaxBandwidth(maxBandwidth); }
 
-    void setPacketFilterOperator(udt::PacketFilterOperator filterOperator) { _nodeSocket.setPacketFilterOperator(filterOperator); }
+    void setPacketFilterOperator(udt::PacketFilterOperator filterOperator) {
+        _nodeSocket.setPacketFilterOperator(filterOperator);
+    }
     bool packetVersionMatch(const udt::Packet& packet);
 
     bool isPacketVerifiedWithSource(const udt::Packet& packet, Node* sourceNode = nullptr);
@@ -372,8 +388,7 @@ protected:
     LimitedNodeList(LimitedNodeList const&) = delete; // Don't implement, needed to avoid copies of singleton
     void operator=(LimitedNodeList const&) = delete; // Don't implement, needed to avoid copies of singleton
 
-    qint64 sendPacket(std::unique_ptr<NLPacket> packet, const Node& destinationNode,
-                      const HifiSockAddr& overridenSockAddr);
+    qint64 sendPacket(std::unique_ptr<NLPacket> packet, const Node& destinationNode, const HifiSockAddr& overridenSockAddr);
     void fillPacketHeader(const NLPacket& packet, HMACAuth* hmacAuth = nullptr);
 
     void setLocalSocket(const HifiSockAddr& sockAddr);
@@ -411,7 +426,7 @@ protected:
     quint64 _firstSTUNTime = 0;
     quint64 _publicSocketUpdateTime = 0;
 
-    mutable QReadWriteLock _connectionTimeLock { };
+    mutable QReadWriteLock _connectionTimeLock {};
     QMap<quint64, ConnectionStep> _lastConnectionTimes;
     bool _areConnectionTimesComplete = false;
 

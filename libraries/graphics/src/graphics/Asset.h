@@ -14,15 +14,15 @@
 #include <memory>
 #include <vector>
 
-#include "Material.h"
 #include "Geometry.h"
+#include "Material.h"
 
 namespace graphics {
 
-template <class T>
+template<class T>
 class Table {
 public:
-    typedef std::vector< T > Vector;
+    typedef std::vector<T> Vector;
     typedef int ID;
 
     static const ID INVALID_ID = 0;
@@ -41,12 +41,8 @@ public:
             return FINAL;
         }
     }
-    static Index evalIndexFromID(ID id) {
-        return Index(id < 0 ? -id : id) - 1;
-    }
-    static ID evalID(Index index, Version version) {
-        return (version == DRAFT ? -int(index + 1) : int(index + 1));
-    }
+    static Index evalIndexFromID(ID id) { return Index(id < 0 ? -id : id) - 1; }
+    static ID evalID(Index index, Version version) { return (version == DRAFT ? -int(index + 1) : int(index + 1)); }
 
     Table() {
         for (auto e : _elements) {
@@ -55,9 +51,7 @@ public:
     }
     ~Table() {}
 
-    Index getNumElements() const {
-        return _elements[DRAFT].size();
-    }
+    Index getNumElements() const { return _elements[DRAFT].size(); }
 
     ID add(const T& element) {
         for (auto e : _elements) {
@@ -73,7 +67,7 @@ public:
         }
     }
 
-     const T& get(ID id, const T& element) const {
+    const T& get(ID id, const T& element) const {
         Index index = evalIndexFromID(id);
         if (index < getNumElements()) {
             return _elements[DRAFT][index];
@@ -86,26 +80,22 @@ protected:
     T _default;
 };
 
-typedef Table< MaterialPointer > MaterialTable;
+typedef Table<MaterialPointer> MaterialTable;
 
-typedef Table< MeshPointer > MeshTable;
-
+typedef Table<MeshPointer> MeshTable;
 
 class Shape {
 public:
-
-    MeshTable::ID _meshID{ MeshTable::INVALID_ID };
+    MeshTable::ID _meshID { MeshTable::INVALID_ID };
     int _partID = 0;
 
-    MaterialTable::ID _materialID{ MaterialTable::INVALID_ID };
+    MaterialTable::ID _materialID { MaterialTable::INVALID_ID };
 };
 
-typedef Table< Shape > ShapeTable;
+typedef Table<Shape> ShapeTable;
 
 class Asset {
-public:    
-
-
+public:
     Asset();
     ~Asset();
 
@@ -119,14 +109,12 @@ public:
     const ShapeTable& getShapes() const { return _shapes; }
 
 protected:
-
     MeshTable _meshes;
     MaterialTable _materials;
     ShapeTable _shapes;
-
 };
 
-typedef std::shared_ptr< Asset > AssetPointer;
+typedef std::shared_ptr<Asset> AssetPointer;
 
-};
+}; // namespace graphics
 #endif

@@ -28,7 +28,10 @@ public:
 
     void update(const QString& dominantHand, const QUuid& loginObjectID);
 
-    bool isSetUp() const { return (_leftLoginPointerID > PointerEvent::INVALID_POINTER_ID) && (_rightLoginPointerID > PointerEvent::INVALID_POINTER_ID); }
+    bool isSetUp() const {
+        return (_leftLoginPointerID > PointerEvent::INVALID_POINTER_ID) &&
+               (_rightLoginPointerID > PointerEvent::INVALID_POINTER_ID);
+    }
 
 private:
     QString _dominantHand;

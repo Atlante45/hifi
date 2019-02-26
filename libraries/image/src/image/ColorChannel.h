@@ -13,14 +13,7 @@
 #define hifi_image_ColorChannel_h
 
 namespace image {
-    enum class ColorChannel {
-        NONE,
-        RED,
-        GREEN,
-        BLUE,
-        ALPHA,
-        COUNT
-    };
+enum class ColorChannel { NONE, RED, GREEN, BLUE, ALPHA, COUNT };
 };
 
 #endif // hifi_image_ColorChannel_h

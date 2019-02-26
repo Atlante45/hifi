@@ -14,19 +14,18 @@
 #include <SharedUtil.h>
 
 #include <QtCore/QCoreApplication>
-#include <QtCore/QJsonDocument>
 #include <QtCore/QJsonArray>
+#include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
 #include <QtCore/QTimer>
 
+#include <FaceshiftConstants.h>
 #include <GLMHelpers.h>
 #include <NumericalConstants.h>
-#include <FaceshiftConstants.h>
 
 #include "Application.h"
 #include "InterfaceLogging.h"
 #include "Menu.h"
-
 
 static const QHostAddress DDE_SERVER_ADDR("127.0.0.1");
 static const quint16 DDE_SERVER_PORT = 64204;
@@ -36,11 +35,10 @@ static const QString DDE_PROGRAM_PATH = "/dde/dde.exe";
 #elif defined(Q_OS_MAC)
 static const QString DDE_PROGRAM_PATH = "/dde.app/Contents/MacOS/dde";
 #endif
-static const QStringList DDE_ARGUMENTS = QStringList() 
-    << "--udp=" + DDE_SERVER_ADDR.toString() + ":" + QString::number(DDE_SERVER_PORT) 
-    << "--receiver=" + QString::number(DDE_CONTROL_PORT)
-    << "--facedet_interval=500"  // ms
-    << "--headless";
+static const QStringList DDE_ARGUMENTS = QStringList()
+                                         << "--udp=" + DDE_SERVER_ADDR.toString() + ":" + QString::number(DDE_SERVER_PORT)
+                                         << "--receiver=" + QString::number(DDE_CONTROL_PORT) << "--facedet_interval=500" // ms
+                                         << "--headless";
 
 static const int NUM_EXPRESSIONS = 46;
 static const int MIN_PACKET_SIZE = (8 + NUM_EXPRESSIONS) * sizeof(float) + sizeof(int);
@@ -50,23 +48,13 @@ static const int MAX_NAME_SIZE = 31;
 // The best guess at mapping is to:
 // - Swap L and R values
 // - Skip two Faceshift values: JawChew (22) and LipsLowerDown (37)
-static const int DDE_TO_FACESHIFT_MAPPING[] = {
-    1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14,
-    16,
-    18, 17,
-    19,
-    23,
-    21,
-    // Skip JawChew
-    20,
-    25, 24, 27, 26, 29, 28, 31, 30, 33, 32,
-    34, 35, 36,
-    // Skip LipsLowerDown
-    38, 39, 40, 41, 42, 43, 44, 45,
-    47, 46
-};
+static const int DDE_TO_FACESHIFT_MAPPING[] = { 1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14, 16, 18, 17, 19, 23, 21,
+                                                // Skip JawChew
+                                                20, 25, 24, 27, 26, 29, 28, 31, 30, 33, 32, 34, 35, 36,
+                                                // Skip LipsLowerDown
+                                                38, 39, 40, 41, 42, 43, 44, 45, 47, 46 };
 
-// The DDE coefficients, overall, range from -0.2 to 1.5 or so. However, individual coefficients typically vary much 
+// The DDE coefficients, overall, range from -0.2 to 1.5 or so. However, individual coefficients typically vary much
 // less than this.
 static const float DDE_COEFFICIENT_SCALES[] = {
     1.0f, // EyeBlink_L
@@ -116,25 +104,25 @@ static const float DDE_COEFFICIENT_SCALES[] = {
     1.0f, // Sneer
     3.0f, // Puff
     1.0f, // CheekSquint_L
-    1.0f  // CheekSquint_R
+    1.0f // CheekSquint_R
 };
 
 struct DDEPacket {
-    //roughly in mm
+    // roughly in mm
     float focal_length[1];
     float translation[3];
-    
-    //quaternion
+
+    // quaternion
     float rotation[4];
-    
-    // The DDE coefficients, overall, range from -0.2 to 1.5 or so. However, individual coefficients typically vary much 
+
+    // The DDE coefficients, overall, range from -0.2 to 1.5 or so. However, individual coefficients typically vary much
     // less than this.
     float expressions[NUM_EXPRESSIONS];
-    
-    //avatar id selected on the UI
+
+    // avatar id selected on the UI
     int avatar_id;
-    
-    //client name, arbitrary length
+
+    // client name, arbitrary length
     char name[MAX_NAME_SIZE + 1];
 };
 
@@ -142,10 +130,7 @@ static const float STARTING_DDE_MESSAGE_TIME = 0.033f;
 static const float DEFAULT_DDE_EYE_CLOSING_THRESHOLD = 0.8f;
 static const int CALIBRATION_SAMPLES = 150;
 
-DdeFaceTracker::DdeFaceTracker() :
-    DdeFaceTracker(QHostAddress::Any, DDE_SERVER_PORT, DDE_CONTROL_PORT)
-{
-
+DdeFaceTracker::DdeFaceTracker() : DdeFaceTracker(QHostAddress::Any, DDE_SERVER_PORT, DDE_CONTROL_PORT) {
 }
 
 DdeFaceTracker::DdeFaceTracker(const QHostAddress& host, quint16 serverPort, quint16 controlPort) :
@@ -195,8 +180,7 @@ DdeFaceTracker::DdeFaceTracker(const QHostAddress& host, quint16 serverPort, qui
     _calibrationValues(),
     _calibrationBillboard(NULL),
     _calibrationMessage(QString()),
-    _isCalibrated(false)
-{
+    _isCalibrated(false) {
     _coefficients.resize(NUM_FACESHIFT_BLENDSHAPES);
     _blendshapeCoefficients.resize(NUM_FACESHIFT_BLENDSHAPES);
     _coefficientAverages.resize(NUM_FACESHIFT_BLENDSHAPES);
@@ -207,8 +191,8 @@ DdeFaceTracker::DdeFaceTracker(const QHostAddress& host, quint16 serverPort, qui
 
     connect(&_udpSocket, SIGNAL(readyRead()), SLOT(readPendingDatagrams()));
     connect(&_udpSocket, SIGNAL(error(QAbstractSocket::SocketError)), SLOT(socketErrorOccurred(QAbstractSocket::SocketError)));
-    connect(&_udpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), 
-        SLOT(socketStateChanged(QAbstractSocket::SocketState)));
+    connect(&_udpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)),
+            SLOT(socketStateChanged(QAbstractSocket::SocketState)));
 }
 
 DdeFaceTracker::~DdeFaceTracker() {
@@ -252,7 +236,7 @@ void DdeFaceTracker::setEnabled(bool enabled) {
         connect(_ddeProcess, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(processFinished(int, QProcess::ExitStatus)));
         _ddeProcess->start(QCoreApplication::applicationDirPath() + DDE_PROGRAM_PATH, DDE_ARGUMENTS);
     }
-    
+
     if (!enabled && _ddeProcess) {
         _ddeStopping = true;
         qCDebug(interfaceapp) << "DDE Face Tracker: Stopping";
@@ -306,18 +290,18 @@ bool DdeFaceTracker::isActive() const {
 }
 
 bool DdeFaceTracker::isTracking() const {
-    static const quint64 ACTIVE_TIMEOUT_USECS = 3000000; //3 secs
+    static const quint64 ACTIVE_TIMEOUT_USECS = 3000000; // 3 secs
     return (usecTimestampNow() - _lastReceiveTimestamp < ACTIVE_TIMEOUT_USECS);
 }
 
-//private slots and methods
+// private slots and methods
 void DdeFaceTracker::socketErrorOccurred(QAbstractSocket::SocketError socketError) {
     qCWarning(interfaceapp) << "DDE Face Tracker: Socket error: " << _udpSocket.errorString();
 }
 
 void DdeFaceTracker::socketStateChanged(QAbstractSocket::SocketState socketState) {
     QString state;
-    switch(socketState) {
+    switch (socketState) {
         case QAbstractSocket::BoundState:
             state = "Bound";
             break;
@@ -370,7 +354,7 @@ void DdeFaceTracker::decodePacket(const QByteArray& buffer) {
         int bytesToCopy = glm::min((int)sizeof(packet), buffer.size());
         memset(&packet.name, '\n', MAX_NAME_SIZE + 1);
         memcpy(&packet, buffer.data(), bytesToCopy);
-        
+
         glm::vec3 translation;
         memcpy(&translation, packet.translation, sizeof(packet.translation));
         glm::quat rotation;
@@ -389,8 +373,7 @@ void DdeFaceTracker::decodePacket(const QByteArray& buffer) {
         if (isFiltering) {
             glm::vec3 linearVelocity = (translation - _lastHeadTranslation) / _averageMessageTime;
             const float LINEAR_VELOCITY_FILTER_STRENGTH = 0.3f;
-            float velocityFilter = glm::clamp(1.0f - glm::length(linearVelocity) *
-                LINEAR_VELOCITY_FILTER_STRENGTH, 0.0f, 1.0f);
+            float velocityFilter = glm::clamp(1.0f - glm::length(linearVelocity) * LINEAR_VELOCITY_FILTER_STRENGTH, 0.0f, 1.0f);
             _filteredHeadTranslation = velocityFilter * _filteredHeadTranslation + (1.0f - velocityFilter) * translation;
             _lastHeadTranslation = translation;
             _headTranslation = _filteredHeadTranslation;
@@ -411,8 +394,8 @@ void DdeFaceTracker::decodePacket(const QByteArray& buffer) {
                 angularVelocity = glm::vec3(0, 0, 0);
             }
             const float ANGULAR_VELOCITY_FILTER_STRENGTH = 0.3f;
-            _headRotation = safeMix(_headRotation, rotation, glm::clamp(glm::length(angularVelocity) *
-                ANGULAR_VELOCITY_FILTER_STRENGTH, 0.0f, 1.0f));
+            _headRotation = safeMix(_headRotation, rotation,
+                                    glm::clamp(glm::length(angularVelocity) * ANGULAR_VELOCITY_FILTER_STRENGTH, 0.0f, 1.0f));
         } else {
             _headRotation = rotation;
         }
@@ -459,9 +442,9 @@ void DdeFaceTracker::decodePacket(const QByteArray& buffer) {
         // EyeDown coefficients work better over both +ve and -ve values than EyeUp values.
         // EyeIn coefficients work better over both +ve and -ve values than EyeOut values.
         // Pitch and yaw values are relative to the screen.
-        const float EYE_PITCH_SCALE = -1500.0f;  // Sign, scale, and average to be similar to Faceshift values.
+        const float EYE_PITCH_SCALE = -1500.0f; // Sign, scale, and average to be similar to Faceshift values.
         _eyePitch = EYE_PITCH_SCALE * (_coefficients[_leftEyeDownIndex] + _coefficients[_rightEyeDownIndex]);
-        const float EYE_YAW_SCALE = 2000.0f;  // Scale and average to be similar to Faceshift values.
+        const float EYE_YAW_SCALE = 2000.0f; // Scale and average to be similar to Faceshift values.
         _eyeYaw = EYE_YAW_SCALE * (_coefficients[_leftEyeInIndex] + _coefficients[_rightEyeInIndex]);
         if (isFiltering) {
             const float EYE_VELOCITY_FILTER_STRENGTH = 0.005f;
@@ -502,7 +485,7 @@ void DdeFaceTracker::decodePacket(const QByteArray& buffer) {
             for (int i = 0; i < 2; i++) {
                 // Scale EyeBlink values so that they can be used to control both EyeBlink and EyeOpen
                 // -ve values control EyeOpen; +ve values control EyeBlink
-                static const float EYE_CONTROL_THRESHOLD = 0.5f;  // Resting eye value
+                static const float EYE_CONTROL_THRESHOLD = 0.5f; // Resting eye value
                 eyeCoefficients[i] = (_filteredEyeBlinks[i] - EYE_CONTROL_THRESHOLD) / (1.0f - EYE_CONTROL_THRESHOLD);
 
                 // Change to closing or opening states
@@ -511,12 +494,12 @@ void DdeFaceTracker::decodePacket(const QByteArray& buffer) {
                 float eyeOpeningThreshold = eyeClosingThreshold - EYE_CONTROL_HYSTERISIS;
                 if ((_eyeStates[i] == EYE_OPEN || _eyeStates[i] == EYE_OPENING) && eyeCoefficients[i] > eyeClosingThreshold) {
                     _eyeStates[i] = EYE_CLOSING;
-                } else if ((_eyeStates[i] == EYE_CLOSED || _eyeStates[i] == EYE_CLOSING)
-                    && eyeCoefficients[i] < eyeOpeningThreshold) {
+                } else if ((_eyeStates[i] == EYE_CLOSED || _eyeStates[i] == EYE_CLOSING) &&
+                           eyeCoefficients[i] < eyeOpeningThreshold) {
                     _eyeStates[i] = EYE_OPENING;
                 }
 
-                const float EYELID_MOVEMENT_RATE = 10.0f;  // units/second
+                const float EYELID_MOVEMENT_RATE = 10.0f; // units/second
                 const float EYE_OPEN_SCALE = 0.2f;
                 if (_eyeStates[i] == EYE_CLOSING) {
                     // Close eyelid until it's fully closed
@@ -536,7 +519,7 @@ void DdeFaceTracker::decodePacket(const QByteArray& buffer) {
                     } else {
                         eyeCoefficients[i] = openingValue;
                     }
-                } else  if (_eyeStates[i] == EYE_OPEN) {
+                } else if (_eyeStates[i] == EYE_OPEN) {
                     // Reduce eyelid movement
                     eyeCoefficients[i] = eyeCoefficients[i] * EYE_OPEN_SCALE;
                 } else if (_eyeStates[i] == EYE_CLOSED) {
@@ -585,21 +568,20 @@ void DdeFaceTracker::decodePacket(const QByteArray& buffer) {
 
         // Scale all coefficients
         for (int i = 0; i < NUM_EXPRESSIONS; i++) {
-            _blendshapeCoefficients[i]
-                = glm::clamp(DDE_COEFFICIENT_SCALES[i] * _coefficients[i], 0.0f, 1.0f);
+            _blendshapeCoefficients[i] = glm::clamp(DDE_COEFFICIENT_SCALES[i] * _coefficients[i], 0.0f, 1.0f);
         }
 
         // Calculate average frame time
         const float FRAME_AVERAGING_FACTOR = 0.99f;
         quint64 usecsNow = usecTimestampNow();
         if (_lastMessageReceived != 0) {
-            _averageMessageTime = FRAME_AVERAGING_FACTOR * _averageMessageTime 
-                + (1.0f - FRAME_AVERAGING_FACTOR) * (float)(usecsNow - _lastMessageReceived) / 1000000.0f;
+            _averageMessageTime = FRAME_AVERAGING_FACTOR * _averageMessageTime +
+                                  (1.0f - FRAME_AVERAGING_FACTOR) * (float)(usecsNow - _lastMessageReceived) / 1000000.0f;
         }
         _lastMessageReceived = usecsNow;
 
         FaceTracker::countFrame();
-        
+
     } else {
         qCWarning(interfaceapp) << "DDE Face Tracker: Decode error";
     }

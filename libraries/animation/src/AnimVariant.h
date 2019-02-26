@@ -11,28 +11,20 @@
 #ifndef hifi_AnimVariant_h
 #define hifi_AnimVariant_h
 
+#include <GLMHelpers.h>
+#include <StreamUtils.h>
+#include <QScriptValue>
 #include <cassert>
 #include <functional>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <map>
 #include <set>
-#include <QScriptValue>
-#include <StreamUtils.h>
-#include <GLMHelpers.h>
 #include "AnimationLogging.h"
 
 class AnimVariant {
 public:
-    enum class Type {
-        Bool = 0,
-        Int,
-        Float,
-        Vec3,
-        Quat,
-        String,
-        NumTypes
-    };
+    enum class Type { Bool = 0, Int, Float, Vec3, Quat, String, NumTypes };
 
     static const AnimVariant False;
 
@@ -52,12 +44,30 @@ public:
     bool isString() const { return _type == Type::String; }
     Type getType() const { return _type; }
 
-    void setBool(bool value) { assert(_type == Type::Bool); _val.boolVal = value; }
-    void setInt(int value) { assert(_type == Type::Int); _val.intVal = value; }
-    void setFloat(float value) { assert(_type == Type::Float); _val.floats[0] = value; }
-    void setVec3(const glm::vec3& value) { assert(_type == Type::Vec3); *reinterpret_cast<glm::vec3*>(&_val) = value; }
-    void setQuat(const glm::quat& value) { assert(_type == Type::Quat); *reinterpret_cast<glm::quat*>(&_val) = value; }
-    void setString(const QString& value) { assert(_type == Type::String); _stringVal = value; }
+    void setBool(bool value) {
+        assert(_type == Type::Bool);
+        _val.boolVal = value;
+    }
+    void setInt(int value) {
+        assert(_type == Type::Int);
+        _val.intVal = value;
+    }
+    void setFloat(float value) {
+        assert(_type == Type::Float);
+        _val.floats[0] = value;
+    }
+    void setVec3(const glm::vec3& value) {
+        assert(_type == Type::Vec3);
+        *reinterpret_cast<glm::vec3*>(&_val) = value;
+    }
+    void setQuat(const glm::quat& value) {
+        assert(_type == Type::Quat);
+        *reinterpret_cast<glm::quat*>(&_val) = value;
+    }
+    void setString(const QString& value) {
+        assert(_type == Type::String);
+        _stringVal = value;
+    }
 
     bool getBool() const {
         if (_type == Type::Bool) {
@@ -100,9 +110,7 @@ public:
             return Quaternions::IDENTITY;
         }
     }
-    const QString& getString() const {
-        return _stringVal;
-    }
+    const QString& getString() const { return _stringVal; }
 
 protected:
     Type _type;
@@ -116,7 +124,6 @@ protected:
 
 class AnimVariantMap {
 public:
-
     bool lookup(const QString& key, bool defaultValue) const {
         // check triggers first, then map
         if (key.isEmpty()) {
@@ -216,7 +223,10 @@ public:
         _rigToGeometryRot = glmExtractRotation(rigToGeometry);
     }
 
-    void clearMap() { _map.clear(); _triggers.clear(); }
+    void clearMap() {
+        _map.clear();
+        _triggers.clear();
+    }
     bool hasKey(const QString& key) const { return _map.find(key) != _map.end(); }
 
     const AnimVariant& get(const QString& key) const {
@@ -242,26 +252,26 @@ public:
         qCDebug(animation) << "AnimVariantMap =";
         for (auto& pair : _map) {
             switch (pair.second.getType()) {
-            case AnimVariant::Type::Bool:
-                qCDebug(animation) << "    " << pair.first << "=" << pair.second.getBool();
-                break;
-            case AnimVariant::Type::Int:
-                qCDebug(animation) << "    " << pair.first << "=" << pair.second.getInt();
-                break;
-            case AnimVariant::Type::Float:
-                qCDebug(animation) << "    " << pair.first << "=" << pair.second.getFloat();
-                break;
-            case AnimVariant::Type::Vec3:
-                qCDebug(animation) << "    " << pair.first << "=" << pair.second.getVec3();
-                break;
-            case AnimVariant::Type::Quat:
-                qCDebug(animation) << "    " << pair.first << "=" << pair.second.getQuat();
-                break;
-            case AnimVariant::Type::String:
-                qCDebug(animation) << "    " << pair.first << "=" << pair.second.getString();
-                break;
-            default:
-                assert(("invalid AnimVariant::Type", false));
+                case AnimVariant::Type::Bool:
+                    qCDebug(animation) << "    " << pair.first << "=" << pair.second.getBool();
+                    break;
+                case AnimVariant::Type::Int:
+                    qCDebug(animation) << "    " << pair.first << "=" << pair.second.getInt();
+                    break;
+                case AnimVariant::Type::Float:
+                    qCDebug(animation) << "    " << pair.first << "=" << pair.second.getFloat();
+                    break;
+                case AnimVariant::Type::Vec3:
+                    qCDebug(animation) << "    " << pair.first << "=" << pair.second.getVec3();
+                    break;
+                case AnimVariant::Type::Quat:
+                    qCDebug(animation) << "    " << pair.first << "=" << pair.second.getQuat();
+                    break;
+                case AnimVariant::Type::String:
+                    qCDebug(animation) << "    " << pair.first << "=" << pair.second.getString();
+                    break;
+                default:
+                    assert(("invalid AnimVariant::Type", false));
             }
         }
     }

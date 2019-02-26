@@ -13,15 +13,15 @@
 
 #include <QFuture>
 #include <QLabel>
-#include <QScrollBar>
-#include <QtConcurrent/QtConcurrentRun>
-#include <QStringListModel>
 #include <QListView>
+#include <QScrollBar>
+#include <QStringListModel>
 #include <QToolTip>
+#include <QtConcurrent/QtConcurrentRun>
 
-#include <shared/QtHelpers.h>
-#include <ScriptEngines.h>
 #include <PathUtils.h>
+#include <ScriptEngines.h>
+#include <shared/QtHelpers.h>
 
 #include "Application.h"
 #include "ScriptHighlighting.h"
@@ -42,8 +42,7 @@ const QString GUTTER_ERROR = "<span style=\"color: #d13b22;\">X</span>";
 
 const QString JSDOC_LINE_SEPARATOR = "\r";
 
-const QString JSDOC_STYLE =
-    "<style type=\"text/css\"> \
+const QString JSDOC_STYLE = "<style type=\"text/css\"> \
         .code { \
             font-family: Consolas, Monaco, 'Andale Mono', monospace \
         } \
@@ -66,7 +65,7 @@ QList<QString> _readLines(const QString& filename) {
     // TODO: check root["version"]
     return root[JSON_KEY].toVariant().toStringList();
 }
- 
+
 void _writeLines(const QString& filename, const QList<QString>& lines) {
     QFile file(filename);
     file.open(QFile::WriteOnly);
@@ -101,31 +100,27 @@ QStandardItemModel* JSConsole::getAutoCompleteModel(const QString& memberOf) {
     auto model = new QStandardItemModel(this);
 
     if (memberOf != nullptr) {
-        foreach(auto doc, _apiDocs) {
+        foreach (auto doc, _apiDocs) {
             auto object = doc.toObject();
             if (object.value("name").toString() == memberOf && object.value("scope").toString() == "global" &&
                 object.value("kind").toString() == "namespace") {
-
                 memberOfProperty = object.value("longname").toString();
 
                 auto properties = doc.toObject().value("properties").toArray();
-                foreach(auto propertyObject, properties) {
-                    model->appendRow(getAutoCompleteItem(propertyObject));
-                }
+                foreach (auto propertyObject, properties) { model->appendRow(getAutoCompleteItem(propertyObject)); }
             }
         }
         if (memberOfProperty == nullptr) {
             return nullptr;
         }
     }
-    
-    foreach(auto doc, _apiDocs) {
+
+    foreach (auto doc, _apiDocs) {
         auto object = doc.toObject();
         auto scope = object.value("scope");
         if ((memberOfProperty == nullptr && scope.toString() == "global" && object.value("kind").toString() == "namespace") ||
             (memberOfProperty != nullptr && object.value("memberof").toString() == memberOfProperty &&
-                object.value("kind").toString() != "typedef")) {
-
+             object.value("kind").toString() != "typedef")) {
             model->appendRow(getAutoCompleteItem(doc));
         }
     }
@@ -140,7 +135,6 @@ JSConsole::JSConsole(QWidget* parent, const ScriptEnginePointer& scriptEngine) :
     _savedHistoryFilename(QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/" + HISTORY_FILENAME),
     _commandHistory(_readLines(_savedHistoryFilename)),
     _completer(new QCompleter(this)) {
-
     readAPI();
 
     _ui->setupUi(this);
@@ -166,7 +160,7 @@ JSConsole::JSConsole(QWidget* parent, const ScriptEnginePointer& scriptEngine) :
     _completer->setCompletionMode(QCompleter::PopupCompletion);
     _completer->setCaseSensitivity(Qt::CaseSensitive);
 
-    QListView *listView = new QListView();
+    QListView* listView = new QListView();
     listView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     listView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     listView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -175,11 +169,11 @@ JSConsole::JSConsole(QWidget* parent, const ScriptEnginePointer& scriptEngine) :
 
     _completer->setPopup(listView);
     _completer->popup()->installEventFilter(this);
-    QObject::connect(_completer, static_cast<void(QCompleter::*)(const QModelIndex&)>(&QCompleter::activated), this,
-        &JSConsole::insertCompletion);
+    QObject::connect(_completer, static_cast<void (QCompleter::*)(const QModelIndex&)>(&QCompleter::activated), this,
+                     &JSConsole::insertCompletion);
 
-    QObject::connect(_completer, static_cast<void(QCompleter::*)(const QModelIndex&)>(&QCompleter::highlighted), this,
-        &JSConsole::highlightedCompletion);
+    QObject::connect(_completer, static_cast<void (QCompleter::*)(const QModelIndex&)>(&QCompleter::highlighted), this,
+                     &JSConsole::highlightedCompletion);
 
     setScriptEngine(scriptEngine);
 
@@ -229,7 +223,7 @@ void JSConsole::highlightedCompletion(const QModelIndex& completion) {
             bool hasDefaultParam = false;
             bool hasOptionalParam = false;
             bool firstItem = true;
-            foreach(auto param, params) {
+            foreach (auto param, params) {
                 auto paramObject = param.toObject();
                 if (!hasOptionalParam && paramObject.value("optional").toBool(false)) {
                     hasOptionalParam = true;
@@ -254,10 +248,10 @@ void JSConsole::highlightedCompletion(const QModelIndex& completion) {
                 paramsTable += "<th>Default</th>";
             }
             paramsTable += "<th>Description</th></tr></thead><tbody>";
-            foreach(auto param, params) {
+            foreach (auto param, params) {
                 auto paramObject = param.toObject();
                 paramsTable += "<tr><td>" + paramObject.value("name").toString() + "</td><td>" +
-                    _jsdocTypeToString(paramObject.value("type")) + "</td><td>";
+                               _jsdocTypeToString(paramObject.value("type")) + "</td><td>";
                 if (hasDefaultParam) {
                     paramsTable += paramObject.value("defaultvalue").toVariant().toString() + "</td><td>";
                 }
@@ -267,30 +261,30 @@ void JSConsole::highlightedCompletion(const QModelIndex& completion) {
             paramsTable += "</tbody></table>";
         }
         name += ")";
-    } else if (!jsdocObject.value("type").isUndefined()){
+    } else if (!jsdocObject.value("type").isUndefined()) {
         returnTypeText = _jsdocTypeToString(jsdocObject.value("type")) + " ";
     }
     auto popupText = JSDOC_STYLE + "<span class=\"no-wrap\">" + returnTypeText + name + "</span>";
-	auto descriptionText = "<p>" + description.replace(JSDOC_LINE_SEPARATOR, "<br>") + "</p>";
+    auto descriptionText = "<p>" + description.replace(JSDOC_LINE_SEPARATOR, "<br>") + "</p>";
 
     popupText += descriptionText;
     popupText += paramsTable;
     auto returns = jsdocObject.value("returns");
     if (!returns.isUndefined()) {
-        foreach(auto returnEntry, returns.toArray()) {
+        foreach (auto returnEntry, returns.toArray()) {
             auto returnsObject = returnEntry.toObject();
             auto returnsDescription = returnsObject.value("description").toString().replace(JSDOC_LINE_SEPARATOR, "<br>");
             popupText += "<h4>Returns</h4><p>" + returnsDescription + "</p><h5>Type</h5><pre><code>" +
-                _jsdocTypeToString(returnsObject.value("type")) + "</code></pre>";
+                         _jsdocTypeToString(returnsObject.value("type")) + "</code></pre>";
         }
     }
 
     if (!examples.isEmpty()) {
         popupText += "<h4>Examples</h4>";
-        foreach(auto example, examples) {
+        foreach (auto example, examples) {
             auto exampleText = example.toString();
             auto exampleLines = exampleText.split(JSDOC_LINE_SEPARATOR);
-            foreach(auto exampleLine, exampleLines) {
+            foreach (auto exampleLine, exampleLines) {
                 if (exampleLine.contains("<caption>")) {
                     popupText += exampleLine.replace("caption>", "h5>");
                 } else {
@@ -301,7 +295,7 @@ void JSConsole::highlightedCompletion(const QModelIndex& completion) {
     }
 
     QToolTip::showText(QPoint(_completer->popup()->pos().x() + _completer->popup()->width(), _completer->popup()->pos().y()),
-        popupText, _completer->popup());
+                       popupText, _completer->popup());
 }
 
 JSConsole::~JSConsole() {
@@ -349,14 +343,12 @@ void JSConsole::executeCommand(const QString& command) {
 
     QWeakPointer<ScriptEngine> weakScriptEngine = _scriptEngine;
     auto consoleFileName = _consoleFileName;
-    QFuture<QScriptValue> future = QtConcurrent::run([weakScriptEngine, consoleFileName, command]()->QScriptValue{
+    QFuture<QScriptValue> future = QtConcurrent::run([weakScriptEngine, consoleFileName, command]() -> QScriptValue {
         QScriptValue result;
         auto scriptEngine = weakScriptEngine.lock();
         if (scriptEngine) {
-            BLOCKING_INVOKE_METHOD(scriptEngine.data(), "evaluate",
-                Q_RETURN_ARG(QScriptValue, result),
-                Q_ARG(const QString&, command),
-                Q_ARG(const QString&, consoleFileName));
+            BLOCKING_INVOKE_METHOD(scriptEngine.data(), "evaluate", Q_RETURN_ARG(QScriptValue, result),
+                                   Q_ARG(const QString&, command), Q_ARG(const QString&, consoleFileName));
         }
         return result;
     });
@@ -418,14 +410,14 @@ bool JSConsole::eventFilter(QObject* sender, QEvent* event) {
         if (_completer->popup()->isVisible()) {
             // The following keys are forwarded by the completer to the widget
             switch (key) {
-            case Qt::Key_Space:
-            case Qt::Key_Enter:
-            case Qt::Key_Return:
-                insertCompletion(_completer->popup()->currentIndex());
-                _completer->popup()->hide();
-                return true;
-            default:
-                return false;
+                case Qt::Key_Space:
+                case Qt::Key_Enter:
+                case Qt::Key_Return:
+                    insertCompletion(_completer->popup()->currentIndex());
+                    _completer->popup()->hide();
+                    return true;
+                default:
+                    return false;
             }
         }
 
@@ -468,9 +460,8 @@ bool JSConsole::eventFilter(QObject* sender, QEvent* event) {
 
         // completer shortcut (CTRL + SPACE)
         bool isCompleterShortcut = ((keyEvent->modifiers() & Qt::ControlModifier) && key == Qt::Key_Space) ||
-            key == Qt::Key_Period;
+                                   key == Qt::Key_Period;
         if (_completer->popup()->isVisible() || isCompleterShortcut) {
-
             const bool ctrlOrShift = keyEvent->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier);
             if (ctrlOrShift && keyEvent->text().isEmpty()) {
                 return false;
@@ -484,9 +475,9 @@ bool JSConsole::eventFilter(QObject* sender, QEvent* event) {
             }
 
             auto textCursor = _ui->promptTextEdit->textCursor();
-                
+
             textCursor.select(QTextCursor::WordUnderCursor);
-                
+
             QString completionPrefix = textCursor.selectedText();
 
             auto leftOfCursor = _ui->promptTextEdit->toPlainText().left(textCursor.position());
@@ -521,7 +512,7 @@ bool JSConsole::eventFilter(QObject* sender, QEvent* event) {
             }
             auto cursorRect = _ui->promptTextEdit->cursorRect();
             cursorRect.setWidth(_completer->popup()->sizeHintForColumn(0) +
-                _completer->popup()->verticalScrollBar()->sizeHint().width());
+                                _completer->popup()->verticalScrollBar()->sizeHint().width());
             _completer->complete(cursorRect);
             highlightedCompletion(_completer->popup()->currentIndex());
             return false;

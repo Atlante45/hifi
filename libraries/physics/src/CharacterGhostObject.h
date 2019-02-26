@@ -14,18 +14,18 @@
 
 #include <stdint.h>
 
-#include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <btBulletDynamicsCommon.h>
 #include <stdint.h>
 
-#include "CharacterSweepResult.h"
 #include "CharacterRayResult.h"
+#include "CharacterSweepResult.h"
 
 class CharacterGhostShape;
 
 class CharacterGhostObject : public btGhostObject {
 public:
-    CharacterGhostObject() { }
+    CharacterGhostObject() {}
     ~CharacterGhostObject();
 
     void setCollisionGroupAndMask(int32_t group, int32_t mask);
@@ -38,9 +38,7 @@ public:
 
     void setCollisionWorld(btCollisionWorld* world);
 
-    bool rayTest(const btVector3& start,
-            const btVector3& end,
-            CharacterRayResult& result) const;
+    bool rayTest(const btVector3& start, const btVector3& end, CharacterRayResult& result) const;
 
     void refreshOverlappingPairCache();
 

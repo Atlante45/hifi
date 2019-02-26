@@ -23,7 +23,7 @@ void JSBakerTest::setTestCases() {
     _testCases.emplace_back("var a =      1;", "var a=1;"); // Multiple spaces omitted
     _testCases.emplace_back("var a=\t\t\t1;", "var a=1;"); // Multiple tabs omitted
 
-                                                              // Cases for space not omitted
+    // Cases for space not omitted
     _testCases.emplace_back("var x", "var x");
     _testCases.emplace_back("a '", "a '");
     _testCases.emplace_back("a $", "a $");
@@ -42,7 +42,7 @@ void JSBakerTest::setTestCases() {
     _testCases.emplace_back("a\n\n b", "a\nb"); // Skip multiple new lines followed by whitespace
     _testCases.emplace_back("a\n\n  b", "a\nb"); // Skip multiple new lines followed by tab
 
-                                                 //Cases for new line not omitted
+    // Cases for new line not omitted
     _testCases.emplace_back("a\nb", "a\nb");
     _testCases.emplace_back("a\n9", "a\n9");
     _testCases.emplace_back("9\na", "9\na");
@@ -71,19 +71,18 @@ void JSBakerTest::setTestCases() {
 
     // Edge Cases
 
-    //No semicolon to terminate an expression, instead a new line used for termination
+    // No semicolon to terminate an expression, instead a new line used for termination
     _testCases.emplace_back("var x=5\nvar y=6;", "var x=5\nvar y=6;");
 
-     //a + ++b is minified as a+ ++b.
+    // a + ++b is minified as a+ ++b.
     _testCases.emplace_back("a + ++b", "a + ++b");
 
-    //a - --b is minified as a- --b.
+    // a - --b is minified as a- --b.
     _testCases.emplace_back("a - --b", "a - --b");
 }
 
 void JSBakerTest::testJSBaking() {
-
-    for (int i = 0;i < _testCases.size();i++) {
+    for (int i = 0; i < _testCases.size(); i++) {
         QByteArray output;
         auto input = _testCases.at(i).first;
         JSBaker::bakeJS(input, output);

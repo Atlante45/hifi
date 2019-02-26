@@ -12,10 +12,10 @@
 
 namespace controller {
 
-    AxisValue::AxisValue(const float value, const quint64 timestamp) :
-        value(value), timestamp(timestamp) { }
-
-    bool AxisValue::operator==(const AxisValue& right) const {
-        return value == right.value && timestamp == right.timestamp;
-    }
+AxisValue::AxisValue(const float value, const quint64 timestamp) : value(value), timestamp(timestamp) {
 }
+
+bool AxisValue::operator==(const AxisValue& right) const {
+    return value == right.value && timestamp == right.timestamp;
+}
+} // namespace controller

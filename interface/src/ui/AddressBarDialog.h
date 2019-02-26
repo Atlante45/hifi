@@ -13,8 +13,8 @@
 #ifndef hifi_AddressBarDialog_h
 #define hifi_AddressBarDialog_h
 
-#include <OffscreenQmlDialog.h>
 #include <NetworkingConstants.h>
+#include <OffscreenQmlDialog.h>
 
 class AddressBarDialog : public OffscreenQmlDialog {
     Q_OBJECT
@@ -29,7 +29,12 @@ public:
     bool backEnabled() { return _backEnabled; }
     bool forwardEnabled() { return _forwardEnabled; }
     bool useFeed() { return _useFeed; }
-    void setUseFeed(bool useFeed) { if (_useFeed != useFeed) { _useFeed = useFeed; emit useFeedChanged(); } }
+    void setUseFeed(bool useFeed) {
+        if (_useFeed != useFeed) {
+            _useFeed = useFeed;
+            emit useFeedChanged();
+        }
+    }
     QString metaverseServerUrl() { return NetworkingConstants::METAVERSE_SERVER_URL().toString(); }
 
 signals:

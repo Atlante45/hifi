@@ -26,58 +26,56 @@ class ModelHandler : public QObject {
     Q_OBJECT
 public:
     ModelHandler(FSTReader::ModelType modelsType, QWidget* parent = NULL);
-    
+
     void lockModel() { _lock.lockForRead(); }
     QStandardItemModel* getModel() { return &_model; }
     void unlockModel() { _lock.unlock(); }
-    
+
 signals:
     void doneDownloading();
     void updated();
-    
+
 public slots:
     void setNameFilter(QString nameFilter);
     void download();
     void update();
     void exit();
-    
+
 private slots:
     void downloadFinished();
-    
+
 private:
     bool _initiateExit;
     FSTReader::ModelType _type;
     QReadWriteLock _lock;
     QStandardItemModel _model;
     QString _nameFilter;
-    
+
     void queryNewFiles(QString marker = QString());
     bool parseXML(QByteArray xmlFile);
     bool parseHeaders(QNetworkReply* reply);
 };
 
-
 class ModelsBrowser : public QWidget {
     Q_OBJECT
 public:
-    
     ModelsBrowser(FSTReader::ModelType modelsType, QWidget* parent = NULL);
     QString getSelectedFile() { return _selectedFile; }
-    
+
 signals:
     void startDownloading();
     void startUpdating();
     void selected(QString filename);
-    
+
 public slots:
     void setNameFilter(QString nameFilter);
     void browse();
-    
+
 private slots:
     void applyFilter(const QString& filter);
     void resizeView();
     void enableSearchBar();
-    
+
 private:
     ModelHandler* _handler;
     QLineEdit* _searchBar;

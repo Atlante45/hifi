@@ -62,7 +62,7 @@ static const int TYPE_SIZE[NUM_TYPES] = {
     // normalized values
     4, // NINT32
     4, // NUINT32
-    2, // NINT16 
+    2, // NINT16
     2, // NUINT16
     1, // NINT8
     1, // NUINT8
@@ -72,7 +72,7 @@ static const int TYPE_SIZE[NUM_TYPES] = {
     1, // COMPRESSED
 };
 
-// Array answering the question Does this type is integer or not 
+// Array answering the question Does this type is integer or not
 static const bool TYPE_IS_INTEGER[NUM_TYPES] = {
     false, // FLOAT
     true, // INT32
@@ -86,7 +86,7 @@ static const bool TYPE_IS_INTEGER[NUM_TYPES] = {
     // Normalized values
     false, // NINT32
     false, // NUINT32
-    false, // NINT16 
+    false, // NINT16
     false, // NUINT16
     false, // NINT8
     false, // NUINT8
@@ -111,50 +111,22 @@ enum Dimension : uint8_t {
 
 // Count (of scalars) in an Element for a given Dimension
 static const int DIMENSION_LOCATION_COUNT[NUM_DIMENSIONS] = {
-    1,
-    1,
-    1,
-    1,
-    1,
-    3,
-    4,
-    1,
+    1, 1, 1, 1, 1, 3, 4, 1,
 };
 
 // Count (of scalars) in an Element for a given Dimension's location
 static const int DIMENSION_SCALAR_COUNT_PER_LOCATION[NUM_DIMENSIONS] = {
-    1,
-    2,
-    3,
-    4,
-    4,
-    3,
-    4,
-    1,
+    1, 2, 3, 4, 4, 3, 4, 1,
 };
 
 // Count (of scalars) in an Element for a given Dimension
 static const int DIMENSION_SCALAR_COUNT[NUM_DIMENSIONS] = {
-    1,
-    2,
-    3,
-    4,
-    4,
-    9,
-    16,
-    1,
+    1, 2, 3, 4, 4, 9, 16, 1,
 };
 
 // Tile dimension described by the ELement for "Tilexxx" DIMENSIONs
 static const glm::ivec2 DIMENSION_TILE_DIM[NUM_DIMENSIONS] = {
-    { 1, 1 },
-    { 1, 1 },
-    { 1, 1 },
-    { 1, 1 },
-    { 1, 1 },
-    { 1, 1 },
-    { 1, 1 },
-    { 4, 4 },
+    { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 }, { 4, 4 },
 };
 
 // Semantic of an Element
@@ -172,7 +144,7 @@ enum Semantic : uint8_t {
     XYZW,
     QUAT,
     UV,
-    INDEX, //used by index buffer of a mesh
+    INDEX, // used by index buffer of a mesh
     PART, // used by part buffer of a mesh
 
     DEPTH, // Depth only buffer
@@ -220,95 +192,87 @@ enum Semantic : uint8_t {
     SAMPLER_MULTISAMPLE,
     SAMPLER_SHADOW,
 
-
     NUM_SEMANTICS, // total Number of semantics (not a valid Semantic)!
 };
 
 // Array providing the scaling factor to size in bytes depending on a given semantic
 static const int SEMANTIC_SIZE_FACTOR[NUM_SEMANTICS] = {
-    1, //RAW = 0, // used as RAW memory
+    1, // RAW = 0, // used as RAW memory
 
-    1, //RED,
-    1, //RGB,
-    1, //RGBA,
-    1, //BGRA,
+    1, // RED,
+    1, // RGB,
+    1, // RGBA,
+    1, // BGRA,
 
-    1, //XY,
-    1, //XYZ,
-    1, //XYZW,
-    1, //QUAT,
-    1, //UV,
-    1, //INDEX, //used by index buffer of a mesh
-    1, //PART, // used by part buffer of a mesh
+    1, // XY,
+    1, // XYZ,
+    1, // XYZW,
+    1, // QUAT,
+    1, // UV,
+    1, // INDEX, //used by index buffer of a mesh
+    1, // PART, // used by part buffer of a mesh
 
-    1, //DEPTH, // Depth only buffer
-    1, //STENCIL, // Stencil only buffer
-    1, //DEPTH_STENCIL, // Depth Stencil buffer
+    1, // DEPTH, // Depth only buffer
+    1, // STENCIL, // Stencil only buffer
+    1, // DEPTH_STENCIL, // Depth Stencil buffer
 
-    1, //SRED,
-    1, //SRGB,
-    1, //SRGBA,
-    1, //SBGRA,
+    1, // SRED,
+    1, // SRGB,
+    1, // SRGBA,
+    1, // SBGRA,
 
     // These are generic compression format smeantic for images
     // THey must be used with Dim = BLOB and Type = Compressed
     // THe size of a compressed element is defined from the semantic
     1, //_FIRST_COMPRESSED,
 
-    8, //COMPRESSED_BC1_SRGB, 1/2 byte/pixel * 4x4 pixels = 8 bytes
-    8, //COMPRESSED_BC1_SRGBA, 1/2 byte/pixel * 4x4 pixels = 8 bytes
-    16, //COMPRESSED_BC3_SRGBA, 1 byte/pixel * 4x4 pixels = 16 bytes
-    8, //COMPRESSED_BC4_RED, 1/2 byte/pixel * 4x4 pixels = 8 bytes
-    16, //COMPRESSED_BC5_XY, 1 byte/pixel * 4x4 pixels = 16 bytes
-    16, //COMPRESSED_BC6_RGB, 1 byte/pixel * 4x4 pixels = 16 bytes
-    16, //COMPRESSED_BC7_SRGBA, 1 byte/pixel * 4x4 pixels = 16 bytes
+    8, // COMPRESSED_BC1_SRGB, 1/2 byte/pixel * 4x4 pixels = 8 bytes
+    8, // COMPRESSED_BC1_SRGBA, 1/2 byte/pixel * 4x4 pixels = 8 bytes
+    16, // COMPRESSED_BC3_SRGBA, 1 byte/pixel * 4x4 pixels = 16 bytes
+    8, // COMPRESSED_BC4_RED, 1/2 byte/pixel * 4x4 pixels = 8 bytes
+    16, // COMPRESSED_BC5_XY, 1 byte/pixel * 4x4 pixels = 16 bytes
+    16, // COMPRESSED_BC6_RGB, 1 byte/pixel * 4x4 pixels = 16 bytes
+    16, // COMPRESSED_BC7_SRGBA, 1 byte/pixel * 4x4 pixels = 16 bytes
 
-    8,  //COMPRESSED_ETC2_RGB,
-    8,  //COMPRESSED_ETC2_SRGB,
-    8,  //COMPRESSED_ETC2_RGB_PUNCHTHROUGH_ALPHA,
-    8,  //COMPRESSED_ETC2_SRGB_PUNCHTHROUGH_ALPHA,
-    16, //COMPRESSED_ETC2_RGBA,
-    16, //COMPRESSED_ETC2_SRGBA,
-    8,  //COMPRESSED_EAC_RED,
-    8,  //COMPRESSED_EAC_RED_SIGNED,
-    16, //COMPRESSED_EAC_XY,
-    16, //COMPRESSED_EAC_XY_SIGNED,
+    8, // COMPRESSED_ETC2_RGB,
+    8, // COMPRESSED_ETC2_SRGB,
+    8, // COMPRESSED_ETC2_RGB_PUNCHTHROUGH_ALPHA,
+    8, // COMPRESSED_ETC2_SRGB_PUNCHTHROUGH_ALPHA,
+    16, // COMPRESSED_ETC2_RGBA,
+    16, // COMPRESSED_ETC2_SRGBA,
+    8, // COMPRESSED_EAC_RED,
+    8, // COMPRESSED_EAC_RED_SIGNED,
+    16, // COMPRESSED_EAC_XY,
+    16, // COMPRESSED_EAC_XY_SIGNED,
 
     1, //_LAST_COMPRESSED,
 
-    1, //R11G11B10,
-    1, //RGB9E5
+    1, // R11G11B10,
+    1, // RGB9E5
 
-    1, //UNIFORM,
-    1, //UNIFORM_BUFFER,
-    1, //RESOURCE_BUFFER,
-    1, //SAMPLER,
-    1, //SAMPLER_MULTISAMPLE,
-    1, //SAMPLER_SHADOW,
+    1, // UNIFORM,
+    1, // UNIFORM_BUFFER,
+    1, // RESOURCE_BUFFER,
+    1, // SAMPLER,
+    1, // SAMPLER_MULTISAMPLE,
+    1, // SAMPLER_SHADOW,
 };
-
 
 // Element is a simple 16bit value that contains everything we need to know about an element
 // of a buffer, a pixel of a texture, a varying input/output or uniform from a shader pipeline.
 // Type and dimension of the element, and semantic
 class Element {
 public:
-    Element(Dimension dim, Type type, Semantic sem) :
-        _semantic(sem),
-        _dimension(dim),
-        _type(type) 
-    {}
-    Element() :
-        _semantic(RAW),
-        _dimension(SCALAR),
-        _type(INT8)
-    {}
- 
+    Element(Dimension dim, Type type, Semantic sem) : _semantic(sem), _dimension(dim), _type(type) {}
+    Element() : _semantic(RAW), _dimension(SCALAR), _type(INT8) {}
+
     Semantic getSemantic() const { return (Semantic)_semantic; }
 
     Dimension getDimension() const { return (Dimension)_dimension; }
-    
-    bool isCompressed() const { return uint8(getSemantic() - _FIRST_COMPRESSED) <= uint8(_LAST_COMPRESSED - _FIRST_COMPRESSED); }
+
+    bool isCompressed() const {
+        return uint8(getSemantic() - _FIRST_COMPRESSED) <= uint8(_LAST_COMPRESSED - _FIRST_COMPRESSED);
+    }
 
     Type getType() const { return (Type)_type; }
     bool isNormalized() const { return (getType() >= NORMALIZED_START); }
@@ -318,19 +282,14 @@ public:
     uint32 getSize() const { return (DIMENSION_SCALAR_COUNT[_dimension] * TYPE_SIZE[_type] * SEMANTIC_SIZE_FACTOR[_semantic]); }
     const glm::ivec2& getTile() const { return (DIMENSION_TILE_DIM[_dimension]); }
 
-    uint8 getLocationCount() const { return  DIMENSION_LOCATION_COUNT[(Dimension)_dimension]; }
+    uint8 getLocationCount() const { return DIMENSION_LOCATION_COUNT[(Dimension)_dimension]; }
     uint8 getLocationScalarCount() const { return DIMENSION_SCALAR_COUNT_PER_LOCATION[(Dimension)_dimension]; }
     uint32 getLocationSize() const { return DIMENSION_SCALAR_COUNT_PER_LOCATION[_dimension] * TYPE_SIZE[_type]; }
 
-    uint16 getRaw() const { return *((const uint16*) (this)); }
+    uint16 getRaw() const { return *((const uint16*)(this)); }
 
-    
-    bool operator ==(const Element& right) const {
-        return getRaw() == right.getRaw();
-    }
-    bool operator !=(const Element& right) const {
-        return getRaw() != right.getRaw();
-    }
+    bool operator==(const Element& right) const { return getRaw() == right.getRaw(); }
+    bool operator!=(const Element& right) const { return getRaw() != right.getRaw(); }
 
     static const Element COLOR_R_8;
     static const Element COLOR_SR_8;
@@ -368,14 +327,13 @@ public:
     static const Element INDEX_UINT16;
     static const Element INDEX_INT32;
     static const Element PART_DRAWCALL;
-    
- protected:
+
+protected:
     uint16 _semantic : 7;
     uint16 _dimension : 4;
     uint16 _type : 5;
 };
 
-  
 enum ComparisonFunction : uint16 {
     NEVER = 0,
     LESS,
@@ -399,7 +357,6 @@ enum Primitive {
     NUM_PRIMITIVES,
 };
 
-};
-
+}; // namespace gpu
 
 #endif

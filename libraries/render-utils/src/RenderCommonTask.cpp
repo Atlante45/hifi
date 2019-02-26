@@ -11,43 +11,36 @@
 #include <gpu/Context.h>
 #include <graphics/ShaderConstants.h>
 
-#include "render-utils/ShaderConstants.h"
 #include "DeferredLightingEffect.h"
 #include "RenderUtilsLogging.h"
+#include "render-utils/ShaderConstants.h"
 
 namespace ru {
-    using render_utils::slot::texture::Texture;
-    using render_utils::slot::buffer::Buffer;
-}
+using render_utils::slot::buffer::Buffer;
+using render_utils::slot::texture::Texture;
+} // namespace ru
 
 namespace gr {
-    using graphics::slot::texture::Texture;
-    using graphics::slot::buffer::Buffer;
-}
-
+using graphics::slot::buffer::Buffer;
+using graphics::slot::texture::Texture;
+} // namespace gr
 
 using namespace render;
 extern void initForwardPipelines(ShapePlumber& plumber);
 
 void BeginGPURangeTimer::run(const render::RenderContextPointer& renderContext, gpu::RangeTimerPointer& timer) {
     timer = _gpuTimer;
-    gpu::doInBatch("BeginGPURangeTimer", renderContext->args->_context, [&](gpu::Batch& batch) {
-        _gpuTimer->begin(batch);
-    });
+    gpu::doInBatch("BeginGPURangeTimer", renderContext->args->_context, [&](gpu::Batch& batch) { _gpuTimer->begin(batch); });
 }
 
 void EndGPURangeTimer::run(const render::RenderContextPointer& renderContext, const gpu::RangeTimerPointer& timer) {
-    gpu::doInBatch("EndGPURangeTimer", renderContext->args->_context, [&](gpu::Batch& batch) {
-        timer->end(batch);
-    });
-    
+    gpu::doInBatch("EndGPURangeTimer", renderContext->args->_context, [&](gpu::Batch& batch) { timer->end(batch); });
+
     auto config = std::static_pointer_cast<Config>(renderContext->jobConfig);
     config->setGPUBatchRunTime(timer->getGPUAverage(), timer->getBatchAverage());
 }
 
-DrawLayered3D::DrawLayered3D(bool opaque) :
-    _shapePlumber(std::make_shared<ShapePlumber>()),
-    _opaquePass(opaque) {
+DrawLayered3D::DrawLayered3D(bool opaque) : _shapePlumber(std::make_shared<ShapePlumber>()), _opaquePass(opaque) {
     initForwardPipelines(*_shapePlumber);
 }
 
@@ -60,14 +53,14 @@ void DrawLayered3D::run(const RenderContextPointer& renderContext, const Inputs&
     const auto& inItems = inputs.get0();
     const auto& lightingModel = inputs.get1();
     const auto jitter = inputs.get2();
-    
+
     config->setNumDrawn((int)inItems.size());
     emit config->numDrawnChanged();
 
     RenderArgs* args = renderContext->args;
 
     // Clear the framebuffer without stereo
-    // Needs to be distinct from the other batch because using the clear call 
+    // Needs to be distinct from the other batch because using the clear call
     // while stereo is enabled triggers a warning
     if (_opaquePass) {
         gpu::doInBatch("DrawLayered3D::run::clear", args->_context, [&](gpu::Batch& batch) {
@@ -123,7 +116,8 @@ void CompositeHUD::run(const RenderContextPointer& renderContext, const gpu::Fra
             batch.setFramebuffer(inputs);
         }
         if (renderContext->args->_hudOperator) {
-            renderContext->args->_hudOperator(batch, renderContext->args->_hudTexture, renderContext->args->_renderMode == RenderArgs::RenderMode::MIRROR_RENDER_MODE);
+            renderContext->args->_hudOperator(batch, renderContext->args->_hudTexture,
+                                              renderContext->args->_renderMode == RenderArgs::RenderMode::MIRROR_RENDER_MODE);
         }
     });
 #endif
@@ -200,7 +194,6 @@ void Blit::run(const RenderContextPointer& renderContext, const gpu::Framebuffer
     });
 }
 
-
 void ResolveFramebuffer::run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs) {
     RenderArgs* args = renderContext->args;
     auto srcFbo = inputs.get0();
@@ -215,7 +208,7 @@ void ResolveFramebuffer::run(const render::RenderContextPointer& renderContext, 
     if (!srcFbo || !destFbo) {
         return;
     }
-    
+
     // Check valid size for sr and dest
     auto frameSize(srcFbo->getSize());
     if (destFbo->getSize() != frameSize) {
@@ -225,9 +218,7 @@ void ResolveFramebuffer::run(const render::RenderContextPointer& renderContext, 
     gpu::Vec4i rectSrc;
     rectSrc.z = frameSize.x;
     rectSrc.w = frameSize.y;
-    gpu::doInBatch("Resolve", args->_context, [&](gpu::Batch& batch) { 
-        batch.blit(srcFbo, rectSrc, destFbo, rectSrc);
-    });
+    gpu::doInBatch("Resolve", args->_context, [&](gpu::Batch& batch) { batch.blit(srcFbo, rectSrc, destFbo, rectSrc); });
 }
 
 void ResolveNewFramebuffer::run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs) {
@@ -252,21 +243,21 @@ void ResolveNewFramebuffer::run(const render::RenderContextPointer& renderContex
         _outputFramebuffer = gpu::FramebufferPointer(gpu::Framebuffer::create("resolvedNew.out"));
         auto colorFormat = gpu::Element::COLOR_SRGBA_32;
         auto defaultSampler = gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_LINEAR);
-        auto colorTexture = gpu::Texture::createRenderBuffer(colorFormat, frameSize.x, frameSize.y, gpu::Texture::SINGLE_MIP, defaultSampler);
+        auto colorTexture = gpu::Texture::createRenderBuffer(colorFormat, frameSize.x, frameSize.y, gpu::Texture::SINGLE_MIP,
+                                                             defaultSampler);
         _outputFramebuffer->setRenderBuffer(0, colorTexture);
     }
 
     gpu::Vec4i rectSrc;
     rectSrc.z = frameSize.x;
     rectSrc.w = frameSize.y;
-    gpu::doInBatch("ResolveNew", args->_context, [&](gpu::Batch& batch) { batch.blit(srcFbo, rectSrc, _outputFramebuffer, rectSrc); });
+    gpu::doInBatch("ResolveNew", args->_context,
+                   [&](gpu::Batch& batch) { batch.blit(srcFbo, rectSrc, _outputFramebuffer, rectSrc); });
 
     outputs = _outputFramebuffer;
 }
 
-
-
- void ExtractFrustums::run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& output) {
+void ExtractFrustums::run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& output) {
     assert(renderContext->args);
     assert(renderContext->args->_context);
 
@@ -288,8 +279,8 @@ void ResolveNewFramebuffer::run(const render::RenderContextPointer& renderContex
         globalShadow = shadowFrame->_objects[0];
     }
     for (auto i = 0; i < SHADOW_CASCADE_FRUSTUM_COUNT; i++) {
-        auto& shadowFrustum = output[SHADOW_CASCADE0_FRUSTUM+i].edit<ViewFrustumPointer>();
-        if (globalShadow && i<(int)globalShadow->getCascadeCount()) {
+        auto& shadowFrustum = output[SHADOW_CASCADE0_FRUSTUM + i].edit<ViewFrustumPointer>();
+        if (globalShadow && i < (int)globalShadow->getCascadeCount()) {
             auto& cascade = globalShadow->getCascade(i);
             shadowFrustum = cascade.getFrustum();
         } else {
@@ -297,4 +288,3 @@ void ResolveNewFramebuffer::run(const render::RenderContextPointer& renderContex
         }
     }
 }
-

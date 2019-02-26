@@ -14,21 +14,20 @@
 
 #include <glm/glm.hpp>
 
-#include <QString>
 #include <QStandardPaths>
-#include <QUrl>
+#include <QString>
 #include <QTimer>
+#include <QUrl>
 #include <QtGui/QImage>
 
-#include <SettingHandle.h>
 #include <DependencyManager.h>
+#include <SettingHandle.h>
 
 class QFile;
 class QTemporaryFile;
 
 class SnapshotMetaData {
 public:
-
     QUrl getURL() { return _URL; }
     void setURL(QUrl URL) { _URL = URL; }
 
@@ -36,10 +35,9 @@ private:
     QUrl _URL;
 };
 
-
 /**jsdoc
  * @namespace Snapshot
- * 
+ *
  * @hifi-interface
  * @hifi-client-entity
  * @hifi-avatar
@@ -51,14 +49,12 @@ class Snapshot : public QObject, public Dependency {
 public:
     Snapshot();
     QString saveSnapshot(QImage image, const QString& filename, const QString& pathname = QString());
-    void save360Snapshot(const glm::vec3& cameraPosition,
-                         const bool& cubemapOutputFormat,
-                         const bool& notify,
+    void save360Snapshot(const glm::vec3& cameraPosition, const bool& cubemapOutputFormat, const bool& notify,
                          const QString& filename);
     QTemporaryFile* saveTempSnapshot(QImage image);
     SnapshotMetaData* parseSnapshotData(QString snapshotPath);
 
-    Setting::Handle<QString> _snapshotsLocation{ "snapshotsLocation" };
+    Setting::Handle<QString> _snapshotsLocation { "snapshotsLocation" };
     void uploadSnapshot(const QString& filename, const QUrl& href = QUrl(""));
 
 signals:
@@ -88,10 +84,8 @@ private slots:
     void takeNextSnapshot();
 
 private:
-    QFile* savedFileForSnapshot(QImage& image,
-                                       bool isTemporary,
-                                       const QString& userSelectedFilename = QString(),
-                                       const QString& userSelectedPathname = QString());
+    QFile* savedFileForSnapshot(QImage& image, bool isTemporary, const QString& userSelectedFilename = QString(),
+                                const QString& userSelectedPathname = QString());
     QString _snapshotFilename;
     bool _notify360;
     bool _cubemapOutputFormat;

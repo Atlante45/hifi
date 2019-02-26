@@ -32,12 +32,9 @@ void PCMCodec::deactivate() {
     CodecPlugin::deactivate();
 }
 
-
 bool PCMCodec::isSupported() const {
     return true;
 }
-
-
 
 Encoder* PCMCodec::createEncoder(int sampleRate, int numChannels) {
     return this;
@@ -91,4 +88,3 @@ void zLibCodec::releaseEncoder(Encoder* encoder) {
 void zLibCodec::releaseDecoder(Decoder* decoder) {
     // do nothing... it wasn't allocated
 }
-

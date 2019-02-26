@@ -7,15 +7,14 @@
 //
 #pragma once
 
+#include <QtCore/QMutex>
 #include <QtCore/QObject>
 #include <QtCore/QSharedPointer>
+#include <QtCore/QSize>
 #include <QtCore/QThread>
 #include <QtCore/QWaitCondition>
-#include <QtCore/QMutex>
-#include <QtCore/QSize>
 
 #include "TextureCache.h"
-
 
 class QWindow;
 class QTimer;
@@ -26,7 +25,8 @@ class QQmlEngine;
 class QQmlContext;
 class OffscreenGLCanvas;
 
-namespace hifi { namespace qml {
+namespace hifi {
+namespace qml {
 
 class OffscreenSurface;
 
@@ -94,32 +94,33 @@ private:
     QList<QPointer<QObject>> _deletionList;
 
     // Texture management
-    TextureAndFence _latestTextureAndFence{ 0, 0 };
-    QQuickItem* _item{ nullptr };
-    QQuickItem* _rootItem{ nullptr };
-    QQuickWindow* _quickWindow{ nullptr };
-    QQmlContext* _qmlContext{ nullptr };
+    TextureAndFence _latestTextureAndFence { 0, 0 };
+    QQuickItem* _item { nullptr };
+    QQuickItem* _rootItem { nullptr };
+    QQuickWindow* _quickWindow { nullptr };
+    QQmlContext* _qmlContext { nullptr };
     mutable QMutex _mutex;
     QWaitCondition _cond;
 
 #ifndef DISABLE_QML
-    QWindow* _proxyWindow{ nullptr };
-    RenderControl* _renderControl{ nullptr };
-    RenderEventHandler* _renderObject{ nullptr };
+    QWindow* _proxyWindow { nullptr };
+    RenderControl* _renderControl { nullptr };
+    RenderEventHandler* _renderObject { nullptr };
 
-    QTimer* _renderTimer{ nullptr };
-    QThread* _renderThread{ nullptr };
+    QTimer* _renderTimer { nullptr };
+    QThread* _renderThread { nullptr };
 #endif
 
-    uint64_t _lastRenderTime{ 0 };
-    QSize _size{ 100, 100 };
-    uint8_t _maxFps{ 60 };
+    uint64_t _lastRenderTime { 0 };
+    QSize _size { 100, 100 };
+    uint8_t _maxFps { 60 };
 
-    bool _renderRequested{ false };
-    bool _syncRequested{ false };
-    bool _quit{ false };
-    bool _paused{ false };
+    bool _renderRequested { false };
+    bool _syncRequested { false };
+    bool _quit { false };
+    bool _paused { false };
 };
 
-}  // namespace impl
-}}  // namespace hifi::qml
+} // namespace impl
+} // namespace qml
+} // namespace hifi

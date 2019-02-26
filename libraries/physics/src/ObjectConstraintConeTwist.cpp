@@ -25,26 +25,23 @@ const glm::vec3 DEFAULT_CONE_TWIST_AXIS(1.0f, 0.0f, 0.0f);
 ObjectConstraintConeTwist::ObjectConstraintConeTwist(const QUuid& id, EntityItemPointer ownerEntity) :
     ObjectConstraint(DYNAMIC_TYPE_CONE_TWIST, id, ownerEntity),
     _axisInA(DEFAULT_CONE_TWIST_AXIS),
-    _axisInB(DEFAULT_CONE_TWIST_AXIS)
-{
-    #if WANT_DEBUG
+    _axisInB(DEFAULT_CONE_TWIST_AXIS) {
+#if WANT_DEBUG
     qCDebug(physics) << "ObjectConstraintConeTwist::ObjectConstraintConeTwist";
-    #endif
+#endif
 }
 
 ObjectConstraintConeTwist::~ObjectConstraintConeTwist() {
-    #if WANT_DEBUG
+#if WANT_DEBUG
     qCDebug(physics) << "ObjectConstraintConeTwist::~ObjectConstraintConeTwist";
-    #endif
+#endif
 }
 
 QList<btRigidBody*> ObjectConstraintConeTwist::getRigidBodies() {
     QList<btRigidBody*> result;
     result += getRigidBody();
     QUuid otherEntityID;
-    withReadLock([&]{
-        otherEntityID = _otherID;
-    });
+    withReadLock([&] { otherEntityID = _otherID; });
     if (!otherEntityID.isNull()) {
         result += getOtherRigidBody(otherEntityID);
     }
@@ -60,7 +57,7 @@ void ObjectConstraintConeTwist::updateConeTwist() {
     float swingSpan2;
     float twistSpan;
 
-    withReadLock([&]{
+    withReadLock([&] {
         constraint = static_cast<btConeTwistConstraint*>(_constraint);
         swingSpan1 = _swingSpan1;
         swingSpan2 = _swingSpan2;
@@ -71,11 +68,8 @@ void ObjectConstraintConeTwist::updateConeTwist() {
         return;
     }
 
-    constraint->setLimit(swingSpan1,
-                         swingSpan2,
-                         twistSpan);
+    constraint->setLimit(swingSpan1, swingSpan2, twistSpan);
 }
-
 
 btTypedConstraint* ObjectConstraintConeTwist::getConstraint() {
     btConeTwistConstraint* constraint { nullptr };
@@ -85,7 +79,7 @@ btTypedConstraint* ObjectConstraintConeTwist::getConstraint() {
     glm::vec3 pivotInB;
     glm::vec3 axisInB;
 
-    withReadLock([&]{
+    withReadLock([&] {
         constraint = static_cast<btConeTwistConstraint*>(_constraint);
         pivotInA = _pivotInA;
         axisInA = _axisInA;
@@ -145,9 +139,7 @@ btTypedConstraint* ObjectConstraintConeTwist::getConstraint() {
         constraint = new btConeTwistConstraint(*rigidBodyA, frameInA);
     }
 
-    withWriteLock([&]{
-        _constraint = constraint;
-    });
+    withWriteLock([&] { _constraint = constraint; });
 
     // if we don't wake up rigidBodyA, we may not send the dynamicData property over the network
     forceBodyNonStatic();
@@ -157,7 +149,6 @@ btTypedConstraint* ObjectConstraintConeTwist::getConstraint() {
 
     return constraint;
 }
-
 
 bool ObjectConstraintConeTwist::updateArguments(QVariantMap arguments) {
     glm::vec3 pivotInA;
@@ -171,7 +162,7 @@ bool ObjectConstraintConeTwist::updateArguments(QVariantMap arguments) {
 
     bool needUpdate = false;
     bool somethingChanged = ObjectDynamic::updateArguments(arguments);
-    withReadLock([&]{
+    withReadLock([&] {
         bool ok = true;
         pivotInA = EntityDynamicInterface::extractVec3Argument("coneTwist constraint", arguments, "pivot", ok, false);
         if (!ok) {
@@ -185,8 +176,8 @@ bool ObjectConstraintConeTwist::updateArguments(QVariantMap arguments) {
         }
 
         ok = true;
-        otherEntityID = QUuid(EntityDynamicInterface::extractStringArgument("coneTwist constraint",
-                                                                            arguments, "otherEntityID", ok, false));
+        otherEntityID = QUuid(
+            EntityDynamicInterface::extractStringArgument("coneTwist constraint", arguments, "otherEntityID", ok, false));
         if (!ok) {
             otherEntityID = _otherID;
         }
@@ -221,14 +212,8 @@ bool ObjectConstraintConeTwist::updateArguments(QVariantMap arguments) {
             twistSpan = _twistSpan;
         }
 
-        if (somethingChanged ||
-            pivotInA != _pivotInA ||
-            axisInA != _axisInA ||
-            otherEntityID != _otherID ||
-            pivotInB != _pivotInB ||
-            axisInB != _axisInB ||
-            swingSpan1 != _swingSpan1 ||
-            swingSpan2 != _swingSpan2 ||
+        if (somethingChanged || pivotInA != _pivotInA || axisInA != _axisInA || otherEntityID != _otherID ||
+            pivotInB != _pivotInB || axisInB != _axisInB || swingSpan1 != _swingSpan1 || swingSpan2 != _swingSpan2 ||
             twistSpan != _twistSpan) {
             // something changed
             needUpdate = true;
@@ -262,7 +247,7 @@ bool ObjectConstraintConeTwist::updateArguments(QVariantMap arguments) {
 }
 
 /**jsdoc
- * The <code>"cone-twist"</code> {@link Entities.ActionType|ActionType} connects two entities with a joint that can move 
+ * The <code>"cone-twist"</code> {@link Entities.ActionType|ActionType} connects two entities with a joint that can move
  * through a cone and can twist.
  * It has arguments in addition to the common {@link Entities.ActionArguments|ActionArguments}.
  *

@@ -11,18 +11,18 @@
 
 #include "EntityServer.h"
 
-#include <QtCore/QEventLoop>
-#include <QTimer>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QTimer>
+#include <QtCore/QEventLoop>
 
+#include <AddressManager.h>
+#include <EntityEditFilters.h>
 #include <EntityTree.h>
-#include <SimpleEntitySimulation.h>
+#include <NetworkingConstants.h>
 #include <ResourceCache.h>
 #include <ScriptCache.h>
-#include <EntityEditFilters.h>
-#include <NetworkingConstants.h>
-#include <AddressManager.h>
+#include <SimpleEntitySimulation.h>
 #include <hfm/ModelFormatRegistry.h>
 
 #include "../AssignmentDynamicFactory.h"
@@ -38,28 +38,23 @@ const char* LOCAL_MODELS_PERSIST_FILE = "resources/models.svo";
 EntityServer::EntityServer(ReceivedMessage& message) :
     OctreeServer(message),
     _entitySimulation(NULL),
-    _dynamicDomainVerificationTimer(this)
-{
+    _dynamicDomainVerificationTimer(this) {
     DependencyManager::set<ResourceManager>();
     DependencyManager::set<ResourceCacheSharedItems>();
     DependencyManager::set<ScriptCache>();
 
     DependencyManager::registerInheritance<EntityDynamicFactoryInterface, AssignmentDynamicFactory>();
     DependencyManager::set<AssignmentDynamicFactory>();
-    DependencyManager::set<ModelFormatRegistry>(); // ModelFormatRegistry must be defined before ModelCache. See the ModelCache ctor
+    DependencyManager::set<ModelFormatRegistry>(); // ModelFormatRegistry must be defined before ModelCache. See the ModelCache
+                                                   // ctor
     DependencyManager::set<ModelCache>();
 
     auto& packetReceiver = DependencyManager::get<NodeList>()->getPacketReceiver();
-    packetReceiver.registerListenerForTypes({ PacketType::EntityAdd,
-        PacketType::EntityClone,
-        PacketType::EntityEdit,
-        PacketType::EntityErase,
-        PacketType::EntityPhysics,
-        PacketType::ChallengeOwnership,
-        PacketType::ChallengeOwnershipRequest,
-        PacketType::ChallengeOwnershipReply },
-        this,
-        "handleEntityPacket");
+    packetReceiver.registerListenerForTypes({ PacketType::EntityAdd, PacketType::EntityClone, PacketType::EntityEdit,
+                                              PacketType::EntityErase, PacketType::EntityPhysics,
+                                              PacketType::ChallengeOwnership, PacketType::ChallengeOwnershipRequest,
+                                              PacketType::ChallengeOwnershipReply },
+                                            this, "handleEntityPacket");
 
     connect(&_dynamicDomainVerificationTimer, &QTimer::timeout, this, &EntityServer::startDynamicDomainVerification);
     _dynamicDomainVerificationTimer.setSingleShot(true);
@@ -139,12 +134,13 @@ bool EntityServer::hasSpecialPacketsToSend(const SharedNodePointer& node) {
         EntityTreePointer tree = std::static_pointer_cast<EntityTree>(_tree);
         shouldSendDeletedEntities = tree->hasEntitiesDeletedSince(deletedEntitiesSentAt);
 
-        #ifdef EXTRA_ERASE_DEBUGGING
-            if (shouldSendDeletedEntities) {
-                int elapsed = usecTimestampNow() - deletedEntitiesSentAt;
-                qDebug() << "shouldSendDeletedEntities to node:" << node->getUUID() << "deletedEntitiesSentAt:" << deletedEntitiesSentAt << "elapsed:" << elapsed;
-            }
-        #endif
+#ifdef EXTRA_ERASE_DEBUGGING
+        if (shouldSendDeletedEntities) {
+            int elapsed = usecTimestampNow() - deletedEntitiesSentAt;
+            qDebug() << "shouldSendDeletedEntities to node:" << node->getUUID()
+                     << "deletedEntitiesSentAt:" << deletedEntitiesSentAt << "elapsed:" << elapsed;
+        }
+#endif
     }
 
     return shouldSendDeletedEntities;
@@ -159,7 +155,6 @@ int EntityServer::sendSpecialPackets(const SharedNodePointer& node, OctreeQueryN
 
     EntityNodeData* nodeData = static_cast<EntityNodeData*>(node->getLinkedData());
     if (nodeData) {
-
         quint64 deletedEntitiesSentAt = nodeData->getLastDeletedEntitiesSentAt();
         quint64 considerEntitiesSince = EntityTree::getAdjustedConsiderSince(deletedEntitiesSentAt);
 
@@ -193,19 +188,15 @@ int EntityServer::sendSpecialPackets(const SharedNodePointer& node, OctreeQueryN
         // deleted since we last sent to this node
         auto it = recentlyDeleted.constBegin();
         while (it != recentlyDeleted.constEnd()) {
-
             // if the timestamp is more recent then out last sent time, include it
             if (it.key() > considerEntitiesSince) {
-
                 // get all the IDs for this timestamp
                 const auto& entityIDsFromTime = recentlyDeleted.values(it.key());
 
                 for (const auto& entityID : entityIDsFromTime) {
-
                     // check to make sure we have room for one more ID, if we don't have more
                     // room, then send out this packet and create another one
                     if (NUM_BYTES_RFC4122_UUID > deletesPacket->bytesAvailableForWrite()) {
-
                         // replace the count for the number of included IDs
                         deletesPacket->seek(numberOfIDsPos);
                         deletesPacket->writePrimitive(numberOfIDs);
@@ -217,10 +208,10 @@ int EntityServer::sendSpecialPackets(const SharedNodePointer& node, OctreeQueryN
                         packetsSent++;
                         DependencyManager::get<NodeList>()->sendPacket(std::move(deletesPacket), *node);
 
-                        #ifdef EXTRA_ERASE_DEBUGGING
-                            qDebug() << "EntityServer::sendSpecialPackets() sending packet packetsSent[" << packetsSent << "] size:" << thisPacketSize;
-                        #endif
-
+#ifdef EXTRA_ERASE_DEBUGGING
+                        qDebug() << "EntityServer::sendSpecialPackets() sending packet packetsSent[" << packetsSent
+                                 << "] size:" << thisPacketSize;
+#endif
 
                         // create another packet
                         deletesPacket = NLPacket::create(PacketType::EntityErase);
@@ -249,13 +240,12 @@ int EntityServer::sendSpecialPackets(const SharedNodePointer& node, OctreeQueryN
                     deletesPacket->write(entityID.toRfc4122());
                     ++numberOfIDs;
 
-                    #ifdef EXTRA_ERASE_DEBUGGING
-                        qDebug() << "EntityTree::encodeEntitiesDeletedSince() including:" << entityID;
-                    #endif
+#ifdef EXTRA_ERASE_DEBUGGING
+                    qDebug() << "EntityTree::encodeEntitiesDeletedSince() including:" << entityID;
+#endif
                 } // end for (ids)
 
             } // end if (it.val > sinceLast)
-
 
             ++it;
         } // end while
@@ -270,19 +260,20 @@ int EntityServer::sendSpecialPackets(const SharedNodePointer& node, OctreeQueryN
         totalBytes += thisPacketSize;
         packetsSent++;
         DependencyManager::get<NodeList>()->sendPacket(std::move(deletesPacket), *node);
-        #ifdef EXTRA_ERASE_DEBUGGING
-            qDebug() << "EntityServer::sendSpecialPackets() sending packet packetsSent[" << packetsSent << "] size:" << thisPacketSize;
-        #endif
+#ifdef EXTRA_ERASE_DEBUGGING
+        qDebug() << "EntityServer::sendSpecialPackets() sending packet packetsSent[" << packetsSent
+                 << "] size:" << thisPacketSize;
+#endif
 
         nodeData->setLastDeletedEntitiesSentAt(deletePacketSentAt);
     }
 
-    #ifdef EXTRA_ERASE_DEBUGGING
-        if (packetsSent > 0) {
-            qDebug() << "EntityServer::sendSpecialPackets() sent " << packetsSent << "special packets of " 
-                        << totalBytes << " total bytes to node:" << node->getUUID();
-        }
-    #endif
+#ifdef EXTRA_ERASE_DEBUGGING
+    if (packetsSent > 0) {
+        qDebug() << "EntityServer::sendSpecialPackets() sent " << packetsSent << "special packets of " << totalBytes
+                 << " total bytes to node:" << node->getUUID();
+    }
+#endif
 
     // TODO: caller is expecting a packetLength, what if we send more than one packet??
     return totalBytes;
@@ -291,7 +282,6 @@ int EntityServer::sendSpecialPackets(const SharedNodePointer& node, OctreeQueryN
 void EntityServer::pruneDeletedEntities() {
     EntityTreePointer tree = std::static_pointer_cast<EntityTree>(_tree);
     if (tree->hasAnyDeletedEntities()) {
-
         quint64 earliestLastDeletedEntitiesSent = usecTimestampNow() + 1; // in the future
         DependencyManager::get<NodeList>()->eachNode([&earliestLastDeletedEntitiesSent](const SharedNodePointer& node) {
             if (node->getLinkedData()) {
@@ -345,14 +335,14 @@ void EntityServer::readAdditionalConfiguration(const QJsonObject& settingsSectio
     } else {
         tree->setEntityScriptSourceWhitelist("");
     }
-    
+
     auto entityEditFilters = DependencyManager::get<EntityEditFilters>();
-    
+
     QString filterURL;
     if (readOptionString("entityEditFilter", settingsSectionObject, filterURL) && !filterURL.isEmpty()) {
         // connect the filterAdded signal, and block edits until you hear back
         connect(entityEditFilters.data(), &EntityEditFilters::filterAdded, this, &EntityServer::entityFilterAdded);
-        
+
         entityEditFilters->addFilter(EntityItemID(), filterURL);
     }
 }
@@ -375,16 +365,14 @@ void EntityServer::nodeAdded(SharedNodePointer node) {
 
 void EntityServer::nodeKilled(SharedNodePointer node) {
     EntityTreePointer tree = std::static_pointer_cast<EntityTree>(_tree);
-    tree->withWriteLock([&] {
-        tree->deleteDescendantsOfAvatar(node->getUUID());
-    });
+    tree->withWriteLock([&] { tree->deleteDescendantsOfAvatar(node->getUUID()); });
     tree->forgetAvatarID(node->getUUID());
     OctreeServer::nodeKilled(node);
 }
 
 // FIXME - this stats tracking is somewhat temporary to debug the Whiteboard issues. It's not a bad
 // set of stats to have, but we'd probably want a different data structure if we keep it very long.
-// Since this version uses a single shared QMap for all senders, there could be some lock contention 
+// Since this version uses a single shared QMap for all senders, there could be some lock contention
 // on this QWriteLocker
 void EntityServer::trackSend(const QUuid& dataID, quint64 dataLastEdited, const QUuid& sessionID) {
     QWriteLocker locker(&_viewerSendingStatsLock);
@@ -398,9 +386,7 @@ void EntityServer::trackViewerGone(const QUuid& sessionID) {
     }
 
     if (_entitySimulation) {
-        _tree->withReadLock([&] {
-            _entitySimulation->clearOwnership(sessionID);
-        });
+        _tree->withReadLock([&] { _entitySimulation->clearOwnership(sessionID); });
     }
 }
 
@@ -442,9 +428,9 @@ QString EntityServer::serverSubclassStats() {
                 statsString += entityID.toString();
                 statsString += "    ";
                 statsString += QString("%1 msecs ago")
-                    .arg(locale.toString((double)sentMsecsAgo).rightJustified(COLUMN_WIDTH, ' '));
+                                   .arg(locale.toString((double)sentMsecsAgo).rightJustified(COLUMN_WIDTH, ' '));
                 statsString += QString("%1 msecs ago")
-                    .arg(locale.toString((double)editMsecsAgo).rightJustified(COLUMN_WIDTH, ' '));
+                                   .arg(locale.toString((double)editMsecsAgo).rightJustified(COLUMN_WIDTH, ' '));
                 statsString += "\r\n";
             }
             viewers++;
@@ -460,7 +446,8 @@ QString EntityServer::serverSubclassStats() {
 
 void EntityServer::domainSettingsRequestFailed() {
     auto nodeList = DependencyManager::get<NodeList>();
-    qCDebug(entities) << "The EntityServer couldn't get the Domain Settings. Starting dynamic domain verification with default values...";
+    qCDebug(entities)
+        << "The EntityServer couldn't get the Domain Settings. Starting dynamic domain verification with default values...";
 
     _MINIMUM_DYNAMIC_DOMAIN_VERIFICATION_TIMER_MS = DEFAULT_MINIMUM_DYNAMIC_DOMAIN_VERIFICATION_TIMER_MS;
     _MAXIMUM_DYNAMIC_DOMAIN_VERIFICATION_TIMER_MS = DEFAULT_MAXIMUM_DYNAMIC_DOMAIN_VERIFICATION_TIMER_MS;
@@ -485,11 +472,9 @@ void EntityServer::startDynamicDomainVerification() {
         if (entity) {
             if (!entity->getProperties().verifyStaticCertificateProperties()) {
                 qCDebug(entities) << "During Dynamic Domain Verification, a certified entity with ID" << entityID << "failed"
-                    << "static certificate verification.";
+                                  << "static certificate verification.";
                 // Delete the entity if it doesn't pass static certificate verification
-                tree->withWriteLock([&] {
-                    tree->deleteEntity(entityID, true);
-                });
+                tree->withWriteLock([&] { tree->deleteEntity(entityID, true); });
             } else {
                 QNetworkAccessManager& networkAccessManager = NetworkAccessManager::getInstance();
                 QNetworkRequest networkRequest;
@@ -510,29 +495,32 @@ void EntityServer::startDynamicDomainVerification() {
                     jsonObject = jsonObject["data"].toObject();
 
                     if (networkReply->error() == QNetworkReply::NoError) {
-                        QString thisDomainID = DependencyManager::get<AddressManager>()->getDomainID().remove(QRegExp("\\{|\\}"));
+                        QString thisDomainID = DependencyManager::get<AddressManager>()->getDomainID().remove(
+                            QRegExp("\\{|\\}"));
                         if (jsonObject["domain_id"].toString() != thisDomainID) {
                             EntityItemPointer entity = tree->findEntityByEntityItemID(entityID);
                             if (!entity) {
-                                qCDebug(entities) << "Entity undergoing dynamic domain verification is no longer available:" << entityID;
+                                qCDebug(entities)
+                                    << "Entity undergoing dynamic domain verification is no longer available:" << entityID;
                                 networkReply->deleteLater();
                                 return;
                             }
-                            if (entity->getAge() > (_MAXIMUM_DYNAMIC_DOMAIN_VERIFICATION_TIMER_MS/MSECS_PER_SECOND)) {
-                                qCDebug(entities) << "Entity's cert's domain ID" << jsonObject["domain_id"].toString()
-                                                << "doesn't match the current Domain ID" << thisDomainID << "; deleting entity" << entityID;
-                                tree->withWriteLock([&] {
-                                    tree->deleteEntity(entityID, true);
-                                });
+                            if (entity->getAge() > (_MAXIMUM_DYNAMIC_DOMAIN_VERIFICATION_TIMER_MS / MSECS_PER_SECOND)) {
+                                qCDebug(entities)
+                                    << "Entity's cert's domain ID" << jsonObject["domain_id"].toString()
+                                    << "doesn't match the current Domain ID" << thisDomainID << "; deleting entity" << entityID;
+                                tree->withWriteLock([&] { tree->deleteEntity(entityID, true); });
                             } else {
-                                qCDebug(entities) << "Entity failed dynamic domain verification, but was created too recently to necessitate deletion:" << entityID;
+                                qCDebug(entities) << "Entity failed dynamic domain verification, but was created too recently "
+                                                     "to necessitate deletion:"
+                                                  << entityID;
                             }
                         } else {
                             qCDebug(entities) << "Entity passed dynamic domain verification:" << entityID;
                         }
                     } else {
-                        qCDebug(entities) << "Call to" << networkReply->url() << "failed with error" << networkReply->error() << "; NOT deleting entity" << entityID
-                            << "More info:" << jsonObject;
+                        qCDebug(entities) << "Call to" << networkReply->url() << "failed with error" << networkReply->error()
+                                          << "; NOT deleting entity" << entityID << "More info:" << jsonObject;
                     }
 
                     networkReply->deleteLater();
@@ -543,7 +531,9 @@ void EntityServer::startDynamicDomainVerification() {
         }
     }
 
-    int nextInterval = qrand() % ((_MAXIMUM_DYNAMIC_DOMAIN_VERIFICATION_TIMER_MS + 1) - _MINIMUM_DYNAMIC_DOMAIN_VERIFICATION_TIMER_MS) + _MINIMUM_DYNAMIC_DOMAIN_VERIFICATION_TIMER_MS;
+    int nextInterval = qrand() % ((_MAXIMUM_DYNAMIC_DOMAIN_VERIFICATION_TIMER_MS + 1) -
+                                  _MINIMUM_DYNAMIC_DOMAIN_VERIFICATION_TIMER_MS) +
+                       _MINIMUM_DYNAMIC_DOMAIN_VERIFICATION_TIMER_MS;
     qCDebug(entities) << "Restarting Dynamic Domain Verification timer for" << nextInterval / 1000 << "seconds";
     _dynamicDomainVerificationTimer.start(nextInterval);
 }

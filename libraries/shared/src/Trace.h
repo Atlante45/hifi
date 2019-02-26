@@ -13,11 +13,11 @@
 #include <cstdint>
 #include <mutex>
 
+#include <QtCore/QHash>
+#include <QtCore/QLoggingCategory>
+#include <QtCore/QSet>
 #include <QtCore/QString>
 #include <QtCore/QVariantMap>
-#include <QtCore/QHash>
-#include <QtCore/QSet>
-#include <QtCore/QLoggingCategory>
 
 #include "DependencyManager.h"
 
@@ -78,10 +78,8 @@ struct TraceEvent {
 
 class Tracer : public Dependency {
 public:
-    void traceEvent(const QLoggingCategory& category, 
-        const QString& name, EventType type,
-        const QString& id = "", 
-        const QVariantMap& args = QVariantMap(), const QVariantMap& extra = QVariantMap());
+    void traceEvent(const QLoggingCategory& category, const QString& name, EventType type, const QString& id = "",
+                    const QVariantMap& args = QVariantMap(), const QVariantMap& extra = QVariantMap());
 
     void startTracing();
     void stopTracing();
@@ -89,11 +87,9 @@ public:
     bool isEnabled() const { return _enabled; }
 
 private:
-    void traceEvent(const QLoggingCategory& category, 
-        const QString& name, EventType type,
-        qint64 timestamp, qint64 processID, qint64 threadID,
-        const QString& id = "",
-        const QVariantMap& args = QVariantMap(), const QVariantMap& extra = QVariantMap());
+    void traceEvent(const QLoggingCategory& category, const QString& name, EventType type, qint64 timestamp, qint64 processID,
+                    qint64 threadID, const QString& id = "", const QVariantMap& args = QVariantMap(),
+                    const QVariantMap& extra = QVariantMap());
 
     bool _enabled { false };
     std::list<TraceEvent> _events;
@@ -101,7 +97,8 @@ private:
     std::mutex _eventsMutex;
 };
 
-inline void traceEvent(const QLoggingCategory& category, const QString& name, EventType type, const QString& id = "", const QVariantMap& args = {}, const QVariantMap& extra = {}) {
+inline void traceEvent(const QLoggingCategory& category, const QString& name, EventType type, const QString& id = "",
+                       const QVariantMap& args = {}, const QVariantMap& extra = {}) {
     if (!DependencyManager::isSet<Tracer>()) {
         return;
     }
@@ -111,10 +108,11 @@ inline void traceEvent(const QLoggingCategory& category, const QString& name, Ev
     }
 }
 
-inline void traceEvent(const QLoggingCategory& category, const QString& name, EventType type, int id, const QVariantMap& args = {}, const QVariantMap& extra = {}) {
+inline void traceEvent(const QLoggingCategory& category, const QString& name, EventType type, int id,
+                       const QVariantMap& args = {}, const QVariantMap& extra = {}) {
     traceEvent(category, name, type, QString::number(id), args, extra);
 }
 
-}
+} // namespace tracing
 
 #endif // hifi_Trace_h

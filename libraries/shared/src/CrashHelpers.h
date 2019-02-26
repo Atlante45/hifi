@@ -26,6 +26,6 @@ void doAbort();
 void outOfBoundsVectorCrash();
 void newFault();
 
-}
+} // namespace crash
 
 #endif // hifi_CrashHelpers_h

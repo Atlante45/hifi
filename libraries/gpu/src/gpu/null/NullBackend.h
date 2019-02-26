@@ -9,18 +9,19 @@
 #define hifi_gpu_Null_Backend_h
 
 #include <assert.h>
-#include <functional>
+#include <array>
 #include <bitset>
+#include <functional>
+#include <list>
 #include <queue>
 #include <utility>
-#include <list>
-#include <array>
 
 #include <QtCore/QLoggingCategory>
 
 #include "../Context.h"
 
-namespace gpu { namespace null {
+namespace gpu {
+namespace null {
 
 class Backend : public gpu::Backend {
     using Parent = gpu::Backend;
@@ -30,26 +31,28 @@ class Backend : public gpu::Backend {
     static gpu::Backend* createBackend() { return new Backend(); }
 
 protected:
-    explicit Backend(bool syncCache) : Parent() { }
-    Backend() : Parent() { }
-public:
-    ~Backend() { }
+    explicit Backend(bool syncCache) : Parent() {}
+    Backend() : Parent() {}
 
-    void render(const Batch& batch) final { }
+public:
+    ~Backend() {}
+
+    void render(const Batch& batch) final {}
 
     // This call synchronize the Full Backend cache with the current GLState
     // THis is only intended to be used when mixing raw gl calls with the gpu api usage in order to sync
     // the gpu::Backend state with the true gl state which has probably been messed up by these ugly naked gl calls
     // Let's try to avoid to do that as much as possible!
-    void syncCache() final { }
+    void syncCache() final {}
 
     void syncProgram(const gpu::ShaderPointer& program) final {}
 
     // This is the ugly "download the pixels to sysmem for taking a snapshot"
     // Just avoid using it, it's ugly and will break performances
-    virtual void downloadFramebuffer(const FramebufferPointer& srcFramebuffer, const Vec4i& region, QImage& destImage) final { }
+    virtual void downloadFramebuffer(const FramebufferPointer& srcFramebuffer, const Vec4i& region, QImage& destImage) final {}
 };
 
-} }
+} // namespace null
+} // namespace gpu
 
 #endif

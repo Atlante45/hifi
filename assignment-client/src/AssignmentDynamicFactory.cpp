@@ -11,15 +11,12 @@
 
 #include "AssignmentDynamicFactory.h"
 
-
 EntityDynamicPointer assignmentDynamicFactory(EntityDynamicType type, const QUuid& id, EntityItemPointer ownerEntity) {
     return EntityDynamicPointer(new AssignmentDynamic(type, id, ownerEntity));
 }
 
-EntityDynamicPointer AssignmentDynamicFactory::factory(EntityDynamicType type,
-                                                     const QUuid& id,
-                                                     EntityItemPointer ownerEntity,
-                                                     QVariantMap arguments) {
+EntityDynamicPointer AssignmentDynamicFactory::factory(EntityDynamicType type, const QUuid& id, EntityItemPointer ownerEntity,
+                                                       QVariantMap arguments) {
     EntityDynamicPointer dynamic = assignmentDynamicFactory(type, id, ownerEntity);
     if (dynamic) {
         bool ok = dynamic->updateArguments(arguments);
@@ -29,7 +26,6 @@ EntityDynamicPointer AssignmentDynamicFactory::factory(EntityDynamicType type,
     }
     return nullptr;
 }
-
 
 EntityDynamicPointer AssignmentDynamicFactory::factoryBA(EntityItemPointer ownerEntity, QByteArray data) {
     QDataStream serializedDynamicDataStream(data);

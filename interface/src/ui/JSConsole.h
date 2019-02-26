@@ -12,14 +12,14 @@
 #ifndef hifi_JSConsole_h
 #define hifi_JSConsole_h
 
+#include <QCompleter>
 #include <QFutureWatcher>
 #include <QObject>
 #include <QSharedPointer>
-#include <QCompleter>
 #include <QtCore/QJsonArray>
 
-#include "ui_console.h"
 #include "ScriptEngine.h"
+#include "ui_console.h"
 
 const QString CONSOLE_TITLE = "Scripting Console";
 const float CONSOLE_WINDOW_OPACITY = 0.95f;
@@ -77,8 +77,7 @@ private:
     static const QString _consoleFileName;
     QJsonArray _apiDocs;
     QCompleter* _completer;
-    QString _completerModule {""};
+    QString _completerModule { "" };
 };
-
 
 #endif // hifi_JSConsole_h

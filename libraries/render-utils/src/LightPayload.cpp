@@ -9,45 +9,43 @@
 //
 #include "LightPayload.h"
 
-
 #include <gpu/Batch.h>
 #include "DeferredLightingEffect.h"
 
-
 namespace render {
-    template <> const ItemKey payloadGetKey(const LightPayload::Pointer& payload) {
-        ItemKey::Builder builder;
-        builder.withTypeLight();
-        builder.withTagBits(ItemKey::TAG_BITS_ALL);
-        if (payload) {
-            if (!payload->isVisible()) {
-                builder.withInvisible();
-            }
+template<>
+const ItemKey payloadGetKey(const LightPayload::Pointer& payload) {
+    ItemKey::Builder builder;
+    builder.withTypeLight();
+    builder.withTagBits(ItemKey::TAG_BITS_ALL);
+    if (payload) {
+        if (!payload->isVisible()) {
+            builder.withInvisible();
         }
-
-        return builder.build();
     }
 
-    template <> const Item::Bound payloadGetBound(const LightPayload::Pointer& payload) {
-        if (payload) {
-            return payload->editBound();
-        }
-        return render::Item::Bound();
+    return builder.build();
+}
+
+template<>
+const Item::Bound payloadGetBound(const LightPayload::Pointer& payload) {
+    if (payload) {
+        return payload->editBound();
     }
-    template <> void payloadRender(const LightPayload::Pointer& payload, RenderArgs* args) {
-        if (args) {
-            if (payload) {
-                payload->render(args);
-            }
+    return render::Item::Bound();
+}
+template<>
+void payloadRender(const LightPayload::Pointer& payload, RenderArgs* args) {
+    if (args) {
+        if (payload) {
+            payload->render(args);
         }
     }
 }
+} // namespace render
 
-LightPayload::LightPayload() :
-    _light(std::make_shared<graphics::Light>())
-{
+LightPayload::LightPayload() : _light(std::make_shared<graphics::Light>()) {
 }
-
 
 LightPayload::~LightPayload() {
     if (!LightStage::isIndexInvalid(_index)) {
@@ -72,7 +70,7 @@ void LightPayload::render(RenderArgs* args) {
         _stage->updateLightArrayBuffer(_index);
         _needUpdate = false;
     }
-    
+
     if (isVisible()) {
         // FInally, push the light visible in the frame
         _stage->_currentFrame.pushLight(_index, _light->getType());
@@ -86,38 +84,37 @@ void LightPayload::render(RenderArgs* args) {
     }
 }
 
-
 namespace render {
-    template <> const ItemKey payloadGetKey(const KeyLightPayload::Pointer& payload) {
-        ItemKey::Builder builder;
-        builder.withTypeLight();
-        builder.withTagBits(ItemKey::TAG_BITS_ALL);
-        if (!payload || !payload->isVisible()) {
-            builder.withInvisible();
-        }
-        return builder.build();
+template<>
+const ItemKey payloadGetKey(const KeyLightPayload::Pointer& payload) {
+    ItemKey::Builder builder;
+    builder.withTypeLight();
+    builder.withTagBits(ItemKey::TAG_BITS_ALL);
+    if (!payload || !payload->isVisible()) {
+        builder.withInvisible();
     }
+    return builder.build();
+}
 
-    template <> const Item::Bound payloadGetBound(const KeyLightPayload::Pointer& payload) {
+template<>
+const Item::Bound payloadGetBound(const KeyLightPayload::Pointer& payload) {
+    if (payload) {
+        return payload->editBound();
+    }
+    return render::Item::Bound();
+}
+template<>
+void payloadRender(const KeyLightPayload::Pointer& payload, RenderArgs* args) {
+    if (args) {
         if (payload) {
-            return payload->editBound();
-        }
-        return render::Item::Bound();
-    }
-    template <> void payloadRender(const KeyLightPayload::Pointer& payload, RenderArgs* args) {
-        if (args) {
-            if (payload) {
-                payload->render(args);
-            }
+            payload->render(args);
         }
     }
 }
+} // namespace render
 
-KeyLightPayload::KeyLightPayload() :
-_light(std::make_shared<graphics::Light>())
-{
+KeyLightPayload::KeyLightPayload() : _light(std::make_shared<graphics::Light>()) {
 }
-
 
 KeyLightPayload::~KeyLightPayload() {
     if (!LightStage::isIndexInvalid(_index)) {
@@ -155,4 +152,3 @@ void KeyLightPayload::render(RenderArgs* args) {
 #endif
     }
 }
-

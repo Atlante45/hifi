@@ -23,12 +23,12 @@ public:
     void bind();
 
     uint32_t _depth { 0 };
-    uint32_t _fbo{ 0 };
-    int _length{ -1 };
-    int _index{ -1 };
-    bool _validTexture{ false };
+    uint32_t _fbo { 0 };
+    int _length { -1 };
+    int _index { -1 };
+    bool _validTexture { false };
     glm::uvec2 _size;
-    ovrTextureSwapChain* _swapChain{ nullptr };
+    ovrTextureSwapChain* _swapChain { nullptr };
 };
 
-}  // namespace ovr
+} // namespace ovr

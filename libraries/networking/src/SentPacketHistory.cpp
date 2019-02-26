@@ -14,14 +14,12 @@
 
 #include <QDebug>
 
-#include "NetworkLogging.h"
 #include "NLPacket.h"
+#include "NetworkLogging.h"
 
-SentPacketHistory::SentPacketHistory(int size)
-    : _sentPackets(size),
-    _newestSequenceNumber(std::numeric_limits<uint16_t>::max())
-{
-
+SentPacketHistory::SentPacketHistory(int size) :
+    _sentPackets(size),
+    _newestSequenceNumber(std::numeric_limits<uint16_t>::max()) {
 }
 
 void SentPacketHistory::untrackedPacketSent(uint16_t sequenceNumber) {
@@ -30,7 +28,7 @@ void SentPacketHistory::untrackedPacketSent(uint16_t sequenceNumber) {
     uint16_t expectedSequenceNumber = _newestSequenceNumber + (uint16_t)1;
     if (sequenceNumber != expectedSequenceNumber) {
         qCDebug(networking) << "Unexpected sequence number passed to SentPacketHistory::packetSent()!"
-            << "Expected:" << expectedSequenceNumber << "Actual:" << sequenceNumber;
+                            << "Expected:" << expectedSequenceNumber << "Actual:" << sequenceNumber;
     }
     _newestSequenceNumber = sequenceNumber;
 }
@@ -43,7 +41,6 @@ void SentPacketHistory::packetSent(uint16_t sequenceNumber, const NLPacket& pack
 }
 
 const NLPacket* SentPacketHistory::getPacket(uint16_t sequenceNumber) const {
-
     const int UINT16_RANGE = std::numeric_limits<uint16_t>::max() + 1;
 
     // if sequenceNumber > _newestSequenceNumber, assume sequenceNumber is from before the most recent rollover
@@ -52,7 +49,7 @@ const NLPacket* SentPacketHistory::getPacket(uint16_t sequenceNumber) const {
     if (seqDiff < 0) {
         seqDiff += UINT16_RANGE;
     }
-    
+
     QReadLocker locker(&_packetsLock);
     auto packet = _sentPackets.get(seqDiff);
     if (packet) {

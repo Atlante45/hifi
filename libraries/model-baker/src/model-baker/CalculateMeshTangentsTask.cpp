@@ -36,7 +36,7 @@ void CalculateMeshTangentsTask::run(const baker::BakeContextPointer& context, co
         const auto& tangentsIn = mesh.tangents;
         const auto& normals = normalsPerMesh[i];
         tangentsPerMeshOut.emplace_back();
-        auto& tangentsOut = tangentsPerMeshOut[tangentsPerMeshOut.size()-1];
+        auto& tangentsOut = tangentsPerMeshOut[tangentsPerMeshOut.size() - 1];
 
         // Check if we already have tangents and therefore do not need to do any calculation
         // Otherwise confirm if we have the normals needed, and need to calculate the tangents
@@ -45,14 +45,15 @@ void CalculateMeshTangentsTask::run(const baker::BakeContextPointer& context, co
         } else if (!normals.empty() && needTangents(mesh, materials)) {
             tangentsOut.resize(normals.size());
             baker::calculateTangents(mesh,
-            [&mesh, &normals, &tangentsOut](int firstIndex, int secondIndex, glm::vec3* outVertices, glm::vec2* outTexCoords, glm::vec3& outNormal) {
-                outVertices[0] = mesh.vertices[firstIndex];
-                outVertices[1] = mesh.vertices[secondIndex];
-                outNormal = normals[firstIndex];
-                outTexCoords[0] = mesh.texCoords[firstIndex];
-                outTexCoords[1] = mesh.texCoords[secondIndex];
-                return &(tangentsOut[firstIndex]);
-            });
+                                     [&mesh, &normals, &tangentsOut](int firstIndex, int secondIndex, glm::vec3* outVertices,
+                                                                     glm::vec2* outTexCoords, glm::vec3& outNormal) {
+                                         outVertices[0] = mesh.vertices[firstIndex];
+                                         outVertices[1] = mesh.vertices[secondIndex];
+                                         outNormal = normals[firstIndex];
+                                         outTexCoords[0] = mesh.texCoords[firstIndex];
+                                         outTexCoords[1] = mesh.texCoords[secondIndex];
+                                         return &(tangentsOut[firstIndex]);
+                                     });
         }
     }
 }

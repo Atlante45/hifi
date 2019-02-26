@@ -79,8 +79,8 @@ class AudioEffectOptions : public QObject {
 
 public:
     AudioEffectOptions(QScriptValue arguments = QScriptValue());
-    AudioEffectOptions(const AudioEffectOptions &other);
-    AudioEffectOptions& operator=(const AudioEffectOptions &other);
+    AudioEffectOptions(const AudioEffectOptions& other);
+    AudioEffectOptions& operator=(const AudioEffectOptions& other);
 
     static QScriptValue constructor(QScriptContext* context, QScriptEngine* engine);
 
@@ -148,36 +148,36 @@ public:
     void setWetDryMix(float wetDryMix) { _wetDryMix = wetDryMix; }
 
 private:
-    float _bandwidth;        // [20, 24000] Hz
+    float _bandwidth; // [20, 24000] Hz
 
-    float _preDelay;         // [0, 333] ms
-    float _lateDelay;        // [0, 166] ms
+    float _preDelay; // [0, 333] ms
+    float _lateDelay; // [0, 166] ms
 
-    float _reverbTime;       // [0.1, 100] seconds
+    float _reverbTime; // [0.1, 100] seconds
 
-    float _earlyDiffusion;   // [0, 100] percent
-    float _lateDiffusion;    // [0, 100] percent
+    float _earlyDiffusion; // [0, 100] percent
+    float _lateDiffusion; // [0, 100] percent
 
-    float _roomSize;         // [0, 100] percent
-    float _density;          // [0, 100] percent
+    float _roomSize; // [0, 100] percent
+    float _density; // [0, 100] percent
 
-    float _bassMult;         // [0.1, 10] ratio
-    float _bassFreq;         // [10, 500] Hz
-    float _highGain;         // [-24, 0] dB
-    float _highFreq;         // [1000, 12000] Hz
+    float _bassMult; // [0.1, 10] ratio
+    float _bassFreq; // [10, 500] Hz
+    float _highGain; // [-24, 0] dB
+    float _highFreq; // [1000, 12000] Hz
 
-    float _modRate;          // [0.1, 10] Hz
-    float _modDepth;         // [0, 100] percent
+    float _modRate; // [0.1, 10] Hz
+    float _modDepth; // [0, 100] percent
 
-    float _earlyGain;        // [-96, +24] dB
-    float _lateGain;         // [-96, +24] dB
+    float _earlyGain; // [-96, +24] dB
+    float _lateGain; // [-96, +24] dB
 
-    float _earlyMixLeft;     // [0, 100] percent
-    float _earlyMixRight;    // [0, 100] percent
-    float _lateMixLeft;      // [0, 100] percent
-    float _lateMixRight;     // [0, 100] percent
+    float _earlyMixLeft; // [0, 100] percent
+    float _earlyMixRight; // [0, 100] percent
+    float _lateMixLeft; // [0, 100] percent
+    float _lateMixRight; // [0, 100] percent
 
-    float _wetDryMix;        // [0, 100] percent
+    float _wetDryMix; // [0, 100] percent
 };
 
 #endif // hifi_AudioEffectOptions_h

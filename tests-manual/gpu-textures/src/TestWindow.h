@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <QtGui/QWindow>
 #include <QtCore/QTime>
+#include <QtGui/QWindow>
 
 #include <GLMHelpers.h>
 #include <gl/QOpenGLContextWrapper.h>
@@ -24,7 +24,7 @@ protected:
     QSize _size;
     glm::mat4 _projectionMatrix;
     bool _aboutToQuit { false };
-    std::shared_ptr<RenderArgs> _renderArgs{ std::make_shared<RenderArgs>() };
+    std::shared_ptr<RenderArgs> _renderArgs { std::make_shared<RenderArgs>() };
 
     TestWindow();
     virtual void initGl();
@@ -38,4 +38,3 @@ private:
     void draw();
     void resizeEvent(QResizeEvent* ev) override;
 };
-

@@ -107,11 +107,11 @@ AudioEffectOptions::AudioEffectOptions(QScriptValue arguments) {
     setOption(arguments, WET_DRY_MIX_HANDLE, WET_DRY_MIX_DEFAULT, _wetDryMix);
 }
 
-AudioEffectOptions::AudioEffectOptions(const AudioEffectOptions &other) : QObject() {
+AudioEffectOptions::AudioEffectOptions(const AudioEffectOptions& other) : QObject() {
     *this = other;
 }
 
-AudioEffectOptions& AudioEffectOptions::operator=(const AudioEffectOptions &other) {
+AudioEffectOptions& AudioEffectOptions::operator=(const AudioEffectOptions& other) {
     _bandwidth = other._bandwidth;
     _preDelay = other._preDelay;
     _lateDelay = other._lateDelay;
@@ -133,7 +133,7 @@ AudioEffectOptions& AudioEffectOptions::operator=(const AudioEffectOptions &othe
     _lateMixLeft = other._lateMixLeft;
     _lateMixRight = other._lateMixRight;
     _wetDryMix = other._wetDryMix;
-     
+
     return *this;
 }
 

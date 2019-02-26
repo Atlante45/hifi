@@ -44,7 +44,6 @@ bool TriangleSet::convexHullContains(const glm::vec3& point) const {
             insideMesh = false;
             break;
         }
-
     }
     return insideMesh;
 }
@@ -73,13 +72,12 @@ void TriangleSet::balanceTree() {
 }
 
 // With an octree: 8 ^ MAX_DEPTH = 4096 leaves
-//static const int MAX_DEPTH = 4;
+// static const int MAX_DEPTH = 4;
 // With a k-d tree: 2 ^ MAX_DEPTH = 4096 leaves
 static const int MAX_DEPTH = 12;
 
 TriangleSet::TriangleTreeCell::TriangleTreeCell(std::vector<Triangle>& allTriangles, const AABox& bounds, int depth) :
-    _allTriangles(allTriangles)
-{
+    _allTriangles(allTriangles) {
     reset(bounds, depth);
 }
 
@@ -176,22 +174,24 @@ void TriangleSet::TriangleTreeCell::insert(size_t triangleIndex) {
     _triangleIndices.push_back(triangleIndex);
 }
 
-bool TriangleSet::findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& invDirection, float& distance,
-                                      BoxFace& face, Triangle& triangle, bool precision, bool allowBackface) {
+bool TriangleSet::findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& invDirection,
+                                      float& distance, BoxFace& face, Triangle& triangle, bool precision, bool allowBackface) {
     if (!_isBalanced) {
         balanceTree();
     }
 
     float localDistance = distance;
     int trianglesTouched = 0;
-    bool hit = _triangleTree.findRayIntersection(origin, direction, invDirection, localDistance, face, triangle, precision, trianglesTouched, allowBackface);
+    bool hit = _triangleTree.findRayIntersection(origin, direction, invDirection, localDistance, face, triangle, precision,
+                                                 trianglesTouched, allowBackface);
     if (hit) {
         distance = localDistance;
     }
 
 #if WANT_DEBUGGING
     if (precision) {
-        qDebug() << "trianglesTouched :" << trianglesTouched << "out of:" << _triangleTree._population << "_triangles.size:" << _triangles.size();
+        qDebug() << "trianglesTouched :" << trianglesTouched << "out of:" << _triangleTree._population
+                 << "_triangles.size:" << _triangles.size();
     }
 #endif
     return hit;
@@ -200,8 +200,8 @@ bool TriangleSet::findRayIntersection(const glm::vec3& origin, const glm::vec3& 
 // Determine of the given ray (origin/direction) in model space intersects with any triangles
 // in the set. If an intersection occurs, the distance and surface normal will be provided.
 bool TriangleSet::TriangleTreeCell::findRayIntersectionInternal(const glm::vec3& origin, const glm::vec3& direction,
-                                                                  float& distance, BoxFace& face, Triangle& triangle, bool precision,
-                                                                  int& trianglesTouched, bool allowBackface) {
+                                                                float& distance, BoxFace& face, Triangle& triangle,
+                                                                bool precision, int& trianglesTouched, bool allowBackface) {
     bool intersectedSomething = false;
     float bestDistance = FLT_MAX;
     Triangle bestTriangle;
@@ -232,8 +232,9 @@ bool TriangleSet::TriangleTreeCell::findRayIntersectionInternal(const glm::vec3&
     return intersectedSomething;
 }
 
-bool TriangleSet::TriangleTreeCell::findRayIntersection(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& invDirection,
-                                                        float& distance, BoxFace& face, Triangle& triangle, bool precision, int& trianglesTouched,
+bool TriangleSet::TriangleTreeCell::findRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
+                                                        const glm::vec3& invDirection, float& distance, BoxFace& face,
+                                                        Triangle& triangle, bool precision, int& trianglesTouched,
                                                         bool allowBackface) {
     if (_population < 1) {
         return false; // no triangles below here, so we can't intersect
@@ -250,7 +251,8 @@ bool TriangleSet::TriangleTreeCell::findRayIntersection(const glm::vec3& origin,
         float internalDistance = distance;
         BoxFace internalFace { UNKNOWN_FACE };
         Triangle internalTriangle;
-        if (findRayIntersectionInternal(origin, direction, internalDistance, internalFace, internalTriangle, precision, trianglesTouched, allowBackface)) {
+        if (findRayIntersectionInternal(origin, direction, internalDistance, internalFace, internalTriangle, precision,
+                                        trianglesTouched, allowBackface)) {
             bestLocalDistance = internalDistance;
             bestLocalFace = internalFace;
             bestLocalTriangle = internalTriangle;
@@ -270,8 +272,10 @@ bool TriangleSet::TriangleTreeCell::findRayIntersection(const glm::vec3& origin,
                     float childBoundDistance = FLT_MAX;
                     BoxFace childBoundFace;
                     glm::vec3 childBoundNormal;
-                    if (child->getBounds().findRayIntersection(origin, direction, invDirection, childBoundDistance, childBoundFace, childBoundNormal)) {
-                        // We only need to add this cell if it's closer than the local triangle set intersection (if there was one)
+                    if (child->getBounds().findRayIntersection(origin, direction, invDirection, childBoundDistance,
+                                                               childBoundFace, childBoundNormal)) {
+                        // We only need to add this cell if it's closer than the local triangle set intersection (if there was
+                        // one)
                         if (childBoundDistance < bestLocalDistance) {
                             priority = childBoundDistance;
                         }
@@ -301,11 +305,13 @@ bool TriangleSet::TriangleTreeCell::findRayIntersection(const glm::vec3& origin,
             if (!precision && childDistance < EPSILON) {
                 BoxFace childBoundFace;
                 glm::vec3 childBoundNormal;
-                sortedTriangleCell.second->getBounds().findRayIntersection(origin, direction, invDirection, childDistance, childBoundFace, childBoundNormal);
+                sortedTriangleCell.second->getBounds().findRayIntersection(origin, direction, invDirection, childDistance,
+                                                                           childBoundFace, childBoundNormal);
             }
             BoxFace childFace;
             Triangle childTriangle;
-            if (sortedTriangleCell.second->findRayIntersection(origin, direction, invDirection, childDistance, childFace, childTriangle, precision, trianglesTouched)) {
+            if (sortedTriangleCell.second->findRayIntersection(origin, direction, invDirection, childDistance, childFace,
+                                                               childTriangle, precision, trianglesTouched)) {
                 if (childDistance < bestLocalDistance) {
                     bestLocalDistance = childDistance;
                     bestLocalFace = childFace;
@@ -326,30 +332,33 @@ bool TriangleSet::TriangleTreeCell::findRayIntersection(const glm::vec3& origin,
 }
 
 bool TriangleSet::findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                           float& parabolicDistance, BoxFace& face, Triangle& triangle, bool precision, bool allowBackface) {
+                                           float& parabolicDistance, BoxFace& face, Triangle& triangle, bool precision,
+                                           bool allowBackface) {
     if (!_isBalanced) {
         balanceTree();
     }
 
     float localDistance = parabolicDistance;
     int trianglesTouched = 0;
-    bool hit = _triangleTree.findParabolaIntersection(origin, velocity, acceleration, localDistance, face, triangle, precision, trianglesTouched, allowBackface);
+    bool hit = _triangleTree.findParabolaIntersection(origin, velocity, acceleration, localDistance, face, triangle, precision,
+                                                      trianglesTouched, allowBackface);
     if (hit) {
         parabolicDistance = localDistance;
     }
 
 #if WANT_DEBUGGING
     if (precision) {
-        qDebug() << "trianglesTouched :" << trianglesTouched << "out of:" << _triangleTree._population << "_triangles.size:" << _triangles.size();
+        qDebug() << "trianglesTouched :" << trianglesTouched << "out of:" << _triangleTree._population
+                 << "_triangles.size:" << _triangles.size();
     }
 #endif
     return hit;
 }
 
 bool TriangleSet::TriangleTreeCell::findParabolaIntersectionInternal(const glm::vec3& origin, const glm::vec3& velocity,
-                                                                       const glm::vec3& acceleration, float& parabolicDistance,
-                                                                       BoxFace& face, Triangle& triangle, bool precision,
-                                                                       int& trianglesTouched, bool allowBackface) {
+                                                                     const glm::vec3& acceleration, float& parabolicDistance,
+                                                                     BoxFace& face, Triangle& triangle, bool precision,
+                                                                     int& trianglesTouched, bool allowBackface) {
     bool intersectedSomething = false;
     float bestDistance = FLT_MAX;
     Triangle bestTriangle;
@@ -359,7 +368,8 @@ bool TriangleSet::TriangleTreeCell::findParabolaIntersectionInternal(const glm::
             const auto& thisTriangle = _allTriangles[triangleIndex];
             float thisTriangleDistance;
             trianglesTouched++;
-            if (findParabolaTriangleIntersection(origin, velocity, acceleration, thisTriangle, thisTriangleDistance, allowBackface)) {
+            if (findParabolaTriangleIntersection(origin, velocity, acceleration, thisTriangle, thisTriangleDistance,
+                                                 allowBackface)) {
                 if (thisTriangleDistance < bestDistance) {
                     bestDistance = thisTriangleDistance;
                     bestTriangle = thisTriangle;
@@ -381,9 +391,9 @@ bool TriangleSet::TriangleTreeCell::findParabolaIntersectionInternal(const glm::
 }
 
 bool TriangleSet::TriangleTreeCell::findParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
-                                                               const glm::vec3& acceleration, float& parabolicDistance,
-                                                               BoxFace& face, Triangle& triangle, bool precision,
-                                                               int& trianglesTouched, bool allowBackface) {
+                                                             const glm::vec3& acceleration, float& parabolicDistance,
+                                                             BoxFace& face, Triangle& triangle, bool precision,
+                                                             int& trianglesTouched, bool allowBackface) {
     if (_population < 1) {
         return false; // no triangles below here, so we can't intersect
     }
@@ -399,7 +409,8 @@ bool TriangleSet::TriangleTreeCell::findParabolaIntersection(const glm::vec3& or
         float internalDistance = parabolicDistance;
         BoxFace internalFace;
         Triangle internalTriangle;
-        if (findParabolaIntersectionInternal(origin, velocity, acceleration, internalDistance, internalFace, internalTriangle, precision, trianglesTouched, allowBackface)) {
+        if (findParabolaIntersectionInternal(origin, velocity, acceleration, internalDistance, internalFace, internalTriangle,
+                                             precision, trianglesTouched, allowBackface)) {
             bestLocalDistance = internalDistance;
             bestLocalFace = internalFace;
             bestLocalTriangle = internalTriangle;
@@ -419,8 +430,10 @@ bool TriangleSet::TriangleTreeCell::findParabolaIntersection(const glm::vec3& or
                     float childBoundDistance = FLT_MAX;
                     BoxFace childBoundFace;
                     glm::vec3 childBoundNormal;
-                    if (child->getBounds().findParabolaIntersection(origin, velocity, acceleration, childBoundDistance, childBoundFace, childBoundNormal)) {
-                        // We only need to add this cell if it's closer than the local triangle set intersection (if there was one)
+                    if (child->getBounds().findParabolaIntersection(origin, velocity, acceleration, childBoundDistance,
+                                                                    childBoundFace, childBoundNormal)) {
+                        // We only need to add this cell if it's closer than the local triangle set intersection (if there was
+                        // one)
                         if (childBoundDistance < bestLocalDistance) {
                             priority = childBoundDistance;
                         }
@@ -450,11 +463,13 @@ bool TriangleSet::TriangleTreeCell::findParabolaIntersection(const glm::vec3& or
             if (!precision && childDistance < EPSILON) {
                 BoxFace childBoundFace;
                 glm::vec3 childBoundNormal;
-                sortedTriangleCell.second->getBounds().findParabolaIntersection(origin, velocity, acceleration, childDistance, childBoundFace, childBoundNormal);
+                sortedTriangleCell.second->getBounds().findParabolaIntersection(origin, velocity, acceleration, childDistance,
+                                                                                childBoundFace, childBoundNormal);
             }
             BoxFace childFace;
             Triangle childTriangle;
-            if (sortedTriangleCell.second->findParabolaIntersection(origin, velocity, acceleration, childDistance, childFace, childTriangle, precision, trianglesTouched)) {
+            if (sortedTriangleCell.second->findParabolaIntersection(origin, velocity, acceleration, childDistance, childFace,
+                                                                    childTriangle, precision, trianglesTouched)) {
                 if (childDistance < bestLocalDistance) {
                     bestLocalDistance = childDistance;
                     bestLocalFace = childFace;

@@ -25,7 +25,6 @@ const float ACTIVATION_LINEAR_VELOCITY_DELTA = 0.01f;
 const float ACTIVATION_GRAVITY_DELTA = 0.1f;
 const float ACTIVATION_ANGULAR_VELOCITY_DELTA = 0.03f;
 
-
 // origin of physics simulation in world-frame
 glm::vec3 _worldOffset(0.0f);
 
@@ -63,9 +62,7 @@ ShapeManager* ObjectMotionState::getShapeManager() {
     return shapeManager;
 }
 
-ObjectMotionState::ObjectMotionState(const btCollisionShape* shape) :
-    _lastKinematicStep(worldSimulationStep)
-{
+ObjectMotionState::ObjectMotionState(const btCollisionShape* shape) : _lastKinematicStep(worldSimulationStep) {
     setShape(shape);
 }
 
@@ -141,7 +138,7 @@ glm::vec3 ObjectMotionState::getBodyLinearVelocityGTSigma() const {
 }
 
 glm::vec3 ObjectMotionState::getObjectLinearVelocityChange() const {
-    return glm::vec3(0.0f);  // Subclasses override where meaningful.
+    return glm::vec3(0.0f); // Subclasses override where meaningful.
 }
 
 glm::vec3 ObjectMotionState::getBodyAngularVelocity() const {
@@ -257,8 +254,7 @@ void ObjectMotionState::handleEasyChanges(uint32_t& flags) {
             btVector3 newGravity = glmToBullet(getObjectGravity());
             if (!(flags & Simulation::DIRTY_PHYSICS_ACTIVATION)) {
                 float delta = (newGravity - _body->getGravity()).length();
-                if (delta > ACTIVATION_GRAVITY_DELTA ||
-                        (delta > 0.0f && _body->getGravity().length2() == 0.0f)) {
+                if (delta > ACTIVATION_GRAVITY_DELTA || (delta > 0.0f && _body->getGravity().length2() == 0.0f)) {
                     flags |= Simulation::DIRTY_PHYSICS_ACTIVATION;
                 }
             }
@@ -310,7 +306,7 @@ bool ObjectMotionState::handleHardAndEasyChanges(uint32_t& flags, PhysicsEngine*
                 // the shape didn't actually change, so we clear the DIRTY_SHAPE flag
                 flags &= ~Simulation::DIRTY_SHAPE;
                 // and clear the reference we just created
-                getShapeManager()->releaseShape(_shape);        
+                getShapeManager()->releaseShape(_shape);
             } else {
                 _body->setCollisionShape(const_cast<btCollisionShape*>(newShape));
                 setShape(newShape);
@@ -361,4 +357,3 @@ void ObjectMotionState::updateBodyMassProperties() {
 void ObjectMotionState::saveKinematicState(btScalar timeStep) {
     _body->saveKinematicState(timeStep);
 }
-

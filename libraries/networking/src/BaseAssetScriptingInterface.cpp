@@ -9,8 +9,8 @@
 
 #include "BaseAssetScriptingInterface.h"
 
-#include <QJsonDocument>
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QMimeDatabase>
 #include <QThread>
 
@@ -36,7 +36,8 @@ QSharedPointer<AssetClient> BaseAssetScriptingInterface::assetClient() {
     return client;
 }
 
-BaseAssetScriptingInterface::BaseAssetScriptingInterface(QObject* parent) : QObject(parent) {}
+BaseAssetScriptingInterface::BaseAssetScriptingInterface(QObject* parent) : QObject(parent) {
+}
 
 bool BaseAssetScriptingInterface::initializeCache() {
     if (!assetClient()) {
@@ -50,9 +51,7 @@ bool BaseAssetScriptingInterface::initializeCache() {
     QMetaObject::invokeMethod(assetClient().data(), "initCaching");
 
     Promise deferred = makePromise("BaseAssetScriptingInterface--queryCacheStatus");
-    deferred->then([this](QVariantMap result) {
-        _cacheReady = !result.value("cacheDirectory").toString().isEmpty();
-    });
+    deferred->then([this](QVariantMap result) { _cacheReady = !result.value("cacheDirectory").toString().isEmpty(); });
     deferred->fail([](QString error) {
         qDebug() << "BaseAssetScriptingInterface::queryCacheStatus ERROR" << QThread::currentThread() << error;
     });
@@ -112,11 +111,7 @@ Promise BaseAssetScriptingInterface::loadAsset(QString asset, bool decompress, Q
     auto url = AssetUtils::getATPUrl(hash).toString();
 
     QVariantMap metaData = {
-        { "_asset", asset },
-        { "_type", "download" },
-        { "hash", hash },
-        { "url", url },
-        { "responseType", responseType },
+        { "_asset", asset }, { "_type", "download" }, { "hash", hash }, { "url", url }, { "responseType", responseType },
     };
 
     Promise completed = makePromise("loadAsset::completed");
@@ -157,7 +152,9 @@ Promise BaseAssetScriptingInterface::convertBytes(const QByteArray& dataByteArra
     QString error;
     Promise conversion = makePromise(__FUNCTION__);
     if (!RESPONSE_TYPES.contains(responseType)) {
-        error = QString("convertBytes: invalid responseType: '%1' (expected: %2)").arg(responseType).arg(RESPONSE_TYPES.join(" | "));
+        error = QString("convertBytes: invalid responseType: '%1' (expected: %2)")
+                    .arg(responseType)
+                    .arg(RESPONSE_TYPES.join(" | "));
     } else if (responseType == "arraybuffer") {
         // interpret as bytes
         result["response"] = dataByteArray;
@@ -169,7 +166,8 @@ Promise BaseAssetScriptingInterface::convertBytes(const QByteArray& dataByteArra
         QJsonParseError status;
         auto parsed = QJsonDocument::fromJson(dataByteArray, &status);
         if (status.error == QJsonParseError::NoError) {
-            result["response"] = parsed.isArray() ? QVariant(parsed.array().toVariantList()) : QVariant(parsed.object().toVariantMap());
+            result["response"] = parsed.isArray() ? QVariant(parsed.array().toVariantList())
+                                                  : QVariant(parsed.object().toVariantMap());
         } else {
             result = {
                 { "error", status.error },
@@ -201,7 +199,7 @@ Promise BaseAssetScriptingInterface::decompressBytes(const QByteArray& dataByteA
             { "byteLength", inflated.size() },
             { "contentType", QMimeDatabase().mimeTypeForData(inflated).name() },
             { "data", inflated },
-       });
+        });
     } else {
         decompressed->reject("gunzip error");
     }
@@ -222,7 +220,7 @@ Promise BaseAssetScriptingInterface::compressBytes(const QByteArray& dataByteArr
             { "byteLength", deflated.size() },
             { "contentType", QMimeDatabase().mimeTypeForData(deflated).name() },
             { "data", deflated },
-       });
+        });
     } else {
         compressed->reject("gzip error", {});
     }
@@ -330,7 +328,7 @@ Promise BaseAssetScriptingInterface::getAssetInfo(QString asset) {
         });
         request->start();
     } else {
-        deferred->reject("invalid ATP file path: " + asset + "("+path+")", {});
+        deferred->reject("invalid ATP file path: " + asset + "(" + path + ")", {});
     }
     return deferred;
 }

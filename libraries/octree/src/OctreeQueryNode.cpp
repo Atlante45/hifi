@@ -11,12 +11,12 @@
 
 #include "OctreeQueryNode.h"
 
-#include <cstring>
 #include <cstdio>
+#include <cstring>
 
-#include <udt/PacketHeaders.h>
 #include <SharedUtil.h>
 #include <UUID.h>
+#include <udt/PacketHeaders.h>
 
 void OctreeQueryNode::nodeKilled() {
     _isShuttingDown = true;
@@ -87,7 +87,6 @@ void OctreeQueryNode::init() {
     resetOctreePacket(); // don't bump sequence
 }
 
-
 void OctreeQueryNode::resetOctreePacket() {
     // if shutting down, return immediately
     if (_isShuttingDown) {
@@ -144,7 +143,7 @@ bool OctreeQueryNode::updateCurrentViewFrustum() {
     if (_isShuttingDown) {
         return false;
     }
-    
+
     if (!hasConicalViews()) {
         // this client does not use a view frustum so the view frustum for this query has not changed
         return false;

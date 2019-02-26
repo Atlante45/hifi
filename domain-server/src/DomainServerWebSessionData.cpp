@@ -16,22 +16,14 @@
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonObject>
 
-DomainServerWebSessionData::DomainServerWebSessionData() :
-    _username(),
-    _roles()
-{
-    
+DomainServerWebSessionData::DomainServerWebSessionData() : _username(), _roles() {
 }
 
-DomainServerWebSessionData::DomainServerWebSessionData(const QJsonObject& userObject) :
-    _roles()
-{
+DomainServerWebSessionData::DomainServerWebSessionData(const QJsonObject& userObject) : _roles() {
     _username = userObject["username"].toString();
-    
+
     // pull each of the roles and throw them into our set
-    foreach(const QJsonValue& rolesValue, userObject["roles"].toArray()) {
-        _roles.insert(rolesValue.toString());
-    }
+    foreach (const QJsonValue& rolesValue, userObject["roles"].toArray()) { _roles.insert(rolesValue.toString()); }
 }
 
 DomainServerWebSessionData::DomainServerWebSessionData(const DomainServerWebSessionData& otherSessionData) : QObject() {
@@ -47,18 +39,17 @@ DomainServerWebSessionData& DomainServerWebSessionData::operator=(const DomainSe
 
 void DomainServerWebSessionData::swap(DomainServerWebSessionData& otherSessionData) {
     using std::swap;
-    
+
     swap(_username, otherSessionData._username);
     swap(_roles, otherSessionData._roles);
 }
 
-QDataStream& operator<<(QDataStream &out, const DomainServerWebSessionData& session) {
+QDataStream& operator<<(QDataStream& out, const DomainServerWebSessionData& session) {
     out << session._username << session._roles;
     return out;
 }
 
-QDataStream& operator>>(QDataStream &in, DomainServerWebSessionData& session) {
+QDataStream& operator>>(QDataStream& in, DomainServerWebSessionData& session) {
     in >> session._username >> session._roles;
     return in;
 }
-

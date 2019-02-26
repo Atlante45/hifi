@@ -9,10 +9,10 @@
 #ifndef hifi_ShaderTests_h
 #define hifi_ShaderTests_h
 
-#include <QtTest/QtTest>
-#include <gpu/Forward.h>
-#include <gl/OffscreenGLCanvas.h>
 #include <gl/Context.h>
+#include <gl/OffscreenGLCanvas.h>
+#include <gpu/Forward.h>
+#include <QtTest/QtTest>
 
 class ShaderTests : public QObject {
     Q_OBJECT
@@ -23,8 +23,8 @@ private slots:
     void testShaderLoad();
 
 private:
-    gl::OffscreenContext* _context{ nullptr };
+    gl::OffscreenContext* _context { nullptr };
     gpu::ContextPointer _gpuContext;
 };
 
-#endif  // hifi_ViewFruxtumTests_h
+#endif // hifi_ViewFruxtumTests_h

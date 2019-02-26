@@ -8,38 +8,38 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-#include <unordered_map>
-#include <memory>
 #include <cstdio>
+#include <memory>
 #include <mutex>
 #include <set>
+#include <unordered_map>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <QtCore/QTime>
-#include <QtCore/QTimer>
 #include <QtCore/QDir>
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QFile>
 #include <QtCore/QLoggingCategory>
+#include <QtCore/QTime>
+#include <QtCore/QTimer>
 
-#include <QtGui/QResizeEvent>
-#include <QtGui/QWindow>
 #include <QtGui/QGuiApplication>
 #include <QtGui/QImage>
+#include <QtGui/QResizeEvent>
+#include <QtGui/QWindow>
 
-#include <QtQuick/QQuickItem>
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlContext>
+#include <QtQuick/QQuickItem>
 
-#include <plugins/Plugin.h>
-#include <ui-plugins/PluginContainer.h>
-#include <plugins/PluginManager.h>
+#include <controllers/ScriptingInterface.h>
 #include <input-plugins/InputPlugin.h>
 #include <input-plugins/KeyboardMouseDevice.h>
 #include <input-plugins/TouchscreenDevice.h>
-#include <controllers/ScriptingInterface.h>
+#include <plugins/Plugin.h>
+#include <plugins/PluginManager.h>
+#include <ui-plugins/PluginContainer.h>
 
 #include <DependencyManager.h>
 #include <controllers/UserInputMapper.h>
@@ -77,7 +77,6 @@ const QString& getTestQmlDir() {
 
 using namespace controller;
 
-
 class PluginContainerProxy : public QObject, PluginContainer {
     Q_OBJECT
 public:
@@ -98,7 +97,6 @@ public:
     virtual void registerControllerTypes(QScriptEngine* engine) {};
 };
 
-
 int main(int argc, char** argv) {
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
@@ -113,23 +111,11 @@ int main(int argc, char** argv) {
         float delta = now - last;
         last = now;
 
-        InputCalibrationData calibrationData = {
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4()
-        };
+        InputCalibrationData calibrationData = { glm::mat4(), glm::mat4(), glm::mat4(), glm::mat4(), glm::mat4(),
+                                                 glm::mat4(), glm::mat4(), glm::mat4(), glm::mat4(), glm::mat4(),
+                                                 glm::mat4(), glm::mat4(), glm::mat4() };
 
-        foreach(auto inputPlugin, PluginManager::getInstance()->getInputPlugins()) {
+        foreach (auto inputPlugin, PluginManager::getInstance()->getInputPlugins()) {
             inputPlugin->pluginUpdate(delta, calibrationData);
         }
 
@@ -139,24 +125,12 @@ int main(int argc, char** argv) {
     timer.start(50);
 
     {
-        InputCalibrationData calibrationData = {
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4(),
-            glm::mat4()
-        };
+        InputCalibrationData calibrationData = { glm::mat4(), glm::mat4(), glm::mat4(), glm::mat4(), glm::mat4(),
+                                                 glm::mat4(), glm::mat4(), glm::mat4(), glm::mat4(), glm::mat4(),
+                                                 glm::mat4(), glm::mat4(), glm::mat4() };
 
         DependencyManager::set<controller::UserInputMapper>();
-        foreach(auto inputPlugin, PluginManager::getInstance()->getInputPlugins()) {
+        foreach (auto inputPlugin, PluginManager::getInstance()->getInputPlugins()) {
             QString name = inputPlugin->getName();
             inputPlugin->activate();
             auto userInputMapper = DependencyManager::get<controller::UserInputMapper>();
@@ -183,4 +157,3 @@ int main(int argc, char** argv) {
 }
 
 #include "main.moc"
-

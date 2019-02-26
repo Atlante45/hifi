@@ -26,7 +26,6 @@ const QString emptyPool = QString();
 class Assignment : public QObject {
     Q_OBJECT
 public:
-
     enum Type : uint8_t {
         FirstType = 0,
         AudioMixerType = 0,
@@ -39,27 +38,17 @@ public:
         AllTypes = 7
     };
 
-    enum Command {
-        CreateCommand,
-        DeployCommand,
-        RequestCommand
-    };
+    enum Command { CreateCommand, DeployCommand, RequestCommand };
 
-    enum Location {
-        GlobalLocation,
-        LocalLocation
-    };
+    enum Location { GlobalLocation, LocalLocation };
 
     static Assignment::Type typeForNodeType(NodeType_t nodeType);
 
     Assignment();
-    Assignment(Assignment::Command command,
-               Assignment::Type type,
-               const QString& pool = emptyPool,
-               Assignment::Location location = Assignment::LocalLocation,
-               QString dataDirectory = QString());
+    Assignment(Assignment::Command command, Assignment::Type type, const QString& pool = emptyPool,
+               Assignment::Location location = Assignment::LocalLocation, QString dataDirectory = QString());
     Assignment(const Assignment& otherAssignment);
-    Assignment& operator=(const Assignment &rhsAssignment);
+    Assignment& operator=(const Assignment& rhsAssignment);
 
     void swap(Assignment& otherAssignment);
 
@@ -80,21 +69,21 @@ public:
 
     void setPool(const QString& pool) { _pool = pool; };
     const QString& getPool() const { return _pool; }
-    
+
     void setIsStatic(bool isStatic) { _isStatic = isStatic; }
-    bool isStatic() const  { return _isStatic; }
-    
+    bool isStatic() const { return _isStatic; }
+
     void setWalletUUID(const QUuid& walletUUID) { _walletUUID = walletUUID; }
     const QUuid& getWalletUUID() const { return _walletUUID; }
-    
+
     const QString& getNodeVersion() const { return _nodeVersion; }
-    
+
     const char* getTypeName() const;
     static const char* typeToString(Assignment::Type type);
 
     friend QDebug operator<<(QDebug debug, const Assignment& assignment);
-    friend QDataStream& operator<<(QDataStream &out, const Assignment& assignment);
-    friend QDataStream& operator>>(QDataStream &in, Assignment& assignment);
+    friend QDataStream& operator<<(QDataStream& out, const Assignment& assignment);
+    friend QDataStream& operator>>(QDataStream& in, Assignment& assignment);
 
 protected:
     QUuid _uuid; /// the 16 byte UUID for this assignment

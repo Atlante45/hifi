@@ -12,8 +12,8 @@
 #ifndef hifi_LogDialog_h
 #define hifi_LogDialog_h
 
-#include "BaseLogDialog.h"
 #include <SettingHandle.h>
+#include "BaseLogDialog.h"
 
 class QCheckBox;
 class QPushButton;
@@ -52,7 +52,6 @@ protected:
 
     QString getCurrentLog() override;
     void updateMessageCount();
-    
 
 private:
     QCheckBox* _extraDebuggingBox;

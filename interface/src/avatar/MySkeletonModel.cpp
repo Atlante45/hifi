@@ -8,15 +8,13 @@
 
 #include "MySkeletonModel.h"
 
-#include <avatars-renderer/Avatar.h>
-#include <DebugDraw.h>
 #include <CubicHermiteSpline.h>
+#include <DebugDraw.h>
+#include <avatars-renderer/Avatar.h>
 
+#include "AnimUtil.h"
 #include "Application.h"
 #include "InterfaceLogging.h"
-#include "AnimUtil.h"
-
-
 
 MySkeletonModel::MySkeletonModel(Avatar* owningAvatar, QObject* parent) : SkeletonModel(owningAvatar, parent) {
 }
@@ -37,9 +35,9 @@ Rig::CharacterControllerState convertCharacterControllerState(CharacterControlle
 
 #if defined(Q_OS_ANDROID) || defined(HIFI_USE_OPTIMIZED_IK)
 static glm::vec3 computeSpine2WithHeadHipsSpline(MyAvatar* myAvatar, AnimPose hipsIKTargetPose, AnimPose headIKTargetPose) {
-
     // the the ik targets to compute the spline with
-    CubicHermiteSplineFunctorWithArcLength splineFinal(headIKTargetPose.rot(), headIKTargetPose.trans(), hipsIKTargetPose.rot(), hipsIKTargetPose.trans());
+    CubicHermiteSplineFunctorWithArcLength splineFinal(headIKTargetPose.rot(), headIKTargetPose.trans(), hipsIKTargetPose.rot(),
+                                                       hipsIKTargetPose.trans());
 
     // measure the total arc length along the spline
     float totalArcLength = splineFinal.arcLength(1.0f);
@@ -47,7 +45,6 @@ static glm::vec3 computeSpine2WithHeadHipsSpline(MyAvatar* myAvatar, AnimPose hi
     glm::vec3 spine2Translation = splineFinal(tFinal);
 
     return spine2Translation + myAvatar->getSpine2SplineOffset();
-
 }
 #endif
 
@@ -64,7 +61,8 @@ static AnimPose computeHipsInSensorFrame(MyAvatar* myAvatar, bool isFlying) {
     }
 
     glm::mat4 hipsMat;
-    if (myAvatar->getCenterOfGravityModelEnabled() && !isFlying && !(myAvatar->getIsInWalkingState()) && !(myAvatar->getIsInSittingState()) && myAvatar->getHMDLeanRecenterEnabled()) {
+    if (myAvatar->getCenterOfGravityModelEnabled() && !isFlying && !(myAvatar->getIsInWalkingState()) &&
+        !(myAvatar->getIsInSittingState()) && myAvatar->getHMDLeanRecenterEnabled()) {
         // then we use center of gravity model
         hipsMat = myAvatar->deriveBodyUsingCgModel();
     } else {
@@ -73,7 +71,6 @@ static AnimPose computeHipsInSensorFrame(MyAvatar* myAvatar, bool isFlying) {
     }
     glm::vec3 hipsPos = extractTranslation(hipsMat);
     glm::quat hipsRot = glmExtractRotation(hipsMat);
-
 
     glm::mat4 avatarToWorldMat = myAvatar->getTransform().getMatrix();
     glm::mat4 avatarToSensorMat = worldToSensorMat * avatarToWorldMat;
@@ -89,7 +86,8 @@ static AnimPose computeHipsInSensorFrame(MyAvatar* myAvatar, bool isFlying) {
         // rotate the hips back to match the flying animation.
 
         const float TILT_ANGLE = 0.523f;
-        const glm::quat tiltRot = glm::angleAxis(TILT_ANGLE, glm::normalize(transformVectorFast(avatarToSensorMat, -Vectors::UNIT_X)));
+        const glm::quat tiltRot = glm::angleAxis(TILT_ANGLE,
+                                                 glm::normalize(transformVectorFast(avatarToSensorMat, -Vectors::UNIT_X)));
 
         glm::vec3 headPos;
         int headIndex = myAvatar->getJointIndex("Head");
@@ -205,7 +203,8 @@ void MySkeletonModel::updateRig(float deltaTime, glm::mat4 parentTransform) {
         }
     }
 
-    bool isFlying = (myAvatar->getCharacterController()->getState() == CharacterController::State::Hover || myAvatar->getCharacterController()->computeCollisionMask() == BULLET_COLLISION_MASK_COLLISIONLESS);
+    bool isFlying = (myAvatar->getCharacterController()->getState() == CharacterController::State::Hover ||
+                     myAvatar->getCharacterController()->computeCollisionMask() == BULLET_COLLISION_MASK_COLLISIONLESS);
     if (isFlying != _prevIsFlying) {
         const float FLY_TO_IDLE_HIPS_TRANSITION_TIME = 0.5f;
         _flyIdleTimer = FLY_TO_IDLE_HIPS_TRANSITION_TIME;
@@ -215,12 +214,15 @@ void MySkeletonModel::updateRig(float deltaTime, glm::mat4 parentTransform) {
     _prevIsFlying = isFlying;
 
     // if hips are not under direct control, estimate the hips position.
-    if (avatarHeadPose.isValid() && !(params.primaryControllerFlags[Rig::PrimaryControllerType_Hips] & (uint8_t)Rig::ControllerFlags::Enabled)) {
-        bool isFlying = (myAvatar->getCharacterController()->getState() == CharacterController::State::Hover || myAvatar->getCharacterController()->computeCollisionMask() == BULLET_COLLISION_MASK_COLLISIONLESS);
+    if (avatarHeadPose.isValid() &&
+        !(params.primaryControllerFlags[Rig::PrimaryControllerType_Hips] & (uint8_t)Rig::ControllerFlags::Enabled)) {
+        bool isFlying = (myAvatar->getCharacterController()->getState() == CharacterController::State::Hover ||
+                         myAvatar->getCharacterController()->computeCollisionMask() == BULLET_COLLISION_MASK_COLLISIONLESS);
 
         // timescale in seconds
         const float TRANS_HORIZ_TIMESCALE = 0.15f;
-        const float TRANS_VERT_TIMESCALE = 0.01f; // We want the vertical component of the hips to follow quickly to prevent spine squash/stretch.
+        const float TRANS_VERT_TIMESCALE = 0.01f; // We want the vertical component of the hips to follow quickly to prevent
+                                                  // spine squash/stretch.
         const float ROT_TIMESCALE = 0.15f;
         const float FLY_IDLE_TRANSITION_TIMESCALE = 0.25f;
 
@@ -244,13 +246,13 @@ void MySkeletonModel::updateRig(float deltaTime, glm::mat4 parentTransform) {
         AnimPose sensorToRigPose(invRigMat * myAvatar->getSensorToWorldMatrix());
 
         params.primaryControllerPoses[Rig::PrimaryControllerType_Hips] = sensorToRigPose * sensorHips;
-        params.primaryControllerFlags[Rig::PrimaryControllerType_Hips] = (uint8_t)Rig::ControllerFlags::Enabled | (uint8_t)Rig::ControllerFlags::Estimated;
+        params.primaryControllerFlags[Rig::PrimaryControllerType_Hips] = (uint8_t)Rig::ControllerFlags::Enabled |
+                                                                         (uint8_t)Rig::ControllerFlags::Estimated;
 
         // set spine2 if we have hand controllers
         if (myAvatar->getControllerPoseInAvatarFrame(controller::Action::RIGHT_HAND).isValid() &&
             myAvatar->getControllerPoseInAvatarFrame(controller::Action::LEFT_HAND).isValid() &&
             !(params.primaryControllerFlags[Rig::PrimaryControllerType_Spine2] & (uint8_t)Rig::ControllerFlags::Enabled)) {
-
 #if defined(Q_OS_ANDROID) || defined(HIFI_USE_OPTIMIZED_IK)
             AnimPose headAvatarSpace(avatarHeadPose.getRotation(), avatarHeadPose.getTranslation());
             AnimPose headRigSpace = avatarToRigPose * headAvatarSpace;
@@ -265,7 +267,6 @@ void MySkeletonModel::updateRig(float deltaTime, glm::mat4 parentTransform) {
             bool headExists = _rig.getAbsoluteJointPoseInRigFrame(_rig.indexOfJoint("Head"), currentHeadPose);
             bool hipsExists = _rig.getAbsoluteJointPoseInRigFrame(_rig.indexOfJoint("Hips"), currentHipsPose);
             if (spine2Exists && headExists && hipsExists) {
-
                 AnimPose rigSpaceYaw(myAvatar->getSpine2RotationRigSpace());
 #if defined(Q_OS_ANDROID) || defined(HIFI_USE_OPTIMIZED_IK)
                 rigSpaceYaw.rot() = safeLerp(Quaternions::IDENTITY, rigSpaceYaw.rot(), 0.5f);
@@ -279,13 +280,15 @@ void MySkeletonModel::updateRig(float deltaTime, glm::mat4 parentTransform) {
                     up = glm::vec3(0.0f, 1.0f, 0.0f);
                 }
                 generateBasisVectors(up, fwd, u, v, w);
-                AnimPose newSpinePose(glm::mat4(glm::vec4(w, 0.0f), glm::vec4(u, 0.0f), glm::vec4(v, 0.0f), glm::vec4(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f)));
+                AnimPose newSpinePose(glm::mat4(glm::vec4(w, 0.0f), glm::vec4(u, 0.0f), glm::vec4(v, 0.0f),
+                                                glm::vec4(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f)));
 #if defined(Q_OS_ANDROID) || defined(HIFI_USE_OPTIMIZED_IK)
                 currentSpine2Pose.trans() = spine2TargetTranslation;
 #endif
                 currentSpine2Pose.rot() = safeLerp(currentSpine2Pose.rot(), newSpinePose.rot(), SPINE2_ROTATION_FILTER);
                 params.primaryControllerPoses[Rig::PrimaryControllerType_Spine2] = currentSpine2Pose;
-                params.primaryControllerFlags[Rig::PrimaryControllerType_Spine2] = (uint8_t)Rig::ControllerFlags::Enabled | (uint8_t)Rig::ControllerFlags::Estimated;
+                params.primaryControllerFlags[Rig::PrimaryControllerType_Spine2] = (uint8_t)Rig::ControllerFlags::Enabled |
+                                                                                   (uint8_t)Rig::ControllerFlags::Estimated;
             }
         }
 
@@ -339,82 +342,60 @@ void MySkeletonModel::updateRig(float deltaTime, glm::mat4 parentTransform) {
     updateFingers();
 }
 
-
 void MySkeletonModel::updateFingers() {
-
     MyAvatar* myAvatar = static_cast<MyAvatar*>(_owningAvatar);
 
     static std::vector<std::vector<std::pair<controller::Action, QString>>> fingerChains = {
-        {
-            { controller::Action::LEFT_HAND, "LeftHand" },
-            { controller::Action::LEFT_HAND_THUMB1, "LeftHandThumb1" },
-            { controller::Action::LEFT_HAND_THUMB2, "LeftHandThumb2" },
-            { controller::Action::LEFT_HAND_THUMB3, "LeftHandThumb3" },
-            { controller::Action::LEFT_HAND_THUMB4, "LeftHandThumb4" }
-        },
-        {
-            { controller::Action::LEFT_HAND, "LeftHand" },
-            { controller::Action::LEFT_HAND_INDEX1, "LeftHandIndex1" },
-            { controller::Action::LEFT_HAND_INDEX2, "LeftHandIndex2" },
-            { controller::Action::LEFT_HAND_INDEX3, "LeftHandIndex3" },
-            { controller::Action::LEFT_HAND_INDEX4, "LeftHandIndex4" }
-        },
-        {
-            { controller::Action::LEFT_HAND, "LeftHand" },
-            { controller::Action::LEFT_HAND_MIDDLE1, "LeftHandMiddle1" },
-            { controller::Action::LEFT_HAND_MIDDLE2, "LeftHandMiddle2" },
-            { controller::Action::LEFT_HAND_MIDDLE3, "LeftHandMiddle3" },
-            { controller::Action::LEFT_HAND_MIDDLE4, "LeftHandMiddle4" }
-        },
-        {
-            { controller::Action::LEFT_HAND, "LeftHand" },
-            { controller::Action::LEFT_HAND_RING1, "LeftHandRing1" },
-            { controller::Action::LEFT_HAND_RING2, "LeftHandRing2" },
-            { controller::Action::LEFT_HAND_RING3, "LeftHandRing3" },
-            { controller::Action::LEFT_HAND_RING4, "LeftHandRing4" }
-        },
-        {
-            { controller::Action::LEFT_HAND, "LeftHand" },
-            { controller::Action::LEFT_HAND_PINKY1, "LeftHandPinky1" },
-            { controller::Action::LEFT_HAND_PINKY2, "LeftHandPinky2" },
-            { controller::Action::LEFT_HAND_PINKY3, "LeftHandPinky3" },
-            { controller::Action::LEFT_HAND_PINKY4, "LeftHandPinky4" }
-        },
-        {
-            { controller::Action::RIGHT_HAND, "RightHand" },
-            { controller::Action::RIGHT_HAND_THUMB1, "RightHandThumb1" },
-            { controller::Action::RIGHT_HAND_THUMB2, "RightHandThumb2" },
-            { controller::Action::RIGHT_HAND_THUMB3, "RightHandThumb3" },
-            { controller::Action::RIGHT_HAND_THUMB4, "RightHandThumb4" }
-        },
-        {
-            { controller::Action::RIGHT_HAND, "RightHand" },
-            { controller::Action::RIGHT_HAND_INDEX1, "RightHandIndex1" },
-            { controller::Action::RIGHT_HAND_INDEX2, "RightHandIndex2" },
-            { controller::Action::RIGHT_HAND_INDEX3, "RightHandIndex3" },
-            { controller::Action::RIGHT_HAND_INDEX4, "RightHandIndex4" }
-        },
-        {
-            { controller::Action::RIGHT_HAND, "RightHand" },
-            { controller::Action::RIGHT_HAND_MIDDLE1, "RightHandMiddle1" },
-            { controller::Action::RIGHT_HAND_MIDDLE2, "RightHandMiddle2" },
-            { controller::Action::RIGHT_HAND_MIDDLE3, "RightHandMiddle3" },
-            { controller::Action::RIGHT_HAND_MIDDLE4, "RightHandMiddle4" }
-        },
-        {
-            { controller::Action::RIGHT_HAND, "RightHand" },
-            { controller::Action::RIGHT_HAND_RING1, "RightHandRing1" },
-            { controller::Action::RIGHT_HAND_RING2, "RightHandRing2" },
-            { controller::Action::RIGHT_HAND_RING3, "RightHandRing3" },
-            { controller::Action::RIGHT_HAND_RING4, "RightHandRing4" }
-        },
-        {
-            { controller::Action::RIGHT_HAND, "RightHand" },
-            { controller::Action::RIGHT_HAND_PINKY1, "RightHandPinky1" },
-            { controller::Action::RIGHT_HAND_PINKY2, "RightHandPinky2" },
-            { controller::Action::RIGHT_HAND_PINKY3, "RightHandPinky3" },
-            { controller::Action::RIGHT_HAND_PINKY4, "RightHandPinky4" }
-        }
+        { { controller::Action::LEFT_HAND, "LeftHand" },
+          { controller::Action::LEFT_HAND_THUMB1, "LeftHandThumb1" },
+          { controller::Action::LEFT_HAND_THUMB2, "LeftHandThumb2" },
+          { controller::Action::LEFT_HAND_THUMB3, "LeftHandThumb3" },
+          { controller::Action::LEFT_HAND_THUMB4, "LeftHandThumb4" } },
+        { { controller::Action::LEFT_HAND, "LeftHand" },
+          { controller::Action::LEFT_HAND_INDEX1, "LeftHandIndex1" },
+          { controller::Action::LEFT_HAND_INDEX2, "LeftHandIndex2" },
+          { controller::Action::LEFT_HAND_INDEX3, "LeftHandIndex3" },
+          { controller::Action::LEFT_HAND_INDEX4, "LeftHandIndex4" } },
+        { { controller::Action::LEFT_HAND, "LeftHand" },
+          { controller::Action::LEFT_HAND_MIDDLE1, "LeftHandMiddle1" },
+          { controller::Action::LEFT_HAND_MIDDLE2, "LeftHandMiddle2" },
+          { controller::Action::LEFT_HAND_MIDDLE3, "LeftHandMiddle3" },
+          { controller::Action::LEFT_HAND_MIDDLE4, "LeftHandMiddle4" } },
+        { { controller::Action::LEFT_HAND, "LeftHand" },
+          { controller::Action::LEFT_HAND_RING1, "LeftHandRing1" },
+          { controller::Action::LEFT_HAND_RING2, "LeftHandRing2" },
+          { controller::Action::LEFT_HAND_RING3, "LeftHandRing3" },
+          { controller::Action::LEFT_HAND_RING4, "LeftHandRing4" } },
+        { { controller::Action::LEFT_HAND, "LeftHand" },
+          { controller::Action::LEFT_HAND_PINKY1, "LeftHandPinky1" },
+          { controller::Action::LEFT_HAND_PINKY2, "LeftHandPinky2" },
+          { controller::Action::LEFT_HAND_PINKY3, "LeftHandPinky3" },
+          { controller::Action::LEFT_HAND_PINKY4, "LeftHandPinky4" } },
+        { { controller::Action::RIGHT_HAND, "RightHand" },
+          { controller::Action::RIGHT_HAND_THUMB1, "RightHandThumb1" },
+          { controller::Action::RIGHT_HAND_THUMB2, "RightHandThumb2" },
+          { controller::Action::RIGHT_HAND_THUMB3, "RightHandThumb3" },
+          { controller::Action::RIGHT_HAND_THUMB4, "RightHandThumb4" } },
+        { { controller::Action::RIGHT_HAND, "RightHand" },
+          { controller::Action::RIGHT_HAND_INDEX1, "RightHandIndex1" },
+          { controller::Action::RIGHT_HAND_INDEX2, "RightHandIndex2" },
+          { controller::Action::RIGHT_HAND_INDEX3, "RightHandIndex3" },
+          { controller::Action::RIGHT_HAND_INDEX4, "RightHandIndex4" } },
+        { { controller::Action::RIGHT_HAND, "RightHand" },
+          { controller::Action::RIGHT_HAND_MIDDLE1, "RightHandMiddle1" },
+          { controller::Action::RIGHT_HAND_MIDDLE2, "RightHandMiddle2" },
+          { controller::Action::RIGHT_HAND_MIDDLE3, "RightHandMiddle3" },
+          { controller::Action::RIGHT_HAND_MIDDLE4, "RightHandMiddle4" } },
+        { { controller::Action::RIGHT_HAND, "RightHand" },
+          { controller::Action::RIGHT_HAND_RING1, "RightHandRing1" },
+          { controller::Action::RIGHT_HAND_RING2, "RightHandRing2" },
+          { controller::Action::RIGHT_HAND_RING3, "RightHandRing3" },
+          { controller::Action::RIGHT_HAND_RING4, "RightHandRing4" } },
+        { { controller::Action::RIGHT_HAND, "RightHand" },
+          { controller::Action::RIGHT_HAND_PINKY1, "RightHandPinky1" },
+          { controller::Action::RIGHT_HAND_PINKY2, "RightHandPinky2" },
+          { controller::Action::RIGHT_HAND_PINKY3, "RightHandPinky3" },
+          { controller::Action::RIGHT_HAND_PINKY4, "RightHandPinky4" } }
     };
 
     const float CONTROLLER_PRIORITY = 2.0f;
@@ -430,7 +411,7 @@ void MySkeletonModel::updateFingers() {
                     rotationFrameOffset = _jointRotationFrameOffsetMap.find(index);
                 }
                 auto pose = myAvatar->getControllerPoseInSensorFrame(link.first);
-                
+
                 if (pose.valid) {
                     glm::quat relRot = glm::inverse(prevAbsRot) * pose.getRotation();
                     // only set the rotation for the finger joints, not the hands.
@@ -439,7 +420,8 @@ void MySkeletonModel::updateFingers() {
                         rotationFrameOffset->second = 0;
                     }
                     prevAbsRot = pose.getRotation();
-                } else if (rotationFrameOffset->second == 1) { // if the pose is invalid and was set on previous frame we do clear ( current frame offset = 1 )
+                } else if (rotationFrameOffset->second ==
+                           1) { // if the pose is invalid and was set on previous frame we do clear ( current frame offset = 1 )
                     _rig.clearJointAnimationPriority(index);
                 }
                 rotationFrameOffset->second++;

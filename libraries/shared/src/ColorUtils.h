@@ -26,15 +26,15 @@ public:
 
     // Convert to gamma 2.2 space from linear
     inline static glm::vec3 toGamma22Vec3(const glm::vec3& linear);
-    
+
     // Convert from sRGB gamma space to linear.
     // This is pretty different from converting from 2.2.
     inline static glm::vec3 sRGBToLinearVec3(const glm::vec3& srgb);
     inline static glm::vec3 tosRGBVec3(const glm::vec3& srgb);
-    
+
     inline static glm::vec4 sRGBToLinearVec4(const glm::vec4& srgb);
     inline static glm::vec4 tosRGBVec4(const glm::vec4& srgb);
-    
+
     inline static float sRGBToLinearFloat(const float& srgb);
     inline static float sRGB8ToLinearFloat(const uint8_t srgb);
     inline static float tosRGBFloat(const float& linear);
@@ -73,17 +73,17 @@ inline glm::vec4 ColorUtils::tosRGBVec4(const glm::vec4& linear) {
 
 // This is based upon the conversions found in section 8.24 of the OpenGL 4.4 4.4 specification.
 // glm::pow(color, 2.2f) is approximate, and will cause subtle differences when used with sRGB framebuffers.
-inline float ColorUtils::sRGBToLinearFloat(const float &srgb) {
+inline float ColorUtils::sRGBToLinearFloat(const float& srgb) {
     const float SRGB_ELBOW = 0.04045f;
     float linearValue = 0.0f;
-    
+
     // This should mirror the conversion table found in section 8.24: sRGB Texture Color Conversion
     if (srgb <= SRGB_ELBOW) {
         linearValue = srgb / 12.92f;
     } else {
         linearValue = powf(((srgb + 0.055f) / 1.055f), 2.4f);
     }
-    
+
     return linearValue;
 }
 inline float ColorUtils::sRGB8ToLinearFloat(const uint8_t srgb) {
@@ -92,10 +92,10 @@ inline float ColorUtils::sRGB8ToLinearFloat(const uint8_t srgb) {
 
 // This is based upon the conversions found in section 17.3.9 of the OpenGL 4.4 specification.
 // glm::pow(color, 1.0f/2.2f) is approximate, and will cause subtle differences when used with sRGB framebuffers.
-inline float ColorUtils::tosRGBFloat(const float &linear) {
+inline float ColorUtils::tosRGBFloat(const float& linear) {
     const float SRGB_ELBOW_INV = 0.0031308f;
     float sRGBValue = 0.0f;
-    
+
     // This should mirror the conversion table found in section 17.3.9: sRGB Conversion
     if (linear <= 0.0f) {
         sRGBValue = 0.0f;
@@ -106,7 +106,7 @@ inline float ColorUtils::tosRGBFloat(const float &linear) {
     } else {
         sRGBValue = 1.0f;
     }
-    
+
     return sRGBValue;
 }
 

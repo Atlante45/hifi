@@ -12,9 +12,9 @@
 
 #include <shared/GlobalAppProperties.h>
 
+#include <shaders/Shaders.h>
 #include "Frame.h"
 #include "GPULogging.h"
-#include <shaders/Shaders.h>
 
 using namespace gpu;
 
@@ -28,11 +28,10 @@ void ContextStats::evalDelta(const ContextStats& begin, const ContextStats& end)
 
     _DSNumAPIDrawcalls = end._DSNumAPIDrawcalls - begin._DSNumAPIDrawcalls;
     _DSNumDrawcalls = end._DSNumDrawcalls - begin._DSNumDrawcalls;
-    _DSNumTriangles= end._DSNumTriangles - begin._DSNumTriangles;
+    _DSNumTriangles = end._DSNumTriangles - begin._DSNumTriangles;
 
     _PSNumSetPipelines = end._PSNumSetPipelines - begin._PSNumSetPipelines;
 }
-
 
 Context::CreateBackend Context::_createBackendCallback = nullptr;
 std::once_flag Context::_initialized;
@@ -127,7 +126,7 @@ void Context::executeFrame(const FramePointer& frame) const {
     consumeFrameUpdates(frame);
     _backend->setStereoState(frame->stereoState);
 
-    executeBatch("Context::executeFrame::begin", [&](Batch& batch){
+    executeBatch("Context::executeFrame::begin", [&](Batch& batch) {
         batch.pushProfileRange("Frame");
         _frameRangeTimer->begin(batch);
     });
@@ -135,7 +134,7 @@ void Context::executeFrame(const FramePointer& frame) const {
     for (auto& batch : frame->batches) {
         _backend->render(*batch);
     }
-    executeBatch("Context::executeFrame::end", [&](Batch& batch){
+    executeBatch("Context::executeFrame::end", [&](Batch& batch) {
         batch.popProfileRange();
         _frameRangeTimer->end(batch);
     });
@@ -225,7 +224,8 @@ const Backend::TransformCamera& Backend::TransformCamera::recomputeDerived(const
     return *this;
 }
 
-Backend::TransformCamera Backend::TransformCamera::getEyeCamera(int eye, const StereoState& _stereo, const Transform& xformView, Vec2 normalizedJitter) const {
+Backend::TransformCamera Backend::TransformCamera::getEyeCamera(int eye, const StereoState& _stereo, const Transform& xformView,
+                                                                Vec2 normalizedJitter) const {
     TransformCamera result = *this;
     Transform offsetTransform = xformView;
     if (!_stereo._skybox) {
@@ -254,26 +254,26 @@ Backend::TransformCamera Backend::TransformCamera::getMonoCamera(const Transform
 
 // Counters for Buffer and Texture usage in GPU/Context
 
-ContextMetricSize  Backend::freeGPUMemSize;
+ContextMetricSize Backend::freeGPUMemSize;
 
 ContextMetricCount Backend::bufferCount;
-ContextMetricSize  Backend::bufferGPUMemSize;
+ContextMetricSize Backend::bufferGPUMemSize;
 
 ContextMetricCount Backend::textureResidentCount;
 ContextMetricCount Backend::textureFramebufferCount;
 ContextMetricCount Backend::textureResourceCount;
 ContextMetricCount Backend::textureExternalCount;
 
-ContextMetricSize  Backend::textureResidentGPUMemSize;
-ContextMetricSize  Backend::textureFramebufferGPUMemSize;
-ContextMetricSize  Backend::textureResourceGPUMemSize;
-ContextMetricSize  Backend::textureExternalGPUMemSize;
+ContextMetricSize Backend::textureResidentGPUMemSize;
+ContextMetricSize Backend::textureFramebufferGPUMemSize;
+ContextMetricSize Backend::textureResourceGPUMemSize;
+ContextMetricSize Backend::textureExternalGPUMemSize;
 
 ContextMetricCount Backend::texturePendingGPUTransferCount;
-ContextMetricSize  Backend::texturePendingGPUTransferMemSize;
+ContextMetricSize Backend::texturePendingGPUTransferMemSize;
 
-ContextMetricSize  Backend::textureResourcePopulatedGPUMemSize;
-ContextMetricSize  Backend::textureResourceIdealGPUMemSize;
+ContextMetricSize Backend::textureResourcePopulatedGPUMemSize;
+ContextMetricSize Backend::textureResourceIdealGPUMemSize;
 
 Size Context::getFreeGPUMemSize() {
     return Backend::freeGPUMemSize.getValue();
@@ -337,12 +337,12 @@ Size Context::getTextureResourcePopulatedGPUMemSize() {
 
 PipelinePointer Context::createMipGenerationPipeline(const ShaderPointer& ps) {
     auto vs = gpu::Shader::createVertex(shader::gpu::vertex::DrawViewportQuadTransformTexcoord);
-	static gpu::StatePointer state(new gpu::State());
+    static gpu::StatePointer state(new gpu::State());
 
-	gpu::ShaderPointer program = gpu::Shader::createProgram(vs, ps);
+    gpu::ShaderPointer program = gpu::Shader::createProgram(vs, ps);
 
-	// Good to go add the brand new pipeline
-	return gpu::Pipeline::create(program, state);
+    // Good to go add the brand new pipeline
+    return gpu::Pipeline::create(program, state);
 }
 
 Size Context::getTextureResourceIdealGPUMemSize() {
@@ -417,8 +417,7 @@ void Context::releaseBatch(Batch* batch) {
     _batchPool.push_back(batch);
 }
 
-void gpu::doInBatch(const char* name,
-                    const std::shared_ptr<gpu::Context>& context,
+void gpu::doInBatch(const char* name, const std::shared_ptr<gpu::Context>& context,
                     const std::function<void(Batch& batch)>& f) {
     auto batch = Context::acquireBatch(name);
     f(*batch);

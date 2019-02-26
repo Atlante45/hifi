@@ -47,12 +47,28 @@ public:
 
     void setFlag(FlagBit flag, bool value) { _flags[flag] = value; }
 
-    // There are different groups of related flags.  If none of the flags in a group are set, the search filter includes them all.
-    bool doesPickDomainEntities() const { return _flags[DOMAIN_ENTITIES] || !(_flags[AVATAR_ENTITIES] || _flags[LOCAL_ENTITIES] || _flags[AVATARS] || _flags[HUD]); }
-    bool doesPickAvatarEntities() const { return _flags[AVATAR_ENTITIES] || !(_flags[DOMAIN_ENTITIES] || _flags[LOCAL_ENTITIES] || _flags[AVATARS] || _flags[HUD]); }
-    bool doesPickLocalEntities() const { return _flags[LOCAL_ENTITIES] || !(_flags[DOMAIN_ENTITIES] || _flags[AVATAR_ENTITIES] || _flags[AVATARS] || _flags[HUD]); }
-    bool doesPickAvatars() const { return _flags[AVATARS] || !(_flags[DOMAIN_ENTITIES] || _flags[AVATAR_ENTITIES] || _flags[LOCAL_ENTITIES] || _flags[HUD]); }
-    bool doesPickHUD() const { return _flags[HUD] || !(_flags[DOMAIN_ENTITIES] || _flags[AVATAR_ENTITIES] || _flags[LOCAL_ENTITIES] || _flags[AVATARS]); }
+    // There are different groups of related flags.  If none of the flags in a group are set, the search filter includes them
+    // all.
+    bool doesPickDomainEntities() const {
+        return _flags[DOMAIN_ENTITIES] ||
+               !(_flags[AVATAR_ENTITIES] || _flags[LOCAL_ENTITIES] || _flags[AVATARS] || _flags[HUD]);
+    }
+    bool doesPickAvatarEntities() const {
+        return _flags[AVATAR_ENTITIES] ||
+               !(_flags[DOMAIN_ENTITIES] || _flags[LOCAL_ENTITIES] || _flags[AVATARS] || _flags[HUD]);
+    }
+    bool doesPickLocalEntities() const {
+        return _flags[LOCAL_ENTITIES] ||
+               !(_flags[DOMAIN_ENTITIES] || _flags[AVATAR_ENTITIES] || _flags[AVATARS] || _flags[HUD]);
+    }
+    bool doesPickAvatars() const {
+        return _flags[AVATARS] ||
+               !(_flags[DOMAIN_ENTITIES] || _flags[AVATAR_ENTITIES] || _flags[LOCAL_ENTITIES] || _flags[HUD]);
+    }
+    bool doesPickHUD() const {
+        return _flags[HUD] ||
+               !(_flags[DOMAIN_ENTITIES] || _flags[AVATAR_ENTITIES] || _flags[LOCAL_ENTITIES] || _flags[AVATARS]);
+    }
 
     bool doesPickVisible() const { return _flags[VISIBLE] || !_flags[INVISIBLE]; }
     bool doesPickInvisible() const { return _flags[INVISIBLE] || !_flags[VISIBLE]; }
@@ -87,4 +103,3 @@ public:
 };
 
 #endif // hifi_PickFilter_h
-

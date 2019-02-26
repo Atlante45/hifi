@@ -13,8 +13,8 @@
 #ifndef hifi_ObjectAction_h
 #define hifi_ObjectAction_h
 
-#include <QUuid>
 #include <btBulletDynamicsCommon.h>
+#include <QUuid>
 #include "ObjectDynamic.h"
 
 class ObjectAction : public btActionInterface, public ObjectDynamic {

@@ -7,9 +7,9 @@
 //
 #include "ParabolaPointer.h"
 
+#include <StencilMaskPass.h>
 #include "Application.h"
 #include "avatar/AvatarManager.h"
-#include <StencilMaskPass.h>
 
 #include <DependencyManager.h>
 #include <shaders/Shaders.h>
@@ -23,12 +23,12 @@ const bool ParabolaPointer::RenderState::ParabolaRenderItem::DEFAULT_PARABOLA_DR
 gpu::PipelinePointer ParabolaPointer::RenderState::ParabolaRenderItem::_parabolaPipeline { nullptr };
 gpu::PipelinePointer ParabolaPointer::RenderState::ParabolaRenderItem::_transparentParabolaPipeline { nullptr };
 
-ParabolaPointer::ParabolaPointer(const QVariant& rayProps, const RenderStateMap& renderStates, const DefaultRenderStateMap& defaultRenderStates, bool hover,
-                                 const PointerTriggers& triggers, bool faceAvatar, bool followNormal, float followNormalStrength, bool centerEndY, bool lockEnd, bool distanceScaleEnd,
-                                 bool scaleWithAvatar, bool enabled) :
-    PathPointer(PickQuery::Parabola, rayProps, renderStates, defaultRenderStates, hover, triggers, faceAvatar, followNormal, followNormalStrength,
-                centerEndY, lockEnd, distanceScaleEnd, scaleWithAvatar, enabled)
-{
+ParabolaPointer::ParabolaPointer(const QVariant& rayProps, const RenderStateMap& renderStates,
+                                 const DefaultRenderStateMap& defaultRenderStates, bool hover, const PointerTriggers& triggers,
+                                 bool faceAvatar, bool followNormal, float followNormalStrength, bool centerEndY, bool lockEnd,
+                                 bool distanceScaleEnd, bool scaleWithAvatar, bool enabled) :
+    PathPointer(PickQuery::Parabola, rayProps, renderStates, defaultRenderStates, hover, triggers, faceAvatar, followNormal,
+                followNormalStrength, centerEndY, lockEnd, distanceScaleEnd, scaleWithAvatar, enabled) {
 }
 
 PickResultPointer ParabolaPointer::getPickResultCopy(const PickResultPointer& pickResult) const {
@@ -135,7 +135,8 @@ QUuid ParabolaPointer::getPickedObjectID(const PickResultPointer& pickResult) co
 }
 
 void ParabolaPointer::setVisualPickResultInternal(PickResultPointer pickResult, IntersectionType type, const QUuid& id,
-                                               const glm::vec3& intersection, float distance, const glm::vec3& surfaceNormal) {
+                                                  const glm::vec3& intersection, float distance,
+                                                  const glm::vec3& surfaceNormal) {
     auto parabolaPickResult = std::static_pointer_cast<ParabolaPickResult>(pickResult);
     if (parabolaPickResult) {
         parabolaPickResult->type = type;
@@ -144,21 +145,24 @@ void ParabolaPointer::setVisualPickResultInternal(PickResultPointer pickResult, 
         parabolaPickResult->distance = distance;
         parabolaPickResult->surfaceNormal = surfaceNormal;
         PickParabola parabola = PickParabola(parabolaPickResult->pickVariant);
-        parabolaPickResult->pickVariant["velocity"] = vec3toVariant((intersection - parabola.origin -
-            0.5f * parabola.acceleration * parabolaPickResult->parabolicDistance * parabolaPickResult->parabolicDistance) / parabolaPickResult->parabolicDistance);
+        parabolaPickResult->pickVariant["velocity"] = vec3toVariant(
+            (intersection - parabola.origin -
+             0.5f * parabola.acceleration * parabolaPickResult->parabolicDistance * parabolaPickResult->parabolicDistance) /
+            parabolaPickResult->parabolicDistance);
     }
 }
 
-ParabolaPointer::RenderState::RenderState(const QUuid& startID, const QUuid& endID, const glm::vec3& pathColor, float pathAlpha, float pathWidth,
-                                          bool isVisibleInSecondaryCamera, bool drawInFront, bool pathEnabled) :
-    StartEndRenderState(startID, endID)
-{
+ParabolaPointer::RenderState::RenderState(const QUuid& startID, const QUuid& endID, const glm::vec3& pathColor, float pathAlpha,
+                                          float pathWidth, bool isVisibleInSecondaryCamera, bool drawInFront,
+                                          bool pathEnabled) :
+    StartEndRenderState(startID, endID) {
     render::Transaction transaction;
     auto scene = qApp->getMain3DScene();
     _pathID = scene->allocateID();
     _pathWidth = pathWidth;
     if (render::Item::isValidID(_pathID)) {
-        auto renderItem = std::make_shared<ParabolaRenderItem>(pathColor, pathAlpha, pathWidth, isVisibleInSecondaryCamera, drawInFront, pathEnabled);
+        auto renderItem = std::make_shared<ParabolaRenderItem>(pathColor, pathAlpha, pathWidth, isVisibleInSecondaryCamera,
+                                                               drawInFront, pathEnabled);
         transaction.resetItem(_pathID, std::make_shared<ParabolaRenderItem::Payload>(renderItem));
         scene->enqueueTransaction(transaction);
     }
@@ -179,18 +183,18 @@ void ParabolaPointer::RenderState::disable() {
     if (render::Item::isValidID(_pathID)) {
         render::Transaction transaction;
         auto scene = qApp->getMain3DScene();
-        transaction.updateItem<ParabolaRenderItem>(_pathID, [](ParabolaRenderItem& item) {
-            item.setVisible(false);
-        });
+        transaction.updateItem<ParabolaRenderItem>(_pathID, [](ParabolaRenderItem& item) { item.setVisible(false); });
         scene->enqueueTransaction(transaction);
     }
 }
 
-void ParabolaPointer::RenderState::editParabola(const glm::vec3& color, float alpha, float width, bool isVisibleInSecondaryCamera, bool drawInFront, bool enabled) {
+void ParabolaPointer::RenderState::editParabola(const glm::vec3& color, float alpha, float width,
+                                                bool isVisibleInSecondaryCamera, bool drawInFront, bool enabled) {
     if (render::Item::isValidID(_pathID)) {
         render::Transaction transaction;
         auto scene = qApp->getMain3DScene();
-        transaction.updateItem<ParabolaRenderItem>(_pathID, [color, alpha, width, isVisibleInSecondaryCamera, drawInFront, enabled](ParabolaRenderItem& item) {
+        transaction.updateItem<ParabolaRenderItem>(_pathID, [color, alpha, width, isVisibleInSecondaryCamera, drawInFront,
+                                                             enabled](ParabolaRenderItem& item) {
             item.setColor(color);
             item.setAlpha(alpha);
             item.setWidth(width);
@@ -203,9 +207,12 @@ void ParabolaPointer::RenderState::editParabola(const glm::vec3& color, float al
     }
 }
 
-void ParabolaPointer::RenderState::update(const glm::vec3& origin, const glm::vec3& end, const glm::vec3& surfaceNormal, float parentScale, bool distanceScaleEnd, bool centerEndY,
-                                          bool faceAvatar, bool followNormal, float followNormalStrength, float distance, const PickResultPointer& pickResult) {
-    StartEndRenderState::update(origin, end, surfaceNormal, parentScale, distanceScaleEnd, centerEndY, faceAvatar, followNormal, followNormalStrength, distance, pickResult);
+void ParabolaPointer::RenderState::update(const glm::vec3& origin, const glm::vec3& end, const glm::vec3& surfaceNormal,
+                                          float parentScale, bool distanceScaleEnd, bool centerEndY, bool faceAvatar,
+                                          bool followNormal, float followNormalStrength, float distance,
+                                          const PickResultPointer& pickResult) {
+    StartEndRenderState::update(origin, end, surfaceNormal, parentScale, distanceScaleEnd, centerEndY, faceAvatar, followNormal,
+                                followNormalStrength, distance, pickResult);
     auto parabolaPickResult = std::static_pointer_cast<ParabolaPickResult>(pickResult);
     if (parabolaPickResult && render::Item::isValidID(_pathID)) {
         render::Transaction transaction;
@@ -216,7 +223,8 @@ void ParabolaPointer::RenderState::update(const glm::vec3& origin, const glm::ve
         glm::vec3 acceleration = parabola.acceleration;
         float parabolicDistance = distance > 0.0f ? distance : parabolaPickResult->parabolicDistance;
         float width = getPathWidth() * parentScale;
-        transaction.updateItem<ParabolaRenderItem>(_pathID, [origin, velocity, acceleration, parabolicDistance, width](ParabolaRenderItem& item) {
+        transaction.updateItem<ParabolaRenderItem>(_pathID, [origin, velocity, acceleration, parabolicDistance,
+                                                             width](ParabolaRenderItem& item) {
             item.setVisible(true);
             item.setOrigin(origin);
             item.setVelocity(velocity);
@@ -230,7 +238,8 @@ void ParabolaPointer::RenderState::update(const glm::vec3& origin, const glm::ve
 }
 
 std::shared_ptr<StartEndRenderState> ParabolaPointer::buildRenderState(const QVariantMap& propMap) {
-    // FIXME: we have to keep using the Overlays interface here, because existing scripts use overlay properties to define pointers
+    // FIXME: we have to keep using the Overlays interface here, because existing scripts use overlay properties to define
+    // pointers
     QUuid startID;
     if (propMap["start"].isValid()) {
         QVariantMap startMap = propMap["start"].toMap();
@@ -282,7 +291,8 @@ std::shared_ptr<StartEndRenderState> ParabolaPointer::buildRenderState(const QVa
     return std::make_shared<RenderState>(startID, endID, color, alpha, width, isVisibleInSecondaryCamera, drawInFront, enabled);
 }
 
-PointerEvent ParabolaPointer::buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult, const std::string& button, bool hover) {
+PointerEvent ParabolaPointer::buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult,
+                                                const std::string& button, bool hover) {
     QUuid pickedID;
     glm::vec3 intersection, surfaceNormal, origin, velocity, acceleration;
     auto parabolaPickResult = std::static_pointer_cast<ParabolaPickResult>(pickResult);
@@ -305,7 +315,8 @@ PointerEvent ParabolaPointer::buildPointerEvent(const PickedObject& target, cons
     TriggerState& state = hover ? _latestState : _states[button];
     float sensorToWorldScale = DependencyManager::get<AvatarManager>()->getMyAvatar()->getSensorToWorldScale();
     float deadspotSquared = TOUCH_PRESS_TO_MOVE_DEADSPOT_SQUARED * sensorToWorldScale * sensorToWorldScale;
-    bool withinDeadspot = usecTimestampNow() - state.triggerStartTime < POINTER_MOVE_DELAY && glm::distance2(pos2D, state.triggerPos2D) < deadspotSquared;
+    bool withinDeadspot = usecTimestampNow() - state.triggerStartTime < POINTER_MOVE_DELAY &&
+                          glm::distance2(pos2D, state.triggerPos2D) < deadspotSquared;
     if ((state.triggering || state.wasTriggering) && !state.deadspotExpired && withinDeadspot) {
         pos2D = state.triggerPos2D;
         intersection = state.intersection;
@@ -318,21 +329,24 @@ PointerEvent ParabolaPointer::buildPointerEvent(const PickedObject& target, cons
     return PointerEvent(pos2D, intersection, surfaceNormal, velocity);
 }
 
-glm::vec3 ParabolaPointer::findIntersection(const PickedObject& pickedObject, const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration) {
+glm::vec3 ParabolaPointer::findIntersection(const PickedObject& pickedObject, const glm::vec3& origin,
+                                            const glm::vec3& velocity, const glm::vec3& acceleration) {
     // TODO: implement
     switch (pickedObject.type) {
         case ENTITY:
         case LOCAL_ENTITY:
-            //return ParabolaPick::intersectParabolaWithEntityXYPlane(pickedObject.objectID, origin, velocity, acceleration);
+            // return ParabolaPick::intersectParabolaWithEntityXYPlane(pickedObject.objectID, origin, velocity, acceleration);
         default:
             return glm::vec3(NAN);
     }
 }
 
 ParabolaPointer::RenderState::ParabolaRenderItem::ParabolaRenderItem(const glm::vec3& color, float alpha, float width,
-                                                                     bool isVisibleInSecondaryCamera, bool drawInFront, bool enabled) :
-    _isVisibleInSecondaryCamera(isVisibleInSecondaryCamera), _drawInFront(drawInFront), _enabled(enabled)
-{
+                                                                     bool isVisibleInSecondaryCamera, bool drawInFront,
+                                                                     bool enabled) :
+    _isVisibleInSecondaryCamera(isVisibleInSecondaryCamera),
+    _drawInFront(drawInFront),
+    _enabled(enabled) {
     _uniformBuffer->resize(sizeof(ParabolaData));
     setColor(color);
     setAlpha(alpha);
@@ -350,10 +364,11 @@ void ParabolaPointer::RenderState::ParabolaRenderItem::setVisible(bool visible) 
 }
 
 void ParabolaPointer::RenderState::ParabolaRenderItem::updateKey() {
-    auto builder = _parabolaData.color.a < 1.0f ? render::ItemKey::Builder::transparentShape() : render::ItemKey::Builder::opaqueShape();
+    auto builder = _parabolaData.color.a < 1.0f ? render::ItemKey::Builder::transparentShape()
+                                                : render::ItemKey::Builder::opaqueShape();
 
     // TODO: parabolas should cast shadows, but they're so thin that the cascaded shadow maps make them look pretty bad
-    //builder.withShadowCaster();
+    // builder.withShadowCaster();
 
     if (_enabled && _visible) {
         builder.withVisible();
@@ -379,7 +394,7 @@ void ParabolaPointer::RenderState::ParabolaRenderItem::updateBounds() {
     glm::vec3 min = _origin;
 
     glm::vec3 end = _origin + _parabolaData.velocity * _parabolaData.parabolicDistance +
-        0.5f * _parabolaData.acceleration * _parabolaData.parabolicDistance * _parabolaData.parabolicDistance;
+                    0.5f * _parabolaData.acceleration * _parabolaData.parabolicDistance * _parabolaData.parabolicDistance;
     max = glm::max(max, end);
     min = glm::min(min, end);
 
@@ -407,9 +422,8 @@ const gpu::PipelinePointer ParabolaPointer::RenderState::ParabolaRenderItem::get
             gpu::ShaderPointer program = gpu::Shader::createProgram(shader::render_utils::program::parabola);
             auto state = std::make_shared<gpu::State>();
             state->setDepthTest(true, true, gpu::LESS_EQUAL);
-            state->setBlendFunction(false,
-                gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
-                gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
+            state->setBlendFunction(false, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
+                                    gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
             PrepareStencil::testMaskDrawShape(*state);
             state->setCullMode(gpu::State::CULL_NONE);
             _parabolaPipeline = gpu::Pipeline::create(program, state);
@@ -419,9 +433,8 @@ const gpu::PipelinePointer ParabolaPointer::RenderState::ParabolaRenderItem::get
             gpu::ShaderPointer program = gpu::Shader::createProgram(shader::render_utils::program::parabola_translucent);
             auto state = std::make_shared<gpu::State>();
             state->setDepthTest(true, true, gpu::LESS_EQUAL);
-            state->setBlendFunction(true,
-                gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
-                gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
+            state->setBlendFunction(true, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
+                                    gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
             PrepareStencil::testMask(*state);
             state->setCullMode(gpu::State::CULL_NONE);
             _transparentParabolaPipeline = gpu::Pipeline::create(program, state);
@@ -457,21 +470,25 @@ void ParabolaPointer::RenderState::ParabolaRenderItem::render(RenderArgs* args) 
 }
 
 namespace render {
-    template <> const ItemKey payloadGetKey(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload) {
-        return payload->getKey();
+template<>
+const ItemKey payloadGetKey(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload) {
+    return payload->getKey();
+}
+template<>
+const Item::Bound payloadGetBound(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload) {
+    if (payload) {
+        return payload->getBound();
     }
-    template <> const Item::Bound payloadGetBound(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload) {
-        if (payload) {
-            return payload->getBound();
-        }
-        return Item::Bound();
-    }
-    template <> void payloadRender(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload, RenderArgs* args) {
-        if (payload) {
-            payload->render(args);
-        }
-    }
-    template <> const ShapeKey shapeGetShapeKey(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload) {
-        return ShapeKey::Builder::ownPipeline();
+    return Item::Bound();
+}
+template<>
+void payloadRender(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload, RenderArgs* args) {
+    if (payload) {
+        payload->render(args);
     }
 }
+template<>
+const ShapeKey shapeGetShapeKey(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload) {
+    return ShapeKey::Builder::ownPipeline();
+}
+} // namespace render

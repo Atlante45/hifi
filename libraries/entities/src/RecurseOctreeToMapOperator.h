@@ -17,7 +17,8 @@ public:
                                bool skipThoseWithBadParents, std::shared_ptr<AvatarData> myAvatar);
     bool preRecursion(const OctreeElementPointer& element) override;
     bool postRecursion(const OctreeElementPointer& element) override;
- private:
+
+private:
     QVariantMap& _map;
     OctreeElementPointer _top;
     QScriptEngine* _engine;

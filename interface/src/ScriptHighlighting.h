@@ -20,10 +20,7 @@ class ScriptHighlighting : public QSyntaxHighlighter {
 public:
     ScriptHighlighting(QTextDocument* parent = NULL);
 
-    enum BlockState {
-        BlockStateClean,
-        BlockStateInMultiComment
-    };
+    enum BlockState { BlockStateClean, BlockStateInMultiComment };
 
 protected:
     void highlightBlock(const QString& text) override;

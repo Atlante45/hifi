@@ -16,8 +16,7 @@
 
 #include "OffscreenUi.h"
 
-class OffscreenQmlDialog : public QQuickItem
-{
+class OffscreenQmlDialog : public QQuickItem {
     Q_OBJECT
     Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged)
     Q_ENUMS(StandardButton)
@@ -57,7 +56,7 @@ protected:
     virtual void accept();
     virtual void reject();
 
-public:    
+public:
     QString title() const;
     void setTitle(const QString& title);
 
@@ -68,7 +67,6 @@ signals:
 
 private:
     QString _title;
-
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(OffscreenQmlDialog::StandardButtons)

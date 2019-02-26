@@ -12,10 +12,9 @@
 #include "ScriptHighlighting.h"
 #include <QTextDocument>
 
-ScriptHighlighting::ScriptHighlighting(QTextDocument* parent) :
-    QSyntaxHighlighter(parent)
-{
-    _keywordRegex = QRegExp("\\b(break|case|catch|continue|debugger|default|delete|do|else|finally|for|function|if|in|instanceof|new|return|switch|this|throw|try|typeof|var|void|while|with)\\b");
+ScriptHighlighting::ScriptHighlighting(QTextDocument* parent) : QSyntaxHighlighter(parent) {
+    _keywordRegex = QRegExp("\\b(break|case|catch|continue|debugger|default|delete|do|else|finally|for|function|if|in|"
+                            "instanceof|new|return|switch|this|throw|try|typeof|var|void|while|with)\\b");
     _quotedTextRegex = QRegExp("(\"[^\"]*(\"){0,1}|\'[^\']*(\'){0,1})");
     _multiLineCommentBegin = QRegExp("/\\*");
     _multiLineCommentEnd = QRegExp("\\*/");
@@ -43,7 +42,6 @@ void ScriptHighlighting::highlightKeywords(const QString& text) {
 }
 
 void ScriptHighlighting::formatComments(const QString& text) {
-
     setCurrentBlockState(BlockStateClean);
 
     int start = (previousBlockState() != BlockStateInMultiComment) ? text.indexOf(_multiLineCommentBegin) : 0;
@@ -78,7 +76,7 @@ void ScriptHighlighting::formatComments(const QString& text) {
     }
 }
 
-void ScriptHighlighting::formatQuotedText(const QString& text){
+void ScriptHighlighting::formatQuotedText(const QString& text) {
     int index = _quotedTextRegex.indexIn(text);
     while (index >= 0) {
         int length = _quotedTextRegex.matchedLength();
@@ -87,7 +85,7 @@ void ScriptHighlighting::formatQuotedText(const QString& text){
     }
 }
 
-void ScriptHighlighting::formatNumbers(const QString& text){
+void ScriptHighlighting::formatNumbers(const QString& text) {
     int index = _numberRegex.indexIn(text);
     while (index >= 0) {
         int length = _numberRegex.matchedLength();
@@ -98,7 +96,7 @@ void ScriptHighlighting::formatNumbers(const QString& text){
     }
 }
 
-void ScriptHighlighting::formatTrueFalse(const QString& text){
+void ScriptHighlighting::formatTrueFalse(const QString& text) {
     int index = _truefalseRegex.indexIn(text);
     while (index >= 0) {
         int length = _truefalseRegex.matchedLength();

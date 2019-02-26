@@ -13,12 +13,11 @@
 
 #include <cmath>
 
-TestRailTestCasesSelectorWindow::TestRailTestCasesSelectorWindow(QWidget *parent) {
+TestRailTestCasesSelectorWindow::TestRailTestCasesSelectorWindow(QWidget* parent) {
     setupUi(this);
 
     projectIDLineEdit->setValidator(new QIntValidator(1, 999, this));
 }
-
 
 void TestRailTestCasesSelectorWindow::reset() {
     urlLineEdit->setDisabled(false);

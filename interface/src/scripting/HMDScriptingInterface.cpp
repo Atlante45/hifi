@@ -13,23 +13,19 @@
 
 #include <QtScript/QScriptContext>
 
-#include <shared/QtHelpers.h>
-#include <avatar/AvatarManager.h>
-#include <display-plugins/DisplayPlugin.h>
-#include <display-plugins/CompositorHelper.h>
 #include <OffscreenUi.h>
+#include <avatar/AvatarManager.h>
+#include <display-plugins/CompositorHelper.h>
+#include <display-plugins/DisplayPlugin.h>
 #include <plugins/PluginUtils.h>
+#include <shared/QtHelpers.h>
 #include <QUuid>
 
 #include "Application.h"
 
 HMDScriptingInterface::HMDScriptingInterface() {
-    connect(qApp, &Application::activeDisplayPluginChanged, [this]{
-        emit displayModeChanged(isHMDMode());
-    });
-    connect(qApp, &Application::miniTabletEnabledChanged, [this](bool enabled) {
-        emit miniTabletEnabledChanged(enabled);
-    });
+    connect(qApp, &Application::activeDisplayPluginChanged, [this] { emit displayModeChanged(isHMDMode()); });
+    connect(qApp, &Application::miniTabletEnabledChanged, [this](bool enabled) { emit miniTabletEnabledChanged(enabled); });
 }
 
 glm::vec3 HMDScriptingInterface::calculateRayUICollisionPoint(const glm::vec3& position, const glm::vec3& direction) const {
@@ -38,9 +34,12 @@ glm::vec3 HMDScriptingInterface::calculateRayUICollisionPoint(const glm::vec3& p
     return result;
 }
 
-glm::vec3 HMDScriptingInterface::calculateParabolaUICollisionPoint(const glm::vec3& position, const glm::vec3& velocity, const glm::vec3& acceleration, float& parabolicDistance) const {
+glm::vec3 HMDScriptingInterface::calculateParabolaUICollisionPoint(const glm::vec3& position, const glm::vec3& velocity,
+                                                                   const glm::vec3& acceleration,
+                                                                   float& parabolicDistance) const {
     glm::vec3 result;
-    qApp->getApplicationCompositor().calculateParabolaUICollisionPoint(position, velocity, acceleration, result, parabolicDistance);
+    qApp->getApplicationCompositor().calculateParabolaUICollisionPoint(position, velocity, acceleration, result,
+                                                                       parabolicDistance);
     return result;
 }
 
@@ -52,11 +51,11 @@ glm::vec3 HMDScriptingInterface::worldPointFromOverlay(const glm::vec2& overlay)
     return qApp->getApplicationCompositor().sphereSurfaceFromOverlay(overlay);
 }
 
-glm::vec2 HMDScriptingInterface::sphericalToOverlay(const glm::vec2 & position) const {
+glm::vec2 HMDScriptingInterface::sphericalToOverlay(const glm::vec2& position) const {
     return qApp->getApplicationCompositor().sphericalToOverlay(position);
 }
 
-glm::vec2 HMDScriptingInterface::overlayToSpherical(const glm::vec2 & position) const {
+glm::vec2 HMDScriptingInterface::overlayToSpherical(const glm::vec2& position) const {
     return qApp->getApplicationCompositor().overlayToSpherical(position);
 }
 
@@ -71,7 +70,6 @@ bool HMDScriptingInterface::isHeadControllerAvailable(const QString& name) {
 bool HMDScriptingInterface::isHandControllerAvailable(const QString& name) {
     return PluginUtils::isHandControllerAvailable(name);
 }
-
 
 bool HMDScriptingInterface::isSubdeviceContainingNameAvailable(const QString& name) {
     return PluginUtils::isSubdeviceContainingNameAvailable(name);
@@ -107,7 +105,7 @@ void HMDScriptingInterface::deactivateHMDHandMouse() {
     }
 }
 
-void  HMDScriptingInterface::closeTablet() {
+void HMDScriptingInterface::closeTablet() {
     _showTablet = false;
     _tabletContextualMode = false;
 }
@@ -136,7 +134,6 @@ void HMDScriptingInterface::setMiniTabletEnabled(bool enabled) {
 bool HMDScriptingInterface::getMiniTabletEnabled() {
     return qApp->getMiniTabletEnabled();
 }
-
 
 QScriptValue HMDScriptingInterface::getHUDLookAtPosition2D(QScriptContext* context, QScriptEngine* engine) {
     glm::vec3 hudIntersection;

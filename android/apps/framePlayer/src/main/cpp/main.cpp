@@ -8,9 +8,9 @@
 
 #include <android/log.h>
 
-#include <QtGui/QGuiApplication>
-#include <QtCore/QTimer>
 #include <QtCore/QFileInfo>
+#include <QtCore/QTimer>
+#include <QtGui/QGuiApplication>
 
 #include <Trace.h>
 
@@ -18,23 +18,23 @@
 
 void messageHandler(QtMsgType type, const QMessageLogContext& context, const QString& message) {
     if (!message.isEmpty()) {
-        const char * local=message.toStdString().c_str();
+        const char* local = message.toStdString().c_str();
         switch (type) {
             case QtDebugMsg:
-                __android_log_write(ANDROID_LOG_DEBUG,"Interface",local);
+                __android_log_write(ANDROID_LOG_DEBUG, "Interface", local);
                 break;
             case QtInfoMsg:
-                __android_log_write(ANDROID_LOG_INFO,"Interface",local);
+                __android_log_write(ANDROID_LOG_INFO, "Interface", local);
                 break;
             case QtWarningMsg:
-                __android_log_write(ANDROID_LOG_WARN,"Interface",local);
+                __android_log_write(ANDROID_LOG_WARN, "Interface", local);
                 break;
             case QtCriticalMsg:
-                __android_log_write(ANDROID_LOG_ERROR,"Interface",local);
+                __android_log_write(ANDROID_LOG_ERROR, "Interface", local);
                 break;
             case QtFatalMsg:
             default:
-                __android_log_write(ANDROID_LOG_FATAL,"Interface",local);
+                __android_log_write(ANDROID_LOG_FATAL, "Interface", local);
                 abort();
         }
     }
@@ -50,5 +50,3 @@ int main(int argc, char** argv) {
     qInstallMessageHandler(oldMessageHandler);
     return 0;
 }
-
-

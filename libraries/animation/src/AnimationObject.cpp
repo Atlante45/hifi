@@ -28,10 +28,9 @@ QVector<glm::quat> AnimationFrameObject::getRotations() const {
 }
 
 void registerAnimationTypes(QScriptEngine* engine) {
-    qScriptRegisterSequenceMetaType<QVector<HFMAnimationFrame> >(engine);
-    engine->setDefaultPrototype(qMetaTypeId<HFMAnimationFrame>(), engine->newQObject(
-        new AnimationFrameObject(), QScriptEngine::ScriptOwnership));
-    engine->setDefaultPrototype(qMetaTypeId<AnimationPointer>(), engine->newQObject(
-        new AnimationObject(), QScriptEngine::ScriptOwnership));
+    qScriptRegisterSequenceMetaType<QVector<HFMAnimationFrame>>(engine);
+    engine->setDefaultPrototype(qMetaTypeId<HFMAnimationFrame>(),
+                                engine->newQObject(new AnimationFrameObject(), QScriptEngine::ScriptOwnership));
+    engine->setDefaultPrototype(qMetaTypeId<AnimationPointer>(),
+                                engine->newQObject(new AnimationObject(), QScriptEngine::ScriptOwnership));
 }
-

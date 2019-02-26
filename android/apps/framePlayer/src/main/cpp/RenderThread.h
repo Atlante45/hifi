@@ -16,22 +16,23 @@
 
 class RenderThread : public GenericThread {
     using Parent = GenericThread;
+
 public:
-    QWindow* _window{ nullptr };
+    QWindow* _window { nullptr };
     std::mutex _mutex;
-    gpu::ContextPointer _gpuContext;  // initialized during window creation
+    gpu::ContextPointer _gpuContext; // initialized during window creation
     std::shared_ptr<gpu::Backend> _backend;
-    std::atomic<size_t> _presentCount{ 0 };
+    std::atomic<size_t> _presentCount { 0 };
     std::mutex _frameLock;
     std::queue<gpu::FramePointer> _pendingFrames;
     gpu::FramePointer _activeFrame;
-    uint32_t _externalTexture{ 0 };
+    uint32_t _externalTexture { 0 };
     glm::mat4 _correction;
-    hifi::qml::OffscreenSurface* _offscreen{ nullptr };
+    hifi::qml::OffscreenSurface* _offscreen { nullptr };
 
     gl::Context _glContext;
-    uint32_t _uiTexture{ 0 };
-    uint32_t _uiFbo{ 0 };
+    uint32_t _uiTexture { 0 };
+    uint32_t _uiFbo { 0 };
 
     void move(const glm::vec3& v);
     void setup() override;
@@ -44,11 +45,7 @@ public:
     void updateFrame();
     void renderFrame();
 
-    bool makeCurrent() {
-        return _glContext.makeCurrent();
-    }
+    bool makeCurrent() { return _glContext.makeCurrent(); }
 
-    void doneCurrent() {
-        _glContext.doneCurrent();
-    }
+    void doneCurrent() { _glContext.doneCurrent(); }
 };

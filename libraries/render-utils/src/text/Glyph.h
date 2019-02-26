@@ -13,8 +13,8 @@
 #include <stdint.h>
 
 #include <QChar>
-#include <QRect>
 #include <QIODevice>
+#include <QRect>
 
 #include <GLMHelpers.h>
 
@@ -25,7 +25,7 @@ struct Glyph {
     vec2 texSize;
     vec2 size;
     vec2 offset;
-    float d;  // xadvance - adjusts character positioning
+    float d; // xadvance - adjusts character positioning
     size_t indexOffset;
 
     // We adjust bounds because offset is the bottom left corner of the font but the top left corner of a QRect

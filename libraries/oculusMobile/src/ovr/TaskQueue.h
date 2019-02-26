@@ -7,8 +7,8 @@
 //
 #pragma once
 
-#include <mutex>
 #include <functional>
+#include <mutex>
 
 namespace ovr {
 
@@ -27,16 +27,12 @@ public:
 
     void withLock(const Task& task);
     void withLockConditional(const LockTask& task);
+
 private:
     Mutex _mutex;
     Task _task;
-    bool _taskPending{ false };
+    bool _taskPending { false };
     Condition _taskCondition;
 };
 
-}
-
-
-
-
-
+} // namespace ovr

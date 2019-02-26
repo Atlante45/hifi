@@ -13,12 +13,12 @@
 
 #include <iostream>
 
-#include <btBulletDynamicsCommon.h>
 #include <LinearMath/btHashMap.h>
+#include <btBulletDynamicsCommon.h>
 
 #include <HashKey.h>
-#include <ShapeInfo.h>
 #include <ShapeFactory.h>
+#include <ShapeInfo.h>
 #include <StreamUtils.h>
 
 QTEST_MAIN(ShapeInfoTests)
@@ -58,9 +58,8 @@ void ShapeInfoTests::testHashFunctions() {
         HashKey hashKey(info.getHash());
         hashPtr = hashes.find(hashKey);
         if (hashPtr) {
-            std::cout << testCount << "  hash collision sphere radius = " << radiusX
-                << "  h = 0x" << std::hex << hashKey.getHash() << " : 0x" << *hashPtr
-                << std::dec << std::endl;
+            std::cout << testCount << "  hash collision sphere radius = " << radiusX << "  h = 0x" << std::hex
+                      << hashKey.getHash() << " : 0x" << *hashPtr << std::dec << std::endl;
             ++numCollisions;
             assert(false);
         } else {
@@ -83,10 +82,10 @@ void ShapeInfoTests::testHashFunctions() {
                 HashKey hashKey(info.getHash());
                 hashPtr = hashes.find(hashKey);
                 if (hashPtr) {
-                    std::cout << testCount << "  hash collision box dimensions = < " << radiusX
-                        << ", " << radiusY << ", " << radiusZ << " >"
-                        << "  h = 0x" << std::hex << hashKey.getHash() << " : 0x" << *hashPtr << " : 0x" << hashKey.getHash64()
-                        << std::dec << std::endl;
+                    std::cout << testCount << "  hash collision box dimensions = < " << radiusX << ", " << radiusY << ", "
+                              << radiusZ << " >"
+                              << "  h = 0x" << std::hex << hashKey.getHash() << " : 0x" << *hashPtr << " : 0x"
+                              << hashKey.getHash64() << std::dec << std::endl;
                     ++numCollisions;
                     assert(false);
                 } else {
@@ -182,4 +181,3 @@ void ShapeInfoTests::testCapsuleShape() {
     delete shape;
     */
 }
-

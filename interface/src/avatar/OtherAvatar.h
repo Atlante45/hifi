@@ -32,7 +32,7 @@ public:
         MultiSphereHigh // All joints
     };
 
-    virtual void instantiableAvatar() override { };
+    virtual void instantiableAvatar() override {};
     virtual void createOrb() override;
     virtual void indicateLoadingStatus(LoadingStatus loadingStatus) override;
     void updateOrbPosition();
@@ -61,7 +61,7 @@ public:
     void computeShapeLOD();
 
     void updateCollisionGroup(bool myAvatarCollide);
-    bool getCollideWithOtherAvatars() const { return _collideWithOtherAvatars; } 
+    bool getCollideWithOtherAvatars() const { return _collideWithOtherAvatars; }
 
     void setCollisionWithOtherAvatarsFlags() override;
 
@@ -98,4 +98,4 @@ protected:
 using OtherAvatarPointer = std::shared_ptr<OtherAvatar>;
 using AvatarPointer = std::shared_ptr<Avatar>;
 
-#endif  // hifi_OtherAvatar_h
+#endif // hifi_OtherAvatar_h

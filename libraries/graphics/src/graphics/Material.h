@@ -15,8 +15,8 @@
 
 #include <bitset>
 #include <map>
-#include <unordered_map>
 #include <queue>
+#include <unordered_map>
 
 #include <ColorUtils.h>
 
@@ -30,19 +30,19 @@ class Transform;
 namespace graphics {
 
 class TextureMap;
-typedef std::shared_ptr< TextureMap > TextureMapPointer;
+typedef std::shared_ptr<TextureMap> TextureMapPointer;
 
 // Material Key is a coarse trait description of a material used to classify the materials
 class MaterialKey {
 public:
-   enum FlagBit {
+    enum FlagBit {
         EMISSIVE_VAL_BIT = 0,
         UNLIT_VAL_BIT,
         ALBEDO_VAL_BIT,
         METALLIC_VAL_BIT,
         GLOSSY_VAL_BIT,
         OPACITY_VAL_BIT,
-        OPACITY_MASK_MAP_BIT,           // Opacity Map and Opacity MASK map are mutually exclusive
+        OPACITY_MASK_MAP_BIT, // Opacity Map and Opacity MASK map are mutually exclusive
         OPACITY_TRANSLUCENT_MAP_BIT,
         SCATTERING_VAL_BIT,
 
@@ -80,35 +80,87 @@ public:
     MaterialKey(const Flags& flags) : _flags(flags) {}
 
     class Builder {
-        Flags _flags{ 0 };
+        Flags _flags { 0 };
+
     public:
         Builder() {}
 
         MaterialKey build() const { return MaterialKey(_flags); }
 
-        Builder& withEmissive() { _flags.set(EMISSIVE_VAL_BIT); return (*this); }
-        Builder& withUnlit() { _flags.set(UNLIT_VAL_BIT); return (*this); }
+        Builder& withEmissive() {
+            _flags.set(EMISSIVE_VAL_BIT);
+            return (*this);
+        }
+        Builder& withUnlit() {
+            _flags.set(UNLIT_VAL_BIT);
+            return (*this);
+        }
 
-        Builder& withAlbedo() { _flags.set(ALBEDO_VAL_BIT); return (*this); }
-        Builder& withMetallic() { _flags.set(METALLIC_VAL_BIT); return (*this); }
-        Builder& withGlossy() { _flags.set(GLOSSY_VAL_BIT); return (*this); }
+        Builder& withAlbedo() {
+            _flags.set(ALBEDO_VAL_BIT);
+            return (*this);
+        }
+        Builder& withMetallic() {
+            _flags.set(METALLIC_VAL_BIT);
+            return (*this);
+        }
+        Builder& withGlossy() {
+            _flags.set(GLOSSY_VAL_BIT);
+            return (*this);
+        }
 
-        Builder& withTranslucentFactor() { _flags.set(OPACITY_VAL_BIT); return (*this); }
+        Builder& withTranslucentFactor() {
+            _flags.set(OPACITY_VAL_BIT);
+            return (*this);
+        }
 
-        Builder& withScattering() { _flags.set(SCATTERING_VAL_BIT); return (*this); }
+        Builder& withScattering() {
+            _flags.set(SCATTERING_VAL_BIT);
+            return (*this);
+        }
 
-        Builder& withEmissiveMap() { _flags.set(EMISSIVE_MAP_BIT); return (*this); }
-        Builder& withAlbedoMap() { _flags.set(ALBEDO_MAP_BIT); return (*this); }
-        Builder& withMetallicMap() { _flags.set(METALLIC_MAP_BIT); return (*this); }
-        Builder& withRoughnessMap() { _flags.set(ROUGHNESS_MAP_BIT); return (*this); }
+        Builder& withEmissiveMap() {
+            _flags.set(EMISSIVE_MAP_BIT);
+            return (*this);
+        }
+        Builder& withAlbedoMap() {
+            _flags.set(ALBEDO_MAP_BIT);
+            return (*this);
+        }
+        Builder& withMetallicMap() {
+            _flags.set(METALLIC_MAP_BIT);
+            return (*this);
+        }
+        Builder& withRoughnessMap() {
+            _flags.set(ROUGHNESS_MAP_BIT);
+            return (*this);
+        }
 
-        Builder& withTranslucentMap() { _flags.set(OPACITY_TRANSLUCENT_MAP_BIT); return (*this); }
-        Builder& withMaskMap() { _flags.set(OPACITY_MASK_MAP_BIT); return (*this); }
+        Builder& withTranslucentMap() {
+            _flags.set(OPACITY_TRANSLUCENT_MAP_BIT);
+            return (*this);
+        }
+        Builder& withMaskMap() {
+            _flags.set(OPACITY_MASK_MAP_BIT);
+            return (*this);
+        }
 
-        Builder& withNormalMap() { _flags.set(NORMAL_MAP_BIT); return (*this); }
-        Builder& withOcclusionMap() { _flags.set(OCCLUSION_MAP_BIT); return (*this); }
-        Builder& withLightmapMap() { _flags.set(LIGHTMAP_MAP_BIT); return (*this); }
-        Builder& withScatteringMap() { _flags.set(SCATTERING_MAP_BIT); return (*this); }
+        Builder& withNormalMap() {
+            _flags.set(NORMAL_MAP_BIT);
+            return (*this);
+        }
+        Builder& withOcclusionMap() {
+            _flags.set(OCCLUSION_MAP_BIT);
+            return (*this);
+        }
+        Builder& withLightmapMap() {
+            _flags.set(LIGHTMAP_MAP_BIT);
+            return (*this);
+        }
+        Builder& withScatteringMap() {
+            _flags.set(SCATTERING_MAP_BIT);
+            return (*this);
+        }
 
         // Convenient standard keys that we will keep on using all over the place
         static MaterialKey opaqueAlbedo() { return Builder().withAlbedo().build(); }
@@ -122,7 +174,7 @@ public:
 
     void setEmissiveMap(bool value) { _flags.set(EMISSIVE_MAP_BIT, value); }
     bool isEmissiveMap() const { return _flags[EMISSIVE_MAP_BIT]; }
- 
+
     void setAlbedo(bool value) { _flags.set(ALBEDO_VAL_BIT, value); }
     bool isAlbedo() const { return _flags[ALBEDO_VAL_BIT]; }
 
@@ -169,7 +221,6 @@ public:
     void setMapChannel(MapChannel channel, bool value) { _flags.set(EMISSIVE_MAP_BIT + channel, value); }
     bool isMapChannel(MapChannel channel) const { return _flags[EMISSIVE_MAP_BIT + channel]; }
 
-
     // Translucency and Opacity Heuristics are combining several flags:
     bool isTranslucent() const { return isTranslucentFactor() || isTranslucentMap(); }
     bool isOpaque() const { return !isTranslucent(); }
@@ -179,71 +230,209 @@ public:
 
 class MaterialFilter {
 public:
-    MaterialKey::Flags _value{ 0 };
-    MaterialKey::Flags _mask{ 0 };
+    MaterialKey::Flags _value { 0 };
+    MaterialKey::Flags _mask { 0 };
 
-
-    MaterialFilter(const MaterialKey::Flags& value = MaterialKey::Flags(0), const MaterialKey::Flags& mask = MaterialKey::Flags(0)) : _value(value), _mask(mask) {}
+    MaterialFilter(const MaterialKey::Flags& value = MaterialKey::Flags(0),
+                   const MaterialKey::Flags& mask = MaterialKey::Flags(0)) :
+        _value(value),
+        _mask(mask) {}
 
     class Builder {
-        MaterialKey::Flags _value{ 0 };
-        MaterialKey::Flags _mask{ 0 };
+        MaterialKey::Flags _value { 0 };
+        MaterialKey::Flags _mask { 0 };
+
     public:
         Builder() {}
 
         MaterialFilter build() const { return MaterialFilter(_value, _mask); }
 
-        Builder& withoutEmissive()       { _value.reset(MaterialKey::EMISSIVE_VAL_BIT); _mask.set(MaterialKey::EMISSIVE_VAL_BIT); return (*this); }
-        Builder& withEmissive()        { _value.set(MaterialKey::EMISSIVE_VAL_BIT);  _mask.set(MaterialKey::EMISSIVE_VAL_BIT); return (*this); }
+        Builder& withoutEmissive() {
+            _value.reset(MaterialKey::EMISSIVE_VAL_BIT);
+            _mask.set(MaterialKey::EMISSIVE_VAL_BIT);
+            return (*this);
+        }
+        Builder& withEmissive() {
+            _value.set(MaterialKey::EMISSIVE_VAL_BIT);
+            _mask.set(MaterialKey::EMISSIVE_VAL_BIT);
+            return (*this);
+        }
 
-        Builder& withoutEmissiveMap()       { _value.reset(MaterialKey::EMISSIVE_MAP_BIT); _mask.set(MaterialKey::EMISSIVE_MAP_BIT); return (*this); }
-        Builder& withEmissiveMap()        { _value.set(MaterialKey::EMISSIVE_MAP_BIT);  _mask.set(MaterialKey::EMISSIVE_MAP_BIT); return (*this); }
+        Builder& withoutEmissiveMap() {
+            _value.reset(MaterialKey::EMISSIVE_MAP_BIT);
+            _mask.set(MaterialKey::EMISSIVE_MAP_BIT);
+            return (*this);
+        }
+        Builder& withEmissiveMap() {
+            _value.set(MaterialKey::EMISSIVE_MAP_BIT);
+            _mask.set(MaterialKey::EMISSIVE_MAP_BIT);
+            return (*this);
+        }
 
-        Builder& withoutUnlit()       { _value.reset(MaterialKey::UNLIT_VAL_BIT); _mask.set(MaterialKey::UNLIT_VAL_BIT); return (*this); }
-        Builder& withUnlit()        { _value.set(MaterialKey::UNLIT_VAL_BIT);  _mask.set(MaterialKey::UNLIT_VAL_BIT); return (*this); }
+        Builder& withoutUnlit() {
+            _value.reset(MaterialKey::UNLIT_VAL_BIT);
+            _mask.set(MaterialKey::UNLIT_VAL_BIT);
+            return (*this);
+        }
+        Builder& withUnlit() {
+            _value.set(MaterialKey::UNLIT_VAL_BIT);
+            _mask.set(MaterialKey::UNLIT_VAL_BIT);
+            return (*this);
+        }
 
-        Builder& withoutAlbedo()       { _value.reset(MaterialKey::ALBEDO_VAL_BIT); _mask.set(MaterialKey::ALBEDO_VAL_BIT); return (*this); }
-        Builder& withAlbedo()        { _value.set(MaterialKey::ALBEDO_VAL_BIT);  _mask.set(MaterialKey::ALBEDO_VAL_BIT); return (*this); }
+        Builder& withoutAlbedo() {
+            _value.reset(MaterialKey::ALBEDO_VAL_BIT);
+            _mask.set(MaterialKey::ALBEDO_VAL_BIT);
+            return (*this);
+        }
+        Builder& withAlbedo() {
+            _value.set(MaterialKey::ALBEDO_VAL_BIT);
+            _mask.set(MaterialKey::ALBEDO_VAL_BIT);
+            return (*this);
+        }
 
-        Builder& withoutAlbedoMap()       { _value.reset(MaterialKey::ALBEDO_MAP_BIT); _mask.set(MaterialKey::ALBEDO_MAP_BIT); return (*this); }
-        Builder& withAlbedoMap()        { _value.set(MaterialKey::ALBEDO_MAP_BIT);  _mask.set(MaterialKey::ALBEDO_MAP_BIT); return (*this); }
+        Builder& withoutAlbedoMap() {
+            _value.reset(MaterialKey::ALBEDO_MAP_BIT);
+            _mask.set(MaterialKey::ALBEDO_MAP_BIT);
+            return (*this);
+        }
+        Builder& withAlbedoMap() {
+            _value.set(MaterialKey::ALBEDO_MAP_BIT);
+            _mask.set(MaterialKey::ALBEDO_MAP_BIT);
+            return (*this);
+        }
 
-        Builder& withoutMetallic()       { _value.reset(MaterialKey::METALLIC_VAL_BIT); _mask.set(MaterialKey::METALLIC_VAL_BIT); return (*this); }
-        Builder& withMetallic()        { _value.set(MaterialKey::METALLIC_VAL_BIT);  _mask.set(MaterialKey::METALLIC_VAL_BIT); return (*this); }
+        Builder& withoutMetallic() {
+            _value.reset(MaterialKey::METALLIC_VAL_BIT);
+            _mask.set(MaterialKey::METALLIC_VAL_BIT);
+            return (*this);
+        }
+        Builder& withMetallic() {
+            _value.set(MaterialKey::METALLIC_VAL_BIT);
+            _mask.set(MaterialKey::METALLIC_VAL_BIT);
+            return (*this);
+        }
 
-        Builder& withoutMetallicMap()       { _value.reset(MaterialKey::METALLIC_MAP_BIT); _mask.set(MaterialKey::METALLIC_MAP_BIT); return (*this); }
-        Builder& withMetallicMap()        { _value.set(MaterialKey::METALLIC_MAP_BIT);  _mask.set(MaterialKey::METALLIC_MAP_BIT); return (*this); }
+        Builder& withoutMetallicMap() {
+            _value.reset(MaterialKey::METALLIC_MAP_BIT);
+            _mask.set(MaterialKey::METALLIC_MAP_BIT);
+            return (*this);
+        }
+        Builder& withMetallicMap() {
+            _value.set(MaterialKey::METALLIC_MAP_BIT);
+            _mask.set(MaterialKey::METALLIC_MAP_BIT);
+            return (*this);
+        }
 
-        Builder& withoutGlossy()       { _value.reset(MaterialKey::GLOSSY_VAL_BIT); _mask.set(MaterialKey::GLOSSY_VAL_BIT); return (*this); }
-        Builder& withGlossy()        { _value.set(MaterialKey::GLOSSY_VAL_BIT);  _mask.set(MaterialKey::GLOSSY_VAL_BIT); return (*this); }
+        Builder& withoutGlossy() {
+            _value.reset(MaterialKey::GLOSSY_VAL_BIT);
+            _mask.set(MaterialKey::GLOSSY_VAL_BIT);
+            return (*this);
+        }
+        Builder& withGlossy() {
+            _value.set(MaterialKey::GLOSSY_VAL_BIT);
+            _mask.set(MaterialKey::GLOSSY_VAL_BIT);
+            return (*this);
+        }
 
-        Builder& withoutRoughnessMap()       { _value.reset(MaterialKey::ROUGHNESS_MAP_BIT); _mask.set(MaterialKey::ROUGHNESS_MAP_BIT); return (*this); }
-        Builder& withRoughnessMap()        { _value.set(MaterialKey::ROUGHNESS_MAP_BIT);  _mask.set(MaterialKey::ROUGHNESS_MAP_BIT); return (*this); }
+        Builder& withoutRoughnessMap() {
+            _value.reset(MaterialKey::ROUGHNESS_MAP_BIT);
+            _mask.set(MaterialKey::ROUGHNESS_MAP_BIT);
+            return (*this);
+        }
+        Builder& withRoughnessMap() {
+            _value.set(MaterialKey::ROUGHNESS_MAP_BIT);
+            _mask.set(MaterialKey::ROUGHNESS_MAP_BIT);
+            return (*this);
+        }
 
-        Builder& withoutTranslucentFactor()       { _value.reset(MaterialKey::OPACITY_VAL_BIT); _mask.set(MaterialKey::OPACITY_VAL_BIT); return (*this); }
-        Builder& withTranslucentFactor()        { _value.set(MaterialKey::OPACITY_VAL_BIT);  _mask.set(MaterialKey::OPACITY_VAL_BIT); return (*this); }
+        Builder& withoutTranslucentFactor() {
+            _value.reset(MaterialKey::OPACITY_VAL_BIT);
+            _mask.set(MaterialKey::OPACITY_VAL_BIT);
+            return (*this);
+        }
+        Builder& withTranslucentFactor() {
+            _value.set(MaterialKey::OPACITY_VAL_BIT);
+            _mask.set(MaterialKey::OPACITY_VAL_BIT);
+            return (*this);
+        }
 
-        Builder& withoutTranslucentMap()       { _value.reset(MaterialKey::OPACITY_TRANSLUCENT_MAP_BIT); _mask.set(MaterialKey::OPACITY_TRANSLUCENT_MAP_BIT); return (*this); }
-        Builder& withTranslucentMap()        { _value.set(MaterialKey::OPACITY_TRANSLUCENT_MAP_BIT);  _mask.set(MaterialKey::OPACITY_TRANSLUCENT_MAP_BIT); return (*this); }
+        Builder& withoutTranslucentMap() {
+            _value.reset(MaterialKey::OPACITY_TRANSLUCENT_MAP_BIT);
+            _mask.set(MaterialKey::OPACITY_TRANSLUCENT_MAP_BIT);
+            return (*this);
+        }
+        Builder& withTranslucentMap() {
+            _value.set(MaterialKey::OPACITY_TRANSLUCENT_MAP_BIT);
+            _mask.set(MaterialKey::OPACITY_TRANSLUCENT_MAP_BIT);
+            return (*this);
+        }
 
-        Builder& withoutMaskMap()       { _value.reset(MaterialKey::OPACITY_MASK_MAP_BIT); _mask.set(MaterialKey::OPACITY_MASK_MAP_BIT); return (*this); }
-        Builder& withMaskMap()        { _value.set(MaterialKey::OPACITY_MASK_MAP_BIT);  _mask.set(MaterialKey::OPACITY_MASK_MAP_BIT); return (*this); }
+        Builder& withoutMaskMap() {
+            _value.reset(MaterialKey::OPACITY_MASK_MAP_BIT);
+            _mask.set(MaterialKey::OPACITY_MASK_MAP_BIT);
+            return (*this);
+        }
+        Builder& withMaskMap() {
+            _value.set(MaterialKey::OPACITY_MASK_MAP_BIT);
+            _mask.set(MaterialKey::OPACITY_MASK_MAP_BIT);
+            return (*this);
+        }
 
-        Builder& withoutNormalMap()       { _value.reset(MaterialKey::NORMAL_MAP_BIT); _mask.set(MaterialKey::NORMAL_MAP_BIT); return (*this); }
-        Builder& withNormalMap()        { _value.set(MaterialKey::NORMAL_MAP_BIT);  _mask.set(MaterialKey::NORMAL_MAP_BIT); return (*this); }
+        Builder& withoutNormalMap() {
+            _value.reset(MaterialKey::NORMAL_MAP_BIT);
+            _mask.set(MaterialKey::NORMAL_MAP_BIT);
+            return (*this);
+        }
+        Builder& withNormalMap() {
+            _value.set(MaterialKey::NORMAL_MAP_BIT);
+            _mask.set(MaterialKey::NORMAL_MAP_BIT);
+            return (*this);
+        }
 
-        Builder& withoutOcclusionMap()       { _value.reset(MaterialKey::OCCLUSION_MAP_BIT); _mask.set(MaterialKey::OCCLUSION_MAP_BIT); return (*this); }
-        Builder& withOcclusionMap()        { _value.set(MaterialKey::OCCLUSION_MAP_BIT);  _mask.set(MaterialKey::OCCLUSION_MAP_BIT); return (*this); }
+        Builder& withoutOcclusionMap() {
+            _value.reset(MaterialKey::OCCLUSION_MAP_BIT);
+            _mask.set(MaterialKey::OCCLUSION_MAP_BIT);
+            return (*this);
+        }
+        Builder& withOcclusionMap() {
+            _value.set(MaterialKey::OCCLUSION_MAP_BIT);
+            _mask.set(MaterialKey::OCCLUSION_MAP_BIT);
+            return (*this);
+        }
 
-        Builder& withoutLightmapMap()       { _value.reset(MaterialKey::LIGHTMAP_MAP_BIT); _mask.set(MaterialKey::LIGHTMAP_MAP_BIT); return (*this); }
-        Builder& withLightmapMap()        { _value.set(MaterialKey::LIGHTMAP_MAP_BIT);  _mask.set(MaterialKey::LIGHTMAP_MAP_BIT); return (*this); }
+        Builder& withoutLightmapMap() {
+            _value.reset(MaterialKey::LIGHTMAP_MAP_BIT);
+            _mask.set(MaterialKey::LIGHTMAP_MAP_BIT);
+            return (*this);
+        }
+        Builder& withLightmapMap() {
+            _value.set(MaterialKey::LIGHTMAP_MAP_BIT);
+            _mask.set(MaterialKey::LIGHTMAP_MAP_BIT);
+            return (*this);
+        }
 
-        Builder& withoutScattering()       { _value.reset(MaterialKey::SCATTERING_VAL_BIT); _mask.set(MaterialKey::SCATTERING_VAL_BIT); return (*this); }
-        Builder& withScattering()        { _value.set(MaterialKey::SCATTERING_VAL_BIT);  _mask.set(MaterialKey::SCATTERING_VAL_BIT); return (*this); }
+        Builder& withoutScattering() {
+            _value.reset(MaterialKey::SCATTERING_VAL_BIT);
+            _mask.set(MaterialKey::SCATTERING_VAL_BIT);
+            return (*this);
+        }
+        Builder& withScattering() {
+            _value.set(MaterialKey::SCATTERING_VAL_BIT);
+            _mask.set(MaterialKey::SCATTERING_VAL_BIT);
+            return (*this);
+        }
 
-        Builder& withoutScatteringMap()       { _value.reset(MaterialKey::SCATTERING_MAP_BIT); _mask.set(MaterialKey::SCATTERING_MAP_BIT); return (*this); }
-        Builder& withScatteringMap()        { _value.set(MaterialKey::SCATTERING_MAP_BIT);  _mask.set(MaterialKey::SCATTERING_MAP_BIT); return (*this); }
-
+        Builder& withoutScatteringMap() {
+            _value.reset(MaterialKey::SCATTERING_MAP_BIT);
+            _mask.set(MaterialKey::SCATTERING_MAP_BIT);
+            return (*this);
+        }
+        Builder& withScatteringMap() {
+            _value.set(MaterialKey::SCATTERING_MAP_BIT);
+            _mask.set(MaterialKey::SCATTERING_MAP_BIT);
+            return (*this);
+        }
 
         // Convenient standard keys that we will keep on using all over the place
         static MaterialFilter opaqueAlbedo() { return Builder().withAlbedo().withoutTranslucentFactor().build(); }
@@ -254,7 +443,7 @@ public:
 
     class Less {
     public:
-        bool operator() (const MaterialFilter& left, const MaterialFilter& right) const {
+        bool operator()(const MaterialFilter& left, const MaterialFilter& right) const {
             if (left._value.to_ulong() == right._value.to_ulong()) {
                 return left._mask.to_ulong() < right._mask.to_ulong();
             } else {
@@ -271,7 +460,7 @@ public:
 
     Material();
     Material(const Material& material);
-    Material& operator= (const Material& material);
+    Material& operator=(const Material& material);
 
     const MaterialKey& getKey() const { return _key; }
 
@@ -305,7 +494,7 @@ public:
     // The texture map to channel association
     static const int NUM_TEXCOORD_TRANSFORMS { 2 };
     void setTextureMap(MapChannel channel, const TextureMapPointer& textureMap);
-    const TextureMaps& getTextureMaps() const { return _textureMaps; } // FIXME - not thread safe... 
+    const TextureMaps& getTextureMaps() const { return _textureMaps; } // FIXME - not thread safe...
     const TextureMapPointer getTextureMap(MapChannel channel) const;
 
     // Albedo maps cannot have opacity detected until they are loaded
@@ -377,9 +566,7 @@ public:
 
 class MaterialLayerCompare {
 public:
-    bool operator() (MaterialLayer left, MaterialLayer right) {
-        return left.priority < right.priority;
-    }
+    bool operator()(MaterialLayer left, MaterialLayer right) { return left.priority < right.priority; }
 };
 typedef std::priority_queue<MaterialLayer, std::vector<MaterialLayer>, MaterialLayerCompare> MaterialLayerQueue;
 
@@ -453,7 +640,9 @@ public:
     };
 
     gpu::BufferView& getSchemaBuffer() { return _schemaBuffer; }
-    graphics::MaterialKey getMaterialKey() const { return graphics::MaterialKey(_schemaBuffer.get<graphics::MultiMaterial::Schema>()._key); }
+    graphics::MaterialKey getMaterialKey() const {
+        return graphics::MaterialKey(_schemaBuffer.get<graphics::MultiMaterial::Schema>()._key);
+    }
     const gpu::TextureTablePointer& getTextureTable() const { return _textureTable; }
 
     bool needsUpdate() const { return _needsUpdate; }
@@ -462,8 +651,14 @@ public:
     void setTexturesLoading(bool value) { _texturesLoading = value; }
     bool areTexturesLoading() const { return _texturesLoading; }
 
-    int getTextureCount() const { calculateMaterialInfo(); return _textureCount; }
-    size_t getTextureSize()  const { calculateMaterialInfo(); return _textureSize; }
+    int getTextureCount() const {
+        calculateMaterialInfo();
+        return _textureCount;
+    }
+    size_t getTextureSize() const {
+        calculateMaterialInfo();
+        return _textureSize;
+    }
     bool hasTextureInfo() const { return _hasCalculatedTextureInfo; }
 
 private:
@@ -478,6 +673,6 @@ private:
     void calculateMaterialInfo() const;
 };
 
-};
+}; // namespace graphics
 
 #endif

@@ -15,6 +15,8 @@ void ModelFormatRegistry::addFormat(const hfm::Serializer& serializer) {
     _hfmFormatRegistry.registerMediaType(serializer.getMediaType(), serializer.getFactory());
 }
 
-std::shared_ptr<hfm::Serializer> ModelFormatRegistry::getSerializerForMediaType(const hifi::ByteArray& data, const hifi::URL& url, const std::string& webMediaType) const {
+std::shared_ptr<hfm::Serializer> ModelFormatRegistry::getSerializerForMediaType(const hifi::ByteArray& data,
+                                                                                const hifi::URL& url,
+                                                                                const std::string& webMediaType) const {
     return _hfmFormatRegistry.getSerializerForMediaType(data, url, webMediaType);
 }

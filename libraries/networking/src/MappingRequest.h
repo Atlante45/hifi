@@ -16,21 +16,13 @@
 
 #include <QtCore/QObject>
 
-#include "AssetUtils.h"
 #include "AssetClient.h"
+#include "AssetUtils.h"
 
 class MappingRequest : public QObject {
     Q_OBJECT
 public:
-    enum Error {
-        NoError,
-        NotFound,
-        NetworkError,
-        PermissionDenied,
-        InvalidPath,
-        InvalidHash,
-        UnknownError
-    };
+    enum Error { NoError, NotFound, NetworkError, PermissionDenied, InvalidPath, InvalidHash, UnknownError };
 
     virtual ~MappingRequest();
 
@@ -46,13 +38,12 @@ private:
     virtual void doStart() = 0;
 };
 
-
 class GetMappingRequest : public MappingRequest {
     Q_OBJECT
 public:
     GetMappingRequest(const AssetUtils::AssetPath& path);
 
-    AssetUtils::AssetHash getHash() const { return _hash;  }
+    AssetUtils::AssetHash getHash() const { return _hash; }
     AssetUtils::AssetPath getRedirectedPath() const { return _redirectedPath; }
     bool wasRedirected() const { return _wasRedirected; }
 
@@ -65,7 +56,6 @@ private:
     AssetUtils::AssetPath _path;
     AssetUtils::AssetHash _hash;
 
-
     AssetUtils::AssetPath _redirectedPath;
     bool _wasRedirected { false };
 };
@@ -75,8 +65,8 @@ class SetMappingRequest : public MappingRequest {
 public:
     SetMappingRequest(const AssetUtils::AssetPath& path, const AssetUtils::AssetHash& hash);
 
-    AssetUtils::AssetPath getPath() const { return _path;  }
-    AssetUtils::AssetHash getHash() const { return _hash;  }
+    AssetUtils::AssetPath getPath() const { return _path; }
+    AssetUtils::AssetHash getHash() const { return _hash; }
 
 signals:
     void finished(SetMappingRequest* thisRequest);
@@ -120,7 +110,7 @@ private:
 class GetAllMappingsRequest : public MappingRequest {
     Q_OBJECT
 public:
-    AssetUtils::AssetMappings getMappings() const { return _mappings;  }
+    AssetUtils::AssetMappings getMappings() const { return _mappings; }
 
 signals:
     void finished(GetAllMappingsRequest* thisRequest);
@@ -145,6 +135,5 @@ private:
     AssetUtils::AssetPathList _paths;
     bool _enabled;
 };
-
 
 #endif // hifi_MappingRequest_h

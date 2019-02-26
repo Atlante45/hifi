@@ -12,8 +12,8 @@
 #ifndef hifi_CalculateBlendshapeNormalsTask_h
 #define hifi_CalculateBlendshapeNormalsTask_h
 
-#include "Engine.h"
 #include "BakerTypes.h"
+#include "Engine.h"
 
 // Calculate blendshape normals if not already present in the blendshape
 class CalculateBlendshapeNormalsTask {

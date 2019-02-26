@@ -33,7 +33,7 @@ LogHandler& LogHandler::getInstance() {
 }
 
 LogHandler::LogHandler() {
-    // make sure we setup the repeated message flusher, but do it on the LogHandler thread	
+    // make sure we setup the repeated message flusher, but do it on the LogHandler thread
     QMetaObject::invokeMethod(this, "setupRepeatedMessageFlusher");
 }
 
@@ -85,7 +85,6 @@ void LogHandler::setShouldDisplayMilliseconds(bool shouldDisplayMilliseconds) {
     _shouldDisplayMilliseconds = shouldDisplayMilliseconds;
 }
 
-
 void LogHandler::flushRepeatedMessages() {
     QMutexLocker lock(&_mutex);
 
@@ -93,8 +92,8 @@ void LogHandler::flushRepeatedMessages() {
     for (int m = 0; m < (int)_repeatedMessageRecords.size(); ++m) {
         int repeatCount = _repeatedMessageRecords[m].repeatCount;
         if (repeatCount > 1) {
-            QString repeatLogMessage = QString().setNum(repeatCount) + " repeated log entries - Last entry: \"" 
-                    + _repeatedMessageRecords[m].repeatString + "\"";
+            QString repeatLogMessage = QString().setNum(repeatCount) + " repeated log entries - Last entry: \"" +
+                                       _repeatedMessageRecords[m].repeatString + "\"";
             printMessage(LogSuppressed, QMessageLogContext(), repeatLogMessage);
             _repeatedMessageRecords[m].repeatCount = 0;
             _repeatedMessageRecords[m].repeatString = QString();
@@ -116,8 +115,9 @@ QString LogHandler::printMessage(LogMsgType type, const QMessageLogContext& cont
         dateFormatPtr = &DATE_STRING_FORMAT_WITH_MILLISECONDS;
     }
 
-    QString prefixString = QString("[%1] [%2] [%3]").arg(QDateTime::currentDateTime().toString(*dateFormatPtr),
-        stringForLogType(type), context.category);
+    QString prefixString = QString("[%1] [%2] [%3]")
+                               .arg(QDateTime::currentDateTime().toString(*dateFormatPtr), stringForLogType(type),
+                                    context.category);
 
     if (_shouldOutputProcessID) {
         prefixString.append(QString(" [%1]").arg(QCoreApplication::applicationPid()));
@@ -135,7 +135,7 @@ QString LogHandler::printMessage(LogMsgType type, const QMessageLogContext& cont
     // for [qml] console.* messages include an abbreviated source filename
     if (context.category && context.file && !strcmp("qml", context.category)) {
         if (const char* basename = strrchr(context.file, '/')) {
-            prefixString.append(QString(" [%1]").arg(basename+1));
+            prefixString.append(QString(" [%1]").arg(basename + 1));
         }
     }
 
@@ -150,7 +150,7 @@ QString LogHandler::printMessage(LogMsgType type, const QMessageLogContext& cont
 }
 
 void LogHandler::verboseMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& message) {
-    getInstance().printMessage((LogMsgType) type, context, message);
+    getInstance().printMessage((LogMsgType)type, context, message);
 }
 
 void LogHandler::setupRepeatedMessageFlusher() {
@@ -184,6 +184,6 @@ void LogHandler::printRepeatedMessage(int messageID, LogMsgType type, const QMes
     } else {
         _repeatedMessageRecords[messageID].repeatString = message;
     }
- 
+
     ++_repeatedMessageRecords[messageID].repeatCount;
 }

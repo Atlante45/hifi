@@ -13,8 +13,8 @@
 #ifndef hifi_ContextOverlayInterface_h
 #define hifi_ContextOverlayInterface_h
 
-#include <QtCore/QObject>
 #include <QUuid>
+#include <QtCore/QObject>
 
 #include <DependencyManager.h>
 #include <PointerEvent.h>
@@ -26,8 +26,8 @@
 #include "scripting/SelectionScriptingInterface.h"
 #include "scripting/WalletScriptingInterface.h"
 
-#include "EntityTree.h"
 #include "ContextOverlayLogging.h"
+#include "EntityTree.h"
 
 class ContextOverlayInterface : public QObject, public Dependency {
     Q_OBJECT
@@ -42,11 +42,15 @@ class ContextOverlayInterface : public QObject, public Dependency {
     QSharedPointer<TabletScriptingInterface> _tabletScriptingInterface;
     QSharedPointer<SelectionScriptingInterface> _selectionScriptingInterface;
     QUuid _contextOverlayID { UNKNOWN_ENTITY_ID };
+
 public:
     ContextOverlayInterface();
     Q_INVOKABLE QUuid getCurrentEntityWithContextOverlay() { return _currentEntityWithContextOverlay; }
     void setCurrentEntityWithContextOverlay(const QUuid& entityID) { _currentEntityWithContextOverlay = entityID; }
-    void setLastInspectedEntity(const QUuid& entityID) { _challengeOwnershipTimeoutTimer.stop(); _lastInspectedEntity = entityID; }
+    void setLastInspectedEntity(const QUuid& entityID) {
+        _challengeOwnershipTimeoutTimer.stop();
+        _lastInspectedEntity = entityID;
+    }
     void setEnabled(bool enabled);
     bool getEnabled() { return _enabled; }
     bool getIsInMarketplaceInspectionMode() { return _isInMarketplaceInspectionMode; }
@@ -75,10 +79,7 @@ private slots:
     void handleChallengeOwnershipReplyPacket(QSharedPointer<ReceivedMessage> packet, SharedNodePointer sendingNode);
 
 private:
-
-    enum {
-        MAX_SELECTION_COUNT = 16
-    };
+    enum { MAX_SELECTION_COUNT = 16 };
     bool _verboseLogging { true };
     bool _enabled { true };
     EntityItemID _mouseDownEntity;

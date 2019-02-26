@@ -18,7 +18,7 @@ class MismatchWindow : public QDialog, public Ui::MismatchWindow {
     Q_OBJECT
 
 public:
-    MismatchWindow(QWidget *parent = Q_NULLPTR);
+    MismatchWindow(QWidget* parent = Q_NULLPTR);
 
     void setTestResult(TestResult testResult);
 
@@ -33,10 +33,9 @@ private slots:
     void on_abortTestsButton_clicked();
 
 private:
-    UserResponse _userResponse{ USER_RESPONSE_INVALID };
+    UserResponse _userResponse { USER_RESPONSE_INVALID };
 
     QPixmap _diffPixmap;
 };
-
 
 #endif // hifi_MismatchWindow_h

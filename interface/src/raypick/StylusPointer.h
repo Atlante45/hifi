@@ -9,8 +9,8 @@
 #define hifi_StylusPointer_h
 
 #include <Pointer.h>
-#include <shared/Bilateral.h>
 #include <RegisteredMetaTypes.h>
+#include <shared/Bilateral.h>
 
 #include "StylusPick.h"
 
@@ -19,8 +19,8 @@ class StylusPointer : public Pointer {
     using Ptr = std::shared_ptr<StylusPointer>;
 
 public:
-    StylusPointer(const QVariant& props, const QUuid& stylus, bool hover, bool enabled,
-                  const glm::vec3& modelPositionOffset, const glm::quat& modelRotationOffset, const glm::vec3& modelDimensions);
+    StylusPointer(const QVariant& props, const QUuid& stylus, bool hover, bool enabled, const glm::vec3& modelPositionOffset,
+                  const glm::quat& modelRotationOffset, const glm::vec3& modelDimensions);
     ~StylusPointer();
 
     void updateVisuals(const PickResultPointer& pickResult) override;
@@ -30,7 +30,8 @@ public:
     // "events off" -> render, don't hover/trigger
     // "disabled" -> don't render, don't hover/trigger
     void setRenderState(const std::string& state) override;
-    void editRenderState(const std::string& state, const QVariant& startProps, const QVariant& pathProps, const QVariant& endProps) override {}
+    void editRenderState(const std::string& state, const QVariant& startProps, const QVariant& pathProps,
+                         const QVariant& endProps) override {}
 
     QVariantMap toVariantMap() const override;
 
@@ -43,7 +44,8 @@ protected:
     bool shouldTrigger(const PickResultPointer& pickResult) override;
     virtual PickResultPointer getPickResultCopy(const PickResultPointer& pickResult) const override;
 
-    PointerEvent buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult, const std::string& button = "", bool hover = true) override;
+    PointerEvent buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult,
+                                   const std::string& button = "", bool hover = true) override;
 
 private:
     void show(const StylusTip& tip);
@@ -64,11 +66,7 @@ private:
 
     TriggerState _state;
 
-    enum RenderState {
-        EVENTS_ON = 0,
-        EVENTS_OFF,
-        DISABLED
-    };
+    enum RenderState { EVENTS_ON = 0, EVENTS_OFF, DISABLED };
 
     RenderState _renderState { EVENTS_ON };
 
@@ -83,11 +81,6 @@ private:
     glm::vec3 _modelPositionOffset;
     glm::vec3 _modelDimensions;
     glm::quat _modelRotationOffset;
-
 };
 
 #endif // hifi_StylusPointer_h
-
-
-
-

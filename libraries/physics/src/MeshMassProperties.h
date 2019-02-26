@@ -12,8 +12,8 @@
 #ifndef hifi_MeshMassProperties_h
 #define hifi_MeshMassProperties_h
 
-#include <vector>
 #include <stdint.h>
+#include <vector>
 
 #include <btBulletDynamicsCommon.h>
 
@@ -44,7 +44,6 @@ void applyParallelAxisTheorem(btMatrix3x3& inertia, const btVector3& shift, btSc
 //
 class MeshMassProperties {
 public:
-    
     // the mass properties calculation is done in the constructor, so if the mesh is complex
     // then the construction could be computationally expensiuve.
     MeshMassProperties(const VectorOfPoints& points, const VectorOfIndices& triangleIndices);

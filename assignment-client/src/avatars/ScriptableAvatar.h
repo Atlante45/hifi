@@ -12,18 +12,18 @@
 #ifndef hifi_ScriptableAvatar_h
 #define hifi_ScriptableAvatar_h
 
-#include <AnimationCache.h>
 #include <AnimSkeleton.h>
+#include <AnimationCache.h>
 #include <AvatarData.h>
-#include <ScriptEngine.h>
 #include <EntityItem.h>
+#include <ScriptEngine.h>
 
 /**jsdoc
- * The <code>Avatar</code> API is used to manipulate scriptable avatars on the domain. This API is a subset of the 
+ * The <code>Avatar</code> API is used to manipulate scriptable avatars on the domain. This API is a subset of the
  * {@link MyAvatar} API.
  *
  * <p><strong>Note:</strong> In the examples, use "<code>Avatar</code>" instead of "<code>MyAvatar</code>".</p>
- * 
+ *
  * @namespace Avatar
  *
  * @hifi-assignment-client
@@ -32,7 +32,7 @@
  * @property {number} scale
  * @property {number} density <em>Read-only.</em>
  * @property {Vec3} handPosition
- * @property {number} bodyYaw - The rotation left or right about an axis running from the head to the feet of the avatar. 
+ * @property {number} bodyYaw - The rotation left or right about an axis running from the head to the feet of the avatar.
  *     Yaw is sometimes called "heading".
  * @property {number} bodyPitch - The rotation about an axis running from shoulder to shoulder of the avatar. Pitch is
  *     sometimes called "elevation".
@@ -128,7 +128,6 @@ class ScriptableAvatar : public AvatarData, public Dependency {
     using TimePoint = Clock::time_point;
 
 public:
-
     ScriptableAvatar();
 
     /**jsdoc
@@ -144,7 +143,7 @@ public:
      */
     /// Allows scripts to run animations.
     Q_INVOKABLE void startAnimation(const QString& url, float fps = 30.0f, float priority = 1.0f, bool loop = false,
-                                    bool hold = false, float firstFrame = 0.0f, float lastFrame = FLT_MAX, 
+                                    bool hold = false, float firstFrame = 0.0f, float lastFrame = FLT_MAX,
                                     const QStringList& maskedJoints = QStringList());
 
     /**jsdoc
@@ -159,23 +158,23 @@ public:
     Q_INVOKABLE AnimationDetails getAnimationDetails();
 
     /**jsdoc
-    * Get the names of all the joints in the current avatar.
-    * @function MyAvatar.getJointNames
-    * @returns {string[]} The joint names.
-    * @example <caption>Report the names of all the joints in your current avatar.</caption>
-    * print(JSON.stringify(MyAvatar.getJointNames()));
-    */
+     * Get the names of all the joints in the current avatar.
+     * @function MyAvatar.getJointNames
+     * @returns {string[]} The joint names.
+     * @example <caption>Report the names of all the joints in your current avatar.</caption>
+     * print(JSON.stringify(MyAvatar.getJointNames()));
+     */
     Q_INVOKABLE virtual QStringList getJointNames() const override;
 
     /**jsdoc
-    * Get the joint index for a named joint. The joint index value is the position of the joint in the array returned by
-    * {@link MyAvatar.getJointNames} or {@link Avatar.getJointNames}.
-    * @function MyAvatar.getJointIndex
-    * @param {string} name - The name of the joint.
-    * @returns {number} The index of the joint.
-    * @example <caption>Report the index of your avatar's left arm joint.</caption>
-    * print(JSON.stringify(MyAvatar.getJointIndex("LeftArm"));
-    */
+     * Get the joint index for a named joint. The joint index value is the position of the joint in the array returned by
+     * {@link MyAvatar.getJointNames} or {@link Avatar.getJointNames}.
+     * @function MyAvatar.getJointIndex
+     * @param {string} name - The name of the joint.
+     * @returns {number} The index of the joint.
+     * @example <caption>Report the index of your avatar's left arm joint.</caption>
+     * print(JSON.stringify(MyAvatar.getJointIndex("LeftArm"));
+     */
     /// Returns the index of the joint with the specified name, or -1 if not found/unknown.
     Q_INVOKABLE virtual int getJointIndex(const QString& name) const override;
 
@@ -192,7 +191,7 @@ public:
     void setHasAudioEnabledFaceMovement(bool hasAudioEnabledFaceMovement);
     bool getHasAudioEnabledFaceMovement() const override { return _headData->getHasAudioEnabledFaceMovement(); }
 
-     /**jsdoc
+    /**jsdoc
      * Potentially Very Expensive.  Do not use.
      * @function Avatar.getAvatarEntityData
      * @returns {object}
@@ -200,9 +199,9 @@ public:
     Q_INVOKABLE AvatarEntityMap getAvatarEntityData() const override;
 
     /**jsdoc
-    * @function MyAvatar.setAvatarEntityData
-    * @param {object} avatarEntityData
-    */
+     * @function MyAvatar.setAvatarEntityData
+     * @param {object} avatarEntityData
+     */
     Q_INVOKABLE void setAvatarEntityData(const AvatarEntityMap& avatarEntityData) override;
 
     /**jsdoc
@@ -216,8 +215,8 @@ public slots:
     void update(float deltatime);
 
     /**jsdoc
-    * @function MyAvatar.setJointMappingsFromNetworkReply
-    */
+     * @function MyAvatar.setJointMappingsFromNetworkReply
+     */
     void setJointMappingsFromNetworkReply();
 
 private:

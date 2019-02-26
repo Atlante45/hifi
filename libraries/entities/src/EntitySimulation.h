@@ -14,9 +14,9 @@
 
 #include <limits>
 
-#include <QtCore/QObject>
 #include <QSet>
 #include <QVector>
+#include <QtCore/QObject>
 
 #include <PerfStat.h>
 
@@ -30,23 +30,15 @@ using VectorOfEntities = QVector<EntityItemPointer>;
 
 // the EntitySimulation needs to know when these things change on an entity,
 // so it can sort EntityItem or relay its state to the PhysicsEngine.
-const int DIRTY_SIMULATION_FLAGS =
-        Simulation::DIRTY_POSITION |
-        Simulation::DIRTY_ROTATION |
-        Simulation::DIRTY_LINEAR_VELOCITY |
-        Simulation::DIRTY_ANGULAR_VELOCITY |
-        Simulation::DIRTY_MASS |
-        Simulation::DIRTY_COLLISION_GROUP |
-        Simulation::DIRTY_MOTION_TYPE |
-        Simulation::DIRTY_SHAPE |
-        Simulation::DIRTY_LIFETIME |
-        Simulation::DIRTY_UPDATEABLE |
-        Simulation::DIRTY_MATERIAL |
-        Simulation::DIRTY_SIMULATOR_ID;
+const int DIRTY_SIMULATION_FLAGS = Simulation::DIRTY_POSITION | Simulation::DIRTY_ROTATION | Simulation::DIRTY_LINEAR_VELOCITY |
+                                   Simulation::DIRTY_ANGULAR_VELOCITY | Simulation::DIRTY_MASS |
+                                   Simulation::DIRTY_COLLISION_GROUP | Simulation::DIRTY_MOTION_TYPE | Simulation::DIRTY_SHAPE |
+                                   Simulation::DIRTY_LIFETIME | Simulation::DIRTY_UPDATEABLE | Simulation::DIRTY_MATERIAL |
+                                   Simulation::DIRTY_SIMULATOR_ID;
 
 class EntitySimulation : public QObject, public std::enable_shared_from_this<EntitySimulation> {
 public:
-    EntitySimulation() : _mutex(QMutex::Recursive), _entityTree(NULL), _nextExpiry(std::numeric_limits<uint64_t>::max()) { }
+    EntitySimulation() : _mutex(QMutex::Recursive), _entityTree(NULL), _nextExpiry(std::numeric_limits<uint64_t>::max()) {}
     virtual ~EntitySimulation() { setEntityTree(NULL); }
 
     inline EntitySimulationPointer getThisPointer() const {
@@ -95,7 +87,7 @@ protected:
     void callUpdateOnEntitiesThatNeedIt(uint64_t now);
     virtual void sortEntitiesThatMoved();
 
-    QMutex _mutex{ QMutex::Recursive };
+    QMutex _mutex { QMutex::Recursive };
 
     SetOfEntities _entitiesToSort; // entities moved by simulation (and might need resort in EntityTree)
     SetOfEntities _simpleKinematicEntities; // entities undergoing non-colliding kinematic motion
@@ -117,7 +109,6 @@ private:
     SetOfEntities _allEntities; // tracks all entities added the simulation
     SetOfEntities _mortalEntities; // entities that have an expiry
     uint64_t _nextExpiry;
-
 
     SetOfEntities _entitiesToUpdate; // entities that need to call EntityItem::update()
 };

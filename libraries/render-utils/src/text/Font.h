@@ -10,10 +10,10 @@
 #ifndef hifi_Font_h
 #define hifi_Font_h
 
-#include "Glyph.h"
-#include "EffectType.h"
 #include <gpu/Batch.h>
 #include <gpu/Pipeline.h>
+#include "EffectType.h"
+#include "Glyph.h"
 
 class Font {
 public:
@@ -24,7 +24,7 @@ public:
     void read(QIODevice& path);
 
     struct DrawParams {
-        vec4 color{ -1 };
+        vec4 color { -1 };
         EffectType effect;
     };
 
@@ -44,12 +44,10 @@ public:
     float getFontSize() const { return _fontSize; }
 
     // Render string to batch
-    void drawString(gpu::Batch& batch, DrawInfo& drawInfo, const QString& str,
-        const glm::vec4& color, EffectType effectType, 
-        const glm::vec2& origin, const glm::vec2& bound);
+    void drawString(gpu::Batch& batch, DrawInfo& drawInfo, const QString& str, const glm::vec4& color, EffectType effectType,
+                    const glm::vec2& origin, const glm::vec2& bound);
 
     static Pointer load(const QString& family);
-
 
 private:
     static Pointer load(QIODevice& fontFile);
@@ -88,4 +86,3 @@ private:
 };
 
 #endif
-

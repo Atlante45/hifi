@@ -8,8 +8,8 @@
 
 #include "RenderableMaterialEntityItem.h"
 
-#include "RenderPipelines.h"
 #include "GeometryCache.h"
+#include "RenderPipelines.h"
 
 using namespace render;
 using namespace render::entities;
@@ -26,40 +26,42 @@ bool MaterialEntityRenderer::needsRenderUpdate() const {
 
 bool MaterialEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const {
     if (resultWithReadLock<bool>([&] {
-        if (entity->getMaterialMappingMode() != _materialMappingMode) {
-            return true;
-        }
-        if (entity->getMaterialRepeat() != _materialRepeat) {
-            return true;
-        }
-        if (entity->getMaterialMappingPos() != _materialMappingPos || entity->getMaterialMappingScale() != _materialMappingScale || entity->getMaterialMappingRot() != _materialMappingRot) {
-            return true;
-        }
-        if (entity->getTransform() != _transform) {
-            return true;
-        }
-        if (entity->getUnscaledDimensions() != _dimensions) {
-            return true;
-        }
+            if (entity->getMaterialMappingMode() != _materialMappingMode) {
+                return true;
+            }
+            if (entity->getMaterialRepeat() != _materialRepeat) {
+                return true;
+            }
+            if (entity->getMaterialMappingPos() != _materialMappingPos ||
+                entity->getMaterialMappingScale() != _materialMappingScale ||
+                entity->getMaterialMappingRot() != _materialMappingRot) {
+                return true;
+            }
+            if (entity->getTransform() != _transform) {
+                return true;
+            }
+            if (entity->getUnscaledDimensions() != _dimensions) {
+                return true;
+            }
 
-        if (entity->getMaterialURL() != _materialURL) {
-            return true;
-        }
-        if (entity->getMaterialData() != _materialData) {
-            return true;
-        }
-        if (entity->getParentMaterialName() != _parentMaterialName) {
-            return true;
-        }
-        if (entity->getParentID() != _parentID) {
-            return true;
-        }
-        if (entity->getPriority() != _priority) {
-            return true;
-        }
+            if (entity->getMaterialURL() != _materialURL) {
+                return true;
+            }
+            if (entity->getMaterialData() != _materialData) {
+                return true;
+            }
+            if (entity->getParentMaterialName() != _parentMaterialName) {
+                return true;
+            }
+            if (entity->getParentID() != _parentID) {
+                return true;
+            }
+            if (entity->getPriority() != _priority) {
+                return true;
+            }
 
-        return false;
-    })) {
+            return false;
+        })) {
         return true;
     }
     return false;
@@ -88,7 +90,8 @@ void MaterialEntityRenderer::doRenderUpdateAsynchronousTyped(const TypedEntityPo
             glm::vec2 mappingPos = entity->getMaterialMappingPos();
             glm::vec2 mappingScale = entity->getMaterialMappingScale();
             float mappingRot = entity->getMaterialMappingRot();
-            if (mappingPos != _materialMappingPos || mappingScale != _materialMappingScale || mappingRot != _materialMappingRot) {
+            if (mappingPos != _materialMappingPos || mappingScale != _materialMappingScale ||
+                mappingRot != _materialMappingRot) {
                 _materialMappingPos = mappingPos;
                 _materialMappingScale = mappingScale;
                 _materialMappingRot = mappingRot;
@@ -192,7 +195,8 @@ void MaterialEntityRenderer::doRenderUpdateAsynchronousTyped(const TypedEntityPo
         } else if (materialDataChanged && usingMaterialData) {
             deleteMaterial(oldParentID, oldParentMaterialName);
             _texturesLoaded = false;
-            _parsedMaterials = NetworkMaterialResource::parseJSONMaterials(QJsonDocument::fromJson(_materialData.toUtf8()), _materialURL);
+            _parsedMaterials = NetworkMaterialResource::parseJSONMaterials(QJsonDocument::fromJson(_materialData.toUtf8()),
+                                                                           _materialURL);
             // Since our material changed, the current name might not be valid anymore, so we need to update
             setCurrentMaterialName(newCurrentMaterialName);
             applyMaterial();
@@ -251,7 +255,7 @@ ShapeKey MaterialEntityRenderer::getShapeKey() {
     bool hasTangents = drawMaterialKey.isNormalMap();
     bool hasLightmap = drawMaterialKey.isLightmapMap();
     bool isUnlit = drawMaterialKey.isUnlit();
-    
+
     ShapeKey::Builder builder;
     builder.withMaterial();
 
@@ -282,9 +286,7 @@ void MaterialEntityRenderer::doRender(RenderArgs* args) {
 
     // Don't render if our parent is set or our material is null
     QUuid parentID;
-    withReadLock([&] {
-        parentID = _parentID;
-    });
+    withReadLock([&] { parentID = _parentID; });
     if (!parentID.isNull()) {
         return;
     }

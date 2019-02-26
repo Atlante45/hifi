@@ -9,11 +9,11 @@
 #include <mutex>
 
 #include <QtCore/QObject>
-#include <QtCore/QtPlugin>
 #include <QtCore/QStringList>
+#include <QtCore/QtPlugin>
 
-#include <plugins/RuntimePlugin.h>
 #include <plugins/CodecPlugin.h>
+#include <plugins/RuntimePlugin.h>
 
 #include "PCMCodecManager.h"
 
@@ -29,7 +29,6 @@ public:
     virtual CodecPluginList getCodecPlugins() override {
         static std::once_flag once;
         std::call_once(once, [&] {
-
             CodecPluginPointer pcmCodec(new PCMCodec());
             if (pcmCodec->isSupported()) {
                 _codecPlugins.push_back(pcmCodec);
@@ -39,7 +38,6 @@ public:
             if (zlibCodec->isSupported()) {
                 _codecPlugins.push_back(zlibCodec);
             }
-
         });
         return _codecPlugins;
     }

@@ -12,9 +12,9 @@
 #ifndef hifi_FileScriptingInterface_h
 #define hifi_FileScriptingInterface_h
 
-#include <QtCore/QObject>
 #include <QFileInfo>
 #include <QString>
+#include <QtCore/QObject>
 
 /**jsdoc
  * @namespace File
@@ -76,7 +76,6 @@ private:
     QStringList unzipFile(QString path, QString tempDir);
     void recursiveFileScan(QFileInfo file, QString* dirName);
     void downloadZip(QString path, const QString link);
-
 };
 
 #endif // hifi_FileScriptingInterface_h

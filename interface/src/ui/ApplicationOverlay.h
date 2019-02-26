@@ -15,7 +15,6 @@
 #include <gpu/Texture.h>
 #include <render/Args.h>
 
-
 // Handles the drawing of the overlays to the screen
 // TODO, move divide up the rendering, displaying and input handling
 // facilities of this class
@@ -27,7 +26,7 @@ public:
 
     void renderOverlay(RenderArgs* renderArgs);
 
-    gpu::TexturePointer getOverlayTexture(); 
+    gpu::TexturePointer getOverlayTexture();
 
 private:
     void renderStatsAndLogs(RenderArgs* renderArgs);
@@ -36,8 +35,8 @@ private:
     void renderOverlays(RenderArgs* renderArgs);
     void buildFramebufferObject();
 
-    float _alpha{ 1.0f };
-    float _trailingAudioLoudness{ 0.0f };
+    float _alpha { 1.0f };
+    float _trailingAudioLoudness { 0.0f };
 
     int _domainStatusBorder;
     int _magnifierBorder;

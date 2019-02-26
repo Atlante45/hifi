@@ -9,17 +9,15 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #ifndef hifi_ACClientApp_h
 #define hifi_ACClientApp_h
 
-#include <QCoreApplication>
-#include <udt/Constants.h>
-#include <udt/Socket.h>
-#include <ReceivedMessage.h>
 #include <NetworkPeer.h>
 #include <NodeList.h>
-
+#include <ReceivedMessage.h>
+#include <udt/Constants.h>
+#include <udt/Socket.h>
+#include <QCoreApplication>
 
 class ACClientApp : public QCoreApplication {
     Q_OBJECT
@@ -52,4 +50,4 @@ private:
     QString _password;
 };
 
-#endif //hifi_ACClientApp_h
+#endif // hifi_ACClientApp_h

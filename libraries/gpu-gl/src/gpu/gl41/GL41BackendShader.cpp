@@ -5,8 +5,8 @@
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
-#include "GL41Backend.h"
 #include <gpu/gl/GLShader.h>
+#include "GL41Backend.h"
 
 using namespace gpu;
 using namespace gpu::gl;
@@ -54,7 +54,7 @@ void GL41Backend::postLinkProgram(ShaderObject& programObject, const Shader& pro
     }
 
     // Special case for the transformObjectBuffer, which is filtered out of the reflection data at shader load time
-    // 
+    //
     {
         static const std::string TRANSFORM_OBJECT_BUFFER = "transformObjectBuffer";
         const auto uniform = ::gl::Uniform::loadByName(glprogram, TRANSFORM_OBJECT_BUFFER);
@@ -63,5 +63,3 @@ void GL41Backend::postLinkProgram(ShaderObject& programObject, const Shader& pro
         }
     }
 }
-
-

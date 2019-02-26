@@ -15,10 +15,10 @@
 #include <QFileInfo>
 
 #include <render/DrawTask.h>
+#include "AmbientOcclusionEffect.h"
 #include "DeferredFrameTransform.h"
 #include "DeferredFramebuffer.h"
 #include "SurfaceGeometryPass.h"
-#include "AmbientOcclusionEffect.h"
 #include "VelocityBufferPass.h"
 
 #include "LightStage.h"
@@ -32,20 +32,17 @@ public:
 
     void setMode(int newMode);
 
-    int mode{ 0 };
-    glm::vec4 size{ 0.0f, -1.0f, 1.0f, 1.0f };
+    int mode { 0 };
+    glm::vec4 size { 0.0f, -1.0f, 1.0f, 1.0f };
 signals:
     void dirty();
 };
 
 class DebugDeferredBuffer {
 public:
-    using Inputs = render::VaryingSet7<DeferredFramebufferPointer,
-                                       LinearDepthFramebufferPointer,
-                                       SurfaceGeometryFramebufferPointer,
-                                       AmbientOcclusionFramebufferPointer,
-                                       VelocityFramebufferPointer,
-                                       DeferredFrameTransformPointer,
+    using Inputs = render::VaryingSet7<DeferredFramebufferPointer, LinearDepthFramebufferPointer,
+                                       SurfaceGeometryFramebufferPointer, AmbientOcclusionFramebufferPointer,
+                                       VelocityFramebufferPointer, DeferredFrameTransformPointer,
                                        LightStage::ShadowFramePointer>;
     using Config = DebugDeferredBufferConfig;
     using JobModel = render::Job::ModelI<DebugDeferredBuffer, Inputs, Config>;
@@ -59,8 +56,7 @@ public:
 protected:
     friend class DebugDeferredBufferConfig;
 
-    enum Mode : uint8_t
-    {
+    enum Mode : uint8_t {
         // Use Mode suffix to avoid collisions
         Off = 0,
         DepthMode,
@@ -92,13 +88,13 @@ protected:
         AmbientOcclusionBlurredMode,
         AmbientOcclusionNormalMode,
         VelocityMode,
-        CustomMode,  // Needs to stay last
+        CustomMode, // Needs to stay last
 
         NumModes,
     };
 
 private:
-    Mode _mode{ Off };
+    Mode _mode { Off };
     glm::vec4 _size;
 
 #include "debug_deferred_buffer_shared.slh"
@@ -119,7 +115,7 @@ private:
     ParametersBuffer _parameters;
     StandardPipelines _pipelines;
     CustomPipelines _customPipelines;
-    int _geometryId{ 0 };
+    int _geometryId { 0 };
 };
 
-#endif  // hifi_DebugDeferredBuffer_h
+#endif // hifi_DebugDeferredBuffer_h

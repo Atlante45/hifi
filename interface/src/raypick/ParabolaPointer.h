@@ -14,6 +14,7 @@
 
 class ParabolaPointer : public PathPointer {
     using Parent = PathPointer;
+
 public:
     class RenderState : public StartEndRenderState {
     public:
@@ -22,8 +23,8 @@ public:
             using Payload = render::Payload<ParabolaRenderItem>;
             using Pointer = Payload::DataPointer;
 
-            ParabolaRenderItem(const glm::vec3& color, float alpha, float width,
-                               bool isVisibleInSecondaryCamera, bool drawInFront, bool enabled);
+            ParabolaRenderItem(const glm::vec3& color, float alpha, float width, bool isVisibleInSecondaryCamera,
+                               bool drawInFront, bool enabled);
             ~ParabolaRenderItem() {}
 
             static gpu::PipelinePointer _parabolaPipeline;
@@ -47,7 +48,9 @@ public:
             void setVelocity(const glm::vec3& velocity) { _parabolaData.velocity = velocity; }
             void setAcceleration(const glm::vec3& acceleration) { _parabolaData.acceleration = acceleration; }
             void setOrigin(const glm::vec3& origin) { _origin = origin; }
-            void setIsVisibleInSecondaryCamera(const bool& isVisibleInSecondaryCamera) { _isVisibleInSecondaryCamera = isVisibleInSecondaryCamera; }
+            void setIsVisibleInSecondaryCamera(const bool& isVisibleInSecondaryCamera) {
+                _isVisibleInSecondaryCamera = isVisibleInSecondaryCamera;
+            }
             void setDrawInFront(const bool& drawInFront) { _drawInFront = drawInFront; }
             void setEnabled(const bool& enabled) { _enabled = enabled; }
 
@@ -71,7 +74,7 @@ public:
                 float parabolicDistance { 0.0f };
                 vec3 acceleration { 0.0f };
                 float width { DEFAULT_PARABOLA_WIDTH };
-                vec4 color { vec4(DEFAULT_PARABOLA_COLOR)};
+                vec4 color { vec4(DEFAULT_PARABOLA_COLOR) };
                 int numSections { 0 };
                 ivec3 spare;
             };
@@ -89,18 +92,22 @@ public:
 
         void cleanup() override;
         void disable() override;
-        void update(const glm::vec3& origin, const glm::vec3& end, const glm::vec3& surfaceNormal, float parentScale, bool distanceScaleEnd, bool centerEndY,
-                    bool faceAvatar, bool followNormal, float followNormalStrength, float distance, const PickResultPointer& pickResult) override;
+        void update(const glm::vec3& origin, const glm::vec3& end, const glm::vec3& surfaceNormal, float parentScale,
+                    bool distanceScaleEnd, bool centerEndY, bool faceAvatar, bool followNormal, float followNormalStrength,
+                    float distance, const PickResultPointer& pickResult) override;
 
-        void editParabola(const glm::vec3& color, float alpha, float width, bool isVisibleInSecondaryCamera, bool drawInFront, bool enabled);
+        void editParabola(const glm::vec3& color, float alpha, float width, bool isVisibleInSecondaryCamera, bool drawInFront,
+                          bool enabled);
 
     private:
         int _pathID;
         float _pathWidth;
     };
 
-    ParabolaPointer(const QVariant& rayProps, const RenderStateMap& renderStates, const DefaultRenderStateMap& defaultRenderStates, bool hover, const PointerTriggers& triggers,
-        bool faceAvatar, bool followNormal, float followNormalStrength, bool centerEndY, bool lockEnd, bool distanceScaleEnd, bool scaleWithAvatar, bool enabled);
+    ParabolaPointer(const QVariant& rayProps, const RenderStateMap& renderStates,
+                    const DefaultRenderStateMap& defaultRenderStates, bool hover, const PointerTriggers& triggers,
+                    bool faceAvatar, bool followNormal, float followNormalStrength, bool centerEndY, bool lockEnd,
+                    bool distanceScaleEnd, bool scaleWithAvatar, bool enabled);
 
     QVariantMap toVariantMap() const override;
 
@@ -119,17 +126,23 @@ protected:
     void setVisualPickResultInternal(PickResultPointer pickResult, IntersectionType type, const QUuid& id,
                                      const glm::vec3& intersection, float distance, const glm::vec3& surfaceNormal) override;
 
-    PointerEvent buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult, const std::string& button = "", bool hover = true) override;
+    PointerEvent buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult,
+                                   const std::string& button = "", bool hover = true) override;
 
 private:
-    static glm::vec3 findIntersection(const PickedObject& pickedObject, const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration);
+    static glm::vec3 findIntersection(const PickedObject& pickedObject, const glm::vec3& origin, const glm::vec3& velocity,
+                                      const glm::vec3& acceleration);
 };
 
 namespace render {
-    template <> const ItemKey payloadGetKey(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload);
-    template <> const Item::Bound payloadGetBound(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload);
-    template <> void payloadRender(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload, RenderArgs* args);
-    template <> const ShapeKey shapeGetShapeKey(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload);
-}
+template<>
+const ItemKey payloadGetKey(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload);
+template<>
+const Item::Bound payloadGetBound(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload);
+template<>
+void payloadRender(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload, RenderArgs* args);
+template<>
+const ShapeKey shapeGetShapeKey(const ParabolaPointer::RenderState::ParabolaRenderItem::Pointer& payload);
+} // namespace render
 
 #endif // hifi_ParabolaPointer_h

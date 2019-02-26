@@ -16,16 +16,15 @@ namespace controller {
 
 class ConstrainToPositiveIntegerFilter : public Filter {
     REGISTER_FILTER_CLASS(ConstrainToPositiveIntegerFilter);
+
 public:
     ConstrainToPositiveIntegerFilter() = default;
 
-    virtual AxisValue apply(AxisValue value) const override {
-        return { (value.value <= 0.0f) ? 0.0f : 1.0f, value.timestamp };
-    }
+    virtual AxisValue apply(AxisValue value) const override { return { (value.value <= 0.0f) ? 0.0f : 1.0f, value.timestamp }; }
 
     virtual Pose apply(Pose value) const override { return value; }
 };
 
-}
+} // namespace controller
 
 #endif

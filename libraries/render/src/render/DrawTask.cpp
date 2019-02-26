@@ -11,15 +11,15 @@
 
 #include "DrawTask.h"
 
-#include <algorithm>
 #include <assert.h>
+#include <algorithm>
 
 #include <LogHandler.h>
 #include <PerfStat.h>
 #include <ViewFrustum.h>
 #include <gpu/Context.h>
-#include <shaders/Shaders.h>
 #include <gpu/ShaderConstants.h>
+#include <shaders/Shaders.h>
 
 #include "Logging.h"
 
@@ -40,9 +40,9 @@ void render::renderItems(const RenderContextPointer& renderContext, const ItemBo
 }
 
 namespace {
-    int repeatedInvalidKeyMessageID = 0;
-    std::once_flag messageIDFlag;
-}
+int repeatedInvalidKeyMessageID = 0;
+std::once_flag messageIDFlag;
+} // namespace
 
 void renderShape(RenderArgs* args, const ShapePlumberPointer& shapeContext, const Item& item, const ShapeKey& globalKey) {
     assert(item.getKey().isShape());
@@ -59,14 +59,14 @@ void renderShape(RenderArgs* args, const ShapePlumberPointer& shapeContext, cons
         item.render(args);
     } else {
         std::call_once(messageIDFlag, [](int* id) { *id = LogHandler::getInstance().newRepeatedMessageID(); },
-                           &repeatedInvalidKeyMessageID);
+                       &repeatedInvalidKeyMessageID);
         HIFI_FCDEBUG_ID(renderlogging(), repeatedInvalidKeyMessageID, "Item could not be rendered with invalid key" << key);
     }
     args->_itemShapeKey = 0;
 }
 
-void render::renderShapes(const RenderContextPointer& renderContext,
-    const ShapePlumberPointer& shapeContext, const ItemBounds& inItems, int maxDrawnItems, const ShapeKey& globalKey) {
+void render::renderShapes(const RenderContextPointer& renderContext, const ShapePlumberPointer& shapeContext,
+                          const ItemBounds& inItems, int maxDrawnItems, const ShapeKey& globalKey) {
     auto& scene = renderContext->_scene;
     RenderArgs* args = renderContext->args;
 
@@ -80,8 +80,8 @@ void render::renderShapes(const RenderContextPointer& renderContext,
     }
 }
 
-void render::renderStateSortShapes(const RenderContextPointer& renderContext,
-    const ShapePlumberPointer& shapeContext, const ItemBounds& inItems, int maxDrawnItems, const ShapeKey& globalKey) {
+void render::renderStateSortShapes(const RenderContextPointer& renderContext, const ShapePlumberPointer& shapeContext,
+                                   const ItemBounds& inItems, int maxDrawnItems, const ShapeKey& globalKey) {
     auto& scene = renderContext->_scene;
     RenderArgs* args = renderContext->args;
 
@@ -91,10 +91,11 @@ void render::renderStateSortShapes(const RenderContextPointer& renderContext,
     }
 
     using SortedPipelines = std::vector<render::ShapeKey>;
-    using SortedShapes = std::unordered_map<render::ShapeKey, std::vector<Item>, render::ShapeKey::Hash, render::ShapeKey::KeyEqual>;
+    using SortedShapes = std::unordered_map<render::ShapeKey, std::vector<Item>, render::ShapeKey::Hash,
+                                            render::ShapeKey::KeyEqual>;
     SortedPipelines sortedPipelines;
     SortedShapes sortedShapes;
-    std::vector< std::tuple<Item,ShapeKey> > ownPipelineBucket;
+    std::vector<std::tuple<Item, ShapeKey>> ownPipelineBucket;
 
     for (auto i = 0; i < numItemsToDraw; ++i) {
         auto& item = scene->getItem(inItems[i].id);
@@ -108,11 +109,12 @@ void render::renderStateSortShapes(const RenderContextPointer& renderContext,
                 }
                 bucket.push_back(item);
             } else if (key.hasOwnPipeline()) {
-                ownPipelineBucket.push_back( std::make_tuple(item, key) );
+                ownPipelineBucket.push_back(std::make_tuple(item, key));
             } else {
                 std::call_once(messageIDFlag, [](int* id) { *id = LogHandler::getInstance().newRepeatedMessageID(); },
-                    &repeatedInvalidKeyMessageID);
-                HIFI_FCDEBUG_ID(renderlogging(), repeatedInvalidKeyMessageID, "Item could not be rendered with invalid key" << key);
+                               &repeatedInvalidKeyMessageID);
+                HIFI_FCDEBUG_ID(renderlogging(), repeatedInvalidKeyMessageID,
+                                "Item could not be rendered with invalid key" << key);
             }
         }
     }
@@ -160,20 +162,18 @@ const gpu::PipelinePointer DrawBounds::getPipeline() {
         gpu::ShaderPointer program = gpu::Shader::createProgram(shader::render::program::drawItemBounds);
         auto state = std::make_shared<gpu::State>();
         state->setDepthTest(true, false, gpu::LESS_EQUAL);
-        state->setBlendFunction(true,
-            gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
-            gpu::State::DEST_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ZERO);
+        state->setBlendFunction(true, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
+                                gpu::State::DEST_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ZERO);
 
         _boundsPipeline = gpu::Pipeline::create(program, state);
     }
     return _boundsPipeline;
 }
 
-void DrawBounds::run(const RenderContextPointer& renderContext,
-    const Inputs& items) {
+void DrawBounds::run(const RenderContextPointer& renderContext, const Inputs& items) {
     RenderArgs* args = renderContext->args;
 
-    uint32_t numItems = (uint32_t) items.size();
+    uint32_t numItems = (uint32_t)items.size();
     if (numItems == 0) {
         return;
     }
@@ -187,8 +187,8 @@ void DrawBounds::run(const RenderContextPointer& renderContext,
         _paramsBuffer = std::make_shared<gpu::Buffer>(sizeof(vec4), nullptr);
     }
 
-    _drawBuffer->setData(numItems * sizeOfItemBound, (const gpu::Byte*) items.data());
-    glm::vec4 color(glm::vec3(0.0f), -(float) numItems);
+    _drawBuffer->setData(numItems * sizeOfItemBound, (const gpu::Byte*)items.data());
+    glm::vec4 color(glm::vec3(0.0f), -(float)numItems);
     _paramsBuffer->setSubData(0, color);
     gpu::doInBatch("DrawBounds::run", args->_context, [&](gpu::Batch& batch) {
         args->_batch = &batch;
@@ -205,7 +205,7 @@ void DrawBounds::run(const RenderContextPointer& renderContext,
         // Bind program
         batch.setPipeline(getPipeline());
 
-        glm::vec4 color(glm::vec3(0.0f), -(float) numItems);
+        glm::vec4 color(glm::vec3(0.0f), -(float)numItems);
         batch.setUniformBuffer(0, _paramsBuffer);
         batch.setResourceBuffer(0, _drawBuffer);
 
@@ -235,7 +235,7 @@ void DrawQuadVolume::run(const render::RenderContextPointer& renderContext, cons
     assert(renderContext->args);
     assert(renderContext->args->_context);
     if (_isUpdateEnabled) {
-        auto& streamVertices = _meshVertices.edit<std::array<glm::vec3, 8U> >();
+        auto& streamVertices = _meshVertices.edit<std::array<glm::vec3, 8U>>();
         std::copy(vertices, vertices + 8, streamVertices.begin());
     }
 
@@ -277,26 +277,12 @@ gpu::PipelinePointer DrawQuadVolume::getPipeline() {
 
 gpu::BufferView DrawAABox::_cubeMeshIndices;
 
-DrawAABox::DrawAABox(const glm::vec3& color) :
-    DrawQuadVolume{ color } {
+DrawAABox::DrawAABox(const glm::vec3& color) : DrawQuadVolume { color } {
 }
 
 void DrawAABox::run(const render::RenderContextPointer& renderContext, const Inputs& box) {
     if (!box.isNull()) {
-        static const uint8_t indexData[] = {
-            0, 1,
-            1, 2,
-            2, 3,
-            3, 0,
-            4, 5,
-            5, 6,
-            6, 7,
-            7, 4,
-            0, 4,
-            1, 5,
-            3, 7,
-            2, 6
-        };
+        static const uint8_t indexData[] = { 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 3, 7, 2, 6 };
 
         if (!_cubeMeshIndices._buffer) {
             auto indices = std::make_shared<gpu::Buffer>(sizeof(indexData), indexData);
@@ -324,32 +310,15 @@ void DrawAABox::getVertices(const AABox& box, glm::vec3 vertices[8]) {
 
 gpu::BufferView DrawFrustum::_frustumMeshIndices;
 
-DrawFrustum::DrawFrustum(const glm::vec3& color) :
-    DrawQuadVolume{ color } {
+DrawFrustum::DrawFrustum(const glm::vec3& color) : DrawQuadVolume { color } {
 }
 
 void DrawFrustum::run(const render::RenderContextPointer& renderContext, const Input& input) {
     if (input) {
         const auto& frustum = *input;
 
-        static const uint8_t indexData[] = { 
-            0, 1, 
-            1, 2, 
-            2, 3, 
-            3, 0, 
-            0, 2, 
-            3, 1,
-            4, 5,
-            5, 6,
-            6, 7,
-            7, 4,
-            4, 6,
-            7, 5,
-            0, 4,
-            1, 5,
-            3, 7,
-            2, 6
-        };
+        static const uint8_t indexData[] = { 0, 1, 1, 2, 2, 3, 3, 0, 0, 2, 3, 1, 4, 5, 5, 6,
+                                             6, 7, 7, 4, 4, 6, 7, 5, 0, 4, 1, 5, 3, 7, 2, 6 };
 
         if (!_frustumMeshIndices._buffer) {
             auto indices = std::make_shared<gpu::Buffer>(sizeof(indexData), indexData);

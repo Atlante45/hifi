@@ -14,18 +14,18 @@
 #ifndef __hifi__Rig__
 #define __hifi__Rig__
 
-#include <QObject>
+#include <JointData.h>
 #include <QMutex>
+#include <QObject>
+#include <QReadWriteLock>
 #include <QScriptValue>
 #include <vector>
-#include <JointData.h>
-#include <QReadWriteLock>
 
 #include "AnimNode.h"
 #include "AnimNodeLoader.h"
-#include "SimpleMovingAverage.h"
 #include "AnimUtil.h"
 #include "Flow.h"
+#include "SimpleMovingAverage.h"
 
 class Rig;
 class AnimInverseKinematics;
@@ -71,10 +71,7 @@ public:
         NumSecondaryControllerTypes
     };
 
-    enum class ControllerFlags : uint8_t {
-        Enabled = 0x01,
-        Estimated = 0x02
-    };
+    enum class ControllerFlags : uint8_t { Enabled = 0x01, Estimated = 0x02 };
 
     struct ControllerParameters {
         ControllerParameters() {
@@ -82,9 +79,9 @@ public:
             memset(secondaryControllerFlags, 0, NumPrimaryControllerTypes);
         }
         glm::mat4 rigToSensorMatrix;
-        AnimPose primaryControllerPoses[NumPrimaryControllerTypes];  // rig space
+        AnimPose primaryControllerPoses[NumPrimaryControllerTypes]; // rig space
         uint8_t primaryControllerFlags[NumPrimaryControllerTypes];
-        AnimPose secondaryControllerPoses[NumSecondaryControllerTypes];  // rig space
+        AnimPose secondaryControllerPoses[NumSecondaryControllerTypes]; // rig space
         uint8_t secondaryControllerFlags[NumSecondaryControllerTypes];
         bool isTalking;
         HFMJointShapeInfo hipsShapeInfo;
@@ -94,7 +91,7 @@ public:
     };
 
     struct EyeParameters {
-        glm::vec3 eyeLookAt = glm::vec3();  // world space
+        glm::vec3 eyeLookAt = glm::vec3(); // world space
         glm::vec3 eyeSaccade = glm::vec3(); // world space
         glm::vec3 modelTranslation = glm::vec3();
         glm::quat modelRotation = glm::quat();
@@ -102,12 +99,7 @@ public:
         int rightEyeJointIndex = -1;
     };
 
-    enum class CharacterControllerState {
-        Ground = 0,
-        Takeoff,
-        InAir,
-        Hover
-    };
+    enum class CharacterControllerState { Ground = 0, Takeoff, InAir, Hover };
 
     Rig();
     virtual ~Rig();
@@ -116,13 +108,14 @@ public:
 
     void overrideAnimation(const QString& url, float fps, bool loop, float firstFrame, float lastFrame);
     void restoreAnimation();
-    
+
     void overrideNetworkAnimation(const QString& url, float fps, bool loop, float firstFrame, float lastFrame);
     void triggerNetworkRole(const QString& role);
     void restoreNetworkAnimation();
 
     QStringList getAnimationRoles() const;
-    void overrideRoleAnimation(const QString& role, const QString& url, float fps, bool loop, float firstFrame, float lastFrame);
+    void overrideRoleAnimation(const QString& role, const QString& url, float fps, bool loop, float firstFrame,
+                               float lastFrame);
     void restoreRoleAnimation(const QString& role);
 
     void initJointStates(const HFMModel& hfmModel, const glm::mat4& modelOffset);
@@ -156,8 +149,7 @@ public:
     void setJointRotation(int index, bool valid, const glm::quat& rotation, float priority);
 
     // if translation and rotation is identity, position will be in rig space
-    bool getJointPositionInWorldFrame(int jointIndex, glm::vec3& position,
-                                      glm::vec3 translation, glm::quat rotation) const;
+    bool getJointPositionInWorldFrame(int jointIndex, glm::vec3& position, glm::vec3 translation, glm::quat rotation) const;
 
     // rig space
     bool getJointPosition(int jointIndex, glm::vec3& position) const;
@@ -180,7 +172,8 @@ public:
 
     // Start or stop animations as needed.
     void computeMotionAnimationState(float deltaTime, const glm::vec3& worldPosition, const glm::vec3& worldVelocity,
-                                     const glm::quat& worldRotation, CharacterControllerState ccState, float sensorToWorldScale);
+                                     const glm::quat& worldRotation, CharacterControllerState ccState,
+                                     float sensorToWorldScale);
 
     // Regardless of who started the animations or how many, update the joints.
     void updateAnimations(float deltaTime, const glm::mat4& rootTransform, const glm::mat4& rigToWorldTransform);
@@ -224,7 +217,9 @@ public:
     const AnimPose& getGeometryOffsetPose() const { return _geometryOffset; }
 
     void setEnableDebugDrawIKTargets(bool enableDebugDrawIKTargets) { _enableDebugDrawIKTargets = enableDebugDrawIKTargets; }
-    void setEnableDebugDrawIKConstraints(bool enableDebugDrawIKConstraints) { _enableDebugDrawIKConstraints = enableDebugDrawIKConstraints; }
+    void setEnableDebugDrawIKConstraints(bool enableDebugDrawIKConstraints) {
+        _enableDebugDrawIKConstraints = enableDebugDrawIKConstraints;
+    }
     void setEnableDebugDrawIKChains(bool enableDebugDrawIKChains) { _enableDebugDrawIKChains = enableDebugDrawIKChains; }
 
     // input assumed to be in rig space
@@ -237,7 +232,6 @@ public:
     void initFlow(bool isActive);
     Flow& getFlow() { return _internalFlow; }
 
-
 signals:
     void onLoadComplete();
 
@@ -248,26 +242,28 @@ protected:
     void buildAbsoluteRigPoses(const AnimPoseVec& relativePoses, AnimPoseVec& absolutePosesOut);
 
     void updateHead(bool headEnabled, bool hipsEnabled, const AnimPose& headMatrix);
-    void updateHands(bool leftHandEnabled, bool rightHandEnabled, bool hipsEnabled, bool hipsEstimated,
-                     bool leftArmEnabled, bool rightArmEnabled, bool headEnabled, float dt,
-                     const AnimPose& leftHandPose, const AnimPose& rightHandPose,
-                     const HFMJointShapeInfo& hipsShapeInfo, const HFMJointShapeInfo& spineShapeInfo,
-                     const HFMJointShapeInfo& spine1ShapeInfo, const HFMJointShapeInfo& spine2ShapeInfo,
-                     const glm::mat4& rigToSensorMatrix, const glm::mat4& sensorToRigMatrix);
-    void updateFeet(bool leftFootEnabled, bool rightFootEnabled, bool headEnabled,
-                    const AnimPose& leftFootPose, const AnimPose& rightFootPose,
-                    const glm::mat4& rigToSensorMatrix, const glm::mat4& sensorToRigMatrix);
+    void updateHands(bool leftHandEnabled, bool rightHandEnabled, bool hipsEnabled, bool hipsEstimated, bool leftArmEnabled,
+                     bool rightArmEnabled, bool headEnabled, float dt, const AnimPose& leftHandPose,
+                     const AnimPose& rightHandPose, const HFMJointShapeInfo& hipsShapeInfo,
+                     const HFMJointShapeInfo& spineShapeInfo, const HFMJointShapeInfo& spine1ShapeInfo,
+                     const HFMJointShapeInfo& spine2ShapeInfo, const glm::mat4& rigToSensorMatrix,
+                     const glm::mat4& sensorToRigMatrix);
+    void updateFeet(bool leftFootEnabled, bool rightFootEnabled, bool headEnabled, const AnimPose& leftFootPose,
+                    const AnimPose& rightFootPose, const glm::mat4& rigToSensorMatrix, const glm::mat4& sensorToRigMatrix);
 
-    void updateEyeJoint(int index, const glm::vec3& modelTranslation, const glm::quat& modelRotation, const glm::vec3& lookAt, const glm::vec3& saccade);
+    void updateEyeJoint(int index, const glm::vec3& modelTranslation, const glm::quat& modelRotation, const glm::vec3& lookAt,
+                        const glm::vec3& saccade);
     void calcAnimAlpha(float speed, const std::vector<float>& referenceSpeeds, float* alphaOut) const;
 
-    bool calculateElbowPoleVector(int handIndex, int elbowIndex, int armIndex, int oppositeArmIndex, glm::vec3& poleVector) const;
-    glm::vec3 calculateKneePoleVector(int footJointIndex, int kneeJoint, int upLegIndex, int hipsIndex, const AnimPose& targetFootPose) const;
-    glm::vec3 deflectHandFromTorso(const glm::vec3& handPosition, const HFMJointShapeInfo& hipsShapeInfo, const HFMJointShapeInfo& spineShapeInfo,
-                                   const HFMJointShapeInfo& spine1ShapeInfo, const HFMJointShapeInfo& spine2ShapeInfo) const;
+    bool calculateElbowPoleVector(int handIndex, int elbowIndex, int armIndex, int oppositeArmIndex,
+                                  glm::vec3& poleVector) const;
+    glm::vec3 calculateKneePoleVector(int footJointIndex, int kneeJoint, int upLegIndex, int hipsIndex,
+                                      const AnimPose& targetFootPose) const;
+    glm::vec3 deflectHandFromTorso(const glm::vec3& handPosition, const HFMJointShapeInfo& hipsShapeInfo,
+                                   const HFMJointShapeInfo& spineShapeInfo, const HFMJointShapeInfo& spine1ShapeInfo,
+                                   const HFMJointShapeInfo& spine2ShapeInfo) const;
 
-
-    AnimPose _modelOffset;  // model to rig space
+    AnimPose _modelOffset; // model to rig space
     AnimPose _geometryOffset; // geometry to model space (includes unit offset & fst offsets)
     AnimPose _invGeometryOffset;
 
@@ -319,30 +315,22 @@ protected:
     AnimVariantMap _animVars;
     AnimVariantMap _networkVars;
 
-    enum class RigRole {
-        Idle = 0,
-        Turn,
-        Move,
-        Hover,
-        Takeoff,
-        InAir
-    };
+    enum class RigRole { Idle = 0, Turn, Move, Hover, Takeoff, InAir };
     RigRole _state { RigRole::Idle };
     RigRole _desiredState { RigRole::Idle };
     float _desiredStateAge { 0.0f };
-    
+
     struct NetworkAnimState {
-        enum ClipNodeEnum {
-            None = 0,
-            PreTransit,
-            Transit,
-            PostTransit,
-            A,
-            B
-        };
+        enum ClipNodeEnum { None = 0, PreTransit, Transit, PostTransit, A, B };
         NetworkAnimState() : clipNodeEnum(NetworkAnimState::None) {}
-        NetworkAnimState(ClipNodeEnum clipNodeEnumIn, const QString& urlIn, float fpsIn, bool loopIn, float firstFrameIn, float lastFrameIn) :
-            clipNodeEnum(clipNodeEnumIn), url(urlIn), fps(fpsIn), loop(loopIn), firstFrame(firstFrameIn), lastFrame(lastFrameIn) {}
+        NetworkAnimState(ClipNodeEnum clipNodeEnumIn, const QString& urlIn, float fpsIn, bool loopIn, float firstFrameIn,
+                         float lastFrameIn) :
+            clipNodeEnum(clipNodeEnumIn),
+            url(urlIn),
+            fps(fpsIn),
+            loop(loopIn),
+            firstFrame(firstFrameIn),
+            lastFrame(lastFrameIn) {}
 
         ClipNodeEnum clipNodeEnum;
         QString url;
@@ -354,15 +342,17 @@ protected:
     };
 
     struct UserAnimState {
-        enum ClipNodeEnum {
-            None = 0,
-            A,
-            B
-        };
+        enum ClipNodeEnum { None = 0, A, B };
 
         UserAnimState() : clipNodeEnum(UserAnimState::None) {}
-        UserAnimState(ClipNodeEnum clipNodeEnumIn, const QString& urlIn, float fpsIn, bool loopIn, float firstFrameIn, float lastFrameIn) :
-            clipNodeEnum(clipNodeEnumIn), url(urlIn), fps(fpsIn), loop(loopIn), firstFrame(firstFrameIn), lastFrame(lastFrameIn) {}
+        UserAnimState(ClipNodeEnum clipNodeEnumIn, const QString& urlIn, float fpsIn, bool loopIn, float firstFrameIn,
+                      float lastFrameIn) :
+            clipNodeEnum(clipNodeEnumIn),
+            url(urlIn),
+            fps(fpsIn),
+            loop(loopIn),
+            firstFrame(firstFrameIn),
+            lastFrame(lastFrameIn) {}
 
         ClipNodeEnum clipNodeEnum;
         QString url;
@@ -373,9 +363,15 @@ protected:
     };
 
     struct RoleAnimState {
-       RoleAnimState() {}
-       RoleAnimState(const QString& roleId, const QString& urlIn, float fpsIn, bool loopIn, float firstFrameIn, float lastFrameIn) :
-            role(roleId), url(urlIn), fps(fpsIn), loop(loopIn), firstFrame(firstFrameIn), lastFrame(lastFrameIn) {}
+        RoleAnimState() {}
+        RoleAnimState(const QString& roleId, const QString& urlIn, float fpsIn, bool loopIn, float firstFrameIn,
+                      float lastFrameIn) :
+            role(roleId),
+            url(urlIn),
+            fps(fpsIn),
+            loop(loopIn),
+            firstFrame(firstFrameIn),
+            lastFrame(lastFrameIn) {}
 
         QString role;
         QString url;

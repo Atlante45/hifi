@@ -11,11 +11,11 @@
 
 #include "OBJBaker.h"
 
-#include <PathUtils.h>
 #include <NetworkAccessManager.h>
+#include <PathUtils.h>
 
-#include "OBJSerializer.h"
 #include "FBXWriter.h"
+#include "OBJSerializer.h"
 
 const double UNIT_SCALE_FACTOR = 100.0;
 const QByteArray PROPERTIES70_NODE_NAME = "Properties70";
@@ -61,7 +61,8 @@ void OBJBaker::loadOBJ() {
         // loading the local OBJ
         QFile localOBJ { _modelURL.toLocalFile() };
 
-        qDebug() << "Local file url: " << _modelURL << _modelURL.toString() << _modelURL.toLocalFile() << ", copying to: " << _originalModelFilePath;
+        qDebug() << "Local file url: " << _modelURL << _modelURL.toString() << _modelURL.toLocalFile()
+                 << ", copying to: " << _originalModelFilePath;
 
         if (!localOBJ.exists()) {
             handleError("Could not find " + _modelURL.toString());
@@ -79,7 +80,7 @@ void OBJBaker::loadOBJ() {
         // local OBJ is loaded emit signal to trigger its baking
         emit OBJLoaded();
     } else {
-        // OBJ is remote, start download 
+        // OBJ is remote, start download
         auto& networkAccessManager = NetworkAccessManager::getInstance();
 
         QNetworkRequest networkRequest;
@@ -110,7 +111,8 @@ void OBJBaker::handleOBJNetworkReply() {
 
         if (!copyOfOriginal.open(QIODevice::WriteOnly)) {
             // add an error to the error list for this obj stating that a duplicate of the original obj could not be made
-            handleError("Could not create copy of " + _modelURL.toString() + " (Failed to open " + _originalModelFilePath + ")");
+            handleError("Could not create copy of " + _modelURL.toString() + " (Failed to open " + _originalModelFilePath +
+                        ")");
             return;
         }
         if (copyOfOriginal.write(requestReply->readAll()) == -1) {
@@ -171,10 +173,7 @@ void OBJBaker::createFBXNodeTree(FBXNode& rootNode, HFMModel& hfmModel) {
     FBXNode pNode;
     {
         pNode.name = P_NODE_NAME;
-        pNode.properties.append({
-            "UnitScaleFactor", "double", "Number", "",
-            UNIT_SCALE_FACTOR
-        });
+        pNode.properties.append({ "UnitScaleFactor", "double", "Number", "", UNIT_SCALE_FACTOR });
     }
 
     properties70Node.children = { pNode };
@@ -184,17 +183,13 @@ void OBJBaker::createFBXNodeTree(FBXNode& rootNode, HFMModel& hfmModel) {
     FBXNode objectNode;
     objectNode.name = OBJECTS_NODE_NAME;
 
-    // Generating Object node's child - Geometry node 
+    // Generating Object node's child - Geometry node
     FBXNode geometryNode;
     geometryNode.name = GEOMETRY_NODE_NAME;
     NodeID geometryID;
     {
         geometryID = nextNodeID();
-        geometryNode.properties = {
-            geometryID,
-            GEOMETRY_NODE_NAME,
-            MESH
-        };
+        geometryNode.properties = { geometryID, GEOMETRY_NODE_NAME, MESH };
     }
 
     // Compress the mesh information and store in dracoNode
@@ -257,13 +252,15 @@ void OBJBaker::createFBXNodeTree(FBXNode& rootNode, HFMModel& hfmModel) {
 
             // Texture node child - Relative Filename node
             FBXNode relativeFilenameNode;
-            {
-                relativeFilenameNode.name = RELATIVEFILENAME_NODE_NAME;
-            }
+            { relativeFilenameNode.name = RELATIVEFILENAME_NODE_NAME; }
 
-            QByteArray textureFileName = (!currentMaterial.albedoTexture.filename.isEmpty()) ? currentMaterial.albedoTexture.filename : currentMaterial.specularTexture.filename;
+            QByteArray textureFileName = (!currentMaterial.albedoTexture.filename.isEmpty())
+                                             ? currentMaterial.albedoTexture.filename
+                                             : currentMaterial.specularTexture.filename;
 
-            auto textureType = (!currentMaterial.albedoTexture.filename.isEmpty()) ? image::TextureUsage::Type::ALBEDO_TEXTURE : image::TextureUsage::Type::SPECULAR_TEXTURE;
+            auto textureType = (!currentMaterial.albedoTexture.filename.isEmpty())
+                                   ? image::TextureUsage::Type::ALBEDO_TEXTURE
+                                   : image::TextureUsage::Type::SPECULAR_TEXTURE;
 
             // Compress the texture using ModelBaker::compressTexture() and store compressed file's name in the node
             auto textureFile = compressTexture(textureFileName, textureType);
@@ -284,7 +281,7 @@ void OBJBaker::createFBXNodeTree(FBXNode& rootNode, HFMModel& hfmModel) {
     FBXNode connectionsNode;
     connectionsNode.name = CONNECTIONS_NODE_NAME;
 
-    // connect Geometry to Model 
+    // connect Geometry to Model
     FBXNode cNode;
     cNode.name = C_NODE_NAME;
     cNode.properties = { CONNECTIONS_NODE_PROPERTY, geometryID, modelID };
@@ -302,22 +299,12 @@ void OBJBaker::createFBXNodeTree(FBXNode& rootNode, HFMModel& hfmModel) {
     for (const auto& texMat : _mapTextureMaterial) {
         FBXNode cAmbientNode;
         cAmbientNode.name = C_NODE_NAME;
-        cAmbientNode.properties = {
-            CONNECTIONS_NODE_PROPERTY_1,
-            texMat.first,
-            _materialIDs[texMat.second],
-            "AmbientFactor"
-        };
+        cAmbientNode.properties = { CONNECTIONS_NODE_PROPERTY_1, texMat.first, _materialIDs[texMat.second], "AmbientFactor" };
         connectionsNode.children.append(cAmbientNode);
 
         FBXNode cDiffuseNode;
         cDiffuseNode.name = C_NODE_NAME;
-        cDiffuseNode.properties = {
-            CONNECTIONS_NODE_PROPERTY_1,
-            texMat.first,
-            _materialIDs[texMat.second],
-            "DiffuseColor"
-        };
+        cDiffuseNode.properties = { CONNECTIONS_NODE_PROPERTY_1, texMat.first, _materialIDs[texMat.second], "DiffuseColor" };
         connectionsNode.children.append(cDiffuseNode);
     }
 
@@ -341,10 +328,8 @@ void OBJBaker::setMaterialNodeProperties(FBXNode& materialNode, QString material
     FBXNode pNodeDiffuseColor;
     {
         pNodeDiffuseColor.name = P_NODE_NAME;
-        pNodeDiffuseColor.properties.append({
-            "DiffuseColor", "Color", "", "A",
-            currentMaterial.diffuseColor[0], currentMaterial.diffuseColor[1], currentMaterial.diffuseColor[2]
-        });
+        pNodeDiffuseColor.properties.append({ "DiffuseColor", "Color", "", "A", currentMaterial.diffuseColor[0],
+                                              currentMaterial.diffuseColor[1], currentMaterial.diffuseColor[2] });
     }
     properties70Node.children.append(pNodeDiffuseColor);
 
@@ -352,10 +337,8 @@ void OBJBaker::setMaterialNodeProperties(FBXNode& materialNode, QString material
     FBXNode pNodeSpecularColor;
     {
         pNodeSpecularColor.name = P_NODE_NAME;
-        pNodeSpecularColor.properties.append({
-            "SpecularColor", "Color", "", "A",
-            currentMaterial.specularColor[0], currentMaterial.specularColor[1], currentMaterial.specularColor[2]
-        });
+        pNodeSpecularColor.properties.append({ "SpecularColor", "Color", "", "A", currentMaterial.specularColor[0],
+                                               currentMaterial.specularColor[1], currentMaterial.specularColor[2] });
     }
     properties70Node.children.append(pNodeSpecularColor);
 
@@ -363,10 +346,7 @@ void OBJBaker::setMaterialNodeProperties(FBXNode& materialNode, QString material
     FBXNode pNodeShininess;
     {
         pNodeShininess.name = P_NODE_NAME;
-        pNodeShininess.properties.append({
-            "Shininess", "Number", "", "A",
-            currentMaterial.shininess
-        });
+        pNodeShininess.properties.append({ "Shininess", "Number", "", "A", currentMaterial.shininess });
     }
     properties70Node.children.append(pNodeShininess);
 
@@ -374,10 +354,7 @@ void OBJBaker::setMaterialNodeProperties(FBXNode& materialNode, QString material
     FBXNode pNodeOpacity;
     {
         pNodeOpacity.name = P_NODE_NAME;
-        pNodeOpacity.properties.append({
-            "Opacity", "Number", "", "A",
-            currentMaterial.opacity
-        });
+        pNodeOpacity.properties.append({ "Opacity", "Number", "", "A", currentMaterial.opacity });
     }
     properties70Node.children.append(pNodeOpacity);
 

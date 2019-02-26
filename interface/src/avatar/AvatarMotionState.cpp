@@ -15,7 +15,9 @@
 #include <PhysicsEngine.h>
 #include <PhysicsHelpers.h>
 
-AvatarMotionState::AvatarMotionState(OtherAvatarPointer avatar, const btCollisionShape* shape) : ObjectMotionState(shape), _avatar(avatar) {
+AvatarMotionState::AvatarMotionState(OtherAvatarPointer avatar, const btCollisionShape* shape) :
+    ObjectMotionState(shape),
+    _avatar(avatar) {
     assert(_avatar);
     _type = MOTIONSTATE_TYPE_AVATAR;
     _collisionGroup = BULLET_COLLISION_GROUP_OTHER_AVATAR;
@@ -145,7 +147,7 @@ glm::vec3 AvatarMotionState::getObjectLinearVelocity() const {
 glm::vec3 AvatarMotionState::getObjectAngularVelocity() const {
     // HACK: avatars use a capusle collision shape and their angularVelocity in the local simulation is unimportant.
     // Therefore, as optimization toward support for larger crowds we ignore it and return zero.
-    //return _avatar->getWorldAngularVelocity();
+    // return _avatar->getWorldAngularVelocity();
     return glm::vec3(0.0f);
 }
 

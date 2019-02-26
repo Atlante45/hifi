@@ -9,31 +9,30 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #include "RenderableEntityItem.h"
 
 #include <ObjectMotionState.h>
 
-#include "RenderableShapeEntityItem.h"
-#include "RenderableModelEntityItem.h"
-#include "RenderableTextEntityItem.h"
+#include "RenderableGizmoEntityItem.h"
+#include "RenderableGridEntityItem.h"
 #include "RenderableImageEntityItem.h"
-#include "RenderableWebEntityItem.h"
-#include "RenderableParticleEffectEntityItem.h"
+#include "RenderableLightEntityItem.h"
 #include "RenderableLineEntityItem.h"
+#include "RenderableMaterialEntityItem.h"
+#include "RenderableModelEntityItem.h"
+#include "RenderableParticleEffectEntityItem.h"
 #include "RenderablePolyLineEntityItem.h"
 #include "RenderablePolyVoxEntityItem.h"
-#include "RenderableGridEntityItem.h"
-#include "RenderableGizmoEntityItem.h"
-#include "RenderableLightEntityItem.h"
+#include "RenderableShapeEntityItem.h"
+#include "RenderableTextEntityItem.h"
+#include "RenderableWebEntityItem.h"
 #include "RenderableZoneEntityItem.h"
-#include "RenderableMaterialEntityItem.h"
 
 using namespace render;
 using namespace render::entities;
 
-// These or the icon "name" used by the render item status value, they correspond to the atlas texture used by the DrawItemStatus
-// job in the current rendering pipeline defined as of now  (11/2015) in render-utils/RenderDeferredTask.cpp.
+// These or the icon "name" used by the render item status value, they correspond to the atlas texture used by the
+// DrawItemStatus job in the current rendering pipeline defined as of now  (11/2015) in render-utils/RenderDeferredTask.cpp.
 enum class RenderItemStatusIcon {
     ACTIVE_IN_BULLET = 0,
     PACKET_SENT = 1,
@@ -64,78 +63,77 @@ void EntityRenderer::makeStatusGetters(const EntityItemPointer& entity, Item::St
         float normalizedDelta = delta * WAIT_THRESHOLD_INV;
         // Status icon will scale from 1.0f down to 0.0f after WAIT_THRESHOLD
         // Color is red if last update is after WAIT_THRESHOLD, green otherwise (120 deg is green)
-        return render::Item::Status::Value(1.0f - normalizedDelta, (normalizedDelta > 1.0f ?
-            render::Item::Status::Value::GREEN :
-            render::Item::Status::Value::RED),
-            (unsigned char)RenderItemStatusIcon::PACKET_RECEIVED);
+        return render::Item::Status::Value(1.0f - normalizedDelta,
+                                           (normalizedDelta > 1.0f ? render::Item::Status::Value::GREEN
+                                                                   : render::Item::Status::Value::RED),
+                                           (unsigned char)RenderItemStatusIcon::PACKET_RECEIVED);
     });
 
-    statusGetters.push_back([entity] () -> render::Item::Status::Value {
+    statusGetters.push_back([entity]() -> render::Item::Status::Value {
         uint64_t delta = usecTimestampNow() - entity->getLastBroadcast();
         const float WAIT_THRESHOLD_INV = 1.0f / (0.4f * USECS_PER_SECOND);
         float normalizedDelta = delta * WAIT_THRESHOLD_INV;
         // Status icon will scale from 1.0f down to 0.0f after WAIT_THRESHOLD
         // Color is Magenta if last update is after WAIT_THRESHOLD, cyan otherwise (180 deg is green)
-        return render::Item::Status::Value(1.0f - normalizedDelta, (normalizedDelta > 1.0f ?
-            render::Item::Status::Value::MAGENTA :
-            render::Item::Status::Value::CYAN),
-            (unsigned char)RenderItemStatusIcon::PACKET_SENT);
+        return render::Item::Status::Value(1.0f - normalizedDelta,
+                                           (normalizedDelta > 1.0f ? render::Item::Status::Value::MAGENTA
+                                                                   : render::Item::Status::Value::CYAN),
+                                           (unsigned char)RenderItemStatusIcon::PACKET_SENT);
     });
 
-    statusGetters.push_back([entity] () -> render::Item::Status::Value {
+    statusGetters.push_back([entity]() -> render::Item::Status::Value {
         ObjectMotionState* motionState = static_cast<ObjectMotionState*>(entity->getPhysicsInfo());
         if (motionState && motionState->isActive()) {
             return render::Item::Status::Value(1.0f, render::Item::Status::Value::BLUE,
-                (unsigned char)RenderItemStatusIcon::ACTIVE_IN_BULLET);
+                                               (unsigned char)RenderItemStatusIcon::ACTIVE_IN_BULLET);
         }
         return render::Item::Status::Value(0.0f, render::Item::Status::Value::BLUE,
-            (unsigned char)RenderItemStatusIcon::ACTIVE_IN_BULLET);
+                                           (unsigned char)RenderItemStatusIcon::ACTIVE_IN_BULLET);
     });
 
-    statusGetters.push_back([entity, myNodeID] () -> render::Item::Status::Value {
+    statusGetters.push_back([entity, myNodeID]() -> render::Item::Status::Value {
         bool weOwnSimulation = entity->getSimulationOwner().matchesValidID(myNodeID);
         bool otherOwnSimulation = !weOwnSimulation && !entity->getSimulationOwner().isNull();
 
         if (weOwnSimulation) {
             return render::Item::Status::Value(1.0f, render::Item::Status::Value::BLUE,
-                (unsigned char)RenderItemStatusIcon::SIMULATION_OWNER);
+                                               (unsigned char)RenderItemStatusIcon::SIMULATION_OWNER);
         } else if (otherOwnSimulation) {
             return render::Item::Status::Value(1.0f, render::Item::Status::Value::RED,
-                (unsigned char)RenderItemStatusIcon::OTHER_SIMULATION_OWNER);
+                                               (unsigned char)RenderItemStatusIcon::OTHER_SIMULATION_OWNER);
         }
         return render::Item::Status::Value(0.0f, render::Item::Status::Value::BLUE,
-            (unsigned char)RenderItemStatusIcon::SIMULATION_OWNER);
+                                           (unsigned char)RenderItemStatusIcon::SIMULATION_OWNER);
     });
 
-    statusGetters.push_back([entity] () -> render::Item::Status::Value {
+    statusGetters.push_back([entity]() -> render::Item::Status::Value {
         if (entity->hasActions()) {
             return render::Item::Status::Value(1.0f, render::Item::Status::Value::GREEN,
-                (unsigned char)RenderItemStatusIcon::HAS_ACTIONS);
+                                               (unsigned char)RenderItemStatusIcon::HAS_ACTIONS);
         }
         return render::Item::Status::Value(0.0f, render::Item::Status::Value::GREEN,
-            (unsigned char)RenderItemStatusIcon::HAS_ACTIONS);
+                                           (unsigned char)RenderItemStatusIcon::HAS_ACTIONS);
     });
 
-    statusGetters.push_back([entity, myNodeID] () -> render::Item::Status::Value {
+    statusGetters.push_back([entity, myNodeID]() -> render::Item::Status::Value {
         if (entity->isAvatarEntity()) {
             if (entity->getOwningAvatarID() == myNodeID) {
                 return render::Item::Status::Value(1.0f, render::Item::Status::Value::GREEN,
-                    (unsigned char)RenderItemStatusIcon::ENTITY_HOST_TYPE);
+                                                   (unsigned char)RenderItemStatusIcon::ENTITY_HOST_TYPE);
             } else {
                 return render::Item::Status::Value(1.0f, render::Item::Status::Value::RED,
-                    (unsigned char)RenderItemStatusIcon::ENTITY_HOST_TYPE);
+                                                   (unsigned char)RenderItemStatusIcon::ENTITY_HOST_TYPE);
             }
         } else if (entity->isLocalEntity()) {
             return render::Item::Status::Value(1.0f, render::Item::Status::Value::BLUE,
-                (unsigned char)RenderItemStatusIcon::ENTITY_HOST_TYPE);
+                                               (unsigned char)RenderItemStatusIcon::ENTITY_HOST_TYPE);
         }
         return render::Item::Status::Value(0.0f, render::Item::Status::Value::GREEN,
-            (unsigned char)RenderItemStatusIcon::ENTITY_HOST_TYPE);
+                                           (unsigned char)RenderItemStatusIcon::ENTITY_HOST_TYPE);
     });
 }
 
-
-template <typename T> 
+template<typename T>
 std::shared_ptr<T> make_renderer(const EntityItemPointer& entity) {
     // We want to use deleteLater so that renderer destruction gets pushed to the main thread
     return std::shared_ptr<T>(new T(entity), [](T* ptr) { ptr->deleteLater(); });
@@ -148,7 +146,8 @@ EntityRenderer::EntityRenderer(const EntityItemPointer& entity) : _created(entit
     });
 }
 
-EntityRenderer::~EntityRenderer() { }
+EntityRenderer::~EntityRenderer() {
+}
 
 //
 // Smart payload proxy members, implementing the payload interface
@@ -189,7 +188,11 @@ ItemKey EntityRenderer::getKey() {
 
     // This allows shapes to cast shadows
     if (_canCastShadow) {
-        return ItemKey::Builder::opaqueShape().withTypeMeta().withTagBits(getTagMask()).withShadowCaster().withLayer(getHifiRenderLayer());
+        return ItemKey::Builder::opaqueShape()
+            .withTypeMeta()
+            .withTagBits(getTagMask())
+            .withShadowCaster()
+            .withLayer(getHifiRenderLayer());
     } else {
         return ItemKey::Builder::opaqueShape().withTypeMeta().withTagBits(getTagMask()).withLayer(getHifiRenderLayer());
     }
@@ -209,7 +212,7 @@ void EntityRenderer::render(RenderArgs* args) {
     }
 
     if (!_renderUpdateQueued && needsRenderUpdate()) {
-        // FIXME find a way to spread out the calls to needsRenderUpdate so that only a given subset of the 
+        // FIXME find a way to spread out the calls to needsRenderUpdate so that only a given subset of the
         // items checks every frame, like 1/N of the tree ever N frames
         _renderUpdateQueued = true;
         emit requestRenderUpdate();
@@ -217,8 +220,7 @@ void EntityRenderer::render(RenderArgs* args) {
 
     auto& renderMode = args->_renderMode;
     bool cauterized = (renderMode != RenderArgs::RenderMode::SHADOW_RENDER_MODE &&
-                       renderMode != RenderArgs::RenderMode::SECONDARY_CAMERA_RENDER_MODE &&
-                       _cauterized);
+                       renderMode != RenderArgs::RenderMode::SECONDARY_CAMERA_RENDER_MODE && _cauterized);
 
     if (_visible && !cauterized) {
         doRender(args);
@@ -229,7 +231,8 @@ void EntityRenderer::render(RenderArgs* args) {
 // Methods called by the EntityTreeRenderer
 //
 
-EntityRenderer::Pointer EntityRenderer::addToScene(EntityTreeRenderer& renderer, const EntityItemPointer& entity, const ScenePointer& scene, Transaction& transaction) {
+EntityRenderer::Pointer EntityRenderer::addToScene(EntityTreeRenderer& renderer, const EntityItemPointer& entity,
+                                                   const ScenePointer& scene, Transaction& transaction) {
     EntityRenderer::Pointer result;
     if (!entity) {
         return result;
@@ -238,7 +241,6 @@ EntityRenderer::Pointer EntityRenderer::addToScene(EntityTreeRenderer& renderer,
     using Type = EntityTypes::EntityType_t;
     auto type = entity->getType();
     switch (type) {
-
         case Type::Shape:
         case Type::Box:
         case Type::Sphere:
@@ -358,7 +360,7 @@ void EntityRenderer::updateInScene(const ScenePointer& scene, Transaction& trans
 // Internal methods
 //
 
-// Returns true if the item needs to have updateInscene called because of internal rendering 
+// Returns true if the item needs to have updateInscene called because of internal rendering
 // changes (animation, fading, etc)
 bool EntityRenderer::needsRenderUpdate() const {
     if (_needsRenderUpdate) {
@@ -410,7 +412,8 @@ void EntityRenderer::updateModelTransformAndBound() {
     }
 }
 
-void EntityRenderer::doRenderUpdateSynchronous(const ScenePointer& scene, Transaction& transaction, const EntityItemPointer& entity) {
+void EntityRenderer::doRenderUpdateSynchronous(const ScenePointer& scene, Transaction& transaction,
+                                               const EntityItemPointer& entity) {
     DETAILED_PROFILE_RANGE(simulation_physics, __FUNCTION__);
     withWriteLock([&] {
         auto transparent = isTransparent();
@@ -437,12 +440,14 @@ void EntityRenderer::doRenderUpdateSynchronous(const ScenePointer& scene, Transa
 }
 
 void EntityRenderer::onAddToScene(const EntityItemPointer& entity) {
-    QObject::connect(this, &EntityRenderer::requestRenderUpdate, this, [this] { 
-        auto renderer = DependencyManager::get<EntityTreeRenderer>();
-        if (renderer) {
-            renderer->onEntityChanged(_entity->getID());
-        }
-    }, Qt::QueuedConnection);
+    QObject::connect(this, &EntityRenderer::requestRenderUpdate, this,
+                     [this] {
+                         auto renderer = DependencyManager::get<EntityTreeRenderer>();
+                         if (renderer) {
+                             renderer->onEntityChanged(_entity->getID());
+                         }
+                     },
+                     Qt::QueuedConnection);
     _changeHandlerId = entity->registerChangeHandler([](const EntityItemID& changedEntity) {
         auto renderer = DependencyManager::get<EntityTreeRenderer>();
         if (renderer) {
@@ -451,7 +456,7 @@ void EntityRenderer::onAddToScene(const EntityItemPointer& entity) {
     });
 }
 
-void EntityRenderer::onRemoveFromScene(const EntityItemPointer& entity) { 
+void EntityRenderer::onRemoveFromScene(const EntityItemPointer& entity) {
     entity->deregisterChangeHandler(_changeHandlerId);
     QObject::disconnect(this, &EntityRenderer::requestRenderUpdate, this, nullptr);
 }
@@ -466,13 +471,17 @@ void EntityRenderer::removeMaterial(graphics::MaterialPointer material, const st
     _materials[parentMaterialName].remove(material);
 }
 
-glm::vec4 EntityRenderer::calculatePulseColor(const glm::vec4& color, const PulsePropertyGroup& pulseProperties, quint64 start) {
-    if (pulseProperties.getPeriod() == 0.0f || (pulseProperties.getColorMode() == PulseMode::NONE && pulseProperties.getAlphaMode() == PulseMode::NONE)) {
+glm::vec4 EntityRenderer::calculatePulseColor(const glm::vec4& color, const PulsePropertyGroup& pulseProperties,
+                                              quint64 start) {
+    if (pulseProperties.getPeriod() == 0.0f ||
+        (pulseProperties.getColorMode() == PulseMode::NONE && pulseProperties.getAlphaMode() == PulseMode::NONE)) {
         return color;
     }
 
     float t = ((float)(usecTimestampNow() - start)) / ((float)USECS_PER_SECOND);
-    float pulse = 0.5f * (cosf(t * (2.0f * (float)M_PI) / pulseProperties.getPeriod()) + 1.0f) * (pulseProperties.getMax() - pulseProperties.getMin()) + pulseProperties.getMin();
+    float pulse = 0.5f * (cosf(t * (2.0f * (float)M_PI) / pulseProperties.getPeriod()) + 1.0f) *
+                      (pulseProperties.getMax() - pulseProperties.getMin()) +
+                  pulseProperties.getMin();
     float outPulse = (1.0f - pulse);
 
     glm::vec4 result = color;

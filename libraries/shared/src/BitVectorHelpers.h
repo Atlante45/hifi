@@ -19,7 +19,7 @@ int calcBitVectorSize(int numBits) {
 }
 
 // func should be of type bool func(int index)
-template <typename F>
+template<typename F>
 int writeBitVector(uint8_t* destinationBuffer, int numBits, const F& func) {
     int totalBytes = calcBitVectorSize(numBits);
     uint8_t* cursor = destinationBuffer;
@@ -46,7 +46,7 @@ int writeBitVector(uint8_t* destinationBuffer, int numBits, const F& func) {
 }
 
 // func should be of type 'void func(int index, bool value)'
-template <typename F>
+template<typename F>
 int readBitVector(const uint8_t* sourceBuffer, int numBits, const F& func) {
     int totalBytes = calcBitVectorSize(numBits);
     const uint8_t* cursor = sourceBuffer;

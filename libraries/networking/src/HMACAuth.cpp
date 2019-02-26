@@ -11,28 +11,24 @@
 
 #include "HMACAuth.h"
 
-#include <openssl/opensslv.h>
 #include <openssl/hmac.h>
+#include <openssl/opensslv.h>
 
 #include <QUuid>
-#include "NetworkLogging.h"
 #include <cassert>
+#include "NetworkLogging.h"
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000
-HMACAuth::HMACAuth(AuthMethod authMethod)
-    : _hmacContext(HMAC_CTX_new())
-    , _authMethod(authMethod) { }
+HMACAuth::HMACAuth(AuthMethod authMethod) : _hmacContext(HMAC_CTX_new()), _authMethod(authMethod) {
+}
 
-HMACAuth::~HMACAuth()
-{
+HMACAuth::~HMACAuth() {
     HMAC_CTX_free(_hmacContext);
 }
 
 #else
 
-HMACAuth::HMACAuth(AuthMethod authMethod)
-    : _hmacContext(new HMAC_CTX())
-    , _authMethod(authMethod) {
+HMACAuth::HMACAuth(AuthMethod authMethod) : _hmacContext(new HMAC_CTX()), _authMethod(authMethod) {
     HMAC_CTX_init(_hmacContext);
 }
 
@@ -46,32 +42,32 @@ bool HMACAuth::setKey(const char* keyValue, int keyLen) {
     const EVP_MD* sslStruct = nullptr;
 
     switch (_authMethod) {
-    case MD5:
-        sslStruct = EVP_md5();
-        break;
+        case MD5:
+            sslStruct = EVP_md5();
+            break;
 
-    case SHA1:
-        sslStruct = EVP_sha1();
-        break;
+        case SHA1:
+            sslStruct = EVP_sha1();
+            break;
 
-    case SHA224:
-        sslStruct = EVP_sha224();
-        break;
+        case SHA224:
+            sslStruct = EVP_sha224();
+            break;
 
-    case SHA256:
-        sslStruct = EVP_sha256();
-        break;
+        case SHA256:
+            sslStruct = EVP_sha256();
+            break;
 
-    case RIPEMD160:
-        sslStruct = EVP_ripemd160();
-        break;
+        case RIPEMD160:
+            sslStruct = EVP_ripemd160();
+            break;
 
-    default:
-        return false;
+        default:
+            return false;
     }
 
     QMutexLocker lock(&_lock);
-    return (bool) HMAC_Init_ex(_hmacContext, keyValue, keyLen, sslStruct, nullptr);
+    return (bool)HMAC_Init_ex(_hmacContext, keyValue, keyLen, sslStruct, nullptr);
 }
 
 bool HMACAuth::setKey(const QUuid& uidKey) {
@@ -81,16 +77,16 @@ bool HMACAuth::setKey(const QUuid& uidKey) {
 
 bool HMACAuth::addData(const char* data, int dataLen) {
     QMutexLocker lock(&_lock);
-    return (bool) HMAC_Update(_hmacContext, reinterpret_cast<const unsigned char*>(data), dataLen);
+    return (bool)HMAC_Update(_hmacContext, reinterpret_cast<const unsigned char*>(data), dataLen);
 }
 
 HMACAuth::HMACHash HMACAuth::result() {
     HMACHash hashValue(EVP_MAX_MD_SIZE);
     unsigned int hashLen;
     QMutexLocker lock(&_lock);
-    
+
     auto hmacResult = HMAC_Final(_hmacContext, &hashValue[0], &hashLen);
-    
+
     if (hmacResult) {
         hashValue.resize((size_t)hashLen);
     } else {

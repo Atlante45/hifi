@@ -16,35 +16,35 @@
 #include <vector>
 
 #include <QtCore/QObject>
-#include <QtCore/QUrl>
 #include <QtCore/QSet>
-#include <QtCore/QWaitCondition>
 #include <QtCore/QStringList>
+#include <QtCore/QUrl>
+#include <QtCore/QWaitCondition>
 
 #include <QtScript/QScriptEngine>
 
-#include <AnimationCache.h>
 #include <AnimVariant.h>
+#include <AnimationCache.h>
 #include <AvatarData.h>
 #include <AvatarHashMap.h>
-#include <LimitedNodeList.h>
-#include <EntityItemID.h>
 #include <EntitiesScriptEngineProvider.h>
+#include <EntityItemID.h>
 #include <EntityScriptUtils.h>
+#include <LimitedNodeList.h>
 
-#include "PointerEvent.h"
 #include "ArrayBufferClass.h"
 #include "AssetScriptingInterface.h"
 #include "AudioScriptingInterface.h"
 #include "BaseScriptEngine.h"
-#include "Quat.h"
+#include "ConsoleScriptingInterface.h"
 #include "Mat4.h"
+#include "PointerEvent.h"
+#include "Profile.h"
+#include "Quat.h"
 #include "ScriptCache.h"
 #include "ScriptUUID.h"
-#include "Vec3.h"
-#include "ConsoleScriptingInterface.h"
 #include "SettingHandle.h"
-#include "Profile.h"
+#include "Vec3.h"
 
 class QScriptEngineDebugger;
 
@@ -69,7 +69,7 @@ class DeferredLoadEntity {
 public:
     EntityItemID entityID;
     QString entityScript;
-    //bool forceRedownload;
+    // bool forceRedownload;
 };
 
 struct EntityScriptContentAvailable {
@@ -114,24 +114,13 @@ class ScriptEngine : public BaseScriptEngine, public EntitiesScriptEngineProvide
     Q_OBJECT
     Q_PROPERTY(QString context READ getContext)
 public:
+    enum Context { CLIENT_SCRIPT, ENTITY_CLIENT_SCRIPT, ENTITY_SERVER_SCRIPT, AGENT_SCRIPT };
 
-    enum Context {
-        CLIENT_SCRIPT,
-        ENTITY_CLIENT_SCRIPT,
-        ENTITY_SERVER_SCRIPT,
-        AGENT_SCRIPT
-    };
-
-    enum Type {
-        CLIENT,
-        ENTITY_CLIENT,
-        ENTITY_SERVER,
-        AGENT,
-        AVATAR
-    };
+    enum Type { CLIENT, ENTITY_CLIENT, ENTITY_SERVER, AGENT, AVATAR };
 
     static int processLevelMaxRetries;
-    ScriptEngine(Context context, const QString& scriptContents = NO_SCRIPT, const QString& fileNameString = QString("about:ScriptEngine"));
+    ScriptEngine(Context context, const QString& scriptContents = NO_SCRIPT,
+                 const QString& fileNameString = QString("about:ScriptEngine"));
     ~ScriptEngine();
 
     /// run the script in a dedicated thread. This will have the side effect of evalulating
@@ -145,7 +134,6 @@ public:
     void run();
 
     QString getFilename() const;
-
 
     QList<EntityItemID> getListOfEntityScriptIDs();
 
@@ -220,7 +208,8 @@ public:
      * @returns {object}
      */
     /// evaluate some code in the context of the ScriptEngine and return the result
-    Q_INVOKABLE QScriptValue evaluate(const QString& program, const QString& fileName, int lineNumber = 1); // this is also used by the script tool widget
+    Q_INVOKABLE QScriptValue evaluate(const QString& program, const QString& fileName,
+                                      int lineNumber = 1); // this is also used by the script tool widget
 
     /**jsdoc
      * @function Script.evaluateInClosure
@@ -311,21 +300,21 @@ public:
     Q_INVOKABLE void load(const QString& loadfile);
 
     /**jsdoc
-     * Include JavaScript from other files in the current script. If a callback is specified the files are loaded and included 
+     * Include JavaScript from other files in the current script. If a callback is specified the files are loaded and included
      * asynchronously, otherwise they are included synchronously (i.e., script execution blocks while the files are included).
      * @function Script.include
      * @param {string[]} filenames - The URLs of the scripts to include. Each can be relative to the current script.
-     * @param {function} [callback=null] - The function to call back when the scripts have been included. Can be an in-line 
+     * @param {function} [callback=null] - The function to call back when the scripts have been included. Can be an in-line
      * function or the name of a function.
      */
     Q_INVOKABLE void include(const QStringList& includeFiles, QScriptValue callback = QScriptValue());
 
     /**jsdoc
-     * Include JavaScript from another file in the current script. If a callback is specified the file is loaded and included 
+     * Include JavaScript from another file in the current script. If a callback is specified the file is loaded and included
      * asynchronously, otherwise it is included synchronously (i.e., script execution blocks while the file is included).
      * @function Script.include
      * @param {string} filename - The URL of the script to include. Can be relative to the current script.
-     * @param {function} [callback=null] - The function to call back when the script has been included. Can be an in-line 
+     * @param {function} [callback=null] - The function to call back when the script has been included. Can be an in-line
      * function or the name of a function.
      * @example <caption>Include a script file asynchronously.</caption>
      * // First file: scriptA.js
@@ -375,7 +364,7 @@ public:
      * Script.setInterval(function () {
      *     print("Timer fired");
      * }, 1000);
-    */
+     */
     Q_INVOKABLE QObject* setInterval(const QScriptValue& function, int intervalMS);
 
     /**jsdoc
@@ -485,7 +474,8 @@ public:
      * @param {Uuid} entityID
      * @param {boolean} [shouldRemoveFromMap=false]
      */
-    Q_INVOKABLE void unloadEntityScript(const EntityItemID& entityID, bool shouldRemoveFromMap = false); // will call unload method
+    Q_INVOKABLE void unloadEntityScript(const EntityItemID& entityID,
+                                        bool shouldRemoveFromMap = false); // will call unload method
 
     /**jsdoc
      * @function Script.unloadAllEntityScripts
@@ -518,7 +508,8 @@ public:
      * @param {Uuid} otherID
      * @param {Collision} collision
      */
-    Q_INVOKABLE void callEntityScriptMethod(const EntityItemID& entityID, const QString& methodName, const EntityItemID& otherID, const Collision& collision);
+    Q_INVOKABLE void callEntityScriptMethod(const EntityItemID& entityID, const QString& methodName,
+                                            const EntityItemID& otherID, const Collision& collision);
 
     /**jsdoc
      * @function Script.requestGarbageCollection
@@ -564,7 +555,7 @@ public:
     void scriptPrintedMessage(const QString& message);
     void clearDebugLogWindow();
     int getNumRunningEntityScripts() const;
-    bool getEntityScriptDetails(const EntityItemID& entityID, EntityScriptDetails &details) const;
+    bool getEntityScriptDetails(const EntityItemID& entityID, EntityScriptDetails& details) const;
     bool hasEntityScriptDetails(const EntityItemID& entityID) const;
 
     void setScriptEngines(QSharedPointer<ScriptEngines>& scriptEngines) { _scriptEngines = scriptEngines; }
@@ -579,7 +570,8 @@ public slots:
      * @param {boolean} useNames
      * @param {object} resultHandler
      */
-    void callAnimationStateHandler(QScriptValue callback, AnimVariantMap parameters, QStringList names, bool useNames, AnimVariantResultHandler resultHandler);
+    void callAnimationStateHandler(QScriptValue callback, AnimVariantMap parameters, QStringList names, bool useNames,
+                                   AnimVariantResultHandler resultHandler);
 
     /**jsdoc
      * @function Script.updateMemoryCost
@@ -733,7 +725,8 @@ protected:
      * @param {object} function
      * @param {ConnectionType} [type=2]
      */
-    Q_INVOKABLE void executeOnScriptThread(std::function<void()> function, const Qt::ConnectionType& type = Qt::QueuedConnection );
+    Q_INVOKABLE void executeOnScriptThread(std::function<void()> function,
+                                           const Qt::ConnectionType& type = Qt::QueuedConnection);
 
     /**jsdoc
      * @function Script._requireResolve
@@ -750,7 +743,8 @@ protected:
     void stopAllTimers();
     void stopAllTimersForEntityScript(const EntityItemID& entityID);
     void refreshFileScript(const EntityItemID& entityID);
-    void updateEntityScriptStatus(const EntityItemID& entityID, const EntityScriptStatus& status, const QString& errorInfo = QString());
+    void updateEntityScriptStatus(const EntityItemID& entityID, const EntityScriptStatus& status,
+                                  const QString& errorInfo = QString());
     void setEntityScriptDetails(const EntityItemID& entityID, const EntityScriptDetails& details);
     void setParentURL(const QString& parentURL) { _parentURL = parentURL; }
 
@@ -769,12 +763,15 @@ protected:
      * @param {boolean} success
      * @param {string} status
      */
-    Q_INVOKABLE void entityScriptContentAvailable(const EntityItemID& entityID, const QString& scriptOrURL, const QString& contents, bool isURL, bool success, const QString& status);
+    Q_INVOKABLE void entityScriptContentAvailable(const EntityItemID& entityID, const QString& scriptOrURL,
+                                                  const QString& contents, bool isURL, bool success, const QString& status);
 
-    EntityItemID currentEntityIdentifier; // Contains the defining entity script entity id during execution, if any. Empty for interface script execution.
+    EntityItemID currentEntityIdentifier; // Contains the defining entity script entity id during execution, if any. Empty for
+                                          // interface script execution.
     QUrl currentSandboxURL; // The toplevel url string for the entity script that loaded the code being executed, else empty.
     void doWithEnvironment(const EntityItemID& entityID, const QUrl& sandboxURL, std::function<void()> operation);
-    void callWithEnvironment(const EntityItemID& entityID, const QUrl& sandboxURL, QScriptValue function, QScriptValue thisObject, QScriptValueList args);
+    void callWithEnvironment(const EntityItemID& entityID, const QUrl& sandboxURL, QScriptValue function,
+                             QScriptValue thisObject, QScriptValueList args);
 
     Context _context;
     Type _type;
@@ -810,7 +807,7 @@ protected:
 
     AssetScriptingInterface* _assetScriptingInterface;
 
-    std::function<bool()> _emitScriptUpdates{ []() { return true; }  };
+    std::function<bool()> _emitScriptUpdates { []() { return true; } };
 
     std::recursive_mutex _lock;
 
@@ -824,8 +821,7 @@ protected:
     QWeakPointer<ScriptEngines> _scriptEngines;
 };
 
-ScriptEnginePointer scriptEngineFactory(ScriptEngine::Context context,
-                                        const QString& scriptContents,
+ScriptEnginePointer scriptEngineFactory(ScriptEngine::Context context, const QString& scriptContents,
                                         const QString& fileNameString);
 
 #endif // hifi_ScriptEngine_h

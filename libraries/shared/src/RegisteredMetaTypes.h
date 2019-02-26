@@ -12,19 +12,19 @@
 #ifndef hifi_RegisteredMetaTypes_h
 #define hifi_RegisteredMetaTypes_h
 
-#include <QtScript/QScriptEngine>
-#include <QtCore/QUuid>
 #include <QtCore/QUrl>
+#include <QtCore/QUuid>
+#include <QtScript/QScriptEngine>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
 #include "AACube.h"
+#include "PhysicsCollisionGroups.h"
 #include "ShapeInfo.h"
 #include "SharedUtil.h"
-#include "shared/Bilateral.h"
 #include "Transform.h"
-#include "PhysicsCollisionGroups.h"
+#include "shared/Bilateral.h"
 
 class QColor;
 class QUrl;
@@ -47,19 +47,19 @@ QScriptValue mat4toScriptValue(QScriptEngine* engine, const glm::mat4& mat4);
 void mat4FromScriptValue(const QScriptValue& object, glm::mat4& mat4);
 
 /**jsdoc
-* A 2-dimensional vector.
-*
-* @typedef {object} Vec2
-* @property {number} x - X-coordinate of the vector. Synonyms: <code>u</code>.
-* @property {number} y - Y-coordinate of the vector. Synonyms: <code>v</code>.
-* @example <caption>Vec2s can be set in multiple ways and modified with their aliases, but still stringify in the same way</caption>
-* Entities.editEntity(<id>, { materialMappingPos: { x: 0.1, y: 0.2 }});          // { x: 0.1, y: 0.2 }
-* Entities.editEntity(<id>, { materialMappingPos: { u: 0.3, v: 0.4 }});          // { x: 0.3, y: 0.4 }
-* Entities.editEntity(<id>, { materialMappingPos: [0.5, 0.6] });                 // { x: 0.5, y: 0.6 }
-* Entities.editEntity(<id>, { materialMappingPos: 0.7 });                        // { x: 0.7, y: 0.7 }
-* var color = Entities.getEntityProperties(<id>).materialMappingPos;             // { x: 0.7, y: 0.7 }
-* color.v = 0.8;                                                                 // { x: 0.7, y: 0.8 }
-*/
+ * A 2-dimensional vector.
+ *
+ * @typedef {object} Vec2
+ * @property {number} x - X-coordinate of the vector. Synonyms: <code>u</code>.
+ * @property {number} y - Y-coordinate of the vector. Synonyms: <code>v</code>.
+ * @example <caption>Vec2s can be set in multiple ways and modified with their aliases, but still stringify in the same
+ * way</caption> Entities.editEntity(<id>, { materialMappingPos: { x: 0.1, y: 0.2 }});          // { x: 0.1, y: 0.2 }
+ * Entities.editEntity(<id>, { materialMappingPos: { u: 0.3, v: 0.4 }});          // { x: 0.3, y: 0.4 }
+ * Entities.editEntity(<id>, { materialMappingPos: [0.5, 0.6] });                 // { x: 0.5, y: 0.6 }
+ * Entities.editEntity(<id>, { materialMappingPos: 0.7 });                        // { x: 0.7, y: 0.7 }
+ * var color = Entities.getEntityProperties(<id>).materialMappingPos;             // { x: 0.7, y: 0.7 }
+ * color.v = 0.8;                                                                 // { x: 0.7, y: 0.8 }
+ */
 QScriptValue vec2ToScriptValue(QScriptEngine* engine, const glm::vec2& vec2);
 void vec2FromScriptValue(const QScriptValue& object, glm::vec2& vec2);
 
@@ -68,78 +68,84 @@ glm::vec2 vec2FromVariant(const QVariant& object, bool& valid);
 glm::vec2 vec2FromVariant(const QVariant& object);
 
 /**jsdoc
-* A 3-dimensional vector. See also the {@link Vec3(0)|Vec3} object.
-*
-* @typedef {object} Vec3
-* @property {number} x - X-coordinate of the vector. Synonyms: <code>r</code>, <code>red</code>.
-* @property {number} y - Y-coordinate of the vector. Synonyms: <code>g</code>, <code>green</code>.
-* @property {number} z - Z-coordinate of the vector. Synonyms: <code>b</code>, <code>blue</code>.
-* @example <caption>Vec3s can be set in multiple ways and modified with their aliases, but still stringify in the same way</caption>
-* Entities.editEntity(<id>, { position: { x: 1, y: 2, z: 3 }});                 // { x: 1, y: 2, z: 3 }
-* Entities.editEntity(<id>, { position: { r: 4, g: 5, b: 6 }});                 // { x: 4, y: 5, z: 6 }
-* Entities.editEntity(<id>, { position: { red: 7, green: 8, blue: 9 }});        // { x: 7, y: 8, z: 9 }
-* Entities.editEntity(<id>, { position: [10, 11, 12] });                        // { x: 10, y: 11, z: 12 }
-* Entities.editEntity(<id>, { position: 13 });                                  // { x: 13, y: 13, z: 13 }
-* var position = Entities.getEntityProperties(<id>).position;                   // { x: 13, y: 13, z: 13 }
-* position.g = 14;                                                              // { x: 13, y: 14, z: 13 }
-* position.blue = 15;                                                           // { x: 13, y: 14, z: 15 }
-* Entities.editEntity(<id>, { position: "red"});                                // { x: 255, y: 0, z: 0 }
-* Entities.editEntity(<id>, { position: "#00FF00"});                            // { x: 0, y: 255, z: 0 }
-*/
+ * A 3-dimensional vector. See also the {@link Vec3(0)|Vec3} object.
+ *
+ * @typedef {object} Vec3
+ * @property {number} x - X-coordinate of the vector. Synonyms: <code>r</code>, <code>red</code>.
+ * @property {number} y - Y-coordinate of the vector. Synonyms: <code>g</code>, <code>green</code>.
+ * @property {number} z - Z-coordinate of the vector. Synonyms: <code>b</code>, <code>blue</code>.
+ * @example <caption>Vec3s can be set in multiple ways and modified with their aliases, but still stringify in the same
+ * way</caption> Entities.editEntity(<id>, { position: { x: 1, y: 2, z: 3 }});                 // { x: 1, y: 2, z: 3 }
+ * Entities.editEntity(<id>, { position: { r: 4, g: 5, b: 6 }});                 // { x: 4, y: 5, z: 6 }
+ * Entities.editEntity(<id>, { position: { red: 7, green: 8, blue: 9 }});        // { x: 7, y: 8, z: 9 }
+ * Entities.editEntity(<id>, { position: [10, 11, 12] });                        // { x: 10, y: 11, z: 12 }
+ * Entities.editEntity(<id>, { position: 13 });                                  // { x: 13, y: 13, z: 13 }
+ * var position = Entities.getEntityProperties(<id>).position;                   // { x: 13, y: 13, z: 13 }
+ * position.g = 14;                                                              // { x: 13, y: 14, z: 13 }
+ * position.blue = 15;                                                           // { x: 13, y: 14, z: 15 }
+ * Entities.editEntity(<id>, { position: "red"});                                // { x: 255, y: 0, z: 0 }
+ * Entities.editEntity(<id>, { position: "#00FF00"});                            // { x: 0, y: 255, z: 0 }
+ */
 QScriptValue vec3ToScriptValue(QScriptEngine* engine, const glm::vec3& vec3);
 QScriptValue vec3ColorToScriptValue(QScriptEngine* engine, const glm::vec3& vec3);
 void vec3FromScriptValue(const QScriptValue& object, glm::vec3& vec3);
 
 QVariant vec3toVariant(const glm::vec3& vec3);
-glm::vec3 vec3FromVariant(const QVariant &object, bool& valid);
-glm::vec3 vec3FromVariant(const QVariant &object);
+glm::vec3 vec3FromVariant(const QVariant& object, bool& valid);
+glm::vec3 vec3FromVariant(const QVariant& object);
 
 /**jsdoc
-* A color vector. See also the {@link Vec3(0)|Vec3} object.
-*
-* @typedef {object} Color
-* @property {number} red - Red component value. Integer in the range <code>0</code> - <code>255</code>.  Synonyms: <code>r</code>, <code>x</code>.
-* @property {number} green - Green component value. Integer in the range <code>0</code> - <code>255</code>.  Synonyms: <code>g</code>, <code>y</code>.
-* @property {number} blue - Blue component value. Integer in the range <code>0</code> - <code>255</code>.  Synonyms: <code>b</code>, <code>z</code>.
-* @example <caption>Colors can be set in multiple ways and modified with their aliases, but still stringify in the same way</caption>
-* Entities.editEntity(<id>, { color: { x: 1, y: 2, z: 3 }});                 // { red: 1, green: 2, blue: 3 }
-* Entities.editEntity(<id>, { color: { r: 4, g: 5, b: 6 }});                 // { red: 4, green: 5, blue: 6 }
-* Entities.editEntity(<id>, { color: { red: 7, green: 8, blue: 9 }});        // { red: 7, green: 8, blue: 9 }
-* Entities.editEntity(<id>, { color: [10, 11, 12] });                        // { red: 10, green: 11, blue: 12 }
-* Entities.editEntity(<id>, { color: 13 });                                  // { red: 13, green: 13, blue: 13 }
-* var color = Entities.getEntityProperties(<id>).color;                      // { red: 13, green: 13, blue: 13 }
-* color.g = 14;                                                              // { red: 13, green: 14, blue: 13 }
-* color.blue = 15;                                                           // { red: 13, green: 14, blue: 15 }
-* Entities.editEntity(<id>, { color: "red"});                                // { red: 255, green: 0, blue: 0 }
-* Entities.editEntity(<id>, { color: "#00FF00"});                            // { red: 0, green: 255, blue: 0 }
-*/
+ * A color vector. See also the {@link Vec3(0)|Vec3} object.
+ *
+ * @typedef {object} Color
+ * @property {number} red - Red component value. Integer in the range <code>0</code> - <code>255</code>.  Synonyms:
+ * <code>r</code>, <code>x</code>.
+ * @property {number} green - Green component value. Integer in the range <code>0</code> - <code>255</code>.  Synonyms:
+ * <code>g</code>, <code>y</code>.
+ * @property {number} blue - Blue component value. Integer in the range <code>0</code> - <code>255</code>.  Synonyms:
+ * <code>b</code>, <code>z</code>.
+ * @example <caption>Colors can be set in multiple ways and modified with their aliases, but still stringify in the same
+ * way</caption> Entities.editEntity(<id>, { color: { x: 1, y: 2, z: 3 }});                 // { red: 1, green: 2, blue: 3 }
+ * Entities.editEntity(<id>, { color: { r: 4, g: 5, b: 6 }});                 // { red: 4, green: 5, blue: 6 }
+ * Entities.editEntity(<id>, { color: { red: 7, green: 8, blue: 9 }});        // { red: 7, green: 8, blue: 9 }
+ * Entities.editEntity(<id>, { color: [10, 11, 12] });                        // { red: 10, green: 11, blue: 12 }
+ * Entities.editEntity(<id>, { color: 13 });                                  // { red: 13, green: 13, blue: 13 }
+ * var color = Entities.getEntityProperties(<id>).color;                      // { red: 13, green: 13, blue: 13 }
+ * color.g = 14;                                                              // { red: 13, green: 14, blue: 13 }
+ * color.blue = 15;                                                           // { red: 13, green: 14, blue: 15 }
+ * Entities.editEntity(<id>, { color: "red"});                                // { red: 255, green: 0, blue: 0 }
+ * Entities.editEntity(<id>, { color: "#00FF00"});                            // { red: 0, green: 255, blue: 0 }
+ */
 /**jsdoc
-* A color vector. See also the {@link Vec3(0)|Vec3} object.
-*
-* @typedef {object} ColorFloat
-* @property {number} red - Red component value. Real in the range <code>0</code> - <code>255</code>.  Synonyms: <code>r</code>, <code>x</code>.
-* @property {number} green - Green component value. Real in the range <code>0</code> - <code>255</code>.  Synonyms: <code>g</code>, <code>y</code>.
-* @property {number} blue - Blue component value. Real in the range <code>0</code> - <code>255</code>.  Synonyms: <code>b</code>, <code>z</code>.
-* @example <caption>ColorFloats can be set in multiple ways and modified with their aliases, but still stringify in the same way</caption>
-* Entities.editEntity(<id>, { color: { x: 1, y: 2, z: 3 }});                 // { red: 1, green: 2, blue: 3 }
-* Entities.editEntity(<id>, { color: { r: 4, g: 5, b: 6 }});                 // { red: 4, green: 5, blue: 6 }
-* Entities.editEntity(<id>, { color: { red: 7, green: 8, blue: 9 }});        // { red: 7, green: 8, blue: 9 }
-* Entities.editEntity(<id>, { color: [10, 11, 12] });                        // { red: 10, green: 11, blue: 12 }
-* Entities.editEntity(<id>, { color: 13 });                                  // { red: 13, green: 13, blue: 13 }
-* var color = Entities.getEntityProperties(<id>).color;                      // { red: 13, green: 13, blue: 13 }
-* color.g = 14;                                                              // { red: 13, green: 14, blue: 13 }
-* color.blue = 15;                                                           // { red: 13, green: 14, blue: 15 }
-* Entities.editEntity(<id>, { color: "red"});                                // { red: 255, green: 0, blue: 0 }
-* Entities.editEntity(<id>, { color: "#00FF00"});                            // { red: 0, green: 255, blue: 0 }
-*/
+ * A color vector. See also the {@link Vec3(0)|Vec3} object.
+ *
+ * @typedef {object} ColorFloat
+ * @property {number} red - Red component value. Real in the range <code>0</code> - <code>255</code>.  Synonyms: <code>r</code>,
+ * <code>x</code>.
+ * @property {number} green - Green component value. Real in the range <code>0</code> - <code>255</code>.  Synonyms:
+ * <code>g</code>, <code>y</code>.
+ * @property {number} blue - Blue component value. Real in the range <code>0</code> - <code>255</code>.  Synonyms:
+ * <code>b</code>, <code>z</code>.
+ * @example <caption>ColorFloats can be set in multiple ways and modified with their aliases, but still stringify in the same
+ * way</caption> Entities.editEntity(<id>, { color: { x: 1, y: 2, z: 3 }});                 // { red: 1, green: 2, blue: 3 }
+ * Entities.editEntity(<id>, { color: { r: 4, g: 5, b: 6 }});                 // { red: 4, green: 5, blue: 6 }
+ * Entities.editEntity(<id>, { color: { red: 7, green: 8, blue: 9 }});        // { red: 7, green: 8, blue: 9 }
+ * Entities.editEntity(<id>, { color: [10, 11, 12] });                        // { red: 10, green: 11, blue: 12 }
+ * Entities.editEntity(<id>, { color: 13 });                                  // { red: 13, green: 13, blue: 13 }
+ * var color = Entities.getEntityProperties(<id>).color;                      // { red: 13, green: 13, blue: 13 }
+ * color.g = 14;                                                              // { red: 13, green: 14, blue: 13 }
+ * color.blue = 15;                                                           // { red: 13, green: 14, blue: 15 }
+ * Entities.editEntity(<id>, { color: "red"});                                // { red: 255, green: 0, blue: 0 }
+ * Entities.editEntity(<id>, { color: "#00FF00"});                            // { red: 0, green: 255, blue: 0 }
+ */
 QScriptValue u8vec3ToScriptValue(QScriptEngine* engine, const glm::u8vec3& vec3);
 QScriptValue u8vec3ColorToScriptValue(QScriptEngine* engine, const glm::u8vec3& vec3);
 void u8vec3FromScriptValue(const QScriptValue& object, glm::u8vec3& vec3);
 
 QVariant u8vec3toVariant(const glm::u8vec3& vec3);
 QVariant u8vec3ColortoVariant(const glm::u8vec3& vec3);
-glm::u8vec3 u8vec3FromVariant(const QVariant &object, bool& valid);
-glm::u8vec3 u8vec3FromVariant(const QVariant &object);
+glm::u8vec3 u8vec3FromVariant(const QVariant& object, bool& valid);
+glm::u8vec3 u8vec3FromVariant(const QVariant& object);
 
 /**jsdoc
  * A 4-dimensional vector.
@@ -153,16 +159,16 @@ glm::u8vec3 u8vec3FromVariant(const QVariant &object);
 QScriptValue vec4toScriptValue(QScriptEngine* engine, const glm::vec4& vec4);
 void vec4FromScriptValue(const QScriptValue& object, glm::vec4& vec4);
 QVariant vec4toVariant(const glm::vec4& vec4);
-glm::vec4 vec4FromVariant(const QVariant &object, bool& valid);
-glm::vec4 vec4FromVariant(const QVariant &object);
+glm::vec4 vec4FromVariant(const QVariant& object, bool& valid);
+glm::vec4 vec4FromVariant(const QVariant& object);
 
 // Quaternions
 QScriptValue quatToScriptValue(QScriptEngine* engine, const glm::quat& quat);
-void quatFromScriptValue(const QScriptValue &object, glm::quat& quat);
+void quatFromScriptValue(const QScriptValue& object, glm::quat& quat);
 
 QVariant quatToVariant(const glm::quat& quat);
-glm::quat quatFromVariant(const QVariant &object, bool& isValid);
-glm::quat quatFromVariant(const QVariant &object);
+glm::quat quatFromVariant(const QVariant& object, bool& isValid);
+glm::quat quatFromVariant(const QVariant& object);
 
 /**jsdoc
  * Defines a rectangular portion of an image or screen, or similar.
@@ -221,7 +227,7 @@ void qVectorIntFromScriptValue(const QScriptValue& array, QVector<uint32_t>& vec
 QVector<QUuid> qVectorQUuidFromScriptValue(const QScriptValue& array);
 
 QScriptValue aaCubeToScriptValue(QScriptEngine* engine, const AACube& aaCube);
-void aaCubeFromScriptValue(const QScriptValue &object, AACube& aaCube);
+void aaCubeFromScriptValue(const QScriptValue& object, AACube& aaCube);
 
 // MathPicks also have to overide operator== for their type
 class MathPick {
@@ -241,18 +247,16 @@ public:
  */
 class PickRay : public MathPick {
 public:
-    PickRay() : origin(NAN), direction(NAN)  { }
-    PickRay(const QVariantMap& pickVariant) : origin(vec3FromVariant(pickVariant["origin"])), direction(vec3FromVariant(pickVariant["direction"])) {}
+    PickRay() : origin(NAN), direction(NAN) {}
+    PickRay(const QVariantMap& pickVariant) :
+        origin(vec3FromVariant(pickVariant["origin"])),
+        direction(vec3FromVariant(pickVariant["direction"])) {}
     PickRay(const glm::vec3& origin, const glm::vec3 direction) : origin(origin), direction(direction) {}
     glm::vec3 origin;
     glm::vec3 direction;
 
-    operator bool() const override {
-        return !(glm::any(glm::isnan(origin)) || glm::any(glm::isnan(direction)));
-    }
-    bool operator==(const PickRay& other) const {
-        return (origin == other.origin && direction == other.direction);
-    }
+    operator bool() const override { return !(glm::any(glm::isnan(origin)) || glm::any(glm::isnan(direction))); }
+    bool operator==(const PickRay& other) const { return (origin == other.origin && direction == other.direction); }
     QVariantMap toVariantMap() const override {
         QVariantMap pickRay;
         pickRay["origin"] = vec3toVariant(origin);
@@ -277,11 +281,20 @@ void pickRayFromScriptValue(const QScriptValue& object, PickRay& pickRay);
 class StylusTip : public MathPick {
 public:
     StylusTip() : position(NAN), velocity(NAN) {}
-    StylusTip(const bilateral::Side& side, const glm::vec3& tipOffset = Vectors::ZERO ,const glm::vec3& position = Vectors::ZERO,
-              const glm::quat& orientation = Quaternions::IDENTITY, const glm::vec3& velocity = Vectors::ZERO) :
-        side(side), tipOffset(tipOffset), position(position), orientation(orientation), velocity(velocity) {}
-    StylusTip(const QVariantMap& pickVariant) : side(bilateral::Side(pickVariant["side"].toInt())), tipOffset(vec3FromVariant(pickVariant["tipOffset"])),
-        position(vec3FromVariant(pickVariant["position"])), orientation(quatFromVariant(pickVariant["orientation"])), velocity(vec3FromVariant(pickVariant["velocity"])) {}
+    StylusTip(const bilateral::Side& side, const glm::vec3& tipOffset = Vectors::ZERO,
+              const glm::vec3& position = Vectors::ZERO, const glm::quat& orientation = Quaternions::IDENTITY,
+              const glm::vec3& velocity = Vectors::ZERO) :
+        side(side),
+        tipOffset(tipOffset),
+        position(position),
+        orientation(orientation),
+        velocity(velocity) {}
+    StylusTip(const QVariantMap& pickVariant) :
+        side(bilateral::Side(pickVariant["side"].toInt())),
+        tipOffset(vec3FromVariant(pickVariant["tipOffset"])),
+        position(vec3FromVariant(pickVariant["position"])),
+        orientation(quatFromVariant(pickVariant["orientation"])),
+        velocity(vec3FromVariant(pickVariant["velocity"])) {}
 
     bilateral::Side side { bilateral::Side::Invalid };
     glm::vec3 tipOffset;
@@ -292,7 +305,8 @@ public:
     operator bool() const override { return side != bilateral::Side::Invalid; }
 
     bool operator==(const StylusTip& other) const {
-        return (side == other.side && tipOffset == other.tipOffset && position == other.position && orientation == other.orientation && velocity == other.velocity);
+        return (side == other.side && tipOffset == other.tipOffset && position == other.position &&
+                orientation == other.orientation && velocity == other.velocity);
     }
 
     QVariantMap toVariantMap() const override {
@@ -307,18 +321,24 @@ public:
 };
 
 /**jsdoc
-* A PickParabola defines a parabola with a starting point, intitial velocity, and acceleration.
-*
-* @typedef {object} PickParabola
-* @property {Vec3} origin - The starting position of the PickParabola.
-* @property {Vec3} velocity - The starting velocity of the parabola.
-* @property {Vec3} acceleration - The acceleration that the parabola experiences.
-*/
+ * A PickParabola defines a parabola with a starting point, intitial velocity, and acceleration.
+ *
+ * @typedef {object} PickParabola
+ * @property {Vec3} origin - The starting position of the PickParabola.
+ * @property {Vec3} velocity - The starting velocity of the parabola.
+ * @property {Vec3} acceleration - The acceleration that the parabola experiences.
+ */
 class PickParabola : public MathPick {
 public:
-    PickParabola() : origin(NAN), velocity(NAN), acceleration(NAN) { }
-    PickParabola(const QVariantMap& pickVariant) : origin(vec3FromVariant(pickVariant["origin"])), velocity(vec3FromVariant(pickVariant["velocity"])), acceleration(vec3FromVariant(pickVariant["acceleration"])) {}
-    PickParabola(const glm::vec3& origin, const glm::vec3 velocity, const glm::vec3 acceleration) : origin(origin), velocity(velocity), acceleration(acceleration) {}
+    PickParabola() : origin(NAN), velocity(NAN), acceleration(NAN) {}
+    PickParabola(const QVariantMap& pickVariant) :
+        origin(vec3FromVariant(pickVariant["origin"])),
+        velocity(vec3FromVariant(pickVariant["velocity"])),
+        acceleration(vec3FromVariant(pickVariant["acceleration"])) {}
+    PickParabola(const glm::vec3& origin, const glm::vec3 velocity, const glm::vec3 acceleration) :
+        origin(origin),
+        velocity(velocity),
+        acceleration(acceleration) {}
     glm::vec3 origin;
     glm::vec3 velocity;
     glm::vec3 acceleration;
@@ -344,20 +364,25 @@ public:
 * A CollisionRegion defines a volume for checking collisions in the physics simulation.
 
 * @typedef {object} CollisionRegion
-* @property {Shape} shape - The information about the collision region's size and shape. Dimensions are in world space, but will scale with the parent if defined.
+* @property {Shape} shape - The information about the collision region's size and shape. Dimensions are in world space, but will
+scale with the parent if defined.
 * @property {Vec3} position - The position of the collision region, relative to a parent if defined.
 * @property {Quat} orientation - The orientation of the collision region, relative to a parent if defined.
-* @property {float} threshold - The approximate minimum penetration depth for a test object to be considered in contact with the collision region.
+* @property {float} threshold - The approximate minimum penetration depth for a test object to be considered in contact with the
+collision region.
 * The depth is measured in world space, but will scale with the parent if defined.
-* @property {CollisionMask} [collisionGroup=8] - The type of object this collision pick collides as. Objects whose collision masks overlap with the pick's collision group
+* @property {CollisionMask} [collisionGroup=8] - The type of object this collision pick collides as. Objects whose collision
+masks overlap with the pick's collision group
 * will be considered colliding with the pick.
 * @property {Uuid} parentID - The ID of the parent, either an avatar or an entity.
-* @property {number} parentJointIndex - The joint of the parent to parent to, for example, the joints on the model of an avatar. (default = 0, no joint)
-* @property {string} joint - If "Mouse," parents the pick to the mouse. If "Avatar," parents the pick to MyAvatar's head. Otherwise, parents to the joint of the given name on MyAvatar.
+* @property {number} parentJointIndex - The joint of the parent to parent to, for example, the joints on the model of an avatar.
+(default = 0, no joint)
+* @property {string} joint - If "Mouse," parents the pick to the mouse. If "Avatar," parents the pick to MyAvatar's head.
+Otherwise, parents to the joint of the given name on MyAvatar.
 */
 class CollisionRegion : public MathPick {
 public:
-    CollisionRegion() { }
+    CollisionRegion() {}
 
     CollisionRegion(const CollisionRegion& collisionRegion) :
         loaded(collisionRegion.loaded),
@@ -365,9 +390,9 @@ public:
         shapeInfo(std::make_shared<ShapeInfo>()),
         transform(collisionRegion.transform),
         threshold(collisionRegion.threshold),
-        collisionGroup(collisionRegion.collisionGroup)
-    {
-        shapeInfo->setParams(collisionRegion.shapeInfo->getType(), collisionRegion.shapeInfo->getHalfExtents(), collisionRegion.modelURL.toString());
+        collisionGroup(collisionRegion.collisionGroup) {
+        shapeInfo->setParams(collisionRegion.shapeInfo->getType(), collisionRegion.shapeInfo->getHalfExtents(),
+                             collisionRegion.modelURL.toString());
     }
 
     CollisionRegion(const QVariantMap& pickVariant) {
@@ -431,28 +456,21 @@ public:
 
     operator bool() const override {
         return !std::isnan(threshold) &&
-            !(glm::any(glm::isnan(transform.getTranslation())) ||
-            glm::any(glm::isnan(transform.getRotation())) ||
-            shapeInfo->getType() == SHAPE_TYPE_NONE ||
-            collisionGroup == 0);
+               !(glm::any(glm::isnan(transform.getTranslation())) || glm::any(glm::isnan(transform.getRotation())) ||
+                 shapeInfo->getType() == SHAPE_TYPE_NONE || collisionGroup == 0);
     }
 
     bool operator==(const CollisionRegion& other) const {
-        return loaded == other.loaded &&
-            threshold == other.threshold &&
-            collisionGroup == other.collisionGroup &&
-            glm::all(glm::equal(transform.getTranslation(), other.transform.getTranslation())) &&
-            glm::all(glm::equal(transform.getRotation(), other.transform.getRotation())) &&
-            glm::all(glm::equal(transform.getScale(), other.transform.getScale())) &&
-            shapeInfo->getType() == other.shapeInfo->getType() &&
-            modelURL == other.modelURL;
+        return loaded == other.loaded && threshold == other.threshold && collisionGroup == other.collisionGroup &&
+               glm::all(glm::equal(transform.getTranslation(), other.transform.getTranslation())) &&
+               glm::all(glm::equal(transform.getRotation(), other.transform.getRotation())) &&
+               glm::all(glm::equal(transform.getScale(), other.transform.getScale())) &&
+               shapeInfo->getType() == other.shapeInfo->getType() && modelURL == other.modelURL;
     }
 
     bool shouldComputeShapeInfo() const {
         if (!(shapeInfo->getType() == SHAPE_TYPE_HULL ||
-            (shapeInfo->getType() >= SHAPE_TYPE_COMPOUND &&
-                shapeInfo->getType() <= SHAPE_TYPE_STATIC_MESH)
-            )) {
+              (shapeInfo->getType() >= SHAPE_TYPE_COMPOUND && shapeInfo->getType() <= SHAPE_TYPE_STATIC_MESH))) {
             return false;
         }
 
@@ -463,11 +481,13 @@ public:
         return !shapeInfo->getPointCollection().size();
     }
 
-    // We can't load the model here because it would create a circular dependency, so we delegate that responsibility to the owning CollisionPick
+    // We can't load the model here because it would create a circular dependency, so we delegate that responsibility to the
+    // owning CollisionPick
     bool loaded { false };
     QUrl modelURL;
 
-    // We can't compute the shapeInfo here without loading the model first, so we delegate that responsibility to the owning CollisionPick
+    // We can't compute the shapeInfo here without loading the model first, so we delegate that responsibility to the owning
+    // CollisionPick
     std::shared_ptr<ShapeInfo> shapeInfo = std::make_shared<ShapeInfo>();
     Transform transform;
     float threshold { 0.0f };
@@ -475,92 +495,89 @@ public:
 };
 
 namespace std {
-    inline void hash_combine(std::size_t& seed) { }
-
-    template <typename T, typename... Rest>
-    inline void hash_combine(std::size_t& seed, const T& v, Rest... rest) {
-        std::hash<T> hasher;
-        seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
-        hash_combine(seed, rest...);
-    }
-
-    template <>
-    struct hash<bilateral::Side> {
-        size_t operator()(const bilateral::Side& a) const {
-            return std::hash<int>()((int)a);
-        }
-    };
-
-    template <>
-    struct hash<glm::vec3> {
-        size_t operator()(const glm::vec3& a) const {
-            size_t result = 0;
-            hash_combine(result, a.x, a.y, a.z);
-            return result;
-        }
-    };
-
-    template <>
-    struct hash<glm::quat> {
-        size_t operator()(const glm::quat& a) const {
-            size_t result = 0;
-            hash_combine(result, a.x, a.y, a.z, a.w);
-            return result;
-        }
-    };
-
-    template <>
-    struct hash<Transform> {
-        size_t operator()(const Transform& a) const {
-            size_t result = 0;
-            hash_combine(result, a.getTranslation(), a.getRotation(), a.getScale());
-            return result;
-        }
-    };
-
-    template <>
-    struct hash<PickRay> {
-        size_t operator()(const PickRay& a) const {
-            size_t result = 0;
-            hash_combine(result, a.origin, a.direction);
-            return result;
-        }
-    };
-
-    template <>
-    struct hash<StylusTip> {
-        size_t operator()(const StylusTip& a) const {
-            size_t result = 0;
-            hash_combine(result, a.side, a.position, a.orientation, a.velocity);
-            return result;
-        }
-    };
-
-    template <>
-    struct hash<PickParabola> {
-        size_t operator()(const PickParabola& a) const {
-            size_t result = 0;
-            hash_combine(result, a.origin, a.velocity, a.acceleration);
-            return result;
-        }
-    };
-
-    template <>
-    struct hash<CollisionRegion> {
-        size_t operator()(const CollisionRegion& a) const {
-            size_t result = 0;
-            hash_combine(result, a.transform, (int)a.shapeInfo->getType(), qHash(a.modelURL));
-            return result;
-        }
-    };
-
-    template <>
-    struct hash<QString> {
-        size_t operator()(const QString& a) const {
-            return qHash(a);
-        }
-    };
+inline void hash_combine(std::size_t& seed) {
 }
+
+template<typename T, typename... Rest>
+inline void hash_combine(std::size_t& seed, const T& v, Rest... rest) {
+    std::hash<T> hasher;
+    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    hash_combine(seed, rest...);
+}
+
+template<>
+struct hash<bilateral::Side> {
+    size_t operator()(const bilateral::Side& a) const { return std::hash<int>()((int)a); }
+};
+
+template<>
+struct hash<glm::vec3> {
+    size_t operator()(const glm::vec3& a) const {
+        size_t result = 0;
+        hash_combine(result, a.x, a.y, a.z);
+        return result;
+    }
+};
+
+template<>
+struct hash<glm::quat> {
+    size_t operator()(const glm::quat& a) const {
+        size_t result = 0;
+        hash_combine(result, a.x, a.y, a.z, a.w);
+        return result;
+    }
+};
+
+template<>
+struct hash<Transform> {
+    size_t operator()(const Transform& a) const {
+        size_t result = 0;
+        hash_combine(result, a.getTranslation(), a.getRotation(), a.getScale());
+        return result;
+    }
+};
+
+template<>
+struct hash<PickRay> {
+    size_t operator()(const PickRay& a) const {
+        size_t result = 0;
+        hash_combine(result, a.origin, a.direction);
+        return result;
+    }
+};
+
+template<>
+struct hash<StylusTip> {
+    size_t operator()(const StylusTip& a) const {
+        size_t result = 0;
+        hash_combine(result, a.side, a.position, a.orientation, a.velocity);
+        return result;
+    }
+};
+
+template<>
+struct hash<PickParabola> {
+    size_t operator()(const PickParabola& a) const {
+        size_t result = 0;
+        hash_combine(result, a.origin, a.velocity, a.acceleration);
+        return result;
+    }
+};
+
+template<>
+struct hash<CollisionRegion> {
+    size_t operator()(const CollisionRegion& a) const {
+        size_t result = 0;
+        hash_combine(result, a.transform, (int)a.shapeInfo->getType(), qHash(a.modelURL));
+        return result;
+    }
+};
+
+template<>
+struct hash<QString> {
+    size_t operator()(const QString& a) const { return qHash(a); }
+};
+} // namespace std
 
 /**jsdoc
  * <p>The type of a collision contact event.
@@ -576,18 +593,19 @@ namespace std {
  * </table>
  * @typedef {number} ContactEventType
  */
-enum ContactEventType {
-    CONTACT_EVENT_TYPE_START,
-    CONTACT_EVENT_TYPE_CONTINUE,
-    CONTACT_EVENT_TYPE_END
-};
+enum ContactEventType { CONTACT_EVENT_TYPE_START, CONTACT_EVENT_TYPE_CONTINUE, CONTACT_EVENT_TYPE_END };
 
 class Collision {
 public:
-    Collision() : type(CONTACT_EVENT_TYPE_START), idA(), idB(), contactPoint(0.0f), penetration(0.0f), velocityChange(0.0f) { }
+    Collision() : type(CONTACT_EVENT_TYPE_START), idA(), idB(), contactPoint(0.0f), penetration(0.0f), velocityChange(0.0f) {}
     Collision(ContactEventType cType, const QUuid& cIdA, const QUuid& cIdB, const glm::vec3& cPoint,
-              const glm::vec3& cPenetration, const glm::vec3& velocityChange)
-    :   type(cType), idA(cIdA), idB(cIdB), contactPoint(cPoint), penetration(cPenetration), velocityChange(velocityChange) { }
+              const glm::vec3& cPenetration, const glm::vec3& velocityChange) :
+        type(cType),
+        idA(cIdA),
+        idB(cIdB),
+        contactPoint(cPoint),
+        penetration(cPenetration),
+        velocityChange(velocityChange) {}
 
     void invert(); // swap A and B
 
@@ -600,21 +618,21 @@ public:
 };
 Q_DECLARE_METATYPE(Collision)
 QScriptValue collisionToScriptValue(QScriptEngine* engine, const Collision& collision);
-void collisionFromScriptValue(const QScriptValue &object, Collision& collision);
+void collisionFromScriptValue(const QScriptValue& object, Collision& collision);
 
-//Q_DECLARE_METATYPE(QUuid) // don't need to do this for QUuid since it's already a meta type
+// Q_DECLARE_METATYPE(QUuid) // don't need to do this for QUuid since it's already a meta type
 QScriptValue quuidToScriptValue(QScriptEngine* engine, const QUuid& uuid);
 void quuidFromScriptValue(const QScriptValue& object, QUuid& uuid);
 
-//Q_DECLARE_METATYPE(QSizeF) // Don't need to to this becase it's arleady a meta type
+// Q_DECLARE_METATYPE(QSizeF) // Don't need to to this becase it's arleady a meta type
 QScriptValue qSizeFToScriptValue(QScriptEngine* engine, const QSizeF& qSizeF);
 void qSizeFFromScriptValue(const QScriptValue& object, QSizeF& qSizeF);
 
 class AnimationDetails {
 public:
     AnimationDetails();
-    AnimationDetails(QString role, QUrl url, float fps, float priority, bool loop,
-        bool hold, bool startAutomatically, float firstFrame, float lastFrame, bool running, float currentFrame, bool allowTranslation);
+    AnimationDetails(QString role, QUrl url, float fps, float priority, bool loop, bool hold, bool startAutomatically,
+                     float firstFrame, float lastFrame, bool running, float currentFrame, bool allowTranslation);
 
     QString role;
     QUrl url;
@@ -634,7 +652,7 @@ QScriptValue animationDetailsToScriptValue(QScriptEngine* engine, const Animatio
 void animationDetailsFromScriptValue(const QScriptValue& object, AnimationDetails& event);
 
 namespace graphics {
-    class Mesh;
+class Mesh;
 }
 
 using MeshPointer = std::shared_ptr<graphics::Mesh>;
@@ -656,7 +674,7 @@ class MeshProxy : public QObject {
 
 public:
     virtual MeshPointer getMeshPointer() const = 0;
-    
+
     /**jsdoc
      * Get the number of vertices in the mesh.
      * @function MeshProxy#getNumVertices
@@ -681,15 +699,13 @@ Q_DECLARE_METATYPE(MeshProxy*);
 class MeshProxyList : public QList<MeshProxy*> {}; // typedef and using fight with the Qt macros/templates, do this instead
 Q_DECLARE_METATYPE(MeshProxyList);
 
+QScriptValue meshToScriptValue(QScriptEngine* engine, MeshProxy* const& in);
+void meshFromScriptValue(const QScriptValue& value, MeshProxy*& out);
 
-QScriptValue meshToScriptValue(QScriptEngine* engine, MeshProxy* const &in);
-void meshFromScriptValue(const QScriptValue& value, MeshProxy* &out);
-
-QScriptValue meshesToScriptValue(QScriptEngine* engine, const MeshProxyList &in);
-void meshesFromScriptValue(const QScriptValue& value, MeshProxyList &out);
+QScriptValue meshesToScriptValue(QScriptEngine* engine, const MeshProxyList& in);
+void meshesFromScriptValue(const QScriptValue& value, MeshProxyList& out);
 
 class MeshFace {
-
 public:
     MeshFace() {}
     ~MeshFace() {}
@@ -701,12 +717,11 @@ public:
 Q_DECLARE_METATYPE(MeshFace)
 Q_DECLARE_METATYPE(QVector<MeshFace>)
 
-QScriptValue meshFaceToScriptValue(QScriptEngine* engine, const MeshFace &meshFace);
-void meshFaceFromScriptValue(const QScriptValue &object, MeshFace& meshFaceResult);
+QScriptValue meshFaceToScriptValue(QScriptEngine* engine, const MeshFace& meshFace);
+void meshFaceFromScriptValue(const QScriptValue& object, MeshFace& meshFaceResult);
 QScriptValue qVectorMeshFaceToScriptValue(QScriptEngine* engine, const QVector<MeshFace>& vector);
 void qVectorMeshFaceFromScriptValue(const QScriptValue& array, QVector<MeshFace>& result);
 
 QVariantMap parseTexturesToMap(QString textures, const QVariantMap& defaultTextures);
-
 
 #endif // hifi_RegisteredMetaTypes_h

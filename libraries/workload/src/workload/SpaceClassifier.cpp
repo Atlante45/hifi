@@ -10,13 +10,12 @@
 //
 #include "SpaceClassifier.h"
 
-#include "ViewTask.h"
 #include "RegionState.h"
+#include "ViewTask.h"
 
 using namespace workload;
 
 void PerformSpaceTransaction::configure(const Config& config) {
-
 }
 void PerformSpaceTransaction::run(const WorkloadContextPointer& context) {
     context->_space->enqueueFrame();
@@ -24,11 +23,10 @@ void PerformSpaceTransaction::run(const WorkloadContextPointer& context) {
 }
 
 void SpaceClassifierTask::build(JobModel& model, const Varying& in, Varying& out) {
-    model.addJob<AssignSpaceViews >("assignSpaceViews", in);
+    model.addJob<AssignSpaceViews>("assignSpaceViews", in);
     model.addJob<PerformSpaceTransaction>("updateSpace");
     const auto regionTrackerOut = model.addJob<RegionTracker>("regionTracker");
     const auto regionChanges = regionTrackerOut.getN<RegionTracker::Outputs>(1);
     model.addJob<RegionState>("regionState", regionChanges);
     out = regionTrackerOut;
 }
-

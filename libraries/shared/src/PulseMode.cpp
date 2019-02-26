@@ -8,11 +8,7 @@
 
 #include "PulseMode.h"
 
-const char* pulseModeNames[] = {
-    "none",
-    "in",
-    "out"
-};
+const char* pulseModeNames[] = { "none", "in", "out" };
 
 static const size_t PULSE_MODE_NAMES = (sizeof(pulseModeNames) / sizeof(pulseModeNames[0]));
 

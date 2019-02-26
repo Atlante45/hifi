@@ -12,12 +12,12 @@
 #ifndef hifi_render_Scene_h
 #define hifi_render_Scene_h
 
+#include "HighlightStyle.h"
 #include "Item.h"
+#include "Selection.h"
 #include "SpatialTree.h"
 #include "Stage.h"
-#include "Selection.h"
 #include "Transition.h"
-#include "HighlightStyle.h"
 
 namespace render {
 
@@ -32,11 +32,11 @@ class Scene;
 // These changes must be expressed through the corresponding command from the Transaction
 // THe Transaction is then queued on the Scene so all the pending transactions can be consolidated and processed at the time
 // of updating the scene before it s rendered.
-// 
+//
 class Transaction {
     friend class Scene;
-public:
 
+public:
     typedef std::function<void(ItemID, const Transition*)> TransitionQueryFunc;
     typedef std::function<void(HighlightStyle const*)> SelectionHighlightQueryFunc;
 
@@ -53,7 +53,8 @@ public:
     void reApplyTransitionToItem(ItemID id);
     void queryTransitionOnItem(ItemID id, TransitionQueryFunc func);
 
-    template <class T> void updateItem(ItemID id, std::function<void(T&)> func) {
+    template<class T>
+    void updateItem(ItemID id, std::function<void(T&)> func) {
         updateItem(id, std::make_shared<UpdateFunctor<T>>(func));
     }
 
@@ -78,7 +79,6 @@ public:
     bool touchTransactions() const { return !_resetSelections.empty(); }
 
 protected:
-
     using Reset = std::tuple<ItemID, PayloadPointer>;
     using Remove = ItemID;
     using Update = std::tuple<ItemID, UpdateFunctorPointer>;
@@ -114,7 +114,6 @@ protected:
 };
 typedef std::vector<Transaction> TransactionQueue;
 
-
 // Scene is a container for Items
 // Items are introduced, modified or erased in the scene through Transaction
 // Once per Frame, the Transaction are all flushed
@@ -122,7 +121,6 @@ typedef std::vector<Transaction> TransactionQueue;
 // Items are notified accordingly on any update message happening
 class Scene {
 public:
-
     Scene(glm::vec3 origin, float size);
     ~Scene();
 
@@ -162,7 +160,13 @@ public:
     const Item& getItem(const ItemID& id) const { return _items[id]; }
 
     // Same as getItem, checking if the id is valid
-    const Item getItemSafe(const ItemID& id) const { if (isAllocatedID(id)) { return _items[id]; } else { return Item(); } }
+    const Item getItemSafe(const ItemID& id) const {
+        if (isAllocatedID(id)) {
+            return _items[id];
+        } else {
+            return Item();
+        }
+    }
 
     // Access the spatialized items
     const ItemSpatialTree& getSpatialTree() const { return _masterSpatialTree; }
@@ -173,7 +177,7 @@ public:
     // Access a particular Stage (empty if doesn't exist)
     // Thread safe
     StagePointer getStage(const Stage::Name& name) const;
-    template <class T>
+    template<class T>
     std::shared_ptr<T> getStage(const Stage::Name& name = T::getName()) const {
         auto stage = getStage(name);
         return (stage ? std::static_pointer_cast<T>(stage) : std::shared_ptr<T>());
@@ -184,20 +188,18 @@ public:
     void resetItemTransition(ItemID id);
 
 protected:
-
     // Thread safe elements that can be accessed from anywhere
-    std::atomic<unsigned int> _IDAllocator{ 1 }; // first valid itemID will be One
-    std::atomic<unsigned int> _numAllocatedItems{ 1 }; // num of allocated items, matching the _items.size()
+    std::atomic<unsigned int> _IDAllocator { 1 }; // first valid itemID will be One
+    std::atomic<unsigned int> _numAllocatedItems { 1 }; // num of allocated items, matching the _items.size()
     std::mutex _transactionQueueMutex;
     TransactionQueue _transactionQueue;
 
-    
     std::mutex _transactionFramesMutex;
     using TransactionFrames = std::vector<Transaction>;
     TransactionFrames _transactionFrames;
-    uint32_t _transactionFrameNumber{ 0 };
+    uint32_t _transactionFrameNumber { 0 };
 
-    // Process one transaction frame 
+    // Process one transaction frame
     void processTransactionFrame(const Transaction& transaction);
 
     // The actual database
@@ -224,15 +226,14 @@ protected:
     SelectionMap _selections;
 
     void resetSelections(const Transaction::SelectionResets& transactions);
-  // More actions coming to selections soon:
-  //  void removeFromSelection(const Selection& selection);
-  //  void appendToSelection(const Selection& selection);
-  //  void mergeWithSelection(const Selection& selection);
+    // More actions coming to selections soon:
+    //  void removeFromSelection(const Selection& selection);
+    //  void appendToSelection(const Selection& selection);
+    //  void mergeWithSelection(const Selection& selection);
 
     // The Stage map
     mutable std::mutex _stagesMutex; // mutable so it can be used in the thread safe getStage const method
     StageMap _stages;
-
 
     friend class RenderEngine;
 };
@@ -240,6 +241,6 @@ protected:
 typedef std::shared_ptr<Scene> ScenePointer;
 typedef std::vector<ScenePointer> Scenes;
 
-}
+} // namespace render
 
 #endif // hifi_render_Scene_h

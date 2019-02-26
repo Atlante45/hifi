@@ -32,11 +32,7 @@ using EntityItemFilter = std::function<bool(EntityItemPointer&)>;
 
 class EntityTreeUpdateArgs {
 public:
-    EntityTreeUpdateArgs() :
-            _totalElements(0),
-            _totalItems(0),
-            _movingItems(0)
-    { }
+    EntityTreeUpdateArgs() : _totalElements(0), _totalItems(0), _movingItems(0) {}
 
     QList<EntityItemPointer> _movingEntities;
     int _totalElements;
@@ -46,12 +42,9 @@ public:
 
 class EntityTreeElementExtraEncodeData : public OctreeElementExtraEncodeDataBase {
 public:
-    EntityTreeElementExtraEncodeData() :
-        elementCompleted(false),
-        subtreeCompleted(false),
-        entities() {
-            memset(childCompleted, 0, sizeof(childCompleted));
-        }
+    EntityTreeElementExtraEncodeData() : elementCompleted(false), subtreeCompleted(false), entities() {
+        memset(childCompleted, 0, sizeof(childCompleted));
+    }
     bool elementCompleted;
     bool subtreeCompleted;
     bool childCompleted[NUMBER_OF_CHILDREN];
@@ -70,7 +63,6 @@ inline QDebug operator<<(QDebug debug, const EntityTreeElementExtraEncodeDataPoi
     debug << " entities.size: " << data->entities.size() << "}";
     return debug;
 }
-
 
 class SendModelsOperationArgs {
 public:
@@ -115,7 +107,7 @@ public:
     /// Override this to break up large octree elements when an edit operation is performed on a smaller octree element.
     /// For example, if the octrees represent solid cubes and a delete of a smaller octree element is done then the
     /// meaningful split would be to break the larger cube into smaller cubes of the same color/texture.
-    virtual void splitChildren() override { }
+    virtual void splitChildren() override {}
 
     /// Override to indicate that this element requires a split before editing lower elements in the octree
     virtual bool requiresSplit() const override { return false; }
@@ -136,32 +128,37 @@ public:
 
     static bool checkFilterSettings(const EntityItemPointer& entity, PickFilter searchFilter);
     virtual bool canPickIntersect() const override { return hasEntities(); }
-    virtual EntityItemID evalRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-        OctreeElementPointer& element, float& distance, BoxFace& face, glm::vec3& surfaceNormal,
-        const QVector<EntityItemID>& entityIdsToInclude, const QVector<EntityItemID>& entityIdsToDiscard,
-        PickFilter searchFilter, QVariantMap& extraInfo);
+    virtual EntityItemID evalRayIntersection(const glm::vec3& origin, const glm::vec3& direction, OctreeElementPointer& element,
+                                             float& distance, BoxFace& face, glm::vec3& surfaceNormal,
+                                             const QVector<EntityItemID>& entityIdsToInclude,
+                                             const QVector<EntityItemID>& entityIdsToDiscard, PickFilter searchFilter,
+                                             QVariantMap& extraInfo);
     virtual EntityItemID evalDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                         OctreeElementPointer& element, float& distance,
-                         BoxFace& face, glm::vec3& surfaceNormal, const QVector<EntityItemID>& entityIdsToInclude,
-                         const QVector<EntityItemID>& entityIdsToDiscard, PickFilter searchFilter, QVariantMap& extraInfo);
-    virtual bool findSpherePenetration(const glm::vec3& center, float radius,
-                        glm::vec3& penetration, void** penetratedObject) const override;
+                                                     OctreeElementPointer& element, float& distance, BoxFace& face,
+                                                     glm::vec3& surfaceNormal, const QVector<EntityItemID>& entityIdsToInclude,
+                                                     const QVector<EntityItemID>& entityIdsToDiscard, PickFilter searchFilter,
+                                                     QVariantMap& extraInfo);
+    virtual bool findSpherePenetration(const glm::vec3& center, float radius, glm::vec3& penetration,
+                                       void** penetratedObject) const override;
 
     virtual EntityItemID evalParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
-        const glm::vec3& acceleration, OctreeElementPointer& element, float& parabolicDistance,
-        BoxFace& face, glm::vec3& surfaceNormal, const QVector<EntityItemID>& entityIdsToInclude,
-        const QVector<EntityItemID>& entityIdsToDiscard, PickFilter searchFilter, QVariantMap& extraInfo);
+                                                  const glm::vec3& acceleration, OctreeElementPointer& element,
+                                                  float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+                                                  const QVector<EntityItemID>& entityIdsToInclude,
+                                                  const QVector<EntityItemID>& entityIdsToDiscard, PickFilter searchFilter,
+                                                  QVariantMap& extraInfo);
     virtual EntityItemID evalDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
-        const glm::vec3& normal, const glm::vec3& acceleration, OctreeElementPointer& element, float& parabolicDistance,
-        BoxFace& face, glm::vec3& surfaceNormal, const QVector<EntityItemID>& entityIdsToInclude,
-        const QVector<EntityItemID>& entityIdsToDiscard, PickFilter searchFilter, QVariantMap& extraInfo);
+                                                          const glm::vec3& normal, const glm::vec3& acceleration,
+                                                          OctreeElementPointer& element, float& parabolicDistance,
+                                                          BoxFace& face, glm::vec3& surfaceNormal,
+                                                          const QVector<EntityItemID>& entityIdsToInclude,
+                                                          const QVector<EntityItemID>& entityIdsToDiscard,
+                                                          PickFilter searchFilter, QVariantMap& extraInfo);
 
-    template <typename F>
+    template<typename F>
     void forEachEntity(F f) const {
         withReadLock([&] {
-            foreach(EntityItemPointer entityItem, _entityItems) {
-                f(entityItem);
-            }
+            foreach (EntityItemPointer entityItem, _entityItems) { f(entityItem); }
         });
     }
 
@@ -174,9 +171,12 @@ public:
     void addEntityItem(EntityItemPointer entity);
 
     QUuid evalClosetEntity(const glm::vec3& position, PickFilter searchFilter, float& closestDistanceSquared) const;
-    void evalEntitiesInSphere(const glm::vec3& position, float radius, PickFilter searchFilter, QVector<QUuid>& foundEntities) const;
-    void evalEntitiesInSphereWithType(const glm::vec3& position, float radius, EntityTypes::EntityType type, PickFilter searchFilter, QVector<QUuid>& foundEntities) const;
-    void evalEntitiesInSphereWithName(const glm::vec3& position, float radius, const QString& name, bool caseSensitive, PickFilter searchFilter, QVector<QUuid>& foundEntities) const;
+    void evalEntitiesInSphere(const glm::vec3& position, float radius, PickFilter searchFilter,
+                              QVector<QUuid>& foundEntities) const;
+    void evalEntitiesInSphereWithType(const glm::vec3& position, float radius, EntityTypes::EntityType type,
+                                      PickFilter searchFilter, QVector<QUuid>& foundEntities) const;
+    void evalEntitiesInSphereWithName(const glm::vec3& position, float radius, const QString& name, bool caseSensitive,
+                                      PickFilter searchFilter, QVector<QUuid>& foundEntities) const;
     void evalEntitiesInCube(const AACube& cube, PickFilter searchFilter, QVector<QUuid>& foundEntities) const;
     void evalEntitiesInBox(const AABox& box, PickFilter searchFilter, QVector<QUuid>& foundEntities) const;
     void evalEntitiesInFrustum(const ViewFrustum& frustum, PickFilter searchFilter, QVector<QUuid>& foundEntities) const;
@@ -184,7 +184,7 @@ public:
     /// finds all entities that match filter
     /// \param filter function that adds matching entities to foundEntities
     /// \param entities[out] vector of non-const EntityItemPointer
-    void getEntities(EntityItemFilter& filter,  QVector<EntityItemPointer>& foundEntities);
+    void getEntities(EntityItemFilter& filter, QVector<EntityItemPointer>& foundEntities);
 
     EntityItemPointer getEntityWithID(uint32_t id) const;
     EntityItemPointer getEntityWithEntityItemID(const EntityItemID& id) const;
@@ -215,18 +215,14 @@ public:
 
     void expandExtentsToContents(Extents& extents);
 
-    EntityTreeElementPointer getThisPointer() {
-        return std::static_pointer_cast<EntityTreeElement>(shared_from_this());
-    }
-    OctreeElementPointer getThisOctreeElementPointer() {
-        return std::static_pointer_cast<OctreeElement>(shared_from_this());
-    }
+    EntityTreeElementPointer getThisPointer() { return std::static_pointer_cast<EntityTreeElement>(shared_from_this()); }
+    OctreeElementPointer getThisOctreeElementPointer() { return std::static_pointer_cast<OctreeElement>(shared_from_this()); }
     const ConstOctreeElementPointer getConstThisOctreeElementPointer() const {
         return std::static_pointer_cast<const OctreeElement>(shared_from_this());
     }
 
 protected:
-    virtual void init(unsigned char * octalCode) override;
+    virtual void init(unsigned char* octalCode) override;
     EntityTreePointer _myTree;
     EntityItems _entityItems;
 };

@@ -18,7 +18,9 @@
 
 const glm::u8vec3 SkyboxPropertyGroup::DEFAULT_COLOR = { 0, 0, 0 };
 
-void SkyboxPropertyGroup::copyToScriptValue(const EntityPropertyFlags& desiredProperties, QScriptValue& properties, QScriptEngine* engine, bool skipDefaults, EntityItemProperties& defaultEntityProperties) const {
+void SkyboxPropertyGroup::copyToScriptValue(const EntityPropertyFlags& desiredProperties, QScriptValue& properties,
+                                            QScriptEngine* engine, bool skipDefaults,
+                                            EntityItemProperties& defaultEntityProperties) const {
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE_TYPED(PROP_SKYBOX_COLOR, Skybox, skybox, Color, color, u8vec3Color);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_SKYBOX_URL, Skybox, skybox, URL, url);
 }
@@ -32,7 +34,6 @@ void SkyboxPropertyGroup::merge(const SkyboxPropertyGroup& other) {
     COPY_PROPERTY_IF_CHANGED(color);
     COPY_PROPERTY_IF_CHANGED(url);
 }
-
 
 void SkyboxPropertyGroup::debugDump() const {
     qCDebug(entities) << "   SkyboxPropertyGroup: ---------------------------------------------";
@@ -49,13 +50,9 @@ void SkyboxPropertyGroup::listChangedProperties(QList<QString>& out) {
     }
 }
 
-bool SkyboxPropertyGroup::appendToEditPacket(OctreePacketData* packetData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount, 
-                                    OctreeElement::AppendState& appendState) const {
-
+bool SkyboxPropertyGroup::appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+                                             EntityPropertyFlags& propertyFlags, EntityPropertyFlags& propertiesDidntFit,
+                                             int& propertyCount, OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_SKYBOX_COLOR, getColor());
@@ -64,9 +61,8 @@ bool SkyboxPropertyGroup::appendToEditPacket(OctreePacketData* packetData,
     return true;
 }
 
-
-bool SkyboxPropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt , int& processedBytes) {
-
+bool SkyboxPropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt,
+                                               int& processedBytes) {
     int bytesRead = 0;
     bool overwriteLocalData = true;
     bool somethingChanged = false;
@@ -91,7 +87,7 @@ void SkyboxPropertyGroup::markAllChanged() {
 
 EntityPropertyFlags SkyboxPropertyGroup::getChangedProperties() const {
     EntityPropertyFlags changedProperties;
-    
+
     CHECK_PROPERTY_CHANGE(PROP_SKYBOX_COLOR, color);
     CHECK_PROPERTY_CHANGE(PROP_SKYBOX_URL, url);
 
@@ -117,29 +113,24 @@ EntityPropertyFlags SkyboxPropertyGroup::getEntityProperties(EncodeBitstreamPara
 
     requestedProperties += PROP_SKYBOX_COLOR;
     requestedProperties += PROP_SKYBOX_URL;
-    
+
     return requestedProperties;
 }
-    
-void SkyboxPropertyGroup::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params, 
-                                EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                EntityPropertyFlags& requestedProperties,
-                                EntityPropertyFlags& propertyFlags,
-                                EntityPropertyFlags& propertiesDidntFit,
-                                int& propertyCount, 
-                                OctreeElement::AppendState& appendState) const {
 
+void SkyboxPropertyGroup::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
+                                             EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
+                                             EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                             EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                             OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_SKYBOX_COLOR, getColor());
     APPEND_ENTITY_PROPERTY(PROP_SKYBOX_URL, getURL());
 }
 
-int SkyboxPropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead, 
-                                            ReadBitstreamToTreeParams& args,
-                                            EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                            bool& somethingChanged) {
-
+int SkyboxPropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
+                                                          ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                          bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 

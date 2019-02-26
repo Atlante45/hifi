@@ -12,16 +12,16 @@
 
 #include <SharedLogging.h>
 
+#include <BitVectorHelpers.h>
+#include <StreamUtils.h>
 #include <test-utils/QTestExtensions.h>
 #include <QtCore/QDebug>
-#include <StreamUtils.h>
 #include <glm/glm.hpp>
-#include <BitVectorHelpers.h>
 
 QTEST_MAIN(BitVectorHelperTests)
 
 void BitVectorHelperTests::sizeTest() {
-    std::vector<int> sizes = {0, 6, 7, 8, 30, 31, 32, 33, 87, 88, 89, 90, 90, 91, 92, 93};
+    std::vector<int> sizes = { 0, 6, 7, 8, 30, 31, 32, 33, 87, 88, 89, 90, 90, 91, 92, 93 };
     for (auto& size : sizes) {
         const int oldWay = (int)ceil((float)size / (float)BITS_IN_BYTE);
         const int newWay = (int)calcBitVectorSize(size);
@@ -30,20 +30,15 @@ void BitVectorHelperTests::sizeTest() {
 }
 
 static void readWriteHelper(const std::vector<bool>& src) {
-
     int numBits = (int)src.size();
     int numBytes = calcBitVectorSize(numBits);
     uint8_t* bytes = new uint8_t[numBytes];
     memset(bytes, numBytes, sizeof(uint8_t));
-    int numBytesWritten = writeBitVector(bytes, numBits, [&](int i) {
-        return src[i];
-    });
+    int numBytesWritten = writeBitVector(bytes, numBits, [&](int i) { return src[i]; });
     QCOMPARE(numBytesWritten, numBytes);
 
     std::vector<bool> dst;
-    int numBytesRead = readBitVector(bytes, numBits, [&](int i, bool value) {
-        dst.push_back(value);
-    });
+    int numBytesRead = readBitVector(bytes, numBits, [&](int i, bool value) { dst.push_back(value); });
     QCOMPARE(numBytesRead, numBytes);
 
     QCOMPARE(numBits, (int)src.size());
@@ -56,7 +51,7 @@ static void readWriteHelper(const std::vector<bool>& src) {
 }
 
 void BitVectorHelperTests::readWriteTest() {
-    std::vector<int> sizes = {0, 6, 7, 8, 30, 31, 32, 33, 87, 88, 89, 90, 90, 91, 92, 93};
+    std::vector<int> sizes = { 0, 6, 7, 8, 30, 31, 32, 33, 87, 88, 89, 90, 90, 91, 92, 93 };
 
     for (auto& size : sizes) {
         std::vector<bool> allTrue(size, true);

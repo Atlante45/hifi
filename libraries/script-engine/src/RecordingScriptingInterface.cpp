@@ -14,18 +14,18 @@
 #include <QtScript/QScriptValue>
 #include <QtWidgets/QFileDialog>
 
-#include <shared/QtHelpers.h>
 #include <AssetClient.h>
 #include <AssetUpload.h>
 #include <BuildInfo.h>
 #include <NumericalConstants.h>
 #include <PathUtils.h>
 #include <Transform.h>
-#include <recording/Deck.h>
-#include <recording/Recorder.h>
 #include <recording/Clip.h>
-#include <recording/Frame.h>
 #include <recording/ClipCache.h>
+#include <recording/Deck.h>
+#include <recording/Frame.h>
+#include <recording/Recorder.h>
+#include <shared/QtHelpers.h>
 
 #include "ScriptEngineLogging.h"
 
@@ -80,31 +80,31 @@ void RecordingScriptingInterface::loadRecording(const QString& url, QScriptValue
     // when clip loaded, call the callback with the URL and success boolean
     connect(clipLoader.data(), &recording::NetworkClipLoader::clipLoaded, callback.engine(),
             [this, weakClipLoader, url, callback]() mutable {
+                if (auto clipLoader = weakClipLoader.toStrongRef()) {
+                    qCDebug(scriptengine) << "Loaded recording from" << url;
 
-        if (auto clipLoader = weakClipLoader.toStrongRef()) {
-            qCDebug(scriptengine) << "Loaded recording from" << url;
+                    playClip(clipLoader, url, callback);
 
-            playClip(clipLoader, url, callback);
-
-            // drop our strong pointer to this clip so it is cleaned up
-            _clipLoaders.remove(clipLoader);
-        }
-    });
+                    // drop our strong pointer to this clip so it is cleaned up
+                    _clipLoaders.remove(clipLoader);
+                }
+            });
 
     // when clip load fails, call the callback with the URL and failure boolean
-    connect(clipLoader.data(), &recording::NetworkClipLoader::failed, callback.engine(), [this, weakClipLoader, url, callback](QNetworkReply::NetworkError error) mutable {
-        qCDebug(scriptengine) << "Failed to load recording from" << url;
+    connect(clipLoader.data(), &recording::NetworkClipLoader::failed, callback.engine(),
+            [this, weakClipLoader, url, callback](QNetworkReply::NetworkError error) mutable {
+                qCDebug(scriptengine) << "Failed to load recording from" << url;
 
-        if (callback.isFunction()) {
-            QScriptValueList args { false, url };
-            callback.call(QScriptValue(), args);
-        }
+                if (callback.isFunction()) {
+                    QScriptValueList args { false, url };
+                    callback.call(QScriptValue(), args);
+                }
 
-        if (auto clipLoader = weakClipLoader.toStrongRef()) {
-            // drop out strong pointer to this clip so it is cleaned up
-            _clipLoaders.remove(clipLoader);
-        }
-    });
+                if (auto clipLoader = weakClipLoader.toStrongRef()) {
+                    // drop out strong pointer to this clip so it is cleaned up
+                    _clipLoaders.remove(clipLoader);
+                }
+            });
 }
 
 void RecordingScriptingInterface::startPlaying() {
@@ -117,11 +117,11 @@ void RecordingScriptingInterface::startPlaying() {
 }
 
 void RecordingScriptingInterface::setPlayerVolume(float volume) {
-    // FIXME 
+    // FIXME
 }
 
 void RecordingScriptingInterface::setPlayerAudioOffset(float audioOffset) {
-    // FIXME 
+    // FIXME
 }
 
 void RecordingScriptingInterface::setPlayerTime(float time) {
@@ -210,8 +210,7 @@ QString RecordingScriptingInterface::getDefaultRecordingSaveDirectory() {
 
 void RecordingScriptingInterface::saveRecording(const QString& filename) {
     if (QThread::currentThread() != thread()) {
-        BLOCKING_INVOKE_METHOD(this, "saveRecording",
-            Q_ARG(QString, filename));
+        BLOCKING_INVOKE_METHOD(this, "saveRecording", Q_ARG(QString, filename));
         return;
     }
 
@@ -231,9 +230,7 @@ bool RecordingScriptingInterface::saveRecordingToAsset(QScriptValue getClipAtpUr
 
     if (QThread::currentThread() != thread()) {
         bool result;
-        BLOCKING_INVOKE_METHOD(this, "saveRecordingToAsset",
-            Q_RETURN_ARG(bool, result),
-            Q_ARG(QScriptValue, getClipAtpUrl));
+        BLOCKING_INVOKE_METHOD(this, "saveRecordingToAsset", Q_RETURN_ARG(bool, result), Q_ARG(QScriptValue, getClipAtpUrl));
         return result;
     }
 
@@ -243,22 +240,21 @@ bool RecordingScriptingInterface::saveRecordingToAsset(QScriptValue getClipAtpUr
     }
 
     if (auto upload = DependencyManager::get<AssetClient>()->createUpload(recording::Clip::toBuffer(_lastClip))) {
-        QObject::connect(upload, &AssetUpload::finished,
-                         getClipAtpUrl.engine(), [=](AssetUpload* upload, const QString& hash) mutable {
-            QString clip_atp_url = "";
+        QObject::connect(upload, &AssetUpload::finished, getClipAtpUrl.engine(),
+                         [=](AssetUpload* upload, const QString& hash) mutable {
+                             QString clip_atp_url = "";
 
-            if (upload->getError() == AssetUpload::NoError) {
+                             if (upload->getError() == AssetUpload::NoError) {
+                                 clip_atp_url = QString("%1:%2").arg(URL_SCHEME_ATP, hash);
+                                 upload->deleteLater();
+                             } else {
+                                 qCWarning(scriptengine) << "Error during the Asset upload.";
+                             }
 
-                clip_atp_url = QString("%1:%2").arg(URL_SCHEME_ATP, hash);
-                upload->deleteLater();
-            } else {
-                qCWarning(scriptengine) << "Error during the Asset upload.";
-            }
-
-            QScriptValueList args;
-            args << clip_atp_url;
-            getClipAtpUrl.call(QScriptValue(), args);
-        });
+                             QScriptValueList args;
+                             args << clip_atp_url;
+                             getClipAtpUrl.call(QScriptValue(), args);
+                         });
         upload->start();
         return true;
     }
@@ -281,4 +277,3 @@ void RecordingScriptingInterface::loadLastRecording() {
     _player->queueClip(_lastClip);
     _player->play();
 }
-

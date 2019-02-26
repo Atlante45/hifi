@@ -11,23 +11,24 @@
 #ifndef hifi_RenderableZoneEntityItem_h
 #define hifi_RenderableZoneEntityItem_h
 
-#include <ZoneEntityItem.h>
-#include <graphics/Skybox.h>
-#include <graphics/Haze.h>
-#include <graphics/Bloom.h>
-#include <graphics/Stage.h>
-#include <LightStage.h>
 #include <BackgroundStage.h>
-#include <HazeStage.h>
 #include <BloomStage.h>
-#include <TextureCache.h>
-#include "RenderableEntityItem.h"
 #include <ComponentMode.h>
+#include <HazeStage.h>
+#include <LightStage.h>
+#include <TextureCache.h>
+#include <ZoneEntityItem.h>
+#include <graphics/Bloom.h>
+#include <graphics/Haze.h>
+#include <graphics/Skybox.h>
+#include <graphics/Stage.h>
+#include "RenderableEntityItem.h"
 
 #if 0
 #include <Model.h>
 #endif
-namespace render { namespace entities { 
+namespace render {
+namespace entities {
 
 class ZoneEntityRenderer : public TypedEntityRenderer<ZoneEntityItem> {
     using Parent = TypedEntityRenderer<ZoneEntityItem>;
@@ -42,7 +43,8 @@ protected:
     virtual void doRender(RenderArgs* args) override;
     virtual void removeFromScene(const ScenePointer& scene, Transaction& transaction) override;
     virtual bool needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const override;
-    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) override;
+    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                const TypedEntityPointer& entity) override;
     virtual void doRenderUpdateAsynchronousTyped(const TypedEntityPointer& entity) override;
 
 private:
@@ -66,12 +68,27 @@ private:
     void setSkyboxColor(const glm::vec3& color);
     void setProceduralUserData(const QString& userData);
 
-    graphics::LightPointer editSunLight() { _needSunUpdate = true; return _sunLight; }
-    graphics::LightPointer editAmbientLight() { _needAmbientUpdate = true; return _ambientLight; }
-    graphics::SunSkyStagePointer editBackground() { _needBackgroundUpdate = true; return _background; }
+    graphics::LightPointer editSunLight() {
+        _needSunUpdate = true;
+        return _sunLight;
+    }
+    graphics::LightPointer editAmbientLight() {
+        _needAmbientUpdate = true;
+        return _ambientLight;
+    }
+    graphics::SunSkyStagePointer editBackground() {
+        _needBackgroundUpdate = true;
+        return _background;
+    }
     graphics::SkyboxPointer editSkybox() { return editBackground()->getSkybox(); }
-    graphics::HazePointer editHaze() { _needHazeUpdate = true; return _haze; }
-    graphics::BloomPointer editBloom() { _needBloomUpdate = true; return _bloom; }
+    graphics::HazePointer editHaze() {
+        _needHazeUpdate = true;
+        return _haze;
+    }
+    graphics::BloomPointer editBloom() {
+        _needBloomUpdate = true;
+        return _bloom;
+    }
 
     glm::vec3 _lastPosition;
     glm::vec3 _lastDimensions;
@@ -110,11 +127,11 @@ private:
     BloomStagePointer _bloomStage;
     BloomStage::Index _bloomIndex { BloomStage::INVALID_INDEX };
 
-    bool _needUpdate{ true };
-    bool _needSunUpdate{ true };
-    bool _needAmbientUpdate{ true };
-    bool _needBackgroundUpdate{ true };
-    bool _needHazeUpdate{ true };
+    bool _needUpdate { true };
+    bool _needSunUpdate { true };
+    bool _needAmbientUpdate { true };
+    bool _needBackgroundUpdate { true };
+    bool _needHazeUpdate { true };
     bool _needBloomUpdate { true };
 
     KeyLightPropertyGroup _keyLightProperties;
@@ -126,16 +143,17 @@ private:
     // More attributes used for rendering:
     QString _ambientTextureURL;
     NetworkTexturePointer _ambientTexture;
-    bool _pendingAmbientTexture{ false };
+    bool _pendingAmbientTexture { false };
 
     QString _skyboxTextureURL;
     NetworkTexturePointer _skyboxTexture;
-    bool _pendingSkyboxTexture{ false };
+    bool _pendingSkyboxTexture { false };
 
     QString _proceduralUserData;
 };
 
-} } // namespace 
+} // namespace entities
+} // namespace render
 
 #if 0
 

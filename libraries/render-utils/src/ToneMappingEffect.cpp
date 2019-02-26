@@ -14,14 +14,13 @@
 #include <gpu/Context.h>
 #include <shaders/Shaders.h>
 
-#include "render-utils/ShaderConstants.h"
-#include "StencilMaskPass.h"
 #include "FramebufferCache.h"
-
+#include "StencilMaskPass.h"
+#include "render-utils/ShaderConstants.h"
 
 ToneMappingEffect::ToneMappingEffect() {
     Parameters parameters;
-    _parametersBuffer = gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(Parameters), (const gpu::Byte*) &parameters));
+    _parametersBuffer = gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(Parameters), (const gpu::Byte*)&parameters));
 }
 
 void ToneMappingEffect::init(RenderArgs* args) {
@@ -47,7 +46,8 @@ void ToneMappingEffect::setToneCurve(ToneCurve curve) {
     }
 }
 
-void ToneMappingEffect::render(RenderArgs* args, const gpu::TexturePointer& lightingBuffer, const gpu::FramebufferPointer& requestedDestinationFramebuffer) {
+void ToneMappingEffect::render(RenderArgs* args, const gpu::TexturePointer& lightingBuffer,
+                               const gpu::FramebufferPointer& requestedDestinationFramebuffer) {
     if (!_blitLightBuffer) {
         init(args);
     }
@@ -63,7 +63,7 @@ void ToneMappingEffect::render(RenderArgs* args, const gpu::TexturePointer& ligh
         batch.setFramebuffer(destinationFramebuffer);
 
         // FIXME: Generate the Luminosity map
-        //batch.generateTextureMips(lightingBuffer);
+        // batch.generateTextureMips(lightingBuffer);
 
         batch.setViewportTransform(args->_viewport);
         batch.setProjectionTransform(glm::mat4());
@@ -77,14 +77,12 @@ void ToneMappingEffect::render(RenderArgs* args, const gpu::TexturePointer& ligh
     });
 }
 
-
 void ToneMappingDeferred::configure(const Config& config) {
     _toneMappingEffect.setExposure(config.exposure);
     _toneMappingEffect.setToneCurve((ToneMappingEffect::ToneCurve)config.curve);
 }
 
 void ToneMappingDeferred::run(const render::RenderContextPointer& renderContext, const Inputs& inputs) {
-
     auto lightingBuffer = inputs.get0()->getRenderBuffer(0);
     auto destFbo = inputs.get1();
     _toneMappingEffect.render(renderContext->args, lightingBuffer, destFbo);

@@ -11,12 +11,12 @@
 
 #include "MeshMassPropertiesTests.h"
 
-#include <iostream>
 #include <MeshMassProperties.h>
+#include <iostream>
 
 // Add additional qtest functionality (the include order is important!)
-#include "BulletTestUtils.h"
 #include <test-utils/QTestExtensions.h>
+#include "BulletTestUtils.h"
 
 const btScalar acceptableRelativeError(1.0e-5f);
 const btScalar acceptableAbsoluteError(1.0e-4f);
@@ -61,7 +61,7 @@ void MeshMassPropertiesTests::testParallelAxisTheorem() {
     QCOMPARE_WITH_ABS_ERROR(bitBoxInertia, twoSmallBoxesInertia, acceptableAbsoluteError);
 }
 
-void MeshMassPropertiesTests::testTetrahedron(){
+void MeshMassPropertiesTests::testTetrahedron() {
     // given the four vertices of a tetrahedron verify the analytic formula for inertia
     // agrees with expected results
 
@@ -89,8 +89,7 @@ void MeshMassPropertiesTests::testTetrahedron(){
     btScalar volume = computeTetrahedronVolume(points);
     btScalar error = (volume - expectedVolume) / expectedVolume;
     if (fabsf(error) > acceptableRelativeError) {
-        std::cout << __FILE__ << ":" << __LINE__ << " ERROR : volume of tetrahedron off by = "
-            << error << std::endl;
+        std::cout << __FILE__ << ":" << __LINE__ << " ERROR : volume of tetrahedron off by = " << error << std::endl;
     }
 
     btVector3 centerOfMass = 0.25f * (points[0] + points[1] + points[2] + points[3]);
@@ -203,9 +202,9 @@ void MeshMassPropertiesTests::testClosedTetrahedronMesh() {
     mesh.computeMassProperties(points, triangles);
 
     // verify
-//    QCOMPARE_WITH_ABS_ERROR(mesh._volume, expectedVolume, acceptableRelativeError * expectedVolume);
-//    QCOMPARE_WITH_ABS_ERROR(mesh._centerOfMass, expectedCenterOfMass, acceptableAbsoluteError);
-//    QCOMPARE_WITH_RELATIVE_ERROR(mesh._inertia, expectedInertia, acceptableRelativeError);
+    //    QCOMPARE_WITH_ABS_ERROR(mesh._volume, expectedVolume, acceptableRelativeError * expectedVolume);
+    //    QCOMPARE_WITH_ABS_ERROR(mesh._centerOfMass, expectedCenterOfMass, acceptableAbsoluteError);
+    //    QCOMPARE_WITH_RELATIVE_ERROR(mesh._inertia, expectedInertia, acceptableRelativeError);
 }
 
 void MeshMassPropertiesTests::testBoxAsMesh() {
@@ -274,21 +273,21 @@ void MeshMassPropertiesTests::testBoxAsMesh() {
     QCOMPARE_WITH_RELATIVE_ERROR(mesh._inertia, expectedInertia, acceptableRelativeError);
 
     // These two macros impl this:
-//    for (int i = 0; i < 3; ++i) {
-//        for (int j = 0; j < 3; ++j) {
-//            if (expectedInertia [i][j] == btScalar(0.0f)) {
-//                error = mesh._inertia[i][j] - expectedInertia[i][j];                                  // COMPARE_WITH_ABS_ERROR
-//                if (fabsf(error) > acceptableAbsoluteError) {
-//                    std::cout << __FILE__ << ":" << __LINE__ << " ERROR : inertia[" << i << "][" << j << "] off by "
-//                        << error << " absolute"<< std::endl;
-//                }
-//            } else {
-//                error = (mesh._inertia[i][j] - expectedInertia[i][j]) / expectedInertia[i][j];        // COMPARE_WITH_RELATIVE_ERROR
-//                if (fabsf(error) > acceptableRelativeError) {
-//                    std::cout << __FILE__ << ":" << __LINE__ << " ERROR : inertia[" << i << "][" << j << "] off by "
-//                        << error << std::endl;
-//                }
-//            }
-//        }
-//    }
+    //    for (int i = 0; i < 3; ++i) {
+    //        for (int j = 0; j < 3; ++j) {
+    //            if (expectedInertia [i][j] == btScalar(0.0f)) {
+    //                error = mesh._inertia[i][j] - expectedInertia[i][j];                                  //
+    //                COMPARE_WITH_ABS_ERROR if (fabsf(error) > acceptableAbsoluteError) {
+    //                    std::cout << __FILE__ << ":" << __LINE__ << " ERROR : inertia[" << i << "][" << j << "] off by "
+    //                        << error << " absolute"<< std::endl;
+    //                }
+    //            } else {
+    //                error = (mesh._inertia[i][j] - expectedInertia[i][j]) / expectedInertia[i][j];        //
+    //                COMPARE_WITH_RELATIVE_ERROR if (fabsf(error) > acceptableRelativeError) {
+    //                    std::cout << __FILE__ << ":" << __LINE__ << " ERROR : inertia[" << i << "][" << j << "] off by "
+    //                        << error << std::endl;
+    //                }
+    //            }
+    //        }
+    //    }
 }

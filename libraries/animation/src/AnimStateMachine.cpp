@@ -12,16 +12,14 @@
 #include "AnimUtil.h"
 #include "AnimationLogging.h"
 
-AnimStateMachine::AnimStateMachine(const QString& id) :
-    AnimNode(AnimNode::Type::StateMachine, id) {
-
+AnimStateMachine::AnimStateMachine(const QString& id) : AnimNode(AnimNode::Type::StateMachine, id) {
 }
 
 AnimStateMachine::~AnimStateMachine() {
-
 }
 
-const AnimPoseVec& AnimStateMachine::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) {
+const AnimPoseVec& AnimStateMachine::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                              AnimVariantMap& triggersOut) {
     float parentDebugAlpha = context.getDebugAlpha(_id);
 
     QString desiredStateID = animVars.lookup(_currentStateVar, _currentState->getID());
@@ -36,7 +34,8 @@ const AnimPoseVec& AnimStateMachine::evaluate(const AnimVariantMap& animVars, co
             }
         }
         if (!foundState) {
-            qCCritical(animation) << "AnimStateMachine could not find state =" << desiredStateID << ", referenced by _currentStateVar =" << _currentStateVar;
+            qCCritical(animation) << "AnimStateMachine could not find state =" << desiredStateID
+                                  << ", referenced by _currentStateVar =" << _currentStateVar;
         }
     }
 
@@ -72,7 +71,8 @@ const AnimPoseVec& AnimStateMachine::evaluate(const AnimVariantMap& animVars, co
             if (_poses.size() > 0 && nextPoses && prevPoses && nextPoses->size() > 0 && prevPoses->size() > 0) {
                 ::blend(_poses.size(), &(prevPoses->at(0)), &(nextPoses->at(0)), _alpha, &_poses[0]);
             }
-            context.setDebugAlpha(_currentState->getID(), _alpha * parentDebugAlpha, _children[_currentState->getChildIndex()]->getType());
+            context.setDebugAlpha(_currentState->getID(), _alpha * parentDebugAlpha,
+                                  _children[_currentState->getChildIndex()]->getType());
         } else {
             _duringInterp = false;
             _prevPoses.clear();
@@ -105,7 +105,6 @@ void AnimStateMachine::addState(State::Pointer state) {
 }
 
 void AnimStateMachine::switchState(const AnimVariantMap& animVars, const AnimContext& context, State::Pointer desiredState) {
-
     const float FRAMES_PER_SECOND = 30.0f;
 
     auto prevStateNode = _children[_currentState->getChildIndex()];
@@ -138,7 +137,9 @@ void AnimStateMachine::switchState(const AnimVariantMap& animVars, const AnimCon
     }
 
 #ifdef WANT_DEBUG
-    qCDebug(animation) << "AnimStateMachine::switchState:" << _currentState->getID() << "->" << desiredState->getID() << "duration =" << duration << "targetFrame =" << desiredState->_interpTarget << "interpType = " << (int)_interpType;
+    qCDebug(animation) << "AnimStateMachine::switchState:" << _currentState->getID() << "->" << desiredState->getID()
+                       << "duration =" << duration << "targetFrame =" << desiredState->_interpTarget
+                       << "interpType = " << (int)_interpType;
 #endif
 
     setCurrentState(desiredState);

@@ -15,8 +15,8 @@
 #define hifi_ATPAssetMigrator_h
 
 #include <QtCore/QJsonArray>
-#include <QtCore/QObject>
 #include <QtCore/QMultiHash>
+#include <QtCore/QObject>
 #include <QtCore/QSet>
 
 class AssetUpload;
@@ -27,26 +27,27 @@ class ATPAssetMigrator : public QObject {
     Q_OBJECT
 public:
     static ATPAssetMigrator& getInstance();
-    
+
     void setDialogParent(QWidget* dialogParent) { _dialogParent = dialogParent; }
 public slots:
     void loadEntityServerFile();
 private slots:
     void assetUploadFinished(AssetUpload* upload, const QString& hash);
     void setMappingFinished(SetMappingRequest* request);
+
 private:
     void migrateResource(ResourceRequest* request);
 
     void checkIfFinished();
     void saveEntityServerFile();
-    
+
     void reset();
-    
+
     bool wantsToMigrateResource(const QUrl& url);
-    
+
     QWidget* _dialogParent = nullptr;
     QJsonArray _entitiesArray;
-    
+
     bool _doneReading { false };
 
     using JSONTypePair = std::pair<QJsonValueRef, quint8>;
@@ -57,6 +58,5 @@ private:
     QSet<QUrl> _ignoredUrls;
     int _errorCount { 0 };
 };
-
 
 #endif // hifi_ATPAssetMigrator_h

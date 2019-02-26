@@ -12,7 +12,7 @@
 
 class MyAvatarHeadTransformNode : public TransformNode {
 public:
-    MyAvatarHeadTransformNode() { }
+    MyAvatarHeadTransformNode() {}
     Transform getTransform() override;
 };
 

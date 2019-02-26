@@ -15,12 +15,12 @@
 
 #include <graphics/Stage.h>
 
+#include <DeferredLightingEffect.h>
 #include <DependencyManager.h>
 #include <GeometryCache.h>
+#include <LightPayload.h>
 #include <PerfStat.h>
 #include <procedural/ProceduralSkybox.h>
-#include <LightPayload.h>
-#include <DeferredLightingEffect.h>
 
 #include "EntityTreeRenderer.h"
 
@@ -31,8 +31,7 @@ static const float SPHERE_ENTITY_SCALE = 0.5f;
 using namespace render;
 using namespace render::entities;
 
-ZoneEntityRenderer::ZoneEntityRenderer(const EntityItemPointer& entity)
-    : Parent(entity) {
+ZoneEntityRenderer::ZoneEntityRenderer(const EntityItemPointer& entity) : Parent(entity) {
     _background->setSkybox(std::make_shared<ProceduralSkybox>());
 }
 
@@ -91,7 +90,7 @@ void ZoneEntityRenderer::doRender(RenderArgs* args) {
         assert(_bloomStage);
     }
 
-    { // Sun 
+    { // Sun
       // Need an update ?
         if (_needSunUpdate) {
             // Do we need to allocate the light in the stage ?
@@ -195,7 +194,8 @@ void ZoneEntityRenderer::removeFromScene(const ScenePointer& scene, Transaction&
     Parent::removeFromScene(scene, transaction);
 }
 
-void ZoneEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) {
+void ZoneEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                        const TypedEntityPointer& entity) {
     DependencyManager::get<EntityTreeRenderer>()->updateZone(entity->getID());
 
     auto position = entity->getWorldPosition();
@@ -207,7 +207,7 @@ void ZoneEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scen
     auto proceduralUserData = entity->getUserData();
     bool proceduralUserDataChanged = _proceduralUserData != proceduralUserData;
 
-    // FIXME one of the bools here could become true between being fetched and being reset, 
+    // FIXME one of the bools here could become true between being fetched and being reset,
     // resulting in a lost update
     bool keyLightChanged = entity->keyLightPropertiesChanged() || rotationChanged;
     bool ambientLightChanged = entity->ambientLightPropertiesChanged() || transformChanged;
@@ -290,18 +290,13 @@ void ZoneEntityRenderer::doRenderUpdateAsynchronousTyped(const TypedEntityPointe
     }
 }
 
-
 ItemKey ZoneEntityRenderer::getKey() {
     return ItemKey::Builder().withTypeMeta().withTagBits(getTagMask()).build();
 }
 
 bool ZoneEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const {
-    if (entity->keyLightPropertiesChanged() ||
-        entity->ambientLightPropertiesChanged() ||
-        entity->hazePropertiesChanged() ||
-        entity->bloomPropertiesChanged() ||
-        entity->skyboxPropertiesChanged()) {
-
+    if (entity->keyLightPropertiesChanged() || entity->ambientLightPropertiesChanged() || entity->hazePropertiesChanged() ||
+        entity->bloomPropertiesChanged() || entity->skyboxPropertiesChanged()) {
         return true;
     }
 
@@ -406,7 +401,8 @@ void ZoneEntityRenderer::updateHazeFromEntity(const TypedEntityPointer& entity) 
 
     haze->setHazeAttenuateKeyLight(_hazeProperties.getHazeAttenuateKeyLight());
     haze->setHazeKeyLightRangeFactor(graphics::Haze::convertHazeRangeToHazeRangeFactor(_hazeProperties.getHazeKeyLightRange()));
-    haze->setHazeKeyLightAltitudeFactor(graphics::Haze::convertHazeAltitudeToHazeAltitudeFactor(_hazeProperties.getHazeKeyLightAltitude()));
+    haze->setHazeKeyLightAltitudeFactor(
+        graphics::Haze::convertHazeAltitudeToHazeAltitudeFactor(_hazeProperties.getHazeKeyLightAltitude()));
 }
 
 void ZoneEntityRenderer::updateBloomFromEntity(const TypedEntityPointer& entity) {
@@ -552,4 +548,3 @@ void ZoneEntityRenderer::setSkyboxColor(const glm::vec3& color) {
 void ZoneEntityRenderer::setProceduralUserData(const QString& userData) {
     std::dynamic_pointer_cast<ProceduralSkybox>(editSkybox())->parse(userData);
 }
-

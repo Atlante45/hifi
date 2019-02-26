@@ -16,7 +16,8 @@
 QMap<QString, QString> getJointNameMapping(const QVariantHash& mapping) {
     static const QString JOINT_NAME_MAPPING_FIELD = "jointMap";
     QMap<QString, QString> hfmToHifiJointNameMap;
-    if (!mapping.isEmpty() && mapping.contains(JOINT_NAME_MAPPING_FIELD) && mapping[JOINT_NAME_MAPPING_FIELD].type() == QVariant::Hash) {
+    if (!mapping.isEmpty() && mapping.contains(JOINT_NAME_MAPPING_FIELD) &&
+        mapping[JOINT_NAME_MAPPING_FIELD].type() == QVariant::Hash) {
         auto jointNames = mapping[JOINT_NAME_MAPPING_FIELD].toHash();
         for (auto itr = jointNames.begin(); itr != jointNames.end(); itr++) {
             hfmToHifiJointNameMap.insert(itr.key(), itr.value().toString());
@@ -29,7 +30,8 @@ QMap<QString, QString> getJointNameMapping(const QVariantHash& mapping) {
 QMap<QString, glm::quat> getJointRotationOffsets(const QVariantHash& mapping) {
     QMap<QString, glm::quat> jointRotationOffsets;
     static const QString JOINT_ROTATION_OFFSET_FIELD = "jointRotationOffset";
-    if (!mapping.isEmpty() && mapping.contains(JOINT_ROTATION_OFFSET_FIELD) && mapping[JOINT_ROTATION_OFFSET_FIELD].type() == QVariant::Hash) {
+    if (!mapping.isEmpty() && mapping.contains(JOINT_ROTATION_OFFSET_FIELD) &&
+        mapping[JOINT_ROTATION_OFFSET_FIELD].type() == QVariant::Hash) {
         auto offsets = mapping[JOINT_ROTATION_OFFSET_FIELD].toHash();
         for (auto itr = offsets.begin(); itr != offsets.end(); itr++) {
             QString jointName = itr.key();
@@ -80,7 +82,9 @@ void PrepareJointsTask::run(const baker::BakeContextPointer& context, const Inpu
         if (jointIndex != -1) {
             glm::quat rotationOffset = itr.value();
             jointRotationOffsets.insert(jointIndex, rotationOffset);
-            qCDebug(model_baker) << "Joint Rotation Offset added to Rig._jointRotationOffsets : " << " jointName: " << jointName << " jointIndex: " << jointIndex << " rotation offset: " << rotationOffset;
+            qCDebug(model_baker) << "Joint Rotation Offset added to Rig._jointRotationOffsets : "
+                                 << " jointName: " << jointName << " jointIndex: " << jointIndex
+                                 << " rotation offset: " << rotationOffset;
         }
     }
 }

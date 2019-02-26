@@ -21,10 +21,13 @@ class QAction;
 class Basic2DWindowOpenGLDisplayPlugin : public OpenGLDisplayPlugin {
     Q_OBJECT
     using Parent = OpenGLDisplayPlugin;
+
 public:
     virtual const QString getName() const override { return NAME; }
 
-    virtual float getTargetFrameRate() const override { return  _framerateTarget ? (float) _framerateTarget : TARGET_FRAMERATE_Basic2DWindowOpenGL; }
+    virtual float getTargetFrameRate() const override {
+        return _framerateTarget ? (float)_framerateTarget : TARGET_FRAMERATE_Basic2DWindowOpenGL;
+    }
 
     virtual void customizeContext() override;
     virtual void uncustomizeContext() override;
@@ -46,7 +49,7 @@ private:
     std::vector<QAction*> _framerateActions;
     QAction* _vsyncAction { nullptr };
     uint32_t _framerateTarget { 0 };
-    int _fullscreenTarget{ -1 };
+    int _fullscreenTarget { -1 };
 
 #if defined(Q_OS_ANDROID)
     gpu::TexturePointer _virtualPadStickTexture;
@@ -61,7 +64,6 @@ private:
 
     class VirtualPadButton {
     public:
-
         VirtualPadButton() {}
         VirtualPadButton(qreal pixelSize, QString iconPath, VirtualPad::Manager::Button button);
 

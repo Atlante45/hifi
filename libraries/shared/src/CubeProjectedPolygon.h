@@ -50,31 +50,33 @@ public:
     float getMinX() const { return corner.x; }
     float getMinY() const { return corner.y; }
 
-    void printDebugDetails(const char* label=NULL) const;
+    void printDebugDetails(const char* label = NULL) const;
+
 private:
     bool _set;
 };
 
-const int PROJECTION_RIGHT   = 1;
-const int PROJECTION_LEFT    = 2;
-const int PROJECTION_BOTTOM  = 4;
-const int PROJECTION_TOP     = 8;
-const int PROJECTION_NEAR    = 16;
-const int PROJECTION_FAR     = 32;
+const int PROJECTION_RIGHT = 1;
+const int PROJECTION_LEFT = 2;
+const int PROJECTION_BOTTOM = 4;
+const int PROJECTION_TOP = 8;
+const int PROJECTION_NEAR = 16;
+const int PROJECTION_FAR = 32;
 const int PROJECTION_CLIPPED = 64;
 
 class CubeProjectedPolygon {
-
 public:
     CubeProjectedPolygon(const BoundingRectangle& box);
 
     CubeProjectedPolygon(int vertexCount = 0) :
         _vertexCount(vertexCount),
-        _maxX(-FLT_MAX), _maxY(-FLT_MAX), _minX(FLT_MAX), _minY(FLT_MAX),
-        _distance(0)
-        { }
+        _maxX(-FLT_MAX),
+        _maxY(-FLT_MAX),
+        _minX(FLT_MAX),
+        _minY(FLT_MAX),
+        _distance(0) {}
 
-    ~CubeProjectedPolygon() { }
+    ~CubeProjectedPolygon() {}
     const ProjectedVertices& getVertices() const { return _vertices; }
     const glm::vec2& getVertex(int i) const { return _vertices[i]; }
     void setVertex(int vertex, const glm::vec2& point);
@@ -89,7 +91,6 @@ public:
     void setAnyInView(bool anyInView) { _anyInView = anyInView; }
     void setAllInView(bool allInView) { _allInView = allInView; }
     void setProjectionType(unsigned char type) { _projectionType = type; }
-
 
     bool pointInside(const glm::vec2& point, bool* matchesVertex = NULL) const;
     bool occludes(const CubeProjectedPolygon& occludee, bool checkAllInView = false) const;
@@ -109,7 +110,7 @@ public:
     float getMinY() const { return _minY; }
 
     BoundingRectangle getBoundingBox() const {
-        return BoundingRectangle(glm::vec2(_minX,_minY), glm::vec2(_maxX - _minX, _maxY - _minY));
+        return BoundingRectangle(glm::vec2(_minX, _minY), glm::vec2(_maxX - _minX, _maxY - _minY));
     }
 
     void printDebugDetails() const;
@@ -130,6 +131,5 @@ private:
     bool _allInView; // if all points are in view
     unsigned char _projectionType;
 };
-
 
 #endif // hifi_CubeProjectedPolygon_h

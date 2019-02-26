@@ -14,8 +14,8 @@
 
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QHash>
-#include <QtCore/QUuid>
 #include <QtCore/QJsonObject>
+#include <QtCore/QUuid>
 
 #include <HifiSockAddr.h>
 #include <NLPacket.h>
@@ -51,13 +51,13 @@ public:
 
     const NodeSet& getNodeInterestSet() const { return _nodeInterestSet; }
     void setNodeInterestSet(const NodeSet& nodeInterestSet) { _nodeInterestSet = nodeInterestSet; }
-    
+
     void setNodeVersion(const QString& nodeVersion) { _nodeVersion = nodeVersion; }
     const QString& getNodeVersion() { return _nodeVersion; }
 
     void setHardwareAddress(const QString& hardwareAddress) { _hardwareAddress = hardwareAddress; }
     const QString& getHardwareAddress() { return _hardwareAddress; }
-   
+
     void setMachineFingerprint(const QUuid& machineFingerprint) { _machineFingerprint = machineFingerprint; }
     const QUuid& getMachineFingerprint() { return _machineFingerprint; }
 
@@ -72,27 +72,27 @@ public:
 
     bool hasCheckedIn() const { return _hasCheckedIn; }
     void setHasCheckedIn(bool hasCheckedIn) { _hasCheckedIn = hasCheckedIn; }
-    
+
 private:
     QJsonObject overrideValuesIfNeeded(const QJsonObject& newStats);
     QJsonArray overrideValuesIfNeeded(const QJsonArray& newStats);
-    
+
     QHash<QUuid, QUuid> _sessionSecretHash;
     QUuid _assignmentUUID;
     QUuid _walletUUID;
     QString _username;
     QElapsedTimer _paymentIntervalTimer;
-    
+
     using StringPairHash = QHash<QPair<QString, QString>, QString>;
     QJsonObject _statsJSONObject;
     static StringPairHash _overrideHash;
-    
+
     HifiSockAddr _sendingSockAddr;
     bool _isAuthenticated = true;
     NodeSet _nodeInterestSet;
     QString _nodeVersion;
     QString _hardwareAddress;
-    QUuid   _machineFingerprint;
+    QUuid _machineFingerprint;
 
     QString _placeName;
 

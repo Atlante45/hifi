@@ -7,9 +7,9 @@
 //
 #pragma once
 
-#include <glm/glm.hpp>
-#include <jni.h>
 #include <VrApi_Types.h>
+#include <jni.h>
+#include <glm/glm.hpp>
 
 #include "TaskQueue.h"
 
@@ -39,9 +39,4 @@ protected:
     void doneCurrent();
 };
 
-}
-
-
-
-
-
+} // namespace ovr

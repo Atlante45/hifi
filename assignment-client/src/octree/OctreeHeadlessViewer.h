@@ -15,7 +15,6 @@
 #include <OctreeProcessor.h>
 #include <OctreeQuery.h>
 
-
 // Generic client side Octree renderer class.
 class OctreeHeadlessViewer : public OctreeProcessor {
     Q_OBJECT
@@ -32,34 +31,44 @@ public slots:
      */
     void queryOctree();
 
-
     // setters for camera attributes
 
     /**jsdoc
      * @function EntityViewer.setPosition
      * @param {Vec3} position
      */
-    void setPosition(const glm::vec3& position) { _hasViewFrustum = true; _viewFrustum.setPosition(position); }
+    void setPosition(const glm::vec3& position) {
+        _hasViewFrustum = true;
+        _viewFrustum.setPosition(position);
+    }
 
     /**jsdoc
      * @function EntityViewer.setOrientation
      * @param {Quat} orientation
      */
-    void setOrientation(const glm::quat& orientation) { _hasViewFrustum = true; _viewFrustum.setOrientation(orientation); }
+    void setOrientation(const glm::quat& orientation) {
+        _hasViewFrustum = true;
+        _viewFrustum.setOrientation(orientation);
+    }
 
     /**jsdoc
      * @function EntityViewer.setCenterRadius
      * @param {number} radius
      */
-    void setCenterRadius(float radius) { _hasViewFrustum = true; _viewFrustum.setCenterRadius(radius); }
+    void setCenterRadius(float radius) {
+        _hasViewFrustum = true;
+        _viewFrustum.setCenterRadius(radius);
+    }
 
     /**jsdoc
      * @function EntityViewer.setKeyholeRadius
      * @param {number} radius
      * @deprecated Use {@link EntityViewer.setCenterRadius|setCenterRadius} instead.
      */
-    void setKeyholeRadius(float radius) { _hasViewFrustum = true; _viewFrustum.setCenterRadius(radius); } // TODO: remove this legacy support
-
+    void setKeyholeRadius(float radius) {
+        _hasViewFrustum = true;
+        _viewFrustum.setCenterRadius(radius);
+    } // TODO: remove this legacy support
 
     // setters for LOD and PPS
 
@@ -67,7 +76,7 @@ public slots:
      * @function EntityViewer.setVoxelSizeScale
      * @param {number} sizeScale
      */
-    void setVoxelSizeScale(float sizeScale) { _octreeQuery.setOctreeSizeScale(sizeScale) ; }
+    void setVoxelSizeScale(float sizeScale) { _octreeQuery.setOctreeSizeScale(sizeScale); }
 
     /**jsdoc
      * @function EntityViewer.setBoundaryLevelAdjust
@@ -95,7 +104,6 @@ public slots:
      */
     const glm::quat& getOrientation() const { return _viewFrustum.getOrientation(); }
 
-
     // getters for LOD and PPS
 
     /**jsdoc
@@ -115,7 +123,6 @@ public slots:
      * @returns {number}
      */
     int getMaxPacketsPerSecond() const { return _octreeQuery.getMaxQueryPacketsPerSecond(); }
-
 
     /**jsdoc
      * @function EntityViewer.getOctreeElementsCount

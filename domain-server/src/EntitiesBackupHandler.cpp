@@ -29,8 +29,7 @@
 
 EntitiesBackupHandler::EntitiesBackupHandler(QString entitiesFilePath, QString entitiesReplacementFilePath) :
     _entitiesFilePath(entitiesFilePath),
-    _entitiesReplacementFilePath(entitiesReplacementFilePath)
-{
+    _entitiesReplacementFilePath(entitiesReplacementFilePath) {
 }
 
 static const QString ENTITIES_BACKUP_FILENAME = "models.json.gz";

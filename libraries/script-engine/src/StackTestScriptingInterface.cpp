@@ -11,8 +11,8 @@
 
 #include "StackTestScriptingInterface.h"
 
-#include <QLoggingCategory>
 #include <QCoreApplication>
+#include <QLoggingCategory>
 
 Q_DECLARE_LOGGING_CATEGORY(stackTest)
 Q_LOGGING_CATEGORY(stackTest, "hifi.tools.stack-test")

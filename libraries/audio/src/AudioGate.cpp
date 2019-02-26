@@ -8,9 +8,9 @@
 
 #include "AudioGate.h"
 
-#include <string.h>
-#include <stdlib.h>
 #include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "AudioDynamics.h"
 
@@ -19,7 +19,6 @@ static const int LOG2_HEADROOM_Q30 = 1;
 
 // convert Q30 to Q15 with saturation
 static inline int32_t saturateQ30(int32_t x) {
-
     x = (x + (1 << 14)) >> 15;
     x = MIN(MAX(x, -32768), 32767);
 
@@ -35,25 +34,21 @@ static inline int32_t saturateQ30(int32_t x) {
 // input in Q15, output in Q30
 //
 class MonoDCBlock {
-
-    int32_t _dcOffset = {};     // Q30, cannot overflow
+    int32_t _dcOffset = {}; // Q30, cannot overflow
 
 public:
     void process(int32_t& x) {
-
-        x *= (1 << 15);         // scale to Q30
-        x -= _dcOffset;         // remove DC
-        _dcOffset += x >> 13;   // pole = (1.0 - 2^-13) = 0.9999
+        x *= (1 << 15); // scale to Q30
+        x -= _dcOffset; // remove DC
+        _dcOffset += x >> 13; // pole = (1.0 - 2^-13) = 0.9999
     }
 };
 
 class StereoDCBlock {
-
     int32_t _dcOffset[2] = {};
 
 public:
     void process(int32_t& x0, int32_t& x1) {
-
         x0 *= (1 << 15);
         x1 *= (1 << 15);
 
@@ -66,12 +61,10 @@ public:
 };
 
 class QuadDCBlock {
-
     int32_t _dcOffset[4] = {};
 
 public:
     void process(int32_t& x0, int32_t& x1, int32_t& x2, int32_t& x3) {
-
         x0 *= (1 << 15);
         x1 *= (1 << 15);
         x2 *= (1 << 15);
@@ -94,7 +87,6 @@ public:
 //
 class GateImpl {
 protected:
-
     // histogram
     static const int NHIST = 256;
     int _update[NHIST] = {};
@@ -143,7 +135,6 @@ public:
 };
 
 GateImpl::GateImpl(int sampleRate) {
-
     sampleRate = MAX(sampleRate, 8000);
     sampleRate = MIN(sampleRate, 96000);
     _sampleRate = sampleRate;
@@ -160,7 +151,6 @@ GateImpl::GateImpl(int sampleRate) {
 // This is a base value that is modulated by the adaptive threshold algorithm.
 //
 void GateImpl::setThreshold(float threshold) {
-
     // gate threshold = -96dB to 0dB
     threshold = MAX(threshold, -96.0f);
     threshold = MIN(threshold, 0.0f);
@@ -176,9 +166,8 @@ void GateImpl::setThreshold(float threshold) {
 // Set the detector hold time (milliseconds)
 //
 void GateImpl::setHold(float hold) {
-
-    const double RELEASE = 100.0;   // release = 100ms
-    const double PROGHOLD = 100.0;  // progressive hold = 100ms
+    const double RELEASE = 100.0; // release = 100ms
+    const double PROGHOLD = 100.0; // progressive hold = 100ms
 
     // pure hold = 1 to 1000ms
     hold = MAX(hold, 1.0f);
@@ -188,12 +177,12 @@ void GateImpl::setHold(float hold) {
     _holdMin = msToTc(RELEASE, _sampleRate);
 
     // compute tc increment, to progress from 0x7fffffff to _holdMin in PROGHOLD ms
-    double progSamples = PROGHOLD/1000.0 * _sampleRate;
+    double progSamples = PROGHOLD / 1000.0 * _sampleRate;
     _holdInc = (uint32_t)((0x7fffffff - _holdMin) / progSamples);
-    _holdInc = MAX(_holdInc, 1);    // prevent 0 on long releases
-    
+    _holdInc = MAX(_holdInc, 1); // prevent 0 on long releases
+
     // compute initial tc, to progress from _holdMax to 0x7fffffff in hold ms
-    double holdSamples = (double)hold/1000.0 * _sampleRate;
+    double holdSamples = (double)hold / 1000.0 * _sampleRate;
     _holdMax = 0x7fffffff + (uint32_t)(_holdInc * holdSamples);
 }
 
@@ -201,7 +190,6 @@ void GateImpl::setHold(float hold) {
 // Set the detector hysteresis (dB)
 //
 void GateImpl::setHysteresis(float hysteresis) {
-
     // gate hysteresis in log2 domain
     _hysteresis = (int32_t)((double)hysteresis * DB_TO_LOG2 * (1 << LOG2_FRACBITS));
 }
@@ -210,7 +198,6 @@ void GateImpl::setHysteresis(float hysteresis) {
 // Set the gate release time (milliseconds)
 //
 void GateImpl::setRelease(float release) {
-
     // gate release = 50 to 5000ms
     release = MAX(release, 50.0f);
     release = MIN(release, 5000.0f);
@@ -222,14 +209,13 @@ void GateImpl::setRelease(float release) {
 // Update the histogram count of the bin which contains value
 //
 void GateImpl::updateHistogram(int32_t value, int count = 1) {
-
     // quantize to LOG2 + 3 fraction bits (0.75dB steps)
-    int index = (NHIST-1) - (value >> (LOG2_FRACBITS - 3));
+    int index = (NHIST - 1) - (value >> (LOG2_FRACBITS - 3));
 
     assert(index >= 0);
     assert(index < NHIST);
 
-    _update[index] += count << 16;  // Q16 for filtering
+    _update[index] += count << 16; // Q16 for filtering
 
     assert(_update[index] >= 0);
 }
@@ -239,7 +225,7 @@ void GateImpl::updateHistogram(int32_t value, int count = 1) {
 //
 // The idea behind the adaptive threshold:
 //
-// When processing a gaussian mixture of signal and noise, separated by minimal SNR, 
+// When processing a gaussian mixture of signal and noise, separated by minimal SNR,
 // a bimodal distribution emerges in the histogram of preprocessed peak levels.
 // In this case, the threshold adapts toward the level that optimally partitions the distributions.
 // Partitioning is computed using Otsu's method.
@@ -250,9 +236,8 @@ void GateImpl::updateHistogram(int32_t value, int count = 1) {
 // At levels above the fixed threshold, the threshold adapts toward the lower edge
 // of the distribution, presumed to be signal.
 // This is implemented by adding a hidden (bias) distribution at the fixed threshold.
-// 
+//
 int GateImpl::partitionHistogram() {
-
     // initialize
     int total = 0;
     float sum = 0.0f;
@@ -267,17 +252,16 @@ int GateImpl::partitionHistogram() {
     int index = 0;
 
     // find the index that maximizes the between-class variance
-    for (int i = 0 ; i < NHIST; i++) {
-
+    for (int i = 0; i < NHIST; i++) {
         // update weights
         w0 += _histogram[i];
         int w1 = total - w0;
 
         if (w0 == 0) {
-            continue;   // skip leading zeros
+            continue; // skip leading zeros
         }
         if (w1 == 0) {
-            break;      // skip trailing zeros
+            break; // skip trailing zeros
         }
 
         // update means
@@ -303,15 +287,14 @@ int GateImpl::partitionHistogram() {
 // Process the histogram to update the adaptive threshold
 //
 void GateImpl::processHistogram(int numFrames) {
-
     const int32_t LOG2E_Q26 = (int32_t)(log2(exp(1.0)) * (1 << LOG2_FRACBITS) + 0.5);
 
     // compute time constants, for sampleRate downsampled by numFrames
-    int32_t tcHistogram = fixexp2(MULDIV64(numFrames, LOG2E_Q26, _sampleRate * 10));    // 10 seconds
-    int32_t tcThreshold = fixexp2(MULDIV64(numFrames, LOG2E_Q26, _sampleRate * 1));     // 1 second
-    
+    int32_t tcHistogram = fixexp2(MULDIV64(numFrames, LOG2E_Q26, _sampleRate * 10)); // 10 seconds
+    int32_t tcThreshold = fixexp2(MULDIV64(numFrames, LOG2E_Q26, _sampleRate * 1)); // 1 second
+
     // add bias at the fixed threshold
-    updateHistogram(_threshFixed, (numFrames+7)/8);
+    updateHistogram(_threshFixed, (numFrames + 7) / 8);
 
     // leaky integrate into long-term histogram
     for (int i = 0; i < NHIST; i++) {
@@ -320,7 +303,7 @@ void GateImpl::processHistogram(int numFrames) {
 
     // compute new threshold
     int index = partitionHistogram();
-    int32_t threshold = ((NHIST-1) - index) << (LOG2_FRACBITS - 3);
+    int32_t threshold = ((NHIST - 1) - index) << (LOG2_FRACBITS - 3);
 
     // smooth threshold update
     _threshAdapt = threshold + MULQ31((_threshAdapt - threshold), tcThreshold);
@@ -330,9 +313,7 @@ void GateImpl::processHistogram(int numFrames) {
 // Gate detector peakhold
 //
 int32_t GateImpl::peakhold(int32_t peak) {
-
     if (peak > _holdPeak) {
-
         // RELEASE
         // 3-stage progressive hold
         //
@@ -340,14 +321,13 @@ int32_t GateImpl::peakhold(int32_t peak) {
         // (_holdRel > _holdMin) progressive hold
         // (_holdRel = _holdMin) release
 
-        _holdRel -= _holdInc;                                   // update progressive hold
-        int32_t tc = MIN(MAX(_holdRel, _holdMin), 0x7fffffff);  // saturate to [_holdMin, 0x7fffffff]
-        peak += MULQ31((_holdPeak - peak), tc);                 // apply release
+        _holdRel -= _holdInc; // update progressive hold
+        int32_t tc = MIN(MAX(_holdRel, _holdMin), 0x7fffffff); // saturate to [_holdMin, 0x7fffffff]
+        peak += MULQ31((_holdPeak - peak), tc); // apply release
 
     } else {
-
         // ATTACK
-        _holdRel = _holdMax;    // reset release
+        _holdRel = _holdMax; // reset release
     }
     _holdPeak = peak;
 
@@ -359,7 +339,6 @@ int32_t GateImpl::peakhold(int32_t peak) {
 // Implemented as detector hysteresis instead of high/low thresholds, to simplify adaptive threshold.
 //
 int32_t GateImpl::hysteresis(int32_t peak) {
-
     // by construction, cannot overflow/underflow
     assert((double)_hystOffset + (peak - _hystPeak) <= +(double)0x7fffffff);
     assert((double)_hystOffset + (peak - _hystPeak) >= -(double)0x80000000);
@@ -369,7 +348,7 @@ int32_t GateImpl::hysteresis(int32_t peak) {
     _hystOffset = MIN(MAX(_hystOffset, 0), _hysteresis);
 
     _hystPeak = peak;
-    peak -= _hystOffset;    // apply hysteresis
+    peak -= _hystOffset; // apply hysteresis
 
     assert(peak >= 0);
     return peak;
@@ -380,9 +359,8 @@ int32_t GateImpl::hysteresis(int32_t peak) {
 // zero attack, fixed release
 //
 int32_t GateImpl::envelope(int32_t attn) {
-
     if (attn > _attn) {
-        attn += MULQ31((_attn - attn), _release);   // apply release
+        attn += MULQ31((_attn - attn), _release); // apply release
     }
     _attn = attn;
 
@@ -394,7 +372,6 @@ int32_t GateImpl::envelope(int32_t attn) {
 //
 template<int N>
 class GateMono : public GateImpl {
-
     MonoDCBlock _dc;
     MaxFilter<N> _filter;
     MonoDelay<N, int32_t> _delay;
@@ -409,12 +386,10 @@ public:
 
 template<int N>
 bool GateMono<N>::process(int16_t* input, int16_t* output, int numFrames) {
-
     clearHistogram();
     int32_t mask = 0;
 
     for (int n = 0; n < numFrames; n++) {
-
         int32_t x = input[n];
 
         // remove DC
@@ -436,7 +411,7 @@ bool GateMono<N>::process(int16_t* input, int16_t* output, int numFrames) {
         peak = hysteresis(peak);
 
         // compute gate attenuation
-        int32_t attn = (peak > _threshAdapt) ? 0x7fffffff : 0;    // hard-knee, 1:inf ratio
+        int32_t attn = (peak > _threshAdapt) ? 0x7fffffff : 0; // hard-knee, 1:inf ratio
 
         // apply envelope
         attn = envelope(attn);
@@ -467,11 +442,9 @@ bool GateMono<N>::process(int16_t* input, int16_t* output, int numFrames) {
 
 template<int N>
 bool GateMono<N>::removeDC(int16_t* input, int16_t* output, int numFrames) {
-
     int32_t mask = 0;
 
     for (int n = 0; n < numFrames; n++) {
-
         int32_t x = input[n];
 
         // remove DC
@@ -492,7 +465,6 @@ bool GateMono<N>::removeDC(int16_t* input, int16_t* output, int numFrames) {
 //
 template<int N>
 class GateStereo : public GateImpl {
-
     StereoDCBlock _dc;
     MaxFilter<N> _filter;
     StereoDelay<N, int32_t> _delay;
@@ -507,14 +479,12 @@ public:
 
 template<int N>
 bool GateStereo<N>::process(int16_t* input, int16_t* output, int numFrames) {
-
     clearHistogram();
     int32_t mask = 0;
 
     for (int n = 0; n < numFrames; n++) {
-
-        int32_t x0 = input[2*n+0];
-        int32_t x1 = input[2*n+1];
+        int32_t x0 = input[2 * n + 0];
+        int32_t x1 = input[2 * n + 1];
 
         // remove DC
         _dc.process(x0, x1);
@@ -535,7 +505,7 @@ bool GateStereo<N>::process(int16_t* input, int16_t* output, int numFrames) {
         peak = hysteresis(peak);
 
         // compute gate attenuation
-        int32_t attn = (peak > _threshAdapt) ? 0x7fffffff : 0;    // hard-knee, 1:inf ratio
+        int32_t attn = (peak > _threshAdapt) ? 0x7fffffff : 0; // hard-knee, 1:inf ratio
 
         // apply envelope
         attn = envelope(attn);
@@ -556,8 +526,8 @@ bool GateStereo<N>::process(int16_t* input, int16_t* output, int numFrames) {
         // store 16-bit output
         x0 = saturateQ30(x0);
         x1 = saturateQ30(x1);
-        output[2*n+0] = (int16_t)x0;
-        output[2*n+1] = (int16_t)x1;
+        output[2 * n + 0] = (int16_t)x0;
+        output[2 * n + 1] = (int16_t)x1;
 
         mask |= (x0 | x1);
     }
@@ -569,13 +539,11 @@ bool GateStereo<N>::process(int16_t* input, int16_t* output, int numFrames) {
 
 template<int N>
 bool GateStereo<N>::removeDC(int16_t* input, int16_t* output, int numFrames) {
-
     int32_t mask = 0;
 
     for (int n = 0; n < numFrames; n++) {
-
-        int32_t x0 = input[2*n+0];
-        int32_t x1 = input[2*n+1];
+        int32_t x0 = input[2 * n + 0];
+        int32_t x1 = input[2 * n + 1];
 
         // remove DC
         _dc.process(x0, x1);
@@ -583,8 +551,8 @@ bool GateStereo<N>::removeDC(int16_t* input, int16_t* output, int numFrames) {
         // store 16-bit output
         x0 = saturateQ30(x0);
         x1 = saturateQ30(x1);
-        output[2*n+0] = (int16_t)x0;
-        output[2*n+1] = (int16_t)x1;
+        output[2 * n + 0] = (int16_t)x0;
+        output[2 * n + 1] = (int16_t)x1;
 
         mask |= (x0 | x1);
     }
@@ -597,7 +565,6 @@ bool GateStereo<N>::removeDC(int16_t* input, int16_t* output, int numFrames) {
 //
 template<int N>
 class GateQuad : public GateImpl {
-
     QuadDCBlock _dc;
     MaxFilter<N> _filter;
     QuadDelay<N, int32_t> _delay;
@@ -612,16 +579,14 @@ public:
 
 template<int N>
 bool GateQuad<N>::process(int16_t* input, int16_t* output, int numFrames) {
-
     clearHistogram();
     int32_t mask = 0;
 
     for (int n = 0; n < numFrames; n++) {
-
-        int32_t x0 = input[4*n+0];
-        int32_t x1 = input[4*n+1];
-        int32_t x2 = input[4*n+2];
-        int32_t x3 = input[4*n+3];
+        int32_t x0 = input[4 * n + 0];
+        int32_t x1 = input[4 * n + 1];
+        int32_t x2 = input[4 * n + 2];
+        int32_t x3 = input[4 * n + 3];
 
         // remove DC
         _dc.process(x0, x1, x2, x3);
@@ -642,7 +607,7 @@ bool GateQuad<N>::process(int16_t* input, int16_t* output, int numFrames) {
         peak = hysteresis(peak);
 
         // compute gate attenuation
-        int32_t attn = (peak > _threshAdapt) ? 0x7fffffff : 0;    // hard-knee, 1:inf ratio
+        int32_t attn = (peak > _threshAdapt) ? 0x7fffffff : 0; // hard-knee, 1:inf ratio
 
         // apply envelope
         attn = envelope(attn);
@@ -667,10 +632,10 @@ bool GateQuad<N>::process(int16_t* input, int16_t* output, int numFrames) {
         x1 = saturateQ30(x1);
         x2 = saturateQ30(x2);
         x3 = saturateQ30(x3);
-        output[4*n+0] = (int16_t)x0;
-        output[4*n+1] = (int16_t)x1;
-        output[4*n+2] = (int16_t)x2;
-        output[4*n+3] = (int16_t)x3;
+        output[4 * n + 0] = (int16_t)x0;
+        output[4 * n + 1] = (int16_t)x1;
+        output[4 * n + 2] = (int16_t)x2;
+        output[4 * n + 3] = (int16_t)x3;
 
         mask |= (x0 | x1 | x2 | x3);
     }
@@ -682,15 +647,13 @@ bool GateQuad<N>::process(int16_t* input, int16_t* output, int numFrames) {
 
 template<int N>
 bool GateQuad<N>::removeDC(int16_t* input, int16_t* output, int numFrames) {
-
     int32_t mask = 0;
 
     for (int n = 0; n < numFrames; n++) {
-
-        int32_t x0 = input[4*n+0];
-        int32_t x1 = input[4*n+1];
-        int32_t x2 = input[4*n+2];
-        int32_t x3 = input[4*n+3];
+        int32_t x0 = input[4 * n + 0];
+        int32_t x1 = input[4 * n + 1];
+        int32_t x2 = input[4 * n + 2];
+        int32_t x3 = input[4 * n + 3];
 
         // remove DC
         _dc.process(x0, x1, x2, x3);
@@ -700,10 +663,10 @@ bool GateQuad<N>::removeDC(int16_t* input, int16_t* output, int numFrames) {
         x1 = saturateQ30(x1);
         x2 = saturateQ30(x2);
         x3 = saturateQ30(x3);
-        output[4*n+0] = (int16_t)x0;
-        output[4*n+1] = (int16_t)x1;
-        output[4*n+2] = (int16_t)x2;
-        output[4*n+3] = (int16_t)x3;
+        output[4 * n + 0] = (int16_t)x0;
+        output[4 * n + 1] = (int16_t)x1;
+        output[4 * n + 2] = (int16_t)x2;
+        output[4 * n + 3] = (int16_t)x3;
 
         mask |= (x0 | x1 | x2 | x3);
     }
@@ -716,9 +679,7 @@ bool GateQuad<N>::removeDC(int16_t* input, int16_t* output, int numFrames) {
 //
 
 AudioGate::AudioGate(int sampleRate, int numChannels) {
-
     if (numChannels == 1) {
-
         // ~3ms lookahead for all rates
         if (sampleRate < 16000) {
             _impl = new GateMono<32>(sampleRate);
@@ -731,7 +692,6 @@ AudioGate::AudioGate(int sampleRate, int numChannels) {
         }
 
     } else if (numChannels == 2) {
-
         // ~3ms lookahead for all rates
         if (sampleRate < 16000) {
             _impl = new GateStereo<32>(sampleRate);
@@ -744,7 +704,6 @@ AudioGate::AudioGate(int sampleRate, int numChannels) {
         }
 
     } else if (numChannels == 4) {
-
         // ~3ms lookahead for all rates
         if (sampleRate < 16000) {
             _impl = new GateQuad<32>(sampleRate);

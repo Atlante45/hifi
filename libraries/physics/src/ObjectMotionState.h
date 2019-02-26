@@ -24,9 +24,9 @@
 #include "ShapeManager.h"
 
 enum PhysicsMotionType {
-    MOTION_TYPE_STATIC,     // no motion
-    MOTION_TYPE_DYNAMIC,    // motion according to physical laws
-    MOTION_TYPE_KINEMATIC   // keyframed motion
+    MOTION_TYPE_STATIC, // no motion
+    MOTION_TYPE_DYNAMIC, // motion according to physical laws
+    MOTION_TYPE_KINEMATIC // keyframed motion
 };
 
 /**jsdoc
@@ -36,48 +36,43 @@ enum PhysicsMotionType {
  *     <tr><th>Value</th><th>Description</th></tr>
  *   </thead>
  *   <tbody>
- *     <tr><td><code>"static"</code></td><td>There is no motion because the entity is locked  &mdash; its <code>locked</code> 
+ *     <tr><td><code>"static"</code></td><td>There is no motion because the entity is locked  &mdash; its <code>locked</code>
  *         property is set to <code>true</code>.</td></tr>
- *     <tr><td><code>"kinematic"</code></td><td>Motion is applied without physical laws (e.g., damping) because the entity is 
+ *     <tr><td><code>"kinematic"</code></td><td>Motion is applied without physical laws (e.g., damping) because the entity is
  *         not locked and has its <code>dynamic</code> property set to <code>false</code>.</td></tr>
- *     <tr><td><code>"dynamic"</code></td><td>Motion is applied according to physical laws (e.g., damping) because the entity 
+ *     <tr><td><code>"dynamic"</code></td><td>Motion is applied according to physical laws (e.g., damping) because the entity
  *         is not locked and has its <code>dynamic</code> property set to <code>true</code>.</td></tr>
  *   </tbody>
  * </table>
  * @typedef {string} Entities.PhysicsMotionType
  */
 inline QString motionTypeToString(PhysicsMotionType motionType) {
-    switch(motionType) {
-        case MOTION_TYPE_STATIC: return QString("static");
-        case MOTION_TYPE_DYNAMIC: return QString("dynamic");
-        case MOTION_TYPE_KINEMATIC: return QString("kinematic");
+    switch (motionType) {
+        case MOTION_TYPE_STATIC:
+            return QString("static");
+        case MOTION_TYPE_DYNAMIC:
+            return QString("dynamic");
+        case MOTION_TYPE_KINEMATIC:
+            return QString("kinematic");
     }
     return QString("unknown");
 }
 
-enum MotionStateType {
-    MOTIONSTATE_TYPE_INVALID,
-    MOTIONSTATE_TYPE_ENTITY,
-    MOTIONSTATE_TYPE_AVATAR,
-    MOTIONSTATE_TYPE_DETAILED
-};
+enum MotionStateType { MOTIONSTATE_TYPE_INVALID, MOTIONSTATE_TYPE_ENTITY, MOTIONSTATE_TYPE_AVATAR, MOTIONSTATE_TYPE_DETAILED };
 
 // The update flags trigger two varieties of updates: "hard" which require the body to be pulled
 // and re-added to the physics engine and "easy" which just updates the body properties.
 const uint32_t HARD_DIRTY_PHYSICS_FLAGS = (uint32_t)(Simulation::DIRTY_MOTION_TYPE | Simulation::DIRTY_SHAPE |
                                                      Simulation::DIRTY_COLLISION_GROUP);
-const uint32_t EASY_DIRTY_PHYSICS_FLAGS = (uint32_t)(Simulation::DIRTY_TRANSFORM | Simulation::DIRTY_VELOCITIES |
-                                                     Simulation::DIRTY_MASS | Simulation::DIRTY_MATERIAL |
-                                                     Simulation::DIRTY_SIMULATOR_ID | Simulation::DIRTY_SIMULATION_OWNERSHIP_PRIORITY |
-                                                     Simulation::DIRTY_PHYSICS_ACTIVATION);
-
+const uint32_t EASY_DIRTY_PHYSICS_FLAGS = (uint32_t)(
+    Simulation::DIRTY_TRANSFORM | Simulation::DIRTY_VELOCITIES | Simulation::DIRTY_MASS | Simulation::DIRTY_MATERIAL |
+    Simulation::DIRTY_SIMULATOR_ID | Simulation::DIRTY_SIMULATION_OWNERSHIP_PRIORITY | Simulation::DIRTY_PHYSICS_ACTIVATION);
 
 // These are the set of incoming flags that the PhysicsEngine needs to hear about:
 const uint32_t DIRTY_PHYSICS_FLAGS = (uint32_t)(HARD_DIRTY_PHYSICS_FLAGS | EASY_DIRTY_PHYSICS_FLAGS);
 
 // These are the outgoing flags that the PhysicsEngine can affect:
 const uint32_t OUTGOING_DIRTY_PHYSICS_FLAGS = Simulation::DIRTY_TRANSFORM | Simulation::DIRTY_VELOCITIES;
-
 
 class OctreeEditPacketSender;
 class PhysicsEngine;

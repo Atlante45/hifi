@@ -14,8 +14,8 @@
 
 #include <QSet>
 
-#include <ObjectMotionState.h>
 #include <BulletUtil.h>
+#include <ObjectMotionState.h>
 
 #include "OtherAvatar.h"
 
@@ -40,7 +40,6 @@ public:
 
     // this relays outgoing position/rotation to the EntityItem
     virtual void setWorldTransform(const btTransform& worldTrans) override;
-
 
     // These pure virtual methods must be implemented for each MotionState type
     // and make it possible to implement more complicated methods in this base class.

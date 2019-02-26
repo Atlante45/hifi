@@ -14,8 +14,8 @@
 #include <ViewFrustum.h>
 #include <gpu/Buffer.h>
 #include <render/Engine.h>
-#include "LightStage.h"
 #include "DeferredFrameTransform.h"
+#include "LightStage.h"
 #include "LightingModel.h"
 #include "SurfaceGeometryPass.h"
 
@@ -39,7 +39,7 @@ public:
     void updateFrustum(const ViewFrustum& frustum) {
         frustumNear = frustum.getNearClip();
         frustumFar = frustum.getFarClip();
-        
+
         eyeToGridProj = frustum.evalProjectionMatrixRange(rangeNear, rangeFar);
 
         Transform view;
@@ -55,12 +55,9 @@ public:
 #define frustumGrid (*this)
 #include "LightClusterGrid_shared.slh"
 
-
-    using Planes = std::vector < glm::vec4 >;
+    using Planes = std::vector<glm::vec4>;
     void generateGridPlanes(Planes& xPlanes, Planes& yPlanes, Planes& zPlanes);
 };
-
-
 
 class LightClusters {
 public:
@@ -81,15 +78,11 @@ public:
 
     void updateLightFrame(const LightStage::FramePointer& lightFrame, bool points = true, bool spots = true);
 
-    glm::ivec3  updateClusters();
-
+    glm::ivec3 updateClusters();
 
     ViewFrustum _frustum;
 
-
     LightStagePointer _lightStage;
-
-    
 
     gpu::StructBuffer<FrustumGrid> _frustumGridBuffer;
 
@@ -115,17 +108,15 @@ public:
 
 using LightClustersPointer = std::shared_ptr<LightClusters>;
 
-
-
 class LightClusteringPassConfig : public render::Job::Config {
     Q_OBJECT
     Q_PROPERTY(float rangeNear MEMBER rangeNear NOTIFY dirty)
     Q_PROPERTY(float rangeFar MEMBER rangeFar NOTIFY dirty)
- 
+
     Q_PROPERTY(int dimX MEMBER dimX NOTIFY dirty)
     Q_PROPERTY(int dimY MEMBER dimY NOTIFY dirty)
     Q_PROPERTY(int dimZ MEMBER dimZ NOTIFY dirty)
-    
+
     Q_PROPERTY(bool freeze MEMBER freeze NOTIFY dirty)
 
     Q_PROPERTY(int numClusteredLightReferences MEMBER numClusteredLightReferences NOTIFY dirty)
@@ -137,16 +128,15 @@ class LightClusteringPassConfig : public render::Job::Config {
     Q_PROPERTY(int numAllocatedSceneLights MEMBER numAllocatedSceneLights NOTIFY dirty)
 
 public:
-    LightClusteringPassConfig() : render::Job::Config(true){}
-    float rangeNear{ 0.1f };
-    float rangeFar{ 200.0f };
+    LightClusteringPassConfig() : render::Job::Config(true) {}
+    float rangeNear { 0.1f };
+    float rangeFar { 200.0f };
 
     int dimX { 14 };
     int dimY { 14 };
     int dimZ { 14 };
 
-
-    bool freeze{ false };
+    bool freeze { false };
 
     int numClusteredLightReferences { 0 };
     int numInputLights { 0 };
@@ -161,33 +151,28 @@ public:
     int numAllocatedSceneLights { 0 };
 signals:
     void dirty();
-    
+
 protected:
 };
 
 class LightClusteringPass {
 public:
-    using Input = render::VaryingSet4<DeferredFrameTransformPointer, LightingModelPointer, LightStage::FramePointer, LinearDepthFramebufferPointer>;
+    using Input = render::VaryingSet4<DeferredFrameTransformPointer, LightingModelPointer, LightStage::FramePointer,
+                                      LinearDepthFramebufferPointer>;
     using Output = LightClustersPointer;
     using Config = LightClusteringPassConfig;
     using JobModel = render::Job::ModelIO<LightClusteringPass, Input, Output, Config>;
-    
+
     LightClusteringPass();
-    
+
     void configure(const Config& config);
-    
+
     void run(const render::RenderContextPointer& renderContext, const Input& input, Output& output);
-    
+
 protected:
     LightClustersPointer _lightClusters;
     bool _freeze;
 };
-
-
-
-
-
-
 
 class DebugLightClustersConfig : public render::Job::Config {
     Q_OBJECT
@@ -195,10 +180,9 @@ class DebugLightClustersConfig : public render::Job::Config {
     Q_PROPERTY(bool doDrawClusterFromDepth MEMBER doDrawClusterFromDepth NOTIFY dirty)
     Q_PROPERTY(bool doDrawContent MEMBER doDrawContent NOTIFY dirty)
 public:
-    DebugLightClustersConfig() : render::Job::Config(false){}
+    DebugLightClustersConfig() : render::Job::Config(false) {}
 
-
-    bool doDrawGrid{ false };
+    bool doDrawGrid { false };
     bool doDrawClusterFromDepth { false };
     bool doDrawContent { false };
 
@@ -208,12 +192,12 @@ signals:
 protected:
 };
 
-
 #include "DeferredFramebuffer.h"
 
 class DebugLightClusters {
 public:
-    using Inputs = render::VaryingSet4 < DeferredFrameTransformPointer, LightingModelPointer, LinearDepthFramebufferPointer, LightClustersPointer>;
+    using Inputs = render::VaryingSet4<DeferredFrameTransformPointer, LightingModelPointer, LinearDepthFramebufferPointer,
+                                       LightClustersPointer>;
     using Config = DebugLightClustersConfig;
     using JobModel = render::Job::ModelI<DebugLightClusters, Inputs, Config>;
 

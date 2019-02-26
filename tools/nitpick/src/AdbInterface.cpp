@@ -20,16 +20,14 @@ QString AdbInterface::getAdbCommand() {
         if (!adbPath.isNull()) {
             _adbCommand = adbPath + _adbExe;
         } else {
-            QMessageBox::critical(0, "python.exe not found",
-                "Please verify that pyton.exe is in the PATH");
+            QMessageBox::critical(0, "python.exe not found", "Please verify that pyton.exe is in the PATH");
             exit(-1);
         }
     }
 #elif defined Q_OS_MAC
     _adbCommand = "/usr/local/bin/adb";
     if (!QFile::exists(_adbCommand)) {
-        QMessageBox::critical(0, "adb not found",
-            "adb not found at " + _adbCommand);
+        QMessageBox::critical(0, "adb not found", "adb not found at " + _adbCommand);
         exit(-1);
     }
 #endif

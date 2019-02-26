@@ -28,7 +28,8 @@ public:
     void enablePointer(unsigned int uid) const;
     void disablePointer(unsigned int uid) const;
     void setRenderState(unsigned int uid, const std::string& renderState) const;
-    void editRenderState(unsigned int uid, const std::string& state, const QVariant& startProps, const QVariant& pathProps, const QVariant& endProps) const;
+    void editRenderState(unsigned int uid, const std::string& state, const QVariant& startProps, const QVariant& pathProps,
+                         const QVariant& endProps) const;
     PickResultPointer getPrevPickResult(unsigned int uid) const;
     QVariantMap getPointerProperties(unsigned int uid) const;
 

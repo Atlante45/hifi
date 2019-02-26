@@ -20,6 +20,7 @@ class InfoView : public QQuickItem {
 
     static const QUrl QML;
     static const QString NAME;
+
 public:
     static void registerType();
     static void show(const QString& path, bool firstOrChangedOnly = false, QString urlQuery = "");

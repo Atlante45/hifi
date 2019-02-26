@@ -11,12 +11,12 @@
 #ifndef hifi_FST_h
 #define hifi_FST_h
 
-#include <QVariantHash>
 #include <QUuid>
+#include <QVariantHash>
 #include "FSTReader.h"
 
 namespace hfm {
-    class Model;
+class Model;
 };
 
 class FST : public QObject {
@@ -59,13 +59,13 @@ signals:
 private:
     QString _fstPath;
 
-    QString _name{};
-    QString _modelPath{};
-    QUuid _marketplaceID{};
+    QString _name {};
+    QString _modelPath {};
+    QUuid _marketplaceID {};
 
-    QStringList _scriptPaths{};
+    QStringList _scriptPaths {};
 
-    QVariantHash _other{};
+    QVariantHash _other {};
 };
 
-#endif  // hifi_FST_h
+#endif // hifi_FST_h

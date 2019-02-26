@@ -8,16 +8,15 @@
 
 #include "CauterizedModel.h"
 
-#include <PerfStat.h>
 #include <DualQuaternion.h>
+#include <PerfStat.h>
 
 #include "AbstractViewStateInterface.h"
-#include "MeshPartPayload.h"
 #include "CauterizedMeshPartPayload.h"
+#include "MeshPartPayload.h"
 #include "RenderUtilsLogging.h"
 
-CauterizedModel::CauterizedModel(QObject* parent) :
-        Model(parent) {
+CauterizedModel::CauterizedModel(QObject* parent) : Model(parent) {
 }
 
 CauterizedModel::~CauterizedModel() {
@@ -88,11 +87,12 @@ void CauterizedModel::createRenderItemSet() {
             for (int partIndex = 0; partIndex < numParts; partIndex++) {
                 initializeBlendshapes(hfmModel.meshes[i], i);
 
-                auto ptr = std::make_shared<CauterizedMeshPartPayload>(shared_from_this(), i, partIndex, shapeID, transform, offset);
+                auto ptr = std::make_shared<CauterizedMeshPartPayload>(shared_from_this(), i, partIndex, shapeID, transform,
+                                                                       offset);
                 _modelMeshRenderItems << std::static_pointer_cast<ModelMeshPartPayload>(ptr);
                 auto material = getGeometry()->getShapeMaterial(shapeID);
                 _modelMeshMaterialNames.push_back(material ? material->getName() : "");
-                _modelMeshRenderItemShapes.emplace_back(ShapeInfo{ (int)i });
+                _modelMeshRenderItemShapes.emplace_back(ShapeInfo { (int)i });
                 shapeID++;
             }
         }
@@ -124,27 +124,28 @@ void CauterizedModel::updateClusterMatrices() {
                 auto jointPose = _rig.getJointPose(cluster.jointIndex);
                 Transform jointTransform(jointPose.rot(), jointPose.scale(), jointPose.trans());
                 Transform clusterTransform;
-                Transform::mult(clusterTransform, jointTransform, _rig.getAnimSkeleton()->getClusterBindMatricesOriginalValues(meshIndex, clusterIndex).inverseBindTransform);
+                Transform::mult(
+                    clusterTransform, jointTransform,
+                    _rig.getAnimSkeleton()->getClusterBindMatricesOriginalValues(meshIndex, clusterIndex).inverseBindTransform);
                 state.clusterDualQuaternions[j] = Model::TransformDualQuaternion(clusterTransform);
                 state.clusterDualQuaternions[j].setCauterizationParameters(0.0f, jointPose.trans());
             } else {
                 auto jointMatrix = _rig.getJointTransform(cluster.jointIndex);
-                glm_mat4u_mul(jointMatrix, _rig.getAnimSkeleton()->getClusterBindMatricesOriginalValues(meshIndex, clusterIndex).inverseBindMatrix, state.clusterMatrices[j]);
+                glm_mat4u_mul(
+                    jointMatrix,
+                    _rig.getAnimSkeleton()->getClusterBindMatricesOriginalValues(meshIndex, clusterIndex).inverseBindMatrix,
+                    state.clusterMatrices[j]);
             }
         }
     }
 
     // as an optimization, don't build cautrizedClusterMatrices if the boneSet is empty.
     if (!_cauterizeBoneSet.empty()) {
-
         AnimPose cauterizePose = _rig.getJointPose(_rig.indexOfJoint("Neck"));
         cauterizePose.scale() = glm::vec3(0.0001f, 0.0001f, 0.0001f);
 
-        static const glm::mat4 zeroScale(
-            glm::vec4(0.0001f, 0.0f, 0.0f, 0.0f),
-            glm::vec4(0.0f, 0.0001f, 0.0f, 0.0f),
-            glm::vec4(0.0f, 0.0f, 0.0001f, 0.0f),
-            glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        static const glm::mat4 zeroScale(glm::vec4(0.0001f, 0.0f, 0.0f, 0.0f), glm::vec4(0.0f, 0.0001f, 0.0f, 0.0f),
+                                         glm::vec4(0.0f, 0.0f, 0.0001f, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
         auto cauterizeMatrix = _rig.getJointTransform(_rig.indexOfJoint("Neck")) * zeroScale;
 
         for (int i = 0; i < _cauterizeMeshStates.size(); i++) {
@@ -163,7 +164,10 @@ void CauterizedModel::updateClusterMatrices() {
                     } else {
                         Transform jointTransform(cauterizePose.rot(), cauterizePose.scale(), cauterizePose.trans());
                         Transform clusterTransform;
-                        Transform::mult(clusterTransform, jointTransform, _rig.getAnimSkeleton()->getClusterBindMatricesOriginalValues(meshIndex, clusterIndex).inverseBindTransform);
+                        Transform::mult(clusterTransform, jointTransform,
+                                        _rig.getAnimSkeleton()
+                                            ->getClusterBindMatricesOriginalValues(meshIndex, clusterIndex)
+                                            .inverseBindTransform);
                         state.clusterDualQuaternions[j] = Model::TransformDualQuaternion(clusterTransform);
                         state.clusterDualQuaternions[j].setCauterizationParameters(1.0f, cauterizePose.trans());
                     }
@@ -172,7 +176,11 @@ void CauterizedModel::updateClusterMatrices() {
                         // not cauterized so just copy the value from the non-cauterized version.
                         state.clusterMatrices[j] = _meshStates[i].clusterMatrices[j];
                     } else {
-                        glm_mat4u_mul(cauterizeMatrix, _rig.getAnimSkeleton()->getClusterBindMatricesOriginalValues(meshIndex, clusterIndex).inverseBindMatrix, state.clusterMatrices[j]);
+                        glm_mat4u_mul(cauterizeMatrix,
+                                      _rig.getAnimSkeleton()
+                                          ->getClusterBindMatricesOriginalValues(meshIndex, clusterIndex)
+                                          .inverseBindMatrix,
+                                      state.clusterMatrices[j]);
                     }
                 }
             }
@@ -182,7 +190,8 @@ void CauterizedModel::updateClusterMatrices() {
 
     // post the blender if we're not currently waiting for one to finish
     auto modelBlender = DependencyManager::get<ModelBlender>();
-    if (_blendshapeOffsetsInitialized && modelBlender->shouldComputeBlendshapes() && hfmModel.hasBlendedMeshes() && _blendshapeCoefficients != _blendedBlendshapeCoefficients) {
+    if (_blendshapeOffsetsInitialized && modelBlender->shouldComputeBlendshapes() && hfmModel.hasBlendedMeshes() &&
+        _blendshapeCoefficients != _blendedBlendshapeCoefficients) {
         _blendedBlendshapeCoefficients = _blendshapeCoefficients;
         modelBlender->noteRequiresBlend(getThisPointer());
     }
@@ -207,7 +216,8 @@ void CauterizedModel::updateRenderItems() {
                 return;
             }
 
-            // lazy update of cluster matrices used for rendering.  We need to update them here, so we can correctly update the bounding box.
+            // lazy update of cluster matrices used for rendering.  We need to update them here, so we can correctly update the
+            // bounding box.
             self->updateClusterMatrices();
 
             render::ScenePointer scene = AbstractViewStateInterface::instance()->getMain3DScene();
@@ -222,7 +232,6 @@ void CauterizedModel::updateRenderItems() {
 
             render::Transaction transaction;
             for (int i = 0; i < (int)self->_modelMeshRenderItemIDs.size(); i++) {
-
                 auto itemID = self->_modelMeshRenderItemIDs[i];
                 auto meshIndex = self->_modelMeshRenderItemShapes[i].meshIndex;
 
@@ -232,24 +241,22 @@ void CauterizedModel::updateRenderItems() {
                 bool invalidatePayloadShapeKey = self->shouldInvalidatePayloadShapeKey(meshIndex);
                 bool useDualQuaternionSkinning = self->getUseDualQuaternionSkinning();
 
-                transaction.updateItem<ModelMeshPartPayload>(itemID, [modelTransform, meshState, useDualQuaternionSkinning, cauterizedMeshState, invalidatePayloadShapeKey,
-                        primitiveMode, renderItemKeyGlobalFlags, enableCauterization](ModelMeshPartPayload& mmppData) {
+                transaction.updateItem<ModelMeshPartPayload>(itemID, [modelTransform, meshState, useDualQuaternionSkinning,
+                                                                      cauterizedMeshState, invalidatePayloadShapeKey,
+                                                                      primitiveMode, renderItemKeyGlobalFlags,
+                                                                      enableCauterization](ModelMeshPartPayload& mmppData) {
                     CauterizedMeshPartPayload& data = static_cast<CauterizedMeshPartPayload&>(mmppData);
                     if (useDualQuaternionSkinning) {
-                        data.updateClusterBuffer(meshState.clusterDualQuaternions,
-                                                 cauterizedMeshState.clusterDualQuaternions);
+                        data.updateClusterBuffer(meshState.clusterDualQuaternions, cauterizedMeshState.clusterDualQuaternions);
                     } else {
-                        data.updateClusterBuffer(meshState.clusterMatrices,
-                                                 cauterizedMeshState.clusterMatrices);
+                        data.updateClusterBuffer(meshState.clusterMatrices, cauterizedMeshState.clusterMatrices);
                     }
 
                     Transform renderTransform = modelTransform;
                     if (useDualQuaternionSkinning) {
                         if (meshState.clusterDualQuaternions.size() == 1) {
                             const auto& dq = meshState.clusterDualQuaternions[0];
-                            Transform transform(dq.getRotation(),
-                                                dq.getScale(),
-                                                dq.getTranslation());
+                            Transform transform(dq.getRotation(), dq.getScale(), dq.getTranslation());
                             renderTransform = modelTransform.worldTransform(transform);
                         }
                     } else {
@@ -263,9 +270,7 @@ void CauterizedModel::updateRenderItems() {
                     if (useDualQuaternionSkinning) {
                         if (cauterizedMeshState.clusterDualQuaternions.size() == 1) {
                             const auto& dq = cauterizedMeshState.clusterDualQuaternions[0];
-                            Transform transform(dq.getRotation(),
-                                                dq.getScale(),
-                                                dq.getTranslation());
+                            Transform transform(dq.getRotation(), dq.getScale(), dq.getTranslation());
                             renderTransform = modelTransform.worldTransform(Transform(transform));
                         }
                     } else {

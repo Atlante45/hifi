@@ -13,10 +13,10 @@
 
 #include <mutex>
 
+#include <QFileInfo>
 #include <QNetworkDiskCache>
 #include <QStandardPaths>
 #include <QThread>
-#include <QFileInfo>
 
 #include <SharedUtil.h>
 
@@ -97,7 +97,7 @@ QUrl ResourceManager::normalizeURL(const QUrl& originalUrl) {
     if (!getKnownUrls().contains(scheme)) {
         // check the degenerative file case: on windows we can often have urls of the form c:/filename
         // this checks for and works around that case.
-        QUrl urlWithFileScheme{ HIFI_URL_SCHEME_FILE + ":///" + url.toString() };
+        QUrl urlWithFileScheme { HIFI_URL_SCHEME_FILE + ":///" + url.toString() };
         if (!urlWithFileScheme.toLocalFile().isEmpty()) {
             return urlWithFileScheme;
         }
@@ -112,13 +112,8 @@ void ResourceManager::cleanup() {
     _thread.wait();
 }
 
-ResourceRequest* ResourceManager::createResourceRequest(
-    QObject* parent,
-    const QUrl& url,
-    const bool isObservable,
-    const qint64 callerId,
-    const QString& extra
-) {
+ResourceRequest* ResourceManager::createResourceRequest(QObject* parent, const QUrl& url, const bool isObservable,
+                                                        const qint64 callerId, const QString& extra) {
     auto normalizedURL = normalizeURL(url);
     auto scheme = normalizedURL.scheme();
 
@@ -150,11 +145,11 @@ ResourceRequest* ResourceManager::createResourceRequest(
 bool ResourceManager::resourceExists(const QUrl& url) {
     auto scheme = url.scheme();
     if (scheme == HIFI_URL_SCHEME_FILE) {
-        QFileInfo file{ url.toString() };
+        QFileInfo file { url.toString() };
         return file.exists();
     } else if (scheme == HIFI_URL_SCHEME_HTTP || scheme == HIFI_URL_SCHEME_HTTPS || scheme == HIFI_URL_SCHEME_FTP) {
         auto& networkAccessManager = NetworkAccessManager::getInstance();
-        QNetworkRequest request{ url };
+        QNetworkRequest request { url };
 
         request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
         request.setHeader(QNetworkRequest::UserAgentHeader, HIGH_FIDELITY_USER_AGENT);

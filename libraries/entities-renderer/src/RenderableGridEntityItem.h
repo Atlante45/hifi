@@ -13,11 +13,13 @@
 
 #include <GridEntityItem.h>
 
-namespace render { namespace entities { 
+namespace render {
+namespace entities {
 
 class GridEntityRenderer : public TypedEntityRenderer<GridEntityItem> {
     using Parent = TypedEntityRenderer<GridEntityItem>;
     using Pointer = std::shared_ptr<GridEntityRenderer>;
+
 public:
     GridEntityRenderer(const EntityItemPointer& entity);
     ~GridEntityRenderer();
@@ -31,7 +33,8 @@ protected:
 private:
     virtual bool needsRenderUpdate() const override;
     virtual bool needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const override;
-    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) override;
+    virtual void doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                const TypedEntityPointer& entity) override;
     virtual void doRender(RenderArgs* args) override;
 
     glm::u8vec3 _color;
@@ -45,8 +48,8 @@ private:
     glm::vec3 _dimensions;
 
     int _geometryId { 0 };
-
 };
 
-} } 
+} // namespace entities
+} // namespace render
 #endif // hifi_RenderableGridEntityItem_h

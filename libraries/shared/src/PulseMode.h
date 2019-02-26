@@ -26,11 +26,7 @@
  * @typedef {string} PulseMode
  */
 
-enum class PulseMode {
-    NONE = 0,
-    IN_PHASE,
-    OUT_PHASE
-};
+enum class PulseMode { NONE = 0, IN_PHASE, OUT_PHASE };
 
 class PulseModeHelpers {
 public:
@@ -38,4 +34,3 @@ public:
 };
 
 #endif // hifi_PulseMode_h
-

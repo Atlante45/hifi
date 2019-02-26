@@ -22,6 +22,7 @@ class AnimExpression {
 public:
     friend class AnimTests;
     explicit AnimExpression(const QString& str);
+
 protected:
     struct Token {
         enum Type {
@@ -49,15 +50,15 @@ protected:
             Comma,
             Error
         };
-        explicit Token(Type type) : type {type} {}
-        explicit Token(const QStringRef& strRef) : type {Type::Identifier}, strVal {strRef.toString()} {}
-        explicit Token(int val) : type {Type::Int}, intVal {val} {}
-        explicit Token(bool val) : type {Type::Bool}, intVal {val} {}
-        explicit Token(float val) : type {Type::Float}, floatVal {val} {}
-        Type type {End};
+        explicit Token(Type type) : type { type } {}
+        explicit Token(const QStringRef& strRef) : type { Type::Identifier }, strVal { strRef.toString() } {}
+        explicit Token(int val) : type { Type::Int }, intVal { val } {}
+        explicit Token(bool val) : type { Type::Bool }, intVal { val } {}
+        explicit Token(float val) : type { Type::Float }, floatVal { val } {}
+        Type type { End };
         QString strVal;
-        int intVal {0};
-        float floatVal {0.0f};
+        int intVal { 0 };
+        float floatVal { 0.0f };
     };
 
     struct OpCode {
@@ -82,12 +83,12 @@ protected:
             Modulus,
             UnaryMinus
         };
-        explicit OpCode(Type type) : type {type} {}
-        explicit OpCode(const QStringRef& strRef) : type {Type::Identifier}, strVal {strRef.toString()} {}
-        explicit OpCode(const QString& str) : type {Type::Identifier}, strVal {str} {}
-        explicit OpCode(int val) : type {Type::Int}, intVal {val} {}
-        explicit OpCode(bool val) : type {Type::Bool}, intVal {(int)val} {}
-        explicit OpCode(float val) : type {Type::Float}, floatVal {val} {}
+        explicit OpCode(Type type) : type { type } {}
+        explicit OpCode(const QStringRef& strRef) : type { Type::Identifier }, strVal { strRef.toString() } {}
+        explicit OpCode(const QString& str) : type { Type::Identifier }, strVal { str } {}
+        explicit OpCode(int val) : type { Type::Int }, intVal { val } {}
+        explicit OpCode(bool val) : type { Type::Bool }, intVal { (int)val } {}
+        explicit OpCode(float val) : type { Type::Float }, floatVal { val } {}
 
         bool coerceBool(const AnimVariantMap& map) const {
             if (type == Int || type == Bool) {
@@ -99,10 +100,10 @@ protected:
             }
         }
 
-        Type type {Int};
+        Type type { Int };
         QString strVal;
-        int intVal {0};
-        float floatVal {0.0f};
+        int intVal { 0 };
+        float floatVal { 0.0f };
     };
 
     void unconsumeToken(const Token& token);
@@ -146,7 +147,7 @@ protected:
     OpCode coerseToValue(const AnimVariantMap& map, const OpCode& opCode) const;
 
     QString _expression;
-    mutable std::stack<Token> _tokenStack;    // TODO: remove, only needed during parsing
+    mutable std::stack<Token> _tokenStack; // TODO: remove, only needed during parsing
     std::vector<OpCode> _opCodes;
 
 #ifndef NDEBUG
@@ -155,4 +156,3 @@ protected:
 };
 
 #endif
-

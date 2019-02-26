@@ -17,10 +17,9 @@ bool EntityNodeData::insertFlaggedExtraEntity(const QUuid& filteredEntityID, con
 }
 
 bool EntityNodeData::isEntityFlaggedAsExtra(const QUuid& entityID) const {
-
     // enumerate each of the sets for the entities that matched our filter
     // and immediately return true if any of them contain this entity ID
-    foreach(QSet<QUuid> entitySet, _flaggedExtraEntities) {
+    foreach (QSet<QUuid> entitySet, _flaggedExtraEntities) {
         if (entitySet.contains(entityID)) {
             return true;
         }

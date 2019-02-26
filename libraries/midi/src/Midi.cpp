@@ -12,7 +12,6 @@
 
 #include "Midi.h"
 
-
 #include <QtCore/QLoggingCategory>
 
 #if defined Q_OS_WIN32
@@ -40,7 +39,7 @@ const int MIDI_SYSTEM_MESSAGE = 0xf;
 const int MIDI_CONTROL_CHANGE = 0xb;
 const int MIDI_CHANNEL_MODE_ALL_NOTES_OFF = 0x07b;
 
-static Midi* instance = NULL;        // communicate this to non-class callbacks
+static Midi* instance = NULL; // communicate this to non-class callbacks
 static bool thruModeEnabled = false;
 static bool broadcastEnabled = false;
 static bool typeNoteOffEnabled = true;
@@ -113,9 +112,10 @@ void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR dwInstance, DWORD
                 note = 0;
             }
             if (typePitchBendEnabled && type == MIDI_PITCH_BEND_CHANGE) {
-                bend = ((MIDI_BYTE_MASK & (dwParam1 >> MIDI_SHIFT_NOTE)) | 
-                    (MIDI_PITCH_BEND_MASK & (dwParam1 >> MIDI_SHIFT_PITCH_BEND))) - 8192;
-                channel = 0;        // Weird values on different instruments
+                bend = ((MIDI_BYTE_MASK & (dwParam1 >> MIDI_SHIFT_NOTE)) |
+                        (MIDI_PITCH_BEND_MASK & (dwParam1 >> MIDI_SHIFT_PITCH_BEND))) -
+                       8192;
+                channel = 0; // Weird values on different instruments
                 note = 0;
                 velocity = 0;
             }
@@ -123,9 +123,9 @@ void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR dwInstance, DWORD
                 return;
             }
             if (thruModeEnabled) {
-                instance->sendNote(status, note, velocity);        // relay the message on to all other midi devices.
+                instance->sendNote(status, note, velocity); // relay the message on to all other midi devices.
             }
-            instance->midiReceived(device, raw, channel, status, type, note, velocity, bend, program);        // notify the javascript
+            instance->midiReceived(device, raw, channel, status, type, note, velocity, bend, program); // notify the javascript
             break;
         }
     }
@@ -163,7 +163,7 @@ void Midi::sendRawMessage(int device, int raw) {
 void Midi::sendMessage(int device, int channel, int type, int note, int velocity) {
     int message = (channel - 1) | (type << MIDI_SHIFT_STATUS);
     if (broadcastEnabled) {
-        for (int i = 1; i < midihout.size(); i++) {  //  Skip 0 (Microsoft GS Wavetable Synth)
+        for (int i = 1; i < midihout.size(); i++) { //  Skip 0 (Microsoft GS Wavetable Synth)
             if (midihout[i] != NULL) {
                 midiOutShortMsg(midihout[i], message | (note << MIDI_SHIFT_NOTE) | (velocity << MIDI_SHIFT_VELOCITY));
             }
@@ -174,7 +174,7 @@ void Midi::sendMessage(int device, int channel, int type, int note, int velocity
 }
 
 void Midi::sendNote(int status, int note, int velocity) {
-    for (int i = 1; i < midihout.size(); i++) {  //  Skip 0 (Microsoft GS Wavetable Synth)
+    for (int i = 1; i < midihout.size(); i++) { //  Skip 0 (Microsoft GS Wavetable Synth)
         if (midihout[i] != NULL) {
             midiOutShortMsg(midihout[i], status | (note << MIDI_SHIFT_NOTE) | (velocity << MIDI_SHIFT_VELOCITY));
         }
@@ -196,7 +196,7 @@ void Midi::MidiSetup() {
                 break;
             }
         }
-        if (!found) {        // EXCLUDE AN INPUT BY NAME
+        if (!found) { // EXCLUDE AN INPUT BY NAME
             HMIDIIN tmphin;
             midiInOpen(&tmphin, i, (DWORD_PTR)MidiInProc, NULL, CALLBACK_FUNCTION);
             midiInStart(tmphin);
@@ -215,7 +215,7 @@ void Midi::MidiSetup() {
                 break;
             }
         }
-        if (!found) {        // EXCLUDE AN OUTPUT BY NAME
+        if (!found) { // EXCLUDE AN OUTPUT BY NAME
             HMIDIOUT tmphout;
             midiOutOpen(&tmphout, i, (DWORD_PTR)MidiOutProc, NULL, CALLBACK_FUNCTION);
             midihout.push_back(tmphout);
@@ -249,7 +249,7 @@ void Midi::sendRawMessage(int device, int raw) {
 void Midi::sendNote(int status, int note, int velocity) {
 }
 
-void Midi::sendMessage(int device, int channel, int type, int note, int velocity){
+void Midi::sendMessage(int device, int channel, int type, int note, int velocity) {
 }
 
 void Midi::MidiSetup() {
@@ -272,7 +272,7 @@ void Midi::midiReceived(int device, int raw, int channel, int status, int type, 
     eventData["velocity"] = velocity;
     eventData["bend"] = bend;
     eventData["program"] = program;
-    emit midiNote(eventData);// Legacy
+    emit midiNote(eventData); // Legacy
     emit midiMessage(eventData);
 }
 
@@ -302,7 +302,7 @@ void Midi::sendMidiMessage(int device, int channel, int type, int note, int velo
 }
 
 void Midi::allNotesOff() {
-    sendNote(MIDI_CONTROL_CHANGE, MIDI_CHANNEL_MODE_ALL_NOTES_OFF, 0);        // all notes off
+    sendNote(MIDI_CONTROL_CHANGE, MIDI_CHANNEL_MODE_ALL_NOTES_OFF, 0); // all notes off
 }
 
 void Midi::resetDevices() {
@@ -357,7 +357,7 @@ void Midi::unblockMidiDevice(QString name, bool output) {
 }
 
 void Midi::blockMidiDevice(QString name, bool output) {
-    unblockMidiDevice(name, output);        // make sure it's only in there once
+    unblockMidiDevice(name, output); // make sure it's only in there once
     if (output) {
         midiOutExclude.push_back(name);
     } else {

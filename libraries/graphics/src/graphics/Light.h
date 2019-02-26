@@ -26,10 +26,8 @@ typedef glm::vec3 Vec3;
 typedef glm::vec4 Vec4;
 typedef glm::quat Quat;
 
-
 class Light {
 public:
-
     struct LightVolume {
         vec3 position { 0.f };
         float radius { 1.0f };
@@ -48,7 +46,6 @@ public:
         vec2 getSpotAngleCosSin() const { return vec2(spotCos, sqrt(1.f - spotCos * spotCos)); }
     };
 
-
     struct LightIrradiance {
         vec3 color { 1.f };
         float intensity { 1.f };
@@ -65,8 +62,6 @@ public:
         float getFalloffSpot() const { return falloffSpot; }
     };
 
-
- 
     enum Type {
         AMBIENT = 0,
         SUN,
@@ -91,7 +86,7 @@ public:
 
     Light();
     Light(const Light& light);
-    Light& operator= (const Light& light);
+    Light& operator=(const Light& light);
     virtual ~Light();
 
     void setType(Type type);
@@ -116,7 +111,7 @@ public:
     void setIntensity(float intensity);
 
     bool isRanged() const { return (getType() == POINT) || (getType() == SPOT); }
- 
+
     // FalloffRradius is the physical radius of the light sphere through which energy shines,
     // expressed in meters. It is used only to calculate the falloff curve of the light.
     // Actual rendered lights will all have surface radii approaching 0.
@@ -137,7 +132,8 @@ public:
     void setSpotExponent(float exponent);
     float getSpotExponent() const { return _lightSchemaBuffer->irradiance.falloffSpot; }
 
-    // If the light has an ambient (Indirect) component, then the Ambientintensity can be used to control its contribution to the lighting
+    // If the light has an ambient (Indirect) component, then the Ambientintensity can be used to control its contribution to
+    // the lighting
     void setAmbientIntensity(float intensity);
     float getAmbientIntensity() const { return _ambientSchemaBuffer->intensity; }
 
@@ -150,7 +146,7 @@ public:
     gpu::TexturePointer getAmbientMap() const { return _ambientMap; }
 
     void setAmbientMapNumMips(uint16_t numMips);
-    uint16_t getAmbientMapNumMips() const { return (uint16_t) _ambientSchemaBuffer->mapNumMips; }
+    uint16_t getAmbientMapNumMips() const { return (uint16_t)_ambientSchemaBuffer->mapNumMips; }
 
     void setTransform(const glm::mat4& transform);
 
@@ -179,8 +175,7 @@ public:
     const AmbientSchemaBuffer& getAmbientSchemaBuffer() const { return _ambientSchemaBuffer; }
 
 protected:
-
-    Flags _flags{ 0 };
+    Flags _flags { 0 };
 
     LightSchemaBuffer _lightSchemaBuffer;
     AmbientSchemaBuffer _ambientSchemaBuffer;
@@ -194,11 +189,10 @@ protected:
 
     void updateLightRadius();
 
-    bool _castShadows{ false };
-
+    bool _castShadows { false };
 };
-typedef std::shared_ptr< Light > LightPointer;
+typedef std::shared_ptr<Light> LightPointer;
 
-};
+}; // namespace graphics
 
 #endif

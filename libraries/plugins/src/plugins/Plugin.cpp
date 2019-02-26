@@ -13,10 +13,15 @@ void Plugin::setContainer(PluginContainer* container) {
     _container = container;
 }
 
-bool Plugin::isSupported() const { return true; }
+bool Plugin::isSupported() const {
+    return true;
+}
 
-void Plugin::init() {}
+void Plugin::init() {
+}
 
-void Plugin::deinit() {}
+void Plugin::deinit() {
+}
 
-void Plugin::idle() {}
+void Plugin::idle() {
+}

@@ -22,17 +22,16 @@
 #include <QDir>
 #include <QStandardPaths>
 
-
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc++14-extensions"
 #endif
 
-#include <client/crashpad_client.h>
-#include <client/crash_report_database.h>
-#include <client/settings.h>
 #include <client/annotation_list.h>
+#include <client/crash_report_database.h>
+#include <client/crashpad_client.h>
 #include <client/crashpad_info.h>
+#include <client/settings.h>
 
 #if defined(__clang__)
 #pragma clang diagnostic pop
@@ -92,7 +91,6 @@ bool startCrashHandler(std::string appPath) {
 
     auto machineFingerPrint = uuidStringWithoutCurlyBraces(FingerprintUtils::getMachineFingerprint());
     annotations["machine_fingerprint"] = machineFingerPrint.toStdString();
-
 
     arguments.push_back("--no-rate-limit");
 

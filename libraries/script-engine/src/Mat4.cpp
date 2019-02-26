@@ -12,14 +12,14 @@
 #include "Mat4.h"
 
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
-#include <QDebug>
 #include <GLMHelpers.h>
+#include <QDebug>
 
-#include "ScriptEngineLogging.h"
 #include "ScriptEngine.h"
+#include "ScriptEngineLogging.h"
 
 glm::mat4 Mat4::multiply(const glm::mat4& m1, const glm::mat4& m2) const {
     return m1 * m2;
@@ -33,7 +33,8 @@ glm::mat4 Mat4::createFromScaleRotAndTrans(const glm::vec3& scale, const glm::qu
     return createMatFromScaleQuatAndPos(scale, rot, trans);
 }
 
-glm::mat4 Mat4::createFromColumns(const glm::vec4& col0, const glm::vec4& col1, const glm::vec4& col2, const glm::vec4& col3) const {
+glm::mat4 Mat4::createFromColumns(const glm::vec4& col0, const glm::vec4& col1, const glm::vec4& col2,
+                                  const glm::vec4& col3) const {
     return glm::mat4(col0, col1, col2, col3);
 }
 

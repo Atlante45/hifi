@@ -15,21 +15,21 @@
 
 #include <QFile>
 
+#include <BulletCollision/CollisionShapes/btTriangleShape.h>
 #include <PerfStat.h>
 #include <PhysicsCollisionGroups.h>
 #include <Profile.h>
-#include <BulletCollision/CollisionShapes/btTriangleShape.h>
 
 #include "CharacterController.h"
 #include "ObjectMotionState.h"
-#include "PhysicsHelpers.h"
 #include "PhysicsDebugDraw.h"
-#include "ThreadSafeDynamicsWorld.h"
+#include "PhysicsHelpers.h"
 #include "PhysicsLogging.h"
+#include "ThreadSafeDynamicsWorld.h"
 
-static bool flipNormalsMyAvatarVsBackfacingTriangles(btManifoldPoint& cp,
-        const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0,
-        const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1) {
+static bool flipNormalsMyAvatarVsBackfacingTriangles(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap,
+                                                     int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap,
+                                                     int partId1, int index1) {
     if (colObj1Wrap->getCollisionShape()->getShapeType() == TRIANGLE_SHAPE_PROXYTYPE) {
         auto triShape = static_cast<const btTriangleShape*>(colObj1Wrap->getCollisionShape());
         const btVector3* v = triShape->m_vertices1;
@@ -45,9 +45,7 @@ static bool flipNormalsMyAvatarVsBackfacingTriangles(btManifoldPoint& cp,
     return false;
 }
 
-PhysicsEngine::PhysicsEngine(const glm::vec3& offset) :
-        _originOffset(offset),
-        _myAvatarController(nullptr) {
+PhysicsEngine::PhysicsEngine(const glm::vec3& offset) : _originOffset(offset), _myAvatarController(nullptr) {
 }
 
 PhysicsEngine::~PhysicsEngine() {
@@ -68,7 +66,8 @@ void PhysicsEngine::init() {
         _collisionDispatcher = new btCollisionDispatcher(_collisionConfig);
         _broadphaseFilter = new btDbvtBroadphase();
         _constraintSolver = new btSequentialImpulseConstraintSolver;
-        _dynamicsWorld = new ThreadSafeDynamicsWorld(_collisionDispatcher, _broadphaseFilter, _constraintSolver, _collisionConfig);
+        _dynamicsWorld = new ThreadSafeDynamicsWorld(_collisionDispatcher, _broadphaseFilter, _constraintSolver,
+                                                     _collisionConfig);
         _physicsDebugDraw.reset(new PhysicsDebugDraw());
 
         // hook up debug draw renderer
@@ -108,7 +107,7 @@ void PhysicsEngine::addObjectToDynamicsWorld(ObjectMotionState* motionState) {
     btRigidBody* body = motionState->getRigidBody();
     PhysicsMotionType motionType = motionState->computePhysicsMotionType();
     motionState->setMotionType(motionType);
-    switch(motionType) {
+    switch (motionType) {
         case MOTION_TYPE_KINEMATIC: {
             if (!body) {
                 btCollisionShape* shape = const_cast<btCollisionShape*>(motionState->getShape());
@@ -141,8 +140,8 @@ void PhysicsEngine::addObjectToDynamicsWorld(ObjectMotionState* motionState) {
             } else {
                 body->setMassProps(mass, inertia);
             }
-            body->setCollisionFlags(body->getCollisionFlags() & ~(btCollisionObject::CF_KINEMATIC_OBJECT |
-                                                                  btCollisionObject::CF_STATIC_OBJECT));
+            body->setCollisionFlags(body->getCollisionFlags() &
+                                    ~(btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_STATIC_OBJECT));
             body->updateInertiaTensor();
             motionState->updateBodyVelocities();
 
@@ -344,7 +343,7 @@ void PhysicsEngine::processTransaction(PhysicsEngine::Transaction& transaction) 
         }
         if (object->getMotionType() == MOTION_TYPE_STATIC && object->isActive()) {
             _activeStaticBodies.insert(object->getRigidBody());
-        }       
+        }
     }
     // activeStaticBodies have changed (in an Easy way) and need their Aabbs updated
     // but we've configured Bullet to NOT update them automatically (for improved performance)
@@ -430,7 +429,7 @@ public:
     CProfileOperator() {}
     void recurse(CProfileIterator* itr, QString context) {
         // The context string will get too long if we accumulate it properly
-        //QString newContext = context + QString("/") + itr->Get_Current_Parent_Name();
+        // QString newContext = context + QString("/") + itr->Get_Current_Parent_Name();
         // so we use this four-character indentation
         QString newContext = context + QString(".../");
         process(itr, newContext);
@@ -461,10 +460,10 @@ class StatsHarvester : public CProfileOperator {
 public:
     StatsHarvester() {}
     void process(CProfileIterator* itr, QString context) override {
-            QString name = context + itr->Get_Current_Parent_Name();
-            uint64_t time = (uint64_t)((btScalar)MSECS_PER_SECOND * itr->Get_Current_Parent_Total_Time());
-            PerformanceTimer::addTimerRecord(name, time);
-        };
+        QString name = context + itr->Get_Current_Parent_Name();
+        uint64_t time = (uint64_t)((btScalar)MSECS_PER_SECOND * itr->Get_Current_Parent_Total_Time());
+        PerformanceTimer::addTimerRecord(name, time);
+    };
 };
 
 class StatsWriter : public CProfileOperator {
@@ -475,9 +474,7 @@ public:
             qCDebug(physics) << "unable to open file " << _file.fileName() << " to save stepSimulation() stats";
         }
     }
-    ~StatsWriter() {
-        _file.close();
-    }
+    ~StatsWriter() { _file.close(); }
     void process(CProfileIterator* itr, QString context) override {
         QString name = context + itr->Get_Current_Parent_Name();
         float time = (btScalar)MSECS_PER_SECOND * itr->Get_Current_Parent_Total_Time();
@@ -486,13 +483,14 @@ public:
             s << name << " = " << time << "\n";
         }
     }
+
 protected:
     QFile _file;
 };
 
 void PhysicsEngine::harvestPerformanceStats() {
     // unfortunately the full context names get too long for our stats presentation format
-    //QString contextName = PerformanceTimer::getContextName(); // TODO: how to show full context name?
+    // QString contextName = PerformanceTimer::getContextName(); // TODO: how to show full context name?
     QString contextName("...");
 
     CProfileIterator* itr = CProfileManager::Get_Iterator();
@@ -565,7 +563,7 @@ void PhysicsEngine::updateContactMap() {
     // update all contacts every frame
     int numManifolds = _collisionDispatcher->getNumManifolds();
     for (int i = 0; i < numManifolds; ++i) {
-        btPersistentManifold* contactManifold =  _collisionDispatcher->getManifoldByIndexInternal(i);
+        btPersistentManifold* contactManifold = _collisionDispatcher->getManifoldByIndexInternal(i);
         if (contactManifold->getNumContacts() > 0) {
             // TODO: require scripts to register interest in callbacks for specific objects
             // so we can filter out most collision events right here.
@@ -595,7 +593,7 @@ void PhysicsEngine::updateContactMap() {
 void PhysicsEngine::doOwnershipInfectionForConstraints() {
     BT_PROFILE("ownershipInfectionForConstraints");
     const btCollisionObject* characterObject = _myAvatarController ? _myAvatarController->getCollisionObject() : nullptr;
-    foreach(const auto& dynamic, _objectDynamics) {
+    foreach (const auto& dynamic, _objectDynamics) {
         if (!dynamic) {
             continue;
         }
@@ -604,7 +602,7 @@ void PhysicsEngine::doOwnershipInfectionForConstraints() {
             int32_t numOwned = 0;
             int32_t numStatic = 0;
             uint8_t priority = VOLUNTEER_SIMULATION_PRIORITY;
-            foreach(btRigidBody* body, bodies) {
+            foreach (btRigidBody* body, bodies) {
                 ObjectMotionState* motionState = static_cast<ObjectMotionState*>(body->getUserPointer());
                 if (body->isStaticObject()) {
                     ++numStatic;
@@ -626,7 +624,7 @@ void PhysicsEngine::doOwnershipInfectionForConstraints() {
                 if (numOwned + numStatic != bodies.size()) {
                     // we have partial ownership but it isn't complete so we walk each object
                     // and bump the simulation priority to the highest priority we encountered earlier
-                    foreach(btRigidBody* body, bodies) {
+                    foreach (btRigidBody* body, bodies) {
                         ObjectMotionState* motionState = static_cast<ObjectMotionState*>(body->getUserPointer());
                         if (motionState) {
                             // NOTE: we submit priority+1 because the default behavior of bump() is to actually use priority - 1
@@ -651,8 +649,7 @@ const CollisionEvents& PhysicsEngine::getCollisionEvents() {
         ContactEventType type = contact.computeType(_numContactFrames);
         const btScalar SIGNIFICANT_DEPTH = -0.002f; // penetrations have negative distance
         if (type != CONTACT_EVENT_TYPE_CONTINUE ||
-                (contact.distance < SIGNIFICANT_DEPTH &&
-                 contact.readyForContinue(_numContactFrames))) {
+            (contact.distance < SIGNIFICANT_DEPTH && contact.readyForContinue(_numContactFrames))) {
             ObjectMotionState* motionStateA = static_cast<ObjectMotionState*>(contactItr->first._a);
             ObjectMotionState* motionStateB = static_cast<ObjectMotionState*>(contactItr->first._b);
 
@@ -669,7 +666,7 @@ const CollisionEvents& PhysicsEngine::getCollisionEvents() {
                 }
                 glm::vec3 position = bulletToGLM(contact.getPositionWorldOnB()) + _originOffset;
                 glm::vec3 velocityChange = motionStateA->getObjectLinearVelocityChange() +
-                    (motionStateB ? motionStateB->getObjectLinearVelocityChange() : glm::vec3(0.0f));
+                                           (motionStateB ? motionStateB->getObjectLinearVelocityChange() : glm::vec3(0.0f));
                 glm::vec3 penetration = bulletToGLM(contact.distance * contact.normalWorldOnB);
                 _collisionEvents.push_back(Collision(type, idA, idB, position, penetration, velocityChange));
             } else if (motionStateB && (motionStateB->isLocallyOwnedOrShouldBe())) {
@@ -680,10 +677,10 @@ const CollisionEvents& PhysicsEngine::getCollisionEvents() {
                 }
                 glm::vec3 position = bulletToGLM(contact.getPositionWorldOnA()) + _originOffset;
                 glm::vec3 velocityChange = motionStateB->getObjectLinearVelocityChange() +
-                    (motionStateA ? motionStateA->getObjectLinearVelocityChange() : glm::vec3(0.0f));
+                                           (motionStateA ? motionStateA->getObjectLinearVelocityChange() : glm::vec3(0.0f));
                 // NOTE: we're flipping the order of A and B (so that the first objectID is never NULL)
                 // hence we negate the penetration (because penetration always points from B to A).
-                glm::vec3 penetration = - bulletToGLM(contact.distance * contact.normalWorldOnB);
+                glm::vec3 penetration = -bulletToGLM(contact.distance * contact.normalWorldOnB);
                 _collisionEvents.push_back(Collision(type, idB, idA, position, penetration, velocityChange));
             }
         }
@@ -756,7 +753,7 @@ void PhysicsEngine::bumpAndPruneContacts(ObjectMotionState* motionState) {
 
     int numManifolds = _collisionDispatcher->getNumManifolds();
     for (int i = 0; i < numManifolds; ++i) {
-        btPersistentManifold* contactManifold =  _collisionDispatcher->getManifoldByIndexInternal(i);
+        btPersistentManifold* contactManifold = _collisionDispatcher->getManifoldByIndexInternal(i);
         if (contactManifold->getNumContacts() > 0) {
             const btCollisionObject* objectA = static_cast<const btCollisionObject*>(contactManifold->getBody0());
             const btCollisionObject* objectB = static_cast<const btCollisionObject*>(contactManifold->getBody1());
@@ -832,7 +829,7 @@ bool PhysicsEngine::addDynamic(EntityDynamicPointer dynamic) {
 
     if (success) {
         _objectDynamics[dynamicID] = dynamic;
-        foreach(btRigidBody* rigidBody, std::static_pointer_cast<ObjectDynamic>(dynamic)->getRigidBodies()) {
+        foreach (btRigidBody* rigidBody, std::static_pointer_cast<ObjectDynamic>(dynamic)->getRigidBodies()) {
             _objectDynamicsByBody[rigidBody] += dynamic->getID();
         }
     }
@@ -859,9 +856,7 @@ void PhysicsEngine::removeDynamic(const QUuid dynamicID) {
             }
         }
         _objectDynamics.remove(dynamicID);
-        foreach(btRigidBody* rigidBody, rigidBodies) {
-            _objectDynamicsByBody[rigidBody].remove(dynamic->getID());
-        }
+        foreach (btRigidBody* rigidBody, rigidBodies) { _objectDynamicsByBody[rigidBody].remove(dynamic->getID()); }
         dynamic->invalidate();
     }
 }
@@ -922,17 +917,18 @@ void PhysicsEngine::setShowBulletConstraintLimits(bool value) {
 }
 
 void PhysicsEngine::enableGlobalContactAddedCallback(bool enabled) {
-	if (enabled) {
+    if (enabled) {
         // register contact filter to help MyAvatar pass through backfacing triangles
         gContactAddedCallback = flipNormalsMyAvatarVsBackfacingTriangles;
-	} else {
+    } else {
         // deregister contact filter
         gContactAddedCallback = nullptr;
     }
 }
 
 struct AllContactsCallback : public btCollisionWorld::ContactResultCallback {
-    AllContactsCallback(int32_t mask, int32_t group, const ShapeInfo& shapeInfo, const Transform& transform, btCollisionObject* myAvatarCollisionObject, float threshold) :
+    AllContactsCallback(int32_t mask, int32_t group, const ShapeInfo& shapeInfo, const Transform& transform,
+                        btCollisionObject* myAvatarCollisionObject, float threshold) :
         btCollisionWorld::ContactResultCallback(),
         collisionObject(),
         contacts(),
@@ -952,16 +948,15 @@ struct AllContactsCallback : public btCollisionWorld::ContactResultCallback {
         m_collisionFilterGroup = group;
     }
 
-    ~AllContactsCallback() {
-        ObjectMotionState::getShapeManager()->releaseShape(collisionObject.getCollisionShape());
-    }
+    ~AllContactsCallback() { ObjectMotionState::getShapeManager()->releaseShape(collisionObject.getCollisionShape()); }
 
     btCollisionObject collisionObject;
     std::vector<ContactTestResult> contacts;
     btCollisionObject* myAvatarCollisionObject;
     btScalar threshold;
 
-    btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0, int partId0, int index0, const btCollisionObjectWrapper* colObj1, int partId1, int index1) override {
+    btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0, int partId0, int index0,
+                             const btCollisionObjectWrapper* colObj1, int partId1, int index1) override {
         if (cp.m_distance1 > -threshold) {
             return 0;
         }
@@ -983,8 +978,10 @@ struct AllContactsCallback : public btCollisionWorld::ContactResultCallback {
         }
 
         // TODO: Give MyAvatar a motion state so we don't have to do this
-        if ((m_collisionFilterMask & BULLET_COLLISION_GROUP_MY_AVATAR) && myAvatarCollisionObject && myAvatarCollisionObject == otherBody) {
-            contacts.emplace_back(Physics::getSessionUUID(), bulletToGLM(penetrationPoint), bulletToGLM(otherPenetrationPoint), bulletToGLM(normal));
+        if ((m_collisionFilterMask & BULLET_COLLISION_GROUP_MY_AVATAR) && myAvatarCollisionObject &&
+            myAvatarCollisionObject == otherBody) {
+            contacts.emplace_back(Physics::getSessionUUID(), bulletToGLM(penetrationPoint), bulletToGLM(otherPenetrationPoint),
+                                  bulletToGLM(normal));
             return 0;
         }
 
@@ -1000,7 +997,8 @@ struct AllContactsCallback : public btCollisionWorld::ContactResultCallback {
         }
 
         // This is the correct object type. Add it to the list.
-        contacts.emplace_back(candidate->getObjectID(), bulletToGLM(penetrationPoint), bulletToGLM(otherPenetrationPoint), bulletToGLM(normal));
+        contacts.emplace_back(candidate->getObjectID(), bulletToGLM(penetrationPoint), bulletToGLM(otherPenetrationPoint),
+                              bulletToGLM(normal));
 
         return 0;
     }
@@ -1011,16 +1009,18 @@ protected:
     }
 };
 
-std::vector<ContactTestResult> PhysicsEngine::contactTest(uint16_t mask, const ShapeInfo& regionShapeInfo, const Transform& regionTransform, uint16_t group, float threshold) const {
+std::vector<ContactTestResult> PhysicsEngine::contactTest(uint16_t mask, const ShapeInfo& regionShapeInfo,
+                                                          const Transform& regionTransform, uint16_t group,
+                                                          float threshold) const {
     // TODO: Give MyAvatar a motion state so we don't have to do this
     btCollisionObject* myAvatarCollisionObject = nullptr;
     if ((mask & USER_COLLISION_GROUP_MY_AVATAR) && _myAvatarController) {
         myAvatarCollisionObject = _myAvatarController->getCollisionObject();
     }
 
-    auto contactCallback = AllContactsCallback((int32_t)mask, (int32_t)group, regionShapeInfo, regionTransform, myAvatarCollisionObject, threshold);
+    auto contactCallback = AllContactsCallback((int32_t)mask, (int32_t)group, regionShapeInfo, regionTransform,
+                                               myAvatarCollisionObject, threshold);
     _dynamicsWorld->contactTest(&contactCallback.collisionObject, contactCallback);
 
     return contactCallback.contacts;
 }
-

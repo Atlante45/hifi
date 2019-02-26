@@ -20,10 +20,10 @@
 class UpdateDialog : public OffscreenQmlDialog {
     Q_OBJECT
     HIFI_QML_DECL
-    
+
     Q_PROPERTY(QString updateAvailableDetails READ updateAvailableDetails CONSTANT)
     Q_PROPERTY(QString releaseNotes READ releaseNotes CONSTANT)
-    
+
 public:
     UpdateDialog(QQuickItem* parent = nullptr);
     const QString& updateAvailableDetails() const;
@@ -35,7 +35,6 @@ private:
 
 protected:
     Q_INVOKABLE void triggerUpgrade();
-
 };
 
 #endif // hifi_UpdateDialog_h

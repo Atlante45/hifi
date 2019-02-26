@@ -13,9 +13,9 @@
 
 #include "render/TransitionStage.h"
 
+#include <PathUtils.h>
 #include "FadeObjectParams.shared.slh"
 #include "render-utils/ShaderConstants.h"
-#include <PathUtils.h>
 
 FadeEffect::FadeEffect() {
     auto texturePath = PathUtils::resourcesPath() + "images/fadeMask.png";
@@ -47,18 +47,18 @@ render::ShapePipeline::ItemSetter FadeEffect::getItemUniformSetter() const {
             auto& transitionState = transitionStage->getTransition(item.getTransitionId());
 
             if (transitionState.paramsBuffer._size != sizeof(gpu::StructBuffer<FadeObjectParams>)) {
-                static_assert(sizeof(transitionState.paramsBuffer) == sizeof(gpu::StructBuffer<FadeObjectParams>), "Assuming gpu::StructBuffer is a helper class for gpu::BufferView");
+                static_assert(sizeof(transitionState.paramsBuffer) == sizeof(gpu::StructBuffer<FadeObjectParams>),
+                              "Assuming gpu::StructBuffer is a helper class for gpu::BufferView");
                 transitionState.paramsBuffer = gpu::StructBuffer<FadeObjectParams>();
             }
 
             const auto fadeCategory = FadeJob::transitionToCategory[transitionState.eventType];
             auto& paramsConst = static_cast<gpu::StructBuffer<FadeObjectParams>&>(transitionState.paramsBuffer).get();
 
-            if (paramsConst.category != fadeCategory
-                || paramsConst.threshold != transitionState.threshold
-                || glm::vec3(paramsConst.baseOffset) != transitionState.baseOffset
-                || glm::vec3(paramsConst.noiseOffset) != transitionState.noiseOffset
-                || glm::vec3(paramsConst.baseInvSize) != transitionState.baseInvSize) {
+            if (paramsConst.category != fadeCategory || paramsConst.threshold != transitionState.threshold ||
+                glm::vec3(paramsConst.baseOffset) != transitionState.baseOffset ||
+                glm::vec3(paramsConst.noiseOffset) != transitionState.noiseOffset ||
+                glm::vec3(paramsConst.baseInvSize) != transitionState.baseInvSize) {
                 auto& params = static_cast<gpu::StructBuffer<FadeObjectParams>&>(transitionState.paramsBuffer).edit();
 
                 params.category = fadeCategory;
@@ -90,12 +90,14 @@ render::ShapePipeline::ItemSetter FadeEffect::getItemStoredSetter() {
 }
 
 void FadeEffect::packToAttributes(const int category, const float threshold, const glm::vec3& noiseOffset,
-    const glm::vec3& baseOffset, const glm::vec3& baseInvSize,
-    glm::vec4& packedData1, glm::vec4& packedData2, glm::vec4& packedData3) {
+                                  const glm::vec3& baseOffset, const glm::vec3& baseInvSize, glm::vec4& packedData1,
+                                  glm::vec4& packedData2, glm::vec4& packedData3) {
     packedData1.x = noiseOffset.x;
     packedData1.y = noiseOffset.y;
     packedData1.z = noiseOffset.z;
-    packedData1.w = (float)(category+0.1f); // GLSL hack so that casting back from float to int in fragment shader returns the correct value.
+    packedData1
+        .w = (float)(category +
+                     0.1f); // GLSL hack so that casting back from float to int in fragment shader returns the correct value.
 
     packedData2.x = baseOffset.x;
     packedData2.y = baseOffset.y;

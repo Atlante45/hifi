@@ -22,15 +22,15 @@
 #include <QtCore/QSysInfo>
 #include <QtGlobal>
 
-#include <controllers/UserInputMapper.h>
-#include <GLMHelpers.h>
 #include <DebugDraw.h>
+#include <GLMHelpers.h>
 #include <NumericalConstants.h>
 #include <PathUtils.h>
 #include <PerfStat.h>
-#include <ui-plugins/PluginContainer.h>
 #include <Preferences.h>
 #include <SettingHandle.h>
+#include <controllers/UserInputMapper.h>
+#include <ui-plugins/PluginContainer.h>
 
 #include <QLoggingCategory>
 
@@ -51,14 +51,14 @@ const float SixenseManager::CONTROLLER_THRESHOLD { 0.35f };
 bool SixenseManager::_isEnabled = false;
 bool SixenseManager::_sixenseLoaded = false;
 
-#define BAIL_IF_NOT_ENABLED \
-    if (!_isEnabled) { \
-        return; \
+#define BAIL_IF_NOT_ENABLED                                                                                                    \
+    if (!_isEnabled) {                                                                                                         \
+        return;                                                                                                                \
     }
 
-#define BAIL_IF_NOT_LOADED \
-    if (!_sixenseLoaded) { \
-        return; \
+#define BAIL_IF_NOT_LOADED                                                                                                     \
+    if (!_sixenseLoaded) {                                                                                                     \
+        return;                                                                                                                \
     }
 
 const char* SixenseManager::NAME { "Sixense" };
@@ -66,9 +66,11 @@ const char* SixenseManager::SIXENSE_ID_STRING { "Sixense" };
 
 const bool DEFAULT_ENABLED = false;
 
-const char* MENU_PARENT{ "Developer" };
+const char* MENU_PARENT { "Developer" };
 const char* MENU_NAME { "Sixense" };
-const char* MENU_PATH { "Developer" ">" "Sixense" };
+const char* MENU_PATH { "Developer"
+                        ">"
+                        "Sixense" };
 const char* TOGGLE_SMOOTH { "Smooth Sixense Movement" };
 const char* SHOW_DEBUG_RAW { "Debug Draw Raw Data" };
 const char* SHOW_DEBUG_CALIBRATED { "Debug Draw Calibrated Data" };
@@ -87,7 +89,7 @@ void SixenseManager::init() {
     auto preferences = DependencyManager::get<Preferences>();
     static const QString SIXENSE_PLUGIN { "Sixense Controllers" };
     {
-        auto getter = [this]()->bool { return _isEnabled; };
+        auto getter = [this]() -> bool { return _isEnabled; };
         auto setter = [this](bool value) {
             _isEnabled = value;
             saveSettings();
@@ -101,20 +103,17 @@ bool SixenseManager::activate() {
     InputPlugin::activate();
 
 #ifdef HAVE_SIXENSE
-    #if !defined(Q_OS_LINUX)
+#if !defined(Q_OS_LINUX)
     _container->addMenu(MENU_PATH);
     _container->addMenuItem(PluginType::INPUT_PLUGIN, MENU_PATH, TOGGLE_SMOOTH,
-                           [this] (bool clicked) { setSixenseFilter(clicked); },
-                           true, true);
+                            [this](bool clicked) { setSixenseFilter(clicked); }, true, true);
 
     _container->addMenuItem(PluginType::INPUT_PLUGIN, MENU_PATH, SHOW_DEBUG_RAW,
-                            [this] (bool clicked) { _inputDevice->setDebugDrawRaw(clicked); },
-                            true, false);
+                            [this](bool clicked) { _inputDevice->setDebugDrawRaw(clicked); }, true, false);
 
     _container->addMenuItem(PluginType::INPUT_PLUGIN, MENU_PATH, SHOW_DEBUG_CALIBRATED,
-                            [this] (bool clicked) { _inputDevice->setDebugDrawCalibrated(clicked); },
-                            true, false);
-    #endif
+                            [this](bool clicked) { _inputDevice->setDebugDrawCalibrated(clicked); }, true, false);
+#endif
 
     auto userInputMapper = DependencyManager::get<controller::UserInputMapper>();
     userInputMapper->registerDevice(_inputDevice);
@@ -132,10 +131,10 @@ void SixenseManager::deactivate() {
     InputPlugin::deactivate();
 
 #ifdef HAVE_SIXENSE
-    #if !defined(Q_OS_LINUX)
+#if !defined(Q_OS_LINUX)
     _container->removeMenuItem(MENU_NAME, TOGGLE_SMOOTH);
     _container->removeMenu(MENU_PATH);
-    #endif
+#endif
 
     _inputDevice->_poseStateMap.clear();
 
@@ -168,9 +167,7 @@ void SixenseManager::pluginUpdate(float deltaTime, const controller::InputCalibr
     }
 
     auto userInputMapper = DependencyManager::get<controller::UserInputMapper>();
-    userInputMapper->withLock([&, this]() {
-        _inputDevice->update(deltaTime, inputCalibrationData);
-    });
+    userInputMapper->withLock([&, this]() { _inputDevice->update(deltaTime, inputCalibrationData); });
 
     if (_inputDevice->_requestReset) {
         _container->requestReset();
@@ -207,7 +204,7 @@ void SixenseManager::InputDevice::update(float deltaTime, const controller::Inpu
 
     PerformanceTimer perfTimer("sixense");
     // FIXME send this message once when we've positively identified hydra hardware
-    //UserActivityLogger::getInstance().connectedDevice("spatial_controller", "hydra");
+    // UserActivityLogger::getInstance().connectedDevice("spatial_controller", "hydra");
 
     int maxControllers = sixenseGetMaxControllers();
 
@@ -262,13 +259,15 @@ void SixenseManager::InputDevice::update(float deltaTime, const controller::Inpu
     if (_debugDrawCalibrated) {
         auto poseIter = _poseStateMap.find(controller::StandardPoseChannel::LEFT_HAND);
         if (poseIter != _poseStateMap.end() && poseIter->second.isValid()) {
-            DebugDraw::getInstance().addMyAvatarMarker("SIXENSE_CALIBRATED_LEFT", poseIter->second.rotation, poseIter->second.translation, glm::vec4(1));
+            DebugDraw::getInstance().addMyAvatarMarker("SIXENSE_CALIBRATED_LEFT", poseIter->second.rotation,
+                                                       poseIter->second.translation, glm::vec4(1));
         } else {
             DebugDraw::getInstance().removeMyAvatarMarker("SIXENSE_CALIBRATED_LEFT");
         }
         poseIter = _poseStateMap.find(controller::StandardPoseChannel::RIGHT_HAND);
         if (poseIter != _poseStateMap.end() && poseIter->second.isValid()) {
-            DebugDraw::getInstance().addMyAvatarMarker("SIXENSE_CALIBRATED_RIGHT", poseIter->second.rotation, poseIter->second.translation, glm::vec4(1));
+            DebugDraw::getInstance().addMyAvatarMarker("SIXENSE_CALIBRATED_RIGHT", poseIter->second.rotation,
+                                                       poseIter->second.translation, glm::vec4(1));
         } else {
             DebugDraw::getInstance().removeMyAvatarMarker("SIXENSE_CALIBRATED_RIGHT");
         }
@@ -276,18 +275,20 @@ void SixenseManager::InputDevice::update(float deltaTime, const controller::Inpu
 
     if (_debugDrawRaw) {
         if (rawPoses[0].isValid()) {
-            DebugDraw::getInstance().addMyAvatarMarker("SIXENSE_RAW_LEFT", rawPoses[0].rotation, rawPoses[0].translation, glm::vec4(1));
+            DebugDraw::getInstance().addMyAvatarMarker("SIXENSE_RAW_LEFT", rawPoses[0].rotation, rawPoses[0].translation,
+                                                       glm::vec4(1));
         } else {
             DebugDraw::getInstance().removeMyAvatarMarker("SIXENSE_RAW_LEFT");
         }
         if (rawPoses[1].isValid()) {
-            DebugDraw::getInstance().addMyAvatarMarker("SIXENSE_RAW_RIGHT", rawPoses[1].rotation, rawPoses[1].translation, glm::vec4(1));
+            DebugDraw::getInstance().addMyAvatarMarker("SIXENSE_RAW_RIGHT", rawPoses[1].rotation, rawPoses[1].translation,
+                                                       glm::vec4(1));
         } else {
             DebugDraw::getInstance().removeMyAvatarMarker("SIXENSE_RAW_RIGHT");
         }
     }
 
-#endif  // HAVE_SIXENSE
+#endif // HAVE_SIXENSE
 }
 
 void SixenseManager::InputDevice::setDebugDrawRaw(bool flag) {
@@ -340,18 +341,17 @@ void SixenseManager::InputDevice::updateCalibration(SixenseControllerData* contr
                 return;
 
             case CALIBRATION_STATE_COMPLETE: {
-                    // compute calibration results
-                    _avatarPosition = -0.5f * (_reachLeft + _reachRight); // neck is midway between right and left hands
-                    glm::vec3 xAxis = glm::normalize(_reachRight - _reachLeft);
-                    glm::vec3 zAxis = glm::normalize(glm::cross(xAxis, Vectors::UNIT_Y));
-                    xAxis = glm::normalize(glm::cross(Vectors::UNIT_Y, zAxis));
-                    _avatarRotation = glm::inverse(glm::quat_cast(glm::mat3(xAxis, Vectors::UNIT_Y, zAxis)));
-                    const float Y_OFFSET_CALIBRATED_HANDS_TO_AVATAR = -0.3f;
-                    _avatarPosition.y += Y_OFFSET_CALIBRATED_HANDS_TO_AVATAR;
-                    qCDebug(inputplugins, "succeess: sixense calibration");
-                    _requestReset = true;
-                }
-                break;
+                // compute calibration results
+                _avatarPosition = -0.5f * (_reachLeft + _reachRight); // neck is midway between right and left hands
+                glm::vec3 xAxis = glm::normalize(_reachRight - _reachLeft);
+                glm::vec3 zAxis = glm::normalize(glm::cross(xAxis, Vectors::UNIT_Y));
+                xAxis = glm::normalize(glm::cross(Vectors::UNIT_Y, zAxis));
+                _avatarRotation = glm::inverse(glm::quat_cast(glm::mat3(xAxis, Vectors::UNIT_Y, zAxis)));
+                const float Y_OFFSET_CALIBRATED_HANDS_TO_AVATAR = -0.3f;
+                _avatarPosition.y += Y_OFFSET_CALIBRATED_HANDS_TO_AVATAR;
+                qCDebug(inputplugins, "succeess: sixense calibration");
+                _requestReset = true;
+            } break;
             default:
                 qCDebug(inputplugins, "failed: sixense calibration");
                 break;
@@ -411,7 +411,7 @@ void SixenseManager::InputDevice::updateCalibration(SixenseControllerData* contr
     }
 }
 
-#endif  // HAVE_SIXENSE
+#endif // HAVE_SIXENSE
 
 void SixenseManager::InputDevice::focusOutEvent() {
     BAIL_IF_NOT_LOADED
@@ -445,7 +445,8 @@ void SixenseManager::InputDevice::handleButtonEvent(unsigned int buttons, bool l
     }
 }
 
-void SixenseManager::InputDevice::handlePoseEvent(float deltaTime, const controller::InputCalibrationData& inputCalibrationData, const glm::vec3& position, const glm::quat& rotation, bool left) {
+void SixenseManager::InputDevice::handlePoseEvent(float deltaTime, const controller::InputCalibrationData& inputCalibrationData,
+                                                  const glm::vec3& position, const glm::quat& rotation, bool left) {
     BAIL_IF_NOT_LOADED
 #ifdef HAVE_SIXENSE
     auto hand = left ? controller::StandardPoseChannel::LEFT_HAND : controller::StandardPoseChannel::RIGHT_HAND;
@@ -488,7 +489,7 @@ void SixenseManager::InputDevice::handlePoseEvent(float deltaTime, const control
     //
     //     Qsh = angleAxis(PI, zAxis) * angleAxis(-PI/2, xAxis)
     //
-    const glm::quat sixenseToHand = glm::angleAxis(PI, Vectors::UNIT_Z) * glm::angleAxis(-PI/2.0f, Vectors::UNIT_X);
+    const glm::quat sixenseToHand = glm::angleAxis(PI, Vectors::UNIT_Z) * glm::angleAxis(-PI / 2.0f, Vectors::UNIT_X);
 
     // In addition to Qsh each hand has pre-offset introduced by the shape of the sixense controllers
     // and how they fit into the hand in their relaxed state.  This offset is a quarter turn about
@@ -525,7 +526,6 @@ void SixenseManager::InputDevice::handlePoseEvent(float deltaTime, const control
             nextPose.angularVelocity = glm::normalize(glm::axis(deltaRotation));
             nextPose.angularVelocity *= (rotationAngle / deltaTime);
         }
-
     }
     _poseStateMap[hand] = nextPose;
 
@@ -571,7 +571,6 @@ controller::Input::NamedVector SixenseManager::InputDevice::getAvailableInputs()
     };
     return availableInputs;
 };
-
 
 QString SixenseManager::InputDevice::getDefaultMappingConfig() const {
     static const QString MAPPING_JSON = PathUtils::resourcesPath() + "/controllers/hydra.json";

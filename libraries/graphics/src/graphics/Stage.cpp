@@ -10,13 +10,12 @@
 //
 #include "Stage.h"
 
-#include <glm/gtx/transform.hpp> 
+#include <ComponentMode.h>
 #include <math.h>
 #include <qcompilerdetection.h>
-#include <ComponentMode.h>
+#include <glm/gtx/transform.hpp>
 
 using namespace graphics;
-
 
 void EarthSunModel::updateAll() const {
     updateWorldToSurface();
@@ -27,14 +26,14 @@ void EarthSunModel::updateAll() const {
 Mat4d EarthSunModel::evalWorldToGeoLocationMat(double longitude, double latitude, double absAltitude, double scale) {
     // Longitude is along Z axis but - from east to west
     Mat4d rotLon = glm::rotate(glm::radians(longitude), Vec3d(0.0, 0.0, 1.0));
-     
+
     // latitude is along X axis + from south to north
     Mat4d rotLat = glm::rotate(-glm::radians(latitude), Vec3d(1.0, 0.0, 0.0));
 
     // translation is movin to the earth surface + altiture at the radius along Y axis
     Mat4d surfaceT = glm::translate(Vec3d(0.0, -absAltitude, 0.0));
 
-  //  Mat4d worldScale = glm::scale(Vec3d(scale));
+    //  Mat4d worldScale = glm::scale(Vec3d(scale));
 
     Mat4d worldToGeoLocMat = surfaceT * rotLat * rotLon;
 
@@ -44,7 +43,7 @@ Mat4d EarthSunModel::evalWorldToGeoLocationMat(double longitude, double latitude
 void EarthSunModel::updateWorldToSurface() const {
     // Check if the final position is too close to the earth center ?
     float absAltitude = _earthRadius + _altitude;
-    if ( absAltitude < 0.01f) {
+    if (absAltitude < 0.01f) {
         absAltitude = 0.01f;
     }
 
@@ -60,8 +59,8 @@ void EarthSunModel::updateSurfaceToEye() const {
     _surfaceToEyeMat = glm::inverse(_eyeToSurfaceMat);
     _worldToEyeMat = _surfaceToEyeMat * _worldToSurfaceMat;
     _eyeToWorldMat = _surfaceToWorldMat * _eyeToSurfaceMat;
-    _eyePos = Vec3d(_eyeToWorldMat * Vec4d(0.0, 0.0, 0.0, 1.0) );
-    _eyeDir = Vec3d(_eyeToWorldMat * Vec4d(0.0, 0.0, -1.0, 0.0) );
+    _eyePos = Vec3d(_eyeToWorldMat * Vec4d(0.0, 0.0, 0.0, 1.0));
+    _eyeDir = Vec3d(_eyeToWorldMat * Vec4d(0.0, 0.0, -1.0, 0.0));
 }
 
 void EarthSunModel::updateSun() const {
@@ -71,11 +70,11 @@ void EarthSunModel::updateSun() const {
     Mat4d rotSun = evalWorldToGeoLocationMat(_sunLongitude, _sunLatitude, _earthRadius, _scale);
     rotSun = glm::inverse(rotSun);
 
-    _sunDir = Vec3d(rotSun * Vec4d(0.0, 1.0, 0.0, 0.0)); 
+    _sunDir = Vec3d(rotSun * Vec4d(0.0, 1.0, 0.0, 0.0));
 
     // sun direction is looking up toward Y axis at the specified sun lat, long
     Vec3d lssd = Vec3d(_worldToSurfaceMat * Vec4d(_sunDir.x, _sunDir.y, _sunDir.z, 0.0));
-    
+
     // apply surface rotation offset
     glm::dquat dSurfOrient(_surfaceOrientation);
     lssd = glm::rotate(dSurfOrient, lssd);
@@ -91,7 +90,7 @@ void EarthSunModel::setSurfaceOrientation(const Quat& orientation) {
 double moduloRange(double val, double minVal, double maxVal) {
     double range = maxVal - minVal;
     double rval = (val - minVal) / range;
-    rval =  rval - floor(rval);
+    rval = rval - floor(rval);
     return rval * range + minVal;
 }
 
@@ -138,21 +137,18 @@ const int NUM_DAYS_PER_YEAR = 365;
 const float NUM_HOURS_PER_DAY = 24.0f;
 const float NUM_HOURS_PER_HALF_DAY = NUM_HOURS_PER_DAY * 0.5f;
 
-SunSkyStage::SunSkyStage() :
-    _sunLight(std::make_shared<Light>()),
-    _skybox(std::make_shared<Skybox>())
-{
+SunSkyStage::SunSkyStage() : _sunLight(std::make_shared<Light>()), _skybox(std::make_shared<Skybox>()) {
     _sunLight->setType(Light::SUN);
     // Default ambient sphere (for lack of skybox)
     _sunLight->setAmbientSpherePreset(gpu::SphericalHarmonics::Preset::OLD_TOWN_SQUARE);
- 
+
     setSunIntensity(1.0f);
     setSunAmbientIntensity(0.5f);
     setSunColor(Vec3(1.0f, 1.0f, 1.0f));
 
     // Default origin location is a special place in the world...
     setOriginLocation(122.407f, 37.777f, 0.03f);
-    // Noun 
+    // Noun
     setDayTime(12.0f);
     // Begining of march
     setYearTime(60.0f);
@@ -225,7 +221,7 @@ void SunSkyStage::setSunDirection(const Vec3& direction) {
 
 // The sun declination calculus is taken from https://en.wikipedia.org/wiki/Position_of_the_Sun
 double evalSunDeclination(double dayNumber) {
-    return -(23.0 + 44.0/60.0)*cos(glm::radians((360.0/365.0)*(dayNumber + 10.0)));
+    return -(23.0 + 44.0 / 60.0) * cos(glm::radians((360.0 / 365.0) * (dayNumber + 10.0)));
 }
 
 void SunSkyStage::updateGraphicsObject() const {
@@ -236,7 +232,7 @@ void SunSkyStage::updateGraphicsObject() const {
     _earthSunModel.setSunLongitude(sunLongitude);
 
     // And update the sunLatitude as the declination depending of the time of the year
-    _earthSunModel.setSunLatitude(evalSunDeclination(_yearTime)); 
+    _earthSunModel.setSunLatitude(evalSunDeclination(_yearTime));
 
     if (isSunModelEnabled()) {
         Vec3d sunLightDir = -_earthSunModel.getSurfaceSunDir();

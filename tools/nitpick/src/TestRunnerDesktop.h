@@ -26,19 +26,11 @@ class InstallerWorker;
 class TestRunnerDesktop : public QObject, public TestRunner {
     Q_OBJECT
 public:
-    explicit TestRunnerDesktop(
-        std::vector<QCheckBox*> dayCheckboxes,
-        std::vector<QCheckBox*> timeEditCheckboxes,
-        std::vector<QTimeEdit*> timeEdits,
-        QLabel* workingFolderLabel,
-        QCheckBox* runServerless,
-        QCheckBox* runLatest,
-        QLineEdit* url,
-        QPushButton* runNow,
-        QLabel* statusLabel,
+    explicit TestRunnerDesktop(std::vector<QCheckBox*> dayCheckboxes, std::vector<QCheckBox*> timeEditCheckboxes,
+                               std::vector<QTimeEdit*> timeEdits, QLabel* workingFolderLabel, QCheckBox* runServerless,
+                               QCheckBox* runLatest, QLineEdit* url, QPushButton* runNow, QLabel* statusLabel,
 
-        QObject* parent = 0
-    );
+                               QObject* parent = 0);
 
     ~TestRunnerDesktop();
 
@@ -54,10 +46,10 @@ public:
     void restoreHighFidelityAppDataFolder();
 
     void createSnapshotFolder();
-    
+
     void killProcesses();
     void startLocalServerProcesses();
-    
+
     void runInterfaceWithTestScript();
 
     void evaluateResults();
@@ -77,9 +69,9 @@ signals:
     void startInstaller();
     void startInterface();
     void startResize();
-    
+
 private:
-    bool _automatedTestIsRunning{ false };
+    bool _automatedTestIsRunning { false };
 
     QString _installerURL;
     QString _installerFilename;
@@ -90,8 +82,8 @@ private:
     QString _installationFolder;
     QString _snapshotFolder;
 
-    const QString UNIQUE_FOLDER_NAME{ "fgadhcUDHSFaidsfh3478JJJFSDFIUSOEIrf" };
-    const QString SNAPSHOT_FOLDER_NAME{ "snapshots" };
+    const QString UNIQUE_FOLDER_NAME { "fgadhcUDHSFaidsfh3478JJJFSDFIUSOEIrf" };
+    const QString SNAPSHOT_FOLDER_NAME { "snapshots" };
 
     QString _branch;
     QString _user;

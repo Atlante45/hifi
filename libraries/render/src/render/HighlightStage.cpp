@@ -3,10 +3,10 @@
 using namespace render;
 
 std::string HighlightStage::_name("Highlight");
-const HighlightStage::Index HighlightStage::INVALID_INDEX{ render::indexed_container::INVALID_INDEX };
+const HighlightStage::Index HighlightStage::INVALID_INDEX { render::indexed_container::INVALID_INDEX };
 
 HighlightStage::Index HighlightStage::addHighlight(const std::string& selectionName, const HighlightStyle& style) {
-    Highlight outline{ selectionName, style };
+    Highlight outline { selectionName, style };
     Index id;
 
     id = _highlights.newElement(outline);
@@ -16,7 +16,7 @@ HighlightStage::Index HighlightStage::addHighlight(const std::string& selectionN
 }
 
 void HighlightStage::removeHighlight(Index index) {
-    HighlightIdList::iterator  idIterator = std::find(_activeHighlightIds.begin(), _activeHighlightIds.end(), index);
+    HighlightIdList::iterator idIterator = std::find(_activeHighlightIds.begin(), _activeHighlightIds.end(), index);
     if (idIterator != _activeHighlightIds.end()) {
         _activeHighlightIds.erase(idIterator);
     }
@@ -40,7 +40,7 @@ const HighlightStyle& HighlightStageConfig::getStyle() const {
     if (styleIterator != _styles.end()) {
         return styleIterator->second;
     } else {
-        auto insertion = _styles.insert(SelectionStyles::value_type{ _selectionName, HighlightStyle{} });
+        auto insertion = _styles.insert(SelectionStyles::value_type { _selectionName, HighlightStyle {} });
         return insertion.first->second;
     }
 }
@@ -50,7 +50,7 @@ HighlightStyle& HighlightStageConfig::editStyle() {
     if (styleIterator != _styles.end()) {
         return styleIterator->second;
     } else {
-        auto insertion = _styles.insert(SelectionStyles::value_type{ _selectionName, HighlightStyle{} });
+        auto insertion = _styles.insert(SelectionStyles::value_type { _selectionName, HighlightStyle {} });
         return insertion.first->second;
     }
 }
@@ -127,4 +127,3 @@ void HighlightStageSetup::run(const render::RenderContextPointer& renderContext)
         _styles.clear();
     }
 }
-

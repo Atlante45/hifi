@@ -7,11 +7,11 @@
 //
 
 #pragma once
-#include <QtGui/QWindow>
 #include <QtCore/QSettings>
+#include <QtGui/QWindow>
 
-#include <qml/OffscreenSurface.h>
 #include <gpu/Forward.h>
+#include <qml/OffscreenSurface.h>
 #include "RenderThread.h"
 
 // Create a simple OpenGL window that renders text in various ways
@@ -23,7 +23,7 @@ public:
     virtual ~PlayerWindow();
 
 protected:
-    void touchEvent(QTouchEvent *ev) override;
+    void touchEvent(QTouchEvent* ev) override;
 
 public slots:
     void loadFile(QString filename);

@@ -13,25 +13,25 @@
 
 #include <QAction>
 #include <QInputDialog>
-#include <QMessageBox>
-#include <QStandardPaths>
-#include <QQmlContext>
 #include <QList>
+#include <QMessageBox>
+#include <QQmlContext>
+#include <QStandardPaths>
 #include <QtCore/QThread>
 
-#include <shared/QtHelpers.h>
 #include <Application.h>
-#include <OffscreenUi.h>
-#include <avatar/AvatarManager.h>
+#include <EntityEditPacketSender.h>
 #include <EntityItemID.h>
 #include <EntityTree.h>
 #include <ModelEntityItem.h>
+#include <OffscreenUi.h>
 #include <PhysicalEntitySimulation.h>
-#include <EntityEditPacketSender.h>
 #include <VariantMapToScriptValue.h>
+#include <avatar/AvatarManager.h>
+#include <shared/QtHelpers.h>
 
-#include "MainWindow.h"
 #include "InterfaceLogging.h"
+#include "MainWindow.h"
 
 #include "QVariantGLM.h"
 
@@ -46,7 +46,8 @@ void addAvatarEntities(const QVariantList& avatarEntities) {
         return;
     }
     EntitySimulationPointer entitySimulation = entityTree->getSimulation();
-    PhysicalEntitySimulationPointer physicalEntitySimulation = std::static_pointer_cast<PhysicalEntitySimulation>(entitySimulation);
+    PhysicalEntitySimulationPointer physicalEntitySimulation = std::static_pointer_cast<PhysicalEntitySimulation>(
+        entitySimulation);
     EntityEditPacketSender* entityPacketSender = physicalEntitySimulation->getPacketSender();
     QScriptEngine scriptEngine;
     for (int index = 0; index < avatarEntities.count(); index++) {
@@ -68,7 +69,8 @@ void addAvatarEntities(const QVariantList& avatarEntities) {
             EntityItemPointer entity = entityTree->addEntity(id, entityProperties);
             if (entity) {
                 if (entityProperties.queryAACubeRelatedPropertyChanged()) {
-                    // due to parenting, the server may not know where something is in world-space, so include the bounding cube.
+                    // due to parenting, the server may not know where something is in world-space, so include the bounding
+                    // cube.
                     bool success;
                     AACube queryAACube = entity->getQueryAACube(success);
                     if (success) {
@@ -101,8 +103,9 @@ AvatarBookmarks::AvatarBookmarks() {
     }
 
     _bookmarksFilename = PathUtils::getAppDataPath() + "/" + AVATARBOOKMARKS_FILENAME;
-    if(!QFile::exists(_bookmarksFilename)) {
-        auto defaultBookmarksFilename = PathUtils::resourcesPath() + QString("avatar/bookmarks") + "/" + AVATARBOOKMARKS_FILENAME;
+    if (!QFile::exists(_bookmarksFilename)) {
+        auto defaultBookmarksFilename = PathUtils::resourcesPath() + QString("avatar/bookmarks") + "/" +
+                                        AVATARBOOKMARKS_FILENAME;
         if (!QFile::exists(defaultBookmarksFilename)) {
             qDebug() << defaultBookmarksFilename << "doesn't exist!";
         }
@@ -149,7 +152,7 @@ void AvatarBookmarks::removeBookmark(const QString& bookmarkName) {
     emit bookmarkDeleted(bookmarkName);
 }
 
-void AvatarBookmarks::updateAvatarEntities(const QVariantList &avatarEntities) {
+void AvatarBookmarks::updateAvatarEntities(const QVariantList& avatarEntities) {
     auto myAvatar = DependencyManager::get<AvatarManager>()->getMyAvatar();
     auto currentAvatarEntities = myAvatar->getAvatarEntityData();
     std::set<QUuid> newAvatarEntities;
@@ -186,7 +189,9 @@ void AvatarBookmarks::loadBookmark(const QString& bookmarkName) {
 
     if (bookmarkEntry != _bookmarks.end()) {
         QVariantMap bookmark = bookmarkEntry.value().toMap();
-        if (bookmark.empty()) { // compatibility with bookmarks like this: "Wooden Doll": "http://mpassets.highfidelity.com/7fe80a1e-f445-4800-9e89-40e677b03bee-v1/mannequin.fst?noDownload=false",
+        if (bookmark
+                .empty()) { // compatibility with bookmarks like this: "Wooden Doll":
+                            // "http://mpassets.highfidelity.com/7fe80a1e-f445-4800-9e89-40e677b03bee-v1/mannequin.fst?noDownload=false",
             auto avatarUrl = bookmarkEntry.value().toString();
             if (!avatarUrl.isEmpty()) {
                 bookmark.insert(ENTRY_AVATAR_URL, avatarUrl);
@@ -236,8 +241,7 @@ void AvatarBookmarks::readFromFile() {
     Bookmarks::readFromFile();
 }
 
-QVariantMap AvatarBookmarks::getBookmark(const QString &bookmarkName)
-{
+QVariantMap AvatarBookmarks::getBookmark(const QString& bookmarkName) {
     if (QThread::currentThread() != thread()) {
         QVariantMap result;
         BLOCKING_INVOKE_METHOD(this, "getBookmark", Q_RETURN_ARG(QVariantMap, result), Q_ARG(QString, bookmarkName));
@@ -261,7 +265,8 @@ QVariantMap AvatarBookmarks::getAvatarDataToBookmark() {
     const QString& avatarUrl = myAvatar->getSkeletonModelURL().toString();
     const QVariant& avatarScale = myAvatar->getAvatarScale();
 
-    // If Avatar attachments ever change, this is where to update them, when saving remember to also append to AVATAR_BOOKMARK_VERSION
+    // If Avatar attachments ever change, this is where to update them, when saving remember to also append to
+    // AVATAR_BOOKMARK_VERSION
     QVariantMap bookmark;
     bookmark.insert(ENTRY_VERSION, AVATAR_BOOKMARK_VERSION);
     bookmark.insert(ENTRY_AVATAR_URL, avatarUrl);

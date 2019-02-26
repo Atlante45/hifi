@@ -15,15 +15,14 @@
 #include <QThread>
 #include <glm/gtx/transform.hpp>
 
-#include <shared/QtHelpers.h>
 #include <AnimUtil.h>
-#include <ClientTraitsHandler.h>
-#include <GLMHelpers.h>
-#include <ResourceRequestObserver.h>
 #include <AvatarLogging.h>
+#include <ClientTraitsHandler.h>
 #include <EntityItem.h>
 #include <EntityItemProperties.h>
-
+#include <GLMHelpers.h>
+#include <ResourceRequestObserver.h>
+#include <shared/QtHelpers.h>
 
 ScriptableAvatar::ScriptableAvatar() {
     _clientTraitsHandler.reset(new ClientTraitsHandler(this));
@@ -34,18 +33,18 @@ QByteArray ScriptableAvatar::toByteArrayStateful(AvatarDataDetail dataDetail, bo
     return AvatarData::toByteArrayStateful(dataDetail, dropFaceTracking);
 }
 
-
 // hold and priority unused but kept so that client side JS can run.
-void ScriptableAvatar::startAnimation(const QString& url, float fps, float priority,
-                              bool loop, bool hold, float firstFrame, float lastFrame, const QStringList& maskedJoints) {
+void ScriptableAvatar::startAnimation(const QString& url, float fps, float priority, bool loop, bool hold, float firstFrame,
+                                      float lastFrame, const QStringList& maskedJoints) {
     if (QThread::currentThread() != thread()) {
-        QMetaObject::invokeMethod(this, "startAnimation", Q_ARG(const QString&, url), Q_ARG(float, fps),
-                                  Q_ARG(float, priority), Q_ARG(bool, loop), Q_ARG(bool, hold), Q_ARG(float, firstFrame),
-                                  Q_ARG(float, lastFrame), Q_ARG(const QStringList&, maskedJoints));
+        QMetaObject::invokeMethod(this, "startAnimation", Q_ARG(const QString&, url), Q_ARG(float, fps), Q_ARG(float, priority),
+                                  Q_ARG(bool, loop), Q_ARG(bool, hold), Q_ARG(float, firstFrame), Q_ARG(float, lastFrame),
+                                  Q_ARG(const QStringList&, maskedJoints));
         return;
     }
     _animation = DependencyManager::get<AnimationCache>()->getAnimation(url);
-    _animationDetails = AnimationDetails("", QUrl(url), fps, 0, loop, hold, false, firstFrame, lastFrame, true, firstFrame, false);
+    _animationDetails = AnimationDetails("", QUrl(url), fps, 0, loop, hold, false, firstFrame, lastFrame, true, firstFrame,
+                                         false);
     _maskedJoints = maskedJoints;
 }
 
@@ -60,8 +59,7 @@ void ScriptableAvatar::stopAnimation() {
 AnimationDetails ScriptableAvatar::getAnimationDetails() {
     if (QThread::currentThread() != thread()) {
         AnimationDetails result;
-        BLOCKING_INVOKE_METHOD(this, "getAnimationDetails", 
-                                  Q_RETURN_ARG(AnimationDetails, result));
+        BLOCKING_INVOKE_METHOD(this, "getAnimationDetails", Q_RETURN_ARG(AnimationDetails, result));
         return result;
     }
     return _animationDetails;
@@ -166,11 +164,12 @@ void ScriptableAvatar::update(float deltatime) {
                 // trusting the .fst (which is sometimes not updated to match changes to .fbx).
                 int mapping = _bind->getHFMModel().getJointIndex(name);
                 if (mapping != -1 && !_maskedJoints.contains(name)) {
-
-                    AnimPose floorPose = composeAnimPose(modelJoints[mapping], floorFrame.rotations[i], floorFrame.translations[i] * UNIT_SCALE);
-                    AnimPose ceilPose = composeAnimPose(modelJoints[mapping], ceilFrame.rotations[i], floorFrame.translations[i] * UNIT_SCALE);
+                    AnimPose floorPose = composeAnimPose(modelJoints[mapping], floorFrame.rotations[i],
+                                                         floorFrame.translations[i] * UNIT_SCALE);
+                    AnimPose ceilPose = composeAnimPose(modelJoints[mapping], ceilFrame.rotations[i],
+                                                        floorFrame.translations[i] * UNIT_SCALE);
                     blend(1, &floorPose, &ceilPose, frameFraction, &poses[mapping]);
-                 }
+                }
             }
 
             std::vector<AnimPose> absPoses = poses;
@@ -222,8 +221,7 @@ void ScriptableAvatar::updateJointMappings() {
         QNetworkRequest networkRequest = QNetworkRequest(_skeletonModelURL);
         networkRequest.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
         networkRequest.setHeader(QNetworkRequest::UserAgentHeader, HIGH_FIDELITY_USER_AGENT);
-        DependencyManager::get<ResourceRequestObserver>()->update(
-            _skeletonModelURL, -1, "AvatarData::updateJointMappings");
+        DependencyManager::get<ResourceRequestObserver>()->update(_skeletonModelURL, -1, "AvatarData::updateJointMappings");
         QNetworkReply* networkReply = networkAccessManager.get(networkRequest);
         //
         ////
@@ -380,7 +378,6 @@ void ScriptableAvatar::setAvatarEntityData(const AvatarEntityMap& avatarEntityDa
                         _entities.erase(entityItr);
                         idsToClear.push_back(id);
                     }
-
                 }
             }
             ++propertiesItr;

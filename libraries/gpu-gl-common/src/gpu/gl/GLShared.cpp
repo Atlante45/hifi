@@ -7,20 +7,21 @@
 //
 #include "GLShared.h"
 
-#include <mutex>
 #include <fstream>
+#include <mutex>
 
 #include <QtCore/QThread>
 
-#include <gl/GLHelpers.h>
 #include <GPUIdent.h>
 #include <NumericalConstants.h>
+#include <gl/GLHelpers.h>
 
 Q_LOGGING_CATEGORY(gpugllogging, "hifi.gpu.gl")
 Q_LOGGING_CATEGORY(trace_render_gpu_gl, "trace.render.gpu.gl")
 Q_LOGGING_CATEGORY(trace_render_gpu_gl_detail, "trace.render.gpu.gl.detail")
 
-namespace gpu { namespace gl {
+namespace gpu {
+namespace gl {
 
 gpu::Size getFreeDedicatedMemory() {
     Size result { 0 };
@@ -28,7 +29,6 @@ gpu::Size getFreeDedicatedMemory() {
     static bool nvidiaMemorySupported { true };
     static bool atiMemorySupported { true };
     if (nvidiaMemorySupported) {
-        
         GLint nvGpuMemory { 0 };
         glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &nvGpuMemory);
         if (GL_NO_ERROR == glGetError()) {
@@ -235,8 +235,12 @@ void getCurrentGLState(State::Data& state) {
         glGetIntegerv(GL_STENCIL_BACK_FUNC, &backFunc);
 
         state.stencilActivation = State::StencilActivation(isEnabled, frontWriteMask, backWriteMask);
-        state.stencilTestFront = State::StencilTest(frontRef, frontReadMask, comparisonFuncFromGL(frontFunc), stencilOpFromGL(frontFail), stencilOpFromGL(frontDepthFail), stencilOpFromGL(frontPass));
-        state.stencilTestBack = State::StencilTest(backRef, backReadMask, comparisonFuncFromGL(backFunc), stencilOpFromGL(backFail), stencilOpFromGL(backDepthFail), stencilOpFromGL(backPass));
+        state.stencilTestFront = State::StencilTest(frontRef, frontReadMask, comparisonFuncFromGL(frontFunc),
+                                                    stencilOpFromGL(frontFail), stencilOpFromGL(frontDepthFail),
+                                                    stencilOpFromGL(frontPass));
+        state.stencilTestBack = State::StencilTest(backRef, backReadMask, comparisonFuncFromGL(backFunc),
+                                                   stencilOpFromGL(backFail), stencilOpFromGL(backDepthFail),
+                                                   stencilOpFromGL(backPass));
     }
     {
         GLint mask = 0xFFFFFFFF;
@@ -246,9 +250,7 @@ void getCurrentGLState(State::Data& state) {
         }
         state.sampleMask = mask;
     }
-    {
-        state.flags.alphaToCoverageEnable = glIsEnabled(GL_SAMPLE_ALPHA_TO_COVERAGE);
-    }
+    { state.flags.alphaToCoverageEnable = glIsEnabled(GL_SAMPLE_ALPHA_TO_COVERAGE); }
     {
         GLboolean isEnabled = glIsEnabled(GL_BLEND);
         GLint srcRGB;
@@ -265,22 +267,19 @@ void getCurrentGLState(State::Data& state) {
         glGetIntegerv(GL_BLEND_EQUATION_RGB, &opRGB);
         glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &opA);
 
-        state.blendFunction = State::BlendFunction(isEnabled,
-            blendArgFromGL(srcRGB), blendOpFromGL(opRGB), blendArgFromGL(dstRGB),
-            blendArgFromGL(srcA), blendOpFromGL(opA), blendArgFromGL(dstA));
+        state.blendFunction = State::BlendFunction(isEnabled, blendArgFromGL(srcRGB), blendOpFromGL(opRGB),
+                                                   blendArgFromGL(dstRGB), blendArgFromGL(srcA), blendOpFromGL(opA),
+                                                   blendArgFromGL(dstA));
     }
     {
         GLboolean mask[4];
         glGetBooleanv(GL_COLOR_WRITEMASK, mask);
-        state.colorWriteMask = (State::ColorMask)((mask[0] ? State::WRITE_RED : 0)
-            | (mask[1] ? State::WRITE_GREEN : 0)
-            | (mask[2] ? State::WRITE_BLUE : 0)
-            | (mask[3] ? State::WRITE_ALPHA : 0));
+        state.colorWriteMask = (State::ColorMask)((mask[0] ? State::WRITE_RED : 0) | (mask[1] ? State::WRITE_GREEN : 0) |
+                                                  (mask[2] ? State::WRITE_BLUE : 0) | (mask[3] ? State::WRITE_ALPHA : 0));
     }
 
     (void)CHECK_GL_ERROR();
 }
-
 
 void serverWait() {
     auto fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
@@ -301,9 +300,7 @@ void clientWait() {
     glDeleteSync(fence);
 }
 
-} }
-
+} // namespace gl
+} // namespace gpu
 
 using namespace gpu;
-
-

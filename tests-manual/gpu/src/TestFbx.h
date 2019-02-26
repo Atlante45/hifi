@@ -21,13 +21,12 @@ class TestFbx : public GpuTestBase {
     gpu::BufferPointer _vertexBuffer { std::make_shared<gpu::Buffer>() };
     gpu::BufferPointer _indexBuffer { std::make_shared<gpu::Buffer>() };
     gpu::BufferPointer _indirectBuffer { std::make_shared<gpu::Buffer>() };
+
 public:
     TestFbx(const render::ShapePlumberPointer& shapePlumber);
-    bool isReady() const override; 
+    bool isReady() const override;
     void renderTest(size_t test, RenderArgs* args) override;
 
 private:
     void parseFbx(const QByteArray& fbxData);
 };
-
-

@@ -16,7 +16,7 @@
 NodeConnectionData NodeConnectionData::fromDataStream(QDataStream& dataStream, const HifiSockAddr& senderSockAddr,
                                                       bool isConnectRequest) {
     NodeConnectionData newHeader;
-    
+
     if (isConnectRequest) {
         dataStream >> newHeader.connectUUID;
 
@@ -36,17 +36,16 @@ NodeConnectionData NodeConnectionData::fromDataStream(QDataStream& dataStream, c
         // now the machine fingerprint
         dataStream >> newHeader.machineFingerprint;
     }
-    
-    dataStream >> newHeader.nodeType
-        >> newHeader.publicSockAddr >> newHeader.localSockAddr
-        >> newHeader.interestList >> newHeader.placeName;
+
+    dataStream >> newHeader.nodeType >> newHeader.publicSockAddr >> newHeader.localSockAddr >> newHeader.interestList >>
+        newHeader.placeName;
 
     newHeader.senderSockAddr = senderSockAddr;
-    
+
     if (newHeader.publicSockAddr.getAddress().isNull()) {
         // this node wants to use us its STUN server
         // so set the node public address to whatever we perceive the public address to be
-        
+
         // if the sender is on our box then leave its public address to 0 so that
         // other users attempt to reach it on the same address they have for the domain-server
         if (senderSockAddr.getAddress().isLoopback()) {
@@ -55,6 +54,6 @@ NodeConnectionData NodeConnectionData::fromDataStream(QDataStream& dataStream, c
             newHeader.publicSockAddr.setAddress(senderSockAddr.getAddress());
         }
     }
-    
+
     return newHeader;
 }

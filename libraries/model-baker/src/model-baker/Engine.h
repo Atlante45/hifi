@@ -16,17 +16,17 @@
 
 namespace baker {
 
-    class BakeContext : public task::JobContext {
-    public:
-        // No context settings yet for model prep
-    };
-    using BakeContextPointer = std::shared_ptr<BakeContext>;
+class BakeContext : public task::JobContext {
+public:
+    // No context settings yet for model prep
+};
+using BakeContextPointer = std::shared_ptr<BakeContext>;
 
-    Task_DeclareCategoryTimeProfilerClass(BakerTimeProfiler, trace_baker);
-    Task_DeclareTypeAliases(BakeContext, BakerTimeProfiler)
+Task_DeclareCategoryTimeProfilerClass(BakerTimeProfiler, trace_baker);
+Task_DeclareTypeAliases(BakeContext, BakerTimeProfiler)
 
     using EnginePointer = std::shared_ptr<Engine>;
 
-};
+}; // namespace baker
 
 #endif // hifi_baker_Engine_h

@@ -12,8 +12,8 @@
 #ifndef hifi_ShutdownEventListener_h
 #define hifi_ShutdownEventListener_h
 
-#include <QObject>
 #include <QAbstractNativeEventFilter>
+#include <QObject>
 
 class ShutdownEventListener : public QObject, public QAbstractNativeEventFilter {
     Q_OBJECT
@@ -21,6 +21,7 @@ public:
     static ShutdownEventListener& getInstance();
 
     virtual bool nativeEventFilter(const QByteArray& eventType, void* message, long* result) override;
+
 private:
     ShutdownEventListener(QObject* parent = 0);
 };

@@ -11,11 +11,10 @@
 
 #include "ScriptAvatarData.h"
 
-ScriptAvatarData::ScriptAvatarData(AvatarSharedPointer avatarData) :
-    _avatarData(avatarData)
-{
+ScriptAvatarData::ScriptAvatarData(AvatarSharedPointer avatarData) : _avatarData(avatarData) {
     QObject::connect(avatarData.get(), &AvatarData::displayNameChanged, this, &ScriptAvatarData::displayNameChanged);
-    QObject::connect(avatarData.get(), &AvatarData::sessionDisplayNameChanged, this, &ScriptAvatarData::sessionDisplayNameChanged);
+    QObject::connect(avatarData.get(), &AvatarData::sessionDisplayNameChanged, this,
+                     &ScriptAvatarData::sessionDisplayNameChanged);
     QObject::connect(avatarData.get(), &AvatarData::skeletonModelURLChanged, this, &ScriptAvatarData::skeletonModelURLChanged);
     QObject::connect(avatarData.get(), &AvatarData::lookAtSnappingChanged, this, &ScriptAvatarData::lookAtSnappingChanged);
 }
@@ -128,7 +127,6 @@ glm::vec3 ScriptAvatarData::getAngularVelocity() const {
 // PHYSICAL PROPERTIES: VELOCITY
 // END
 //
-
 
 //
 // IDENTIFIER PROPERTIES
@@ -288,7 +286,6 @@ AvatarEntityMap ScriptAvatarData::getAvatarEntities() const {
 // END
 //
 #endif
-
 
 //
 // AUDIO PROPERTIES

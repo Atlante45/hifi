@@ -24,16 +24,16 @@ ConnectionStats::ConnectionStats() {
 ConnectionStats::Stats ConnectionStats::sample() {
     Stats sample = _currentSample;
     _currentSample = Stats();
-    
+
     auto now = duration_cast<microseconds>(system_clock::now().time_since_epoch());
     sample.endTime = now;
     _currentSample.startTime = now;
-    
+
     return sample;
 }
 
 void ConnectionStats::record(Stats::Event event) {
-    ++_currentSample.events[(int) event];
+    ++_currentSample.events[(int)event];
 }
 
 void ConnectionStats::recordSentACK(int size) {
@@ -93,11 +93,7 @@ void ConnectionStats::recordPacketSendPeriod(int sample) {
 QDebug& operator<<(QDebug&& debug, const udt::ConnectionStats::Stats& stats) {
     debug << "Connection stats:\n";
 #define HIFI_LOG_EVENT(x) << "    " #x " events: " << stats.events[ConnectionStats::Stats::Event::x] << "\n"
-    debug
-    HIFI_LOG_EVENT(SentACK)
-    HIFI_LOG_EVENT(ReceivedACK)
-    HIFI_LOG_EVENT(ProcessedACK)
-    ;
+    debug HIFI_LOG_EVENT(SentACK) HIFI_LOG_EVENT(ReceivedACK) HIFI_LOG_EVENT(ProcessedACK);
 #undef HIFI_LOG_EVENT
 
     debug << "    Sent packets: " << stats.sentPackets;

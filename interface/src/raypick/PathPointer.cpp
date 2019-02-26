@@ -15,8 +15,9 @@
 #include "PickScriptingInterface.h"
 #include "RayPick.h"
 
-PathPointer::PathPointer(PickQuery::PickType type, const QVariant& rayProps, const RenderStateMap& renderStates, const DefaultRenderStateMap& defaultRenderStates,
-                         bool hover, const PointerTriggers& triggers, bool faceAvatar, bool followNormal, float followNormalStrength, bool centerEndY, bool lockEnd,
+PathPointer::PathPointer(PickQuery::PickType type, const QVariant& rayProps, const RenderStateMap& renderStates,
+                         const DefaultRenderStateMap& defaultRenderStates, bool hover, const PointerTriggers& triggers,
+                         bool faceAvatar, bool followNormal, float followNormalStrength, bool centerEndY, bool lockEnd,
                          bool distanceScaleEnd, bool scaleWithParent, bool enabled) :
     Pointer(DependencyManager::get<PickScriptingInterface>()->createPick(type, rayProps), enabled, hover),
     _renderStates(renderStates),
@@ -28,8 +29,7 @@ PathPointer::PathPointer(PickQuery::PickType type, const QVariant& rayProps, con
     _centerEndY(centerEndY),
     _lockEnd(lockEnd),
     _distanceScaleEnd(distanceScaleEnd),
-    _scaleWithParent(scaleWithParent)
-{
+    _scaleWithParent(scaleWithParent) {
     for (auto& state : _renderStates) {
         if (!enabled || state.first != _currentRenderState) {
             state.second->disable();
@@ -68,9 +68,7 @@ void PathPointer::setRenderState(const std::string& state) {
 }
 
 void PathPointer::setLength(float length) {
-    withWriteLock([&] {
-        _pathLength = length;
-    });
+    withWriteLock([&] { _pathLength = length; });
 }
 
 void PathPointer::setLockEndUUID(const QUuid& objectID, bool isAvatar, const glm::mat4& offsetMat) {
@@ -99,7 +97,8 @@ PickResultPointer PathPointer::getVisualPickResult(const PickResultPointer& pick
             glm::vec3 registrationPoint;
             // TODO: use isAvatar
             {
-                EntityItemProperties props = DependencyManager::get<EntityScriptingInterface>()->getEntityProperties(_lockEndObject.id);
+                EntityItemProperties props = DependencyManager::get<EntityScriptingInterface>()->getEntityProperties(
+                    _lockEndObject.id);
                 glm::mat4 entityMat = createMatFromQuatAndPos(props.getRotation(), props.getPosition());
                 glm::mat4 finalPosAndRotMat = entityMat * _lockEndObject.offsetMat;
                 pos = extractTranslation(finalPosAndRotMat);
@@ -163,7 +162,8 @@ void PathPointer::updateVisuals(const PickResultPointer& pickResult) {
         glm::vec3 origin = getPickOrigin(pickResult);
         glm::vec3 end = getPickEnd(pickResult, defaultRenderState->second.first);
         defaultRenderState->second.second->update(origin, end, Vectors::UP, parentScale, _distanceScaleEnd, _centerEndY,
-                                                  _faceAvatar, _followNormal, _followNormalStrength, defaultRenderState->second.first, pickResult);
+                                                  _faceAvatar, _followNormal, _followNormalStrength,
+                                                  defaultRenderState->second.first, pickResult);
     } else if (!_currentRenderState.empty()) {
         if (renderState != _renderStates.end() && renderState->second->isEnabled()) {
             renderState->second->disable();
@@ -174,7 +174,8 @@ void PathPointer::updateVisuals(const PickResultPointer& pickResult) {
     }
 }
 
-void PathPointer::editRenderState(const std::string& state, const QVariant& startProps, const QVariant& pathProps, const QVariant& endProps) {
+void PathPointer::editRenderState(const std::string& state, const QVariant& startProps, const QVariant& pathProps,
+                                  const QVariant& endProps) {
     withWriteLock([&] {
         auto renderState = _renderStates.find(state);
         if (renderState != _renderStates.end()) {
@@ -199,7 +200,8 @@ void PathPointer::editRenderState(const std::string& state, const QVariant& star
 }
 
 void PathPointer::updateRenderState(const QUuid& id, const QVariant& props) {
-    // FIXME: we have to keep using the Overlays interface here, because existing scripts use overlay properties to define pointers
+    // FIXME: we have to keep using the Overlays interface here, because existing scripts use overlay properties to define
+    // pointers
     if (!id.isNull() && props.isValid()) {
         QVariantMap propMap = props.toMap();
         propMap.remove("visible");
@@ -244,8 +246,7 @@ Pointer::Buttons PathPointer::getPressedButtons(const PickResultPointer& pickRes
     return toReturn;
 }
 
-StartEndRenderState::StartEndRenderState(const QUuid& startID, const QUuid& endID) :
-    _startID(startID), _endID(endID) {
+StartEndRenderState::StartEndRenderState(const QUuid& startID, const QUuid& endID) : _startID(startID), _endID(endID) {
     auto entityScriptingInterface = DependencyManager::get<EntityScriptingInterface>();
     if (!_startID.isNull()) {
         EntityPropertyFlags desiredProperties;
@@ -294,8 +295,9 @@ void StartEndRenderState::disable() {
     _enabled = false;
 }
 
-void StartEndRenderState::update(const glm::vec3& origin, const glm::vec3& end, const glm::vec3& surfaceNormal, float parentScale, bool distanceScaleEnd, bool centerEndY,
-                                 bool faceAvatar, bool followNormal, float followNormalStrength, float distance, const PickResultPointer& pickResult) {
+void StartEndRenderState::update(const glm::vec3& origin, const glm::vec3& end, const glm::vec3& surfaceNormal,
+                                 float parentScale, bool distanceScaleEnd, bool centerEndY, bool faceAvatar, bool followNormal,
+                                 float followNormalStrength, float distance, const PickResultPointer& pickResult) {
     auto entityScriptingInterface = DependencyManager::get<EntityScriptingInterface>();
     if (!getStartID().isNull()) {
         EntityItemProperties properties;
@@ -331,8 +333,12 @@ void StartEndRenderState::update(const glm::vec3& origin, const glm::vec3& end, 
             }
         }
         if (faceAvatar) {
-            glm::quat orientation = followNormal ? normalQuat : DependencyManager::get<AvatarManager>()->getMyAvatar()->getWorldOrientation();
-            glm::quat lookAtWorld = Quat().lookAt(position, DependencyManager::get<AvatarManager>()->getMyAvatar()->getWorldPosition(), surfaceNormal);
+            glm::quat orientation = followNormal
+                                        ? normalQuat
+                                        : DependencyManager::get<AvatarManager>()->getMyAvatar()->getWorldOrientation();
+            glm::quat lookAtWorld = Quat().lookAt(position,
+                                                  DependencyManager::get<AvatarManager>()->getMyAvatar()->getWorldPosition(),
+                                                  surfaceNormal);
             glm::quat lookAtModel = glm::inverse(orientation) * lookAtWorld;
             glm::quat lookAtFlatModel = Quat().cancelOutRollAndPitch(lookAtModel);
             glm::quat lookAtFlatWorld = orientation * lookAtFlatModel;
@@ -363,12 +369,12 @@ void StartEndRenderState::update(const glm::vec3& origin, const glm::vec3& end, 
 
 glm::vec2 PathPointer::findPos2D(const PickedObject& pickedObject, const glm::vec3& origin) {
     switch (pickedObject.type) {
-    case ENTITY:
-    case LOCAL_ENTITY:
-        return RayPick::projectOntoEntityXYPlane(pickedObject.objectID, origin);
-    case HUD:
-        return DependencyManager::get<PickManager>()->calculatePos2DFromHUD(origin);
-    default:
-        return glm::vec2(NAN);
+        case ENTITY:
+        case LOCAL_ENTITY:
+            return RayPick::projectOntoEntityXYPlane(pickedObject.objectID, origin);
+        case HUD:
+            return DependencyManager::get<PickManager>()->calculatePos2DFromHUD(origin);
+        default:
+            return glm::vec2(NAN);
     }
 }

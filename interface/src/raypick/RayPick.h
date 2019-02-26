@@ -8,8 +8,8 @@
 #ifndef hifi_RayPick_h
 #define hifi_RayPick_h
 
-#include <RegisteredMetaTypes.h>
 #include <Pick.h>
+#include <RegisteredMetaTypes.h>
 
 class EntityItemID;
 
@@ -17,9 +17,17 @@ class RayPickResult : public PickResult {
 public:
     RayPickResult() {}
     RayPickResult(const QVariantMap& pickVariant) : PickResult(pickVariant) {}
-    RayPickResult(const IntersectionType type, const QUuid& objectID, float distance, const glm::vec3& intersection, const PickRay& searchRay, const glm::vec3& surfaceNormal = glm::vec3(NAN), const QVariantMap& extraInfo = QVariantMap()) :
-        PickResult(searchRay.toVariantMap()), extraInfo(extraInfo), objectID(objectID), intersection(intersection), surfaceNormal(surfaceNormal), type(type), distance(distance), intersects(type != NONE) {
-    }
+    RayPickResult(const IntersectionType type, const QUuid& objectID, float distance, const glm::vec3& intersection,
+                  const PickRay& searchRay, const glm::vec3& surfaceNormal = glm::vec3(NAN),
+                  const QVariantMap& extraInfo = QVariantMap()) :
+        PickResult(searchRay.toVariantMap()),
+        extraInfo(extraInfo),
+        objectID(objectID),
+        intersection(intersection),
+        surfaceNormal(surfaceNormal),
+        type(type),
+        distance(distance),
+        intersects(type != NONE) {}
 
     RayPickResult(const RayPickResult& rayPickResult) : PickResult(rayPickResult.pickVariant) {
         type = rayPickResult.type;
@@ -63,19 +71,18 @@ public:
             return std::make_shared<RayPickResult>(*this);
         }
     }
-
 };
 
 class RayPick : public Pick<PickRay> {
-
 public:
     RayPick(glm::vec3 position, glm::vec3 direction, const PickFilter& filter, float maxDistance, bool enabled) :
-        Pick(PickRay(position, direction), filter, maxDistance, enabled) {
-    }
+        Pick(PickRay(position, direction), filter, maxDistance, enabled) {}
 
     PickRay getMathematicalPick() const override;
 
-    PickResultPointer getDefaultResult(const QVariantMap& pickVariant) const override { return std::make_shared<RayPickResult>(pickVariant); }
+    PickResultPointer getDefaultResult(const QVariantMap& pickVariant) const override {
+        return std::make_shared<RayPickResult>(pickVariant);
+    }
     PickResultPointer getEntityIntersection(const PickRay& pick) override;
     PickResultPointer getAvatarIntersection(const PickRay& pick) override;
     PickResultPointer getHUDIntersection(const PickRay& pick) override;
@@ -85,10 +92,12 @@ public:
     static glm::vec3 intersectRayWithEntityXYPlane(const QUuid& entityID, const glm::vec3& origin, const glm::vec3& direction);
     static glm::vec2 projectOntoEntityXYPlane(const QUuid& entityID, const glm::vec3& worldPos, bool unNormalized = true);
 
-    static glm::vec2 projectOntoXYPlane(const glm::vec3& worldPos, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& dimensions, const glm::vec3& registrationPoint, bool unNormalized);
+    static glm::vec2 projectOntoXYPlane(const glm::vec3& worldPos, const glm::vec3& position, const glm::quat& rotation,
+                                        const glm::vec3& dimensions, const glm::vec3& registrationPoint, bool unNormalized);
 
 private:
-    static glm::vec3 intersectRayWithXYPlane(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& point, const glm::quat& rotation, const glm::vec3& registration);
+    static glm::vec3 intersectRayWithXYPlane(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& point,
+                                             const glm::quat& rotation, const glm::vec3& registration);
 };
 
 #endif // hifi_RayPick_h

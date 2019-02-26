@@ -12,16 +12,16 @@
 #ifndef hifi_WalletScriptingInterface_h
 #define hifi_WalletScriptingInterface_h
 
-#include <QtCore/QObject>
 #include <DependencyManager.h>
+#include <QtCore/QObject>
 
-#include <ui/TabletScriptingInterface.h>
-#include <ui/QmlWrapper.h>
+#include <AccountManager.h>
 #include <OffscreenUi.h>
+#include <ui/QmlWrapper.h>
+#include <ui/TabletScriptingInterface.h>
 #include "Application.h"
 #include "commerce/Wallet.h"
 #include "ui/overlays/ContextOverlayInterface.h"
-#include <AccountManager.h>
 
 class CheckoutProxy : public QmlWrapper {
     Q_OBJECT
@@ -30,7 +30,7 @@ public:
 };
 
 /**jsdoc
- * The <code>WalletScriptingInterface</code> API provides functions related to the user's wallet and verification of certified 
+ * The <code>WalletScriptingInterface</code> API provides functions related to the user's wallet and verification of certified
  * avatar entities.
  *
  * @namespace WalletScriptingInterface
@@ -40,8 +40,8 @@ public:
  * @hifi-avatar
  *
  * @property {WalletScriptingInterface.WalletStatus} walletStatus - The status of the user's wallet. <em>Read-only.</em>
- * @property {boolean} limitedCommerce - <code>true</code> if Interface is running in limited commerce mode. In limited commerce 
- *     mode, certain Interface functionality is disabled, e.g., users can't buy non-free items from the Marketplace. The Oculus 
+ * @property {boolean} limitedCommerce - <code>true</code> if Interface is running in limited commerce mode. In limited commerce
+ *     mode, certain Interface functionality is disabled, e.g., users can't buy non-free items from the Marketplace. The Oculus
  *     Store version of Interface runs in limited commerce mode. <em>Read-only.</em>
  */
 class WalletScriptingInterface : public QObject, public Dependency {
@@ -51,7 +51,6 @@ class WalletScriptingInterface : public QObject, public Dependency {
     Q_PROPERTY(bool limitedCommerce READ getLimitedCommerce WRITE setLimitedCommerce NOTIFY limitedCommerceChanged)
 
 public:
-
     WalletScriptingInterface();
 
     /**jsdoc
@@ -71,10 +70,10 @@ public:
     Q_INVOKABLE uint getWalletStatus() { return _walletStatus; }
 
     /**jsdoc
-     * Check that a certified avatar entity is owned by the avatar whose entity it is. The result of the check is provided via 
-     * the {@link WalletScriptingInterface.ownershipVerificationSuccess|ownershipVerificationSuccess} and 
+     * Check that a certified avatar entity is owned by the avatar whose entity it is. The result of the check is provided via
+     * the {@link WalletScriptingInterface.ownershipVerificationSuccess|ownershipVerificationSuccess} and
      * {@link WalletScriptingInterface.ownershipVerificationFailed|ownershipVerificationFailed} signals.<br />
-     * <strong>Warning:</strong> Neither of these signals fire if the entity is not an avatar entity or it's not a certified 
+     * <strong>Warning:</strong> Neither of these signals fire if the entity is not an avatar entity or it's not a certified
      * entity.
      * @function WalletScriptingInterface.proveAvatarEntityOwnershipVerification
      * @param {Uuid} entityID - The ID of the avatar entity to check.
@@ -88,7 +87,7 @@ public:
      * }
      * WalletScriptingInterface.ownershipVerificationSuccess.connect(ownershipSuccess);
      * WalletScriptingInterface.ownershipVerificationFailed.connect(ownershipFailed);
-     * 
+     *
      * // Check ownership of all nearby certified avatar entities.
      * var entityIDs = Entities.findEntities(MyAvatar.position, 10);
      * var i, length;
@@ -99,7 +98,7 @@ public:
      *         WalletScriptingInterface.proveAvatarEntityOwnershipVerification(entityIDs[i]);
      *     }
      * }
-     * 
+     *
      * // Tidy up.
      * Script.scriptEnding.connect(function () {
      *     WalletScriptingInterface.ownershipVerificationFailed.disconnect(ownershipFailed);
@@ -136,7 +135,7 @@ signals:
     void limitedCommerceChanged();
 
     /**jsdoc
-     * Triggered when the user rezzes a certified entity but the user's wallet is not ready and so the certified location of the 
+     * Triggered when the user rezzes a certified entity but the user's wallet is not ready and so the certified location of the
      * entity cannot be updated in the metaverse.
      * @function WalletScriptingInterface.walletNotSetup
      * @returns {Signal}
@@ -144,8 +143,8 @@ signals:
     void walletNotSetup();
 
     /**jsdoc
-     * Triggered when a certified avatar entity's ownership check requested via 
-     * {@link WalletScriptingInterface.proveAvatarEntityOwnershipVerification|proveAvatarEntityOwnershipVerification} succeeds. 
+     * Triggered when a certified avatar entity's ownership check requested via
+     * {@link WalletScriptingInterface.proveAvatarEntityOwnershipVerification|proveAvatarEntityOwnershipVerification} succeeds.
      * @function WalletScriptingInterface.ownershipVerificationSuccess
      * @param {Uuid} entityID - The ID of the avatar entity checked.
      * @returns {Signal}

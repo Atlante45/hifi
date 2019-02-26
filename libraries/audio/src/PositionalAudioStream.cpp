@@ -19,13 +19,12 @@
 
 #include <LogHandler.h>
 #include <Node.h>
-#include <udt/PacketHeaders.h>
 #include <UUID.h>
+#include <udt/PacketHeaders.h>
 
 PositionalAudioStream::PositionalAudioStream(PositionalAudioStream::Type type, bool isStereo, int numStaticJitterFrames) :
     InboundAudioStream(isStereo ? AudioConstants::STEREO : AudioConstants::MONO,
-                       AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL,
-                       AUDIOMIXER_INBOUND_RING_BUFFER_FRAME_CAPACITY,
+                       AudioConstants::NETWORK_FRAME_SAMPLES_PER_CHANNEL, AUDIOMIXER_INBOUND_RING_BUFFER_FRAME_CAPACITY,
                        numStaticJitterFrames),
     _type(type),
     _position(0.0f, 0.0f, 0.0f),
@@ -37,7 +36,8 @@ PositionalAudioStream::PositionalAudioStream(PositionalAudioStream::Type type, b
     _lastPopOutputLoudness(0.0f),
     _quietestTrailingFrameLoudness(std::numeric_limits<float>::max()),
     _quietestFrameLoudness(0.0f),
-    _frameCounter(0) {}
+    _frameCounter(0) {
+}
 
 void PositionalAudioStream::resetStats() {
     _lastPopOutputTrailingLoudness = 0.0f;
@@ -56,7 +56,8 @@ void PositionalAudioStream::updateLastPopOutputLoudnessAndTrailingLoudness() {
     if (_lastPopOutputLoudness >= _lastPopOutputTrailingLoudness) {
         _lastPopOutputTrailingLoudness = _lastPopOutputLoudness;
     } else {
-        _lastPopOutputTrailingLoudness = (_lastPopOutputTrailingLoudness * PREVIOUS_FRAMES_RATIO) + (CURRENT_FRAME_RATIO * _lastPopOutputLoudness);
+        _lastPopOutputTrailingLoudness = (_lastPopOutputTrailingLoudness * PREVIOUS_FRAMES_RATIO) +
+                                         (CURRENT_FRAME_RATIO * _lastPopOutputLoudness);
 
         if (_lastPopOutputTrailingLoudness < LOUDNESS_EPSILON) {
             _lastPopOutputTrailingLoudness = 0;
@@ -66,7 +67,6 @@ void PositionalAudioStream::updateLastPopOutputLoudnessAndTrailingLoudness() {
         _quietestFrameLoudness = _quietestTrailingFrameLoudness;
         _frameCounter = 0;
         _quietestTrailingFrameLoudness = std::numeric_limits<float>::max();
-
     }
     if (_lastPopOutputLoudness < _quietestTrailingFrameLoudness) {
         _quietestTrailingFrameLoudness = _lastPopOutputLoudness;

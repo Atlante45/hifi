@@ -14,8 +14,8 @@
 
 #include <gpu/Resource.h>
 
-#include <render/Forward.h>
 #include <render/DrawTask.h>
+#include <render/Forward.h>
 
 // LightingModel is  a helper class gathering in one place the flags to enable the lighting contributions
 class LightingModel {
@@ -23,7 +23,6 @@ public:
     using UniformBufferView = gpu::BufferView;
 
     LightingModel();
-
 
     void setUnlit(bool enable);
     bool isUnlitEnabled() const;
@@ -76,7 +75,6 @@ public:
     void setBlendshape(bool enable);
     bool isBlendshapeEnabled() const;
 
-
     void setAmbientOcclusion(bool enable);
     bool isAmbientOcclusionEnabled() const;
     void setShadow(bool enable);
@@ -85,43 +83,41 @@ public:
     UniformBufferView getParametersBuffer() const { return _parametersBuffer; }
 
 protected:
-
-
     // Class describing the uniform buffer with the transform info common to the AO shaders
     // It s changing every frame
     class Parameters {
     public:
-        float enableUnlit{ 1.0f };
-        float enableEmissive{ 1.0f };
-        float enableLightmap{ 1.0f };
-        float enableBackground{ 1.0f };
+        float enableUnlit { 1.0f };
+        float enableEmissive { 1.0f };
+        float enableLightmap { 1.0f };
+        float enableBackground { 1.0f };
 
-        float enableScattering{ 1.0f };
-        float enableDiffuse{ 1.0f };
-        float enableSpecular{ 1.0f };
-        float enableAlbedo{ 1.0f };
+        float enableScattering { 1.0f };
+        float enableDiffuse { 1.0f };
+        float enableSpecular { 1.0f };
+        float enableAlbedo { 1.0f };
 
-        float enableAmbientLight{ 1.0f };
-        float enableDirectionalLight{ 1.0f };
-        float enablePointLight{ 1.0f };
-        float enableSpotLight{ 1.0f };
+        float enableAmbientLight { 1.0f };
+        float enableDirectionalLight { 1.0f };
+        float enablePointLight { 1.0f };
+        float enableSpotLight { 1.0f };
 
         float showLightContour { 0.0f }; // false by default
 
-        float enableObscurance{ 1.0f };
+        float enableObscurance { 1.0f };
 
         float enableMaterialTexturing { 1.0f };
         float enableWireframe { 0.0f }; // false by default
 
-        float enableHaze{ 1.0f };
-        float enableBloom{ 1.0f };
-        float enableSkinning{ 1.0f };
-        float enableBlendshape{ 1.0f };
+        float enableHaze { 1.0f };
+        float enableBloom { 1.0f };
+        float enableSkinning { 1.0f };
+        float enableBlendshape { 1.0f };
 
-        float enableAmbientOcclusion{ 0.0f }; // false by default
-        float enableShadow{ 1.0f };
-        float spare1{ 1.0f };
-        float spare2{ 1.0f };
+        float enableAmbientOcclusion { 0.0f }; // false by default
+        float enableShadow { 1.0f };
+        float spare1 { 1.0f };
+        float spare2 { 1.0f };
 
         Parameters() {}
     };
@@ -129,9 +125,6 @@ protected:
 };
 
 using LightingModelPointer = std::shared_ptr<LightingModel>;
-
-
-
 
 class MakeLightingModelConfig : public render::Job::Config {
     Q_OBJECT
@@ -166,43 +159,47 @@ class MakeLightingModelConfig : public render::Job::Config {
     Q_PROPERTY(bool enableAmbientOcclusion READ isAmbientOcclusionEnabled WRITE setAmbientOcclusion NOTIFY dirty)
     Q_PROPERTY(bool enableShadow READ isShadowEnabled WRITE setShadow NOTIFY dirty)
 
-
 public:
     MakeLightingModelConfig() : render::Job::Config() {} // Make Lighting Model is always on
 
-    bool enableUnlit{ true };
-    bool enableEmissive{ true };
-    bool enableLightmap{ true };
-    bool enableBackground{ true };
-    bool enableObscurance{ true };
+    bool enableUnlit { true };
+    bool enableEmissive { true };
+    bool enableLightmap { true };
+    bool enableBackground { true };
+    bool enableObscurance { true };
 
-    bool enableScattering{ true };
-    bool enableDiffuse{ true };
-    bool enableSpecular{ true };
+    bool enableScattering { true };
+    bool enableDiffuse { true };
+    bool enableSpecular { true };
 
-    bool enableAlbedo{ true };
+    bool enableAlbedo { true };
     bool enableMaterialTexturing { true };
 
-    bool enableAmbientLight{ true };
-    bool enableDirectionalLight{ true };
-    bool enablePointLight{ true };
-    bool enableSpotLight{ true };
+    bool enableAmbientLight { true };
+    bool enableDirectionalLight { true };
+    bool enablePointLight { true };
+    bool enableSpotLight { true };
 
     bool showLightContour { false }; // false by default
 
     bool enableWireframe { false }; // false by default
-    bool enableHaze{ true };
-    bool enableBloom{ true };
-    bool enableSkinning{ true };
-    bool enableBlendshape{ true };
+    bool enableHaze { true };
+    bool enableBloom { true };
+    bool enableSkinning { true };
+    bool enableBlendshape { true };
 
-    bool enableAmbientOcclusion{ false }; // false by default
-    bool enableShadow{ true };
+    bool enableAmbientOcclusion { false }; // false by default
+    bool enableShadow { true };
 
-
-    void setAmbientOcclusion(bool enable) { enableAmbientOcclusion = enable; emit dirty();}
+    void setAmbientOcclusion(bool enable) {
+        enableAmbientOcclusion = enable;
+        emit dirty();
+    }
     bool isAmbientOcclusionEnabled() const { return enableAmbientOcclusion; }
-    void setShadow(bool enable) { enableShadow = enable; emit dirty(); }
+    void setShadow(bool enable) {
+        enableShadow = enable;
+        emit dirty();
+    }
     bool isShadowEnabled() const { return enableShadow; }
 
 signals:

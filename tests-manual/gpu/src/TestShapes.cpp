@@ -11,12 +11,8 @@
 static const size_t TYPE_COUNT = 6;
 
 static GeometryCache::Shape SHAPE[TYPE_COUNT] = {
-    GeometryCache::Cube,
-    GeometryCache::Tetrahedron,
-    GeometryCache::Octahedron,
-    GeometryCache::Dodecahedron,
-    GeometryCache::Icosahedron,
-    GeometryCache::Sphere,
+    GeometryCache::Cube,         GeometryCache::Tetrahedron, GeometryCache::Octahedron,
+    GeometryCache::Dodecahedron, GeometryCache::Icosahedron, GeometryCache::Sphere,
 };
 
 void TestShapes::renderTest(size_t testId, RenderArgs* args) {
@@ -40,8 +36,5 @@ void TestShapes::renderTest(size_t testId, RenderArgs* args) {
     }
 
     batch.setModelTransform(Transform().setScale(1.01f));
-    geometryCache->renderWireCube(batch, glm::vec4(1,1,1,1));
+    geometryCache->renderWireCube(batch, glm::vec4(1, 1, 1, 1));
 }
-
-
-

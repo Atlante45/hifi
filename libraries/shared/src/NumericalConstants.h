@@ -1,5 +1,5 @@
 //
-//  NumericalConstants.h 
+//  NumericalConstants.h
 //  libraries/shared/src
 //
 //  Created by Stephen Birarda on 05/01/15.
@@ -27,10 +27,10 @@ const float ARCMINUTES_PER_DEGREE = 60.0f;
 const float ARCSECONDS_PER_ARCMINUTE = 60.0f;
 const float ARCSECONDS_PER_DEGREE = ARCMINUTES_PER_DEGREE * ARCSECONDS_PER_ARCMINUTE;
 
-const float EPSILON = 0.000001f;    //smallish positive number - used as margin of error for some computations
+const float EPSILON = 0.000001f; // smallish positive number - used as margin of error for some computations
 const float SQUARE_ROOT_OF_2 = (float)sqrt(2.0f);
 const float SQUARE_ROOT_OF_3 = (float)sqrt(3.0f);
-const float METERS_PER_DECIMETER  = 0.1f;
+const float METERS_PER_DECIMETER = 0.1f;
 const float METERS_PER_CENTIMETER = 0.01f;
 const float METERS_PER_MILLIMETER = 0.001f;
 const float MILLIMETERS_PER_METER = 1000.0f;

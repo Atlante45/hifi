@@ -11,26 +11,26 @@
 #include <QVariant>
 #include "GLMHelpers.h"
 
-#include "Application.h"
 #include <PickManager.h>
+#include "Application.h"
 
+#include "CollisionPick.h"
+#include "ParabolaPick.h"
 #include "RayPick.h"
 #include "StylusPick.h"
-#include "ParabolaPick.h"
-#include "CollisionPick.h"
 
-#include "SpatialParentFinder.h"
-#include "PickTransformNode.h"
-#include "MouseTransformNode.h"
-#include "avatar/MyAvatarHeadTransformNode.h"
-#include "avatar/AvatarManager.h"
-#include "NestableTransformNode.h"
-#include "avatars-renderer/AvatarTransformNode.h"
 #include "EntityTransformNode.h"
+#include "MouseTransformNode.h"
+#include "NestableTransformNode.h"
+#include "PickTransformNode.h"
+#include "SpatialParentFinder.h"
+#include "avatar/AvatarManager.h"
+#include "avatar/MyAvatarHeadTransformNode.h"
+#include "avatars-renderer/AvatarTransformNode.h"
 
 #include <ScriptEngine.h>
 
-static const float WEB_TOUCH_Y_OFFSET = 0.105f;  // how far forward (or back with a negative number) to slide stylus in hand
+static const float WEB_TOUCH_Y_OFFSET = 0.105f; // how far forward (or back with a negative number) to slide stylus in hand
 static const glm::vec3 TIP_OFFSET = glm::vec3(0.0f, StylusPick::WEB_STYLUS_LENGTH - WEB_TOUCH_Y_OFFSET, 0.0f);
 
 unsigned int PickScriptingInterface::createPick(const PickQuery::PickType type, const QVariant& properties) {
@@ -57,22 +57,26 @@ PickFilter getPickFilter(unsigned int filter) {
 /**jsdoc
  * A set of properties that can be passed to {@link Picks.createPick} to create a new Ray Pick.
  * @typedef {object} Picks.RayPickProperties
- * @property {boolean} [enabled=false] If this Pick should start enabled or not.  Disabled Picks do not updated their pick results.
+ * @property {boolean} [enabled=false] If this Pick should start enabled or not.  Disabled Picks do not updated their pick
+ * results.
  * @property {number} [filter=0] The filter for this Pick to use, constructed using filter flags combined using bitwise OR.
  * @property {number} [maxDistance=0.0] The max distance at which this Pick will intersect.  0.0 = no max.  < 0.0 is invalid.
  * @property {Uuid} parentID - The ID of the parent, either an avatar, an entity, or a pick.
- * @property {number} [parentJointIndex=0] - The joint of the parent to parent to, for example, the joints on the model of an avatar. (default = 0, no joint)
- * @property {string} joint - If "Mouse," parents the pick to the mouse. If "Avatar," parents the pick to MyAvatar's head. Otherwise, parents to the joint of the given name on MyAvatar.
- * @property {Vec3} [posOffset=Vec3.ZERO] Only for Joint Ray Picks.  A local joint position offset, in meters.  x = upward, y = forward, z = lateral
- * @property {Vec3} [dirOffset=Vec3.UP] Only for Joint Ray Picks.  A local joint direction offset.  x = upward, y = forward, z = lateral
+ * @property {number} [parentJointIndex=0] - The joint of the parent to parent to, for example, the joints on the model of an
+ * avatar. (default = 0, no joint)
+ * @property {string} joint - If "Mouse," parents the pick to the mouse. If "Avatar," parents the pick to MyAvatar's head.
+ * Otherwise, parents to the joint of the given name on MyAvatar.
+ * @property {Vec3} [posOffset=Vec3.ZERO] Only for Joint Ray Picks.  A local joint position offset, in meters.  x = upward, y =
+ * forward, z = lateral
+ * @property {Vec3} [dirOffset=Vec3.UP] Only for Joint Ray Picks.  A local joint direction offset.  x = upward, y = forward, z =
+ * lateral
  * @property {Vec3} [position] Only for Static Ray Picks.  The world-space origin of the ray.
  * @property {Vec3} [direction=-Vec3.UP] Only for Static Ray Picks.  The world-space direction of the ray.
  */
 unsigned int PickScriptingInterface::createRayPick(const QVariant& properties) {
     QVariantMap propMap = properties.toMap();
 
-
-#if defined (Q_OS_ANDROID)
+#if defined(Q_OS_ANDROID)
     QString jointName { "" };
     if (propMap["joint"].isValid()) {
         QString jointName = propMap["joint"].toString();
@@ -127,7 +131,8 @@ unsigned int PickScriptingInterface::createRayPick(const QVariant& properties) {
  * A set of properties that can be passed to {@link Picks.createPick} to create a new Stylus Pick.
  * @typedef {object} Picks.StylusPickProperties
  * @property {number} [hand=-1] An integer.  0 == left, 1 == right.  Invalid otherwise.
- * @property {boolean} [enabled=false] If this Pick should start enabled or not.  Disabled Picks do not updated their pick results.
+ * @property {boolean} [enabled=false] If this Pick should start enabled or not.  Disabled Picks do not updated their pick
+ * results.
  * @property {number} [filter=0] The filter for this Pick to use, constructed using filter flags combined using bitwise OR.
  * @property {number} [maxDistance=0.0] The max distance at which this Pick will intersect.  0.0 = no max.  < 0.0 is invalid.
  */
@@ -162,28 +167,41 @@ unsigned int PickScriptingInterface::createStylusPick(const QVariant& properties
         tipOffset = vec3FromVariant(propMap["tipOffset"]);
     }
 
-    return DependencyManager::get<PickManager>()->addPick(PickQuery::Stylus, std::make_shared<StylusPick>(side, filter, maxDistance, enabled, tipOffset));
+    return DependencyManager::get<PickManager>()->addPick(PickQuery::Stylus,
+                                                          std::make_shared<StylusPick>(side, filter, maxDistance, enabled,
+                                                                                       tipOffset));
 }
 
-// NOTE: Laser pointer still uses scaleWithAvatar. Until scaleWithAvatar is also deprecated for pointers, scaleWithAvatar should not be removed from the pick API.
+// NOTE: Laser pointer still uses scaleWithAvatar. Until scaleWithAvatar is also deprecated for pointers, scaleWithAvatar should
+// not be removed from the pick API.
 /**jsdoc
  * A set of properties that can be passed to {@link Picks.createPick} to create a new Parabola Pick.
  * @typedef {object} Picks.ParabolaPickProperties
- * @property {boolean} [enabled=false] If this Pick should start enabled or not.  Disabled Picks do not updated their pick results.
+ * @property {boolean} [enabled=false] If this Pick should start enabled or not.  Disabled Picks do not updated their pick
+ * results.
  * @property {number} [filter=0] The filter for this Pick to use, constructed using filter flags combined using bitwise OR.
  * @property {number} [maxDistance=0.0] The max distance at which this Pick will intersect.  0.0 = no max.  < 0.0 is invalid.
  * @property {Uuid} parentID - The ID of the parent, either an avatar, an entity, or a pick.
- * @property {number} [parentJointIndex=0] - The joint of the parent to parent to, for example, the joints on the model of an avatar. (default = 0, no joint)
- * @property {string} joint - If "Mouse," parents the pick to the mouse. If "Avatar," parents the pick to MyAvatar's head. Otherwise, parents to the joint of the given name on MyAvatar.
- * @property {Vec3} [posOffset=Vec3.ZERO] Only for Joint Parabola Picks.  A local joint position offset, in meters.  x = upward, y = forward, z = lateral
- * @property {Vec3} [dirOffset=Vec3.UP] Only for Joint Parabola Picks.  A local joint direction offset.  x = upward, y = forward, z = lateral
+ * @property {number} [parentJointIndex=0] - The joint of the parent to parent to, for example, the joints on the model of an
+ * avatar. (default = 0, no joint)
+ * @property {string} joint - If "Mouse," parents the pick to the mouse. If "Avatar," parents the pick to MyAvatar's head.
+ * Otherwise, parents to the joint of the given name on MyAvatar.
+ * @property {Vec3} [posOffset=Vec3.ZERO] Only for Joint Parabola Picks.  A local joint position offset, in meters.  x = upward,
+ * y = forward, z = lateral
+ * @property {Vec3} [dirOffset=Vec3.UP] Only for Joint Parabola Picks.  A local joint direction offset.  x = upward, y =
+ * forward, z = lateral
  * @property {Vec3} [position] Only for Static Parabola Picks.  The world-space origin of the parabola segment.
  * @property {Vec3} [direction=-Vec3.FRONT] Only for Static Parabola Picks.  The world-space direction of the parabola segment.
- * @property {number} [speed=1] The initial speed of the parabola, i.e. the initial speed of the projectile whose trajectory defines the parabola.
- * @property {Vec3} [accelerationAxis=-Vec3.UP] The acceleration of the parabola, i.e. the acceleration of the projectile whose trajectory defines the parabola, both magnitude and direction.
- * @property {boolean} [rotateAccelerationWithAvatar=true] Whether or not the acceleration axis should rotate with the avatar's local Y axis.
- * @property {boolean} [rotateAccelerationWithParent=false] Whether or not the acceleration axis should rotate with the parent's local Y axis, if available.
- * @property {boolean} [scaleWithParent=true] If true, the velocity and acceleration of the Pick will scale linearly with the parent, if available. scaleWithAvatar is an alias but is deprecated.
+ * @property {number} [speed=1] The initial speed of the parabola, i.e. the initial speed of the projectile whose trajectory
+ * defines the parabola.
+ * @property {Vec3} [accelerationAxis=-Vec3.UP] The acceleration of the parabola, i.e. the acceleration of the projectile whose
+ * trajectory defines the parabola, both magnitude and direction.
+ * @property {boolean} [rotateAccelerationWithAvatar=true] Whether or not the acceleration axis should rotate with the avatar's
+ * local Y axis.
+ * @property {boolean} [rotateAccelerationWithParent=false] Whether or not the acceleration axis should rotate with the parent's
+ * local Y axis, if available.
+ * @property {boolean} [scaleWithParent=true] If true, the velocity and acceleration of the Pick will scale linearly with the
+ * parent, if available. scaleWithAvatar is an alias but is deprecated.
  */
 unsigned int PickScriptingInterface::createParabolaPick(const QVariant& properties) {
     QVariantMap propMap = properties.toMap();
@@ -246,39 +264,49 @@ unsigned int PickScriptingInterface::createParabolaPick(const QVariant& properti
     }
 
     auto parabolaPick = std::make_shared<ParabolaPick>(position, direction, speed, accelerationAxis,
-        rotateAccelerationWithAvatar, rotateAccelerationWithParent, scaleWithParent, filter, maxDistance, enabled);
+                                                       rotateAccelerationWithAvatar, rotateAccelerationWithParent,
+                                                       scaleWithParent, filter, maxDistance, enabled);
     setParentTransform(parabolaPick, propMap);
     return DependencyManager::get<PickManager>()->addPick(PickQuery::Parabola, parabolaPick);
 }
 
 /**jsdoc
-* A Shape defines a physical volume.
-*
-* @typedef {object} Shape
-* @property {string} shapeType The type of shape to use. Can be one of the following: "box", "sphere", "capsule-x", "capsule-y", "capsule-z", "cylinder-x", "cylinder-y", "cylinder-z"
-* @property {Vec3} dimensions - The size to scale the shape to.
-*/
+ * A Shape defines a physical volume.
+ *
+ * @typedef {object} Shape
+ * @property {string} shapeType The type of shape to use. Can be one of the following: "box", "sphere", "capsule-x",
+ * "capsule-y", "capsule-z", "cylinder-x", "cylinder-y", "cylinder-z"
+ * @property {Vec3} dimensions - The size to scale the shape to.
+ */
 
 // TODO: Add this property to the Shape jsdoc above once model picks work properly
-// * @property {string} modelURL - If shapeType is one of: "compound", "simple-hull", "simple-compound", or "static-mesh", this defines the model to load to generate the collision volume.
+// * @property {string} modelURL - If shapeType is one of: "compound", "simple-hull", "simple-compound", or "static-mesh", this
+// defines the model to load to generate the collision volume.
 
 /**jsdoc
 * A set of properties that can be passed to {@link Picks.createPick} to create a new Collision Pick.
 
 * @typedef {object} Picks.CollisionPickProperties
-* @property {boolean} [enabled=false] If this Pick should start enabled or not.  Disabled Picks do not updated their pick results.
+* @property {boolean} [enabled=false] If this Pick should start enabled or not.  Disabled Picks do not updated their pick
+results.
 * @property {number} [filter=0] The filter for this Pick to use, constructed using filter flags combined using bitwise OR.
-* @property {Shape} shape - The information about the collision region's size and shape. Dimensions are in world space, but will scale with the parent if defined.
+* @property {Shape} shape - The information about the collision region's size and shape. Dimensions are in world space, but will
+scale with the parent if defined.
 * @property {Vec3} position - The position of the collision region, relative to a parent if defined.
 * @property {Quat} orientation - The orientation of the collision region, relative to a parent if defined.
-* @property {float} threshold - The approximate minimum penetration depth for a test object to be considered in contact with the collision region.
+* @property {float} threshold - The approximate minimum penetration depth for a test object to be considered in contact with the
+collision region.
 * The depth is measured in world space, but will scale with the parent if defined.
-* @property {CollisionMask} [collisionGroup=8] - The type of object this collision pick collides as. Objects whose collision masks overlap with the pick's collision group
+* @property {CollisionMask} [collisionGroup=8] - The type of object this collision pick collides as. Objects whose collision
+masks overlap with the pick's collision group
 * will be considered colliding with the pick.
 * @property {Uuid} parentID - The ID of the parent, either an avatar, an entity, or a pick.
-* @property {number} [parentJointIndex=0] - The joint of the parent to parent to, for example, the joints on the model of an avatar. (default = 0, no joint)
-* @property {string} joint - If "Mouse," parents the pick to the mouse. If "Avatar," parents the pick to MyAvatar's head. Otherwise, parents to the joint of the given name on MyAvatar.
-* @property {boolean} [scaleWithParent=true] If true, the collision pick's dimensions and threshold will adjust according to the scale of the parent.
+* @property {number} [parentJointIndex=0] - The joint of the parent to parent to, for example, the joints on the model of an
+avatar. (default = 0, no joint)
+* @property {string} joint - If "Mouse," parents the pick to the mouse. If "Avatar," parents the pick to MyAvatar's head.
+Otherwise, parents to the joint of the given name on MyAvatar.
+* @property {boolean} [scaleWithParent=true] If true, the collision pick's dimensions and threshold will adjust according to the
+scale of the parent.
 */
 unsigned int PickScriptingInterface::createCollisionPick(const QVariant& properties) {
     QVariantMap propMap = properties.toMap();
@@ -304,7 +332,8 @@ unsigned int PickScriptingInterface::createCollisionPick(const QVariant& propert
     }
 
     CollisionRegion collisionRegion(propMap);
-    auto collisionPick = std::make_shared<CollisionPick>(filter, maxDistance, enabled, scaleWithParent, collisionRegion, qApp->getPhysicsEngine());
+    auto collisionPick = std::make_shared<CollisionPick>(filter, maxDistance, enabled, scaleWithParent, collisionRegion,
+                                                         qApp->getPhysicsEngine());
     setParentTransform(collisionPick, propMap);
 
     return DependencyManager::get<PickManager>()->addPick(PickQuery::Collision, collisionPick);
@@ -410,7 +439,8 @@ void PickScriptingInterface::setParentTransform(std::shared_ptr<PickQuery> pick,
     if (parentUuid == myAvatar->getSessionUUID()) {
         if (parentJointIndex == CONTROLLER_LEFTHAND_INDEX || parentJointIndex == CAMERA_RELATIVE_CONTROLLER_LEFTHAND_INDEX) {
             pick->setJointState(PickQuery::JOINT_STATE_LEFT_HAND);
-        } else if (parentJointIndex == CONTROLLER_RIGHTHAND_INDEX || parentJointIndex == CAMERA_RELATIVE_CONTROLLER_RIGHTHAND_INDEX) {
+        } else if (parentJointIndex == CONTROLLER_RIGHTHAND_INDEX ||
+                   parentJointIndex == CAMERA_RELATIVE_CONTROLLER_RIGHTHAND_INDEX) {
             pick->setJointState(PickQuery::JOINT_STATE_RIGHT_HAND);
         }
 
@@ -419,15 +449,21 @@ void PickScriptingInterface::setParentTransform(std::shared_ptr<PickQuery> pick,
         // Infer object type from parentID
         // For now, assume a QUuid is a SpatiallyNestable. This should change when picks are converted over to QUuids.
         bool success;
-        std::weak_ptr<SpatiallyNestable> nestablePointer = DependencyManager::get<SpatialParentFinder>()->find(parentUuid, success, nullptr);
+        std::weak_ptr<SpatiallyNestable> nestablePointer = DependencyManager::get<SpatialParentFinder>()->find(parentUuid,
+                                                                                                               success,
+                                                                                                               nullptr);
         auto sharedNestablePointer = nestablePointer.lock();
 
         if (success && sharedNestablePointer) {
             NestableType nestableType = sharedNestablePointer->getNestableType();
             if (nestableType == NestableType::Avatar) {
-                pick->parentTransform = std::make_shared<AvatarTransformNode>(std::static_pointer_cast<Avatar>(sharedNestablePointer), parentJointIndex);
+                pick->parentTransform = std::make_shared<AvatarTransformNode>(std::static_pointer_cast<Avatar>(
+                                                                                  sharedNestablePointer),
+                                                                              parentJointIndex);
             } else if (nestableType == NestableType::Entity) {
-                pick->parentTransform = std::make_shared<EntityTransformNode>(std::static_pointer_cast<EntityItem>(sharedNestablePointer), parentJointIndex);
+                pick->parentTransform = std::make_shared<EntityTransformNode>(std::static_pointer_cast<EntityItem>(
+                                                                                  sharedNestablePointer),
+                                                                              parentJointIndex);
             } else {
                 pick->parentTransform = std::make_shared<NestableTransformNode>(nestablePointer, parentJointIndex);
             }

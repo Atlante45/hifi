@@ -16,19 +16,18 @@
 #include <QMessageBox>
 #include <QTemporaryDir>
 
-#include <FSTReader.h>
 #include <FBXSerializer.h>
+#include <FSTReader.h>
 #include <OffscreenUi.h>
 
-#include "ModelSelector.h"
-#include "ModelPropertiesDialog.h"
 #include "InterfaceLogging.h"
+#include "ModelPropertiesDialog.h"
+#include "ModelSelector.h"
 
 static const int MAX_TEXTURE_SIZE = 1024;
 
 void copyDirectoryContent(QDir& from, QDir& to) {
-    for (auto entry : from.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot |
-                                         QDir::NoSymLinks | QDir::Readable)) {
+    for (auto entry : from.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks | QDir::Readable)) {
         if (entry.isDir()) {
             to.mkdir(entry.fileName());
             from.cd(entry.fileName());
@@ -67,7 +66,7 @@ bool ModelPackager::package() {
 
 bool ModelPackager::selectModel() {
     ModelSelector selector;
-    if(selector.exec() == QDialog::Accepted) {
+    if (selector.exec() == QDialog::Accepted) {
         _modelFile = selector.getFileInfo();
         return true;
     }
@@ -79,29 +78,25 @@ bool ModelPackager::loadModel() {
     if (_modelFile.completeSuffix().contains("fst")) {
         QFile fst(_modelFile.filePath());
         if (!fst.open(QFile::ReadOnly | QFile::Text)) {
-            OffscreenUi::asyncWarning(NULL,
-                                 QString("ModelPackager::loadModel()"),
-                                 QString("Could not open FST file %1").arg(_modelFile.filePath()),
-                                 QMessageBox::Ok);
+            OffscreenUi::asyncWarning(NULL, QString("ModelPackager::loadModel()"),
+                                      QString("Could not open FST file %1").arg(_modelFile.filePath()), QMessageBox::Ok);
             qWarning() << QString("ModelPackager::loadModel(): Could not open FST file %1").arg(_modelFile.filePath());
             return false;
         }
         qCDebug(interfaceapp) << "Reading FST file";
         _mapping = FSTReader::readMapping(fst.readAll());
         fst.close();
-        
+
         _fbxInfo = QFileInfo(_modelFile.path() + "/" + _mapping.value(FILENAME_FIELD).toString());
     } else {
         _fbxInfo = QFileInfo(_modelFile.filePath());
     }
-    
+
     // open the fbx file
     QFile fbx(_fbxInfo.filePath());
     if (!_fbxInfo.exists() || !_fbxInfo.isFile() || !fbx.open(QIODevice::ReadOnly)) {
-        OffscreenUi::asyncWarning(NULL,
-                             QString("ModelPackager::loadModel()"),
-                             QString("Could not open FBX file %1").arg(_fbxInfo.filePath()),
-                             QMessageBox::Ok);
+        OffscreenUi::asyncWarning(NULL, QString("ModelPackager::loadModel()"),
+                                  QString("Could not open FBX file %1").arg(_fbxInfo.filePath()), QMessageBox::Ok);
         qWarning() << "ModelPackager::loadModel(): Could not open FBX file";
         return false;
     }
@@ -132,7 +127,7 @@ bool ModelPackager::editProperties() {
     QVariantHash joints = _mapping.value(JOINT_FIELD).toHash();
     if (!joints.contains("jointRoot")) {
         qWarning() << "root joint not configured for skeleton.";
-        
+
         QString message = "Your did not configure a root joint for your skeleton model.\n\nPackaging will be canceled.";
         QMessageBox msgBox;
         msgBox.setWindowTitle("Model Packager");
@@ -140,10 +135,10 @@ bool ModelPackager::editProperties() {
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.exec();
-        
+
         return false;
     }
-    
+
     return true;
 }
 
@@ -151,7 +146,7 @@ bool ModelPackager::zipModel() {
     QTemporaryDir dir;
     dir.setAutoRemove(true);
     QDir tempDir(dir.path());
-    
+
     QByteArray nameField = _mapping.value(NAME_FIELD).toByteArray();
     tempDir.mkpath(nameField + "/textures");
     tempDir.mkpath(nameField + "/scripts");
@@ -182,8 +177,8 @@ bool ModelPackager::zipModel() {
             _mapping.insertMulti(SCRIPT_FIELD, sc);
         }
         copyDirectoryContent(wdir, scriptDir);
-    } 
-    
+    }
+
     // Copy LODs
     QVariantHash lodField = _mapping.value(LOD_FIELD).toHash();
     if (!lodField.empty()) {
@@ -196,13 +191,13 @@ bool ModelPackager::zipModel() {
             }
         }
     }
-    
+
     // Copy FBX
     QFile fbx(_fbxInfo.filePath());
     QByteArray filenameField = _mapping.value(FILENAME_FIELD).toByteArray();
     QString newPath = fbxDir.path() + "/" + QFileInfo(filenameField).fileName();
     fbx.copy(newPath);
-    
+
     // Correct FST
     _mapping[FILENAME_FIELD] = tempDir.relativeFilePath(newPath);
     _mapping[TEXDIR_FIELD] = tempDir.relativeFilePath(texDir.path());
@@ -219,22 +214,19 @@ bool ModelPackager::zipModel() {
         qCDebug(interfaceapp) << "Couldn't write FST file" << fst.fileName();
         return false;
     }
-    
-    
-    QString saveDirPath = QFileDialog::getExistingDirectory(nullptr, "Save Model",
-                                                        "", QFileDialog::ShowDirsOnly);
+
+    QString saveDirPath = QFileDialog::getExistingDirectory(nullptr, "Save Model", "", QFileDialog::ShowDirsOnly);
     if (saveDirPath.isEmpty()) {
         qCDebug(interfaceapp) << "Invalid directory" << saveDirPath;
         return false;
     }
-    
+
     QDir saveDir(saveDirPath);
     copyDirectoryContent(tempDir, saveDir);
     return true;
 }
 
 void ModelPackager::populateBasicMapping(QVariantHash& mapping, QString filename, const hfm::Model& hfmModel) {
-
     // mixamo files - in the event that a mixamo file was edited by some other tool, it's likely the applicationName will
     // be rewritten, so we detect the existence of several different blendshapes which indicate we're likely a mixamo file
     bool likelyMixamoFile = hfmModel.applicationName == "mixamo.com" ||
@@ -243,11 +235,11 @@ void ModelPackager::populateBasicMapping(QVariantHash& mapping, QString filename
                              hfmModel.blendshapeChannelNames.contains("Blink_Left") &&
                              hfmModel.blendshapeChannelNames.contains("Blink_Right") &&
                              hfmModel.blendshapeChannelNames.contains("Squint_Right"));
-    
+
     if (!mapping.contains(NAME_FIELD)) {
         mapping.insert(NAME_FIELD, QFileInfo(filename).baseName());
     }
-    
+
     if (!mapping.contains(FILENAME_FIELD)) {
         QDir root(_modelFile.path());
         mapping.insert(FILENAME_FIELD, root.relativeFilePath(filename));
@@ -264,17 +256,19 @@ void ModelPackager::populateBasicMapping(QVariantHash& mapping, QString filename
     }
     QVariantHash joints = mapping.value(JOINT_FIELD).toHash();
     if (!joints.contains("jointEyeLeft")) {
-        joints.insert("jointEyeLeft", hfmModel.jointIndices.contains("jointEyeLeft") ? "jointEyeLeft" :
-                      (hfmModel.jointIndices.contains("EyeLeft") ? "EyeLeft" : "LeftEye"));
+        joints.insert("jointEyeLeft", hfmModel.jointIndices.contains("jointEyeLeft")
+                                          ? "jointEyeLeft"
+                                          : (hfmModel.jointIndices.contains("EyeLeft") ? "EyeLeft" : "LeftEye"));
     }
     if (!joints.contains("jointEyeRight")) {
-        joints.insert("jointEyeRight", hfmModel.jointIndices.contains("jointEyeRight") ? "jointEyeRight" :
-                      hfmModel.jointIndices.contains("EyeRight") ? "EyeRight" : "RightEye");
+        joints.insert("jointEyeRight", hfmModel.jointIndices.contains("jointEyeRight")
+                                           ? "jointEyeRight"
+                                           : hfmModel.jointIndices.contains("EyeRight") ? "EyeRight" : "RightEye");
     }
     if (!joints.contains("jointNeck")) {
         joints.insert("jointNeck", hfmModel.jointIndices.contains("jointNeck") ? "jointNeck" : "Neck");
     }
-    
+
     if (!joints.contains("jointRoot")) {
         joints.insert("jointRoot", "Hips");
     }
@@ -287,14 +281,14 @@ void ModelPackager::populateBasicMapping(QVariantHash& mapping, QString filename
     if (!joints.contains("jointRightHand")) {
         joints.insert("jointRightHand", "RightHand");
     }
-    
+
     if (!joints.contains("jointHead")) {
         const char* topName = likelyMixamoFile ? "HeadTop_End" : "HeadEnd";
         joints.insert("jointHead", hfmModel.jointIndices.contains(topName) ? topName : "Head");
     }
 
     mapping.insert(JOINT_FIELD, joints);
-    
+
     // If there are no blendshape mappings, and we detect that this is likely a mixamo file,
     // then we can add the default mixamo to "faceshift" mappings
     if (!mapping.contains(BLENDSHAPE_FIELD) && likelyMixamoFile) {
@@ -362,7 +356,6 @@ void ModelPackager::listTextures() {
         }
         if (!mat.normalTexture.filename.isEmpty() && mat.normalTexture.content.isEmpty() &&
             !_textures.contains(mat.normalTexture.filename)) {
-                
             _textures << mat.normalTexture.filename;
         }
         if (!mat.specularTexture.filename.isEmpty() && mat.specularTexture.content.isEmpty() &&
@@ -387,7 +380,7 @@ bool ModelPackager::copyTextures(const QString& oldDir, const QDir& newDir) {
             QString dirPath = newDir.relativeFilePath(QFileInfo(newPath).path());
             newDir.mkpath(dirPath);
         }
-        
+
         QFile texFile(oldPath);
         if (texFile.exists() && texFile.open(QIODevice::ReadOnly)) {
             // Check if texture needs to be recoded
@@ -402,7 +395,7 @@ bool ModelPackager::copyTextures(const QString& oldDir, const QDir& newDir) {
                 image = image.scaled(MAX_TEXTURE_SIZE, MAX_TEXTURE_SIZE, Qt::KeepAspectRatio);
                 mustRecode = true;
             }
-            
+
             // Copy texture
             if (mustRecode) {
                 QFile newTexFile(newPath);
@@ -415,15 +408,12 @@ bool ModelPackager::copyTextures(const QString& oldDir, const QDir& newDir) {
             errors += QString("\n%1").arg(oldPath);
         }
     }
-    
+
     if (!errors.isEmpty()) {
-        OffscreenUi::asyncWarning(nullptr, "ModelPackager::copyTextures()",
-                             "Missing textures:" + errors);
+        OffscreenUi::asyncWarning(nullptr, "ModelPackager::copyTextures()", "Missing textures:" + errors);
         qCDebug(interfaceapp) << "ModelPackager::copyTextures():" << errors;
         return false;
     }
-    
+
     return true;
 }
-
-

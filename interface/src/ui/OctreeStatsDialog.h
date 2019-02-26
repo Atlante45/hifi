@@ -48,11 +48,7 @@ protected:
     void showOctreeServersOfType(NodeType_t serverType);
 
 private:
-    enum details {
-        LESS,
-        MORE,
-        MOST
-    };
+    enum details { LESS, MORE, MOST };
 
     QFormLayout* _form { nullptr };
     QLabel* _labels[MAX_STATS];
@@ -73,7 +69,7 @@ private:
     int _processedPacketsEntities;
     int _processedPacketsTiming;
     int _outboundEditPackets;
-    
+
     const int SAMPLES_PER_SECOND { 10 };
     SimpleMovingAverage _averageUpdatesPerSecond { SAMPLES_PER_SECOND };
     quint64 _lastWindowAt { usecTimestampNow() };

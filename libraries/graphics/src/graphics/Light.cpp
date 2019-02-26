@@ -16,13 +16,10 @@ Light::Light() {
     updateLightRadius();
 }
 
-Light::Light(const Light& light) :
-    _flags(light._flags),
-    _transform(light._transform)
-{
+Light::Light(const Light& light) : _flags(light._flags), _transform(light._transform) {
 }
 
-Light& Light::operator= (const Light& light) {
+Light& Light::operator=(const Light& light) {
     _flags = (light._flags);
     _lightSchemaBuffer = (light._lightSchemaBuffer);
     _ambientSchemaBuffer = (light._ambientSchemaBuffer);
@@ -45,7 +42,6 @@ void Light::setType(Type type) {
         updateLightRadius();
     }
 }
-
 
 void Light::setPosition(const Vec3& position) {
     _transform.setTranslation(position);
@@ -101,7 +97,7 @@ void Light::setMaximumRadius(float radius) {
 void Light::updateLightRadius() {
     // This function relies on the attenuation equation:
     // I = Li / (1 + (d + Lr)/Lr)^2
-    // where I = calculated intensity, Li = light intensity, Lr = light falloff radius, d = distance from surface 
+    // where I = calculated intensity, Li = light intensity, Lr = light falloff radius, d = distance from surface
     // see: https://imdoingitwrong.wordpress.com/2011/01/31/light-attenuation/
     // note that falloff radius replaces surface radius in linked example
     // This equation is biased back by Lr so that all lights act as true points, regardless of surface radii
@@ -170,4 +166,3 @@ void Light::setTransform(const glm::mat4& transform) {
         _ambientSchemaBuffer.edit().transform = transform;
     }
 }
-

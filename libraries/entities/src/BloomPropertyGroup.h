@@ -17,8 +17,8 @@
 
 #include <QtScript/QScriptEngine>
 
-#include "PropertyGroup.h"
 #include "EntityItemPropertiesMacros.h"
+#include "PropertyGroup.h"
 
 class EntityItemProperties;
 class EncodeBitstreamParams;
@@ -51,15 +51,12 @@ public:
     virtual void debugDump() const override;
     virtual void listChangedProperties(QList<QString>& out) override;
 
-    virtual bool appendToEditPacket(OctreePacketData* packetData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
-                                    OctreeElement::AppendState& appendState) const override;
+    virtual bool appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+                                    EntityPropertyFlags& propertyFlags, EntityPropertyFlags& propertiesDidntFit,
+                                    int& propertyCount, OctreeElement::AppendState& appendState) const override;
 
-    virtual bool decodeFromEditPacket(EntityPropertyFlags& propertyFlags,
-                                      const unsigned char*& dataAt, int& processedBytes) override;
+    virtual bool decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt,
+                                      int& processedBytes) override;
     virtual void markAllChanged() override;
     virtual EntityPropertyFlags getChangedProperties() const override;
 
@@ -74,21 +71,17 @@ public:
 
     virtual void appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                     EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
+                                    EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                    EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                                     OctreeElement::AppendState& appendState) const override;
 
     virtual int readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) override;
+                                                 ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                 bool overwriteLocalData, bool& somethingChanged) override;
 
     DEFINE_PROPERTY(PROP_BLOOM_INTENSITY, BloomIntensity, bloomIntensity, float, INITIAL_BLOOM_INTENSITY);
     DEFINE_PROPERTY(PROP_BLOOM_THRESHOLD, BloomThreshold, bloomThreshold, float, INITIAL_BLOOM_THRESHOLD);
     DEFINE_PROPERTY(PROP_BLOOM_SIZE, BloomSize, bloomSize, float, INITIAL_BLOOM_SIZE);
-
 };
 
 #endif // hifi_BloomPropertyGroup_h

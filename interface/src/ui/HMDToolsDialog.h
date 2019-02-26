@@ -49,21 +49,20 @@ private:
     void toggleHMDMode();
     void updateUi();
 
-    QScreen* _previousScreen{ nullptr };
-    QScreen* _hmdScreen{ nullptr };
-    int _hmdScreenNumber{ -1 };
-    QPushButton* _switchModeButton{ nullptr };
-    QLabel* _debugDetails{ nullptr };
+    QScreen* _previousScreen { nullptr };
+    QScreen* _hmdScreen { nullptr };
+    int _hmdScreenNumber { -1 };
+    QPushButton* _switchModeButton { nullptr };
+    QLabel* _debugDetails { nullptr };
 
     QRect _previousDialogRect;
-    QScreen* _previousDialogScreen{ nullptr };
+    QScreen* _previousDialogScreen { nullptr };
     QString _hmdPluginName;
     QString _defaultPluginName;
 
     QHash<QWindow*, HMDWindowWatcher*> _windowWatchers;
     friend class HMDWindowWatcher;
 };
-
 
 class HMDWindowWatcher : public QObject {
     Q_OBJECT

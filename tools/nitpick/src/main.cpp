@@ -14,7 +14,7 @@
 
 Nitpick* nitpick;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     // If no parameters then run in interactive mode
     // Parameter --testFolder <folder containing the test images>
     // Parameter --branch <branch on GitHub>
@@ -26,8 +26,8 @@ int main(int argc, char *argv[]) {
 
     QString testFolder;
 
-    QString branch{ "master" };
-    QString user{ "highfidelity" };
+    QString branch { "master" };
+    QString user { "highfidelity" };
 
     for (int i = 1; i < argc - 1; ++i) {
         if (QString(argv[i]) == "--testFolder") {
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     nitpick->setup();
 
     if (!testFolder.isNull()) {
-        nitpick->startTestsEvaluation(true ,false, testFolder, branch, user);
+        nitpick->startTestsEvaluation(true, false, testFolder, branch, user);
     } else {
         nitpick->show();
     }

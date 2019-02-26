@@ -8,20 +8,20 @@
 #include "Framebuffer.h"
 
 #include <EGL/egl.h>
-#include <glad/glad.h>
 #include <android/log.h>
+#include <glad/glad.h>
 
 #include <VrApi.h>
 #include <VrApi_Helpers.h>
 
 using namespace ovr;
 
-void Framebuffer::updateLayer(int eye, ovrLayerProjection2& layer, const ovrMatrix4f* projectionMatrix ) const {
+void Framebuffer::updateLayer(int eye, ovrLayerProjection2& layer, const ovrMatrix4f* projectionMatrix) const {
     auto& layerTexture = layer.Textures[eye];
     layerTexture.ColorSwapChain = _swapChain;
     layerTexture.SwapChainIndex = _index;
     if (projectionMatrix) {
-        layerTexture.TexCoordsFromTanAngles = ovrMatrix4f_TanAngleMatrixFromProjection( projectionMatrix );
+        layerTexture.TexCoordsFromTanAngles = ovrMatrix4f_TanAngleMatrixFromProjection(projectionMatrix);
     }
     layerTexture.TextureRect = { 0, 0, 1, 1 };
 }

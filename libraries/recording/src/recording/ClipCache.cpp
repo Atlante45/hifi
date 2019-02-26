@@ -12,13 +12,12 @@
 
 #include <shared/QtHelpers.h>
 
-#include "impl/PointerClip.h"
 #include "Logging.h"
+#include "impl/PointerClip.h"
 
 using namespace recording;
-NetworkClipLoader::NetworkClipLoader(const QUrl& url) :
-    Resource(url),
-    _clip(std::make_shared<NetworkClip>(url)) {}
+NetworkClipLoader::NetworkClipLoader(const QUrl& url) : Resource(url), _clip(std::make_shared<NetworkClip>(url)) {
+}
 
 void NetworkClip::init(const QByteArray& clipData) {
     _clipData = clipData;
@@ -31,17 +30,13 @@ void NetworkClipLoader::downloadFinished(const QByteArray& data) {
     emit clipLoaded();
 }
 
-ClipCache::ClipCache(QObject* parent) :
-    ResourceCache(parent)
-{
-    
+ClipCache::ClipCache(QObject* parent) : ResourceCache(parent) {
 }
 
 NetworkClipLoaderPointer ClipCache::getClipLoader(const QUrl& url) {
     if (QThread::currentThread() != thread()) {
         NetworkClipLoaderPointer result;
-        BLOCKING_INVOKE_METHOD(this, "getClipLoader",
-                                  Q_RETURN_ARG(NetworkClipLoaderPointer, result), Q_ARG(const QUrl&, url));
+        BLOCKING_INVOKE_METHOD(this, "getClipLoader", Q_RETURN_ARG(NetworkClipLoaderPointer, result), Q_ARG(const QUrl&, url));
         return result;
     }
 

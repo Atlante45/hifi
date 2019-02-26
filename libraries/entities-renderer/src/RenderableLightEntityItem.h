@@ -12,18 +12,19 @@
 #ifndef hifi_RenderableLightEntityItem_h
 #define hifi_RenderableLightEntityItem_h
 
-#include "RenderableEntityItem.h"
 #include <LightEntityItem.h>
 #include <LightPayload.h>
+#include "RenderableEntityItem.h"
 
-namespace render { namespace entities { 
+namespace render {
+namespace entities {
 
 class LightEntityRenderer final : public TypedEntityRenderer<LightEntityItem> {
     using Parent = TypedEntityRenderer<LightEntityItem>;
     friend class EntityRenderer;
 
 public:
-    LightEntityRenderer(const EntityItemPointer& entity) : Parent(entity) { }
+    LightEntityRenderer(const EntityItemPointer& entity) : Parent(entity) {}
 
 protected:
     virtual bool needsRenderUpdateFromTypedEntity(const TypedEntityPointer& entity) const override;
@@ -34,9 +35,10 @@ protected:
     virtual void doRender(RenderArgs* args) override;
 
 private:
-    const LightPayload::Pointer _lightPayload{ std::make_shared<LightPayload>() };
+    const LightPayload::Pointer _lightPayload { std::make_shared<LightPayload>() };
 };
 
-} } // namespace 
+} // namespace entities
+} // namespace render
 
 #endif // hifi_RenderableLightEntityItem_h

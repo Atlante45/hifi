@@ -9,11 +9,11 @@
 #include <mutex>
 
 #include <QtCore/QObject>
-#include <QtCore/QtPlugin>
 #include <QtCore/QStringList>
+#include <QtCore/QtPlugin>
 
-#include <plugins/RuntimePlugin.h>
 #include <plugins/CodecPlugin.h>
+#include <plugins/RuntimePlugin.h>
 
 #include "HiFiCodec.h"
 
@@ -29,12 +29,10 @@ public:
     virtual CodecPluginList getCodecPlugins() override {
         static std::once_flag once;
         std::call_once(once, [&] {
-
             CodecPluginPointer hiFiCodec(new HiFiCodec());
             if (hiFiCodec->isSupported()) {
                 _codecPlugins.push_back(hiFiCodec);
             }
-
         });
         return _codecPlugins;
     }

@@ -11,10 +11,10 @@
 #include <QtGui/QImage>
 
 #if 0
-#include <gli/texture2d.hpp>
+#include <gpu/Texture.h>
 #include <gli/convert.hpp>
 #include <gli/generate_mipmaps.hpp>
-#include <gpu/Texture.h>
+#include <gli/texture2d.hpp>
 
 gli::format fromQImageFormat(QImage::Format format) {
     switch (format) {

@@ -15,8 +15,8 @@ QByteArray Grab::toByteArray() {
     QByteArray ba;
     QDataStream dataStream(&ba, QIODevice::WriteOnly);
     const int dataEncodingVersion = 1;
-    dataStream << dataEncodingVersion << _ownerID << _targetID << _parentJointIndex
-               << _hand << _positionalOffset << _rotationalOffset;
+    dataStream << dataEncodingVersion << _ownerID << _targetID << _parentJointIndex << _hand << _positionalOffset
+               << _rotationalOffset;
     return ba;
 }
 

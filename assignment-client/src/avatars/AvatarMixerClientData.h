@@ -14,22 +14,22 @@
 
 #include <algorithm>
 #include <cfloat>
+#include <queue>
 #include <unordered_map>
 #include <vector>
-#include <queue>
 
 #include <QtCore/QJsonObject>
 #include <QtCore/QUrl>
 
-#include <AvatarData.h>
 #include <AssociatedTraitValues.h>
+#include <AvatarData.h>
 #include <NodeData.h>
 #include <NumericalConstants.h>
-#include <udt/PacketHeaders.h>
 #include <PortableHighResolutionClock.h>
 #include <SimpleMovingAverage.h>
 #include <UUIDHasher.h>
 #include <shared/ConicalViewFrustum.h>
+#include <udt/PacketHeaders.h>
 
 const QString OUTBOUND_AVATAR_DATA_STATS_KEY = "outbound_av_data_kbps";
 const QString OUTBOUND_AVATAR_TRAITS_STATS_KEY = "outbound_av_traits_kbps";
@@ -52,14 +52,19 @@ public:
     AvatarSharedPointer getAvatarSharedPointer() const { return _avatar; }
 
     uint16_t getLastBroadcastSequenceNumber(NLPacket::LocalID nodeID) const;
-    void setLastBroadcastSequenceNumber(NLPacket::LocalID nodeID, uint16_t sequenceNumber)
-        { _lastBroadcastSequenceNumbers[nodeID] = sequenceNumber; }
-    Q_INVOKABLE void removeLastBroadcastSequenceNumber(NLPacket::LocalID nodeID) { _lastBroadcastSequenceNumbers.erase(nodeID); }
+    void setLastBroadcastSequenceNumber(NLPacket::LocalID nodeID, uint16_t sequenceNumber) {
+        _lastBroadcastSequenceNumbers[nodeID] = sequenceNumber;
+    }
+    Q_INVOKABLE void removeLastBroadcastSequenceNumber(NLPacket::LocalID nodeID) {
+        _lastBroadcastSequenceNumbers.erase(nodeID);
+    }
     bool isIgnoreRadiusEnabled() const { return _isIgnoreRadiusEnabled; }
     void setIsIgnoreRadiusEnabled(bool enabled) { _isIgnoreRadiusEnabled = enabled; }
 
     uint64_t getLastBroadcastTime(NLPacket::LocalID nodeUUID) const;
-    void setLastBroadcastTime(NLPacket::LocalID nodeUUID, uint64_t broadcastTime) { _lastBroadcastTimes[nodeUUID] = broadcastTime; }
+    void setLastBroadcastTime(NLPacket::LocalID nodeUUID, uint64_t broadcastTime) {
+        _lastBroadcastTimes[nodeUUID] = broadcastTime;
+    }
     Q_INVOKABLE void removeLastBroadcastTime(NLPacket::LocalID nodeUUID) { _lastBroadcastTimes.erase(nodeUUID); }
 
     Q_INVOKABLE void cleanupKilledNode(const QUuid& nodeUUID, Node::LocalID nodeLocalID);
@@ -75,10 +80,10 @@ public:
     void incrementNumAvatarsSentLastFrame() { ++_numAvatarsSentLastFrame; }
     int getNumAvatarsSentLastFrame() const { return _numAvatarsSentLastFrame; }
 
-    void recordNumOtherAvatarStarves(int numAvatarsHeldBack) { _otherAvatarStarves.updateAverage((float) numAvatarsHeldBack); }
+    void recordNumOtherAvatarStarves(int numAvatarsHeldBack) { _otherAvatarStarves.updateAverage((float)numAvatarsHeldBack); }
     float getAvgNumOtherAvatarStarvesPerSecond() const { return _otherAvatarStarves.getAverageSampleValuePerSecond(); }
 
-    void recordNumOtherAvatarSkips(int numOtherAvatarSkips) { _otherAvatarSkips.updateAverage((float) numOtherAvatarSkips); }
+    void recordNumOtherAvatarSkips(int numOtherAvatarSkips) { _otherAvatarSkips.updateAverage((float)numOtherAvatarSkips); }
     float getAvgNumOtherAvatarSkipsPerSecond() const { return _otherAvatarSkips.getAverageSampleValuePerSecond(); }
 
     void incrementNumOutOfOrderSends() { ++_numOutOfOrderSends; }
@@ -92,10 +97,12 @@ public:
         _avgOtherAvatarTraitsRate.updateAverage(numTraitsBytes);
     }
 
-    float getOutboundAvatarDataKbps() const
-        { return _avgOtherAvatarDataRate.getAverageSampleValuePerSecond() / (float) BYTES_PER_KILOBIT; }
-    float getOutboundAvatarTraitsKbps() const
-        { return _avgOtherAvatarTraitsRate.getAverageSampleValuePerSecond() / BYTES_PER_KILOBIT; }
+    float getOutboundAvatarDataKbps() const {
+        return _avgOtherAvatarDataRate.getAverageSampleValuePerSecond() / (float)BYTES_PER_KILOBIT;
+    }
+    float getOutboundAvatarTraitsKbps() const {
+        return _avgOtherAvatarTraitsRate.getAverageSampleValuePerSecond() / BYTES_PER_KILOBIT;
+    }
 
     void loadJSONStats(QJsonObject& jsonObject) const;
 
@@ -125,7 +132,9 @@ public:
     uint64_t getLastOtherAvatarEncodeTime(NLPacket::LocalID otherAvatar) const;
     void setLastOtherAvatarEncodeTime(NLPacket::LocalID otherAvatar, uint64_t time);
 
-    QVector<JointData>& getLastOtherAvatarSentJoints(NLPacket::LocalID otherAvatar) { return _lastOtherAvatarSentJoints[otherAvatar]; }
+    QVector<JointData>& getLastOtherAvatarSentJoints(NLPacket::LocalID otherAvatar) {
+        return _lastOtherAvatarSentJoints[otherAvatar];
+    }
 
     void queuePacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer node);
     int processPackets(const SlaveSharedData& slaveSharedData); // returns number of packets processed
@@ -143,8 +152,9 @@ public:
     const AvatarTraits::TraitVersions& getLastReceivedTraitVersions() const { return _lastReceivedTraitVersions; }
 
     TraitsCheckTimestamp getLastOtherAvatarTraitsSendPoint(Node::LocalID otherAvatar) const;
-    void setLastOtherAvatarTraitsSendPoint(Node::LocalID otherAvatar, TraitsCheckTimestamp sendPoint)
-        { _lastSentTraitsTimestamps[otherAvatar] = sendPoint; }
+    void setLastOtherAvatarTraitsSendPoint(Node::LocalID otherAvatar, TraitsCheckTimestamp sendPoint) {
+        _lastSentTraitsTimestamps[otherAvatar] = sendPoint;
+    }
 
     AvatarTraits::TraitMessageSequence getTraitsMessageSequence() const { return _currentTraitsMessageSequence; }
     AvatarTraits::TraitMessageSequence nextTraitsMessageSequence() { return ++_currentTraitsMessageSequence; }
@@ -152,8 +162,12 @@ public:
         return _perNodePendingTraitVersions[seq][otherId];
     }
 
-    AvatarTraits::TraitVersions& getLastSentTraitVersions(Node::LocalID otherAvatar) { return _perNodeSentTraitVersions[otherAvatar]; }
-    AvatarTraits::TraitVersions& getLastAckedTraitVersions(Node::LocalID otherAvatar) { return _perNodeAckedTraitVersions[otherAvatar]; }
+    AvatarTraits::TraitVersions& getLastSentTraitVersions(Node::LocalID otherAvatar) {
+        return _perNodeSentTraitVersions[otherAvatar];
+    }
+    AvatarTraits::TraitVersions& getLastAckedTraitVersions(Node::LocalID otherAvatar) {
+        return _perNodeAckedTraitVersions[otherAvatar];
+    }
 
     void resetSentTraitData(Node::LocalID nodeID);
 
@@ -175,8 +189,8 @@ private:
     std::unordered_map<NLPacket::LocalID, QVector<JointData>> _lastOtherAvatarSentJoints;
 
     uint64_t _identityChangeTimestamp;
-    bool _avatarSessionDisplayNameMustChange{ true };
-    bool _avatarSkeletonModelUrlMustChange{ false };
+    bool _avatarSessionDisplayNameMustChange { true };
+    bool _avatarSkeletonModelUrlMustChange { false };
 
     int _numAvatarsSentLastFrame = 0;
     int _numFramesSinceAdjustment = 0;
@@ -192,14 +206,15 @@ private:
 
     int _recentOtherAvatarsInView { 0 };
     int _recentOtherAvatarsOutOfView { 0 };
-    QString _baseDisplayName{}; // The santized key used in determinging unique sessionDisplayName, so that we can remove from dictionary.
+    QString _baseDisplayName {}; // The santized key used in determinging unique sessionDisplayName, so that we can remove from
+                                 // dictionary.
     bool _requestsDomainListData { false };
-    bool _prevRequestsDomainListData{ false };
+    bool _prevRequestsDomainListData { false };
 
     AvatarTraits::TraitVersions _lastReceivedTraitVersions;
     TraitsCheckTimestamp _lastReceivedTraitsChange;
 
-    AvatarTraits::TraitMessageSequence _currentTraitsMessageSequence{ 0 };
+    AvatarTraits::TraitMessageSequence _currentTraitsMessageSequence { 0 };
 
     // Cache of trait versions sent in a given packet (indexed by sequence number)
     // When an ack is received, the sequence number in the ack is used to look up
@@ -210,14 +225,14 @@ private:
     std::unordered_map<AvatarTraits::TraitMessageSequence, PerNodeTraitVersions> _perNodePendingTraitVersions;
 
     // Versions of traits that have been acked, which will be compared to incoming
-    // trait updates.  Incoming updates going to a given node will be ignored if 
+    // trait updates.  Incoming updates going to a given node will be ignored if
     // the ack for the previous packet (containing those versions) has not been
     // received.
     PerNodeTraitVersions _perNodeAckedTraitVersions;
 
     std::unordered_map<Node::LocalID, TraitsCheckTimestamp> _lastSentTraitsTimestamps;
 
-    // cache of traits sent to a node which are compared to incoming traits to 
+    // cache of traits sent to a node which are compared to incoming traits to
     // prevent sending traits that have already been sent.
     PerNodeTraitVersions _perNodeSentTraitVersions;
 

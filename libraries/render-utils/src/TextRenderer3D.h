@@ -12,18 +12,18 @@
 #ifndef hifi_TextRenderer3D_h
 #define hifi_TextRenderer3D_h
 
-#include <memory>
-#include <glm/glm.hpp>
-#include <QColor>
 #include <gpu/Forward.h>
+#include <QColor>
+#include <glm/glm.hpp>
+#include <memory>
 
 namespace gpu {
 class Batch;
 }
 class Font;
 
-#include "text/Font.h"
 #include "text/EffectType.h"
+#include "text/Font.h"
 #include "text/FontFamilies.h"
 
 // TextRenderer3D is actually a fairly thin wrapper around a Font class
@@ -32,18 +32,18 @@ class TextRenderer3D {
 public:
     static const float DEFAULT_POINT_SIZE;
 
-    static TextRenderer3D* getInstance(const char* family, float pointSize = DEFAULT_POINT_SIZE, 
-            bool bold = false, bool italic = false, EffectType effect = NO_EFFECT, int effectThickness = 1);
+    static TextRenderer3D* getInstance(const char* family, float pointSize = DEFAULT_POINT_SIZE, bool bold = false,
+                                       bool italic = false, EffectType effect = NO_EFFECT, int effectThickness = 1);
 
     glm::vec2 computeExtent(const QString& str) const;
     float getFontSize() const; // Pixel size
-    
+
     void draw(gpu::Batch& batch, float x, float y, const QString& str, const glm::vec4& color = glm::vec4(1.0f),
               const glm::vec2& bounds = glm::vec2(-1.0f));
 
 private:
-    TextRenderer3D(const char* family, float pointSize, int weight = -1, bool italic = false,
-                   EffectType effect = NO_EFFECT, int effectThickness = 1);
+    TextRenderer3D(const char* family, float pointSize, int weight = -1, bool italic = false, EffectType effect = NO_EFFECT,
+                   int effectThickness = 1);
 
     // the type of effect to apply
     const EffectType _effectType;
@@ -56,6 +56,5 @@ private:
     Font::DrawInfo _drawInfo;
     std::shared_ptr<Font> _font;
 };
-
 
 #endif // hifi_TextRenderer3D_h

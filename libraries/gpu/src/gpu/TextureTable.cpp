@@ -11,10 +11,10 @@
 #include <shared/GlobalAppProperties.h>
 using namespace gpu;
 
+const size_t TextureTable::COUNT { TEXTURE_TABLE_COUNT };
 
-const size_t TextureTable::COUNT{ TEXTURE_TABLE_COUNT };
-
-TextureTable::TextureTable() { }
+TextureTable::TextureTable() {
+}
 
 TextureTable::TextureTable(const std::initializer_list<TexturePointer>& textures) {
     auto max = std::min<size_t>(COUNT, textures.size());
@@ -45,10 +45,10 @@ void TextureTable::setTexture(size_t index, const TextureView& textureView) {
 }
 
 TextureTable::Array TextureTable::getTextures() const {
-     Array result; 
-     {
-         Lock lock(_mutex);
-         result = _textures;
-     }
-     return result; 
+    Array result;
+    {
+        Lock lock(_mutex);
+        result = _textures;
+    }
+    return result;
 }

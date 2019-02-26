@@ -8,30 +8,30 @@
 
 #include "HmdDisplayPlugin.h"
 
-#include <memory>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/intersect.hpp>
+#include <memory>
 
-#include <QtCore/QLoggingCategory>
-#include <QtCore/QFileInfo>
 #include <QtCore/QDateTime>
+#include <QtCore/QFileInfo>
+#include <QtCore/QLoggingCategory>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QWidget>
 
-#include <GLMHelpers.h>
-#include <ui-plugins/PluginContainer.h>
 #include <CursorManager.h>
+#include <GLMHelpers.h>
 #include <gl/GLWidget.h>
-#include <shared/NsightHelpers.h>
 #include <gpu/Context.h>
 #include <gpu/gl/GLBackend.h>
 #include <shaders/Shaders.h>
+#include <shared/NsightHelpers.h>
+#include <ui-plugins/PluginContainer.h>
 
-#include <TextureCache.h>
 #include <PathUtils.h>
+#include <TextureCache.h>
 
-#include "../Logging.h"
 #include "../CompositorHelper.h"
+#include "../Logging.h"
 
 #include "DesktopPreviewProvider.h"
 
@@ -56,16 +56,16 @@ QRect HmdDisplayPlugin::getRecommendedHUDRect() const {
     return CompositorHelper::VIRTUAL_SCREEN_RECOMMENDED_OVERLAY_RECT;
 }
 
-glm::mat4 HmdDisplayPlugin::getEyeToHeadTransform(Eye eye) const { 
-    return _eyeOffsets[eye]; 
+glm::mat4 HmdDisplayPlugin::getEyeToHeadTransform(Eye eye) const {
+    return _eyeOffsets[eye];
 }
 
-glm::mat4 HmdDisplayPlugin::getEyeProjection(Eye eye, const glm::mat4& baseProjection) const { 
-    return _eyeProjections[eye]; 
+glm::mat4 HmdDisplayPlugin::getEyeProjection(Eye eye, const glm::mat4& baseProjection) const {
+    return _eyeProjections[eye];
 }
 
-glm::mat4 HmdDisplayPlugin::getCullingProjection(const glm::mat4& baseProjection) const { 
-    return _cullingProjection; 
+glm::mat4 HmdDisplayPlugin::getCullingProjection(const glm::mat4& baseProjection) const {
+    return _cullingProjection;
 }
 
 #define DISABLE_PREVIEW_MENU_ITEM_DELAY_MS 500
@@ -74,10 +74,11 @@ bool HmdDisplayPlugin::internalActivate() {
     _monoPreview = _container->getBoolSetting("monoPreview", DEFAULT_MONO_VIEW);
     _clearPreviewFlag = true;
     _container->addMenuItem(PluginType::DISPLAY_PLUGIN, MENU_PATH(), MONO_PREVIEW,
-        [this](bool clicked) {
-        _monoPreview = clicked;
-        _container->setBoolSetting("monoPreview", _monoPreview);
-    }, true, _monoPreview);
+                            [this](bool clicked) {
+                                _monoPreview = clicked;
+                                _container->setBoolSetting("monoPreview", _monoPreview);
+                            },
+                            true, _monoPreview);
 
 #if defined(Q_OS_MAC)
     _disablePreview = true;
@@ -88,20 +89,19 @@ bool HmdDisplayPlugin::internalActivate() {
     QTimer::singleShot(DISABLE_PREVIEW_MENU_ITEM_DELAY_MS, [this] {
         if (isActive() && !_vsyncEnabled) {
             _container->addMenuItem(PluginType::DISPLAY_PLUGIN, MENU_PATH(), DISABLE_PREVIEW,
-                [this](bool clicked) {
-                _disablePreview = clicked;
-                _container->setBoolSetting("disableHmdPreview", _disablePreview);
-                if (_disablePreview) {
-                    _clearPreviewFlag = true;
-                }
-            }, true, _disablePreview);
+                                    [this](bool clicked) {
+                                        _disablePreview = clicked;
+                                        _container->setBoolSetting("disableHmdPreview", _disablePreview);
+                                        if (_disablePreview) {
+                                            _clearPreviewFlag = true;
+                                        }
+                                    },
+                                    true, _disablePreview);
         }
     });
 
     _container->removeMenu(FRAMERATE);
-    for_each_eye([&](Eye eye) {
-        _eyeInverseProjections[eye] = glm::inverse(_eyeProjections[eye]);
-    });
+    for_each_eye([&](Eye eye) { _eyeInverseProjections[eye] = glm::inverse(_eyeProjections[eye]); });
 
     _clearPreviewFlag = true;
 
@@ -184,9 +184,7 @@ void HmdDisplayPlugin::internalPresent() {
         // Note: _displayTexture must currently be the same size as the display.
         uvec2 dims = uvec2(_displayTexture->getDimensions());
         auto viewport = ivec4(uvec2(0), dims);
-        render([&](gpu::Batch& batch) {
-            renderFromTexture(batch, _displayTexture, viewport, viewport);
-        });
+        render([&](gpu::Batch& batch) { renderFromTexture(batch, _displayTexture, viewport, viewport); });
         swapBuffers();
     } else if (!_disablePreview) {
         // screen preview mirroring
@@ -214,16 +212,14 @@ void HmdDisplayPlugin::internalPresent() {
         auto fbo = gpu::FramebufferPointer();
 
         render([&](gpu::Batch& batch) {
-
             if (_monoPreview) {
                 auto window = _container->getPrimaryWidget();
                 float devicePixelRatio = window->devicePixelRatio();
                 glm::vec2 windowSize = toGlm(window->size());
                 windowSize *= devicePixelRatio;
 
-                float windowAspect = aspect(windowSize);  // example: 1920 x 1080 = 1.78
+                float windowAspect = aspect(windowSize); // example: 1920 x 1080 = 1.78
                 float sceneAspect = aspect(originalClippedSize); // usually: 1512 x 850 = 1.78
-
 
                 bool scaleToWidth = windowAspect < sceneAspect;
 
@@ -265,24 +261,19 @@ void HmdDisplayPlugin::internalPresent() {
         swapBuffers();
 
     } else if (_clearPreviewFlag) {
-
         QImage image = DesktopPreviewProvider::getInstance()->getPreviewDisabledImage(_vsyncEnabled);
-        _previewTexture = gpu::Texture::createStrict(
-                gpu::Element(gpu::VEC4, gpu::NUINT8, gpu::RGBA),
-                image.width(), image.height(),
-                gpu::Texture::MAX_NUM_MIPS,
-                gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_MIP_LINEAR));
-            _previewTexture->setSource("HMD Preview Texture");
-            _previewTexture->setUsage(gpu::Texture::Usage::Builder().withColor().build());
-            _previewTexture->setStoredMipFormat(gpu::Element(gpu::VEC4, gpu::NUINT8, gpu::RGBA));
-            _previewTexture->assignStoredMip(0, image.byteCount(), image.constBits());
-            _previewTexture->setAutoGenerateMips(true);
+        _previewTexture = gpu::Texture::createStrict(gpu::Element(gpu::VEC4, gpu::NUINT8, gpu::RGBA), image.width(),
+                                                     image.height(), gpu::Texture::MAX_NUM_MIPS,
+                                                     gpu::Sampler(gpu::Sampler::FILTER_MIN_MAG_MIP_LINEAR));
+        _previewTexture->setSource("HMD Preview Texture");
+        _previewTexture->setUsage(gpu::Texture::Usage::Builder().withColor().build());
+        _previewTexture->setStoredMipFormat(gpu::Element(gpu::VEC4, gpu::NUINT8, gpu::RGBA));
+        _previewTexture->assignStoredMip(0, image.byteCount(), image.constBits());
+        _previewTexture->setAutoGenerateMips(true);
 
         auto viewport = getViewportForSourceSize(uvec2(_previewTexture->getDimensions()));
 
-        render([&](gpu::Batch& batch) {
-            renderFromTexture(batch, _previewTexture, viewport, viewport);
-        });
+        render([&](gpu::Batch& batch) { renderFromTexture(batch, _previewTexture, viewport, viewport); });
         _clearPreviewFlag = false;
         swapBuffers();
     }
@@ -349,7 +340,7 @@ void HmdDisplayPlugin::HUDRenderer::build() {
     vertices = std::make_shared<gpu::Buffer>();
     indices = std::make_shared<gpu::Buffer>();
 
-    //UV mapping source: http://www.mvps.org/directx/articles/spheremap.htm
+    // UV mapping source: http://www.mvps.org/directx/articles/spheremap.htm
 
     static const float fov = CompositorHelper::VIRTUAL_UI_TARGET_FOV.y;
     static const float aspectRatio = CompositorHelper::VIRTUAL_UI_ASPECT_RATIO;
@@ -410,15 +401,15 @@ void HmdDisplayPlugin::HUDRenderer::updatePipeline() {
         auto program = gpu::Shader::createProgram(shader::render_utils::program::hmd_ui);
         gpu::StatePointer state = gpu::StatePointer(new gpu::State());
         state->setDepthTest(gpu::State::DepthTest(true, true, gpu::LESS_EQUAL));
-        state->setBlendFunction(true,
-            gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
-            gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
+        state->setBlendFunction(true, gpu::State::SRC_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::INV_SRC_ALPHA,
+                                gpu::State::FACTOR_ALPHA, gpu::State::BLEND_OP_ADD, gpu::State::ONE);
 
         pipeline = gpu::Pipeline::create(program, state);
     }
 }
 
-std::function<void(gpu::Batch&, const gpu::TexturePointer&, bool mirror)> HmdDisplayPlugin::HUDRenderer::render(HmdDisplayPlugin& plugin) {
+std::function<void(gpu::Batch&, const gpu::TexturePointer&, bool mirror)> HmdDisplayPlugin::HUDRenderer::render(
+    HmdDisplayPlugin& plugin) {
     updatePipeline();
 
     auto hudPipeline = pipeline;
@@ -433,8 +424,10 @@ std::function<void(gpu::Batch&, const gpu::TexturePointer&, bool mirror)> HmdDis
             batch.setPipeline(hudPipeline);
 
             batch.setInputFormat(hudFormat);
-            gpu::BufferView posView(hudVertices, VERTEX_OFFSET, hudVertices->getSize(), VERTEX_STRIDE, hudFormat->getAttributes().at(gpu::Stream::POSITION)._element);
-            gpu::BufferView uvView(hudVertices, TEXTURE_OFFSET, hudVertices->getSize(), VERTEX_STRIDE, hudFormat->getAttributes().at(gpu::Stream::TEXCOORD)._element);
+            gpu::BufferView posView(hudVertices, VERTEX_OFFSET, hudVertices->getSize(), VERTEX_STRIDE,
+                                    hudFormat->getAttributes().at(gpu::Stream::POSITION)._element);
+            gpu::BufferView uvView(hudVertices, TEXTURE_OFFSET, hudVertices->getSize(), VERTEX_STRIDE,
+                                   hudFormat->getAttributes().at(gpu::Stream::TEXCOORD)._element);
             batch.setInputBuffer(gpu::Stream::POSITION, posView);
             batch.setInputBuffer(gpu::Stream::TEXCOORD, uvView);
             batch.setIndexBuffer(gpu::UINT16, hudIndices, 0);

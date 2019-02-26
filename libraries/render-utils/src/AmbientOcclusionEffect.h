@@ -12,14 +12,14 @@
 #ifndef hifi_AmbientOcclusionEffect_h
 #define hifi_AmbientOcclusionEffect_h
 
-#include <string>
 #include <DependencyManager.h>
+#include <string>
 
 #include "render/DrawTask.h"
 
-#include "LightingModel.h"
 #include "DeferredFrameTransform.h"
 #include "DeferredFramebuffer.h"
+#include "LightingModel.h"
 #include "SurfaceGeometryPass.h"
 
 #include "ssao_shared.h"
@@ -30,7 +30,7 @@ public:
 
     gpu::FramebufferPointer getOcclusionFramebuffer();
     gpu::TexturePointer getOcclusionTexture();
-    
+
     gpu::FramebufferPointer getOcclusionBlurredFramebuffer();
     gpu::TexturePointer getOcclusionBlurredTexture();
 
@@ -49,12 +49,11 @@ public:
     bool isStereo() const { return _isStereo; }
 
 protected:
-
     void clear();
     void allocate();
-    
+
     gpu::TexturePointer _linearDepthTexture;
-    
+
     gpu::FramebufferPointer _occlusionFramebuffer;
     gpu::TexturePointer _occlusionTexture;
 
@@ -65,14 +64,14 @@ protected:
     gpu::TexturePointer _normalTexture;
 
 #if SSAO_USE_QUAD_SPLIT
-    gpu::FramebufferPointer _occlusionSplitFramebuffers[SSAO_SPLIT_COUNT*SSAO_SPLIT_COUNT];
+    gpu::FramebufferPointer _occlusionSplitFramebuffers[SSAO_SPLIT_COUNT * SSAO_SPLIT_COUNT];
     gpu::TexturePointer _occlusionSplitTexture;
 #endif
 
     glm::ivec2 _frameSize;
-    int _resolutionLevel{ 0 };
-    int _depthResolutionLevel{ 0 };
-    bool _isStereo{ false };
+    int _resolutionLevel { 0 };
+    int _depthResolutionLevel { 0 };
+    bool _isStereo { false };
 };
 
 using AmbientOcclusionFramebufferPointer = std::shared_ptr<AmbientOcclusionFramebuffer>;
@@ -153,7 +152,8 @@ signals:
 
 class AmbientOcclusionEffect {
 public:
-    using Input = render::VaryingSet4<LightingModelPointer, DeferredFrameTransformPointer, DeferredFramebufferPointer, LinearDepthFramebufferPointer>;
+    using Input = render::VaryingSet4<LightingModelPointer, DeferredFrameTransformPointer, DeferredFramebufferPointer,
+                                      LinearDepthFramebufferPointer>;
     using Output = render::VaryingSet2<AmbientOcclusionFramebufferPointer, gpu::BufferView>;
     using Config = AmbientOcclusionEffectConfig;
     using JobModel = render::Job::ModelIO<AmbientOcclusionEffect, Input, Output, Config>;
@@ -166,7 +166,6 @@ public:
     // Class describing the uniform buffer with all the parameters common to the AO shaders
     class AOParameters : public AmbientOcclusionParams {
     public:
-
         AOParameters();
 
         int getResolutionLevel() const { return _resolutionInfo.x; }
@@ -174,7 +173,7 @@ public:
         float getPerspectiveScale() const { return _resolutionInfo.z; }
         float getObscuranceLevel() const { return _radiusInfo.w; }
         float getFalloffAngle() const { return (float)_falloffInfo.x; }
-        
+
         float getNumSpiralTurns() const { return _sampleInfo.z; }
         int getNumSamples() const { return (int)_sampleInfo.x; }
         bool isFetchMipsEnabled() const { return _sampleInfo.w; }
@@ -182,25 +181,21 @@ public:
         bool isDitheringEnabled() const { return _ditheringInfo.x != 0.0f; }
         bool isBorderingEnabled() const { return _ditheringInfo.w != 0.0f; }
         bool isHorizonBased() const { return _resolutionInfo.y != 0.0f; }
-
     };
     using AOParametersBuffer = gpu::StructBuffer<AOParameters>;
 
 private:
-
     // Class describing the uniform buffer with all the parameters common to the bilateral blur shaders
     class BlurParameters : public AmbientOcclusionBlurParams {
     public:
-
         BlurParameters();
 
         float getEdgeSharpness() const { return (float)_blurInfo.x; }
         int getBlurRadius() const { return (int)_blurInfo.w; }
-
     };
     using BlurParametersBuffer = gpu::StructBuffer<BlurParameters>;
 
-    using FrameParametersBuffer = gpu::StructBuffer< AmbientOcclusionFrameParams>;
+    using FrameParametersBuffer = gpu::StructBuffer<AmbientOcclusionFrameParams>;
 
     void updateBlurParameters();
     void updateFramebufferSizes();
@@ -210,10 +205,10 @@ private:
     int getDepthResolutionLevel() const;
 
     AOParametersBuffer _aoParametersBuffer;
-    FrameParametersBuffer _aoFrameParametersBuffer[SSAO_SPLIT_COUNT*SSAO_SPLIT_COUNT];
+    FrameParametersBuffer _aoFrameParametersBuffer[SSAO_SPLIT_COUNT * SSAO_SPLIT_COUNT];
     BlurParametersBuffer _vblurParametersBuffer;
     BlurParametersBuffer _hblurParametersBuffer;
-    float _blurEdgeSharpness{ 0.0f };
+    float _blurEdgeSharpness { 0.0f };
 
     static const gpu::PipelinePointer& getOcclusionPipeline();
     static const gpu::PipelinePointer& getBilateralBlurPipeline();
@@ -228,15 +223,14 @@ private:
     static gpu::PipelinePointer _buildNormalsPipeline;
 
     AmbientOcclusionFramebufferPointer _framebuffer;
-    std::array<float, SSAO_RANDOM_SAMPLE_COUNT * SSAO_SPLIT_COUNT*SSAO_SPLIT_COUNT> _randomSamples;
-    int _frameId{ 0 };
-    bool _isJitterEnabled{ true };
-    
+    std::array<float, SSAO_RANDOM_SAMPLE_COUNT * SSAO_SPLIT_COUNT * SSAO_SPLIT_COUNT> _randomSamples;
+    int _frameId { 0 };
+    bool _isJitterEnabled { true };
+
     gpu::RangeTimerPointer _gpuTimer;
 
     friend class DebugAmbientOcclusion;
 };
-
 
 class DebugAmbientOcclusionConfig : public render::Job::Config {
     Q_OBJECT
@@ -246,17 +240,17 @@ class DebugAmbientOcclusionConfig : public render::Job::Config {
 public:
     DebugAmbientOcclusionConfig() : render::Job::Config(false) {}
 
-    bool showCursorPixel{ false };
-    glm::vec2 debugCursorTexcoord{ 0.5f, 0.5f };
+    bool showCursorPixel { false };
+    glm::vec2 debugCursorTexcoord { 0.5f, 0.5f };
 
 signals:
     void dirty();
 };
 
-
 class DebugAmbientOcclusion {
 public:
-    using Inputs = render::VaryingSet4<DeferredFrameTransformPointer, DeferredFramebufferPointer, LinearDepthFramebufferPointer, AmbientOcclusionEffect::AOParametersBuffer>;
+    using Inputs = render::VaryingSet4<DeferredFrameTransformPointer, DeferredFramebufferPointer, LinearDepthFramebufferPointer,
+                                       AmbientOcclusionEffect::AOParametersBuffer>;
     using Config = DebugAmbientOcclusionConfig;
     using JobModel = render::Job::ModelI<DebugAmbientOcclusion, Inputs, Config>;
 
@@ -264,15 +258,14 @@ public:
 
     void configure(const Config& config);
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs);
-    
+
 private:
-       
     // Class describing the uniform buffer with all the parameters common to the debug AO shaders
     class Parameters {
     public:
         // Pixel info
         glm::vec4 pixelInfo { 0.0f, 0.0f, 0.0f, 0.0f };
-        
+
         Parameters() {}
     };
     gpu::StructBuffer<Parameters> _parametersBuffer;
@@ -281,7 +274,7 @@ private:
 
     gpu::PipelinePointer _debugPipeline;
 
-    bool _showCursorPixel{ false };
+    bool _showCursorPixel { false };
 };
 
 #endif // hifi_AmbientOcclusionEffect_h

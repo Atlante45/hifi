@@ -11,6 +11,7 @@
 
 class OculusDisplayPlugin : public OculusBaseDisplayPlugin {
     using Parent = OculusBaseDisplayPlugin;
+
 public:
     OculusDisplayPlugin();
     ~OculusDisplayPlugin();
@@ -47,4 +48,3 @@ private:
     std::atomic_int _longRenders;
     std::atomic_int _longFrames;
 };
-

@@ -10,14 +10,13 @@
 #include <nlohmann/json.hpp>
 #include <unordered_map>
 
-#include <QtCore/QFileInfo>
 #include <QtCore/QDir>
+#include <QtCore/QFileInfo>
 
 #include <ktx/KTX.h>
-#include "Frame.h"
 #include "Batch.h"
+#include "Frame.h"
 #include "TextureTable.h"
-
 
 #include "FrameIOKeys.h"
 
@@ -27,7 +26,7 @@ using json = nlohmann::json;
 class Deserializer {
 public:
     static std::string getBaseName(const std::string& filename) {
-        static const std::string ext{ ".json" };
+        static const std::string ext { ".json" };
         if (std::string::npos != filename.rfind(ext)) {
             return filename.substr(0, filename.size() - ext.size());
         }
@@ -49,8 +48,10 @@ public:
     }
 
     Deserializer(const std::string& filename, uint32_t externalTexture, const TextureLoader& loader) :
-        basename(getBaseName(filename)), basedir(getBaseDir(filename)), externalTexture(externalTexture), textureLoader(loader) {
-    }
+        basename(getBaseName(filename)),
+        basedir(getBaseDir(filename)),
+        externalTexture(externalTexture),
+        textureLoader(loader) {}
 
     const std::string basename;
     const std::string basedir;
@@ -74,10 +75,9 @@ public:
 
     FramePointer deserializeFrame();
 
-
     void readBuffers(const json& node);
 
-    template <typename T>
+    template<typename T>
     static std::vector<T> readArray(const json& node, const std::string& name, std::function<T(const json& node)> parser) {
         std::vector<T> result;
         if (node.count(name)) {
@@ -94,7 +94,7 @@ public:
         return result;
     }
 
-    template <typename T>
+    template<typename T>
     static std::vector<T> readNumericVector(const json& node) {
         auto count = node.size();
         std::vector<T> result;
@@ -105,14 +105,14 @@ public:
         return result;
     }
 
-    template <size_t N>
+    template<size_t N>
     static void readFloatArray(const json& node, float* out) {
         for (size_t i = 0; i < N; ++i) {
             out[i] = node[i].operator float();
         }
     }
 
-    template <typename T>
+    template<typename T>
     static bool readOptionalTransformed(T& dest, const json& node, const std::string& name, std::function<T(const json&)> f) {
         if (node.count(name)) {
             dest = f(node[name]);
@@ -121,10 +121,8 @@ public:
         return false;
     }
 
-    template <typename T>
-    static bool readOptionalVectorTransformed(std::vector<T>& dest,
-                                              const json& node,
-                                              const std::string& name,
+    template<typename T>
+    static bool readOptionalVectorTransformed(std::vector<T>& dest, const json& node, const std::string& name,
                                               std::function<T(const json&)> f) {
         if (node.count(name)) {
             const auto& arrayNode = node[name];
@@ -138,20 +136,18 @@ public:
         return false;
     }
 
-    template <typename T>
+    template<typename T>
     static bool readOptionalVector(std::vector<T>& dest, const json& node, const std::string& name) {
         return readOptionalVectorTransformed(dest, node, name, [](const json& node) { return node.get<T>(); });
     }
 
-    template <typename T>
+    template<typename T>
     static T defaultNodeTransform(const json& node) {
         return node.get<T>();
     }
 
-    template <typename T, typename TT = T>
-    static bool readBatchCacheTransformed(typename Batch::Cache<T>::Vector& dest,
-                                          const json& node,
-                                          const std::string& name,
+    template<typename T, typename TT = T>
+    static bool readBatchCacheTransformed(typename Batch::Cache<T>::Vector& dest, const json& node, const std::string& name,
                                           std::function<TT(const json&)> f = [](const json& node) -> TT {
                                               return node.get<TT>();
                                           }) {
@@ -165,16 +161,14 @@ public:
         return false;
     }
 
-    template <typename T>
-    static bool readPointerCache(typename Batch::Cache<T>::Vector& dest,
-                                 const json& node,
-                                 const std::string& name,
+    template<typename T>
+    static bool readPointerCache(typename Batch::Cache<T>::Vector& dest, const json& node, const std::string& name,
                                  std::vector<T>& global) {
         auto transform = [&](const json& node) -> const T& { return global[node.get<uint32_t>()]; };
         return readBatchCacheTransformed<T, const T&>(dest, node, name, transform);
     }
 
-    template <typename T>
+    template<typename T>
     static bool readOptional(T& dest, const json& node, const std::string& name) {
         return readOptionalTransformed<T>(dest, node, name, [](const json& child) {
             T result = child;
@@ -191,7 +185,7 @@ public:
     BatchPointer readBatch(const json& node);
     Batch::NamedBatchData readNamedBatchData(const json& node);
 
-    //static StatePointer readState(const json& node);
+    // static StatePointer readState(const json& node);
     static QueryPointer readQuery(const json& node);
     TexturePointer readTexture(const json& node, uint32_t externalTexture);
     static ShaderPointer readShader(const json& node);
@@ -226,7 +220,7 @@ public:
         }
         return v;
     }
-    static Transform readTransform(const json& node) { return Transform{ readMat4(node) }; }
+    static Transform readTransform(const json& node) { return Transform { readMat4(node) }; }
     static std::vector<uint8_t> fromBase64(const json& node);
     static void readCommand(const json& node, Batch& batch);
 };
@@ -239,7 +233,7 @@ void optimizeFrame(const std::string& filename, const IndexOptimizer& optimizer)
     return Deserializer(filename, 0, {}).optimizeFrame(optimizer);
 }
 
-}  // namespace gpu
+} // namespace gpu
 
 using namespace gpu;
 
@@ -327,7 +321,7 @@ TexturePointer Deserializer::readTexture(const json& node, uint32_t external) {
         if (QFileInfo(ktxFile.c_str()).isRelative()) {
             ktxFile = basedir + ktxFile;
         }
-        ktx::StoragePointer ktxStorage{ new storage::FileStorage(ktxFile.c_str()) };
+        ktx::StoragePointer ktxStorage { new storage::FileStorage(ktxFile.c_str()) };
         auto ktxObject = ktx::KTX::create(ktxStorage);
         Texture::evalTextureFormat(ktxObject->getHeader(), ktxTexelFormat, ktxMipFormat);
     }
@@ -399,15 +393,15 @@ ShaderPointer Deserializer::readShader(const json& node) {
     // FIXME support procedural shaders
     Shader::Type type = node[keys::type];
     std::string name = node[keys::name];
-    // Using the serialized ID is bad, because it's generated at 
-    // cmake time, and can change across platforms or when 
+    // Using the serialized ID is bad, because it's generated at
+    // cmake time, and can change across platforms or when
     // shaders are added or removed
     // uint32_t id = node[keys::id];
-    
+
     uint32_t id = shadersIdsByName[name];
     ShaderPointer result;
     switch (type) {
-        //case Shader::Type::GEOMETRY:
+        // case Shader::Type::GEOMETRY:
         //    result = Shader::createGeometry(id);
         //    break;
         case Shader::Type::VERTEX:
@@ -549,11 +543,15 @@ StatePointer readState(const json& node) {
 
     State::Data data;
     Deserializer::readOptionalTransformed<State::Flags>(data.flags, node, keys::flags, &readStateFlags);
-    Deserializer::readOptionalTransformed<State::BlendFunction>(data.blendFunction, node, keys::blendFunction, &readBlendFunction);
+    Deserializer::readOptionalTransformed<State::BlendFunction>(data.blendFunction, node, keys::blendFunction,
+                                                                &readBlendFunction);
     Deserializer::readOptionalTransformed<State::DepthTest>(data.depthTest, node, keys::depthTest, &readDepthTest);
-    Deserializer::readOptionalTransformed<State::StencilActivation>(data.stencilActivation, node, keys::stencilActivation, &readStencilActivation);
-    Deserializer::readOptionalTransformed<State::StencilTest>(data.stencilTestFront, node, keys::stencilTestFront, &readStencilTest);
-    Deserializer::readOptionalTransformed<State::StencilTest>(data.stencilTestBack, node, keys::stencilTestBack, &readStencilTest);
+    Deserializer::readOptionalTransformed<State::StencilActivation>(data.stencilActivation, node, keys::stencilActivation,
+                                                                    &readStencilActivation);
+    Deserializer::readOptionalTransformed<State::StencilTest>(data.stencilTestFront, node, keys::stencilTestFront,
+                                                              &readStencilTest);
+    Deserializer::readOptionalTransformed<State::StencilTest>(data.stencilTestBack, node, keys::stencilTestBack,
+                                                              &readStencilTest);
     Deserializer::readOptional(data.colorWriteMask, node, keys::colorWriteMask);
     Deserializer::readOptional(data.cullMode, node, keys::cullMode);
     Deserializer::readOptional(data.depthBias, node, keys::depthBias);
@@ -670,7 +668,7 @@ QueryPointer Deserializer::readQuery(const json& node) {
 
 std::vector<uint8_t> Deserializer::fromBase64(const json& node) {
     std::vector<uint8_t> result;
-    auto decoded = QByteArray::fromBase64(QByteArray{ node.get<std::string>().c_str() });
+    auto decoded = QByteArray::fromBase64(QByteArray { node.get<std::string>().c_str() });
     result.resize(decoded.size());
     memcpy(result.data(), decoded.data(), decoded.size());
     return result;
@@ -705,7 +703,7 @@ Batch::NamedBatchData Deserializer::readNamedBatchData(const json& node) {
     });
     readOptionalVectorTransformed<Batch::DrawCallInfo>(result.drawCallInfos, node, keys::drawCallInfos,
                                                        [](const json& node) -> Batch::DrawCallInfo {
-                                                           Batch::DrawCallInfo result{ 0 };
+                                                           Batch::DrawCallInfo result { 0 };
                                                            *((uint32_t*)&result) = node;
                                                            return result;
                                                        });
@@ -739,7 +737,7 @@ BatchPointer Deserializer::readBatch(const json& node) {
 
     readOptionalVectorTransformed<Batch::DrawCallInfo>(batch._drawCallInfos, node, keys::drawCallInfos,
                                                        [](const json& node) -> Batch::DrawCallInfo {
-                                                           Batch::DrawCallInfo result{ 0 };
+                                                           Batch::DrawCallInfo result { 0 };
                                                            *((uint32_t*)&result) = node;
                                                            return result;
                                                        });
@@ -791,10 +789,9 @@ StereoState readStereoState(const json& node) {
     return result;
 }
 
-
 FramePointer Deserializer::deserializeFrame() {
     {
-        std::string filename{ basename + ".json" };
+        std::string filename { basename + ".json" };
         storage::FileStorage mappedFile(filename.c_str());
         frameNode = json::parse(std::string((const char*)mappedFile.data(), mappedFile.size()));
     }
@@ -810,7 +807,6 @@ FramePointer Deserializer::deserializeFrame() {
     } else {
         binaryFile = basename + ".bin";
     }
-
 
     if (frameNode.count(keys::buffers)) {
         readBuffers(frameNode[keys::buffers]);
@@ -847,8 +843,8 @@ FramePointer Deserializer::deserializeFrame() {
     framebuffers = readArray<FramebufferPointer>(frameNode, keys::framebuffers, framebufferReader);
 
     // Must come after textures & framebuffers
-    swapchains =
-        readArray<SwapChainPointer>(frameNode, keys::swapchains, [this](const json& node) { return readSwapchain(node); });
+    swapchains = readArray<SwapChainPointer>(frameNode, keys::swapchains,
+                                             [this](const json& node) { return readSwapchain(node); });
 
     queries = readArray<QueryPointer>(frameNode, keys::queries, [](const json& node) { return readQuery(node); });
     frame.framebuffer = framebuffers[frameNode[keys::framebuffer].get<uint32_t>()];
@@ -865,8 +861,6 @@ FramePointer Deserializer::deserializeFrame() {
     return result;
 }
 
-
-
 FramePointer Deserializer::readFrame() {
     auto result = deserializeFrame();
     result->finish();
@@ -877,23 +871,21 @@ void Deserializer::optimizeFrame(const IndexOptimizer& optimizer) {
     auto result = deserializeFrame();
     auto& frame = *result;
 
-
-        // optimize the index buffers?
+    // optimize the index buffers?
     struct CurrentIndexBuffer {
-        Offset offset{ 0 };
+        Offset offset { 0 };
         BufferPointer buffer;
-        Type type{ gpu::Type::INT32 };
-        Primitive primitve{ Primitive::TRIANGLES };
-        uint32_t numIndices{ 0 };
-        uint32_t startIndex{ 0 };
+        Type type { gpu::Type::INT32 };
+        Primitive primitve { Primitive::TRIANGLES };
+        uint32_t numIndices { 0 };
+        uint32_t startIndex { 0 };
     };
 
     std::vector<CurrentIndexBuffer> captured;
     for (auto& batch : frame.batches) {
-
         CurrentIndexBuffer currentIndexBuffer;
-        batch->forEachCommand([&](Batch::Command cmd, const Batch::Param* params){
-            switch(cmd) {
+        batch->forEachCommand([&](Batch::Command cmd, const Batch::Param* params) {
+            switch (cmd) {
                 case Batch::Command::COMMAND_setIndexBuffer:
                     currentIndexBuffer.offset = params[0]._size;
                     currentIndexBuffer.buffer = batch->_buffers.get(params[1]._int);
@@ -914,12 +906,11 @@ void Deserializer::optimizeFrame(const IndexOptimizer& optimizer) {
                     captured.emplace_back(currentIndexBuffer);
                     break;
 
-                default: 
+                default:
                     break;
             }
         });
     }
-
 
     std::string optimizedBinaryFile = basename + "_optimized.bin";
     QFile(binaryFile.c_str()).copy(optimizedBinaryFile.c_str());

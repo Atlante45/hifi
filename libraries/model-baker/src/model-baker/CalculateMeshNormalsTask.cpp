@@ -21,20 +21,17 @@ void CalculateMeshNormalsTask::run(const baker::BakeContextPointer& context, con
     for (int i = 0; i < (int)meshes.size(); i++) {
         const auto& mesh = meshes[i];
         normalsPerMeshOut.emplace_back();
-        auto& normalsOut = normalsPerMeshOut[normalsPerMeshOut.size()-1];
+        auto& normalsOut = normalsPerMeshOut[normalsPerMeshOut.size() - 1];
         // Only calculate normals if this mesh doesn't already have them
         if (!mesh.normals.empty()) {
             normalsOut = mesh.normals.toStdVector();
         } else {
             normalsOut.resize(mesh.vertices.size());
             baker::calculateNormals(mesh,
-                [&normalsOut](int normalIndex) /* NormalAccessor */ {
-                    return &normalsOut[normalIndex];
-                },
-                [&mesh](int vertexIndex, glm::vec3& outVertex) /* VertexSetter */ {
-                    outVertex = mesh.vertices[vertexIndex];
-                }
-            );
+                                    [&normalsOut](int normalIndex) /* NormalAccessor */ { return &normalsOut[normalIndex]; },
+                                    [&mesh](int vertexIndex, glm::vec3& outVertex) /* VertexSetter */ {
+                                        outVertex = mesh.vertices[vertexIndex];
+                                    });
         }
     }
 }

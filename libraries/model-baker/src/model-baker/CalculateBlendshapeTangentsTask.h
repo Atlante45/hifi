@@ -12,13 +12,14 @@
 #ifndef hifi_CalculateBlendshapeTangentsTask_h
 #define hifi_CalculateBlendshapeTangentsTask_h
 
-#include "Engine.h"
 #include "BakerTypes.h"
+#include "Engine.h"
 
 // Calculate blendshape tangents if not already present in the blendshape
 class CalculateBlendshapeTangentsTask {
 public:
-    using Input = baker::VaryingSet4<std::vector<baker::NormalsPerBlendshape>, baker::BlendshapesPerMesh, std::vector<hfm::Mesh>, QHash<QString, hfm::Material>>;
+    using Input = baker::VaryingSet4<std::vector<baker::NormalsPerBlendshape>, baker::BlendshapesPerMesh,
+                                     std::vector<hfm::Mesh>, QHash<QString, hfm::Material>>;
     using Output = std::vector<baker::TangentsPerBlendshape>;
     using JobModel = baker::Job::ModelIO<CalculateBlendshapeTangentsTask, Input, Output>;
 

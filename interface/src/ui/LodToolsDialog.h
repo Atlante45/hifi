@@ -36,7 +36,6 @@ public slots:
     void updateAutomaticLODAdjust();
 
 protected:
-
     // Emits a 'closed' signal when this dialog is closed.
     void closeEvent(QCloseEvent* event) override;
 

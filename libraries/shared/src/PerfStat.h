@@ -21,8 +21,8 @@
 
 #include <atomic>
 #include <cstring>
-#include <string>
 #include <map>
+#include <string>
 
 using AtomicUIntStat = std::atomic<uintmax_t>;
 
@@ -35,8 +35,8 @@ private:
     AtomicUIntStat* _runningTotal;
     AtomicUIntStat* _totalCalls;
     static bool _suppressShortTimings;
-public:
 
+public:
     PerformanceWarning(bool renderWarnings, const char* message, bool alwaysDisplay = false,
                        AtomicUIntStat* runningTotal = NULL, AtomicUIntStat* totalCalls = NULL) :
         _start(usecTimestampNow()),
@@ -44,7 +44,7 @@ public:
         _renderWarningsOn(renderWarnings),
         _alwaysDisplay(alwaysDisplay),
         _runningTotal(runningTotal),
-        _totalCalls(totalCalls) { }
+        _totalCalls(totalCalls) {}
 
     quint64 elapsed() const { return (usecTimestampNow() - _start); };
 
@@ -57,7 +57,10 @@ class PerformanceTimerRecord {
 public:
     PerformanceTimerRecord() : _runningTotal(0), _lastTotal(0), _numAccumulations(0), _numTallies(0), _expiry(0) {}
 
-    void accumulateResult(const quint64& elapsed) { _runningTotal += elapsed; ++_numAccumulations; }
+    void accumulateResult(const quint64& elapsed) {
+        _runningTotal += elapsed;
+        ++_numAccumulations;
+    }
     void tallyResult(const quint64& now);
     bool isStale(const quint64& now) const { return now > _expiry; }
     quint64 getAverage() const { return (_numTallies == 0) ? 0 : _runningTotal / _numTallies; }
@@ -75,7 +78,6 @@ private:
 
 class PerformanceTimer {
 public:
-
     PerformanceTimer(const QString& name);
     ~PerformanceTimer();
 
@@ -93,7 +95,7 @@ private:
     QString _name;
     static std::atomic<bool> _isActive;
 
-    static std::mutex _mutex;  // used to guard multi-threaded access to _fullNames and _records
+    static std::mutex _mutex; // used to guard multi-threaded access to _fullNames and _records
     static QHash<QThread*, QString> _fullNames;
     static QMap<QString, PerformanceTimerRecord> _records;
 };
@@ -101,9 +103,9 @@ private:
 // uncomment WANT_DETAILED_PERFORMANCE_TIMERS definition to enable performance timers in high-frequency contexts
 //#define WANT_DETAILED_PERFORMANCE_TIMERS
 #ifdef WANT_DETAILED_PERFORMANCE_TIMERS
-    #define DETAILED_PERFORMANCE_TIMER(name) PerformanceTimer detailedPerformanceTimer(name);
+#define DETAILED_PERFORMANCE_TIMER(name) PerformanceTimer detailedPerformanceTimer(name);
 #else // WANT_DETAILED_PERFORMANCE_TIMERS
-    #define DETAILED_PERFORMANCE_TIMER(name) ; // no-op
+#define DETAILED_PERFORMANCE_TIMER(name) ; // no-op
 #endif // WANT_DETAILED_PERFORMANCE_TIMERS
 
 #endif // hifi_PerfStat_h

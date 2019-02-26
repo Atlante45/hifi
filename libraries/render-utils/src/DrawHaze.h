@@ -15,13 +15,13 @@
 #include <DependencyManager.h>
 #include <NumericalConstants.h>
 
-#include <gpu/Resource.h>
 #include <gpu/Pipeline.h>
-#include <render/Forward.h>
+#include <gpu/Resource.h>
 #include <render/DrawTask.h>
+#include <render/Forward.h>
 
-#include "SurfaceGeometryPass.h"
 #include "LightingModel.h"
+#include "SurfaceGeometryPass.h"
 
 #include "HazeStage.h"
 #include "LightStage.h"
@@ -30,7 +30,8 @@ using LinearDepthFramebufferPointer = std::shared_ptr<LinearDepthFramebuffer>;
 
 class DrawHaze {
 public:
-    using Inputs = render::VaryingSet6<HazeStage::FramePointer, gpu::FramebufferPointer, LinearDepthFramebufferPointer, DeferredFrameTransformPointer, LightingModelPointer, LightStage::FramePointer>;
+    using Inputs = render::VaryingSet6<HazeStage::FramePointer, gpu::FramebufferPointer, LinearDepthFramebufferPointer,
+                                       DeferredFrameTransformPointer, LightingModelPointer, LightStage::FramePointer>;
     using JobModel = render::Job::ModelI<DrawHaze, Inputs>;
 
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs);

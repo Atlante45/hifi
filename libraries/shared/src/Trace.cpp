@@ -10,21 +10,21 @@
 
 #include <chrono>
 
-#include <QtCore/QDebug>
 #include <QtCore/QCoreApplication>
-#include <QtCore/QThread>
-#include <QtCore/QFileInfo>
+#include <QtCore/QDebug>
 #include <QtCore/QDir>
+#include <QtCore/QFileInfo>
 #include <QtCore/QStandardPaths>
+#include <QtCore/QThread>
 
+#include <QtCore/QDataStream>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <QtCore/QTemporaryFile>
-#include <QtCore/QDataStream>
 #include <QtCore/QTextStream>
 
-#include <QtCore/QJsonObject>
 #include <QtCore/QJsonDocument>
+#include <QtCore/QJsonObject>
 
 #include <BuildInfo.h>
 
@@ -81,14 +81,9 @@ void TraceEvent::writeJson(QTextStream& out) const {
     //}
     out << '}';
 #else
-    QJsonObject ev {
-        { "name", QJsonValue(name) },
-        { "cat", category.categoryName() },
-        { "ph", QString(type) },
-        { "ts", timestamp },
-        { "pid", processID },
-        { "tid", threadID }
-    };
+    QJsonObject ev { { "name", QJsonValue(name) }, { "cat", category.categoryName() },
+                     { "ph", QString(type) },      { "ts", timestamp },
+                     { "pid", processID },         { "tid", threadID } };
     if (!id.isEmpty()) {
         ev["id"] = id;
     }
@@ -176,11 +171,9 @@ void Tracer::serialize(const QString& filename) {
 #endif
 }
 
-void Tracer::traceEvent(const QLoggingCategory& category,
-    const QString& name, EventType type,
-    qint64 timestamp, qint64 processID, qint64 threadID,
-    const QString& id,
-    const QVariantMap& args, const QVariantMap& extra) {
+void Tracer::traceEvent(const QLoggingCategory& category, const QString& name, EventType type, qint64 timestamp,
+                        qint64 processID, qint64 threadID, const QString& id, const QVariantMap& args,
+                        const QVariantMap& extra) {
     std::lock_guard<std::mutex> guard(_eventsMutex);
 
     // We always want to store metadata events even if tracing is not enabled so that when
@@ -193,40 +186,20 @@ void Tracer::traceEvent(const QLoggingCategory& category,
     }
 
     if (type == Metadata) {
-        _metadataEvents.push_back({
-            id,
-            name,
-            type,
-            timestamp,
-            processID,
-            threadID,
-            category,
-            args,
-            extra
-        });
+        _metadataEvents.push_back({ id, name, type, timestamp, processID, threadID, category, args, extra });
     } else {
-        _events.push_back({
-            id,
-            name,
-            type,
-            timestamp,
-            processID,
-            threadID,
-            category,
-            args,
-            extra
-        });
+        _events.push_back({ id, name, type, timestamp, processID, threadID, category, args, extra });
     }
 }
 
-void Tracer::traceEvent(const QLoggingCategory& category, 
-    const QString& name, EventType type, const QString& id, 
-    const QVariantMap& args, const QVariantMap& extra) {
+void Tracer::traceEvent(const QLoggingCategory& category, const QString& name, EventType type, const QString& id,
+                        const QVariantMap& args, const QVariantMap& extra) {
     if (!_enabled && type != Metadata) {
         return;
     }
 
-    auto timestamp = std::chrono::duration_cast<std::chrono::microseconds>(p_high_resolution_clock::now().time_since_epoch()).count();
+    auto timestamp = std::chrono::duration_cast<std::chrono::microseconds>(p_high_resolution_clock::now().time_since_epoch())
+                         .count();
     auto processID = QCoreApplication::applicationPid();
     auto threadID = int64_t(QThread::currentThreadId());
 

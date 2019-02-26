@@ -11,19 +11,19 @@
 
 #include "DebugDeferredBuffer.h"
 
-#include <QtCore/QFile>
 #include <QtCore/QDateTime>
+#include <QtCore/QFile>
 
+#include <ViewFrustum.h>
 #include <gpu/Batch.h>
 #include <gpu/Context.h>
 #include <render/Scene.h>
-#include <ViewFrustum.h>
 #include <shaders/Shaders.h>
 #include "render-utils/ShaderConstants.h"
 
+#include "DeferredLightingEffect.h"
 #include "GeometryCache.h"
 #include "TextureCache.h"
-#include "DeferredLightingEffect.h"
 
 using namespace render;
 
@@ -38,43 +38,35 @@ void DebugDeferredBufferConfig::setMode(int newMode) {
     emit dirty();
 }
 
-static const std::string DEFAULT_ALBEDO_SHADER{
-    "vec4 getFragmentColor() {"
-    "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
-    "    return vec4(pow(frag.albedo, vec3(1.0 / 2.2)), 1.0);"
-    " }"
-};
+static const std::string DEFAULT_ALBEDO_SHADER { "vec4 getFragmentColor() {"
+                                                 "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
+                                                 "    return vec4(pow(frag.albedo, vec3(1.0 / 2.2)), 1.0);"
+                                                 " }" };
 
-static const std::string DEFAULT_METALLIC_SHADER{
-    "vec4 getFragmentColor() {"
-    "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
-    "    return vec4(vec3(pow(frag.metallic, 1.0 / 2.2)), 1.0);"
-    " }"
-};
+static const std::string DEFAULT_METALLIC_SHADER { "vec4 getFragmentColor() {"
+                                                   "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
+                                                   "    return vec4(vec3(pow(frag.metallic, 1.0 / 2.2)), 1.0);"
+                                                   " }" };
 
-static const std::string DEFAULT_ROUGHNESS_SHADER{
+static const std::string DEFAULT_ROUGHNESS_SHADER {
     "vec4 getFragmentColor() {"
     "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
     "    return vec4(vec3(pow(frag.roughness, 1.0 / 2.2)), 1.0);"
     // "    return vec4(vec3(pow(colorRamp(frag.roughness), vec3(1.0 / 2.2))), 1.0);"
     " }"
 };
-static const std::string DEFAULT_NORMAL_SHADER{
-    "vec4 getFragmentColor() {"
-    "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
-    "    return vec4(vec3(0.5) + (frag.normal * 0.5), 1.0);"
-    " }"
-};
+static const std::string DEFAULT_NORMAL_SHADER { "vec4 getFragmentColor() {"
+                                                 "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
+                                                 "    return vec4(vec3(0.5) + (frag.normal * 0.5), 1.0);"
+                                                 " }" };
 
-static const std::string DEFAULT_OCCLUSION_SHADER{
-    "vec4 getFragmentColor() {"
-    //   "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
-    //   "    return vec4(vec3(pow(frag.obscurance, 1.0 / 2.2)), 1.0);"
-    "    return vec4(vec3(pow(texture(specularMap, uv).a, 1.0 / 2.2)), 1.0);"
-    " }"
-};
+static const std::string DEFAULT_OCCLUSION_SHADER { "vec4 getFragmentColor() {"
+                                                    //   "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
+                                                    //   "    return vec4(vec3(pow(frag.obscurance, 1.0 / 2.2)), 1.0);"
+                                                    "    return vec4(vec3(pow(texture(specularMap, uv).a, 1.0 / 2.2)), 1.0);"
+                                                    " }" };
 
-static const std::string DEFAULT_EMISSIVE_SHADER{
+static const std::string DEFAULT_EMISSIVE_SHADER {
     "vec4 getFragmentColor() {"
     "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
     "    return (frag.mode == FRAG_MODE_SHADED ? vec4(pow(texture(specularMap, uv).rgb, vec3(1.0 / 2.2)), 1.0) : "
@@ -82,14 +74,14 @@ static const std::string DEFAULT_EMISSIVE_SHADER{
     " }"
 };
 
-static const std::string DEFAULT_UNLIT_SHADER{
+static const std::string DEFAULT_UNLIT_SHADER {
     "vec4 getFragmentColor() {"
     "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
     "    return (frag.mode == FRAG_MODE_UNLIT ? vec4(pow(frag.albedo, vec3(1.0 / 2.2)), 1.0) : vec4(vec3(0.0), 1.0));"
     " }"
 };
 
-static const std::string DEFAULT_LIGHTMAP_SHADER{
+static const std::string DEFAULT_LIGHTMAP_SHADER {
     "vec4 getFragmentColor() {"
     "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
     "    return (frag.mode == FRAG_MODE_LIGHTMAPPED ? vec4(pow(texture(specularMap, uv).rgb, vec3(1.0 / 2.2)), 1.0) : "
@@ -97,26 +89,22 @@ static const std::string DEFAULT_LIGHTMAP_SHADER{
     " }"
 };
 
-static const std::string DEFAULT_SCATTERING_SHADER{
+static const std::string DEFAULT_SCATTERING_SHADER {
     "vec4 getFragmentColor() {"
     "    DeferredFragment frag = unpackDeferredFragmentNoPosition(uv);"
     "    return (frag.mode == FRAG_MODE_SCATTERING ? vec4(vec3(pow(frag.scattering, 1.0 / 2.2)), 1.0) : vec4(vec3(0.0), 1.0));"
     " }"
 };
 
-static const std::string DEFAULT_DEPTH_SHADER{
-    "vec4 getFragmentColor() {"
-    "    return vec4(vec3(texture(depthMap, uv).x), 1.0);"
-    " }"
-};
+static const std::string DEFAULT_DEPTH_SHADER { "vec4 getFragmentColor() {"
+                                                "    return vec4(vec3(texture(depthMap, uv).x), 1.0);"
+                                                " }" };
 
-static const std::string DEFAULT_LIGHTING_SHADER{
-    "vec4 getFragmentColor() {"
-    "    return vec4(pow(texture(lightingMap, uv).xyz, vec3(1.0 / 2.2)), 1.0);"
-    " }"
-};
+static const std::string DEFAULT_LIGHTING_SHADER { "vec4 getFragmentColor() {"
+                                                   "    return vec4(pow(texture(lightingMap, uv).xyz, vec3(1.0 / 2.2)), 1.0);"
+                                                   " }" };
 
-static const std::string DEFAULT_SHADOW_DEPTH_SHADER{
+static const std::string DEFAULT_SHADOW_DEPTH_SHADER {
     "vec4 getFragmentColor() {"
     "    for (int i = 255; i >= 0; --i) {"
     "        float depth = i / 255.0;"
@@ -128,7 +116,7 @@ static const std::string DEFAULT_SHADOW_DEPTH_SHADER{
     " }"
 };
 
-static const std::string DEFAULT_SHADOW_CASCADE_SHADER{
+static const std::string DEFAULT_SHADOW_CASCADE_SHADER {
     "vec3 cascadeColors[4] = vec3[4]( vec3(0,1,0), vec3(0,0,1), vec3(1,0,0), vec3(1) );"
     "vec4 getFragmentColor() {"
     "    DeferredFrameTransform deferredTransform = getDeferredFrameTransform();"
@@ -149,25 +137,21 @@ static const std::string DEFAULT_SHADOW_CASCADE_SHADER{
     "}"
 };
 
-static const std::string DEFAULT_LINEAR_DEPTH_SHADER{
-    "vec4 getFragmentColor() {"
-    "    return vec4(vec3(1.0 - texture(debugTexture0, uv).x * 0.01), 1.0);"
-    "}"
-};
+static const std::string DEFAULT_LINEAR_DEPTH_SHADER { "vec4 getFragmentColor() {"
+                                                       "    return vec4(vec3(1.0 - texture(debugTexture0, uv).x * 0.01), 1.0);"
+                                                       "}" };
 
-static const std::string DEFAULT_HALF_LINEAR_DEPTH_SHADER{
+static const std::string DEFAULT_HALF_LINEAR_DEPTH_SHADER {
     "vec4 getFragmentColor() {"
     "    return vec4(vec3(1.0 - texture(debugTexture0, uv).x * 0.01), 1.0);"
     " }"
 };
 
-static const std::string DEFAULT_HALF_NORMAL_SHADER{
-    "vec4 getFragmentColor() {"
-    "    return vec4(vec3(texture(debugTexture0, uv).xyz), 1.0);"
-    " }"
-};
+static const std::string DEFAULT_HALF_NORMAL_SHADER { "vec4 getFragmentColor() {"
+                                                      "    return vec4(vec3(texture(debugTexture0, uv).xyz), 1.0);"
+                                                      " }" };
 
-static const std::string DEFAULT_CURVATURE_SHADER{
+static const std::string DEFAULT_CURVATURE_SHADER {
     "vec4 getFragmentColor() {"
     "    return vec4(pow(vec3(texture(curvatureMap, uv).a), vec3(1.0 / 2.2)), 1.0);"
     // "    return vec4(pow(vec3(texture(curvatureMap, uv).xyz), vec3(1.0 / 2.2)), 1.0);"
@@ -175,7 +159,7 @@ static const std::string DEFAULT_CURVATURE_SHADER{
     " }"
 };
 
-static const std::string DEFAULT_NORMAL_CURVATURE_SHADER{
+static const std::string DEFAULT_NORMAL_CURVATURE_SHADER {
     "vec4 getFragmentColor() {"
     //"    return vec4(pow(vec3(texture(curvatureMap, uv).a), vec3(1.0 / 2.2)), 1.0);"
     "    return vec4(vec3(texture(curvatureMap, uv).xyz), 1.0);"
@@ -183,7 +167,7 @@ static const std::string DEFAULT_NORMAL_CURVATURE_SHADER{
     " }"
 };
 
-static const std::string DEFAULT_DIFFUSED_CURVATURE_SHADER{
+static const std::string DEFAULT_DIFFUSED_CURVATURE_SHADER {
     "vec4 getFragmentColor() {"
     "    return vec4(pow(vec3(texture(diffusedCurvatureMap, uv).a), vec3(1.0 / 2.2)), 1.0);"
     // "    return vec4(pow(vec3(texture(curvatureMap, uv).xyz), vec3(1.0 / 2.2)), 1.0);"
@@ -191,7 +175,7 @@ static const std::string DEFAULT_DIFFUSED_CURVATURE_SHADER{
     " }"
 };
 
-static const std::string DEFAULT_DIFFUSED_NORMAL_CURVATURE_SHADER{
+static const std::string DEFAULT_DIFFUSED_NORMAL_CURVATURE_SHADER {
     "vec4 getFragmentColor() {"
     //"    return vec4(pow(vec3(texture(curvatureMap, uv).a), vec3(1.0 / 2.2)), 1.0);"
     "    return vec4(vec3(texture(diffusedCurvatureMap, uv).xyz), 1.0);"
@@ -199,7 +183,7 @@ static const std::string DEFAULT_DIFFUSED_NORMAL_CURVATURE_SHADER{
     " }"
 };
 
-static const std::string DEFAULT_CURVATURE_OCCLUSION_SHADER{
+static const std::string DEFAULT_CURVATURE_OCCLUSION_SHADER {
     "vec4 getFragmentColor() {"
     "    vec4 midNormalCurvature;"
     "    vec4 lowNormalCurvature;"
@@ -211,35 +195,29 @@ static const std::string DEFAULT_CURVATURE_OCCLUSION_SHADER{
     " }"
 };
 
-static const std::string DEFAULT_DEBUG_SCATTERING_SHADER{
+static const std::string DEFAULT_DEBUG_SCATTERING_SHADER {
     "vec4 getFragmentColor() {"
     "    return vec4(pow(vec3(texture(debugTexture0, uv).xyz), vec3(1.0 / 2.2)), 1.0);"
     //  "    return vec4(vec3(texture(debugTexture0, uv).xyz), 1.0);"
     " }"
 };
 
-static const std::string DEFAULT_AMBIENT_OCCLUSION_SHADER{
-    "vec4 getFragmentColor() {"
-    "    return vec4(vec3(texture(debugTexture0, uv).x), 1.0);"
-    " }"
-};
-static const std::string DEFAULT_AMBIENT_OCCLUSION_BLURRED_SHADER{
+static const std::string DEFAULT_AMBIENT_OCCLUSION_SHADER { "vec4 getFragmentColor() {"
+                                                            "    return vec4(vec3(texture(debugTexture0, uv).x), 1.0);"
+                                                            " }" };
+static const std::string DEFAULT_AMBIENT_OCCLUSION_BLURRED_SHADER {
     "vec4 getFragmentColor() {"
     "    return vec4(vec3(texture(debugTexture0, uv).xyz), 1.0);"
     " }"
 };
 
-static const std::string DEFAULT_VELOCITY_SHADER{
-    "vec4 getFragmentColor() {"
-    "    return vec4(vec2(texture(debugTexture0, uv).xy), 0.0, 1.0);"
-    " }"
-};
+static const std::string DEFAULT_VELOCITY_SHADER { "vec4 getFragmentColor() {"
+                                                   "    return vec4(vec2(texture(debugTexture0, uv).xy), 0.0, 1.0);"
+                                                   " }" };
 
-static const std::string DEFAULT_CUSTOM_SHADER{
-    "vec4 getFragmentColor() {"
-    "    return vec4(1.0, 0.0, 0.0, 1.0);"
-    " }"
-};
+static const std::string DEFAULT_CUSTOM_SHADER { "vec4 getFragmentColor() {"
+                                                 "    return vec4(1.0, 0.0, 0.0, 1.0);"
+                                                 " }" };
 
 static std::string getFileContent(const std::string& fileName, const std::string& defaultContent = std::string()) {
     QFile customFile(QString::fromStdString(fileName));
@@ -250,7 +228,7 @@ static std::string getFileContent(const std::string& fileName, const std::string
     return defaultContent;
 }
 
-#include <QStandardPaths>  // TODO REMOVE: Temporary until UI
+#include <QStandardPaths> // TODO REMOVE: Temporary until UI
 DebugDeferredBuffer::DebugDeferredBuffer() {
     // TODO REMOVE: Temporary until UI
     static const auto DESKTOP_PATH = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
@@ -355,7 +333,7 @@ const gpu::PipelinePointer& DebugDeferredBuffer::getPipeline(Mode mode, const st
     if (pipelineNeedsUpdate(mode, customFile)) {
         static_assert(shader::render_utils::program::debug_deferred_buffer != 0, "Validate debug deferred program");
 
-        static const std::string REPLACEMENT_MARKER{ "//SOURCE_PLACEHOLDER" };
+        static const std::string REPLACEMENT_MARKER { "//SOURCE_PLACEHOLDER" };
         shader::Source resolvedFragmentSource;
         resolvedFragmentSource = shader::Source::get(shader::render_utils::fragment::debug_deferred_buffer);
         resolvedFragmentSource.replacements[REPLACEMENT_MARKER] = getShaderSourceCode(mode, customFile);
@@ -460,8 +438,7 @@ void DebugDeferredBuffer::run(const RenderContextPointer& renderContext, const I
         }
         if (surfaceGeometryFramebuffer) {
             batch.setResourceTexture(Textures::DeferredCurvature, surfaceGeometryFramebuffer->getCurvatureTexture());
-            batch.setResourceTexture(Textures::DeferredDiffusedCurvature,
-                                     surfaceGeometryFramebuffer->getLowCurvatureTexture());
+            batch.setResourceTexture(Textures::DeferredDiffusedCurvature, surfaceGeometryFramebuffer->getLowCurvatureTexture());
         }
         if (ambientOcclusionFramebuffer) {
             if (_mode == AmbientOcclusionMode) {

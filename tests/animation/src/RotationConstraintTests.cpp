@@ -19,7 +19,6 @@
 
 #include <test-utils/QTestExtensions.h>
 
-
 QTEST_MAIN(RotationConstraintTests)
 
 void RotationConstraintTests::testElbowConstraint() {

@@ -13,8 +13,8 @@
 #define hifi_AssetClient_h
 
 #include <QStandardItemModel>
-#include <QtQml/QJSEngine>
 #include <QString>
+#include <QtQml/QJSEngine>
 
 #include <map>
 
@@ -42,10 +42,13 @@ struct AssetInfo {
     int64_t size;
 };
 
-using MappingOperationCallback = std::function<void(bool responseReceived, AssetUtils::AssetServerError serverError, QSharedPointer<ReceivedMessage> message)>;
-using ReceivedAssetCallback = std::function<void(bool responseReceived, AssetUtils::AssetServerError serverError, const QByteArray& data)>;
+using MappingOperationCallback = std::function<void(bool responseReceived, AssetUtils::AssetServerError serverError,
+                                                    QSharedPointer<ReceivedMessage> message)>;
+using ReceivedAssetCallback = std::function<void(bool responseReceived, AssetUtils::AssetServerError serverError,
+                                                 const QByteArray& data)>;
 using GetInfoCallback = std::function<void(bool responseReceived, AssetUtils::AssetServerError serverError, AssetInfo info)>;
-using UploadResultCallback = std::function<void(bool responseReceived, AssetUtils::AssetServerError serverError, const QString& hash)>;
+using UploadResultCallback = std::function<void(bool responseReceived, AssetUtils::AssetServerError serverError,
+                                                const QString& hash)>;
 using ProgressCallback = std::function<void(qint64 totalReceived, qint64 total)>;
 
 class AssetClient : public QObject, public Dependency {
@@ -56,8 +59,10 @@ public:
     Q_INVOKABLE GetMappingRequest* createGetMappingRequest(const AssetUtils::AssetPath& path);
     Q_INVOKABLE GetAllMappingsRequest* createGetAllMappingsRequest();
     Q_INVOKABLE DeleteMappingsRequest* createDeleteMappingsRequest(const AssetUtils::AssetPathList& paths);
-    Q_INVOKABLE SetMappingRequest* createSetMappingRequest(const AssetUtils::AssetPath& path, const AssetUtils::AssetHash& hash);
-    Q_INVOKABLE RenameMappingRequest* createRenameMappingRequest(const AssetUtils::AssetPath& oldPath, const AssetUtils::AssetPath& newPath);
+    Q_INVOKABLE SetMappingRequest* createSetMappingRequest(const AssetUtils::AssetPath& path,
+                                                           const AssetUtils::AssetHash& hash);
+    Q_INVOKABLE RenameMappingRequest* createRenameMappingRequest(const AssetUtils::AssetPath& oldPath,
+                                                                 const AssetUtils::AssetPath& newPath);
     Q_INVOKABLE SetBakingEnabledRequest* createSetBakingEnabledRequest(const AssetUtils::AssetPathList& path, bool enabled);
     Q_INVOKABLE AssetRequest* createRequest(const AssetUtils::AssetHash& hash, const ByteRange& byteRange = ByteRange());
     Q_INVOKABLE AssetUpload* createUpload(const QString& filename);
@@ -70,7 +75,8 @@ public slots:
     MiniPromise::Promise cacheInfoRequestAsync(MiniPromise::Promise deferred = nullptr);
     MiniPromise::Promise queryCacheMetaAsync(const QUrl& url, MiniPromise::Promise deferred = nullptr);
     MiniPromise::Promise loadFromCacheAsync(const QUrl& url, MiniPromise::Promise deferred = nullptr);
-    MiniPromise::Promise saveToCacheAsync(const QUrl& url, const QByteArray& data, const QVariantMap& metadata = QVariantMap(), MiniPromise::Promise deferred = nullptr);
+    MiniPromise::Promise saveToCacheAsync(const QUrl& url, const QByteArray& data, const QVariantMap& metadata = QVariantMap(),
+                                          MiniPromise::Promise deferred = nullptr);
     void clearCache();
 
 private slots:
@@ -87,12 +93,13 @@ private:
     MessageID getAllAssetMappings(MappingOperationCallback callback);
     MessageID setAssetMapping(const QString& path, const AssetUtils::AssetHash& hash, MappingOperationCallback callback);
     MessageID deleteAssetMappings(const AssetUtils::AssetPathList& paths, MappingOperationCallback callback);
-    MessageID renameAssetMapping(const AssetUtils::AssetPath& oldPath, const AssetUtils::AssetPath& newPath, MappingOperationCallback callback);
+    MessageID renameAssetMapping(const AssetUtils::AssetPath& oldPath, const AssetUtils::AssetPath& newPath,
+                                 MappingOperationCallback callback);
     MessageID setBakingEnabled(const AssetUtils::AssetPathList& paths, bool enabled, MappingOperationCallback callback);
 
     MessageID getAssetInfo(const QString& hash, GetInfoCallback callback);
     MessageID getAsset(const QString& hash, AssetUtils::DataOffset start, AssetUtils::DataOffset end,
-                  ReceivedAssetCallback callback, ProgressCallback progressCallback);
+                       ReceivedAssetCallback callback, ProgressCallback progressCallback);
     MessageID uploadAsset(const QByteArray& data, UploadResultCallback callback);
 
     bool cancelMappingRequest(MessageID id);
@@ -100,7 +107,8 @@ private:
     bool cancelGetAssetRequest(MessageID id);
     bool cancelUploadAssetRequest(MessageID id);
 
-    void handleProgressCallback(const QWeakPointer<Node>& node, MessageID messageID, qint64 size, AssetUtils::DataOffset length);
+    void handleProgressCallback(const QWeakPointer<Node>& node, MessageID messageID, qint64 size,
+                                AssetUtils::DataOffset length);
     void handleCompleteCallback(const QWeakPointer<Node>& node, MessageID messageID, AssetUtils::DataOffset length);
 
     void forceFailureOfPendingRequests(SharedNodePointer node);

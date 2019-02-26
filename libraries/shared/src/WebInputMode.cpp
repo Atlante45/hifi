@@ -8,10 +8,7 @@
 
 #include "WebInputMode.h"
 
-const char* webInputModeNames[] = {
-    "touch",
-    "mouse"
-};
+const char* webInputModeNames[] = { "touch", "mouse" };
 
 static const size_t WEB_INPUT_MODE_NAMES = (sizeof(webInputModeNames) / sizeof(webInputModeNames[0]));
 

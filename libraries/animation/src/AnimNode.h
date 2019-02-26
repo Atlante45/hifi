@@ -11,16 +11,16 @@
 #ifndef hifi_AnimNode_h
 #define hifi_AnimNode_h
 
-#include <string>
-#include <vector>
-#include <memory>
 #include <cassert>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <memory>
+#include <string>
+#include <vector>
 
+#include "AnimContext.h"
 #include "AnimSkeleton.h"
 #include "AnimVariant.h"
-#include "AnimContext.h"
 
 class QJsonObject;
 
@@ -65,15 +65,16 @@ public:
 
     AnimSkeleton::ConstPointer getSkeleton() const { return _skeleton; }
 
-    virtual const AnimPoseVec& evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) = 0;
-    virtual const AnimPoseVec& overlay(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut,
-                                       const AnimPoseVec& underPoses) {
+    virtual const AnimPoseVec& evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                        AnimVariantMap& triggersOut) = 0;
+    virtual const AnimPoseVec& overlay(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                       AnimVariantMap& triggersOut, const AnimPoseVec& underPoses) {
         return evaluate(animVars, context, dt, triggersOut);
     }
 
     void setCurrentFrame(float frame);
 
-    template <typename F>
+    template<typename F>
     bool traverse(F func) {
         if (func(shared_from_this())) {
             for (auto&& child : _children) {
@@ -98,7 +99,6 @@ public:
     }
 
 protected:
-
     virtual void setCurrentFrameInternal(float frame) {}
     virtual void setSkeletonInternal(AnimSkeleton::ConstPointer skeleton) { _skeleton = skeleton; }
 

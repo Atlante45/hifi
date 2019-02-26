@@ -11,26 +11,26 @@
 
 #include "BatchLoader.h"
 
+#include <QFile>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#include <QFile>
 #include <QPointer>
 
 #include <NetworkAccessManager.h>
 #include <SharedUtil.h>
 
-#include "ScriptEngineLogging.h"
 #include "ResourceManager.h"
-#include "ScriptEngines.h"
 #include "ScriptCache.h"
+#include "ScriptEngineLogging.h"
+#include "ScriptEngines.h"
 
-BatchLoader::BatchLoader(const QList<QUrl>& urls) 
-    : QObject(),
-      _started(false),
-      _finished(false),
-      _urls(urls.toSet()),
-      _data(),
-      _status() {
+BatchLoader::BatchLoader(const QList<QUrl>& urls) :
+    QObject(),
+    _started(false),
+    _finished(false),
+    _urls(urls.toSet()),
+    _data(),
+    _status() {
     qRegisterMetaType<QMap<QUrl, QString>>("QMap<QUrl, QString>");
 }
 
@@ -47,7 +47,6 @@ void BatchLoader::start(int maxRetries) {
         return;
     }
 
-
     for (const auto& rawURL : _urls) {
         QUrl url = expandScriptUrl(normalizeScriptURL(rawURL));
 
@@ -59,27 +58,32 @@ void BatchLoader::start(int maxRetries) {
         ScriptCacheSignalProxy* proxy = new ScriptCacheSignalProxy();
         connect(scriptCache.data(), &ScriptCache::destroyed, proxy, &ScriptCacheSignalProxy::deleteLater);
 
-        connect(proxy, &ScriptCacheSignalProxy::contentAvailable, this, [this](const QString& url, const QString& contents, bool isURL, bool success, const QString& status) {
-            _status.insert(url, status);
-            if (isURL && success) {
-                _data.insert(url, contents);
-            } else {
-                _data.insert(url, QString());
-            }
+        connect(proxy, &ScriptCacheSignalProxy::contentAvailable, this,
+                [this](const QString& url, const QString& contents, bool isURL, bool success, const QString& status) {
+                    _status.insert(url, status);
+                    if (isURL && success) {
+                        _data.insert(url, contents);
+                    } else {
+                        _data.insert(url, QString());
+                    }
 
-            if (!_finished && _urls.size() == _data.size()) {
-                _finished = true;
-                emit finished(_data, _status);
-            }
-        });
+                    if (!_finished && _urls.size() == _data.size()) {
+                        _finished = true;
+                        emit finished(_data, _status);
+                    }
+                });
 
-        scriptCache->getScriptContents(url.toString(), [proxy](const QString& url, const QString& contents, bool isURL, bool success, const QString& status) {
-            proxy->receivedContent(url, contents, isURL, success, status);
-            proxy->deleteLater();
-        }, false, maxRetries);
+        scriptCache->getScriptContents(url.toString(),
+                                       [proxy](const QString& url, const QString& contents, bool isURL, bool success,
+                                               const QString& status) {
+                                           proxy->receivedContent(url, contents, isURL, success, status);
+                                           proxy->deleteLater();
+                                       },
+                                       false, maxRetries);
     }
 }
 
-void ScriptCacheSignalProxy::receivedContent(const QString& url, const QString& contents, bool isURL, bool success, const QString& status) {
+void ScriptCacheSignalProxy::receivedContent(const QString& url, const QString& contents, bool isURL, bool success,
+                                             const QString& status) {
     emit contentAvailable(url, contents, isURL, success, status);
 }

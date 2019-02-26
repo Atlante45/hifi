@@ -20,8 +20,8 @@
 // The ShapeFactory assembles and correctly disassembles btCollisionShapes.
 
 namespace ShapeFactory {
-    const btCollisionShape* createShapeFromInfo(const ShapeInfo& info);
-    void deleteShape(const btCollisionShape* shape);
-};
+const btCollisionShape* createShapeFromInfo(const ShapeInfo& info);
+void deleteShape(const btCollisionShape* shape);
+}; // namespace ShapeFactory
 
 #endif // hifi_ShapeFactory_h

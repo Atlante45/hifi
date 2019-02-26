@@ -10,11 +10,10 @@
 //
 #include "ProceduralSkybox.h"
 
-
+#include <ViewFrustum.h>
 #include <gpu/Batch.h>
 #include <gpu/Context.h>
 #include <gpu/Shader.h>
-#include <ViewFrustum.h>
 #include <shaders/Shaders.h>
 
 ProceduralSkybox::ProceduralSkybox() : graphics::Skybox() {
@@ -24,8 +23,10 @@ ProceduralSkybox::ProceduralSkybox() : graphics::Skybox() {
     _procedural.setDoesFade(false);
     // Must match PrepareStencil::STENCIL_BACKGROUND
     const int8_t STENCIL_BACKGROUND = 0;
-    _procedural._opaqueState->setStencilTest(true, 0xFF, gpu::State::StencilTest(STENCIL_BACKGROUND, 0xFF, gpu::EQUAL,
-        gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP));
+    _procedural._opaqueState->setStencilTest(true, 0xFF,
+                                             gpu::State::StencilTest(STENCIL_BACKGROUND, 0xFF, gpu::EQUAL,
+                                                                     gpu::State::STENCIL_OP_KEEP, gpu::State::STENCIL_OP_KEEP,
+                                                                     gpu::State::STENCIL_OP_KEEP));
     _procedural._opaqueState->setDepthTest(gpu::State::DepthTest(false));
 }
 
@@ -63,4 +64,3 @@ void ProceduralSkybox::render(gpu::Batch& batch, const ViewFrustum& viewFrustum,
     skybox.prepare(batch);
     batch.draw(gpu::TRIANGLE_STRIP, 4);
 }
-

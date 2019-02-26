@@ -9,11 +9,11 @@
 
 #include <plugins/PluginManager.h>
 
-#include "NullDisplayPlugin.h"
-#include "stereo/SideBySideStereoDisplayPlugin.h"
-#include "stereo/InterleavedStereoDisplayPlugin.h"
-#include "hmd/DebugHmdDisplayPlugin.h"
 #include "Basic2DWindowOpenGLDisplayPlugin.h"
+#include "NullDisplayPlugin.h"
+#include "hmd/DebugHmdDisplayPlugin.h"
+#include "stereo/InterleavedStereoDisplayPlugin.h"
+#include "stereo/SideBySideStereoDisplayPlugin.h"
 
 const QString& DisplayPlugin::MENU_PATH() {
     static const QString value = "Display";
@@ -36,13 +36,13 @@ DisplayPluginList getDisplayPlugins() {
         new SideBySideStereoDisplayPlugin(),
         // Interleaved left/right
         new InterleavedStereoDisplayPlugin(),
-#endif        
+#endif
         nullptr
     };
 
     DisplayPluginList result;
     for (int i = 0; PLUGIN_POOL[i]; ++i) {
-        DisplayPlugin * plugin = PLUGIN_POOL[i];
+        DisplayPlugin* plugin = PLUGIN_POOL[i];
         if (plugin->isSupported()) {
             plugin->init();
             result.push_back(DisplayPluginPointer(plugin));

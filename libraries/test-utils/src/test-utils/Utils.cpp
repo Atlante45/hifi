@@ -9,13 +9,12 @@
 #include "Utils.h"
 
 #include <QtCore/qlogging.h>
-#include <QtCore/QString>
 #include <QtCore/QByteArray>
+#include <QtCore/QString>
 
 #if defined(Q_OS_WIN)
 #include <Windows.h>
 #endif
-
 
 #include "FileDownloader.h"
 
@@ -28,7 +27,6 @@ static void messageHandler(QtMsgType type, const QMessageLogContext& context, co
 #endif
     originalHandler(type, context, message);
 }
-
 
 void installTestMessageHandler() {
     originalHandler = qInstallMessageHandler(messageHandler);

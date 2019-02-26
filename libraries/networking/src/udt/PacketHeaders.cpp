@@ -18,7 +18,6 @@
 #include <QtCore/QDebug>
 #include <QtCore/QMetaEnum>
 
-
 Q_DECLARE_METATYPE(PacketType);
 int packetTypeMetaTypeId = qRegisterMetaType<PacketType>();
 
@@ -88,7 +87,7 @@ PacketVersion versionForPacketType(PacketType packetType) {
         case PacketType::AudioStreamStats:
             return static_cast<PacketVersion>(AudioVersion::HighDynamicRangeVolume);
         case PacketType::DomainSettings:
-            return 18;  // replace min_avatar_scale and max_avatar_scale with min_avatar_height and max_avatar_height
+            return 18; // replace min_avatar_scale and max_avatar_scale with min_avatar_height and max_avatar_height
         case PacketType::Ping:
             return static_cast<PacketVersion>(PingVersion::IncludeConnectionID);
         case PacketType::AvatarQuery:
@@ -106,15 +105,15 @@ PacketVersion versionForPacketType(PacketType packetType) {
 uint qHash(const PacketType& key, uint seed) {
     // seems odd that Qt couldn't figure out this cast itself, but this fixes a compile error after switch
     // to strongly typed enum for PacketType
-    return qHash((quint8) key, seed);
+    return qHash((quint8)key, seed);
 }
 
 QDebug operator<<(QDebug debug, const PacketType& type) {
     QMetaObject metaObject = PacketTypeEnum::staticMetaObject;
     QMetaEnum metaEnum = metaObject.enumerator(metaObject.enumeratorOffset());
-    QString typeName = metaEnum.valueToKey((int) type);
+    QString typeName = metaEnum.valueToKey((int)type);
 
-    debug.nospace().noquote() << (uint8_t) type << " (" << typeName << ")";
+    debug.nospace().noquote() << (uint8_t)type << " (" << typeName << ")";
     return debug.space();
 }
 
@@ -146,11 +145,11 @@ static void ensureProtocolVersionsSignature() {
 }
 QByteArray protocolVersionsSignature() {
     ensureProtocolVersionsSignature();
-    #if (PR_BUILD || DEV_BUILD)
+#if (PR_BUILD || DEV_BUILD)
     if (sendWrongProtocolVersion) {
         return QByteArray("INCORRECTVERSION"); // only for debugging version checking
     }
-    #endif
+#endif
 
     return protocolVersionSignature;
 }

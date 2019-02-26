@@ -43,7 +43,7 @@ void SoftAttachmentModel::updateClusterMatrices() {
 
     const HFMModel& hfmModel = getHFMModel();
 
-    for (int i = 0; i < (int) _meshStates.size(); i++) {
+    for (int i = 0; i < (int)_meshStates.size(); i++) {
         MeshState& state = _meshStates[i];
         const HFMMesh& mesh = hfmModel.meshes.at(i);
         int meshIndex = i;
@@ -61,17 +61,23 @@ void SoftAttachmentModel::updateClusterMatrices() {
             }
             if (_useDualQuaternionSkinning) {
                 glm::mat4 m;
-                glm_mat4u_mul(jointMatrix, _rig.getAnimSkeleton()->getClusterBindMatricesOriginalValues(meshIndex, clusterIndex).inverseBindMatrix, m);
+                glm_mat4u_mul(
+                    jointMatrix,
+                    _rig.getAnimSkeleton()->getClusterBindMatricesOriginalValues(meshIndex, clusterIndex).inverseBindMatrix, m);
                 state.clusterDualQuaternions[j] = Model::TransformDualQuaternion(m);
             } else {
-                glm_mat4u_mul(jointMatrix, _rig.getAnimSkeleton()->getClusterBindMatricesOriginalValues(meshIndex, clusterIndex).inverseBindMatrix, state.clusterMatrices[j]);
+                glm_mat4u_mul(
+                    jointMatrix,
+                    _rig.getAnimSkeleton()->getClusterBindMatricesOriginalValues(meshIndex, clusterIndex).inverseBindMatrix,
+                    state.clusterMatrices[j]);
             }
         }
     }
 
     // post the blender if we're not currently waiting for one to finish
     auto modelBlender = DependencyManager::get<ModelBlender>();
-    if (_blendshapeOffsetsInitialized && modelBlender->shouldComputeBlendshapes() && hfmModel.hasBlendedMeshes() && _blendshapeCoefficients != _blendedBlendshapeCoefficients) {
+    if (_blendshapeOffsetsInitialized && modelBlender->shouldComputeBlendshapes() && hfmModel.hasBlendedMeshes() &&
+        _blendshapeCoefficients != _blendedBlendshapeCoefficients) {
         _blendedBlendshapeCoefficients = _blendshapeCoefficients;
         modelBlender->noteRequiresBlend(getThisPointer());
     }

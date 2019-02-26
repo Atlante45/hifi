@@ -16,33 +16,29 @@
 
 #include <QtCore/QMutex>
 #include <QtCore/QMutexLocker>
-#include <QtCore/QWaitCondition>
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtCore/QThread>
+#include <QtCore/QWaitCondition>
 
-template <typename L, typename F>
+template<typename L, typename F>
 void withLock(L lock, F function) {
     throw std::exception();
 }
 
-template <typename F>
+template<typename F>
 void withLock(QMutex& lock, F function) {
     QMutexLocker locker(&lock);
     function();
 }
 
-void moveToNewNamedThread(QObject* object, const QString& name, 
-    std::function<void(QThread*)> preStartCallback, 
-    std::function<void()> startCallback, 
-    QThread::Priority priority = QThread::InheritPriority);
+void moveToNewNamedThread(QObject* object, const QString& name, std::function<void(QThread*)> preStartCallback,
+                          std::function<void()> startCallback, QThread::Priority priority = QThread::InheritPriority);
 
-void moveToNewNamedThread(QObject* object, const QString& name, 
-    std::function<void()> startCallback, 
-    QThread::Priority priority = QThread::InheritPriority);
+void moveToNewNamedThread(QObject* object, const QString& name, std::function<void()> startCallback,
+                          QThread::Priority priority = QThread::InheritPriority);
 
-void moveToNewNamedThread(QObject* object, const QString& name, 
-    QThread::Priority priority = QThread::InheritPriority);
+void moveToNewNamedThread(QObject* object, const QString& name, QThread::Priority priority = QThread::InheritPriority);
 
 class ConditionalGuard {
 public:
@@ -59,6 +55,7 @@ public:
         }
         return _triggered;
     }
+
 private:
     QMutex _mutex;
     QWaitCondition _condition;

@@ -18,20 +18,20 @@
 #include <QThread>
 #include <QTimer>
 
-#include <shared/QtHelpers.h>
 #include <AccountManager.h>
 #include <AddressManager.h>
 #include <Assignment.h>
+#include <LimitedNodeList.h>
 #include <LogHandler.h>
 #include <LogUtils.h>
-#include <LimitedNodeList.h>
 #include <NodeList.h>
-#include <udt/PacketHeaders.h>
 #include <SharedUtil.h>
 #include <ShutdownEventListener.h>
+#include <shared/QtHelpers.h>
+#include <udt/PacketHeaders.h>
 
-#include <Trace.h>
 #include <StatTracker.h>
+#include <Trace.h>
 
 #include "AssignmentClientLogging.h"
 #include "AssignmentFactory.h"
@@ -40,11 +40,10 @@
 const QString ASSIGNMENT_CLIENT_TARGET_NAME = "assignment-client";
 const long long ASSIGNMENT_REQUEST_INTERVAL_MSECS = 1 * 1000;
 
-AssignmentClient::AssignmentClient(Assignment::Type requestAssignmentType, QString assignmentPool,
-                                   quint16 listenPort, QUuid walletUUID, QString assignmentServerHostname,
-                                   quint16 assignmentServerPort, quint16 assignmentMonitorPort) :
-    _assignmentServerHostname(DEFAULT_ASSIGNMENT_SERVER_HOSTNAME)
-{
+AssignmentClient::AssignmentClient(Assignment::Type requestAssignmentType, QString assignmentPool, quint16 listenPort,
+                                   QUuid walletUUID, QString assignmentServerHostname, quint16 assignmentServerPort,
+                                   quint16 assignmentMonitorPort) :
+    _assignmentServerHostname(DEFAULT_ASSIGNMENT_SERVER_HOSTNAME) {
     LogUtils::init();
 
     DependencyManager::set<tracing::Tracer>();
@@ -97,8 +96,8 @@ AssignmentClient::AssignmentClient(Assignment::Type requestAssignmentType, QStri
     _requestTimer.start(ASSIGNMENT_REQUEST_INTERVAL_MSECS);
 
     // connections to AccountManager for authentication
-    connect(DependencyManager::get<AccountManager>().data(), &AccountManager::authRequired,
-            this, &AssignmentClient::handleAuthenticationRequest);
+    connect(DependencyManager::get<AccountManager>().data(), &AccountManager::authRequired, this,
+            &AssignmentClient::handleAuthenticationRequest);
 
     // Create Singleton objects on main thread
     NetworkAccessManager::getInstance();
@@ -156,7 +155,7 @@ void AssignmentClient::setUpStatusToMonitor() {
 void AssignmentClient::sendStatusPacketToACM() {
     // tell the assignment client monitor what this assignment client is doing (if anything)
     auto nodeList = DependencyManager::get<NodeList>();
-    
+
     quint8 assignmentType = Assignment::Type::AllTypes;
 
     if (_currentAssignment) {
@@ -167,13 +166,12 @@ void AssignmentClient::sendStatusPacketToACM() {
 
     statusPacket->write(_childAssignmentUUID.toRfc4122());
     statusPacket->writePrimitive(assignmentType);
-    
+
     nodeList->sendPacket(std::move(statusPacket), _assignmentClientMonitorSocket);
 }
 
 void AssignmentClient::sendAssignmentRequest() {
     if (!_currentAssignment && !_isAssigned) {
-
         auto nodeList = DependencyManager::get<NodeList>();
 
         if (_assignmentServerHostname == "localhost") {
@@ -181,15 +179,15 @@ void AssignmentClient::sendAssignmentRequest() {
             quint16 localAssignmentServerPort;
             if (nodeList->getLocalServerPortFromSharedMemory(DOMAIN_SERVER_LOCAL_PORT_SMEM_KEY, localAssignmentServerPort)) {
                 if (localAssignmentServerPort != _assignmentServerSocket.getPort()) {
-                    qCDebug(assignment_client) << "Port for local assignment server read from shared memory is"
-                        << localAssignmentServerPort;
+                    qCDebug(assignment_client)
+                        << "Port for local assignment server read from shared memory is" << localAssignmentServerPort;
 
                     _assignmentServerSocket.setPort(localAssignmentServerPort);
                     nodeList->setAssignmentServerSocket(_assignmentServerSocket);
                 }
             } else {
                 qCWarning(assignment_client) << "Failed to read local assignment server port from shared memory"
-                    << "- will send assignment request to previous assignment server socket.";
+                                             << "- will send assignment request to previous assignment server socket.";
             }
         }
 
@@ -201,7 +199,8 @@ void AssignmentClient::handleCreateAssignmentPacket(QSharedPointer<ReceivedMessa
     qCDebug(assignment_client) << "Received a PacketType::CreateAssignment - attempting to unpack.";
 
     if (_currentAssignment) {
-        qCWarning(assignment_client) << "Received a PacketType::CreateAssignment while still running an active assignment. Ignoring.";
+        qCWarning(assignment_client)
+            << "Received a PacketType::CreateAssignment while still running an active assignment. Ignoring.";
         return;
     }
 
@@ -253,11 +252,10 @@ void AssignmentClient::handleCreateAssignmentPacket(QSharedPointer<ReceivedMessa
 
 void AssignmentClient::handleStopNodePacket(QSharedPointer<ReceivedMessage> message) {
     const HifiSockAddr& senderSockAddr = message->getSenderSockAddr();
-    
-    if (senderSockAddr.getAddress() == QHostAddress::LocalHost ||
-        senderSockAddr.getAddress() == QHostAddress::LocalHostIPv6) {
-        
-        qCDebug(assignment_client) << "AssignmentClientMonitor at" << senderSockAddr << "requested stop via PacketType::StopNode.";
+
+    if (senderSockAddr.getAddress() == QHostAddress::LocalHost || senderSockAddr.getAddress() == QHostAddress::LocalHostIPv6) {
+        qCDebug(assignment_client) << "AssignmentClientMonitor at" << senderSockAddr
+                                   << "requested stop via PacketType::StopNode.";
         QCoreApplication::quit();
     } else {
         qCWarning(assignment_client) << "Got a stop packet from other than localhost.";
@@ -280,9 +278,10 @@ void AssignmentClient::handleAuthenticationRequest() {
         // ask the account manager to log us in from the env variables
         accountManager->requestAccessToken(username, password);
     } else {
-        qCWarning(assignment_client) << "Authentication was requested against" << qPrintable(accountManager->getAuthURL().toString())
-            << "but both or one of" << qPrintable(DATA_SERVER_USERNAME_ENV)
-            << "/" << qPrintable(DATA_SERVER_PASSWORD_ENV) << "are not set. Unable to authenticate.";
+        qCWarning(assignment_client) << "Authentication was requested against"
+                                     << qPrintable(accountManager->getAuthURL().toString()) << "but both or one of"
+                                     << qPrintable(DATA_SERVER_USERNAME_ENV) << "/" << qPrintable(DATA_SERVER_PASSWORD_ENV)
+                                     << "are not set. Unable to authenticate.";
 
         return;
     }
@@ -309,6 +308,6 @@ void AssignmentClient::assignmentCompleted() {
     nodeList->setOwnerType(NodeType::Unassigned);
     nodeList->reset();
     nodeList->resetNodeInterestSet();
-    
+
     _isAssigned = false;
 }

@@ -8,20 +8,20 @@
 
 #include "AnimStats.h"
 
-#include <avatar/AvatarManager.h>
 #include <OffscreenUi.h>
+#include <avatar/AvatarManager.h>
 #include "Menu.h"
 
 HIFI_QML_DEF(AnimStats)
 
-static AnimStats* INSTANCE{ nullptr };
+static AnimStats* INSTANCE { nullptr };
 
 AnimStats* AnimStats::getInstance() {
     Q_ASSERT(INSTANCE);
     return INSTANCE;
 }
 
-AnimStats::AnimStats(QQuickItem* parent) :  QQuickItem(parent) {
+AnimStats::AnimStats(QQuickItem* parent) : QQuickItem(parent) {
     INSTANCE = this;
 }
 
@@ -46,23 +46,22 @@ void AnimStats::updateStats(bool force) {
     glm::quat rotation = myAvatar->getWorldOrientation();
     glm::vec3 velocity = myAvatar->getWorldVelocity();
 
-    _positionText = QString("Position: (%1, %2, %3)").
-        arg(QString::number(position.x, 'f', 2)).
-        arg(QString::number(position.y, 'f', 2)).
-        arg(QString::number(position.z, 'f', 2));
+    _positionText = QString("Position: (%1, %2, %3)")
+                        .arg(QString::number(position.x, 'f', 2))
+                        .arg(QString::number(position.y, 'f', 2))
+                        .arg(QString::number(position.z, 'f', 2));
     emit positionTextChanged();
 
     glm::vec3 eulerRotation = safeEulerAngles(rotation);
-    _rotationText = QString("Heading: %1").
-        arg(QString::number(glm::degrees(eulerRotation.y), 'f', 2));
+    _rotationText = QString("Heading: %1").arg(QString::number(glm::degrees(eulerRotation.y), 'f', 2));
     emit rotationTextChanged();
 
     // transform velocity into rig coordinate frame. z forward.
     glm::vec3 localVelocity = Quaternions::Y_180 * glm::inverse(rotation) * velocity;
-    _velocityText = QString("Local Vel: (%1, %2, %3)").
-        arg(QString::number(localVelocity.x, 'f', 2)).
-        arg(QString::number(localVelocity.y, 'f', 2)).
-        arg(QString::number(localVelocity.z, 'f', 2));
+    _velocityText = QString("Local Vel: (%1, %2, %3)")
+                        .arg(QString::number(localVelocity.x, 'f', 2))
+                        .arg(QString::number(localVelocity.y, 'f', 2))
+                        .arg(QString::number(localVelocity.z, 'f', 2));
     emit velocityTextChanged();
 
     // print if we are recentering or not.
@@ -115,7 +114,6 @@ void AnimStats::updateStats(bool force) {
 
         AnimNodeType type = std::get<1>(iter.second);
         if (type == AnimNodeType::Clip) {
-
             // figure out the grayScale color of this line.
             const float LIT_TIME = 2.0f;
             const float FADE_OUT_TIME = 1.0f;
@@ -189,5 +187,3 @@ void AnimStats::updateStats(bool force) {
     }
     emit animStateMachinesChanged();
 }
-
-

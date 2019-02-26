@@ -42,15 +42,14 @@ enum EntityDynamicType {
     DYNAMIC_TYPE_CONE_TWIST = 9000
 };
 
-
 class EntityDynamicInterface {
 public:
-    EntityDynamicInterface(EntityDynamicType type, const QUuid& id) : _id(id), _type(type) { }
-    virtual ~EntityDynamicInterface() { }
+    EntityDynamicInterface(EntityDynamicType type, const QUuid& id) : _id(id), _type(type) {}
+    virtual ~EntityDynamicInterface() {}
     const QUuid& getID() const { return _id; }
     EntityDynamicType getType() const { return _type; }
 
-    virtual void removeFromOwner() { }
+    virtual void removeFromOwner() {}
 
     virtual void remapIDs(QHash<EntityItemID, EntityItemID>& map) = 0;
 
@@ -81,23 +80,23 @@ public:
 
     virtual bool shouldSuppressLocationEdits() { return false; }
 
-    virtual void prepareForPhysicsSimulation() { }
+    virtual void prepareForPhysicsSimulation() {}
 
     // these look in the arguments map for a named argument.  if it's not found or isn't well formed,
     // ok will be set to false (note that it's never set to true -- set it to true before calling these).
     // if required is true, failure to extract an argument will cause a warning to be printed.
-    static glm::vec3 extractVec3Argument (QString objectName, QVariantMap arguments,
-                                          QString argumentName, bool& ok, bool required = true);
-    static glm::quat extractQuatArgument (QString objectName, QVariantMap arguments,
-                                          QString argumentName, bool& ok, bool required = true);
-    static float extractFloatArgument(QString objectName, QVariantMap arguments,
-                                      QString argumentName, bool& ok, bool required = true);
-    static int extractIntegerArgument(QString objectName, QVariantMap arguments,
-                                      QString argumentName, bool& ok, bool required = true);
-    static QString extractStringArgument(QString objectName, QVariantMap arguments,
-                                         QString argumentName, bool& ok, bool required = true);
-    static bool extractBooleanArgument(QString objectName, QVariantMap arguments,
-                                       QString argumentName, bool& ok, bool required = true);
+    static glm::vec3 extractVec3Argument(QString objectName, QVariantMap arguments, QString argumentName, bool& ok,
+                                         bool required = true);
+    static glm::quat extractQuatArgument(QString objectName, QVariantMap arguments, QString argumentName, bool& ok,
+                                         bool required = true);
+    static float extractFloatArgument(QString objectName, QVariantMap arguments, QString argumentName, bool& ok,
+                                      bool required = true);
+    static int extractIntegerArgument(QString objectName, QVariantMap arguments, QString argumentName, bool& ok,
+                                      bool required = true);
+    static QString extractStringArgument(QString objectName, QVariantMap arguments, QString argumentName, bool& ok,
+                                         bool required = true);
+    static bool extractBooleanArgument(QString objectName, QVariantMap arguments, QString argumentName, bool& ok,
+                                       bool required = true);
 
 protected:
     QUuid _id;
@@ -105,7 +104,6 @@ protected:
     bool _active { false };
     bool _isMine { false }; // did this interface create / edit this dynamic?
 };
-
 
 typedef std::shared_ptr<EntityDynamicInterface> EntityDynamicPointer;
 

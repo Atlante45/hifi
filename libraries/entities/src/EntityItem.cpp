@@ -11,36 +11,35 @@
 
 #include "EntityItem.h"
 
+#include <NetworkAccessManager.h>
+#include <NetworkingConstants.h>
+#include <QJsonDocument>
 #include <QtCore/QObject>
 #include <QtEndian>
-#include <QJsonDocument>
-#include <NetworkingConstants.h>
-#include <NetworkAccessManager.h>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
 
-#include <glm/gtx/transform.hpp>
 #include <glm/gtx/component_wise.hpp>
+#include <glm/gtx/transform.hpp>
 
 #include <BufferParser.h>
 #include <ByteCountCoding.h>
+#include <Extents.h>
 #include <GLMHelpers.h>
+#include <Grab.h>
+#include <LogHandler.h>
 #include <Octree.h>
 #include <PhysicsHelpers.h>
 #include <Profile.h>
+#include <QVariantGLM.h>
 #include <RegisteredMetaTypes.h>
 #include <SharedUtil.h> // usecTimestampNow()
-#include <LogHandler.h>
-#include <Extents.h>
-#include <QVariantGLM.h>
-#include <Grab.h>
 
-#include "EntityScriptingInterface.h"
 #include "EntitiesLogging.h"
-#include "EntityTree.h"
-#include "EntitySimulation.h"
 #include "EntityDynamicFactoryInterface.h"
-
+#include "EntityScriptingInterface.h"
+#include "EntitySimulation.h"
+#include "EntityTree.h"
 
 Q_DECLARE_METATYPE(EntityItemPointer);
 int entityItemPointernMetaTypeId = qRegisterMetaType<EntityItemPointer>();
@@ -49,12 +48,12 @@ int EntityItem::_maxActionsDataSize = 800;
 quint64 EntityItem::_rememberDeletedActionTime = 20 * USECS_PER_SECOND;
 QString EntityItem::_marketplacePublicKey;
 
-std::function<glm::quat(const glm::vec3&, const glm::quat&, BillboardMode, const glm::vec3&)> EntityItem::_getBillboardRotationOperator = [](const glm::vec3&, const glm::quat& rotation, BillboardMode, const glm::vec3&) { return rotation; };
+std::function<glm::quat(const glm::vec3&, const glm::quat&, BillboardMode, const glm::vec3&)>
+    EntityItem::_getBillboardRotationOperator =
+        [](const glm::vec3&, const glm::quat& rotation, BillboardMode, const glm::vec3&) { return rotation; };
 std::function<glm::vec3()> EntityItem::_getPrimaryViewFrustumPositionOperator = []() { return glm::vec3(0.0f); };
 
-EntityItem::EntityItem(const EntityItemID& entityItemID) :
-    SpatiallyNestable(NestableType::Entity, entityItemID)
-{
+EntityItem::EntityItem(const EntityItemID& entityItemID) : SpatiallyNestable(NestableType::Entity, entityItemID) {
     setLocalVelocity(ENTITY_ITEM_DEFAULT_VELOCITY);
     setLocalAngularVelocity(ENTITY_ITEM_DEFAULT_ANGULAR_VELOCITY);
     setUnscaledDimensions(ENTITY_ITEM_DEFAULT_DIMENSIONS);
@@ -149,9 +148,9 @@ EntityPropertyFlags EntityItem::getEntityProperties(EncodeBitstreamParams& param
     return requestedProperties;
 }
 
-OctreeElement::AppendState EntityItem::appendEntityData(OctreePacketData* packetData, EncodeBitstreamParams& params,
-                                            EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData) const {
-
+OctreeElement::AppendState EntityItem::appendEntityData(
+    OctreePacketData* packetData, EncodeBitstreamParams& params,
+    EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData) const {
     // ALL this fits...
     //    object ID [16 bytes]
     //    ByteCountCoded(type code) [~1 byte]
@@ -179,7 +178,6 @@ OctreeElement::AppendState EntityItem::appendEntityData(OctreePacketData* packet
     ByteCountCoded<quint64> simulatedDeltaCoder = simulatedDelta;
     QByteArray encodedSimulatedDelta = simulatedDeltaCoder;
 
-
     EntityPropertyFlags propertyFlags(PROP_LAST_ITEM);
     EntityPropertyFlags requestedProperties = getEntityProperties(params);
 
@@ -200,12 +198,12 @@ OctreeElement::AppendState EntityItem::appendEntityData(OctreePacketData* packet
 
     quint64 lastEdited = getLastEdited();
 
-    #ifdef WANT_DEBUG
-        float editedAgo = getEditedAgo();
-        QString agoAsString = formatSecondsElapsed(editedAgo);
-        qCDebug(entities) << "Writing entity " << getEntityItemID() << " to buffer, lastEdited =" << lastEdited
-                        << " ago=" << editedAgo << "seconds - " << agoAsString;
-    #endif
+#ifdef WANT_DEBUG
+    float editedAgo = getEditedAgo();
+    QString agoAsString = formatSecondsElapsed(editedAgo);
+    qCDebug(entities) << "Writing entity " << getEntityItemID() << " to buffer, lastEdited =" << lastEdited
+                      << " ago=" << editedAgo << "seconds - " << agoAsString;
+#endif
 
     bool successIDFits = false;
     bool successTypeFits = false;
@@ -243,8 +241,8 @@ OctreeElement::AppendState EntityItem::appendEntityData(OctreePacketData* packet
         successPropertyFlagsFits = packetData->appendRawData(encodedPropertyFlags);
     }
 
-    bool headerFits = successIDFits && successTypeFits && successCreatedFits && successLastEditedFits
-                              && successLastUpdatedFits && successPropertyFlagsFits;
+    bool headerFits = successIDFits && successTypeFits && successCreatedFits && successLastEditedFits &&
+                      successLastUpdatedFits && successPropertyFlagsFits;
 
     int startOfEntityItemData = packetData->getUncompressedByteOffset();
 
@@ -253,9 +251,9 @@ OctreeElement::AppendState EntityItem::appendEntityData(OctreePacketData* packet
 
         propertyFlags -= PROP_LAST_ITEM; // clear the last item for now, we may or may not set it as the actual item
 
-        // NOTE: When we enable partial packing of entity properties, we'll want to pack simulationOwner, transform, and velocity properties near each other
-        // since they will commonly be transmitted together.  simulationOwner must always go first, to avoid race conditions of simulation ownership bids
-        // These items would go here once supported....
+        // NOTE: When we enable partial packing of entity properties, we'll want to pack simulationOwner, transform, and
+        // velocity properties near each other since they will commonly be transmitted together.  simulationOwner must always go
+        // first, to avoid race conditions of simulation ownership bids These items would go here once supported....
         //      PROP_PAGED_PROPERTY,
         //      PROP_CUSTOM_PROPERTIES_INCLUDED,
 
@@ -290,7 +288,7 @@ OctreeElement::AppendState EntityItem::appendEntityData(OctreePacketData* packet
         APPEND_ENTITY_PROPERTY(PROP_IGNORE_PICK_INTERSECTION, getIgnorePickIntersection());
         withReadLock([&] {
             _grabProperties.appendSubclassData(packetData, params, entityTreeElementExtraEncodeData, requestedProperties,
-                propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                                               propertyFlags, propertiesDidntFit, propertyCount, appendState);
         });
 
         // Physics
@@ -336,20 +334,16 @@ OctreeElement::AppendState EntityItem::appendEntityData(OctreePacketData* packet
         APPEND_ENTITY_PROPERTY(PROP_CERTIFICATE_ID, getCertificateID());
         APPEND_ENTITY_PROPERTY(PROP_STATIC_CERTIFICATE_VERSION, getStaticCertificateVersion());
 
-        appendSubclassData(packetData, params, entityTreeElementExtraEncodeData,
-                                requestedProperties,
-                                propertyFlags,
-                                propertiesDidntFit,
-                                propertyCount,
-                                appendState);
+        appendSubclassData(packetData, params, entityTreeElementExtraEncodeData, requestedProperties, propertyFlags,
+                           propertiesDidntFit, propertyCount, appendState);
     }
 
     if (propertyCount > 0) {
         int endOfEntityItemData = packetData->getUncompressedByteOffset();
         encodedPropertyFlags = propertyFlags;
         int newPropertyFlagsLength = encodedPropertyFlags.length();
-        packetData->updatePriorBytes(propertyFlagsOffset,
-                (const unsigned char*)encodedPropertyFlags.constData(), encodedPropertyFlags.length());
+        packetData->updatePriorBytes(propertyFlagsOffset, (const unsigned char*)encodedPropertyFlags.constData(),
+                                     encodedPropertyFlags.length());
 
         // if the size of the PropertyFlags shrunk, we need to shift everything down to front of packet.
         if (newPropertyFlagsLength < oldPropertyFlagsLength) {
@@ -455,7 +449,7 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
         dataAt += encodedID.size();
         bytesRead += encodedID.size();
         Q_ASSERT(id == _id);
-        Q_ASSERT(parser.offset() == (unsigned int) bytesRead);
+        Q_ASSERT(parser.offset() == (unsigned int)bytesRead);
     }
 #endif
 
@@ -470,7 +464,7 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
     quint32 type = typeCoder;
     EntityTypes::EntityType oldType = (EntityTypes::EntityType)type;
     Q_ASSERT(oldType == _type);
-    Q_ASSERT(parser.offset() == (unsigned int) bytesRead);
+    Q_ASSERT(parser.offset() == (unsigned int)bytesRead);
 #endif
 
     bool overwriteLocalData = true; // assume the new content overwrites our local data
@@ -488,7 +482,7 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
             dataAt += sizeof(createdFromBuffer2);
             bytesRead += sizeof(createdFromBuffer2);
             Q_ASSERT(createdFromBuffer2 == createdFromBuffer);
-            Q_ASSERT(parser.offset() == (unsigned int) bytesRead);
+            Q_ASSERT(parser.offset() == (unsigned int)bytesRead);
         }
 #endif
         if (_created == UNKNOWN_CREATED_TIME) {
@@ -501,21 +495,21 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
         }
     }
 
-    #ifdef WANT_DEBUG
-        quint64 lastEdited = getLastEdited();
-        float editedAgo = getEditedAgo();
-        QString agoAsString = formatSecondsElapsed(editedAgo);
-        QString ageAsString = formatSecondsElapsed(getAge());
-        qCDebug(entities) << "------------------------------------------";
-        qCDebug(entities) << "Loading entity " << getEntityItemID() << " from buffer...";
-        qCDebug(entities) << "------------------------------------------";
-        debugDump();
-        qCDebug(entities) << "------------------------------------------";
-        qCDebug(entities) << "    _created =" << _created;
-        qCDebug(entities) << "    age=" << getAge() << "seconds - " << ageAsString;
-        qCDebug(entities) << "    lastEdited =" << lastEdited;
-        qCDebug(entities) << "    ago=" << editedAgo << "seconds - " << agoAsString;
-    #endif
+#ifdef WANT_DEBUG
+    quint64 lastEdited = getLastEdited();
+    float editedAgo = getEditedAgo();
+    QString agoAsString = formatSecondsElapsed(editedAgo);
+    QString ageAsString = formatSecondsElapsed(getAge());
+    qCDebug(entities) << "------------------------------------------";
+    qCDebug(entities) << "Loading entity " << getEntityItemID() << " from buffer...";
+    qCDebug(entities) << "------------------------------------------";
+    debugDump();
+    qCDebug(entities) << "------------------------------------------";
+    qCDebug(entities) << "    _created =" << _created;
+    qCDebug(entities) << "    age=" << getAge() << "seconds - " << ageAsString;
+    qCDebug(entities) << "    lastEdited =" << lastEdited;
+    qCDebug(entities) << "    ago=" << editedAgo << "seconds - " << agoAsString;
+#endif
 
     quint64 lastEditedFromBuffer = 0;
 
@@ -529,7 +523,7 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
         dataAt += sizeof(lastEditedFromBuffer2);
         bytesRead += sizeof(lastEditedFromBuffer2);
         Q_ASSERT(lastEditedFromBuffer2 == lastEditedFromBuffer);
-        Q_ASSERT(parser.offset() == (unsigned int) bytesRead);
+        Q_ASSERT(parser.offset() == (unsigned int)bytesRead);
     }
 #endif
     quint64 lastEditedFromBufferAdjusted = lastEditedFromBuffer == 0 ? 0 : lastEditedFromBuffer - clockSkew;
@@ -539,18 +533,18 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
 
     bool fromSameServerEdit = (lastEditedFromBuffer == _lastEditedFromRemoteInRemoteTime);
 
-    #ifdef WANT_DEBUG
-        qCDebug(entities) << "data from server **************** ";
-        qCDebug(entities) << "                           entityItemID:" << getEntityItemID();
-        qCDebug(entities) << "                                    now:" << now;
-        qCDebug(entities) << "                          getLastEdited:" << debugTime(getLastEdited(), now);
-        qCDebug(entities) << "                   lastEditedFromBuffer:" << debugTime(lastEditedFromBuffer, now);
-        qCDebug(entities) << "                              clockSkew:" << clockSkew;
-        qCDebug(entities) << "           lastEditedFromBufferAdjusted:" << debugTime(lastEditedFromBufferAdjusted, now);
-        qCDebug(entities) << "                  _lastEditedFromRemote:" << debugTime(_lastEditedFromRemote, now);
-        qCDebug(entities) << "      _lastEditedFromRemoteInRemoteTime:" << debugTime(_lastEditedFromRemoteInRemoteTime, now);
-        qCDebug(entities) << "                     fromSameServerEdit:" << fromSameServerEdit;
-    #endif
+#ifdef WANT_DEBUG
+    qCDebug(entities) << "data from server **************** ";
+    qCDebug(entities) << "                           entityItemID:" << getEntityItemID();
+    qCDebug(entities) << "                                    now:" << now;
+    qCDebug(entities) << "                          getLastEdited:" << debugTime(getLastEdited(), now);
+    qCDebug(entities) << "                   lastEditedFromBuffer:" << debugTime(lastEditedFromBuffer, now);
+    qCDebug(entities) << "                              clockSkew:" << clockSkew;
+    qCDebug(entities) << "           lastEditedFromBufferAdjusted:" << debugTime(lastEditedFromBufferAdjusted, now);
+    qCDebug(entities) << "                  _lastEditedFromRemote:" << debugTime(_lastEditedFromRemote, now);
+    qCDebug(entities) << "      _lastEditedFromRemoteInRemoteTime:" << debugTime(_lastEditedFromRemoteInRemoteTime, now);
+    qCDebug(entities) << "                     fromSameServerEdit:" << fromSameServerEdit;
+#endif
 
     bool ignoreServerPacket = false; // assume we'll use this server packet
 
@@ -576,24 +570,26 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
     // we can confidently ignore this packet
     EntityTreePointer tree = getTree();
     if (tree && tree->isDeletedEntity(_id)) {
-        #ifdef WANT_DEBUG
-            qCDebug(entities) << "Received packet for previously deleted entity [" << _id << "] ignoring. "
-                "(inside " << __FUNCTION__ << ")";
-        #endif
+#ifdef WANT_DEBUG
+        qCDebug(entities) << "Received packet for previously deleted entity [" << _id
+                          << "] ignoring. "
+                             "(inside "
+                          << __FUNCTION__ << ")";
+#endif
         ignoreServerPacket = true;
     }
 
     if (ignoreServerPacket) {
         overwriteLocalData = false;
-        #ifdef WANT_DEBUG
-            qCDebug(entities) << "IGNORING old data from server!!! ****************";
-            debugDump();
-        #endif
+#ifdef WANT_DEBUG
+        qCDebug(entities) << "IGNORING old data from server!!! ****************";
+        debugDump();
+#endif
     } else {
-        #ifdef WANT_DEBUG
-            qCDebug(entities) << "USING NEW data from server!!! ****************";
-            debugDump();
-        #endif
+#ifdef WANT_DEBUG
+        qCDebug(entities) << "USING NEW data from server!!! ****************";
+        debugDump();
+#endif
 
         // don't allow _lastEdited to be in the future
         _lastEdited = lastEditedFromBufferAdjusted;
@@ -617,17 +613,17 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
         encodedUpdateDelta = updateDeltaCoder; // determine true length
         dataAt += encodedUpdateDelta.size();
         bytesRead += encodedUpdateDelta.size();
-        Q_ASSERT(parser.offset() == (unsigned int) bytesRead);
+        Q_ASSERT(parser.offset() == (unsigned int)bytesRead);
     }
 #endif
 
     if (overwriteLocalData) {
         _lastUpdated = lastEditedFromBufferAdjusted + updateDelta; // don't adjust for clock skew since we already did that
-        #ifdef WANT_DEBUG
-            qCDebug(entities) << "                           _lastUpdated:" << debugTime(_lastUpdated, now);
-            qCDebug(entities) << "                            _lastEdited:" << debugTime(_lastEdited, now);
-            qCDebug(entities) << "           lastEditedFromBufferAdjusted:" << debugTime(lastEditedFromBufferAdjusted, now);
-        #endif
+#ifdef WANT_DEBUG
+        qCDebug(entities) << "                           _lastUpdated:" << debugTime(_lastUpdated, now);
+        qCDebug(entities) << "                            _lastEdited:" << debugTime(_lastEdited, now);
+        qCDebug(entities) << "           lastEditedFromBufferAdjusted:" << debugTime(lastEditedFromBufferAdjusted, now);
+#endif
     }
 
     // Newer bitstreams will have a last simulated and a last updated value
@@ -644,31 +640,31 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
         encodedSimulatedDelta = simulatedDeltaCoder; // determine true length
         dataAt += encodedSimulatedDelta.size();
         bytesRead += encodedSimulatedDelta.size();
-        Q_ASSERT(parser.offset() == (unsigned int) bytesRead);
+        Q_ASSERT(parser.offset() == (unsigned int)bytesRead);
     }
 #endif
 
     if (overwriteLocalData) {
-        lastSimulatedFromBufferAdjusted = lastEditedFromBufferAdjusted + simulatedDelta; // don't adjust for clock skew since we already did that
+        lastSimulatedFromBufferAdjusted = lastEditedFromBufferAdjusted +
+                                          simulatedDelta; // don't adjust for clock skew since we already did that
         if (lastSimulatedFromBufferAdjusted > now) {
             lastSimulatedFromBufferAdjusted = now;
         }
-        #ifdef WANT_DEBUG
-            qCDebug(entities) << "                            _lastEdited:" << debugTime(_lastEdited, now);
-            qCDebug(entities) << "           lastEditedFromBufferAdjusted:" << debugTime(lastEditedFromBufferAdjusted, now);
-            qCDebug(entities) << "        lastSimulatedFromBufferAdjusted:" << debugTime(lastSimulatedFromBufferAdjusted, now);
-        #endif
+#ifdef WANT_DEBUG
+        qCDebug(entities) << "                            _lastEdited:" << debugTime(_lastEdited, now);
+        qCDebug(entities) << "           lastEditedFromBufferAdjusted:" << debugTime(lastEditedFromBufferAdjusted, now);
+        qCDebug(entities) << "        lastSimulatedFromBufferAdjusted:" << debugTime(lastSimulatedFromBufferAdjusted, now);
+#endif
     }
 
-    #ifdef WANT_DEBUG
-        if (overwriteLocalData) {
-            qCDebug(entities) << "EntityItem::readEntityDataFromBuffer()... changed entity:" << getEntityItemID();
-            qCDebug(entities) << "                          getLastEdited:" << debugTime(getLastEdited(), now);
-            qCDebug(entities) << "                       getLastSimulated:" << debugTime(getLastSimulated(), now);
-            qCDebug(entities) << "                         getLastUpdated:" << debugTime(getLastUpdated(), now);
-        }
-    #endif
-
+#ifdef WANT_DEBUG
+    if (overwriteLocalData) {
+        qCDebug(entities) << "EntityItem::readEntityDataFromBuffer()... changed entity:" << getEntityItemID();
+        qCDebug(entities) << "                          getLastEdited:" << debugTime(getLastEdited(), now);
+        qCDebug(entities) << "                       getLastSimulated:" << debugTime(getLastSimulated(), now);
+        qCDebug(entities) << "                         getLastUpdated:" << debugTime(getLastUpdated(), now);
+    }
+#endif
 
     // Property Flags
     EntityPropertyFlags propertyFlags;
@@ -734,9 +730,9 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
             // we're waiting to receive acceptance of a bid
             // this ownership data either satisifies our bid or does not
             bool bidIsSatisfied = newSimOwner.getID() == myNodeID &&
-                (newSimOwner.getPriority() == _pendingOwnershipPriority ||
-                 (_pendingOwnershipPriority == VOLUNTEER_SIMULATION_PRIORITY &&
-                  newSimOwner.getPriority() == RECRUIT_SIMULATION_PRIORITY));
+                                  (newSimOwner.getPriority() == _pendingOwnershipPriority ||
+                                   (_pendingOwnershipPriority == VOLUNTEER_SIMULATION_PRIORITY &&
+                                    newSimOwner.getPriority() == RECRUIT_SIMULATION_PRIORITY));
 
             if (newSimOwner.getID().isNull()) {
                 // the entity-server is clearing someone else's ownership
@@ -798,7 +794,7 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
     READ_ENTITY_PROPERTY(PROP_USER_DATA, QString, setUserData);
     READ_ENTITY_PROPERTY(PROP_HREF, QString, setHref);
     READ_ENTITY_PROPERTY(PROP_DESCRIPTION, QString, setDescription);
-    {   // When we own the simulation we don't accept updates to the entity's transform/velocities
+    { // When we own the simulation we don't accept updates to the entity's transform/velocities
         // we also want to ignore any duplicate packets that have the same "recently updated" values
         // as a packet we've already recieved. This is because we want multiple edits of the same
         // information to be idempotent, but if we applied new physics properties we'd resimulation
@@ -820,7 +816,7 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
         READ_ENTITY_PROPERTY(PROP_POSITION, glm::vec3, customUpdatePositionFromNetwork);
     }
     READ_ENTITY_PROPERTY(PROP_DIMENSIONS, glm::vec3, setScaledDimensions);
-    {   // See comment above
+    { // See comment above
         auto customUpdateRotationFromNetwork = [this, shouldUpdate, lastEdited](glm::quat value) {
             if (shouldUpdate(_lastUpdatedRotationTimestamp, value != _lastUpdatedRotationValue)) {
                 setRotation(value);
@@ -835,14 +831,14 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
     READ_ENTITY_PROPERTY(PROP_LAST_EDITED_BY, QUuid, setLastEditedBy);
     // READ_ENTITY_PROPERTY(PROP_ENTITY_HOST_TYPE, entity::HostType, setEntityHostType); // not sent over the wire
     // READ_ENTITY_PROPERTY(PROP_OWNING_AVATAR_ID, QUuuid, setOwningAvatarID);           // not sent over the wire
-    {   // parentID and parentJointIndex are protected by simulation ownership
+    { // parentID and parentJointIndex are protected by simulation ownership
         bool oldOverwrite = overwriteLocalData;
         overwriteLocalData = overwriteLocalData && !weOwnSimulation;
         READ_ENTITY_PROPERTY(PROP_PARENT_ID, QUuid, setParentID);
         READ_ENTITY_PROPERTY(PROP_PARENT_JOINT_INDEX, quint16, setParentJointIndex);
         overwriteLocalData = oldOverwrite;
     }
-    {   // See comment above
+    { // See comment above
         auto customUpdateQueryAACubeFromNetwork = [this, shouldUpdate, lastEdited](AACube value) {
             if (shouldUpdate(_lastUpdatedQueryAACubeTimestamp, value != _lastUpdatedQueryAACubeValue)) {
                 setQueryAACube(value);
@@ -859,8 +855,8 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
     READ_ENTITY_PROPERTY(PROP_IGNORE_PICK_INTERSECTION, bool, setIgnorePickIntersection);
     withWriteLock([&] {
         int bytesFromGrab = _grabProperties.readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
-            propertyFlags, overwriteLocalData,
-            somethingChanged);
+                                                                             propertyFlags, overwriteLocalData,
+                                                                             somethingChanged);
         bytesRead += bytesFromGrab;
         dataAt += bytesFromGrab;
     });
@@ -875,7 +871,7 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
             }
         };
         READ_ENTITY_PROPERTY(PROP_VELOCITY, glm::vec3, customUpdateVelocityFromNetwork);
-        auto customUpdateAngularVelocityFromNetwork = [this, shouldUpdate, lastEdited](glm::vec3 value){
+        auto customUpdateAngularVelocityFromNetwork = [this, shouldUpdate, lastEdited](glm::vec3 value) {
             if (shouldUpdate(_lastUpdatedAngularVelocityTimestamp, value != _lastUpdatedAngularVelocityValue)) {
                 setAngularVelocity(value);
                 _lastUpdatedAngularVelocityTimestamp = lastEdited;
@@ -884,7 +880,7 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
         };
         READ_ENTITY_PROPERTY(PROP_ANGULAR_VELOCITY, glm::vec3, customUpdateAngularVelocityFromNetwork);
         READ_ENTITY_PROPERTY(PROP_GRAVITY, glm::vec3, setGravity);
-        auto customSetAcceleration = [this, shouldUpdate, lastEdited](glm::vec3 value){
+        auto customSetAcceleration = [this, shouldUpdate, lastEdited](glm::vec3 value) {
             if (shouldUpdate(_lastUpdatedAccelerationTimestamp, value != _lastUpdatedAccelerationValue)) {
                 setAcceleration(value);
                 _lastUpdatedAccelerationTimestamp = lastEdited;
@@ -939,8 +935,8 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
     READ_ENTITY_PROPERTY(PROP_CERTIFICATE_ID, QString, setCertificateID);
     READ_ENTITY_PROPERTY(PROP_STATIC_CERTIFICATE_VERSION, quint32, setStaticCertificateVersion);
 
-    bytesRead += readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
-                                                  propertyFlags, overwriteLocalData, somethingChanged);
+    bytesRead += readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args, propertyFlags,
+                                                  overwriteLocalData, somethingChanged);
 
     ////////////////////////////////////
     // WARNING: Do not add stream content here after the subclass. Always add it before the subclass
@@ -976,7 +972,6 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
         element->getTree()->trackIncomingEntityLastEdited(lastEditedFromBufferAdjusted, bytesRead);
     }
 
-
     return bytesRead;
 }
 
@@ -1000,13 +995,13 @@ void EntityItem::adjustEditPacketForClockSkew(QByteArray& buffer, qint64 clockSk
     memcpy(&lastEditedInLocalTime, dataAt, sizeof(lastEditedInLocalTime));
     quint64 lastEditedInServerTime = lastEditedInLocalTime > 0 ? lastEditedInLocalTime + clockSkew : 0;
     memcpy(dataAt, &lastEditedInServerTime, sizeof(lastEditedInServerTime));
-    #ifdef WANT_DEBUG
-        qCDebug(entities, "EntityItem::adjustEditPacketForClockSkew()...");
-        qCDebug(entities) << "     lastEditedInLocalTime: " << lastEditedInLocalTime;
-        qCDebug(entities) << "                 clockSkew: " << clockSkew;
-        qCDebug(entities) << "    lastEditedInServerTime: " << lastEditedInServerTime;
-    #endif
-    //assert(lastEditedInLocalTime > (quint64)0);
+#ifdef WANT_DEBUG
+    qCDebug(entities, "EntityItem::adjustEditPacketForClockSkew()...");
+    qCDebug(entities) << "     lastEditedInLocalTime: " << lastEditedInLocalTime;
+    qCDebug(entities) << "                 clockSkew: " << clockSkew;
+    qCDebug(entities) << "    lastEditedInServerTime: " << lastEditedInServerTime;
+#endif
+    // assert(lastEditedInLocalTime > (quint64)0);
 }
 
 float EntityItem::computeMass() const {
@@ -1053,16 +1048,12 @@ void EntityItem::setHref(QString value) {
 
     // If the string has something and doesn't start with with "hifi://" it shouldn't be set
     // We allow the string to be empty, because that's the initial state of this property
-    if (!value.isEmpty() &&
-        !(value.toLower().startsWith("hifi://")) &&
-        !(value.toLower().startsWith("file://"))
+    if (!value.isEmpty() && !(value.toLower().startsWith("hifi://")) && !(value.toLower().startsWith("file://"))
         // TODO: serverless-domains will eventually support http and https also
-        ) {
+    ) {
         return;
     }
-    withWriteLock([&] {
-        _href = value;
-    });
+    withWriteLock([&] { _href = value; });
 }
 
 void EntityItem::setCollisionSoundURL(const QString& value) {
@@ -1088,44 +1079,43 @@ void EntityItem::simulate(const quint64& now) {
 
     float timeElapsed = (float)(now - getLastSimulated()) / (float)(USECS_PER_SECOND);
 
-    #ifdef WANT_DEBUG
-        qCDebug(entities) << "********** EntityItem::simulate()";
-        qCDebug(entities) << "    entity ID=" << getEntityItemID();
-        qCDebug(entities) << "    simulator ID=" << getSimulatorID();
-        qCDebug(entities) << "    now=" << now;
-        qCDebug(entities) << "    _lastSimulated=" << _lastSimulated;
-        qCDebug(entities) << "    timeElapsed=" << timeElapsed;
-        qCDebug(entities) << "    hasVelocity=" << hasVelocity();
-        qCDebug(entities) << "    hasGravity=" << hasGravity();
-        qCDebug(entities) << "    hasAcceleration=" << hasAcceleration();
-        qCDebug(entities) << "    hasAngularVelocity=" << hasAngularVelocity();
-        qCDebug(entities) << "    getAngularVelocity=" << getAngularVelocity();
-        qCDebug(entities) << "    isMortal=" << isMortal();
-        qCDebug(entities) << "    getAge()=" << getAge();
-        qCDebug(entities) << "    getLifetime()=" << getLifetime();
+#ifdef WANT_DEBUG
+    qCDebug(entities) << "********** EntityItem::simulate()";
+    qCDebug(entities) << "    entity ID=" << getEntityItemID();
+    qCDebug(entities) << "    simulator ID=" << getSimulatorID();
+    qCDebug(entities) << "    now=" << now;
+    qCDebug(entities) << "    _lastSimulated=" << _lastSimulated;
+    qCDebug(entities) << "    timeElapsed=" << timeElapsed;
+    qCDebug(entities) << "    hasVelocity=" << hasVelocity();
+    qCDebug(entities) << "    hasGravity=" << hasGravity();
+    qCDebug(entities) << "    hasAcceleration=" << hasAcceleration();
+    qCDebug(entities) << "    hasAngularVelocity=" << hasAngularVelocity();
+    qCDebug(entities) << "    getAngularVelocity=" << getAngularVelocity();
+    qCDebug(entities) << "    isMortal=" << isMortal();
+    qCDebug(entities) << "    getAge()=" << getAge();
+    qCDebug(entities) << "    getLifetime()=" << getLifetime();
 
-
-        if (hasVelocity() || hasGravity()) {
-            qCDebug(entities) << "    MOVING...=";
-            qCDebug(entities) << "        hasVelocity=" << hasVelocity();
-            qCDebug(entities) << "        hasGravity=" << hasGravity();
-            qCDebug(entities) << "        hasAcceleration=" << hasAcceleration();
-            qCDebug(entities) << "        hasAngularVelocity=" << hasAngularVelocity();
-            qCDebug(entities) << "        getAngularVelocity=" << getAngularVelocity();
-        }
-        if (hasAngularVelocity()) {
-            qCDebug(entities) << "    CHANGING...=";
-            qCDebug(entities) << "        hasAngularVelocity=" << hasAngularVelocity();
-            qCDebug(entities) << "        getAngularVelocity=" << getAngularVelocity();
-        }
-        if (isMortal()) {
-            qCDebug(entities) << "    MORTAL...=";
-            qCDebug(entities) << "        isMortal=" << isMortal();
-            qCDebug(entities) << "        getAge()=" << getAge();
-            qCDebug(entities) << "        getLifetime()=" << getLifetime();
-        }
-        qCDebug(entities) << "     ********** EntityItem::simulate() .... SETTING _lastSimulated=" << _lastSimulated;
-    #endif
+    if (hasVelocity() || hasGravity()) {
+        qCDebug(entities) << "    MOVING...=";
+        qCDebug(entities) << "        hasVelocity=" << hasVelocity();
+        qCDebug(entities) << "        hasGravity=" << hasGravity();
+        qCDebug(entities) << "        hasAcceleration=" << hasAcceleration();
+        qCDebug(entities) << "        hasAngularVelocity=" << hasAngularVelocity();
+        qCDebug(entities) << "        getAngularVelocity=" << getAngularVelocity();
+    }
+    if (hasAngularVelocity()) {
+        qCDebug(entities) << "    CHANGING...=";
+        qCDebug(entities) << "        hasAngularVelocity=" << hasAngularVelocity();
+        qCDebug(entities) << "        getAngularVelocity=" << getAngularVelocity();
+    }
+    if (isMortal()) {
+        qCDebug(entities) << "    MORTAL...=";
+        qCDebug(entities) << "        isMortal=" << isMortal();
+        qCDebug(entities) << "        getAge()=" << getAge();
+        qCDebug(entities) << "        getLifetime()=" << getLifetime();
+    }
+    qCDebug(entities) << "     ********** EntityItem::simulate() .... SETTING _lastSimulated=" << _lastSimulated;
+#endif
 
     if (!stepKinematicMotion(timeElapsed)) {
         // this entity is no longer moving
@@ -1172,8 +1162,7 @@ bool EntityItem::stepKinematicMotion(float timeElapsed) {
             angularVelocity *= powf(1.0f - angularDamping, timeElapsed);
         }
 
-        const float MIN_KINEMATIC_ANGULAR_SPEED_SQUARED =
-            KINEMATIC_ANGULAR_SPEED_THRESHOLD * KINEMATIC_ANGULAR_SPEED_THRESHOLD;
+        const float MIN_KINEMATIC_ANGULAR_SPEED_SQUARED = KINEMATIC_ANGULAR_SPEED_THRESHOLD * KINEMATIC_ANGULAR_SPEED_THRESHOLD;
         if (glm::length2(angularVelocity) < MIN_KINEMATIC_ANGULAR_SPEED_SQUARED) {
             angularVelocity = Vectors::ZERO;
         } else {
@@ -1182,7 +1171,7 @@ bool EntityItem::stepKinematicMotion(float timeElapsed) {
             glm::quat rotation = transform.getRotation();
             float dt = timeElapsed;
             while (dt > 0.0f) {
-                glm::quat  dQ = computeBulletRotationStep(angularVelocity, glm::min(dt, PHYSICS_ENGINE_FIXED_SUBSTEP));
+                glm::quat dQ = computeBulletRotationStep(angularVelocity, glm::min(dt, PHYSICS_ENGINE_FIXED_SUBSTEP));
                 rotation = glm::normalize(dQ * rotation);
                 dt -= PHYSICS_ENGINE_FIXED_SUBSTEP;
             }
@@ -1191,8 +1180,7 @@ bool EntityItem::stepKinematicMotion(float timeElapsed) {
     }
 
     glm::vec3 position = transform.getTranslation();
-    const float MIN_KINEMATIC_LINEAR_SPEED_SQUARED =
-        KINEMATIC_LINEAR_SPEED_THRESHOLD * KINEMATIC_LINEAR_SPEED_THRESHOLD;
+    const float MIN_KINEMATIC_LINEAR_SPEED_SQUARED = KINEMATIC_LINEAR_SPEED_THRESHOLD * KINEMATIC_LINEAR_SPEED_THRESHOLD;
     if (isTranslating) {
         glm::vec3 deltaVelocity = Vectors::ZERO;
 
@@ -1215,9 +1203,9 @@ bool EntityItem::stepKinematicMotion(float timeElapsed) {
             }
             deltaVelocity += linearAcceleration * timeElapsed;
 
-            if (linearSpeedSquared < MIN_KINEMATIC_LINEAR_SPEED_SQUARED
-                    && glm::length2(deltaVelocity) < MIN_KINEMATIC_LINEAR_SPEED_SQUARED
-                    && glm::length2(linearVelocity + deltaVelocity) < MIN_KINEMATIC_LINEAR_SPEED_SQUARED) {
+            if (linearSpeedSquared < MIN_KINEMATIC_LINEAR_SPEED_SQUARED &&
+                glm::length2(deltaVelocity) < MIN_KINEMATIC_LINEAR_SPEED_SQUARED &&
+                glm::length2(linearVelocity + deltaVelocity) < MIN_KINEMATIC_LINEAR_SPEED_SQUARED) {
                 linearVelocity = Vectors::ZERO;
             } else {
                 // NOTE: we do NOT include the second-order acceleration term (0.5 * a * dt^2)
@@ -1296,10 +1284,12 @@ quint64 EntityItem::getExpiry() const {
     return getCreated() + (quint64)(getLifetime() * (float)USECS_PER_SECOND);
 }
 
-EntityItemProperties EntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
+EntityItemProperties EntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                               bool allowEmptyDesiredProperties) const {
     EncodeBitstreamParams params; // unknown
-    const EntityPropertyFlags propertyFlags = !allowEmptyDesiredProperties && desiredProperties.isEmpty() ?
-        getEntityProperties(params) : desiredProperties;
+    const EntityPropertyFlags propertyFlags = !allowEmptyDesiredProperties && desiredProperties.isEmpty()
+                                                  ? getEntityProperties(params)
+                                                  : desiredProperties;
     EntityItemProperties properties(propertyFlags);
     properties._id = getID();
     properties._idSet = true;
@@ -1331,9 +1321,7 @@ EntityItemProperties EntityItem::getProperties(const EntityPropertyFlags& desire
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(renderLayer, getRenderLayer);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(primitiveMode, getPrimitiveMode);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(ignorePickIntersection, getIgnorePickIntersection);
-    withReadLock([&] {
-        _grabProperties.getProperties(properties);
-    });
+    withReadLock([&] { _grabProperties.getProperties(properties); });
 
     // Physics
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(density, getDensity);
@@ -1382,9 +1370,9 @@ EntityItemProperties EntityItem::getProperties(const EntityPropertyFlags& desire
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(localPosition, getLocalPosition);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(localRotation, getLocalOrientation);
     // FIXME: are these needed?
-    //COPY_ENTITY_PROPERTY_TO_PROPERTIES(localVelocity, getLocalVelocity);
-    //COPY_ENTITY_PROPERTY_TO_PROPERTIES(localAngularVelocity, getLocalAngularVelocity);
-    //COPY_ENTITY_PROPERTY_TO_PROPERTIES(localDimensions, getLocalDimensions);
+    // COPY_ENTITY_PROPERTY_TO_PROPERTIES(localVelocity, getLocalVelocity);
+    // COPY_ENTITY_PROPERTY_TO_PROPERTIES(localAngularVelocity, getLocalAngularVelocity);
+    // COPY_ENTITY_PROPERTY_TO_PROPERTIES(localDimensions, getLocalDimensions);
 
     properties._defaultSettings = false;
 
@@ -1440,15 +1428,13 @@ void EntityItem::setPendingOwnershipPriority(uint8_t priority) {
 }
 
 bool EntityItem::pendingRelease(uint64_t timestamp) const {
-    return _pendingOwnershipPriority == 0 &&
-        _pendingOwnershipState == PENDING_STATE_RELEASE &&
-        _pendingOwnershipTimestamp >= timestamp;
+    return _pendingOwnershipPriority == 0 && _pendingOwnershipState == PENDING_STATE_RELEASE &&
+           _pendingOwnershipTimestamp >= timestamp;
 }
 
 bool EntityItem::stillWaitingToTakeOwnership(uint64_t timestamp) const {
-    return _pendingOwnershipPriority > 0 &&
-        _pendingOwnershipState == PENDING_STATE_TAKE &&
-        _pendingOwnershipTimestamp >= timestamp;
+    return _pendingOwnershipPriority > 0 && _pendingOwnershipState == PENDING_STATE_TAKE &&
+           _pendingOwnershipTimestamp >= timestamp;
 }
 
 bool EntityItem::setProperties(const EntityItemProperties& properties) {
@@ -1536,11 +1522,11 @@ bool EntityItem::setProperties(const EntityItemProperties& properties) {
     // Finally notify if change detected
     if (somethingChanged) {
         uint64_t now = usecTimestampNow();
-        #ifdef WANT_DEBUG
-            int elapsed = now - getLastEdited();
-            qCDebug(entities) << "EntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                    "now=" << now << " getLastEdited()=" << getLastEdited();
-        #endif
+#ifdef WANT_DEBUG
+        int elapsed = now - getLastEdited();
+        qCDebug(entities) << "EntityItem::setProperties() AFTER update... edited AGO=" << elapsed << "now=" << now
+                          << " getLastEdited()=" << getLastEdited();
+#endif
         setLastEdited(now);
         somethingChangedNotification(); // notify derived classes that something has changed
         if (getDirtyFlags() & (Simulation::DIRTY_TRANSFORM | Simulation::DIRTY_VELOCITIES)) {
@@ -1619,7 +1605,7 @@ AACube EntityItem::getMinimumAACube(bool& success) const {
         if (success) {
             _recalcMinAACube = false;
             glm::vec3 dimensions = getScaledDimensions();
-            glm::vec3 unrotatedMinRelativeToEntity = - (dimensions * _registrationPoint);
+            glm::vec3 unrotatedMinRelativeToEntity = -(dimensions * _registrationPoint);
             glm::vec3 unrotatedMaxRelativeToEntity = dimensions * (glm::vec3(1.0f, 1.0f, 1.0f) - _registrationPoint);
             Extents extents = { unrotatedMinRelativeToEntity, unrotatedMaxRelativeToEntity };
             extents.rotate(getWorldOrientation());
@@ -1649,7 +1635,7 @@ AABox EntityItem::getAABox(bool& success) const {
         if (success) {
             _recalcAABox = false;
             glm::vec3 dimensions = getScaledDimensions();
-            glm::vec3 unrotatedMinRelativeToEntity = - (dimensions * _registrationPoint);
+            glm::vec3 unrotatedMinRelativeToEntity = -(dimensions * _registrationPoint);
             glm::vec3 unrotatedMaxRelativeToEntity = dimensions * (glm::vec3(1.0f, 1.0f, 1.0f) - _registrationPoint);
             Extents extents = { unrotatedMinRelativeToEntity, unrotatedMaxRelativeToEntity };
             extents.rotate(getWorldOrientation());
@@ -1680,9 +1666,7 @@ AACube EntityItem::getQueryAACube(bool& success) const {
 }
 
 bool EntityItem::shouldPuffQueryAACube() const {
-    bool hasGrabs = _grabsLock.resultWithReadLock<bool>([&] {
-        return _grabs.count() > 0;
-    });
+    bool hasGrabs = _grabsLock.resultWithReadLock<bool>([&] { return _grabs.count() > 0; });
     return hasActions() || isChildOfMyAvatar() || isMovingRelativeToParent() || hasGrabs;
 }
 
@@ -1711,7 +1695,9 @@ bool EntityItem::contains(const glm::vec3& point) const {
         // anything with shapeType == SPHERE must collide as a bounding sphere in the world-frame regardless of dimensions
         // therefore we must do math using an unscaled localPoint relative to sphere center
         glm::vec3 dimensions = getScaledDimensions();
-        glm::vec3 localPoint = point - (getWorldPosition() + getWorldOrientation() * (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint())));
+        glm::vec3 localPoint = point - (getWorldPosition() +
+                                        getWorldOrientation() *
+                                            (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint())));
         const float HALF_SQUARED = 0.25f;
         return glm::length2(localPoint) < HALF_SQUARED * glm::length2(dimensions);
     }
@@ -1722,7 +1708,7 @@ bool EntityItem::contains(const glm::vec3& point) const {
 
     const float NORMALIZED_HALF_SIDE = 0.5f;
     const float NORMALIZED_RADIUS_SQUARED = NORMALIZED_HALF_SIDE * NORMALIZED_HALF_SIDE;
-    switch(shapeType) {
+    switch (shapeType) {
         case SHAPE_TYPE_NONE:
             return false;
         case SHAPE_TYPE_CAPSULE_X:
@@ -1746,13 +1732,13 @@ bool EntityItem::contains(const glm::vec3& point) const {
         }
         case SHAPE_TYPE_CYLINDER_X:
             return fabsf(localPoint.x) <= NORMALIZED_HALF_SIDE &&
-                localPoint.y * localPoint.y + localPoint.z * localPoint.z <= NORMALIZED_RADIUS_SQUARED;
+                   localPoint.y * localPoint.y + localPoint.z * localPoint.z <= NORMALIZED_RADIUS_SQUARED;
         case SHAPE_TYPE_CYLINDER_Y:
             return fabsf(localPoint.y) <= NORMALIZED_HALF_SIDE &&
-                localPoint.z * localPoint.z + localPoint.x * localPoint.x <= NORMALIZED_RADIUS_SQUARED;
+                   localPoint.z * localPoint.z + localPoint.x * localPoint.x <= NORMALIZED_RADIUS_SQUARED;
         case SHAPE_TYPE_CYLINDER_Z:
             return fabsf(localPoint.z) <= NORMALIZED_HALF_SIDE &&
-                localPoint.x * localPoint.x + localPoint.y * localPoint.y <= NORMALIZED_RADIUS_SQUARED;
+                   localPoint.x * localPoint.x + localPoint.y * localPoint.y <= NORMALIZED_RADIUS_SQUARED;
         default:
             return false;
     }
@@ -1771,8 +1757,8 @@ float EntityItem::getVolumeEstimate() const {
 void EntityItem::setRegistrationPoint(const glm::vec3& value) {
     if (value != _registrationPoint) {
         withWriteLock([&] {
-            _registrationPoint = glm::clamp(value, glm::vec3(ENTITY_ITEM_MIN_REGISTRATION_POINT), 
-                                                   glm::vec3(ENTITY_ITEM_MAX_REGISTRATION_POINT));
+            _registrationPoint = glm::clamp(value, glm::vec3(ENTITY_ITEM_MIN_REGISTRATION_POINT),
+                                            glm::vec3(ENTITY_ITEM_MAX_REGISTRATION_POINT));
         });
         dimensionsChanged(); // Registration Point affects the bounding box
         markDirtyFlags(Simulation::DIRTY_SHAPE);
@@ -1836,20 +1822,20 @@ void EntityItem::setParentID(const QUuid& value) {
             if ((bool)(newParentNoBootstrapping & Simulation::SPECIAL_FLAGS_NO_BOOTSTRAPPING)) {
                 markSpecialFlags(Simulation::SPECIAL_FLAGS_NO_BOOTSTRAPPING);
                 forEachDescendant([&](SpatiallyNestablePointer object) {
-                        if (object->getNestableType() == NestableType::Entity) {
-                            EntityItemPointer entity = std::static_pointer_cast<EntityItem>(object);
-                            entity->markDirtyFlags(Simulation::DIRTY_COLLISION_GROUP);
-                            entity->markSpecialFlags(Simulation::SPECIAL_FLAGS_NO_BOOTSTRAPPING);
-                        }
+                    if (object->getNestableType() == NestableType::Entity) {
+                        EntityItemPointer entity = std::static_pointer_cast<EntityItem>(object);
+                        entity->markDirtyFlags(Simulation::DIRTY_COLLISION_GROUP);
+                        entity->markSpecialFlags(Simulation::SPECIAL_FLAGS_NO_BOOTSTRAPPING);
+                    }
                 });
             } else {
                 clearSpecialFlags(Simulation::SPECIAL_FLAGS_NO_BOOTSTRAPPING);
                 forEachDescendant([&](SpatiallyNestablePointer object) {
-                        if (object->getNestableType() == NestableType::Entity) {
-                            EntityItemPointer entity = std::static_pointer_cast<EntityItem>(object);
-                            entity->markDirtyFlags(Simulation::DIRTY_COLLISION_GROUP);
-                            entity->clearSpecialFlags(Simulation::SPECIAL_FLAGS_NO_BOOTSTRAPPING);
-                        }
+                    if (object->getNestableType() == NestableType::Entity) {
+                        EntityItemPointer entity = std::static_pointer_cast<EntityItem>(object);
+                        entity->markDirtyFlags(Simulation::DIRTY_COLLISION_GROUP);
+                        entity->clearSpecialFlags(Simulation::SPECIAL_FLAGS_NO_BOOTSTRAPPING);
+                    }
                 });
             }
         }
@@ -1879,9 +1865,7 @@ void EntityItem::setScaledDimensions(const glm::vec3& value) {
 void EntityItem::setUnscaledDimensions(const glm::vec3& value) {
     glm::vec3 newDimensions = glm::max(value, glm::vec3(ENTITY_ITEM_MIN_DIMENSION));
     if (getUnscaledDimensions() != newDimensions) {
-        withWriteLock([&] {
-            _unscaledDimensions = newDimensions;
-        });
+        withWriteLock([&] { _unscaledDimensions = newDimensions; });
         locationChanged();
         dimensionsChanged();
         withWriteLock([&] {
@@ -1892,9 +1876,7 @@ void EntityItem::setUnscaledDimensions(const glm::vec3& value) {
 }
 
 glm::vec3 EntityItem::getUnscaledDimensions() const {
-   return resultWithReadLock<glm::vec3>([&] {
-        return _unscaledDimensions;
-    });
+    return resultWithReadLock<glm::vec3>([&] { return _unscaledDimensions; });
 }
 
 void EntityItem::setRotation(glm::quat rotation) {
@@ -2044,7 +2026,6 @@ void EntityItem::setRestitution(float value) {
             _flags |= Simulation::DIRTY_MATERIAL;
         }
     });
-
 }
 
 void EntityItem::setFriction(float value) {
@@ -2090,8 +2071,7 @@ void EntityItem::computeCollisionGroupAndFinalMask(int32_t& group, int32_t& mask
 
         uint16_t userMask = getCollisionMask();
 
-        if ((bool)(userMask & USER_COLLISION_GROUP_MY_AVATAR) !=
-                (bool)(userMask & USER_COLLISION_GROUP_OTHER_AVATAR)) {
+        if ((bool)(userMask & USER_COLLISION_GROUP_MY_AVATAR) != (bool)(userMask & USER_COLLISION_GROUP_OTHER_AVATAR)) {
             // asymmetric avatar collision mask bits
             if (!getSimulatorID().isNull() && getSimulatorID() != Physics::getSessionUUID()) {
                 // someone else owns the simulation, so we toggle the avatar bits (swap interpretation)
@@ -2133,8 +2113,7 @@ void EntityItem::clearSimulationOwnership() {
     // don't bother setting the DIRTY_SIMULATOR_ID flag because:
     // (a) when entity-server calls clearSimulationOwnership() the dirty-flags are meaningless (only used by interface)
     // (b) the interface only calls clearSimulationOwnership() in a context that already knows best about dirty flags
-    //markDirtyFlags(Simulation::DIRTY_SIMULATOR_ID);
-
+    // markDirtyFlags(Simulation::DIRTY_SIMULATOR_ID);
 }
 
 QString EntityItem::actionsToDebugString() {
@@ -2210,7 +2189,6 @@ void EntityItem::disableNoBootstrap() {
         });
     }
 }
-
 
 bool EntityItem::addActionInternal(EntitySimulationPointer simulation, EntityDynamicPointer action) {
     assert(action);
@@ -2354,13 +2332,9 @@ bool EntityItem::clearActions(EntitySimulationPointer simulation) {
     return true;
 }
 
-
 void EntityItem::deserializeActions() {
-    withWriteLock([&] {
-        deserializeActionsInternal();
-    });
+    withWriteLock([&] { deserializeActionsInternal(); });
 }
-
 
 void EntityItem::deserializeActionsInternal() {
     quint64 now = usecTimestampNow();
@@ -2384,7 +2358,7 @@ void EntityItem::deserializeActionsInternal() {
     // Keep track of which actions got added or updated by the new dynamicData
     QSet<QUuid> updated;
 
-    foreach(QByteArray serializedAction, serializedActions) {
+    foreach (QByteArray serializedAction, serializedActions) {
         QDataStream serializedActionStream(serializedAction);
         EntityDynamicType actionType;
         QUuid actionID;
@@ -2411,7 +2385,7 @@ void EntityItem::deserializeActionsInternal() {
                 updated << actionID;
             } else {
                 HIFI_FCDEBUG(entities(), "EntityItem::deserializeActionsInternal -- action creation failed for"
-                        << getID() << _name); // getName();
+                                             << getID() << _name); // getName();
                 removeActionInternal(actionID, nullptr);
             }
         }
@@ -2451,16 +2425,12 @@ void EntityItem::deserializeActionsInternal() {
 }
 
 void EntityItem::checkWaitingToRemove(EntitySimulationPointer simulation) {
-    foreach(QUuid actionID, _actionsToRemove) {
-        removeActionInternal(actionID, simulation);
-    }
+    foreach (QUuid actionID, _actionsToRemove) { removeActionInternal(actionID, simulation); }
     _actionsToRemove.clear();
 }
 
 void EntityItem::setDynamicData(QByteArray dynamicData) {
-    withWriteLock([&] {
-        setDynamicDataInternal(dynamicData);
-    });
+    withWriteLock([&] { setDynamicDataInternal(dynamicData); });
 }
 
 void EntityItem::setDynamicDataInternal(QByteArray dynamicData) {
@@ -2492,8 +2462,8 @@ void EntityItem::serializeActions(bool& success, QByteArray& result) const {
     serializedActionsStream << serializedActions;
 
     if (result.size() >= _maxActionsDataSize) {
-        qCDebug(entities) << "EntityItem::serializeActions size is too large -- "
-                          << result.size() << ">=" << _maxActionsDataSize;
+        qCDebug(entities) << "EntityItem::serializeActions size is too large -- " << result.size()
+                          << ">=" << _maxActionsDataSize;
         success = false;
         return;
     }
@@ -2522,9 +2492,7 @@ const QByteArray EntityItem::getDynamicData() const {
             result = _allActionsDataCache;
         });
     } else {
-        withReadLock([&] {
-            result = _allActionsDataCache;
-        });
+        withReadLock([&] { result = _allActionsDataCache; });
     }
     return result;
 }
@@ -2567,18 +2535,14 @@ bool EntityItem::shouldSuppressLocationEdits() const {
 QList<EntityDynamicPointer> EntityItem::getActionsOfType(EntityDynamicType typeToGet) const {
     QList<EntityDynamicPointer> result;
 
-    for (QHash<QUuid, EntityDynamicPointer>::const_iterator i = _objectActions.begin();
-         i != _objectActions.end();
-         i++) {
+    for (QHash<QUuid, EntityDynamicPointer>::const_iterator i = _objectActions.begin(); i != _objectActions.end(); i++) {
         EntityDynamicPointer action = i.value();
         if (action->getType() == typeToGet && action->isActive()) {
             result += action;
         }
     }
 
-    for (QHash<QUuid, EntityDynamicPointer>::const_iterator i = _grabActions.begin();
-         i != _grabActions.end();
-         i++) {
+    for (QHash<QUuid, EntityDynamicPointer>::const_iterator i = _grabActions.begin(); i != _grabActions.end(); i++) {
         EntityDynamicPointer action = i.value();
         if (action->getType() == typeToGet && action->isActive()) {
             result += action;
@@ -2622,7 +2586,8 @@ bool EntityItem::getScalesWithParent() const {
     }
 }
 
-void EntityItem::globalizeProperties(EntityItemProperties& properties, const QString& messageTemplate, const glm::vec3& offset) const {
+void EntityItem::globalizeProperties(EntityItemProperties& properties, const QString& messageTemplate,
+                                     const glm::vec3& offset) const {
     // TODO -- combine this with convertLocationToScriptSemantics
     bool success;
     auto globalPosition = getWorldPosition(success);
@@ -2630,7 +2595,8 @@ void EntityItem::globalizeProperties(EntityItemProperties& properties, const QSt
         properties.setPosition(globalPosition + offset);
         properties.setRotation(getWorldOrientation());
         properties.setDimensions(getScaledDimensions());
-        // Should we do velocities and accelerations, too? This could end up being quite involved, which is why the method exists.
+        // Should we do velocities and accelerations, too? This could end up being quite involved, which is why the method
+        // exists.
     } else {
         properties.setPosition(getQueryAACube().calcCenter() + offset); // best we can do
     }
@@ -2639,15 +2605,14 @@ void EntityItem::globalizeProperties(EntityItemProperties& properties, const QSt
         if (name.isEmpty()) {
             name = EntityTypes::getEntityTypeName(properties.getType());
         }
-        qCWarning(entities) << messageTemplate.arg(getEntityItemID().toString()).arg(name).arg(properties.getParentID().toString());
+        qCWarning(entities)
+            << messageTemplate.arg(getEntityItemID().toString()).arg(name).arg(properties.getParentID().toString());
     }
     QUuid empty;
     properties.setParentID(empty);
 }
 
-
 bool EntityItem::matchesJSONFilters(const QJsonObject& jsonFilters) const {
-
     // The intention for the query JSON filter and this method is to be flexible to handle a variety of filters for
     // ALL entity properties. Some work will need to be done to the property system so that it can be more flexible
     // (to grab the value and default value of a property given the string representation of that property, for example)
@@ -2667,23 +2632,17 @@ bool EntityItem::matchesJSONFilters(const QJsonObject& jsonFilters) const {
 
 quint64 EntityItem::getLastSimulated() const {
     quint64 result;
-    withReadLock([&] {
-        result = _lastSimulated;
-    });
+    withReadLock([&] { result = _lastSimulated; });
     return result;
 }
 
 void EntityItem::setLastSimulated(quint64 now) {
-    withWriteLock([&] {
-        _lastSimulated = now;
-    });
+    withWriteLock([&] { _lastSimulated = now; });
 }
 
 quint64 EntityItem::getLastEdited() const {
     quint64 result;
-    withReadLock([&] {
-        result = _lastEdited;
-    });
+    withReadLock([&] { result = _lastEdited; });
     return result;
 }
 
@@ -2696,43 +2655,31 @@ void EntityItem::setLastEdited(quint64 lastEdited) {
 
 quint64 EntityItem::getLastBroadcast() const {
     quint64 result;
-    withReadLock([&] {
-        result = _lastBroadcast;
-    });
+    withReadLock([&] { result = _lastBroadcast; });
     return result;
 }
 
 void EntityItem::setLastBroadcast(quint64 lastBroadcast) {
-    withWriteLock([&] {
-        _lastBroadcast = lastBroadcast;
-    });
+    withWriteLock([&] { _lastBroadcast = lastBroadcast; });
 }
 
 void EntityItem::markAsChangedOnServer() {
-    withWriteLock([&] {
-        _changedOnServer = usecTimestampNow();
-    });
+    withWriteLock([&] { _changedOnServer = usecTimestampNow(); });
 }
 
 quint64 EntityItem::getLastChangedOnServer() const {
     quint64 result;
-    withReadLock([&] {
-        result = _changedOnServer;
-    });
+    withReadLock([&] { result = _changedOnServer; });
     return result;
 }
 
 void EntityItem::update(const quint64& now) {
-    withWriteLock([&] {
-        _lastUpdated = now;
-    });
+    withWriteLock([&] { _lastUpdated = now; });
 }
 
 quint64 EntityItem::getLastUpdated() const {
     quint64 result;
-    withReadLock([&] {
-        result = _lastUpdated;
-    });
+    withReadLock([&] { result = _lastUpdated; });
     return result;
 }
 
@@ -2746,122 +2693,90 @@ void EntityItem::requiresRecalcBoxes() {
 
 QString EntityItem::getHref() const {
     QString result;
-    withReadLock([&] {
-        result = _href;
-    });
+    withReadLock([&] { result = _href; });
     return result;
 }
 
 QString EntityItem::getDescription() const {
     QString result;
-    withReadLock([&] {
-        result = _description;
-    });
+    withReadLock([&] { result = _description; });
     return result;
 }
 
 void EntityItem::setDescription(const QString& value) {
-    withWriteLock([&] {
-        _description = value;
-    });
+    withWriteLock([&] { _description = value; });
 }
 
 glm::vec3 EntityItem::getGravity() const {
     glm::vec3 result;
-    withReadLock([&] {
-        result = _gravity;
-    });
+    withReadLock([&] { result = _gravity; });
     return result;
 }
 
 glm::vec3 EntityItem::getAcceleration() const {
     glm::vec3 result;
-    withReadLock([&] {
-        result = _acceleration;
-    });
+    withReadLock([&] { result = _acceleration; });
     return result;
 }
 
 void EntityItem::setAcceleration(const glm::vec3& value) {
-    withWriteLock([&] {
-        _acceleration = value;
-    });
+    withWriteLock([&] { _acceleration = value; });
 }
 
 float EntityItem::getDamping() const {
     float result;
-    withReadLock([&] {
-        result = _damping;
-    });
+    withReadLock([&] { result = _damping; });
     return result;
 }
 
 float EntityItem::getRestitution() const {
     float result;
-    withReadLock([&] {
-        result = _restitution;
-    });
+    withReadLock([&] { result = _restitution; });
     return result;
 }
 
 float EntityItem::getFriction() const {
     float result;
-    withReadLock([&] {
-        result = _friction;
-    });
+    withReadLock([&] { result = _friction; });
     return result;
 }
 
 // lifetime related properties.
 float EntityItem::getLifetime() const {
     float result;
-    withReadLock([&] {
-        result = _lifetime;
-    });
+    withReadLock([&] { result = _lifetime; });
     return result;
 }
 
 quint64 EntityItem::getCreated() const {
     quint64 result;
-    withReadLock([&] {
-        result = _created;
-    });
+    withReadLock([&] { result = _created; });
     return result;
 }
 
 QString EntityItem::getScript() const {
     QString result;
-    withReadLock([&] {
-        result = _script;
-    });
+    withReadLock([&] { result = _script; });
     return result;
 }
 
 void EntityItem::setScript(const QString& value) {
-    withWriteLock([&] {
-        _script = value;
-    });
+    withWriteLock([&] { _script = value; });
 }
 
 quint64 EntityItem::getScriptTimestamp() const {
     quint64 result;
-    withReadLock([&] {
-        result = _scriptTimestamp;
-    });
+    withReadLock([&] { result = _scriptTimestamp; });
     return result;
 }
 
 void EntityItem::setScriptTimestamp(const quint64 value) {
-    withWriteLock([&] {
-        _scriptTimestamp = value;
-    });
+    withWriteLock([&] { _scriptTimestamp = value; });
 }
 
 QString EntityItem::getServerScripts() const {
     QString result;
-    withReadLock([&] {
-        result = _serverScripts;
-    });
+    withReadLock([&] { result = _serverScripts; });
     return result;
 }
 
@@ -2874,40 +2789,30 @@ void EntityItem::setServerScripts(const QString& serverScripts) {
 
 QString EntityItem::getCollisionSoundURL() const {
     QString result;
-    withReadLock([&] {
-        result = _collisionSoundURL;
-    });
+    withReadLock([&] { result = _collisionSoundURL; });
     return result;
 }
 
 glm::vec3 EntityItem::getRegistrationPoint() const {
     glm::vec3 result;
-    withReadLock([&] {
-        result = _registrationPoint;
-    });
+    withReadLock([&] { result = _registrationPoint; });
     return result;
 }
 
 float EntityItem::getAngularDamping() const {
     float result;
-    withReadLock([&] {
-        result = _angularDamping;
-    });
+    withReadLock([&] { result = _angularDamping; });
     return result;
 }
 
 QString EntityItem::getName() const {
     QString result;
-    withReadLock([&] {
-        result = _name;
-    });
+    withReadLock([&] { result = _name; });
     return result;
 }
 
 void EntityItem::setName(const QString& value) {
-    withWriteLock([&] {
-        _name = value;
-    });
+    withWriteLock([&] { _name = value; });
 }
 
 QString EntityItem::getDebugName() {
@@ -2920,9 +2825,7 @@ QString EntityItem::getDebugName() {
 
 bool EntityItem::getVisible() const {
     bool result;
-    withReadLock([&] {
-        result = _visible;
-    });
+    withReadLock([&] { result = _visible; });
     return result;
 }
 
@@ -2943,9 +2846,7 @@ void EntityItem::setVisible(bool value) {
 
 bool EntityItem::isVisibleInSecondaryCamera() const {
     bool result;
-    withReadLock([&] {
-        result = _isVisibleInSecondaryCamera;
-    });
+    withReadLock([&] { result = _isVisibleInSecondaryCamera; });
     return result;
 }
 
@@ -2964,9 +2865,7 @@ void EntityItem::setIsVisibleInSecondaryCamera(bool value) {
 }
 
 RenderLayer EntityItem::getRenderLayer() const {
-    return resultWithReadLock<RenderLayer>([&] {
-        return _renderLayer;
-    });
+    return resultWithReadLock<RenderLayer>([&] { return _renderLayer; });
 }
 
 void EntityItem::setRenderLayer(RenderLayer value) {
@@ -2984,9 +2883,7 @@ void EntityItem::setRenderLayer(RenderLayer value) {
 }
 
 PrimitiveMode EntityItem::getPrimitiveMode() const {
-    return resultWithReadLock<PrimitiveMode>([&] {
-        return _primitiveMode;
-    });
+    return resultWithReadLock<PrimitiveMode>([&] { return _primitiveMode; });
 }
 
 void EntityItem::setPrimitiveMode(PrimitiveMode value) {
@@ -3004,22 +2901,16 @@ void EntityItem::setPrimitiveMode(PrimitiveMode value) {
 }
 
 bool EntityItem::getIgnorePickIntersection() const {
-    return resultWithReadLock<bool>([&] {
-        return _ignorePickIntersection;
-    });
+    return resultWithReadLock<bool>([&] { return _ignorePickIntersection; });
 }
 
 void EntityItem::setIgnorePickIntersection(bool value) {
-    withWriteLock([&] {
-        _ignorePickIntersection = value;
-    });
+    withWriteLock([&] { _ignorePickIntersection = value; });
 }
 
 bool EntityItem::getCanCastShadow() const {
     bool result;
-    withReadLock([&] {
-        result = _canCastShadow;
-    });
+    withReadLock([&] { result = _canCastShadow; });
     return result;
 }
 
@@ -3044,17 +2935,13 @@ bool EntityItem::isChildOfMyAvatar() const {
 
 bool EntityItem::getCollisionless() const {
     bool result;
-    withReadLock([&] {
-        result = _collisionless;
-    });
+    withReadLock([&] { result = _collisionless; });
     return result;
 }
 
 uint16_t EntityItem::getCollisionMask() const {
     uint16_t result;
-    withReadLock([&] {
-        result = _collisionMask;
-    });
+    withReadLock([&] { result = _collisionMask; });
     return result;
 }
 
@@ -3063,17 +2950,13 @@ bool EntityItem::getDynamic() const {
         return false;
     }
     bool result;
-    withReadLock([&] {
-        result = _dynamic;
-    });
+    withReadLock([&] { result = _dynamic; });
     return result;
 }
 
 bool EntityItem::getLocked() const {
     bool result;
-    withReadLock([&] {
-        result = _locked;
-    });
+    withReadLock([&] { result = _locked; });
     return result;
 }
 
@@ -3096,35 +2979,28 @@ void EntityItem::setLocked(bool value) {
 
 QString EntityItem::getUserData() const {
     QString result;
-    withReadLock([&] {
-        result = _userData;
-    });
+    withReadLock([&] { result = _userData; });
     return result;
 }
 
 void EntityItem::setUserData(const QString& value) {
-    withWriteLock([&] {
-        _userData = value;
-    });
+    withWriteLock([&] { _userData = value; });
 }
 
 // Certifiable Properties
-#define DEFINE_PROPERTY_GETTER(type, accessor, var) \
-type EntityItem::get##accessor() const {            \
-    type result;         \
-    withReadLock([&] {   \
-        result = _##var; \
-    });                  \
-    return result;       \
-}
+#define DEFINE_PROPERTY_GETTER(type, accessor, var)                                                                            \
+    type EntityItem::get##accessor() const {                                                                                   \
+        type result;                                                                                                           \
+        withReadLock([&] { result = _##var; });                                                                                \
+        return result;                                                                                                         \
+    }
 
-#define DEFINE_PROPERTY_SETTER(type, accessor, var)   \
-void EntityItem::set##accessor(const type & value) { \
-    withWriteLock([&] {                               \
-       _##var = value;                                \
-    });                                               \
-}
-#define DEFINE_PROPERTY_ACCESSOR(type, accessor, var) DEFINE_PROPERTY_GETTER(type, accessor, var) DEFINE_PROPERTY_SETTER(type, accessor, var)
+#define DEFINE_PROPERTY_SETTER(type, accessor, var)                                                                            \
+    void EntityItem::set##accessor(const type& value) {                                                                        \
+        withWriteLock([&] { _##var = value; });                                                                                \
+    }
+#define DEFINE_PROPERTY_ACCESSOR(type, accessor, var)                                                                          \
+    DEFINE_PROPERTY_GETTER(type, accessor, var) DEFINE_PROPERTY_SETTER(type, accessor, var)
 DEFINE_PROPERTY_ACCESSOR(QString, ItemName, itemName)
 DEFINE_PROPERTY_ACCESSOR(QString, ItemDescription, itemDescription)
 DEFINE_PROPERTY_ACCESSOR(QString, ItemCategories, itemCategories)
@@ -3139,12 +3015,9 @@ DEFINE_PROPERTY_ACCESSOR(quint32, StaticCertificateVersion, staticCertificateVer
 
 uint32_t EntityItem::getDirtyFlags() const {
     uint32_t result;
-    withReadLock([&] {
-        result = _flags & Simulation::DIRTY_FLAGS;
-    });
+    withReadLock([&] { result = _flags & Simulation::DIRTY_FLAGS; });
     return result;
 }
-
 
 void EntityItem::markDirtyFlags(uint32_t mask) {
     withWriteLock([&] {
@@ -3162,9 +3035,7 @@ void EntityItem::clearDirtyFlags(uint32_t mask) {
 
 uint32_t EntityItem::getSpecialFlags() const {
     uint32_t result;
-    withReadLock([&] {
-        result = _flags & Simulation::SPECIAL_FLAGS;
-    });
+    withReadLock([&] { result = _flags & Simulation::SPECIAL_FLAGS; });
     return result;
 }
 
@@ -3184,24 +3055,18 @@ void EntityItem::clearSpecialFlags(uint32_t mask) {
 
 float EntityItem::getDensity() const {
     float result;
-    withReadLock([&] {
-        result = _density;
-    });
+    withReadLock([&] { result = _density; });
     return result;
 }
 
 EntityItem::ChangeHandlerId EntityItem::registerChangeHandler(const ChangeHandlerCallback& handler) {
     ChangeHandlerId result = QUuid::createUuid();
-    withWriteLock([&] {
-        _changeHandlers[result] = handler;
-    });
+    withWriteLock([&] { _changeHandlers[result] = handler; });
     return result;
 }
 
 void EntityItem::deregisterChangeHandler(const ChangeHandlerId& changeHandlerId) {
-    withWriteLock([&] {
-        _changeHandlers.remove(changeHandlerId);
-    });
+    withWriteLock([&] { _changeHandlers.remove(changeHandlerId); });
 }
 
 void EntityItem::somethingChangedNotification() {
@@ -3254,86 +3119,62 @@ void EntityItem::preDelete() {
 
 bool EntityItem::getCloneable() const {
     bool result;
-    withReadLock([&] {
-        result = _cloneable;
-    });
+    withReadLock([&] { result = _cloneable; });
     return result;
 }
 
 void EntityItem::setCloneable(bool value) {
-    withWriteLock([&] {
-        _cloneable = value;
-    });
+    withWriteLock([&] { _cloneable = value; });
 }
 
 float EntityItem::getCloneLifetime() const {
     float result;
-    withReadLock([&] {
-        result = _cloneLifetime;
-    });
+    withReadLock([&] { result = _cloneLifetime; });
     return result;
 }
 
 void EntityItem::setCloneLifetime(float value) {
-    withWriteLock([&] {
-        _cloneLifetime = value;
-    });
+    withWriteLock([&] { _cloneLifetime = value; });
 }
 
 float EntityItem::getCloneLimit() const {
     float result;
-    withReadLock([&] {
-        result = _cloneLimit;
-    });
+    withReadLock([&] { result = _cloneLimit; });
     return result;
 }
 
 void EntityItem::setCloneLimit(float value) {
-    withWriteLock([&] {
-        _cloneLimit = value;
-    });
+    withWriteLock([&] { _cloneLimit = value; });
 }
 
 bool EntityItem::getCloneDynamic() const {
     bool result;
-    withReadLock([&] {
-        result = _cloneDynamic;
-    });
+    withReadLock([&] { result = _cloneDynamic; });
     return result;
 }
 
 void EntityItem::setCloneDynamic(bool value) {
-    withWriteLock([&] {
-        _cloneDynamic = value;
-    });
+    withWriteLock([&] { _cloneDynamic = value; });
 }
 
 bool EntityItem::getCloneAvatarEntity() const {
     bool result;
-    withReadLock([&] {
-        result = _cloneAvatarEntity;
-    });
+    withReadLock([&] { result = _cloneAvatarEntity; });
     return result;
 }
 
 void EntityItem::setCloneAvatarEntity(bool value) {
-    withWriteLock([&] {
-        _cloneAvatarEntity = value;
-    });
+    withWriteLock([&] { _cloneAvatarEntity = value; });
 }
 
 const QUuid EntityItem::getCloneOriginID() const {
     QUuid result;
-    withReadLock([&] {
-        result = _cloneOriginID;
-    });
+    withReadLock([&] { result = _cloneOriginID; });
     return result;
 }
 
 void EntityItem::setCloneOriginID(const QUuid& value) {
-    withWriteLock([&] {
-        _cloneOriginID = value;
-    });
+    withWriteLock([&] { _cloneOriginID = value; });
 }
 
 void EntityItem::addCloneID(const QUuid& cloneID) {
@@ -3355,16 +3196,12 @@ void EntityItem::removeCloneID(const QUuid& cloneID) {
 
 const QVector<QUuid> EntityItem::getCloneIDs() const {
     QVector<QUuid> result;
-    withReadLock([&] {
-        result = _cloneIDs;
-    });
+    withReadLock([&] { result = _cloneIDs; });
     return result;
 }
 
 void EntityItem::setCloneIDs(const QVector<QUuid>& cloneIDs) {
-    withWriteLock([&] {
-        _cloneIDs = cloneIDs;
-    });
+    withWriteLock([&] { _cloneIDs = cloneIDs; });
 }
 
 bool EntityItem::shouldPreloadScript() const {
@@ -3415,7 +3252,7 @@ void EntityItem::prepareForSimulationOwnershipBid(EntityItemProperties& properti
 
 bool EntityItem::isWearable() const {
     return isVisible() &&
-        (getParentID() == DependencyManager::get<NodeList>()->getSessionUUID() || getParentID() == AVATAR_SELF_ID);
+           (getParentID() == DependencyManager::get<NodeList>()->getSessionUUID() || getParentID() == AVATAR_SELF_ID);
 }
 
 void EntityItem::addGrab(GrabPointer grab) {
@@ -3427,9 +3264,8 @@ void EntityItem::addGrab(GrabPointer grab) {
     }
 
     int jointIndex = grab->getParentJointIndex();
-    bool isFarGrab = jointIndex == FARGRAB_RIGHTHAND_INDEX
-        || jointIndex == FARGRAB_LEFTHAND_INDEX
-        || jointIndex == FARGRAB_MOUSE_INDEX;
+    bool isFarGrab = jointIndex == FARGRAB_RIGHTHAND_INDEX || jointIndex == FARGRAB_LEFTHAND_INDEX ||
+                     jointIndex == FARGRAB_MOUSE_INDEX;
 
     // GRAB HACK: FarGrab doesn't work on non-dynamic things yet, but we really really want NearGrab
     // (aka Hold) to work for such ojects, hence we filter the useAction case like so:

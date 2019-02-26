@@ -24,9 +24,9 @@ class MenuItemProperties;
  * <p />
  *
  * <h3>Groupings</h3>
- * 
- * A "grouping" provides a way to group a set of menus or menu items together so 
- * that they can all be set visible or invisible as a group. 
+ *
+ * A "grouping" provides a way to group a set of menus or menu items together so
+ * that they can all be set visible or invisible as a group.
  * There are two available groups: <code>"Advanced"</code> and <code>"Developer"</code>.
  * These groupings can be toggled in the "Settings" menu.
  * If a menu item doesn't belong to a group it is always displayed.
@@ -50,7 +50,8 @@ class MenuItemProperties;
 
 class MenuScriptingInterface : public QObject {
     Q_OBJECT
-    MenuScriptingInterface() { };
+    MenuScriptingInterface() {};
+
 public:
     static MenuScriptingInterface* getInstance();
 
@@ -229,7 +230,7 @@ signals:
      * function onMenuItemEvent(menuItem) {
      *     print("You clicked on " + menuItem);
      * }
-     * 
+     *
      * Menu.menuItemEvent.connect(onMenuItemEvent);
      */
     void menuItemEvent(const QString& menuItem);

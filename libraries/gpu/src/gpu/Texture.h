@@ -17,37 +17,37 @@
 #include <QMetaType>
 #include <QUrl>
 
-#include <functional>
-#include <shared/Storage.h>
-#include <shared/FileCache.h>
 #include <RegisteredMetaTypes.h>
+#include <shared/FileCache.h>
+#include <shared/Storage.h>
+#include <functional>
 #include "Forward.h"
-#include "Resource.h"
 #include "Metric.h"
+#include "Resource.h"
 
 const int ABSOLUTE_MAX_TEXTURE_NUM_PIXELS = 8192 * 8192;
 
 namespace ktx {
-    class KTX;
-    using KTXUniquePointer = std::unique_ptr<KTX>;
-    struct KTXDescriptor;
-    using KTXDescriptorPointer = std::unique_ptr<KTXDescriptor>;
-    struct Header;
-    struct KeyValue;
-    using KeyValues = std::list<KeyValue>;
-}
+class KTX;
+using KTXUniquePointer = std::unique_ptr<KTX>;
+struct KTXDescriptor;
+using KTXDescriptorPointer = std::unique_ptr<KTXDescriptor>;
+struct Header;
+struct KeyValue;
+using KeyValues = std::list<KeyValue>;
+} // namespace ktx
 
-namespace khronos { namespace gl { namespace texture {
-    enum class InternalFormat: uint32_t;
-}}}
+namespace khronos {
+namespace gl {
+namespace texture {
+enum class InternalFormat : uint32_t;
+}
+} // namespace gl
+} // namespace khronos
 
 namespace gpu {
 
-enum class BackendTarget {
-    GL41,
-    GL45,
-    GLES32
-};
+enum class BackendTarget { GL41, GL45, GLES32 };
 
 const std::string SOURCE_HASH_KEY { "hifi.sourceHash" };
 
@@ -58,15 +58,24 @@ const uint8 SOURCE_HASH_BYTES = 16;
 class Texture;
 class SphericalHarmonics {
 public:
-    glm::vec3 L00    ; float spare0;
-    glm::vec3 L1m1   ; float spare1;
-    glm::vec3 L10    ; float spare2;
-    glm::vec3 L11    ; float spare3;
-    glm::vec3 L2m2   ; float spare4;
-    glm::vec3 L2m1   ; float spare5;
-    glm::vec3 L20    ; float spare6;
-    glm::vec3 L21    ; float spare7;
-    glm::vec3 L22    ; float spare8;
+    glm::vec3 L00;
+    float spare0;
+    glm::vec3 L1m1;
+    float spare1;
+    glm::vec3 L10;
+    float spare2;
+    glm::vec3 L11;
+    float spare3;
+    glm::vec3 L2m2;
+    float spare4;
+    glm::vec3 L2m1;
+    float spare5;
+    glm::vec3 L20;
+    float spare6;
+    glm::vec3 L21;
+    float spare7;
+    glm::vec3 L22;
+    float spare8;
 
     static const int NUM_COEFFICIENTS = 9;
 
@@ -89,11 +98,10 @@ public:
 
     void evalFromTexture(const Texture& texture, gpu::BackendTarget target);
 };
-typedef std::shared_ptr< SphericalHarmonics > SHPointer;
+typedef std::shared_ptr<SphericalHarmonics> SHPointer;
 
 class Sampler {
 public:
-
     enum Filter {
         FILTER_MIN_MAG_POINT, // top mip only
         FILTER_MIN_POINT_MAG_LINEAR, // top mip only
@@ -127,7 +135,7 @@ public:
 
     class Desc {
     public:
-        glm::vec4 _borderColor{ 1.0f };
+        glm::vec4 _borderColor { 1.0f };
         uint32 _maxAnisotropy = 16;
 
         uint8 _filter = FILTER_MIN_MAG_POINT;
@@ -136,25 +144,23 @@ public:
         uint8 _wrapModeU = WRAP_REPEAT;
         uint8 _wrapModeV = WRAP_REPEAT;
         uint8 _wrapModeW = WRAP_REPEAT;
-            
+
         uint8 _mipOffset = 0;
         uint8 _minMip = 0;
         uint8 _maxMip = MAX_MIP_LEVEL;
 
         Desc() {}
-        Desc(const Filter filter, const WrapMode wrap = WRAP_REPEAT) : _filter(filter), _wrapModeU(wrap), _wrapModeV(wrap), _wrapModeW(wrap) {}
+        Desc(const Filter filter, const WrapMode wrap = WRAP_REPEAT) :
+            _filter(filter),
+            _wrapModeU(wrap),
+            _wrapModeV(wrap),
+            _wrapModeW(wrap) {}
 
         bool operator==(const Desc& other) const {
-            return _borderColor == other._borderColor &&
-                _maxAnisotropy == other._maxAnisotropy &&
-                _filter == other._filter &&
-                _comparisonFunc == other._comparisonFunc &&
-                _wrapModeU == other._wrapModeU &&
-                _wrapModeV == other._wrapModeV &&
-                _wrapModeW == other._wrapModeW &&
-                _mipOffset == other._mipOffset &&
-                _minMip == other._minMip &&
-                _maxMip == other._maxMip;
+            return _borderColor == other._borderColor && _maxAnisotropy == other._maxAnisotropy && _filter == other._filter &&
+                   _comparisonFunc == other._comparisonFunc && _wrapModeU == other._wrapModeU &&
+                   _wrapModeV == other._wrapModeV && _wrapModeW == other._wrapModeW && _mipOffset == other._mipOffset &&
+                   _minMip == other._minMip && _maxMip == other._maxMip;
         }
     };
 
@@ -181,12 +187,9 @@ public:
 
     const Desc& getDesc() const { return _desc; }
 
-    bool operator==(const Sampler& other) const {
-        return _desc == other._desc;
-    }
-    bool operator!=(const Sampler& other) const {
-        return !(*this == other);
-    }
+    bool operator==(const Sampler& other) const { return _desc == other._desc; }
+    bool operator!=(const Sampler& other) const { return !(*this == other); }
+
 protected:
     Desc _desc;
 
@@ -194,9 +197,9 @@ protected:
 };
 
 enum class TextureUsageType : uint8 {
-    RENDERBUFFER,       // Used as attachments to a framebuffer
-    RESOURCE,           // Resource textures, like materials... subject to memory manipulation
-    STRICT_RESOURCE,    // Resource textures not subject to manipulation, like the normal fitting texture
+    RENDERBUFFER, // Used as attachments to a framebuffer
+    RESOURCE, // Resource textures, like materials... subject to memory manipulation
+    STRICT_RESOURCE, // Resource textures not subject to manipulation, like the normal fitting texture
     EXTERNAL,
 };
 
@@ -226,11 +229,11 @@ public:
     class Usage {
     public:
         enum FlagBit {
-            COLOR = 0,   // Texture is a color map
-            NORMAL,      // Texture is a normal map
-            ALPHA,      // Texture has an alpha channel
-            ALPHA_MASK,       // Texture alpha channel is a Mask 0/1
-            NUM_FLAGS,  
+            COLOR = 0, // Texture is a color map
+            NORMAL, // Texture is a normal map
+            ALPHA, // Texture has an alpha channel
+            ALPHA_MASK, // Texture alpha channel is a Mask 0/1
+            NUM_FLAGS,
         };
 
         typedef std::bitset<NUM_FLAGS> Flags;
@@ -241,21 +244,34 @@ public:
         Usage() : _flags(0) {}
         Usage(const Flags& flags) : _flags(flags) {}
 
-        bool operator== (const Usage& rhs) const { return _flags == rhs._flags; }
-        bool operator!= (const Usage& rhs) const { return _flags != rhs._flags; }
+        bool operator==(const Usage& rhs) const { return _flags == rhs._flags; }
+        bool operator!=(const Usage& rhs) const { return _flags != rhs._flags; }
 
         class Builder {
             friend class Usage;
-            Flags _flags{ 0 };
+            Flags _flags { 0 };
+
         public:
             Builder() {}
 
             Usage build() const { return Usage(_flags); }
 
-            Builder& withColor() { _flags.set(COLOR); return (*this); }
-            Builder& withNormal() { _flags.set(NORMAL); return (*this); }
-            Builder& withAlpha() { _flags.set(ALPHA); return (*this); }
-            Builder& withAlphaMask() { _flags.set(ALPHA_MASK); return (*this); }
+            Builder& withColor() {
+                _flags.set(COLOR);
+                return (*this);
+            }
+            Builder& withNormal() {
+                _flags.set(NORMAL);
+                return (*this);
+            }
+            Builder& withAlpha() {
+                _flags.set(ALPHA);
+                return (*this);
+            }
+            Builder& withAlphaMask() {
+                _flags.set(ALPHA_MASK);
+                return (*this);
+            }
         };
         Usage(const Builder& builder) : Usage(builder._flags) {}
 
@@ -292,9 +308,8 @@ public:
 
     // Lines of pixels are padded to be a multiple of "PACKING_SIZE" which is 4 bytes
     static const uint32 PACKING_SIZE = 4;
-    static uint8 evalPaddingNumBytes(Size byteSize) { return (uint8) (3 - (byteSize + 3) % PACKING_SIZE); }
-    static Size evalPaddedSize(Size byteSize) { return byteSize + (Size) evalPaddingNumBytes(byteSize); }
-
+    static uint8 evalPaddingNumBytes(Size byteSize) { return (uint8)(3 - (byteSize + 3) % PACKING_SIZE); }
+    static Size evalPaddedSize(Size byteSize) { return byteSize + (Size)evalPaddingNumBytes(byteSize); }
 
     using PixelsPointer = storage::StoragePointer;
     class Storage {
@@ -352,7 +367,7 @@ public:
         void assignMipFaceData(uint16 level, uint8 face, const storage::StoragePointer& storage) override;
         uint16 minAvailableMipLevel() const override;
 
-        void reset() override { }
+        void reset() override {}
 
         // Don't keep files open forever.  We close them at the beginning of each frame (GLBackend::recycle)
         static void releaseOpenKtxFiles();
@@ -381,16 +396,27 @@ public:
 
     static const uint16 MAX_NUM_MIPS = 0;
     static const uint16 SINGLE_MIP = 1;
-    static TexturePointer create1D(const Element& texelFormat, uint16 width, uint16 numMips = SINGLE_MIP, const Sampler& sampler = Sampler());
-    static TexturePointer create2D(const Element& texelFormat, uint16 width, uint16 height, uint16 numMips = SINGLE_MIP, const Sampler& sampler = Sampler());
-    static TexturePointer create2DArray(const Element& texelFormat, uint16 width, uint16 height, uint16 numSlices, uint16 numMips = SINGLE_MIP, const Sampler& sampler = Sampler());
-    static TexturePointer create3D(const Element& texelFormat, uint16 width, uint16 height, uint16 depth, uint16 numMips = SINGLE_MIP, const Sampler& sampler = Sampler());
-    static TexturePointer createCube(const Element& texelFormat, uint16 width, uint16 numMips = 1, const Sampler& sampler = Sampler());
-    static TexturePointer createRenderBuffer(const Element& texelFormat, uint16 width, uint16 height, uint16 numMips = SINGLE_MIP, const Sampler& sampler = Sampler());
-    static TexturePointer createRenderBufferMultisample(const Element& texelFormat, uint16 width, uint16 height, uint16 numSamples, const Sampler& sampler = Sampler());
-    static TexturePointer createRenderBufferArray(const Element& texelFormat, uint16 width, uint16 height, uint16 numSlices, uint16 numMips = SINGLE_MIP, const Sampler& sampler = Sampler());
-    static TexturePointer createRenderBufferMultisampleArray(const Element& texelFormat, uint16 width, uint16 height, uint16 numSlices, uint16 numSamples, const Sampler& sampler = Sampler());
-    static TexturePointer createStrict(const Element& texelFormat, uint16 width, uint16 height, uint16 numMips = SINGLE_MIP, const Sampler& sampler = Sampler());
+    static TexturePointer create1D(const Element& texelFormat, uint16 width, uint16 numMips = SINGLE_MIP,
+                                   const Sampler& sampler = Sampler());
+    static TexturePointer create2D(const Element& texelFormat, uint16 width, uint16 height, uint16 numMips = SINGLE_MIP,
+                                   const Sampler& sampler = Sampler());
+    static TexturePointer create2DArray(const Element& texelFormat, uint16 width, uint16 height, uint16 numSlices,
+                                        uint16 numMips = SINGLE_MIP, const Sampler& sampler = Sampler());
+    static TexturePointer create3D(const Element& texelFormat, uint16 width, uint16 height, uint16 depth,
+                                   uint16 numMips = SINGLE_MIP, const Sampler& sampler = Sampler());
+    static TexturePointer createCube(const Element& texelFormat, uint16 width, uint16 numMips = 1,
+                                     const Sampler& sampler = Sampler());
+    static TexturePointer createRenderBuffer(const Element& texelFormat, uint16 width, uint16 height,
+                                             uint16 numMips = SINGLE_MIP, const Sampler& sampler = Sampler());
+    static TexturePointer createRenderBufferMultisample(const Element& texelFormat, uint16 width, uint16 height,
+                                                        uint16 numSamples, const Sampler& sampler = Sampler());
+    static TexturePointer createRenderBufferArray(const Element& texelFormat, uint16 width, uint16 height, uint16 numSlices,
+                                                  uint16 numMips = SINGLE_MIP, const Sampler& sampler = Sampler());
+    static TexturePointer createRenderBufferMultisampleArray(const Element& texelFormat, uint16 width, uint16 height,
+                                                             uint16 numSlices, uint16 numSamples,
+                                                             const Sampler& sampler = Sampler());
+    static TexturePointer createStrict(const Element& texelFormat, uint16 width, uint16 height, uint16 numMips = SINGLE_MIP,
+                                       const Sampler& sampler = Sampler());
     static TexturePointer createExternal(const ExternalRecycler& recycler, const Sampler& sampler = Sampler());
 
     // After the texture has been created, it should be defined
@@ -471,21 +497,34 @@ public:
     uint16 evalMipDepth(uint16 level) const { return std::max(_depth >> level, 1); }
 
     // The true size of an image line or surface depends on the format, tiling and padding rules
-    // 
+    //
     // Here are the static function to compute the different sizes from parametered dimensions and format
     // Tile size must be a power of 2
-    static uint16 evalTiledPadding(uint16 length, int tile) { int tileMinusOne = (tile - 1); return (tileMinusOne - (length + tileMinusOne) % tile); }
+    static uint16 evalTiledPadding(uint16 length, int tile) {
+        int tileMinusOne = (tile - 1);
+        return (tileMinusOne - (length + tileMinusOne) % tile);
+    }
     static uint16 evalTiledLength(uint16 length, int tile) { return length / tile + (evalTiledPadding(length, tile) != 0); }
     static uint16 evalTiledWidth(uint16 width, int tileX) { return evalTiledLength(width, tileX); }
     static uint16 evalTiledHeight(uint16 height, int tileY) { return evalTiledLength(height, tileY); }
-    static Size evalLineSize(uint16 width, const Element& format) { return evalPaddedSize(evalTiledWidth(width, format.getTile().x) * format.getSize()); }
-    static Size evalSurfaceSize(uint16 width, uint16 height, const Element& format) { return evalLineSize(width, format) * evalTiledHeight(height, format.getTile().x); }
+    static Size evalLineSize(uint16 width, const Element& format) {
+        return evalPaddedSize(evalTiledWidth(width, format.getTile().x) * format.getSize());
+    }
+    static Size evalSurfaceSize(uint16 width, uint16 height, const Element& format) {
+        return evalLineSize(width, format) * evalTiledHeight(height, format.getTile().x);
+    }
 
     // Compute the theorical size of the texture elements storage depending on the specified format
     Size evalStoredMipLineSize(uint16 level, const Element& format) const { return evalLineSize(evalMipWidth(level), format); }
-    Size evalStoredMipSurfaceSize(uint16 level, const Element& format) const { return evalSurfaceSize(evalMipWidth(level), evalMipHeight(level), format); }
-    Size evalStoredMipFaceSize(uint16 level, const Element& format) const { return evalStoredMipSurfaceSize(level, format) * evalMipDepth(level); }
-    Size evalStoredMipSize(uint16 level, const Element& format) const { return evalStoredMipFaceSize(level, format) * getNumFaces(); }
+    Size evalStoredMipSurfaceSize(uint16 level, const Element& format) const {
+        return evalSurfaceSize(evalMipWidth(level), evalMipHeight(level), format);
+    }
+    Size evalStoredMipFaceSize(uint16 level, const Element& format) const {
+        return evalStoredMipSurfaceSize(level, format) * evalMipDepth(level);
+    }
+    Size evalStoredMipSize(uint16 level, const Element& format) const {
+        return evalStoredMipFaceSize(level, format) * getNumFaces();
+    }
 
     // For this texture's texel format and dimensions, compute the various mem sizes
     Size evalMipLineSize(uint16 level) const { return evalStoredMipLineSize(level, getTexelFormat()); }
@@ -500,7 +539,7 @@ public:
     uint32 evalMipFaceNumTexels(uint16 level) const { return evalMipWidth(level) * evalMipHeight(level) * evalMipDepth(level); }
     uint32 evalMipNumTexels(uint16 level) const { return evalMipFaceNumTexels(level) * getNumFaces(); }
 
-    // For convenience assign a source name 
+    // For convenience assign a source name
     const std::string& source() const { return _source; }
     void setSource(const std::string& source) { _source = source; }
     const std::string& sourceHash() const { return _sourceHash; }
@@ -591,12 +630,11 @@ protected:
     mutable std::list<ExternalIdAndFence> _externalUpdates;
     ExternalRecycler _externalRecycler;
 
-
     std::weak_ptr<Texture> _fallback;
     // Not strictly necessary, but incredibly useful for debugging
     std::string _source;
     std::string _sourceHash;
-    std::unique_ptr< Storage > _storage;
+    std::unique_ptr<Storage> _storage;
 
     Stamp _stamp { 0 };
 
@@ -620,7 +658,7 @@ protected:
     uint16 _maxMipLevel { 0 };
 
     uint16 _minMip { 0 };
- 
+
     Type _type { TEX_1D };
 
     Usage _usage;
@@ -629,20 +667,22 @@ protected:
     bool _autoGenerateMips = false;
     bool _isIrradianceValid = false;
     bool _defined = false;
-   
-    static TexturePointer create(TextureUsageType usageType, Type type, const Element& texelFormat, uint16 width, uint16 height, uint16 depth, uint16 numSamples, uint16 numSlices, uint16 numMips, const Sampler& sampler);
 
-    Size resize(Type type, const Element& texelFormat, uint16 width, uint16 height, uint16 depth, uint16 numSamples, uint16 numSlices, uint16 numMips);
+    static TexturePointer create(TextureUsageType usageType, Type type, const Element& texelFormat, uint16 width, uint16 height,
+                                 uint16 depth, uint16 numSamples, uint16 numSlices, uint16 numMips, const Sampler& sampler);
+
+    Size resize(Type type, const Element& texelFormat, uint16 width, uint16 height, uint16 depth, uint16 numSamples,
+                uint16 numSlices, uint16 numMips);
 
     friend class Serializer;
     friend class Deserializer;
 };
 
 typedef std::shared_ptr<Texture> TexturePointer;
-typedef std::vector< TexturePointer > Textures;
+typedef std::vector<TexturePointer> Textures;
 
- // TODO: For now TextureView works with Texture as a place holder for the Texture.
- // The overall logic should be about the same except that the Texture will be a real GL Texture under the hood
+// TODO: For now TextureView works with Texture as a place holder for the Texture.
+// The overall logic should be about the same except that the Texture will be a real GL Texture under the hood
 class TextureView {
 public:
     typedef Resource::Size Size;
@@ -653,40 +693,30 @@ public:
 
     TextureView() {};
 
-    TextureView(const Element& element) :
-         _element(element)
-    {};
+    TextureView(const Element& element) : _element(element) {};
 
     // create the TextureView and own the Texture
-    TextureView(Texture* newTexture, const Element& element) :
-        _texture(newTexture),
-        _subresource(0),
-        _element(element)
-    {};
+    TextureView(Texture* newTexture, const Element& element) : _texture(newTexture), _subresource(0), _element(element) {};
     TextureView(const TexturePointer& texture, uint16 subresource, const Element& element) :
         _texture(texture),
         _subresource(subresource),
-        _element(element)
-    {};
+        _element(element) {};
 
-    TextureView(const TexturePointer& texture, uint16 subresource) :
-        _texture(texture),
-        _subresource(subresource)
-    {};
+    TextureView(const TexturePointer& texture, uint16 subresource) : _texture(texture), _subresource(subresource) {};
 
     ~TextureView() {}
     TextureView(const TextureView& view) = default;
     TextureView& operator=(const TextureView& view) = default;
 
     explicit operator bool() const { return bool(_texture); }
-    bool operator !() const { return (!_texture); }
+    bool operator!() const { return (!_texture); }
 
     bool isValid() const { return bool(_texture); }
 };
 typedef std::vector<TextureView> TextureViews;
 
-// TextureSource is the bridge between a URL or a a way to produce an image and the final gpu::Texture that will be used to render it.
-// It provides the mechanism to create a texture using a customizable TextureLoader
+// TextureSource is the bridge between a URL or a a way to produce an image and the final gpu::Texture that will be used to
+// render it. It provides the mechanism to create a texture using a customizable TextureLoader
 class TextureSource {
 public:
     TextureSource(const QUrl& url, int type = 0) : _imageUrl(url), _type(type) {}
@@ -706,20 +736,22 @@ protected:
     QUrl _imageUrl;
     int _type { 0 };
 };
-typedef std::shared_ptr< TextureSource > TextureSourcePointer;
+typedef std::shared_ptr<TextureSource> TextureSourcePointer;
 
-};
+}; // namespace gpu
 
 namespace std {
-    template<> struct hash<gpu::Sampler> {
-        size_t operator()(const gpu::Sampler& sampler) const noexcept {
-            size_t result = 0;
-            const auto& desc = sampler.getDesc();
-            hash_combine(result, desc._comparisonFunc, desc._filter, desc._maxAnisotropy, desc._maxMip, desc._minMip, desc._wrapModeU, desc._wrapModeV, desc._wrapModeW);
-            return result;
-        }
-    };
-}
+template<>
+struct hash<gpu::Sampler> {
+    size_t operator()(const gpu::Sampler& sampler) const noexcept {
+        size_t result = 0;
+        const auto& desc = sampler.getDesc();
+        hash_combine(result, desc._comparisonFunc, desc._filter, desc._maxAnisotropy, desc._maxMip, desc._minMip,
+                     desc._wrapModeU, desc._wrapModeV, desc._wrapModeW);
+        return result;
+    }
+};
+} // namespace std
 
 Q_DECLARE_METATYPE(gpu::TexturePointer)
 

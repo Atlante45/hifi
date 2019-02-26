@@ -9,8 +9,8 @@
 
 #include <assert.h>
 
-#include <QString>
 #include <QObject>
+#include <QString>
 
 #include "Forward.h"
 
@@ -24,7 +24,6 @@ public:
 
 #define DisplayProvider_iid "com.highfidelity.plugins.display"
 Q_DECLARE_INTERFACE(DisplayProvider, DisplayProvider_iid)
-
 
 class InputProvider {
 public:

@@ -7,55 +7,54 @@
 //
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
 
 #include <gl/Config.h>
 
+#include <QtCore/QByteArray>
 #include <QtCore/QDir>
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QLoggingCategory>
-#include <QtCore/QTimer>
-#include <QtCore/QThread>
-#include <QtCore/QThreadPool>
 #include <QtCore/QObject>
-#include <QtCore/QByteArray>
 #include <QtCore/QTemporaryDir>
 #include <QtCore/QTemporaryFile>
+#include <QtCore/QThread>
+#include <QtCore/QThreadPool>
+#include <QtCore/QTimer>
 #include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
+#include <QtNetwork/QNetworkRequest>
 
 #include <QtGui/QGuiApplication>
 #include <QtGui/QResizeEvent>
 #include <QtGui/QWindow>
 
+#include <QtWidgets/QApplication>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QInputDialog>
 #include <QtWidgets/QMessageBox>
-#include <QtWidgets/QApplication>
 
-#include <quazip5/quazip.h>
 #include <quazip5/JlCompress.h>
+#include <quazip5/quazip.h>
 
-
-#include "GLIHelpers.h"
-#include <shared/RateCounter.h>
 #include <AssetClient.h>
 #include <PathUtils.h>
 #include <shaders/Shaders.h>
+#include <shared/RateCounter.h>
+#include "GLIHelpers.h"
 
 #include <gpu/gl/GLBackend.h>
 #include <gpu/gl/GLFramebuffer.h>
 #include <gpu/gl/GLTexture.h>
 
-#include <GenericThread.h>
 #include <AddressManager.h>
+#include <FramebufferCache.h>
+#include <GenericThread.h>
+#include <GeometryCache.h>
 #include <NodeList.h>
 #include <TextureCache.h>
-#include <FramebufferCache.h>
-#include <GeometryCache.h>
 
 #include <gl/Config.h>
 #include <gl/Context.h>
@@ -71,7 +70,7 @@ class FileDownloader : public QObject {
 public:
     using Handler = std::function<void(const QByteArray& data)>;
 
-    FileDownloader(QUrl url, const Handler& handler, QObject *parent = 0) : QObject(parent), _handler(handler) {
+    FileDownloader(QUrl url, const Handler& handler, QObject* parent = 0) : QObject(parent), _handler(handler) {
         connect(&_accessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(fileDownloaded(QNetworkReply*)));
         _accessManager.get(QNetworkRequest(url));
     }
@@ -82,7 +81,7 @@ public:
         }
     }
 
-    private slots:
+private slots:
     void fileDownloaded(QNetworkReply* pReply) {
         _handler(pReply->readAll());
         pReply->deleteLater();
@@ -97,13 +96,14 @@ private:
 
 class RenderThread : public GenericThread {
     using Parent = GenericThread;
+
 public:
     gl::Context _context;
     gpu::PipelinePointer _presentPipeline;
     gpu::ContextPointer _gpuContext; // initialized during window creation
     std::atomic<size_t> _presentCount;
     QElapsedTimer _elapsed;
-    std::atomic<uint16_t> _fps{ 1 };
+    std::atomic<uint16_t> _fps { 1 };
     RateCounter<200> _fpsCounter;
     std::mutex _mutex;
     std::shared_ptr<gpu::Backend> _backend;
@@ -113,13 +113,12 @@ public:
     std::queue<gpu::FramePointer> _pendingFrames;
     gpu::FramePointer _activeFrame;
     QSize _size;
-    static const size_t FRAME_TIME_BUFFER_SIZE{ 1024 };
+    static const size_t FRAME_TIME_BUFFER_SIZE { 1024 };
 
     void submitFrame(const gpu::FramePointer& frame) {
         std::unique_lock<std::mutex> lock(_frameLock);
         _pendingFrames.push(frame);
     }
-
 
     void initialize(QWindow* window, gl::Context& initContext) {
         setObjectName("RenderThread");
@@ -144,14 +143,12 @@ public:
         RENDER_THREAD = QThread::currentThread();
 
         // Wait until the context has been moved to this thread
-        {
-            std::unique_lock<std::mutex> lock(_mutex);
-        }
+        { std::unique_lock<std::mutex> lock(_mutex); }
 
         _context.makeCurrent();
         gl::initModuleGl();
 
-        //wglSwapIntervalEXT(0);
+        // wglSwapIntervalEXT(0);
         _frameTimes.resize(FRAME_TIME_BUFFER_SIZE, 0);
         {
             gpu::ShaderPointer program = gpu::Shader::createProgram(shader::gpu::program::drawTransformUnitQuadTextureOpaque);
@@ -184,7 +181,6 @@ public:
             _gpuContext->executeFrame(frame);
 
             {
-
                 auto geometryCache = DependencyManager::get<GeometryCache>();
                 gpu::Batch presentBatch;
                 presentBatch.setViewportTransform({ 0, 0, _size.width(), _size.height() });
@@ -201,7 +197,7 @@ public:
         _context.makeCurrent();
         _context.swapBuffers();
         _fpsCounter.increment();
-        static size_t _frameCount{ 0 };
+        static size_t _frameCount { 0 };
         ++_frameCount;
         if (_elapsed.elapsed() >= 500) {
             _fps = _fpsCounter.rate();
@@ -224,7 +220,7 @@ public:
         for (size_t i = 0; i < _frameTimes.size(); ++i) {
             const auto& t = _frameTimes[i];
             if (t > averageFrameTime * 6) {
-                sortedHighFrames.push_back({ t, i } );
+                sortedHighFrames.push_back({ t, i });
             }
         }
 
@@ -233,7 +229,6 @@ public:
             qDebug() << "Long frame " << p.first << " " << p.second;
         }
     }
-
 
     bool process() override {
         std::queue<gpu::FramePointer> pendingFrames;
@@ -276,7 +271,7 @@ public:
     //"/-17.2049,-8.08629,-19.4153/0,0.881994,0,-0.47126"
     static void setup() {
         DependencyManager::registerInheritance<LimitedNodeList, NodeList>();
-        //DependencyManager::registerInheritance<SpatialParentFinder, ParentFinder>();
+        // DependencyManager::registerInheritance<SpatialParentFinder, ParentFinder>();
         DependencyManager::set<AddressManager>();
         DependencyManager::set<NodeList>(NodeType::Agent);
         DependencyManager::set<ResourceCacheSharedItems>();
@@ -350,9 +345,7 @@ public:
 
         QTimer* timer = new QTimer(this);
         timer->setInterval(0); // Qt::CoarseTimer acceptable
-        connect(timer, &QTimer::timeout, this, [this] {
-            draw();
-        });
+        connect(timer, &QTimer::timeout, this, [this] { draw(); });
         timer->start();
         _ready = true;
     }
@@ -366,8 +359,7 @@ public:
     }
 
 protected:
-
-    bool eventFilter(QObject *obj, QEvent *event) override {
+    bool eventFilter(QObject* obj, QEvent* event) override {
         if (event->type() == QEvent::Close) {
             _renderThread.terminate();
         }
@@ -405,15 +397,11 @@ protected:
         QWindow::keyPressEvent(event);
     }
 
-    void keyReleaseEvent(QKeyEvent* event) override {
-    }
+    void keyReleaseEvent(QKeyEvent* event) override {}
 
-    void mouseMoveEvent(QMouseEvent* event) override {
-    }
+    void mouseMoveEvent(QMouseEvent* event) override {}
 
-    void resizeEvent(QResizeEvent* ev) override {
-        resizeWindow(ev->size());
-    }
+    void resizeEvent(QResizeEvent* ev) override { resizeWindow(ev->size()); }
 
     void nextTexture() {
         if (_textures.empty()) {
@@ -522,9 +510,7 @@ private:
         }
     }
 
-    void updateText() {
-        setTitle(QString("FPS %1").arg(_fps));
-    }
+    void updateText() { setTitle(QString("FPS %1").arg(_fps)); }
 
     void update() {
         auto now = usecTimestampNow();
@@ -556,9 +542,7 @@ private:
     void render() {
         auto& gpuContext = _renderThread._gpuContext;
         gpuContext->beginFrame();
-        gpu::doInBatch("RenderThread::render::begin", gpuContext, [&](gpu::Batch& batch) {
-            batch.resetStages();
-        });
+        gpu::doInBatch("RenderThread::render::begin", gpuContext, [&](gpu::Batch& batch) { batch.resetStages(); });
         auto framebuffer = DependencyManager::get<FramebufferCache>()->getFramebuffer();
 
         gpu::doInBatch("RenderThread::render", gpuContext, [&](gpu::Batch& batch) {
@@ -603,7 +587,7 @@ private:
     bool _ready { false };
 };
 
-const char * LOG_FILTER_RULES = R"V0G0N(
+const char* LOG_FILTER_RULES = R"V0G0N(
 hifi.gpu=true
 )V0G0N";
 
@@ -622,7 +606,7 @@ void unzipTestData(const QByteArray& zipData) {
     }
     DATA_DIR = QDir(tempDir.path());
 
-    //auto files = JlCompress::getFileList(zipData);
+    // auto files = JlCompress::getFileList(zipData);
     auto files = JlCompress::extractDir(zipFile.fileName(), DATA_DIR.path());
     qDebug() << DATA_DIR.path();
 }
@@ -634,10 +618,12 @@ int main(int argc, char** argv) {
     QLoggingCategory::setFilterRules(LOG_FILTER_RULES);
 
     if (!DATA_DIR.exists()) {
-        FileDownloader(DATA_SET, [&](const QByteArray& data) {
-            qDebug() << "Fetched size " << data.size();
-            unzipTestData(data);
-        }).waitForDownload();
+        FileDownloader(DATA_SET,
+                       [&](const QByteArray& data) {
+                           qDebug() << "Fetched size " << data.size();
+                           unzipTestData(data);
+                       })
+            .waitForDownload();
     }
 
     QTestWindow::setup();

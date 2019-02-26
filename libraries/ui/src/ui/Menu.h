@@ -12,20 +12,19 @@
 #include <functional>
 
 #include <QtCore/QDir>
+#include <QtCore/QHash>
 #include <QtCore/QPointer>
 #include <QtCore/QStandardPaths>
-#include <QtCore/QHash>
 #include <QtGui/QKeySequence>
 #include <QtWidgets/QMenuBar>
 
 class Settings;
 namespace ui {
-    class Menu;
+class Menu;
 }
 
 class MenuWrapper : public QObject {
 public:
-
     QList<QAction*> actions();
     MenuWrapper* addMenu(const QString& menuName);
     void setEnabled(bool enabled = true);
@@ -41,9 +40,7 @@ public:
     QAction* addAction(const QString& menuName, const QObject* receiver, const char* member, const QKeySequence& shortcut = 0);
     void removeAction(QAction* action);
 
-    QAction* newAction() {
-        return new QAction(_realMenu);
-    }
+    QAction* newAction() { return new QAction(_realMenu); }
 
 private:
     MenuWrapper(ui::Menu& rootMenu, QMenu* menu);
@@ -69,38 +66,24 @@ public:
 
     QAction* getActionForOption(const QString& menuOption);
 
-    QAction* addActionToQMenuAndActionHash(MenuWrapper* destinationMenu,
-                                           const QString& actionName,
-                                           const QKeySequence& shortcut = 0,
-                                           const QObject* receiver = NULL,
-                                           const char* member = NULL,
-                                           QAction::MenuRole role = QAction::NoRole,
-                                           int menuItemLocation = UNSPECIFIED_POSITION,
-                                           const QString& grouping = QString());
+    QAction* addActionToQMenuAndActionHash(MenuWrapper* destinationMenu, const QString& actionName,
+                                           const QKeySequence& shortcut = 0, const QObject* receiver = NULL,
+                                           const char* member = NULL, QAction::MenuRole role = QAction::NoRole,
+                                           int menuItemLocation = UNSPECIFIED_POSITION, const QString& grouping = QString());
 
-    QAction* addActionToQMenuAndActionHash(MenuWrapper* destinationMenu,
-                                           QAction* action,
-                                           const QString& actionName = QString(),
-                                           const QKeySequence& shortcut = 0,
-                                           QAction::MenuRole role = QAction::NoRole,
-                                           int menuItemLocation = UNSPECIFIED_POSITION,
-                                           const QString& grouping = QString());
+    QAction* addActionToQMenuAndActionHash(MenuWrapper* destinationMenu, QAction* action, const QString& actionName = QString(),
+                                           const QKeySequence& shortcut = 0, QAction::MenuRole role = QAction::NoRole,
+                                           int menuItemLocation = UNSPECIFIED_POSITION, const QString& grouping = QString());
 
-    QAction* addCheckableActionToQMenuAndActionHash(MenuWrapper* destinationMenu,
-                                                    const QString& actionName,
-                                                    const QKeySequence& shortcut = 0,
-                                                    const bool checked = false,
-                                                    const QObject* receiver = NULL,
-                                                    const char* member = NULL,
+    QAction* addCheckableActionToQMenuAndActionHash(MenuWrapper* destinationMenu, const QString& actionName,
+                                                    const QKeySequence& shortcut = 0, const bool checked = false,
+                                                    const QObject* receiver = NULL, const char* member = NULL,
                                                     int menuItemLocation = UNSPECIFIED_POSITION,
                                                     const QString& grouping = QString());
 
-    QAction* addCheckableActionToQMenuAndActionHash(MenuWrapper* destinationMenu,
-                                                    const QString& actionName,
-                                                    const std::function<void(bool)>& handler,
-                                                    const QKeySequence& shortcut = 0,
-                                                    const bool checked = false,
-                                                    int menuItemLocation = UNSPECIFIED_POSITION,
+    QAction* addCheckableActionToQMenuAndActionHash(MenuWrapper* destinationMenu, const QString& actionName,
+                                                    const std::function<void(bool)>& handler, const QKeySequence& shortcut = 0,
+                                                    const bool checked = false, int menuItemLocation = UNSPECIFIED_POSITION,
                                                     const QString& grouping = QString());
 
     void removeAction(MenuWrapper* menu, const QString& actionName);
@@ -130,17 +113,15 @@ public slots:
     static bool isSomeSubmenuShown() { return _isSomeSubmenuShown; }
 
 protected:
-    typedef void(*settingsAction)(Settings&, QAction&);
+    typedef void (*settingsAction)(Settings&, QAction&);
     static void loadAction(Settings& settings, QAction& action);
     static void saveAction(Settings& settings, QAction& action);
     void scanMenuBar(settingsAction modifySetting);
     void scanMenu(QMenu& menu, settingsAction modifySetting, Settings& settings);
 
     /// helper method to have separators with labels that are also compatible with OS X
-    void addDisabledActionAndSeparator(MenuWrapper* destinationMenu, 
-                                       const QString& actionName,
-                                       int menuItemLocation = UNSPECIFIED_POSITION, 
-                                       const QString& grouping = QString());
+    void addDisabledActionAndSeparator(MenuWrapper* destinationMenu, const QString& actionName,
+                                       int menuItemLocation = UNSPECIFIED_POSITION, const QString& grouping = QString());
 
     QAction* getActionFromName(const QString& menuName, MenuWrapper* menu);
     MenuWrapper* getMenuParent(const QString& menuName, QString& finalMenuPart);

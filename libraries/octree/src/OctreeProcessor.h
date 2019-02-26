@@ -12,17 +12,16 @@
 #ifndef hifi_OctreeProcessor_h
 #define hifi_OctreeProcessor_h
 
-#include <glm/glm.hpp>
 #include <stdint.h>
+#include <glm/glm.hpp>
 
 #include <QObject>
 
-#include <udt/PacketHeaders.h>
 #include <SharedUtil.h>
+#include <udt/PacketHeaders.h>
 
 #include "Octree.h"
 #include "OctreePacketData.h"
-
 
 // Generic client side Octree renderer class.
 class OctreeProcessor : public QObject, public QEnableSharedFromThis<OctreeProcessor> {
@@ -81,7 +80,6 @@ protected:
     int _elementsInLastWindow = 0;
     int _entitiesInLastWindow = 0;
     std::atomic<OCTREE_PACKET_SEQUENCE> _lastOctreeMessageSequence;
-
 };
 
 #endif // hifi_OctreeProcessor_h

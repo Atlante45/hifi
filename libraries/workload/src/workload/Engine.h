@@ -15,29 +15,28 @@
 #ifndef hifi_workload_Engine_h
 #define hifi_workload_Engine_h
 
-#include <QtCore/QObject>
 #include <QLoggingCategory>
+#include <QtCore/QObject>
 
 #include <task/Task.h>
 
 #include "Space.h"
 
 namespace workload {
-    class WorkloadContext : public task::JobContext {
-    public:
-        WorkloadContext(const SpacePointer& space);
-        virtual ~WorkloadContext() {}
+class WorkloadContext : public task::JobContext {
+public:
+    WorkloadContext(const SpacePointer& space);
+    virtual ~WorkloadContext() {}
 
-        SpacePointer _space;
-    };
+    SpacePointer _space;
+};
 
-    using WorkloadContextPointer = std::shared_ptr<WorkloadContext>;
+using WorkloadContextPointer = std::shared_ptr<WorkloadContext>;
 
-    Task_DeclareCategoryTimeProfilerClass(WorkloadTimeProfiler, trace_workload);
+Task_DeclareCategoryTimeProfilerClass(WorkloadTimeProfiler, trace_workload);
 
-    // Instanciate the specialized types of Job Engine and Task for the Workload context
-    Task_DeclareTypeAliases(WorkloadContext, WorkloadTimeProfiler)
-    using EnginePointer = std::shared_ptr<Engine>;
+// Instanciate the specialized types of Job Engine and Task for the Workload context
+Task_DeclareTypeAliases(WorkloadContext, WorkloadTimeProfiler) using EnginePointer = std::shared_ptr<Engine>;
 } // namespace workload
 
 #endif // hifi_workload_Space_h

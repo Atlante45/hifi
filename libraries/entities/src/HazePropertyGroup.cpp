@@ -16,7 +16,9 @@
 #include "EntityItemProperties.h"
 #include "EntityItemPropertiesMacros.h"
 
-void HazePropertyGroup::copyToScriptValue(const EntityPropertyFlags& desiredProperties, QScriptValue& properties, QScriptEngine* engine, bool skipDefaults, EntityItemProperties& defaultEntityProperties) const {
+void HazePropertyGroup::copyToScriptValue(const EntityPropertyFlags& desiredProperties, QScriptValue& properties,
+                                          QScriptEngine* engine, bool skipDefaults,
+                                          EntityItemProperties& defaultEntityProperties) const {
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_HAZE_RANGE, Haze, haze, HazeRange, hazeRange);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE_TYPED(PROP_HAZE_COLOR, Haze, haze, HazeColor, hazeColor, u8vec3Color);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE_TYPED(PROP_HAZE_GLARE_COLOR, Haze, haze, HazeGlareColor, hazeGlareColor, u8vec3Color);
@@ -132,13 +134,9 @@ void HazePropertyGroup::listChangedProperties(QList<QString>& out) {
     }
 }
 
-bool HazePropertyGroup::appendToEditPacket(OctreePacketData* packetData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount, 
-                                    OctreeElement::AppendState& appendState) const {
-
+bool HazePropertyGroup::appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+                                           EntityPropertyFlags& propertyFlags, EntityPropertyFlags& propertiesDidntFit,
+                                           int& propertyCount, OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_HAZE_RANGE, getHazeRange());
@@ -160,8 +158,8 @@ bool HazePropertyGroup::appendToEditPacket(OctreePacketData* packetData,
     return true;
 }
 
-bool HazePropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt , int& processedBytes) {
-
+bool HazePropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt,
+                                             int& processedBytes) {
     int bytesRead = 0;
     bool overwriteLocalData = true;
     bool somethingChanged = false;
@@ -306,15 +304,12 @@ EntityPropertyFlags HazePropertyGroup::getEntityProperties(EncodeBitstreamParams
 
     return requestedProperties;
 }
-    
-void HazePropertyGroup::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
-                                EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                EntityPropertyFlags& requestedProperties,
-                                EntityPropertyFlags& propertyFlags,
-                                EntityPropertyFlags& propertiesDidntFit,
-                                int& propertyCount, 
-                                OctreeElement::AppendState& appendState) const {
 
+void HazePropertyGroup::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
+                                           EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
+                                           EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                           EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                           OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_HAZE_RANGE, getHazeRange());
@@ -335,10 +330,8 @@ void HazePropertyGroup::appendSubclassData(OctreePacketData* packetData, EncodeB
 }
 
 int HazePropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                            ReadBitstreamToTreeParams& args,
-                                            EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                            bool& somethingChanged) {
-
+                                                        ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                        bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 

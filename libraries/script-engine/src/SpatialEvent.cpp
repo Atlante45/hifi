@@ -13,13 +13,7 @@
 
 #include <RegisteredMetaTypes.h>
 
-SpatialEvent::SpatialEvent() :
-    locTranslation(0.0f),
-    locRotation(),
-    absTranslation(0.0f),
-    absRotation()
-{
-    
+SpatialEvent::SpatialEvent() : locTranslation(0.0f), locRotation(), absTranslation(0.0f), absRotation() {
 }
 
 SpatialEvent::SpatialEvent(const SpatialEvent& event) {
@@ -29,18 +23,17 @@ SpatialEvent::SpatialEvent(const SpatialEvent& event) {
     absRotation = event.absRotation;
 }
 
-
 QScriptValue SpatialEvent::toScriptValue(QScriptEngine* engine, const SpatialEvent& event) {
     QScriptValue obj = engine->newObject();
-    
-    obj.setProperty("locTranslation", vec3ToScriptValue(engine, event.locTranslation) );
-    obj.setProperty("locRotation", quatToScriptValue(engine, event.locRotation) );
-    obj.setProperty("absTranslation", vec3ToScriptValue(engine, event.absTranslation) );
-    obj.setProperty("absRotation", quatToScriptValue(engine, event.absRotation) );
-    
+
+    obj.setProperty("locTranslation", vec3ToScriptValue(engine, event.locTranslation));
+    obj.setProperty("locRotation", quatToScriptValue(engine, event.locRotation));
+    obj.setProperty("absTranslation", vec3ToScriptValue(engine, event.absTranslation));
+    obj.setProperty("absRotation", quatToScriptValue(engine, event.absRotation));
+
     return obj;
 }
 
-void SpatialEvent::fromScriptValue(const QScriptValue& object,SpatialEvent& event) {
+void SpatialEvent::fromScriptValue(const QScriptValue& object, SpatialEvent& event) {
     // nothing for now...
 }

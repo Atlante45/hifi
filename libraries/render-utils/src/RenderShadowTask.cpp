@@ -16,37 +16,40 @@
 #include <ViewFrustum.h>
 
 #include <render/CullTask.h>
-#include <render/SortTask.h>
 #include <render/DrawTask.h>
+#include <render/SortTask.h>
 
 #include "DeferredLightingEffect.h"
 #include "FramebufferCache.h"
 
 #include "RenderUtilsLogging.h"
 
-#include "RenderCommonTask.h"
 #include "AssembleLightingStageTask.h"
+#include "RenderCommonTask.h"
 
 #include "FadeEffect.h"
 
 // These values are used for culling the objects rendered in the shadow map
 // but are readjusted afterwards
 #define SHADOW_FRUSTUM_NEAR 1.0f
-#define SHADOW_FRUSTUM_FAR  500.0f
-static const unsigned int SHADOW_CASCADE_COUNT{ 4 };
-static const float SHADOW_MAX_DISTANCE{ 40.0f };
+#define SHADOW_FRUSTUM_FAR 500.0f
+static const unsigned int SHADOW_CASCADE_COUNT { 4 };
+static const float SHADOW_MAX_DISTANCE { 40.0f };
 
 using namespace render;
 
-extern void initZPassPipelines(ShapePlumber& plumber, gpu::StatePointer state, const render::ShapePipeline::BatchSetter& batchSetter, const render::ShapePipeline::ItemSetter& itemSetter);
+extern void initZPassPipelines(ShapePlumber& plumber, gpu::StatePointer state,
+                               const render::ShapePipeline::BatchSetter& batchSetter,
+                               const render::ShapePipeline::ItemSetter& itemSetter);
 
 void RenderShadowTask::configure(const Config& configuration) {
-    //DependencyManager::get<DeferredLightingEffect>()->setShadowMapEnabled(configuration.isEnabled());
+    // DependencyManager::get<DeferredLightingEffect>()->setShadowMapEnabled(configuration.isEnabled());
     // This is a task, so must still propogate configure() to its Jobs
     //    Task::configure(configuration);
 }
 
-void RenderShadowTask::build(JobModel& task, const render::Varying& input, render::Varying& output, render::CullFunctor cameraCullFunctor, uint8_t tagBits, uint8_t tagMask) {
+void RenderShadowTask::build(JobModel& task, const render::Varying& input, render::Varying& output,
+                             render::CullFunctor cameraCullFunctor, uint8_t tagBits, uint8_t tagMask) {
     // Prepare the ShapePipeline
     ShapePlumberPointer shapePlumber = std::make_shared<ShapePlumber>();
     {
@@ -58,9 +61,9 @@ void RenderShadowTask::build(JobModel& task, const render::Varying& input, rende
         initZPassPipelines(*shapePlumber, state, fadeEffect->getBatchSetter(), fadeEffect->getItemUniformSetter());
     }
 
-    // FIXME: calling this here before the zones/lights are drawn during the deferred/forward passes means we're actually using the frames from the previous draw
-    // Fetch the current frame stacks from all the stages
-    // Starting with the Light Frame  genreated in previous tasks
+    // FIXME: calling this here before the zones/lights are drawn during the deferred/forward passes means we're actually using
+    // the frames from the previous draw Fetch the current frame stacks from all the stages Starting with the Light Frame
+    // genreated in previous tasks
 
     const auto setupOutput = task.addJob<RenderShadowSetup>("ShadowSetup", input);
     const auto queryResolution = setupOutput.getN<RenderShadowSetup::Output>(1);
@@ -68,7 +71,11 @@ void RenderShadowTask::build(JobModel& task, const render::Varying& input, rende
     const auto currentKeyLight = setupOutput.getN<RenderShadowSetup::Output>(4);
     // Fetch and cull the items from the scene
 
-    static const auto shadowCasterReceiverFilter = ItemFilter::Builder::visibleWorldItems().withTypeShape().withOpaque().withoutLayered().withTagBits(tagBits, tagMask);
+    static const auto shadowCasterReceiverFilter = ItemFilter::Builder::visibleWorldItems()
+                                                       .withTypeShape()
+                                                       .withOpaque()
+                                                       .withoutLayered()
+                                                       .withTagBits(tagBits, tagMask);
 
     const auto fetchInput = FetchSpatialTree::Inputs(shadowCasterReceiverFilter, queryResolution).asVarying();
     const auto shadowSelection = task.addJob<FetchSpatialTree>("FetchShadowTree", fetchInput);
@@ -79,7 +86,8 @@ void RenderShadowTask::build(JobModel& task, const render::Varying& input, rende
     // frustum culling or this will make shadow casters out of the camera frustum disappear.
     const auto cameraFrustum = setupOutput.getN<RenderShadowSetup::Output>(2);
     const auto applyFunctorInputs = ApplyCullFunctorOnItemBounds::Inputs(shadowItems, cameraFrustum).asVarying();
-    const auto culledShadowItems = task.addJob<ApplyCullFunctorOnItemBounds>("ShadowCullCamera", applyFunctorInputs, cameraCullFunctor);
+    const auto culledShadowItems = task.addJob<ApplyCullFunctorOnItemBounds>("ShadowCullCamera", applyFunctorInputs,
+                                                                             cameraCullFunctor);
 
     // Sort
     const auto sortedPipelines = task.addJob<PipelineSortShapes>("PipelineSortShadow", culledShadowItems);
@@ -87,14 +95,15 @@ void RenderShadowTask::build(JobModel& task, const render::Varying& input, rende
 
     render::Varying cascadeFrustums[SHADOW_CASCADE_MAX_COUNT] = {
         ViewFrustumPointer()
-#if SHADOW_CASCADE_MAX_COUNT>1
-        ,ViewFrustumPointer(),
+#if SHADOW_CASCADE_MAX_COUNT > 1
+            ,
+        ViewFrustumPointer(),
         ViewFrustumPointer(),
         ViewFrustumPointer()
 #endif
     };
 
-    render::VaryingArray<AABox,4> cascadeSceneBBoxes;
+    render::VaryingArray<AABox, 4> cascadeSceneBBoxes;
 
     for (auto i = 0; i < SHADOW_CASCADE_MAX_COUNT; i++) {
         char jobName[64];
@@ -107,14 +116,18 @@ void RenderShadowTask::build(JobModel& task, const render::Varying& input, rende
             antiFrustum = cascadeFrustums[i - 2];
         }
 
-        const auto cullInputs = CullShadowBounds::Inputs(sortedShapes, shadowFilter, antiFrustum, currentKeyLight, cascadeSetupOutput.getN<RenderShadowCascadeSetup::Outputs>(2)).asVarying();
+        const auto cullInputs = CullShadowBounds::Inputs(sortedShapes, shadowFilter, antiFrustum, currentKeyLight,
+                                                         cascadeSetupOutput.getN<RenderShadowCascadeSetup::Outputs>(2))
+                                    .asVarying();
         sprintf(jobName, "CullShadowCascade%d", i);
         const auto culledShadowItemsAndBounds = task.addJob<CullShadowBounds>(jobName, cullInputs);
 
         // GPU jobs: Render to shadow map
         sprintf(jobName, "RenderShadowMap%d", i);
         const auto shadowInputs = RenderShadowMap::Inputs(culledShadowItemsAndBounds.getN<CullShadowBounds::Outputs>(0),
-            culledShadowItemsAndBounds.getN<CullShadowBounds::Outputs>(1), shadowFrame).asVarying();
+                                                          culledShadowItemsAndBounds.getN<CullShadowBounds::Outputs>(1),
+                                                          shadowFrame)
+                                      .asVarying();
         task.addJob<RenderShadowMap>(jobName, shadowInputs, shapePlumber, i);
         sprintf(jobName, "ShadowCascadeTeardown%d", i);
         task.addJob<RenderShadowCascadeTeardown>(jobName, shadowFilter);
@@ -123,9 +136,7 @@ void RenderShadowTask::build(JobModel& task, const render::Varying& input, rende
     }
     task.addJob<RenderShadowTeardown>("ShadowTeardown", setupOutput);
 
-
     output = Output(cascadeSceneBBoxes, setupOutput.getN<RenderShadowSetup::Output>(3));
-
 }
 
 static void computeNearFar(const Triangle& triangle, const Plane shadowClipPlanes[4], float& near, float& far) {
@@ -148,18 +159,19 @@ static void computeNearFar(const Triangle& triangle, const Plane shadowClipPlane
 
 static void computeNearFar(const glm::vec3 sceneBoundVertices[8], const Plane shadowClipPlanes[4], float& near, float& far) {
     // This code is inspired from Microsoft's CascadedShadowMaps11 sample which is under MIT licence.
-    // See https://code.msdn.microsoft.com/windowsdesktop/Direct3D-Shadow-Win32-2d72a4f2/sourcecode?fileId=121915&pathId=1645833187
+    // See
+    // https://code.msdn.microsoft.com/windowsdesktop/Direct3D-Shadow-Win32-2d72a4f2/sourcecode?fileId=121915&pathId=1645833187
     // Basically it decomposes the object bounding box in triangles and clips each triangle with the shadow
-    // frustum planes. Finally it computes the minimum and maximum depth of the clipped triangle vertices 
+    // frustum planes. Finally it computes the minimum and maximum depth of the clipped triangle vertices
     // in shadow space to extract the near and far distances of the shadow frustum.
-    static const std::array<int[4], 6> boxQuadVertexIndices = { {
-        { TOP_LEFT_FAR, BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR },
-        { TOP_LEFT_NEAR, BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR },
-        { TOP_RIGHT_FAR, BOTTOM_RIGHT_FAR, BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR },
-        { TOP_LEFT_FAR, BOTTOM_LEFT_FAR, BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR },
-        { BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR, BOTTOM_RIGHT_NEAR, BOTTOM_LEFT_NEAR },
-        { TOP_LEFT_FAR, TOP_RIGHT_FAR, TOP_RIGHT_NEAR, TOP_LEFT_NEAR }
-    }  };
+    static const std::array<int[4], 6> boxQuadVertexIndices = {
+        { { TOP_LEFT_FAR, BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR, TOP_RIGHT_FAR },
+          { TOP_LEFT_NEAR, BOTTOM_LEFT_NEAR, BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR },
+          { TOP_RIGHT_FAR, BOTTOM_RIGHT_FAR, BOTTOM_RIGHT_NEAR, TOP_RIGHT_NEAR },
+          { TOP_LEFT_FAR, BOTTOM_LEFT_FAR, BOTTOM_LEFT_NEAR, TOP_LEFT_NEAR },
+          { BOTTOM_LEFT_FAR, BOTTOM_RIGHT_FAR, BOTTOM_RIGHT_NEAR, BOTTOM_LEFT_NEAR },
+          { TOP_LEFT_FAR, TOP_RIGHT_FAR, TOP_RIGHT_NEAR, TOP_LEFT_NEAR } }
+    };
     Triangle triangle;
 
     for (auto quadVertexIndices : boxQuadVertexIndices) {
@@ -174,8 +186,8 @@ static void computeNearFar(const glm::vec3 sceneBoundVertices[8], const Plane sh
 
 static void adjustNearFar(const AABox& inShapeBounds, ViewFrustum& shadowFrustum) {
     if (!inShapeBounds.isNull()) {
-        const Transform shadowView{ shadowFrustum.getView() };
-        const Transform shadowViewInverse{ shadowView.getInverseMatrix() };
+        const Transform shadowView { shadowFrustum.getView() };
+        const Transform shadowViewInverse { shadowView.getInverseMatrix() };
 
         glm::vec3 sceneBoundVertices[8];
         // Keep only the left, right, top and bottom shadow frustum planes as we wish to determine
@@ -244,7 +256,7 @@ void RenderShadowMap::run(const render::RenderContextPointer& renderContext, con
         args->_batch = &batch;
         batch.enableStereo(false);
 
-        glm::ivec4 viewport{0, 0, fbo->getWidth(), fbo->getHeight()};
+        glm::ivec4 viewport { 0, 0, fbo->getWidth(), fbo->getHeight() };
         batch.setViewportTransform(viewport);
         batch.setStateScissorRect(viewport);
 
@@ -260,12 +272,14 @@ void RenderShadowMap::run(const render::RenderContextPointer& renderContext, con
             batch.setProjectionTransform(projMat);
             batch.setViewTransform(viewMat, false);
 
-            const std::vector<ShapeKey::Builder> keys = {
-                ShapeKey::Builder(), ShapeKey::Builder().withFade(),
-                ShapeKey::Builder().withDeformed(), ShapeKey::Builder().withDeformed().withFade(),
-                ShapeKey::Builder().withDeformed().withDualQuatSkinned(), ShapeKey::Builder().withDeformed().withDualQuatSkinned().withFade(),
-                ShapeKey::Builder().withOwnPipeline(), ShapeKey::Builder().withOwnPipeline().withFade()
-            };
+            const std::vector<ShapeKey::Builder> keys = { ShapeKey::Builder(),
+                                                          ShapeKey::Builder().withFade(),
+                                                          ShapeKey::Builder().withDeformed(),
+                                                          ShapeKey::Builder().withDeformed().withFade(),
+                                                          ShapeKey::Builder().withDeformed().withDualQuatSkinned(),
+                                                          ShapeKey::Builder().withDeformed().withDualQuatSkinned().withFade(),
+                                                          ShapeKey::Builder().withOwnPipeline(),
+                                                          ShapeKey::Builder().withOwnPipeline().withFade() };
             std::vector<std::vector<ShapeKey>> sortedShapeKeys(keys.size());
 
             const int OWN_PIPELINE_INDEX = 6;
@@ -317,15 +331,15 @@ void RenderShadowMap::run(const render::RenderContextPointer& renderContext, con
 }
 
 RenderShadowSetup::RenderShadowSetup() :
-    _cameraFrustum{ std::make_shared<ViewFrustum>() },
-    _coarseShadowFrustum{ std::make_shared<ViewFrustum>() } {
+    _cameraFrustum { std::make_shared<ViewFrustum>() },
+    _coarseShadowFrustum { std::make_shared<ViewFrustum>() } {
     _shadowFrameCache = std::make_shared<LightStage::ShadowFrame>();
 }
 
 void RenderShadowSetup::configure(const Config& configuration) {
     setConstantBias(0, configuration.constantBias0);
     setSlopeBias(0, configuration.slopeBias0);
-#if SHADOW_CASCADE_MAX_COUNT>1
+#if SHADOW_CASCADE_MAX_COUNT > 1
     setConstantBias(1, configuration.constantBias1);
     setSlopeBias(1, configuration.slopeBias1);
     setConstantBias(2, configuration.constantBias2);
@@ -371,7 +385,8 @@ void RenderShadowSetup::run(const render::RenderContextPointer& renderContext, c
     output.edit2() = _cameraFrustum;
 
     if (!_globalShadowObject) {
-        _globalShadowObject = std::make_shared<LightStage::Shadow>(graphics::LightPointer(), SHADOW_MAX_DISTANCE, SHADOW_CASCADE_COUNT);
+        _globalShadowObject = std::make_shared<LightStage::Shadow>(graphics::LightPointer(), SHADOW_MAX_DISTANCE,
+                                                                   SHADOW_CASCADE_COUNT);
     }
 
     _globalShadowObject->setLight(currentKeyLight);
@@ -384,9 +399,8 @@ void RenderShadowSetup::run(const render::RenderContextPointer& renderContext, c
     // Adjust each cascade frustum
     for (cascadeIndex = 0; cascadeIndex < _globalShadowObject->getCascadeCount(); ++cascadeIndex) {
         auto& bias = _bias[cascadeIndex];
-        _globalShadowObject->setKeylightCascadeFrustum(cascadeIndex, args->getViewFrustum(),
-                                                SHADOW_FRUSTUM_NEAR, SHADOW_FRUSTUM_FAR,
-                                                bias._constant, bias._slope);
+        _globalShadowObject->setKeylightCascadeFrustum(cascadeIndex, args->getViewFrustum(), SHADOW_FRUSTUM_NEAR,
+                                                       SHADOW_FRUSTUM_FAR, bias._constant, bias._slope);
     }
 
     _shadowFrameCache->pushShadow(_globalShadowObject);
@@ -452,14 +466,17 @@ void RenderShadowCascadeSetup::run(const render::RenderContextPointer& renderCon
         const auto globalShadow = shadowFrame->_objects[0];
 
         if (globalShadow && _cascadeIndex < globalShadow->getCascadeCount()) {
-            // Second item filter is to filter items to keep in shadow frustum computation (here we need to keep shadow receivers)
-            output.edit0() = ItemFilter::Builder::visibleWorldItems().withTypeShape().withOpaque().withoutLayered().withTagBits(_tagBits, _tagMask);
+            // Second item filter is to filter items to keep in shadow frustum computation (here we need to keep shadow
+            // receivers)
+            output.edit0() = ItemFilter::Builder::visibleWorldItems().withTypeShape().withOpaque().withoutLayered().withTagBits(
+                _tagBits, _tagMask);
 
             // Set the keylight render args
             auto& cascade = globalShadow->getCascade(_cascadeIndex);
             auto& cascadeFrustum = cascade.getFrustum();
             args->pushViewFrustum(*cascadeFrustum);
-            auto texelSize = glm::min(cascadeFrustum->getHeight(), cascadeFrustum->getWidth()) / cascade.framebuffer->getSize().x;
+            auto texelSize = glm::min(cascadeFrustum->getHeight(), cascadeFrustum->getWidth()) /
+                             cascade.framebuffer->getSize().x;
             // Set the cull threshold to 24 shadow texels. This is totally arbitrary
             const auto minTexelCount = 24.0f;
             // TODO : maybe adapt that with LOD management system?
@@ -472,8 +489,7 @@ void RenderShadowCascadeSetup::run(const render::RenderContextPointer& renderCon
             output.edit0() = ItemFilter::Builder::nothing();
             output.edit1() = ViewFrustumPointer();
         }
-    }
-    else {
+    } else {
         output.edit0() = ItemFilter::Builder::nothing();
         output.edit1() = ViewFrustumPointer();
     }
@@ -557,7 +573,7 @@ void CullShadowBounds::run(const render::RenderContextPointer& renderContext, co
             auto key = inItems.first;
             auto outItems = outShapes.find(key);
             if (outItems == outShapes.end()) {
-                outItems = outShapes.insert(std::make_pair(key, ItemBounds{})).first;
+                outItems = outShapes.insert(std::make_pair(key, ItemBounds {})).first;
                 outItems->second.reserve(inItems.second.size());
             }
 

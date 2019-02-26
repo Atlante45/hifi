@@ -35,7 +35,7 @@
  *     <tr><td><code>"hull"</code></td><td><em>Not used.</em></td></tr>
  *     <tr><td><code>"compound"</code></td><td>A compound convex hull specified in an OBJ file.</td></tr>
  *     <tr><td><code>"simple-hull"</code></td><td>A convex hull automatically generated from the model.</td></tr>
- *     <tr><td><code>"simple-compound"</code></td><td>A compound convex hull automatically generated from the model, using 
+ *     <tr><td><code>"simple-compound"</code></td><td>A compound convex hull automatically generated from the model, using
  *         sub-meshes.</td></tr>
  *     <tr><td><code>"static-mesh"</code></td><td>The exact shape of the model.</td></tr>
  *     <tr><td><code>"plane"</code></td><td>A plane.</td></tr>
@@ -45,26 +45,10 @@
  * @typedef {string} ShapeType
  */
 // Originally within EntityItemProperties.cpp
-const char* shapeTypeNames[] = {
-    "none",
-    "box",
-    "sphere",
-    "capsule-x",
-    "capsule-y",
-    "capsule-z",
-    "cylinder-x",
-    "cylinder-y",
-    "cylinder-z",
-    "hull",
-    "plane",
-    "compound",
-    "simple-hull",
-    "simple-compound",
-    "static-mesh",
-    "ellipsoid",
-    "circle",
-    "multisphere"
-};
+const char* shapeTypeNames[] = { "none",      "box",        "sphere",      "capsule-x",       "capsule-y",
+                                 "capsule-z", "cylinder-x", "cylinder-y",  "cylinder-z",      "hull",
+                                 "plane",     "compound",   "simple-hull", "simple-compound", "static-mesh",
+                                 "ellipsoid", "circle",     "multisphere" };
 
 static const size_t SHAPETYPE_NAME_COUNT = (sizeof(shapeTypeNames) / sizeof((shapeTypeNames)[0]));
 
@@ -105,7 +89,7 @@ void ShapeInfo::setParams(ShapeType type, const glm::vec3& halfExtents, QString 
     _url = "";
     _type = type;
     setHalfExtents(halfExtents);
-    switch(type) {
+    switch (type) {
         case SHAPE_TYPE_NONE:
             _halfExtents = glm::vec3(0.0f);
             break;
@@ -114,15 +98,13 @@ void ShapeInfo::setParams(ShapeType type, const glm::vec3& halfExtents, QString 
         case SHAPE_TYPE_MULTISPHERE:
             break;
         case SHAPE_TYPE_SPHERE: {
-                float radius = glm::length(halfExtents) / SQUARE_ROOT_OF_3;
-                radius = glm::max(radius, MIN_HALF_EXTENT);
-                _halfExtents = glm::vec3(radius);
-            }
-            break;
+            float radius = glm::length(halfExtents) / SQUARE_ROOT_OF_3;
+            radius = glm::max(radius, MIN_HALF_EXTENT);
+            _halfExtents = glm::vec3(radius);
+        } break;
         case SHAPE_TYPE_CIRCLE: {
             _halfExtents = glm::vec3(_halfExtents.x, MIN_HALF_EXTENT, _halfExtents.z);
-        }
-        break;
+        } break;
         case SHAPE_TYPE_COMPOUND:
         case SHAPE_TYPE_SIMPLE_HULL:
         case SHAPE_TYPE_SIMPLE_COMPOUND:
@@ -220,7 +202,7 @@ float computeCapsuleVolume(const float radius, const float cylinderHeight) {
 float ShapeInfo::computeVolume() const {
     const float DEFAULT_VOLUME = 1.0f;
     float volume = DEFAULT_VOLUME;
-    switch(_type) {
+    switch (_type) {
         case SHAPE_TYPE_BOX: {
             // factor of 8.0 because the components of _halfExtents are all halfExtents
             volume = 8.0f * _halfExtents.x * _halfExtents.y * _halfExtents.z;
@@ -278,7 +260,7 @@ uint64_t ShapeInfo::getHash() const {
 
         hashKey.hashUint64((uint64_t)_type);
         if (_type == SHAPE_TYPE_MULTISPHERE) {
-            for (auto &sphereData : _sphereCollection) {
+            for (auto& sphereData : _sphereCollection) {
                 hashKey.hashVec3(glm::vec3(sphereData));
                 hashKey.hashFloat(sphereData.w);
             }
@@ -290,7 +272,7 @@ uint64_t ShapeInfo::getHash() const {
             // descriptive string.  Shapes that are uniquely described by their type and URL could just put their
             // url in the description.
             assert(_pointCollection.size() == (size_t)1);
-            const PointList & points = _pointCollection.back();
+            const PointList& points = _pointCollection.back();
             const int numPoints = (int)points.size();
 
             for (int i = 0; i < numPoints; ++i) {

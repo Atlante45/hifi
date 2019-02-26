@@ -16,14 +16,13 @@
 
 #include "KeyEvent.h"
 
-
 class MenuItemProperties {
 public:
     MenuItemProperties() {}
-    MenuItemProperties(const QString& menuName, const QString& menuItemName,
-                       const QString& shortcutKey = QString(""), bool checkable = false, bool checked = false, bool separator = false);
-    MenuItemProperties(const QString& menuName, const QString& menuItemName,
-                       const KeyEvent& shortcutKeyEvent, bool checkable = false, bool checked = false, bool separator = false);
+    MenuItemProperties(const QString& menuName, const QString& menuItemName, const QString& shortcutKey = QString(""),
+                       bool checkable = false, bool checked = false, bool separator = false);
+    MenuItemProperties(const QString& menuName, const QString& menuItemName, const KeyEvent& shortcutKeyEvent,
+                       bool checkable = false, bool checked = false, bool separator = false);
 
     QString menuName;
     QString menuItemName;
@@ -52,7 +51,5 @@ Q_DECLARE_METATYPE(MenuItemProperties)
 QScriptValue menuItemPropertiesToScriptValue(QScriptEngine* engine, const MenuItemProperties& props);
 void menuItemPropertiesFromScriptValue(const QScriptValue& object, MenuItemProperties& props);
 void registerMenuItemProperties(QScriptEngine* engine);
-
-
 
 #endif // hifi_MenuItemProperties_h

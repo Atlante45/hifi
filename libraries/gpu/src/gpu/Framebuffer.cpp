@@ -13,8 +13,8 @@
 #include <math.h>
 #include <QDebug>
 
-#include <shared/PlatformHacks.h>
 #include <Transform.h>
+#include <shared/PlatformHacks.h>
 
 using namespace gpu;
 
@@ -29,11 +29,11 @@ Framebuffer* Framebuffer::create(const std::string& name) {
     return framebuffer;
 }
 
-
 Framebuffer* Framebuffer::create(const std::string& name, const Format& colorBufferFormat, uint16 width, uint16 height) {
     auto framebuffer = Framebuffer::create(name);
 
-    auto colorTexture = TexturePointer(Texture::createRenderBuffer(colorBufferFormat, width, height, Texture::SINGLE_MIP, Sampler(Sampler::FILTER_MIN_MAG_POINT)));
+    auto colorTexture = TexturePointer(Texture::createRenderBuffer(colorBufferFormat, width, height, Texture::SINGLE_MIP,
+                                                                   Sampler(Sampler::FILTER_MIN_MAG_POINT)));
     colorTexture->setSource("Framebuffer::colorTexture");
 
     framebuffer->setRenderBuffer(0, colorTexture);
@@ -41,11 +41,14 @@ Framebuffer* Framebuffer::create(const std::string& name, const Format& colorBuf
     return framebuffer;
 }
 
-Framebuffer* Framebuffer::create(const std::string& name, const Format& colorBufferFormat, const Format& depthStencilBufferFormat, uint16 width, uint16 height) {
+Framebuffer* Framebuffer::create(const std::string& name, const Format& colorBufferFormat,
+                                 const Format& depthStencilBufferFormat, uint16 width, uint16 height) {
     auto framebuffer = Framebuffer::create(name);
 
-    auto colorTexture = TexturePointer(Texture::createRenderBuffer(colorBufferFormat, width, height, Texture::SINGLE_MIP, Sampler(Sampler::FILTER_MIN_MAG_POINT)));
-    auto depthTexture = TexturePointer(Texture::createRenderBuffer(depthStencilBufferFormat, width, height, Texture::SINGLE_MIP, Sampler(Sampler::FILTER_MIN_MAG_POINT)));
+    auto colorTexture = TexturePointer(Texture::createRenderBuffer(colorBufferFormat, width, height, Texture::SINGLE_MIP,
+                                                                   Sampler(Sampler::FILTER_MIN_MAG_POINT)));
+    auto depthTexture = TexturePointer(Texture::createRenderBuffer(depthStencilBufferFormat, width, height, Texture::SINGLE_MIP,
+                                                                   Sampler(Sampler::FILTER_MIN_MAG_POINT)));
     framebuffer->setRenderBuffer(0, colorTexture);
     framebuffer->setDepthStencilBuffer(depthTexture, depthStencilBufferFormat);
 
@@ -90,8 +93,7 @@ bool Framebuffer::validateTargetCompatibility(const Texture& texture, uint32 sub
     if (isEmpty()) {
         return true;
     } else {
-        if ((texture.getWidth() == getWidth()) && 
-            (texture.getHeight() == getHeight()) && 
+        if ((texture.getWidth() == getWidth()) && (texture.getHeight() == getHeight()) &&
             (texture.getNumSamples() == getNumSamples())) {
             return true;
         } else {
@@ -170,7 +172,7 @@ int Framebuffer::setRenderBuffer(uint32 slot, const TexturePointer& texture, uin
     _renderBuffers[slot] = TextureView(texture, subresource);
 
     // update the mask
-    int mask = (1<<slot);
+    int mask = (1 << slot);
     _bufferMask = (_bufferMask & ~(mask));
     if (texture) {
         _bufferMask |= mask;
@@ -180,7 +182,6 @@ int Framebuffer::setRenderBuffer(uint32 slot, const TexturePointer& texture, uin
 }
 
 void Framebuffer::removeRenderBuffers() {
-
     if (isSwapchain()) {
         return;
     }
@@ -193,7 +194,6 @@ void Framebuffer::removeRenderBuffers() {
 
     updateSize(TexturePointer(nullptr));
 }
-
 
 uint32 Framebuffer::getNumRenderBuffers() const {
     uint32 nb = 0;
@@ -210,7 +210,6 @@ const TexturePointer& Framebuffer::getRenderBuffer(uint32 slot) const {
     } else {
         return EMPTY;
     }
-
 }
 
 uint32 Framebuffer::getRenderBufferSubresource(uint32 slot) const {
@@ -270,7 +269,7 @@ bool Framebuffer::setStencilBuffer(const TexturePointer& texture, const Format& 
         if (texture) {
             if (format.getSemantic() == gpu::STENCIL || format.getSemantic() == gpu::DEPTH_STENCIL) {
                 _bufferMask |= BUFFER_STENCIL;
-            } else  {
+            } else {
                 return false;
             }
         }
@@ -317,13 +316,15 @@ uint32 Framebuffer::getDepthStencilBufferSubresource() const {
 
 Format Framebuffer::getDepthStencilBufferFormat() const {
     if (isSwapchain()) {
-      //  return getSwapchain()->getDepthStencilBufferFormat();
+        //  return getSwapchain()->getDepthStencilBufferFormat();
         return _depthStencilBuffer._element;
     } else {
         return _depthStencilBuffer._element;
     }
 }
-glm::vec4 Framebuffer::evalSubregionTexcoordTransformCoefficients(const glm::ivec2& sourceSurface, const glm::ivec2& destRegionSize, const glm::ivec2& destRegionOffset) {
+glm::vec4 Framebuffer::evalSubregionTexcoordTransformCoefficients(const glm::ivec2& sourceSurface,
+                                                                  const glm::ivec2& destRegionSize,
+                                                                  const glm::ivec2& destRegionOffset) {
     float sMin = destRegionOffset.x / (float)sourceSurface.x;
     float sWidth = destRegionSize.x / (float)sourceSurface.x;
     float tMin = destRegionOffset.y / (float)sourceSurface.y;
@@ -331,11 +332,14 @@ glm::vec4 Framebuffer::evalSubregionTexcoordTransformCoefficients(const glm::ive
     return glm::vec4(sMin, tMin, sWidth, tHeight);
 }
 
-glm::vec4 Framebuffer::evalSubregionTexcoordTransformCoefficients(const glm::ivec2& sourceSurface, const glm::ivec4& destViewport) {
-    return evalSubregionTexcoordTransformCoefficients(sourceSurface, glm::ivec2(destViewport.z, destViewport.w), glm::ivec2(destViewport.x, destViewport.y));
+glm::vec4 Framebuffer::evalSubregionTexcoordTransformCoefficients(const glm::ivec2& sourceSurface,
+                                                                  const glm::ivec4& destViewport) {
+    return evalSubregionTexcoordTransformCoefficients(sourceSurface, glm::ivec2(destViewport.z, destViewport.w),
+                                                      glm::ivec2(destViewport.x, destViewport.y));
 }
 
-Transform Framebuffer::evalSubregionTexcoordTransform(const glm::ivec2& sourceSurface, const glm::ivec2& destRegionSize, const glm::ivec2& destRegionOffset) {
+Transform Framebuffer::evalSubregionTexcoordTransform(const glm::ivec2& sourceSurface, const glm::ivec2& destRegionSize,
+                                                      const glm::ivec2& destRegionOffset) {
     float sMin = destRegionOffset.x / (float)sourceSurface.x;
     float sWidth = destRegionSize.x / (float)sourceSurface.x;
     float tMin = destRegionOffset.y / (float)sourceSurface.y;
@@ -346,5 +350,6 @@ Transform Framebuffer::evalSubregionTexcoordTransform(const glm::ivec2& sourceSu
     return model;
 }
 Transform Framebuffer::evalSubregionTexcoordTransform(const glm::ivec2& sourceSurface, const glm::ivec4& destViewport) {
-    return evalSubregionTexcoordTransform(sourceSurface, glm::ivec2(destViewport.z, destViewport.w), glm::ivec2(destViewport.x, destViewport.y));
+    return evalSubregionTexcoordTransform(sourceSurface, glm::ivec2(destViewport.z, destViewport.w),
+                                          glm::ivec2(destViewport.x, destViewport.y));
 }

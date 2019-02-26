@@ -19,11 +19,10 @@
 #define ENTITIES_TEXTURE_POLYVOX_YMAP 1
 #define ENTITIES_TEXTURE_POLYVOX_ZMAP 2
 
-
-
 // <!
 
-namespace entities_renderer { namespace slot {
+namespace entities_renderer {
+namespace slot {
 
 namespace texture {
 enum Texture {
@@ -33,7 +32,8 @@ enum Texture {
 };
 } // namespace texture
 
-} } // namespace entities::slot
+} // namespace slot
+} // namespace entities_renderer
 
 // !>
 // Hack Comment

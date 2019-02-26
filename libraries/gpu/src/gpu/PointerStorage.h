@@ -28,27 +28,27 @@ namespace gpu {
 // GPU_POINTER_STORAGE_RAW
 
 #if defined(GPU_POINTER_STORAGE_SHARED)
-template <typename T>
+template<typename T>
 static inline bool compare(const std::shared_ptr<T>& a, const std::shared_ptr<T>& b) {
     return a == b;
 }
 
-template <typename T>
+template<typename T>
 static inline T* acquire(const std::shared_ptr<T>& pointer) {
     return pointer.get();
 }
 
-template <typename T>
+template<typename T>
 static inline void reset(std::shared_ptr<T>& pointer) {
     return pointer.reset();
 }
 
-template <typename T>
+template<typename T>
 static inline bool valid(const std::shared_ptr<T>& pointer) {
     return pointer.operator bool();
 }
 
-template <typename T>
+template<typename T>
 static inline void assign(std::shared_ptr<T>& pointer, const std::shared_ptr<T>& source) {
     pointer = source;
 }
@@ -63,7 +63,7 @@ using PipelineReference = PipelinePointer;
 
 #elif defined(GPU_POINTER_STORAGE_REF)
 
-template <typename T>
+template<typename T>
 class PointerReferenceWrapper : public std::reference_wrapper<const std::shared_ptr<T>> {
     using Parent = std::reference_wrapper<const std::shared_ptr<T>>;
 
@@ -80,27 +80,27 @@ private:
     };
 };
 
-template <typename T>
+template<typename T>
 static bool compare(const PointerReferenceWrapper<T>& reference, const std::shared_ptr<T>& pointer) {
     return reference.get() == pointer;
 }
 
-template <typename T>
+template<typename T>
 static inline T* acquire(const PointerReferenceWrapper<T>& reference) {
     return reference.get().get();
 }
 
-template <typename T>
+template<typename T>
 static void assign(PointerReferenceWrapper<T>& reference, const std::shared_ptr<T>& pointer) {
     reference = pointer;
 }
 
-template <typename T>
+template<typename T>
 static bool valid(const PointerReferenceWrapper<T>& reference) {
     return reference.get().operator bool();
 }
 
-template <typename T>
+template<typename T>
 static inline void reset(PointerReferenceWrapper<T>& reference) {
     return reference.clear();
 }
@@ -115,27 +115,27 @@ using PipelineReference = PointerReferenceWrapper<Pipeline>;
 
 #elif defined(GPU_POINTER_STORAGE_RAW)
 
-template <typename T>
+template<typename T>
 static bool compare(const T* const& rawPointer, const std::shared_ptr<T>& pointer) {
     return rawPointer == pointer.get();
 }
 
-template <typename T>
+template<typename T>
 static inline T* acquire(T* const& rawPointer) {
     return rawPointer;
 }
 
-template <typename T>
+template<typename T>
 static inline bool valid(const T* const& rawPointer) {
     return rawPointer;
 }
 
-template <typename T>
+template<typename T>
 static inline void reset(T*& rawPointer) {
     rawPointer = nullptr;
 }
 
-template <typename T>
+template<typename T>
 static inline void assign(T*& rawPointer, const std::shared_ptr<T>& pointer) {
     rawPointer = pointer.get();
 }
@@ -154,6 +154,6 @@ using PipelineReference = Pipeline*;
 
 #endif
 
-}
+} // namespace gpu
 
 #endif // hifi_gpu_PointerStorage_h

@@ -25,8 +25,7 @@ ThreadedAssignment::ThreadedAssignment(ReceivedMessage& message) :
     Assignment(message),
     _isFinished(false),
     _domainServerTimer(this),
-    _statsTimer(this)
-{
+    _statsTimer(this) {
     static const int STATS_TIMEOUT_MS = 1000;
     _statsTimer.setInterval(STATS_TIMEOUT_MS); // 1s, Qt::CoarseTimer acceptable
     connect(&_statsTimer, &QTimer::timeout, this, &ThreadedAssignment::sendStatsPacket);
@@ -41,10 +40,9 @@ ThreadedAssignment::ThreadedAssignment(ReceivedMessage& message) :
 
 void ThreadedAssignment::setFinished(bool isFinished) {
     if (_isFinished != isFinished) {
-         _isFinished = isFinished;
+        _isFinished = isFinished;
 
         if (_isFinished) {
-
             qCDebug(networking) << "ThreadedAssignment::setFinished(true) called - finishing up.";
 
             auto nodeList = DependencyManager::get<NodeList>();
@@ -84,8 +82,8 @@ void ThreadedAssignment::commonInit(const QString& targetName, NodeType_t nodeTy
     _domainServerTimer.start();
 
     // start sending stats packet once we connect to the domain
-    connect(&nodeList->getDomainHandler(), &DomainHandler::connectedToDomain,
-            &_statsTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+    connect(&nodeList->getDomainHandler(), &DomainHandler::connectedToDomain, &_statsTimer,
+            static_cast<void (QTimer::*)()>(&QTimer::start));
 
     // stop sending stats if we disconnect
     connect(&nodeList->getDomainHandler(), &DomainHandler::disconnectedFromDomain, &_statsTimer, &QTimer::stop);
@@ -114,8 +112,9 @@ void ThreadedAssignment::checkInWithDomainServerOrExit() {
     // verify that the number of queued check-ins is not >= our max
     // the number of queued check-ins is cleared anytime we get a response from the domain-server
     if (_numQueuedCheckIns >= MAX_SILENT_DOMAIN_SERVER_CHECK_INS) {
-        qCDebug(networking) << "At least" << MAX_SILENT_DOMAIN_SERVER_CHECK_INS << "have been queued without a response from domain-server"
-            << "Stopping the current assignment";
+        qCDebug(networking) << "At least" << MAX_SILENT_DOMAIN_SERVER_CHECK_INS
+                            << "have been queued without a response from domain-server"
+                            << "Stopping the current assignment";
         stop();
     } else {
         auto nodeList = DependencyManager::get<NodeList>();

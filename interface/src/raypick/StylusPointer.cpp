@@ -14,8 +14,8 @@
 #include "avatar/MyAvatar.h"
 
 #include <DependencyManager.h>
-#include "PickScriptingInterface.h"
 #include <PickManager.h>
+#include "PickScriptingInterface.h"
 
 static const float TABLET_MIN_HOVER_DISTANCE = -0.1f;
 static const float TABLET_MAX_HOVER_DISTANCE = 0.1f;
@@ -28,13 +28,13 @@ static const float TOUCH_HYSTERESIS = 0.001f;
 static const QString DEFAULT_STYLUS_MODEL_URL = PathUtils::resourcesUrl() + "/meshes/tablet-stylus-fat.fbx";
 
 StylusPointer::StylusPointer(const QVariant& props, const QUuid& stylus, bool hover, bool enabled,
-                             const glm::vec3& modelPositionOffset, const glm::quat& modelRotationOffset, const glm::vec3& modelDimensions) :
+                             const glm::vec3& modelPositionOffset, const glm::quat& modelRotationOffset,
+                             const glm::vec3& modelDimensions) :
     Pointer(DependencyManager::get<PickScriptingInterface>()->createStylusPick(props), enabled, hover),
     _stylus(stylus),
     _modelPositionOffset(modelPositionOffset),
     _modelDimensions(modelDimensions),
-    _modelRotationOffset(modelRotationOffset)
-{
+    _modelRotationOffset(modelRotationOffset) {
 }
 
 StylusPointer::~StylusPointer() {
@@ -44,7 +44,8 @@ StylusPointer::~StylusPointer() {
 }
 
 QUuid StylusPointer::buildStylus(const QVariantMap& properties) {
-    // FIXME: we have to keep using the Overlays interface here, because existing scripts use overlay properties to define pointers
+    // FIXME: we have to keep using the Overlays interface here, because existing scripts use overlay properties to define
+    // pointers
     QVariantMap propertiesMap;
 
     QString modelUrl = DEFAULT_STYLUS_MODEL_URL;
@@ -139,7 +140,7 @@ bool StylusPointer::shouldTrigger(const PickResultPointer& pickResult) {
 
         float hysteresis = _state.triggering ? TOUCH_HYSTERESIS * sensorScaleFactor : 0.0f;
         if (isWithinBounds(distance, TABLET_MIN_TOUCH_DISTANCE * sensorScaleFactor,
-            TABLET_MAX_TOUCH_DISTANCE * sensorScaleFactor, hysteresis)) {
+                           TABLET_MAX_TOUCH_DISTANCE * sensorScaleFactor, hysteresis)) {
             _state.wasTriggering = _state.triggering;
             if (!_state.triggering) {
                 _state.triggeredObject = PickedObject(stylusPickResult->objectID, stylusPickResult->type);
@@ -182,7 +183,8 @@ Pointer::Buttons StylusPointer::getPressedButtons(const PickResultPointer& pickR
     return toReturn;
 }
 
-PointerEvent StylusPointer::buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult, const std::string& button, bool hover) {
+PointerEvent StylusPointer::buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult,
+                                              const std::string& button, bool hover) {
     QUuid pickedID;
     glm::vec2 pos2D;
     glm::vec3 intersection, surfaceNormal, direction, origin;
@@ -200,7 +202,8 @@ PointerEvent StylusPointer::buildPointerEvent(const PickedObject& target, const 
     // If we just started triggering and we haven't moved too much, don't update intersection and pos2D
     float sensorToWorldScale = DependencyManager::get<AvatarManager>()->getMyAvatar()->getSensorToWorldScale();
     float deadspotSquared = TOUCH_PRESS_TO_MOVE_DEADSPOT_SQUARED * sensorToWorldScale * sensorToWorldScale;
-    bool withinDeadspot = usecTimestampNow() - _state.triggerStartTime < POINTER_MOVE_DELAY && glm::distance2(pos2D, _state.triggerPos2D) < deadspotSquared;
+    bool withinDeadspot = usecTimestampNow() - _state.triggerStartTime < POINTER_MOVE_DELAY &&
+                          glm::distance2(pos2D, _state.triggerPos2D) < deadspotSquared;
     if ((_state.triggering || _state.wasTriggering) && !_state.deadspotExpired && withinDeadspot) {
         pos2D = _state.triggerPos2D;
         intersection = _state.intersection;
@@ -232,7 +235,8 @@ QVariantMap StylusPointer::toVariantMap() const {
     return QVariantMap();
 }
 
-glm::vec3 StylusPointer::findIntersection(const PickedObject& pickedObject, const glm::vec3& origin, const glm::vec3& direction) {
+glm::vec3 StylusPointer::findIntersection(const PickedObject& pickedObject, const glm::vec3& origin,
+                                          const glm::vec3& direction) {
     switch (pickedObject.type) {
         case ENTITY:
         case LOCAL_ENTITY:

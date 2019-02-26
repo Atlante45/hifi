@@ -17,8 +17,8 @@
 #include <DependencyManager.h>
 #include <NumericalConstants.h>
 
-#include "graphics/Light.h"
 #include "graphics/Geometry.h"
+#include "graphics/Light.h"
 
 #include <procedural/ProceduralSkybox.h>
 
@@ -28,15 +28,14 @@
 #include "DeferredFramebuffer.h"
 #include "LightingModel.h"
 
-#include "LightStage.h"
-#include "LightClusters.h"
 #include "BackgroundStage.h"
 #include "HazeStage.h"
+#include "LightClusters.h"
+#include "LightStage.h"
 
-#include "SurfaceGeometryPass.h"
-#include "SubsurfaceScattering.h"
 #include "AmbientOcclusionEffect.h"
-
+#include "SubsurfaceScattering.h"
+#include "SurfaceGeometryPass.h"
 
 struct LightLocations;
 using LightLocationsPtr = std::shared_ptr<LightLocations>;
@@ -44,10 +43,10 @@ using LightLocationsPtr = std::shared_ptr<LightLocations>;
 // THis is where we currently accumulate the local lights, let s change that sooner than later
 class DeferredLightingEffect : public Dependency {
     SINGLETON_DEPENDENCY
-    
+
 public:
     void init();
- 
+
     static void setupKeyLightBatch(const RenderArgs* args, gpu::Batch& batch);
     static void setupKeyLightBatch(const RenderArgs* args, gpu::Batch& batch, const LightStage::Frame& lightFrame);
     static void unsetKeyLightBatch(gpu::Batch& batch);
@@ -89,10 +88,9 @@ private:
 
 class PreparePrimaryFramebufferConfig : public render::Job::Config {
     Q_OBJECT
-        Q_PROPERTY(float resolutionScale MEMBER resolutionScale NOTIFY dirty)
+    Q_PROPERTY(float resolutionScale MEMBER resolutionScale NOTIFY dirty)
 public:
-
-    float resolutionScale{ 1.0f };
+    float resolutionScale { 1.0f };
 
 signals:
     void dirty();
@@ -100,27 +98,25 @@ signals:
 
 class PreparePrimaryFramebuffer {
 public:
-
     using Output = gpu::FramebufferPointer;
     using Config = PreparePrimaryFramebufferConfig;
     using JobModel = render::Job::ModelO<PreparePrimaryFramebuffer, Output, Config>;
 
-    PreparePrimaryFramebuffer(float resolutionScale = 1.0f) : _resolutionScale{resolutionScale} {}
+    PreparePrimaryFramebuffer(float resolutionScale = 1.0f) : _resolutionScale { resolutionScale } {}
     void configure(const Config& config);
     void run(const render::RenderContextPointer& renderContext, Output& primaryFramebuffer);
 
     gpu::FramebufferPointer _primaryFramebuffer;
-    float _resolutionScale{ 1.0f };
+    float _resolutionScale { 1.0f };
 
 private:
-
     static gpu::FramebufferPointer createFramebuffer(const char* name, const glm::uvec2& size);
 };
 
 class PrepareDeferred {
 public:
     // Inputs: primaryFramebuffer and lightingModel
-    using Inputs = render::VaryingSet2 <gpu::FramebufferPointer, LightingModelPointer>;
+    using Inputs = render::VaryingSet2<gpu::FramebufferPointer, LightingModelPointer>;
     // Output: DeferredFramebuffer, LightingFramebuffer
     using Outputs = render::VaryingSet2<DeferredFramebufferPointer, gpu::FramebufferPointer>;
 
@@ -133,40 +129,31 @@ public:
 
 class RenderDeferredSetup {
 public:
-
-    void run(const render::RenderContextPointer& renderContext,
-        const DeferredFrameTransformPointer& frameTransform,
-        const DeferredFramebufferPointer& deferredFramebuffer,
-        const LightingModelPointer& lightingModel,
-        const LightStage::FramePointer& lightFrame,
-        const LightStage::ShadowFramePointer& shadowFrame,
-        const HazeStage::FramePointer& hazeFrame,
-        const SurfaceGeometryFramebufferPointer& surfaceGeometryFramebuffer,
-        const AmbientOcclusionFramebufferPointer& ambientOcclusionFramebuffer,
-        const SubsurfaceScatteringResourcePointer& subsurfaceScatteringResource);
+    void run(const render::RenderContextPointer& renderContext, const DeferredFrameTransformPointer& frameTransform,
+             const DeferredFramebufferPointer& deferredFramebuffer, const LightingModelPointer& lightingModel,
+             const LightStage::FramePointer& lightFrame, const LightStage::ShadowFramePointer& shadowFrame,
+             const HazeStage::FramePointer& hazeFrame, const SurfaceGeometryFramebufferPointer& surfaceGeometryFramebuffer,
+             const AmbientOcclusionFramebufferPointer& ambientOcclusionFramebuffer,
+             const SubsurfaceScatteringResourcePointer& subsurfaceScatteringResource);
 };
 
 class RenderDeferredLocals {
 public:
     using JobModel = render::Job::ModelI<RenderDeferredLocals, DeferredFrameTransformPointer>;
-    
-    void run(const render::RenderContextPointer& renderContext,
-        const DeferredFrameTransformPointer& frameTransform,
-        const DeferredFramebufferPointer& deferredFramebuffer,
-        const LightingModelPointer& lightingModel,
-        const SurfaceGeometryFramebufferPointer& surfaceGeometryFramebuffer,
-        const LightClustersPointer& lightClusters);
+
+    void run(const render::RenderContextPointer& renderContext, const DeferredFrameTransformPointer& frameTransform,
+             const DeferredFramebufferPointer& deferredFramebuffer, const LightingModelPointer& lightingModel,
+             const SurfaceGeometryFramebufferPointer& surfaceGeometryFramebuffer, const LightClustersPointer& lightClusters);
 
     gpu::BufferView _localLightsBuffer;
 
     RenderDeferredLocals();
 };
 
-
 class RenderDeferredCleanup {
 public:
     using JobModel = render::Job::Model<RenderDeferredCleanup>;
-    
+
     void run(const render::RenderContextPointer& renderContext);
 };
 
@@ -174,9 +161,11 @@ using RenderDeferredConfig = render::GPUJobConfig;
 
 class RenderDeferred {
 public:
-    using ExtraDeferredBuffer = render::VaryingSet3<SurfaceGeometryFramebufferPointer, AmbientOcclusionFramebufferPointer, SubsurfaceScatteringResourcePointer>;
-    using Inputs = render::VaryingSet8<
-        DeferredFrameTransformPointer, DeferredFramebufferPointer, ExtraDeferredBuffer, LightingModelPointer, LightClustersPointer, LightStage::FramePointer, LightStage::ShadowFramePointer, HazeStage::FramePointer>;
+    using ExtraDeferredBuffer = render::VaryingSet3<SurfaceGeometryFramebufferPointer, AmbientOcclusionFramebufferPointer,
+                                                    SubsurfaceScatteringResourcePointer>;
+    using Inputs = render::VaryingSet8<DeferredFrameTransformPointer, DeferredFramebufferPointer, ExtraDeferredBuffer,
+                                       LightingModelPointer, LightClustersPointer, LightStage::FramePointer,
+                                       LightStage::ShadowFramePointer, HazeStage::FramePointer>;
 
     using Config = RenderDeferredConfig;
     using JobModel = render::Job::ModelI<RenderDeferred, Inputs, Config>;
@@ -186,7 +175,7 @@ public:
     void configure(const Config& config);
 
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs);
-    
+
     RenderDeferredSetup setupJob;
     RenderDeferredLocals lightsJob;
     RenderDeferredCleanup cleanupJob;
@@ -205,11 +194,11 @@ public:
 
 protected:
     graphics::LightPointer _defaultLight;
-    LightStage::Index _defaultLightID{ LightStage::INVALID_INDEX };
+    LightStage::Index _defaultLightID { LightStage::INVALID_INDEX };
     graphics::SunSkyStagePointer _defaultBackground;
-    BackgroundStage::Index _defaultBackgroundID{ BackgroundStage::INVALID_INDEX };
-    graphics::HazePointer _defaultHaze{ nullptr };
-    HazeStage::Index _defaultHazeID{ HazeStage::INVALID_INDEX };
+    BackgroundStage::Index _defaultBackgroundID { BackgroundStage::INVALID_INDEX };
+    graphics::HazePointer _defaultHaze { nullptr };
+    HazeStage::Index _defaultHazeID { HazeStage::INVALID_INDEX };
     graphics::SkyboxPointer _defaultSkybox { new ProceduralSkybox() };
     NetworkTexturePointer _defaultSkyboxNetworkTexture;
     gpu::TexturePointer _defaultSkyboxAmbientTexture;

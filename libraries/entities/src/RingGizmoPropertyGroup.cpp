@@ -21,15 +21,17 @@ const float RingGizmoPropertyGroup::MIN_RADIUS = 0.0f;
 const float RingGizmoPropertyGroup::MAX_RADIUS = 0.5f;
 
 void RingGizmoPropertyGroup::copyToScriptValue(const EntityPropertyFlags& desiredProperties, QScriptValue& properties,
-                                          QScriptEngine* engine, bool skipDefaults,
-                                          EntityItemProperties& defaultEntityProperties) const {
+                                               QScriptEngine* engine, bool skipDefaults,
+                                               EntityItemProperties& defaultEntityProperties) const {
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_START_ANGLE, Ring, ring, StartAngle, startAngle);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_END_ANGLE, Ring, ring, EndAngle, endAngle);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_INNER_RADIUS, Ring, ring, InnerRadius, innerRadius);
 
-    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE_TYPED(PROP_INNER_START_COLOR, Ring, ring, InnerStartColor, innerStartColor, u8vec3Color);
+    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE_TYPED(PROP_INNER_START_COLOR, Ring, ring, InnerStartColor, innerStartColor,
+                                              u8vec3Color);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE_TYPED(PROP_INNER_END_COLOR, Ring, ring, InnerEndColor, innerEndColor, u8vec3Color);
-    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE_TYPED(PROP_OUTER_START_COLOR, Ring, ring, OuterStartColor, outerStartColor, u8vec3Color);
+    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE_TYPED(PROP_OUTER_START_COLOR, Ring, ring, OuterStartColor, outerStartColor,
+                                              u8vec3Color);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE_TYPED(PROP_OUTER_END_COLOR, Ring, ring, OuterEndColor, outerEndColor, u8vec3Color);
 
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_INNER_START_ALPHA, Ring, ring, InnerStartAlpha, innerStartAlpha);
@@ -42,8 +44,10 @@ void RingGizmoPropertyGroup::copyToScriptValue(const EntityPropertyFlags& desire
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_MINOR_TICK_MARKS_ANGLE, Ring, ring, MinorTickMarksAngle, minorTickMarksAngle);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_MAJOR_TICK_MARKS_LENGTH, Ring, ring, MajorTickMarksLength, majorTickMarksLength);
     COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE(PROP_MINOR_TICK_MARKS_LENGTH, Ring, ring, MinorTickMarksLength, minorTickMarksLength);
-    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE_TYPED(PROP_MAJOR_TICK_MARKS_COLOR, Ring, ring, MajorTickMarksColor, majorTickMarksColor, u8vec3Color);
-    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE_TYPED(PROP_MINOR_TICK_MARKS_COLOR, Ring, ring, MinorTickMarksColor, minorTickMarksColor, u8vec3Color);
+    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE_TYPED(PROP_MAJOR_TICK_MARKS_COLOR, Ring, ring, MajorTickMarksColor, majorTickMarksColor,
+                                              u8vec3Color);
+    COPY_GROUP_PROPERTY_TO_QSCRIPTVALUE_TYPED(PROP_MINOR_TICK_MARKS_COLOR, Ring, ring, MinorTickMarksColor, minorTickMarksColor,
+                                              u8vec3Color);
 }
 
 void RingGizmoPropertyGroup::copyFromScriptValue(const QScriptValue& object, bool& _defaultSettings) {
@@ -176,13 +180,9 @@ void RingGizmoPropertyGroup::listChangedProperties(QList<QString>& out) {
     }
 }
 
-bool RingGizmoPropertyGroup::appendToEditPacket(OctreePacketData* packetData,
-                                           EntityPropertyFlags& requestedProperties,
-                                           EntityPropertyFlags& propertyFlags,
-                                           EntityPropertyFlags& propertiesDidntFit,
-                                           int& propertyCount,
-                                           OctreeElement::AppendState& appendState) const {
-
+bool RingGizmoPropertyGroup::appendToEditPacket(OctreePacketData* packetData, EntityPropertyFlags& requestedProperties,
+                                                EntityPropertyFlags& propertyFlags, EntityPropertyFlags& propertiesDidntFit,
+                                                int& propertyCount, OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_START_ANGLE, getStartAngle());
@@ -210,9 +210,8 @@ bool RingGizmoPropertyGroup::appendToEditPacket(OctreePacketData* packetData,
     return true;
 }
 
-bool RingGizmoPropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyFlags,
-                                             const unsigned char*& dataAt , int& processedBytes) {
-
+bool RingGizmoPropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyFlags, const unsigned char*& dataAt,
+                                                  int& processedBytes) {
     int bytesRead = 0;
     bool overwriteLocalData = true;
     bool somethingChanged = false;
@@ -238,7 +237,6 @@ bool RingGizmoPropertyGroup::decodeFromEditPacket(EntityPropertyFlags& propertyF
     READ_ENTITY_PROPERTY(PROP_MINOR_TICK_MARKS_LENGTH, float, setMinorTickMarksLength);
     READ_ENTITY_PROPERTY(PROP_MAJOR_TICK_MARKS_COLOR, u8vec3Color, setMajorTickMarksColor);
     READ_ENTITY_PROPERTY(PROP_MINOR_TICK_MARKS_COLOR, u8vec3Color, setMinorTickMarksColor);
-
 
     DECODE_GROUP_PROPERTY_HAS_CHANGED(PROP_START_ANGLE, StartAngle);
     DECODE_GROUP_PROPERTY_HAS_CHANGED(PROP_END_ANGLE, EndAngle);
@@ -402,13 +400,10 @@ EntityPropertyFlags RingGizmoPropertyGroup::getEntityProperties(EncodeBitstreamP
 }
 
 void RingGizmoPropertyGroup::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
-                                           EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                           EntityPropertyFlags& requestedProperties,
-                                           EntityPropertyFlags& propertyFlags,
-                                           EntityPropertyFlags& propertiesDidntFit,
-                                           int& propertyCount,
-                                           OctreeElement::AppendState& appendState) const {
-
+                                                EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
+                                                EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                                EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                                OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
 
     APPEND_ENTITY_PROPERTY(PROP_START_ANGLE, getStartAngle());
@@ -435,10 +430,9 @@ void RingGizmoPropertyGroup::appendSubclassData(OctreePacketData* packetData, En
 }
 
 int RingGizmoPropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                        ReadBitstreamToTreeParams& args,
-                                                        EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                        bool& somethingChanged) {
-
+                                                             ReadBitstreamToTreeParams& args,
+                                                             EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
+                                                             bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 
@@ -468,22 +462,13 @@ int RingGizmoPropertyGroup::readEntitySubclassDataFromBuffer(const unsigned char
 }
 
 bool RingGizmoPropertyGroup::operator==(const RingGizmoPropertyGroup& a) const {
-    return (a._startAngle == _startAngle) &&
-           (a._endAngle == _endAngle) &&
-           (a._innerRadius == _innerRadius) &&
-           (a._innerStartColor == _innerStartColor) &&
-           (a._innerEndColor == _innerEndColor) &&
-           (a._outerStartColor == _outerStartColor) &&
-           (a._outerEndColor == _outerEndColor) &&
-           (a._innerStartAlpha == _innerStartAlpha) &&
-           (a._innerEndAlpha == _innerEndAlpha) &&
-           (a._outerStartAlpha == _outerStartAlpha) &&
-           (a._outerEndAlpha == _outerEndAlpha) &&
-           (a._hasTickMarks == _hasTickMarks) &&
-           (a._majorTickMarksAngle == _majorTickMarksAngle) &&
-           (a._minorTickMarksAngle == _minorTickMarksAngle) &&
-           (a._majorTickMarksLength == _majorTickMarksLength) &&
-           (a._minorTickMarksLength == _minorTickMarksLength) &&
-           (a._majorTickMarksColor == _majorTickMarksColor) &&
+    return (a._startAngle == _startAngle) && (a._endAngle == _endAngle) && (a._innerRadius == _innerRadius) &&
+           (a._innerStartColor == _innerStartColor) && (a._innerEndColor == _innerEndColor) &&
+           (a._outerStartColor == _outerStartColor) && (a._outerEndColor == _outerEndColor) &&
+           (a._innerStartAlpha == _innerStartAlpha) && (a._innerEndAlpha == _innerEndAlpha) &&
+           (a._outerStartAlpha == _outerStartAlpha) && (a._outerEndAlpha == _outerEndAlpha) &&
+           (a._hasTickMarks == _hasTickMarks) && (a._majorTickMarksAngle == _majorTickMarksAngle) &&
+           (a._minorTickMarksAngle == _minorTickMarksAngle) && (a._majorTickMarksLength == _majorTickMarksLength) &&
+           (a._minorTickMarksLength == _minorTickMarksLength) && (a._majorTickMarksColor == _majorTickMarksColor) &&
            (a._minorTickMarksColor == _minorTickMarksColor);
 }

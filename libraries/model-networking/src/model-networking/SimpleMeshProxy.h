@@ -20,7 +20,7 @@
 
 class SimpleMeshProxy : public MeshProxy {
 public:
-    SimpleMeshProxy(const MeshPointer& mesh) : _mesh(mesh) { }
+    SimpleMeshProxy(const MeshPointer& mesh) : _mesh(mesh) {}
 
     MeshPointer getMeshPointer() const override;
 

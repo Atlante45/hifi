@@ -19,7 +19,6 @@ const QString DebugHmdDisplayPlugin::NAME("HMD Simulator");
 static const QString DEBUG_FLAG("HIFI_DEBUG_HMD");
 static bool enableDebugHmd = QProcessEnvironment::systemEnvironment().contains(DEBUG_FLAG);
 
-
 bool DebugHmdDisplayPlugin::isSupported() const {
     return enableDebugHmd;
 }
@@ -36,9 +35,7 @@ bool DebugHmdDisplayPlugin::beginFrameRender(uint32_t frameIndex) {
     //_currentRenderFrameInfo.renderPose = ;
     //_currentRenderFrameInfo.presentPose = _currentRenderFrameInfo.renderPose;
 
-    withNonPresentThreadLock([&] {
-        _frameInfos[frameIndex] = _currentRenderFrameInfo;
-    });
+    withNonPresentThreadLock([&] { _frameInfos[frameIndex] = _currentRenderFrameInfo; });
     return Parent::beginFrameRender(frameIndex);
 }
 
@@ -46,31 +43,32 @@ bool DebugHmdDisplayPlugin::internalActivate() {
     _isAutoRotateEnabled = _container->getBoolSetting("autoRotate", true);
     _container->addMenuItem(PluginType::DISPLAY_PLUGIN, MENU_PATH(), tr("Auto Rotate"),
                             [this](bool clicked) {
-        _isAutoRotateEnabled = clicked;
-        _container->setBoolSetting("autoRotate", _isAutoRotateEnabled);
-    }, true, _isAutoRotateEnabled);
+                                _isAutoRotateEnabled = clicked;
+                                _container->setBoolSetting("autoRotate", _isAutoRotateEnabled);
+                            },
+                            true, _isAutoRotateEnabled);
 
     _ipd = 0.0327499993f * 2.0f;
-    // Quest 
-    _eyeProjections[0][0] = vec4{ 0.91729, 0.0, -0.17407, 0.0  };
-    _eyeProjections[0][1] = vec4{ 0.0, 0.083354, -0.106141, 0.0 };
-    _eyeProjections[0][2] = vec4{ 0.0, 0.0, -1.0, -0.2 };
-    _eyeProjections[0][3] = vec4{ 0.0, 0.0, -1.0, 0.0 };
-    _eyeProjections[1][0] = vec4{ 0.91729, 0.0, 0.17407, 0.0 };
-    _eyeProjections[1][1] = vec4{ 0.0, 0.083354, -0.106141, 0.0 };
-    _eyeProjections[1][2] = vec4{ 0.0, 0.0, -1.0, -0.2 };
-    _eyeProjections[1][3] = vec4{ 0.0, 0.0, -1.0, 0.0 };
+    // Quest
+    _eyeProjections[0][0] = vec4 { 0.91729, 0.0, -0.17407, 0.0 };
+    _eyeProjections[0][1] = vec4 { 0.0, 0.083354, -0.106141, 0.0 };
+    _eyeProjections[0][2] = vec4 { 0.0, 0.0, -1.0, -0.2 };
+    _eyeProjections[0][3] = vec4 { 0.0, 0.0, -1.0, 0.0 };
+    _eyeProjections[1][0] = vec4 { 0.91729, 0.0, 0.17407, 0.0 };
+    _eyeProjections[1][1] = vec4 { 0.0, 0.083354, -0.106141, 0.0 };
+    _eyeProjections[1][2] = vec4 { 0.0, 0.0, -1.0, -0.2 };
+    _eyeProjections[1][3] = vec4 { 0.0, 0.0, -1.0, 0.0 };
     // No need to do so here as this will done in Parent::internalActivate
     //_eyeInverseProjections[0] = glm::inverse(_eyeProjections[0]);
     //_eyeInverseProjections[1] = glm::inverse(_eyeProjections[1]);
-    _eyeOffsets[0][3] = vec4{ -0.0327499993, 0.0, 0.0149999997, 1.0 };
-    _eyeOffsets[1][3] = vec4{ 0.0327499993, 0.0, 0.0149999997, 1.0 };
+    _eyeOffsets[0][3] = vec4 { -0.0327499993, 0.0, 0.0149999997, 1.0 };
+    _eyeOffsets[1][3] = vec4 { 0.0327499993, 0.0, 0.0149999997, 1.0 };
     _eyeInverseProjections[0] = glm::inverse(_eyeProjections[0]);
     _eyeInverseProjections[1] = glm::inverse(_eyeProjections[1]);
-    _eyeOffsets[0][3] = vec4{ -0.0327499993, 0.0, -0.0149999997, 1.0 };
-    _eyeOffsets[1][3] = vec4{ 0.0327499993, 0.0, -0.0149999997, 1.0 };
+    _eyeOffsets[0][3] = vec4 { -0.0327499993, 0.0, -0.0149999997, 1.0 };
+    _eyeOffsets[1][3] = vec4 { 0.0327499993, 0.0, -0.0149999997, 1.0 };
     // Test HMD per-eye resolution
-    _renderTargetSize = uvec2{ 1214 * 2 , 1344 };
+    _renderTargetSize = uvec2 { 1214 * 2, 1344 };
     // uncomment to capture a quarter size frame
     //_renderTargetSize /= 2;
     _cullingProjection = _eyeProjections[0];
@@ -86,8 +84,7 @@ void DebugHmdDisplayPlugin::updatePresentPose() {
         float yaw = sinf(secTimestampNow()) * 0.25f;
         float pitch = cosf(secTimestampNow()) * 0.25f;
         // Simulates head pose latency correction
-        _currentPresentFrameInfo.presentPose =
-            glm::mat4_cast(glm::angleAxis(yaw, Vectors::UP)) *
-            glm::mat4_cast(glm::angleAxis(pitch, Vectors::RIGHT)) ;
+        _currentPresentFrameInfo.presentPose = glm::mat4_cast(glm::angleAxis(yaw, Vectors::UP)) *
+                                               glm::mat4_cast(glm::angleAxis(pitch, Vectors::RIGHT));
     }
 }

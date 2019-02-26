@@ -13,8 +13,8 @@
 #include <QQuickItem>
 
 #include <DependencyManager.h>
-#include <GeometryCache.h>
 #include <GLMHelpers.h>
+#include <GeometryCache.h>
 #include <OffscreenUi.h>
 #include <RegisteredMetaTypes.h>
 #include <SharedUtil.h>
@@ -27,10 +27,10 @@
 QString const TextOverlay::TYPE = "text";
 QUrl const TextOverlay::URL(QString("hifi/overlays/TextOverlay.qml"));
 
-TextOverlay::TextOverlay() : QmlOverlay(URL) { }
+TextOverlay::TextOverlay() : QmlOverlay(URL) {
+}
 
-TextOverlay::TextOverlay(const TextOverlay* textOverlay) 
-    : QmlOverlay(URL, textOverlay) {
+TextOverlay::TextOverlay(const TextOverlay* textOverlay) : QmlOverlay(URL, textOverlay) {
 }
 
 TextOverlay* TextOverlay::createClone() const {
@@ -39,7 +39,7 @@ TextOverlay* TextOverlay::createClone() const {
 
 QSizeF TextOverlay::textSize(const QString& text) const {
     int lines = 1;
-    foreach(QChar c, text) {
+    foreach (QChar c, text) {
         if (c == QChar('\n')) {
             ++lines;
         }
@@ -48,5 +48,5 @@ QSizeF TextOverlay::textSize(const QString& text) const {
     font.setPixelSize(18);
     QFontMetrics fm(font);
     QSizeF result = QSizeF(fm.width(text), 18 * lines);
-    return result; 
+    return result;
 }

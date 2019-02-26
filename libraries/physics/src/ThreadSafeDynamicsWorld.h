@@ -8,7 +8,8 @@
  * including commercial applications, and to alter it and redistribute it freely,
  * subject to the following restrictions:
  *
- * 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+ * 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you
+ * use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
  * 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
@@ -18,8 +19,8 @@
 #ifndef hifi_ThreadSafeDynamicsWorld_h
 #define hifi_ThreadSafeDynamicsWorld_h
 
-#include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
+#include <BulletDynamics/Dynamics/btRigidBody.h>
 
 #include "ObjectMotionState.h"
 
@@ -31,16 +32,13 @@ ATTRIBUTE_ALIGNED16(class) ThreadSafeDynamicsWorld : public btDiscreteDynamicsWo
 public:
     BT_DECLARE_ALIGNED_ALLOCATOR();
 
-    ThreadSafeDynamicsWorld(
-            btDispatcher* dispatcher,
-            btBroadphaseInterface* pairCache,
-            btConstraintSolver* constraintSolver,
-            btCollisionConfiguration* collisionConfiguration);
+    ThreadSafeDynamicsWorld(btDispatcher * dispatcher, btBroadphaseInterface * pairCache, btConstraintSolver * constraintSolver,
+                            btCollisionConfiguration * collisionConfiguration);
 
     int getNumSubsteps() const { return _numSubsteps; }
     int stepSimulationWithSubstepCallback(btScalar timeStep, int maxSubSteps = 1,
-                                          btScalar fixedTimeStep = btScalar(1.)/btScalar(60.),
-                                          SubStepCallback onSubStep = []() { });
+                                          btScalar fixedTimeStep = btScalar(1.) / btScalar(60.),
+                                          SubStepCallback onSubStep = []() {});
     virtual void synchronizeMotionStates() override;
     virtual void saveKinematicState(btScalar timeStep) override;
 
@@ -52,13 +50,14 @@ public:
     const VectorOfMotionStates& getChangedMotionStates() const { return _changedMotionStates; }
     const VectorOfMotionStates& getDeactivatedMotionStates() const { return _deactivatedStates; }
 
-    void addChangedMotionState(ObjectMotionState* motionState) { _changedMotionStates.push_back(motionState); }
-    virtual void debugDrawObject(const btTransform& worldTransform, const btCollisionShape* shape, const btVector3& color) override;
+    void addChangedMotionState(ObjectMotionState * motionState) { _changedMotionStates.push_back(motionState); }
+    virtual void debugDrawObject(const btTransform& worldTransform, const btCollisionShape* shape, const btVector3& color)
+        override;
 
 private:
     // call this instead of non-virtual btDiscreteDynamicsWorld::synchronizeSingleMotionState()
-    void synchronizeMotionState(btRigidBody* body);
-    void drawConnectedSpheres(btIDebugDraw* drawer, btScalar radius1, btScalar radius2, const btVector3& position1, 
+    void synchronizeMotionState(btRigidBody * body);
+    void drawConnectedSpheres(btIDebugDraw * drawer, btScalar radius1, btScalar radius2, const btVector3& position1,
                               const btVector3& position2, const btVector3& color);
 
     VectorOfMotionStates _changedMotionStates;

@@ -15,14 +15,15 @@
 #include <gpu/gl/GLBackend.h>
 #include <gpu/gl/GLTexture.h>
 
-#include <thread>
 #include <gpu/TextureTable.h>
+#include <thread>
 
 #define INCREMENTAL_TRANSFER 0
 #define GPU_SSBO_TRANSFORM_OBJECT 1
 #define GPU_BINDLESS_TEXTURES 0
 
-namespace gpu { namespace gl45 {
+namespace gpu {
+namespace gl45 {
 
 using namespace gpu::gl;
 using TextureWeakPointer = std::weak_ptr<Texture>;
@@ -60,30 +61,25 @@ public:
     protected:
         GL45Texture(const std::weak_ptr<GLBackend>& backend, const Texture& texture);
         void generateMips() const override;
-        Size copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset, GLenum internalFormat, GLenum format, GLenum type, Size sourceSize, const void* sourcePointer) const override;
+        Size copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset, GLenum internalFormat,
+                                         GLenum format, GLenum type, Size sourceSize, const void* sourcePointer) const override;
         void syncSampler() const override;
 
 #if GPU_BINDLESS_TEXTURES
-        bool isBindless() const {
-            return _bindless.operator bool();
-        }
+        bool isBindless() const { return _bindless.operator bool(); }
 
         struct Bindless {
-            uint64_t handle{ 0 };
-            uint32_t minMip{ 0 };
-            uint32_t sampler{ 0 };
+            uint64_t handle { 0 };
+            uint32_t minMip { 0 };
+            uint32_t sampler { 0 };
 
             bool operator==(const Bindless& other) const {
                 return handle == other.handle && minMip == other.minMip && sampler == other.sampler;
             }
 
-            bool operator!=(const Bindless& other) const {
-                return !(*this == other);
-            }
+            bool operator!=(const Bindless& other) const { return !(*this == other); }
 
-            operator bool() const {
-                return handle != 0;
-            }
+            operator bool() const { return handle != 0; }
         };
 
         virtual const Bindless& getBindless() const;
@@ -97,7 +93,7 @@ public:
         static Sampler getInvalidSampler();
 
         // This stores the texture handle (64 bits) in xy, the min mip available in z, and the sampler ID in w
-        mutable Sampler _cachedSampler{ getInvalidSampler() };
+        mutable Sampler _cachedSampler { getInvalidSampler() };
     };
 
 #if GPU_BINDLESS_TEXTURES
@@ -136,7 +132,7 @@ public:
 
         void allocateStorage() const;
         void syncSampler() const override;
-        const Size _size{ 0 };
+        const Size _size { 0 };
     };
 
     class GL45AttachmentTexture : public GL45FixedAllocationTexture {
@@ -172,8 +168,10 @@ public:
 
         Size size() const override { return _size; }
 
-        Size copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset, GLenum internalFormat, GLenum format, GLenum type, Size sourceSize, const void* sourcePointer) const override;
-        void copyTextureMipsInGPUMem(GLuint srcId, GLuint destId, uint16_t srcMipOffset, uint16_t destMipOffset, uint16_t populatedMips) override;
+        Size copyMipFaceLinesFromTexture(uint16_t mip, uint8_t face, const uvec3& size, uint32_t yOffset, GLenum internalFormat,
+                                         GLenum format, GLenum type, Size sourceSize, const void* sourcePointer) const override;
+        void copyTextureMipsInGPUMem(GLuint srcId, GLuint destId, uint16_t srcMipOffset, uint16_t destMipOffset,
+                                     uint16_t populatedMips) override;
 
 #if GPU_BINDLESS_TEXTURES
         virtual const Bindless& getBindless() const override;
@@ -231,7 +229,6 @@ public:
 #endif
 
 protected:
-
     void draw(GLenum mode, uint32 numVertices, uint32 startVertex) override;
     void recycle() const override;
 
@@ -284,7 +281,8 @@ protected:
 #endif
 };
 
-}}  // namespace gpu::gl45
+} // namespace gl45
+} // namespace gpu
 
 Q_DECLARE_LOGGING_CATEGORY(gpugl45logging)
 

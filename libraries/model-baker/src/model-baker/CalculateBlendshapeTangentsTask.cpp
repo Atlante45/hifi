@@ -21,14 +21,14 @@ void CalculateBlendshapeTangentsTask::run(const baker::BakeContextPointer& conte
     const auto& meshes = input.get2();
     const auto& materials = input.get3();
     auto& tangentsPerBlendshapePerMeshOut = output;
-    
+
     tangentsPerBlendshapePerMeshOut.reserve(normalsPerBlendshapePerMesh.size());
     for (size_t i = 0; i < blendshapesPerMesh.size(); i++) {
         const auto& normalsPerBlendshape = normalsPerBlendshapePerMesh[i];
         const auto& blendshapes = blendshapesPerMesh[i];
         const auto& mesh = meshes[i];
         tangentsPerBlendshapePerMeshOut.emplace_back();
-        auto& tangentsPerBlendshapeOut = tangentsPerBlendshapePerMeshOut[tangentsPerBlendshapePerMeshOut.size()-1];
+        auto& tangentsPerBlendshapeOut = tangentsPerBlendshapePerMeshOut[tangentsPerBlendshapePerMeshOut.size() - 1];
 
         // Check if we actually need to calculate the tangents, or just append empty arrays
         bool needTangents = false;
@@ -45,7 +45,7 @@ void CalculateBlendshapeTangentsTask::run(const baker::BakeContextPointer& conte
             const auto& tangentsIn = blendshape.tangents;
             const auto& normals = normalsPerBlendshape[j];
             tangentsPerBlendshapeOut.emplace_back();
-            auto& tangentsOut = tangentsPerBlendshapeOut[tangentsPerBlendshapeOut.size()-1];
+            auto& tangentsOut = tangentsPerBlendshapeOut[tangentsPerBlendshapeOut.size() - 1];
 
             // Check if we already have tangents
             if (!tangentsIn.empty()) {
@@ -68,8 +68,9 @@ void CalculateBlendshapeTangentsTask::run(const baker::BakeContextPointer& conte
                 reverseIndices[indexInMesh] = indexInBlendShape;
             }
 
-            baker::calculateTangents(mesh,
-                [&mesh, &blendshape, &normals, &tangentsOut, &reverseIndices](int firstIndex, int secondIndex, glm::vec3* outVertices, glm::vec2* outTexCoords, glm::vec3& outNormal) {
+            baker::calculateTangents(mesh, [&mesh, &blendshape, &normals, &tangentsOut,
+                                            &reverseIndices](int firstIndex, int secondIndex, glm::vec3* outVertices,
+                                                             glm::vec2* outTexCoords, glm::vec3& outNormal) {
                 const auto index1 = reverseIndices[firstIndex];
                 const auto index2 = reverseIndices[secondIndex];
 

@@ -9,8 +9,8 @@
 #include "MouseTransformNode.h"
 
 #include "Application.h"
-#include "display-plugins/CompositorHelper.h"
 #include "RayPick.h"
+#include "display-plugins/CompositorHelper.h"
 
 Transform MouseTransformNode::getTransform() {
     QVariant position = qApp->getApplicationCompositor().getReticleInterface()->getPosition();

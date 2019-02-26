@@ -21,11 +21,11 @@ class ShapeInfo;
 void runTimingTests();
 void runUnitTests();
 
-bool rayIntersectsSphere(const glm::vec3& rayStarting, const glm::vec3& rayNormalizedDirection,
-    const glm::vec3& sphereCenter, float sphereRadius, float& distance);
+bool rayIntersectsSphere(const glm::vec3& rayStarting, const glm::vec3& rayNormalizedDirection, const glm::vec3& sphereCenter,
+                         float sphereRadius, float& distance);
 
 bool pointInSphere(glm::vec3& point, glm::vec3& sphereCenter, double sphereRadius);
 
-void shapeInfoCalculator(const ShapeEntityItem * const shapeEntity, ShapeInfo &shapeInfo);
+void shapeInfoCalculator(const ShapeEntityItem* const shapeEntity, ShapeInfo& shapeInfo);
 
 #endif // hifi_Util_h

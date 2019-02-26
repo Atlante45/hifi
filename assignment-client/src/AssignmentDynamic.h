@@ -13,11 +13,10 @@
 #ifndef hifi_AssignmentDynamic_h
 #define hifi_AssignmentDynamic_h
 
-#include <QUuid>
 #include <EntityItem.h>
+#include <QUuid>
 
 #include "EntityDynamicInterface.h"
-
 
 class AssignmentDynamic : public EntityDynamicInterface, public ReadWriteLockable {
 public:

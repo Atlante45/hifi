@@ -11,29 +11,28 @@
 
 #include "StandAloneJSConsole.h"
 
-#include <QMainWindow>
 #include <QDialog>
+#include <QMainWindow>
 #include <QVBoxLayout>
 
 #include <Application.h>
 #include <MainWindow.h>
 
-void StandAloneJSConsole::toggleConsole()  {
+void StandAloneJSConsole::toggleConsole() {
     QMainWindow* mainWindow = qApp->getWindow();
     if (!_jsConsole && !qApp->getLoginDialogPoppedUp()) {
         QDialog* dialog = new QDialog(mainWindow, Qt::WindowStaysOnTopHint);
         QVBoxLayout* layout = new QVBoxLayout(dialog);
         dialog->setLayout(layout);
-        
+
         dialog->resize(QSize(CONSOLE_WIDTH, CONSOLE_HEIGHT));
         layout->setMargin(0);
         layout->setSpacing(0);
         layout->addWidget(new JSConsole(dialog));
         dialog->setWindowOpacity(CONSOLE_WINDOW_OPACITY);
         dialog->setWindowTitle(CONSOLE_TITLE);
-        
+
         _jsConsole = dialog;
     }
     _jsConsole->setVisible(!_jsConsole->isVisible());
 }
-

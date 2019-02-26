@@ -19,13 +19,13 @@ class ArrayBufferPrototype : public QObject, public QScriptable {
     Q_OBJECT
 public:
     ArrayBufferPrototype(QObject* parent = NULL);
-    
+
 public slots:
     QByteArray slice(qint32 begin, qint32 end) const;
     QByteArray slice(qint32 begin) const;
     QByteArray compress() const;
     QByteArray recodeImage(const QString& sourceFormat, const QString& targetFormat, qint32 maxSize) const;
-    
+
 private:
     QByteArray* thisArrayBuffer() const;
 };

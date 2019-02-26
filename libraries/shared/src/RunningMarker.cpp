@@ -16,9 +16,7 @@
 
 #include "PathUtils.h"
 
-RunningMarker::RunningMarker(QString name) :
-    _name(name)
-{
+RunningMarker::RunningMarker(QString name) : _name(name) {
 }
 
 RunningMarker::~RunningMarker() {

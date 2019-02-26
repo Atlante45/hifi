@@ -12,9 +12,9 @@
 #ifndef hifi_HFMFormatRegistry_h
 #define hifi_HFMFormatRegistry_h
 
-#include "HFMSerializer.h"
 #include <shared/MediaTypeLibrary.h>
 #include <shared/ReadWriteLockable.h>
+#include "HFMSerializer.h"
 
 namespace hfm {
 
@@ -26,7 +26,8 @@ public:
     MediaTypeID registerMediaType(const MediaType& mediaType, std::unique_ptr<Serializer::Factory> supportedFactory);
     void unregisterMediaType(const MediaTypeID& id);
 
-    std::shared_ptr<Serializer> getSerializerForMediaType(const hifi::ByteArray& data, const hifi::URL& url, const std::string& webMediaType) const;
+    std::shared_ptr<Serializer> getSerializerForMediaType(const hifi::ByteArray& data, const hifi::URL& url,
+                                                          const std::string& webMediaType) const;
 
 protected:
     std::shared_ptr<Serializer> getSerializerForMediaTypeID(MediaTypeID id) const;
@@ -37,14 +38,13 @@ protected:
     public:
         SupportedFormat(const MediaTypeID& mediaTypeID, std::unique_ptr<Serializer::Factory>& factory) :
             mediaTypeID(mediaTypeID),
-            factory(std::move(factory)) {
-        }
+            factory(std::move(factory)) {}
         MediaTypeID mediaTypeID;
         std::unique_ptr<Serializer::Factory> factory;
     };
     std::vector<SupportedFormat> _supportedFormats;
 };
 
-};
+}; // namespace hfm
 
 #endif // hifi_HFMFormatRegistry_h

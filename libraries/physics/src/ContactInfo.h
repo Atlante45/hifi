@@ -17,7 +17,6 @@
 
 #include "RegisteredMetaTypes.h"
 
-
 class ContactInfo {
 public:
     void update(uint32_t currentStep, const btManifoldPoint& p);
@@ -31,10 +30,10 @@ public:
     btVector3 positionWorldOnB;
     btVector3 normalWorldOnB;
     btScalar distance;
+
 private:
     uint32_t _lastStep { 0 };
     uint32_t _continueExpiry { 0 };
 };
-
 
 #endif // hifi_ContactEvent_h

@@ -18,25 +18,24 @@ OctreeStatsProvider::OctreeStatsProvider(QObject* parent, NodeToOctreeSceneStats
     QObject(parent),
     _model(model),
     _statCount(0),
-    _averageUpdatesPerSecond(SAMPLES_PER_SECOND)
-{
-    //schedule updates
+    _averageUpdatesPerSecond(SAMPLES_PER_SECOND) {
+    // schedule updates
     connect(&_updateTimer, &QTimer::timeout, this, &OctreeStatsProvider::updateOctreeStatsData);
     _updateTimer.setInterval(100);
-    //timer will be rescheduled on each new timeout
+    // timer will be rescheduled on each new timeout
     _updateTimer.setSingleShot(true);
 }
 
 /*
  * Start updates statistics
-*/
+ */
 void OctreeStatsProvider::startUpdates() {
     _updateTimer.start();
 }
 
 /*
  * Stop updates statistics
-*/
+ */
 void OctreeStatsProvider::stopUpdates() {
     _updateTimer.stop();
 }
@@ -44,7 +43,7 @@ void OctreeStatsProvider::stopUpdates() {
 QColor OctreeStatsProvider::getColor() const {
     static int statIndex = 1;
     static quint32 rotatingColors[] = { GREENISH, YELLOWISH, GREYISH };
-    quint32 colorRGBA = rotatingColors[statIndex % (sizeof(rotatingColors)/sizeof(rotatingColors[0]))];
+    quint32 colorRGBA = rotatingColors[statIndex % (sizeof(rotatingColors) / sizeof(rotatingColors[0]))];
     quint32 rgb = colorRGBA >> 8;
     const quint32 colorpart1 = 0xfefefeu;
     const quint32 colorpart2 = 0xf8f8f8;
@@ -62,14 +61,13 @@ int OctreeStatsProvider::serversNum() const {
 }
 
 void OctreeStatsProvider::updateOctreeStatsData() {
-
     // Processed Entities Related stats
     auto entities = qApp->getEntities();
     auto entitiesTree = entities->getTree();
 
     // Do this ever paint event... even if we don't update
     auto totalTrackedEdits = entitiesTree->getTotalTrackedEdits();
-    
+
     const quint64 SAMPLING_WINDOW = USECS_PER_SECOND / SAMPLES_PER_SECOND;
     quint64 now = usecTimestampNow();
     quint64 sinceLastWindow = now - _lastWindowAt;
@@ -86,13 +84,13 @@ void OctreeStatsProvider::updateOctreeStatsData() {
     quint64 REFRESH_AFTER = Menu::getInstance()->isOptionChecked(MenuOption::ShowRealtimeEntityStats) ? 0 : USECS_PER_SECOND;
     quint64 sinceLastRefresh = now - _lastRefresh;
     if (sinceLastRefresh < REFRESH_AFTER) {
-        _updateTimer.start((REFRESH_AFTER - sinceLastRefresh)/1000);
+        _updateTimer.start((REFRESH_AFTER - sinceLastRefresh) / 1000);
         return;
     }
     // Only refresh our stats every once in a while, unless asked for realtime
-    //if no realtime, then update once per second. Otherwise consider 60FPS update, ie 16ms interval
-    //int updateinterval = Menu::getInstance()->isOptionChecked(MenuOption::ShowRealtimeEntityStats) ? 16 : 1000;
-    _updateTimer.start(REFRESH_AFTER/1000);
+    // if no realtime, then update once per second. Otherwise consider 60FPS update, ie 16ms interval
+    // int updateinterval = Menu::getInstance()->isOptionChecked(MenuOption::ShowRealtimeEntityStats) ? 16 : 1000;
+    _updateTimer.start(REFRESH_AFTER / 1000);
 
     const int FLOATING_POINT_PRECISION = 3;
 
@@ -100,10 +98,10 @@ void OctreeStatsProvider::updateOctreeStatsData() {
     emit localElementsMemoryChanged(m_localElementsMemory);
 
     // Local Elements
-    m_localElements = QString("Total: %1 / Internal: %2 / Leaves: %3").
-            arg(OctreeElement::getNodeCount()).
-            arg(OctreeElement::getInternalNodeCount()).
-            arg(OctreeElement::getLeafNodeCount());
+    m_localElements = QString("Total: %1 / Internal: %2 / Leaves: %3")
+                          .arg(OctreeElement::getNodeCount())
+                          .arg(OctreeElement::getInternalNodeCount())
+                          .arg(OctreeElement::getLeafNodeCount());
     emit localElementsChanged(m_localElements);
 
     // iterate all the current octree stats, and list their sending modes, total their octree elements, etc...
@@ -117,7 +115,7 @@ void OctreeStatsProvider::updateOctreeStatsData() {
     NodeToOctreeSceneStats* sceneStats = qApp->getOcteeSceneStats();
     sceneStats->withReadLock([&] {
         for (NodeToOctreeSceneStatsIterator i = sceneStats->begin(); i != sceneStats->end(); i++) {
-            //const QUuid& uuid = i->first;
+            // const QUuid& uuid = i->first;
             OctreeSceneStats& stats = i->second;
             serverCount++;
 
@@ -151,12 +149,10 @@ void OctreeStatsProvider::updateOctreeStatsData() {
     }
 
     emit sendingModeChanged(m_sendingMode);
-    
-    // Server Elements
-    m_serverElements = QString("Total: %1 / Internal: %2 / Leaves: %3").
-            arg(totalNodes).arg(totalInternal).arg(totalLeaves);
-    emit serverElementsChanged(m_serverElements);
 
+    // Server Elements
+    m_serverElements = QString("Total: %1 / Internal: %2 / Leaves: %3").arg(totalNodes).arg(totalInternal).arg(totalLeaves);
+    emit serverElementsChanged(m_serverElements);
 
     // Processed Packets Elements
     auto averageElementsPerPacket = entities->getAverageElementsPerPacket();
@@ -169,7 +165,7 @@ void OctreeStatsProvider::updateOctreeStatsData() {
     auto averageUncompressPerPacket = entities->getAverageUncompressPerPacket();
     auto averageReadBitstreamPerPacket = entities->getAverageReadBitstreamPerPacket();
 
-    const OctreePacketProcessor& entitiesPacketProcessor =  qApp->getOctreePacketProcessor();
+    const OctreePacketProcessor& entitiesPacketProcessor = qApp->getOctreePacketProcessor();
 
     auto incomingPacketsDepth = entitiesPacketProcessor.packetsToProcessCount();
     auto incomingPPS = entitiesPacketProcessor.getIncomingPPS();
@@ -177,26 +173,26 @@ void OctreeStatsProvider::updateOctreeStatsData() {
     auto treeProcessedPPS = entities->getAveragePacketsPerSecond();
 
     m_processedPackets = QString("Queue Size: %1 Packets / Network IN: %2 PPS / Queue OUT: %3 PPS / Tree IN: %4 PPS")
-            .arg(incomingPacketsDepth)
-            .arg(incomingPPS, 5, 'f', FLOATING_POINT_PRECISION)
-            .arg(processedPPS, 5, 'f', FLOATING_POINT_PRECISION)
-            .arg(treeProcessedPPS, 5, 'f', FLOATING_POINT_PRECISION);
+                             .arg(incomingPacketsDepth)
+                             .arg(incomingPPS, 5, 'f', FLOATING_POINT_PRECISION)
+                             .arg(processedPPS, 5, 'f', FLOATING_POINT_PRECISION)
+                             .arg(treeProcessedPPS, 5, 'f', FLOATING_POINT_PRECISION);
     emit processedPacketsChanged(m_processedPackets);
 
     m_processedPacketsElements = QString("%1 per packet / %2 per second")
-            .arg(averageElementsPerPacket, 5, 'f', FLOATING_POINT_PRECISION)
-            .arg(averageElementsPerSecond, 5, 'f', FLOATING_POINT_PRECISION);
+                                     .arg(averageElementsPerPacket, 5, 'f', FLOATING_POINT_PRECISION)
+                                     .arg(averageElementsPerSecond, 5, 'f', FLOATING_POINT_PRECISION);
     emit processedPacketsElementsChanged(m_processedPacketsElements);
 
     m_processedPacketsEntities = QString("%1 per packet / %2 per second")
-            .arg(averageEntitiesPerPacket, 5, 'f', FLOATING_POINT_PRECISION)
-            .arg(averageEntitiesPerSecond, 5, 'f', FLOATING_POINT_PRECISION);
+                                     .arg(averageEntitiesPerPacket, 5, 'f', FLOATING_POINT_PRECISION)
+                                     .arg(averageEntitiesPerSecond, 5, 'f', FLOATING_POINT_PRECISION);
     emit processedPacketsEntitiesChanged(m_processedPacketsEntities);
 
     m_processedPacketsTiming = QString("Lock Wait: %1 (usecs) / Uncompress: %2 (usecs) / Process: %3 (usecs)")
-            .arg(averageWaitLockPerPacket)
-            .arg(averageUncompressPerPacket)
-            .arg(averageReadBitstreamPerPacket);
+                                   .arg(averageWaitLockPerPacket)
+                                   .arg(averageUncompressPerPacket)
+                                   .arg(averageReadBitstreamPerPacket);
     emit processedPacketsTimingChanged(m_processedPacketsTiming);
 
     auto entitiesEditPacketSender = qApp->getEntityEditPacketSender();
@@ -205,32 +201,30 @@ void OctreeStatsProvider::updateOctreeStatsData() {
     auto outboundSentPPS = entitiesEditPacketSender->getLifetimePPS();
 
     m_outboundEditPackets = QString("Queue Size: %1 packets / Queued IN: %2 PPS / Sent OUT: %3 PPS")
-            .arg(outboundPacketsDepth)
-            .arg(outboundQueuedPPS, 5, 'f', FLOATING_POINT_PRECISION)
-            .arg(outboundSentPPS, 5, 'f', FLOATING_POINT_PRECISION);
+                                .arg(outboundPacketsDepth)
+                                .arg(outboundQueuedPPS, 5, 'f', FLOATING_POINT_PRECISION)
+                                .arg(outboundSentPPS, 5, 'f', FLOATING_POINT_PRECISION);
     emit outboundEditPacketsChanged(m_outboundEditPackets);
-    
+
     // Entity Edits update time
     auto averageEditDelta = entitiesTree->getAverageEditDeltas();
     auto maxEditDelta = entitiesTree->getMaxEditDelta();
 
-    m_entityUpdateTime = QString("Average: %1 (usecs) / Max: %2 (usecs)")
-            .arg(averageEditDelta)
-            .arg(maxEditDelta);
+    m_entityUpdateTime = QString("Average: %1 (usecs) / Max: %2 (usecs)").arg(averageEditDelta).arg(maxEditDelta);
     emit entityUpdateTimeChanged(m_entityUpdateTime);
 
     // Entity Edits
     auto bytesPerEdit = entitiesTree->getAverageEditBytes();
-    
+
     auto updatesPerSecond = _averageUpdatesPerSecond.getAverage();
     if (updatesPerSecond < 1) {
         updatesPerSecond = 0; // we don't really care about small updates per second so suppress those
     }
 
     m_entityUpdates = QString("%1 updates per second / %2 total updates / Average Size: %3 bytes")
-            .arg(updatesPerSecond, 5, 'f', FLOATING_POINT_PRECISION)
-            .arg(totalTrackedEdits)
-            .arg(bytesPerEdit);
+                          .arg(updatesPerSecond, 5, 'f', FLOATING_POINT_PRECISION)
+                          .arg(totalTrackedEdits)
+                          .arg(bytesPerEdit);
     emit entityUpdatesChanged(m_entityUpdates);
 
     updateOctreeServers();
@@ -275,56 +269,53 @@ void OctreeStatsProvider::showOctreeServersOfType(NodeType_t serverType) {
                     lastFullPPS = lastFullPackets / lastFullSendInSeconds;
                 }
 
-                mostDetails += QString("<br/><br/>Last Full Scene... Encode: %1 ms Send: %2 ms Packets: %3 Bytes: %4 Rate: %5 PPS")
-                        .arg(lastFullEncode)
-                        .arg(lastFullSend)
-                        .arg(lastFullPackets)
-                        .arg(stats.getLastFullTotalBytes())
-                        .arg(lastFullPPS);
+                mostDetails += QString(
+                                   "<br/><br/>Last Full Scene... Encode: %1 ms Send: %2 ms Packets: %3 Bytes: %4 Rate: %5 PPS")
+                                   .arg(lastFullEncode)
+                                   .arg(lastFullSend)
+                                   .arg(lastFullPackets)
+                                   .arg(stats.getLastFullTotalBytes())
+                                   .arg(lastFullPPS);
 
                 for (int i = 0; i < OctreeSceneStats::ITEM_COUNT; i++) {
                     OctreeSceneStats::Item item = (OctreeSceneStats::Item)(i);
                     OctreeSceneStats::ItemInfo& itemInfo = stats.getItemInfo(item);
-                    mostDetails += QString("<br/> %1 %2")
-                            .arg(itemInfo.caption).arg(stats.getItemValue(item));
+                    mostDetails += QString("<br/> %1 %2").arg(itemInfo.caption).arg(stats.getItemValue(item));
                 }
 
-                moreDetails += "<br/>Node UUID: " +nodeUUID.toString() + " ";
+                moreDetails += "<br/>Node UUID: " + nodeUUID.toString() + " ";
 
                 moreDetails += QString("<br/>Elements: %1 total %2 internal %3 leaves ")
-                        .arg(stats.getTotalElements())
-                        .arg(stats.getTotalInternal())
-                        .arg(stats.getTotalLeaves());
+                                   .arg(stats.getTotalElements())
+                                   .arg(stats.getTotalInternal())
+                                   .arg(stats.getTotalLeaves());
 
                 const SequenceNumberStats& seqStats = stats.getIncomingOctreeSequenceNumberStats();
                 qint64 clockSkewInUsecs = node->getClockSkewUsec();
                 qint64 clockSkewInMS = clockSkewInUsecs / (qint64)USECS_PER_MSEC;
 
                 moreDetails += QString("<br/>Incoming Packets: %1/ Lost: %2/ Recovered: %3")
-                        .arg(stats.getIncomingPackets())
-                        .arg(seqStats.getLost())
-                        .arg(seqStats.getRecovered());
+                                   .arg(stats.getIncomingPackets())
+                                   .arg(seqStats.getLost())
+                                   .arg(seqStats.getRecovered());
 
                 moreDetails += QString("<br/> Out of Order: %1/ Early: %2/ Late: %3/ Unreasonable: %4")
-                        .arg(seqStats.getOutOfOrder())
-                        .arg(seqStats.getEarly())
-                        .arg(seqStats.getLate())
-                        .arg(seqStats.getUnreasonable());
+                                   .arg(seqStats.getOutOfOrder())
+                                   .arg(seqStats.getEarly())
+                                   .arg(seqStats.getLate())
+                                   .arg(seqStats.getUnreasonable());
 
-                moreDetails += QString("<br/> Average Flight Time: %1 msecs")
-                        .arg(stats.getIncomingFlightTimeAverage());
+                moreDetails += QString("<br/> Average Flight Time: %1 msecs").arg(stats.getIncomingFlightTimeAverage());
 
-                moreDetails += QString("<br/> Average Ping Time: %1 msecs")
-                        .arg(node->getPingMs());
+                moreDetails += QString("<br/> Average Ping Time: %1 msecs").arg(node->getPingMs());
 
                 moreDetails += QString("<br/> Average Clock Skew: %1 msecs [%2]")
-                        .arg(clockSkewInMS)
-                        .arg(formatUsecTime(clockSkewInUsecs));
-
+                                   .arg(clockSkewInMS)
+                                   .arg(formatUsecTime(clockSkewInUsecs));
 
                 moreDetails += QString("<br/>Incoming Bytes: %1 Wasted Bytes: %2")
-                        .arg(stats.getIncomingBytes())
-                        .arg(stats.getIncomingWastedBytes());
+                                   .arg(stats.getIncomingBytes())
+                                   .arg(stats.getIncomingWastedBytes());
             }
         });
         m_servers.append(lesserDetails);
@@ -338,5 +329,3 @@ void OctreeStatsProvider::showOctreeServersOfType(NodeType_t serverType) {
     }
     emit serversChanged(m_servers);
 }
-
-

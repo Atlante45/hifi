@@ -13,19 +13,18 @@
 
 #include <iostream>
 
-#include <GeometryUtil.h>
 #include <GLMHelpers.h>
+#include <GeometryUtil.h>
 #include <NumericalConstants.h>
 #include <StreamUtils.h>
 
 #include <test-utils/GLMTestUtils.h>
 #include <test-utils/QTestExtensions.h>
 
-
 QTEST_MAIN(GeometryUtilTests)
 
-static void testSphereVsCone(const glm::vec3 coneNormal, const glm::vec3 coneBiNormal, float coneAngle, float sphereRadius, float sphereDistance) {
-
+static void testSphereVsCone(const glm::vec3 coneNormal, const glm::vec3 coneBiNormal, float coneAngle, float sphereRadius,
+                             float sphereDistance) {
     glm::vec3 u, v, w;
     generateBasisVectors(coneNormal, coneBiNormal, u, v, w);
     glm::vec3 coneEdge = u * cosf(coneAngle) + v * sinf(coneAngle);
@@ -50,7 +49,6 @@ static void testSphereVsCone(const glm::vec3 coneNormal, const glm::vec3 coneBiN
 }
 
 void GeometryUtilTests::testConeSphereAngle() {
-
     // start with a 45 degree cone.
     testSphereVsCone(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), PI / 4.0f, 1.0f, 10.0f);
 
@@ -156,7 +154,6 @@ void GeometryUtilTests::testWorldRayRectangleIntersection() {
     glm::vec2 rectDimensions(3.0f, 5.0f);
     glm::vec3 rectCenter(0.7f, 0.5f, -0.3f);
     glm::quat rectRotation = glm::quat(); // identity
-
 
     // create points for generating rays that hit the plane and don't
     glm::vec3 rayStart(1.0f, 2.0f, 3.0f);
@@ -269,7 +266,6 @@ void GeometryUtilTests::testTwistSwingDecomposition() {
         }
     }
 }
-
 
 void GeometryUtilTests::testSphereCapsulePenetration() {
     glm::vec3 sphereCenter(1.5, 0.0, 0.0);

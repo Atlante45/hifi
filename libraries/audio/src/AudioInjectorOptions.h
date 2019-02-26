@@ -30,7 +30,7 @@ public:
     bool ignorePenumbra;
     bool localOnly;
     float secondOffset;
-    float pitch;    // multiplier, where 2.0f shifts up one octave
+    float pitch; // multiplier, where 2.0f shifts up one octave
 };
 
 Q_DECLARE_METATYPE(AudioInjectorOptions);

@@ -10,7 +10,8 @@
 
 #include "GLShared.h"
 
-namespace gpu { namespace gl {
+namespace gpu {
+namespace gl {
 
 class GLTexelFormat {
 public:
@@ -18,20 +19,21 @@ public:
     GLenum format;
     GLenum type;
 
-    GLTexelFormat(GLenum glinternalFormat, GLenum glformat, GLenum gltype) : internalFormat(glinternalFormat), format(glformat), type(gltype) {}
+    GLTexelFormat(GLenum glinternalFormat, GLenum glformat, GLenum gltype) :
+        internalFormat(glinternalFormat),
+        format(glformat),
+        type(gltype) {}
     GLTexelFormat(GLenum glinternalFormat) : internalFormat(glinternalFormat) {}
 
     bool isCompressed() const;
 
-    static GLTexelFormat evalGLTexelFormat(const Element& dstFormat) {
-        return evalGLTexelFormat(dstFormat, dstFormat);
-    }
+    static GLTexelFormat evalGLTexelFormat(const Element& dstFormat) { return evalGLTexelFormat(dstFormat, dstFormat); }
     static GLenum evalGLTexelFormatInternal(const Element& dstFormat);
 
     static GLTexelFormat evalGLTexelFormat(const Element& dstFormat, const Element& srcFormat);
 };
 
-} }
-
+} // namespace gl
+} // namespace gpu
 
 #endif

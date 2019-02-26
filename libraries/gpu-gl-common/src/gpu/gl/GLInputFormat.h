@@ -14,8 +14,8 @@ namespace gpu {
 namespace gl {
 
 class GLInputFormat : public GPUObject {
-    public:
-        static GLInputFormat* sync(const Stream::Format& inputFormat);
+public:
+    static GLInputFormat* sync(const Stream::Format& inputFormat);
 
     GLInputFormat();
     ~GLInputFormat();
@@ -23,7 +23,7 @@ class GLInputFormat : public GPUObject {
     std::string key;
 };
 
-}
-}
+} // namespace gl
+} // namespace gpu
 
 #endif

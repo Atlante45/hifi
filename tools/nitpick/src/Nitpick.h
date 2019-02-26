@@ -10,9 +10,9 @@
 #ifndef hifi_Nitpick_h
 #define hifi_Nitpick_h
 
-#include <QtWidgets/QMainWindow>
 #include <QSignalMapper>
 #include <QTextEdit>
+#include <QtWidgets/QMainWindow>
 #include "ui_Nitpick.h"
 
 #include "Downloader.h"
@@ -30,11 +30,8 @@ public:
 
     void setup();
 
-    void startTestsEvaluation(const bool isRunningFromCommandLine,
-                              const bool isRunningInAutomaticTestRun,
-                              const QString& snapshotDirectory,
-                              const QString& branch,
-                              const QString& user);
+    void startTestsEvaluation(const bool isRunningFromCommandLine, const bool isRunningInAutomaticTestRun,
+                              const QString& snapshotDirectory, const QString& branch, const QString& user);
 
     void automaticTestRunEvaluationComplete(QString zippedFolderName, int numberOfFailures);
 
@@ -105,10 +102,10 @@ private slots:
 
 private:
     Ui::NitpickClass _ui;
-    Test* _test{ nullptr };
+    Test* _test { nullptr };
 
-    TestRunnerDesktop* _testRunnerDesktop{ nullptr };
-    TestRunnerMobile* _testRunnerMobile{ nullptr };
+    TestRunnerDesktop* _testRunnerDesktop { nullptr };
+    TestRunnerMobile* _testRunnerMobile { nullptr };
 
     std::vector<Downloader*> _downloaders;
 
@@ -119,15 +116,15 @@ private:
     // Used to enable passing a parameter to slots
     QSignalMapper* _signalMapper;
 
-    int _numberOfFilesToDownload{ 0 };
-    int _numberOfFilesDownloaded{ 0 };
-    int _index{ 0 };
+    int _numberOfFilesToDownload { 0 };
+    int _numberOfFilesDownloaded { 0 };
+    int _index { 0 };
 
-    bool _isRunningFromCommandline{ false };
+    bool _isRunningFromCommandline { false };
 
     void* _caller;
 
     QStringList clientProfiles;
 };
 
-#endif  // hifi_Nitpick_h
+#endif // hifi_Nitpick_h

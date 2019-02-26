@@ -8,14 +8,14 @@
 
 #include "TestTextures.h"
 
-#include <random>
 #include <algorithm>
+#include <random>
 
-#include <QtCore/QDir>
-#include <QtQuick/QQuickView>
-#include <QtQml/QQmlContext>
 #include <gpu/Batch.h>
 #include <gpu/Context.h>
+#include <QtCore/QDir>
+#include <QtQml/QQmlContext>
+#include <QtQuick/QQuickView>
 
 #include "TestHelpers.h"
 
@@ -54,15 +54,14 @@ void main() {
 
 )SHADER";
 
-#define STAT_UPDATE(name, src) \
-    { \
-        auto val = src; \
-        if (_##name != val) { \
-            _##name = val; \
-            emit name##Changed(); \
-        } \
+#define STAT_UPDATE(name, src)                                                                                                 \
+    {                                                                                                                          \
+        auto val = src;                                                                                                        \
+        if (_##name != val) {                                                                                                  \
+            _##name = val;                                                                                                     \
+            emit name##Changed();                                                                                              \
+        }                                                                                                                      \
     }
-
 
 void TextureTestStats::update(int curIndex, const gpu::TexturePointer& texture) {
     STAT_UPDATE(total, (int)BYTES_TO_MB(gpu::Context::getTextureGPUMemSize()));
@@ -82,7 +81,7 @@ TexturesTest::TexturesTest() {
     connect(&stats, &TextureTestStats::maxTextureMemory, this, &TexturesTest::onMaxTextureMemory);
     {
         shader::Source vertexSource;
-        
+
         auto VS = gpu::Shader::createVertex(shader::Source::generate(vertexShaderSource));
         auto PS = gpu::Shader::createPixel(shader::Source::generate(fragmentShaderSource));
         auto program = gpu::Shader::createProgram(VS, PS);
@@ -96,7 +95,6 @@ TexturesTest::TexturesTest() {
 
     onChangeTextures();
 }
-
 
 void TexturesTest::renderTest(size_t testId, const RenderArgs& args) {
     stats.update((int)index, textures[index]);

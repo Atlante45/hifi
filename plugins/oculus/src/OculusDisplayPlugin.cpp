@@ -12,10 +12,10 @@
 
 #include <OVR_CAPI_Audio.h>
 
-#include <shared/NsightHelpers.h>
-#include <gpu/Frame.h>
 #include <gpu/Context.h>
+#include <gpu/Frame.h>
 #include <gpu/gl/GLBackend.h>
+#include <shared/NsightHelpers.h>
 
 #include "OculusHelpers.h"
 
@@ -23,7 +23,6 @@ using namespace hifi;
 
 const char* OculusDisplayPlugin::NAME { "Oculus Rift" };
 static ovrPerfHudMode currentDebugMode = ovrPerfHud_Off;
-
 
 OculusDisplayPlugin::OculusDisplayPlugin() {
     _appDroppedFrames.store(0);
@@ -65,8 +64,9 @@ void OculusDisplayPlugin::cycleDebugOutput() {
 
 void OculusDisplayPlugin::customizeContext() {
     Parent::customizeContext();
-    _outputFramebuffer.reset(gpu::Framebuffer::create("OculusOutput", gpu::Element::COLOR_SRGBA_32, _renderTargetSize.x, _renderTargetSize.y));
-    ovrTextureSwapChainDesc desc = { };
+    _outputFramebuffer.reset(
+        gpu::Framebuffer::create("OculusOutput", gpu::Element::COLOR_SRGBA_32, _renderTargetSize.x, _renderTargetSize.y));
+    ovrTextureSwapChainDesc desc = {};
     desc.Type = ovrTexture_2D;
     desc.ArraySize = 1;
     desc.Width = _renderTargetSize.x;
@@ -99,7 +99,7 @@ void OculusDisplayPlugin::customizeContext() {
     }
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    // We're rendering both eyes to the same texture, so only one of the 
+    // We're rendering both eyes to the same texture, so only one of the
     // pointers is populated
     _sceneLayer.ColorTexture[0] = _textureSwapChain;
     // not needed since the structure was zeroed on init, but explicit
@@ -152,7 +152,7 @@ void OculusDisplayPlugin::hmdPresent() {
         ovr_GetTextureSwapChainBufferGL(_session, _textureSwapChain, curIndex, &curTexId);
 
         // Manually bind the texture to the FBO
-        // FIXME we should have a way of wrapping raw GL ids in GPU objects without 
+        // FIXME we should have a way of wrapping raw GL ids in GPU objects without
         // taking ownership of the object
         auto fbo = getGLBackend()->getFramebufferID(_outputFramebuffer);
         glNamedFramebufferTexture(fbo, GL_COLOR_ATTACHMENT0, curTexId, 0);
@@ -234,7 +234,6 @@ void OculusDisplayPlugin::hmdPresent() {
 
     _presentRate.increment();
 }
-
 
 QJsonObject OculusDisplayPlugin::getHardwareStats() const {
     QJsonObject hardwareStats;

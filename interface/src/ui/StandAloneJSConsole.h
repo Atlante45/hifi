@@ -12,8 +12,8 @@
 #ifndef hifi_StandAloneJSConsole_h
 #define hifi_StandAloneJSConsole_h
 
-#include <QPointer>
 #include <DependencyManager.h>
+#include <QPointer>
 
 #include "JSConsole.h"
 
@@ -22,13 +22,13 @@ class QDialog;
 class StandAloneJSConsole : public QObject, public Dependency {
     Q_OBJECT
     SINGLETON_DEPENDENCY
-    
+
 public slots:
     void toggleConsole();
-    
+
 private:
     StandAloneJSConsole() {}
-    
+
     QPointer<QDialog> _jsConsole;
 };
 

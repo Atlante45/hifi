@@ -132,9 +132,8 @@ QScriptValue ConsoleScriptingInterface::assertion(QScriptContext* context, QScri
 
 void ConsoleScriptingInterface::trace() {
     if (ScriptEngine* scriptEngine = qobject_cast<ScriptEngine*>(engine())) {
-        scriptEngine->scriptPrintedMessage
-            (QString(STACK_TRACE_FORMAT).arg(LINE_SEPARATOR,
-            scriptEngine->currentContext()->backtrace().join(LINE_SEPARATOR)));
+        scriptEngine->scriptPrintedMessage(
+            QString(STACK_TRACE_FORMAT).arg(LINE_SEPARATOR, scriptEngine->currentContext()->backtrace().join(LINE_SEPARATOR)));
     }
 }
 

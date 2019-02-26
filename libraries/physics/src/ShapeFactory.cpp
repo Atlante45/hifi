@@ -17,13 +17,11 @@
 
 #include "BulletUtil.h"
 
-
 class StaticMeshShape : public btBvhTriangleMeshShape {
 public:
     StaticMeshShape() = delete;
 
-    StaticMeshShape(btTriangleIndexVertexArray* dataArray)
-    :   btBvhTriangleMeshShape(dataArray, true), _dataArray(dataArray) {
+    StaticMeshShape(btTriangleIndexVertexArray* dataArray) : btBvhTriangleMeshShape(dataArray, true), _dataArray(dataArray) {
         assert(_dataArray);
     }
 
@@ -33,10 +31,10 @@ public:
         for (int32_t i = 0; i < meshes.size(); ++i) {
             btIndexedMesh mesh = meshes[i];
             mesh.m_numTriangles = 0;
-            delete [] mesh.m_triangleIndexBase;
+            delete[] mesh.m_triangleIndexBase;
             mesh.m_triangleIndexBase = nullptr;
             mesh.m_numVertices = 0;
-            delete [] mesh.m_vertexBase;
+            delete[] mesh.m_vertexBase;
             mesh.m_vertexBase = nullptr;
         }
         meshes.clear();
@@ -56,50 +54,49 @@ private:
 // for the midpoints the edges, for a total of 42.
 const uint32_t NUM_UNIT_SPHERE_DIRECTIONS = 42;
 static const btVector3 _unitSphereDirections[NUM_UNIT_SPHERE_DIRECTIONS] = {
-    btVector3(btScalar(0.000000) , btScalar(-0.000000),btScalar(-1.000000)),
-    btVector3(btScalar(0.723608) , btScalar(-0.525725),btScalar(-0.447219)),
-    btVector3(btScalar(-0.276388) , btScalar(-0.850649),btScalar(-0.447219)),
-    btVector3(btScalar(-0.894426) , btScalar(-0.000000),btScalar(-0.447216)),
-    btVector3(btScalar(-0.276388) , btScalar(0.850649),btScalar(-0.447220)),
-    btVector3(btScalar(0.723608) , btScalar(0.525725),btScalar(-0.447219)),
-    btVector3(btScalar(0.276388) , btScalar(-0.850649),btScalar(0.447220)),
-    btVector3(btScalar(-0.723608) , btScalar(-0.525725),btScalar(0.447219)),
-    btVector3(btScalar(-0.723608) , btScalar(0.525725),btScalar(0.447219)),
-    btVector3(btScalar(0.276388) , btScalar(0.850649),btScalar(0.447219)),
-    btVector3(btScalar(0.894426) , btScalar(0.000000),btScalar(0.447216)),
-    btVector3(btScalar(-0.000000) , btScalar(0.000000),btScalar(1.000000)),
-    btVector3(btScalar(0.425323) , btScalar(-0.309011),btScalar(-0.850654)),
-    btVector3(btScalar(-0.162456) , btScalar(-0.499995),btScalar(-0.850654)),
-    btVector3(btScalar(0.262869) , btScalar(-0.809012),btScalar(-0.525738)),
-    btVector3(btScalar(0.425323) , btScalar(0.309011),btScalar(-0.850654)),
-    btVector3(btScalar(0.850648) , btScalar(-0.000000),btScalar(-0.525736)),
-    btVector3(btScalar(-0.525730) , btScalar(-0.000000),btScalar(-0.850652)),
-    btVector3(btScalar(-0.688190) , btScalar(-0.499997),btScalar(-0.525736)),
-    btVector3(btScalar(-0.162456) , btScalar(0.499995),btScalar(-0.850654)),
-    btVector3(btScalar(-0.688190) , btScalar(0.499997),btScalar(-0.525736)),
-    btVector3(btScalar(0.262869) , btScalar(0.809012),btScalar(-0.525738)),
-    btVector3(btScalar(0.951058) , btScalar(0.309013),btScalar(0.000000)),
-    btVector3(btScalar(0.951058) , btScalar(-0.309013),btScalar(0.000000)),
-    btVector3(btScalar(0.587786) , btScalar(-0.809017),btScalar(0.000000)),
-    btVector3(btScalar(0.000000) , btScalar(-1.000000),btScalar(0.000000)),
-    btVector3(btScalar(-0.587786) , btScalar(-0.809017),btScalar(0.000000)),
-    btVector3(btScalar(-0.951058) , btScalar(-0.309013),btScalar(-0.000000)),
-    btVector3(btScalar(-0.951058) , btScalar(0.309013),btScalar(-0.000000)),
-    btVector3(btScalar(-0.587786) , btScalar(0.809017),btScalar(-0.000000)),
-    btVector3(btScalar(-0.000000) , btScalar(1.000000),btScalar(-0.000000)),
-    btVector3(btScalar(0.587786) , btScalar(0.809017),btScalar(-0.000000)),
-    btVector3(btScalar(0.688190) , btScalar(-0.499997),btScalar(0.525736)),
-    btVector3(btScalar(-0.262869) , btScalar(-0.809012),btScalar(0.525738)),
-    btVector3(btScalar(-0.850648) , btScalar(0.000000),btScalar(0.525736)),
-    btVector3(btScalar(-0.262869) , btScalar(0.809012),btScalar(0.525738)),
-    btVector3(btScalar(0.688190) , btScalar(0.499997),btScalar(0.525736)),
-    btVector3(btScalar(0.525730) , btScalar(0.000000),btScalar(0.850652)),
-    btVector3(btScalar(0.162456) , btScalar(-0.499995),btScalar(0.850654)),
-    btVector3(btScalar(-0.425323) , btScalar(-0.309011),btScalar(0.850654)),
-    btVector3(btScalar(-0.425323) , btScalar(0.309011),btScalar(0.850654)),
-    btVector3(btScalar(0.162456) , btScalar(0.499995),btScalar(0.850654))
+    btVector3(btScalar(0.000000), btScalar(-0.000000), btScalar(-1.000000)),
+    btVector3(btScalar(0.723608), btScalar(-0.525725), btScalar(-0.447219)),
+    btVector3(btScalar(-0.276388), btScalar(-0.850649), btScalar(-0.447219)),
+    btVector3(btScalar(-0.894426), btScalar(-0.000000), btScalar(-0.447216)),
+    btVector3(btScalar(-0.276388), btScalar(0.850649), btScalar(-0.447220)),
+    btVector3(btScalar(0.723608), btScalar(0.525725), btScalar(-0.447219)),
+    btVector3(btScalar(0.276388), btScalar(-0.850649), btScalar(0.447220)),
+    btVector3(btScalar(-0.723608), btScalar(-0.525725), btScalar(0.447219)),
+    btVector3(btScalar(-0.723608), btScalar(0.525725), btScalar(0.447219)),
+    btVector3(btScalar(0.276388), btScalar(0.850649), btScalar(0.447219)),
+    btVector3(btScalar(0.894426), btScalar(0.000000), btScalar(0.447216)),
+    btVector3(btScalar(-0.000000), btScalar(0.000000), btScalar(1.000000)),
+    btVector3(btScalar(0.425323), btScalar(-0.309011), btScalar(-0.850654)),
+    btVector3(btScalar(-0.162456), btScalar(-0.499995), btScalar(-0.850654)),
+    btVector3(btScalar(0.262869), btScalar(-0.809012), btScalar(-0.525738)),
+    btVector3(btScalar(0.425323), btScalar(0.309011), btScalar(-0.850654)),
+    btVector3(btScalar(0.850648), btScalar(-0.000000), btScalar(-0.525736)),
+    btVector3(btScalar(-0.525730), btScalar(-0.000000), btScalar(-0.850652)),
+    btVector3(btScalar(-0.688190), btScalar(-0.499997), btScalar(-0.525736)),
+    btVector3(btScalar(-0.162456), btScalar(0.499995), btScalar(-0.850654)),
+    btVector3(btScalar(-0.688190), btScalar(0.499997), btScalar(-0.525736)),
+    btVector3(btScalar(0.262869), btScalar(0.809012), btScalar(-0.525738)),
+    btVector3(btScalar(0.951058), btScalar(0.309013), btScalar(0.000000)),
+    btVector3(btScalar(0.951058), btScalar(-0.309013), btScalar(0.000000)),
+    btVector3(btScalar(0.587786), btScalar(-0.809017), btScalar(0.000000)),
+    btVector3(btScalar(0.000000), btScalar(-1.000000), btScalar(0.000000)),
+    btVector3(btScalar(-0.587786), btScalar(-0.809017), btScalar(0.000000)),
+    btVector3(btScalar(-0.951058), btScalar(-0.309013), btScalar(-0.000000)),
+    btVector3(btScalar(-0.951058), btScalar(0.309013), btScalar(-0.000000)),
+    btVector3(btScalar(-0.587786), btScalar(0.809017), btScalar(-0.000000)),
+    btVector3(btScalar(-0.000000), btScalar(1.000000), btScalar(-0.000000)),
+    btVector3(btScalar(0.587786), btScalar(0.809017), btScalar(-0.000000)),
+    btVector3(btScalar(0.688190), btScalar(-0.499997), btScalar(0.525736)),
+    btVector3(btScalar(-0.262869), btScalar(-0.809012), btScalar(0.525738)),
+    btVector3(btScalar(-0.850648), btScalar(0.000000), btScalar(0.525736)),
+    btVector3(btScalar(-0.262869), btScalar(0.809012), btScalar(0.525738)),
+    btVector3(btScalar(0.688190), btScalar(0.499997), btScalar(0.525736)),
+    btVector3(btScalar(0.525730), btScalar(0.000000), btScalar(0.850652)),
+    btVector3(btScalar(0.162456), btScalar(-0.499995), btScalar(0.850654)),
+    btVector3(btScalar(-0.425323), btScalar(-0.309011), btScalar(0.850654)),
+    btVector3(btScalar(-0.425323), btScalar(0.309011), btScalar(0.850654)),
+    btVector3(btScalar(0.162456), btScalar(0.499995), btScalar(0.850654))
 };
-
 
 // util method
 btConvexHullShape* createConvexHull(const ShapeInfo::PointList& points) {
@@ -273,36 +270,32 @@ btTriangleIndexVertexArray* createStaticMeshArray(const ShapeInfo& info) {
 const btCollisionShape* ShapeFactory::createShapeFromInfo(const ShapeInfo& info) {
     btCollisionShape* shape = nullptr;
     int type = info.getType();
-    switch(type) {
+    switch (type) {
         case SHAPE_TYPE_BOX: {
             shape = new btBoxShape(glmToBullet(info.getHalfExtents()));
-        }
-        break;
+        } break;
         case SHAPE_TYPE_SPHERE: {
             glm::vec3 halfExtents = info.getHalfExtents();
             float radius = glm::max(halfExtents.x, glm::max(halfExtents.y, halfExtents.z));
             shape = new btSphereShape(radius);
-        }
-        break;
+        } break;
         case SHAPE_TYPE_MULTISPHERE: {
             std::vector<btVector3> positions;
             std::vector<float> radiuses;
             auto sphereCollection = info.getSphereCollection();
-            for (auto &sphereData : sphereCollection) {
+            for (auto& sphereData : sphereCollection) {
                 positions.push_back(glmToBullet(glm::vec3(sphereData)));
                 radiuses.push_back(sphereData.w);
             }
             shape = new btMultiSphereShape(positions.data(), radiuses.data(), (int)positions.size());
-        }
-        break;
+        } break;
         case SHAPE_TYPE_ELLIPSOID: {
             glm::vec3 halfExtents = info.getHalfExtents();
             float radius = halfExtents.x;
             const float MIN_RADIUS = 0.001f;
             const float MIN_RELATIVE_SPHERICAL_ERROR = 0.001f;
-            if (radius > MIN_RADIUS
-                    && fabsf(radius - halfExtents.y) / radius < MIN_RELATIVE_SPHERICAL_ERROR
-                    && fabsf(radius - halfExtents.z) / radius < MIN_RELATIVE_SPHERICAL_ERROR) {
+            if (radius > MIN_RADIUS && fabsf(radius - halfExtents.y) / radius < MIN_RELATIVE_SPHERICAL_ERROR &&
+                fabsf(radius - halfExtents.z) / radius < MIN_RELATIVE_SPHERICAL_ERROR) {
                 // close enough to true sphere
                 shape = new btSphereShape(radius);
             } else {
@@ -313,48 +306,41 @@ const btCollisionShape* ShapeFactory::createShapeFromInfo(const ShapeInfo& info)
                 }
                 shape = createConvexHull(points);
             }
-        }
-        break;
+        } break;
         case SHAPE_TYPE_CAPSULE_Y: {
             glm::vec3 halfExtents = info.getHalfExtents();
             float radius = halfExtents.x;
             float height = 2.0f * (halfExtents.y - radius);
             shape = new btCapsuleShape(radius, height);
-        }
-        break;
+        } break;
         case SHAPE_TYPE_CAPSULE_X: {
             glm::vec3 halfExtents = info.getHalfExtents();
             float radius = halfExtents.y;
             float height = 2.0f * (halfExtents.x - radius);
             shape = new btCapsuleShapeX(radius, height);
-        }
-        break;
+        } break;
         case SHAPE_TYPE_CAPSULE_Z: {
             glm::vec3 halfExtents = info.getHalfExtents();
             float radius = halfExtents.x;
             float height = 2.0f * (halfExtents.z - radius);
             shape = new btCapsuleShapeZ(radius, height);
-        }
-        break;
+        } break;
         case SHAPE_TYPE_CYLINDER_X: {
             const glm::vec3 halfExtents = info.getHalfExtents();
             const btVector3 btHalfExtents(halfExtents.x, halfExtents.y, halfExtents.z);
             shape = new btCylinderShapeX(btHalfExtents);
-        }
-        break;
+        } break;
         case SHAPE_TYPE_CYLINDER_Z: {
             const glm::vec3 halfExtents = info.getHalfExtents();
             const btVector3 btHalfExtents(halfExtents.x, halfExtents.y, halfExtents.z);
             shape = new btCylinderShapeZ(btHalfExtents);
-        }
-        break;
+        } break;
         case SHAPE_TYPE_CIRCLE:
         case SHAPE_TYPE_CYLINDER_Y: {
             const glm::vec3 halfExtents = info.getHalfExtents();
             const btVector3 btHalfExtents(halfExtents.x, halfExtents.y, halfExtents.z);
             shape = new btCylinderShape(btHalfExtents);
-        }
-        break;
+        } break;
         case SHAPE_TYPE_COMPOUND:
         case SHAPE_TYPE_SIMPLE_HULL: {
             const ShapeInfo::PointCollection& pointCollection = info.getPointCollection();
@@ -373,8 +359,7 @@ const btCollisionShape* ShapeFactory::createShapeFromInfo(const ShapeInfo& info)
                 }
                 shape = compound;
             }
-        }
-        break;
+        } break;
         case SHAPE_TYPE_SIMPLE_COMPOUND: {
             const ShapeInfo::PointCollection& pointCollection = info.getPointCollection();
             const ShapeInfo::TriangleIndices& triangleIndices = info.getTriangleIndices();
@@ -424,15 +409,13 @@ const btCollisionShape* ShapeFactory::createShapeFromInfo(const ShapeInfo& info)
                     shape = compound;
                 }
             }
-        }
-        break;
+        } break;
         case SHAPE_TYPE_STATIC_MESH: {
             btTriangleIndexVertexArray* dataArray = createStaticMeshArray(info);
             if (dataArray) {
                 shape = new StaticMeshShape(dataArray);
             }
-        }
-        break;
+        } break;
     }
     if (shape) {
         if (glm::length2(info.getOffset()) > MIN_SHAPE_OFFSET * MIN_SHAPE_OFFSET) {
@@ -469,7 +452,7 @@ void ShapeFactory::deleteShape(const btCollisionShape* shape) {
     if (nonConstShape->getShapeType() == (int)COMPOUND_SHAPE_PROXYTYPE) {
         btCompoundShape* compoundShape = static_cast<btCompoundShape*>(nonConstShape);
         const int numChildShapes = compoundShape->getNumChildShapes();
-        for (int i = 0; i < numChildShapes; i ++) {
+        for (int i = 0; i < numChildShapes; i++) {
             btCollisionShape* childShape = compoundShape->getChildShape(i);
             if (childShape->getShapeType() == (int)COMPOUND_SHAPE_PROXYTYPE) {
                 // recurse

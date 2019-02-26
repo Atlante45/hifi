@@ -11,9 +11,7 @@
 #include "DependencyManager.h"
 #include "PickManager.h"
 
-PickTransformNode::PickTransformNode(unsigned int uid) :
-    _uid(uid)
-{
+PickTransformNode::PickTransformNode(unsigned int uid) : _uid(uid) {
 }
 
 Transform PickTransformNode::getTransform() {

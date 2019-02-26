@@ -17,11 +17,11 @@
 #include <NodeList.h>
 #include <shared/ReadWriteLockable.h>
 
+#include "OctalCode.h"
 #include "OctreePacketData.h"
 #include "SequenceNumberStats.h"
-#include "OctalCode.h"
 
-#define GREENISH  0x40ff40d0
+#define GREENISH 0x40ff40d0
 #define YELLOWISH 0xffef40c0
 #define GREYISH 0xd0d0d0a0
 
@@ -35,7 +35,7 @@ public:
     void reset();
 
     OctreeSceneStats(const OctreeSceneStats& other); // copy constructor
-    OctreeSceneStats& operator= (const OctreeSceneStats& other); // copy assignment
+    OctreeSceneStats& operator=(const OctreeSceneStats& other); // copy assignment
 
     /// Call when beginning the computation of a scene. Initializes internal structures
     void sceneStarted(bool fullScene, bool moving, const OctreeElementPointer& root);
@@ -64,7 +64,8 @@ public:
     /// Track that a element was skipped as part of computation of a scene due to being out of view.
     void skippedOutOfView(const OctreeElementPointer& element);
 
-    /// Track that a element was skipped as part of computation of a scene due to previously being in view while in delta sending
+    /// Track that a element was skipped as part of computation of a scene due to previously being in view while in delta
+    /// sending
     void skippedWasInView(const OctreeElementPointer& element);
 
     /// Track that a element was skipped as part of computation of a scene due to not having changed since last full scene sent
@@ -164,7 +165,6 @@ public:
     SequenceNumberStats& getIncomingOctreeSequenceNumberStats() { return _incomingOctreeSequenceNumberStats; }
 
 private:
-
     void copyFromOther(const OctreeSceneStats& other);
 
     bool _isReadyToSend;
@@ -179,7 +179,7 @@ private:
 
     quint64 _lastFullElapsed;
     quint64 _lastFullTotalEncodeTime;
-    quint32  _lastFullTotalPackets;
+    quint32 _lastFullTotalPackets;
     quint64 _lastFullTotalBytes;
 
     SimpleMovingAverage _elapsedAverage;
@@ -246,9 +246,9 @@ private:
     //
 
     // scene network related data
-    quint32  _packets;
+    quint32 _packets;
     quint64 _bytes;
-    quint32  _passes;
+    quint32 _passes;
 
     // incoming packets stats
     quint32 _incomingPacket;
@@ -262,7 +262,6 @@ private:
     // features related items
     bool _isMoving;
     bool _isFullScene;
-
 
     static ItemInfo _ITEMS[];
     static const int MAX_ITEM_VALUE_LENGTH = 128;

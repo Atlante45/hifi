@@ -9,16 +9,17 @@
 //
 
 #include "AnimPoleVectorConstraint.h"
-#include "AnimationLogging.h"
 #include "AnimUtil.h"
+#include "AnimationLogging.h"
 #include "GLMHelpers.h"
 
 const float FRAMES_PER_SECOND = 30.0f;
 const float INTERP_DURATION = 6.0f;
 
 AnimPoleVectorConstraint::AnimPoleVectorConstraint(const QString& id, bool enabled, glm::vec3 referenceVector,
-                                                   const QString& baseJointName, const QString& midJointName, const QString& tipJointName,
-                                                   const QString& enabledVar, const QString& poleVectorVar) :
+                                                   const QString& baseJointName, const QString& midJointName,
+                                                   const QString& tipJointName, const QString& enabledVar,
+                                                   const QString& poleVectorVar) :
     AnimNode(AnimNode::Type::PoleVectorConstraint, id),
     _enabled(enabled),
     _referenceVector(referenceVector),
@@ -27,15 +28,13 @@ AnimPoleVectorConstraint::AnimPoleVectorConstraint(const QString& id, bool enabl
     _tipJointName(tipJointName),
     _enabledVar(enabledVar),
     _poleVectorVar(poleVectorVar) {
-
 }
 
 AnimPoleVectorConstraint::~AnimPoleVectorConstraint() {
-
 }
 
-const AnimPoseVec& AnimPoleVectorConstraint::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) {
-
+const AnimPoseVec& AnimPoleVectorConstraint::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                                      AnimVariantMap& triggersOut) {
     assert(_children.size() == 1);
     if (_children.size() != 1) {
         return _poses;
@@ -116,8 +115,8 @@ const AnimPoseVec& AnimPoleVectorConstraint::evaluate(const AnimVariantMap& anim
     // double check for zero length vectors or vectors parallel to rotaiton axis.
     if (axisLength > MIN_LENGTH && refVectorLength > MIN_LENGTH && sideVectorLength > MIN_LENGTH &&
         refVectorProjLength > MIN_LENGTH && poleVectorProjLength > MIN_LENGTH) {
-
-        float dot = glm::clamp(glm::dot(refVectorProj / refVectorProjLength, poleVectorProj / poleVectorProjLength), -1.0f, 1.0f);
+        float dot = glm::clamp(glm::dot(refVectorProj / refVectorProjLength, poleVectorProj / poleVectorProjLength), -1.0f,
+                               1.0f);
         float sideDot = glm::dot(poleVector, sideVector);
         float theta = copysignf(1.0f, sideDot) * acosf(dot);
 
@@ -222,7 +221,7 @@ void AnimPoleVectorConstraint::lookUpIndices() {
     assert(_skeleton);
 
     // look up bone indices by name
-    std::vector<int> indices = _skeleton->lookUpJointIndices({_baseJointName, _midJointName, _tipJointName});
+    std::vector<int> indices = _skeleton->lookUpJointIndices({ _baseJointName, _midJointName, _tipJointName });
 
     // cache the results
     _baseJointIndex = indices[0];

@@ -19,12 +19,12 @@
 
 #include "PolyLineEntityItem.h"
 
-LaserPointer::LaserPointer(const QVariant& rayProps, const RenderStateMap& renderStates, const DefaultRenderStateMap& defaultRenderStates, bool hover,
-                           const PointerTriggers& triggers, bool faceAvatar, bool followNormal, float followNormalTime, bool centerEndY, bool lockEnd,
+LaserPointer::LaserPointer(const QVariant& rayProps, const RenderStateMap& renderStates,
+                           const DefaultRenderStateMap& defaultRenderStates, bool hover, const PointerTriggers& triggers,
+                           bool faceAvatar, bool followNormal, float followNormalTime, bool centerEndY, bool lockEnd,
                            bool distanceScaleEnd, bool scaleWithParent, bool enabled) :
-    PathPointer(PickQuery::Ray, rayProps, renderStates, defaultRenderStates, hover, triggers, faceAvatar, followNormal, followNormalTime,
-                centerEndY, lockEnd, distanceScaleEnd, scaleWithParent, enabled)
-{
+    PathPointer(PickQuery::Ray, rayProps, renderStates, defaultRenderStates, hover, triggers, faceAvatar, followNormal,
+                followNormalTime, centerEndY, lockEnd, distanceScaleEnd, scaleWithParent, enabled) {
 }
 
 void LaserPointer::editRenderStatePath(const std::string& state, const QVariant& pathProps) {
@@ -124,14 +124,15 @@ void LaserPointer::setVisualPickResultInternal(PickResultPointer pickResult, Int
 }
 
 LaserPointer::RenderState::RenderState(const QUuid& startID, const QUuid& pathID, const QUuid& endID) :
-    StartEndRenderState(startID, endID), _pathID(pathID)
-{
+    StartEndRenderState(startID, endID),
+    _pathID(pathID) {
     if (!getPathID().isNull()) {
         auto entityScriptingInterface = DependencyManager::get<EntityScriptingInterface>();
         {
             EntityPropertyFlags desiredProperties;
             desiredProperties += PROP_IGNORE_PICK_INTERSECTION;
-            _pathIgnorePicks = entityScriptingInterface->getEntityProperties(getPathID(), desiredProperties).getIgnorePickIntersection();
+            _pathIgnorePicks = entityScriptingInterface->getEntityProperties(getPathID(), desiredProperties)
+                                   .getIgnorePickIntersection();
         }
         {
             EntityPropertyFlags desiredProperties;
@@ -159,9 +160,12 @@ void LaserPointer::RenderState::disable() {
     }
 }
 
-void LaserPointer::RenderState::update(const glm::vec3& origin, const glm::vec3& end, const glm::vec3& surfaceNormal, float parentScale, bool distanceScaleEnd, bool centerEndY,
-                                       bool faceAvatar, bool followNormal, float followNormalStrength, float distance, const PickResultPointer& pickResult) {
-    StartEndRenderState::update(origin, end, surfaceNormal, parentScale, distanceScaleEnd, centerEndY, faceAvatar, followNormal, followNormalStrength, distance, pickResult);
+void LaserPointer::RenderState::update(const glm::vec3& origin, const glm::vec3& end, const glm::vec3& surfaceNormal,
+                                       float parentScale, bool distanceScaleEnd, bool centerEndY, bool faceAvatar,
+                                       bool followNormal, float followNormalStrength, float distance,
+                                       const PickResultPointer& pickResult) {
+    StartEndRenderState::update(origin, end, surfaceNormal, parentScale, distanceScaleEnd, centerEndY, faceAvatar, followNormal,
+                                followNormalStrength, distance, pickResult);
     if (!getPathID().isNull()) {
         EntityItemProperties properties;
         QVector<glm::vec3> points;
@@ -178,7 +182,8 @@ void LaserPointer::RenderState::update(const glm::vec3& origin, const glm::vec3&
 }
 
 std::shared_ptr<StartEndRenderState> LaserPointer::buildRenderState(const QVariantMap& propMap) {
-    // FIXME: we have to keep using the Overlays interface here, because existing scripts use overlay properties to define pointers
+    // FIXME: we have to keep using the Overlays interface here, because existing scripts use overlay properties to define
+    // pointers
     QUuid startID;
     if (propMap["start"].isValid()) {
         QVariantMap startMap = propMap["start"].toMap();
@@ -210,7 +215,8 @@ std::shared_ptr<StartEndRenderState> LaserPointer::buildRenderState(const QVaria
     return std::make_shared<RenderState>(startID, pathID, endID);
 }
 
-PointerEvent LaserPointer::buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult, const std::string& button, bool hover) {
+PointerEvent LaserPointer::buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult,
+                                             const std::string& button, bool hover) {
     QUuid pickedID;
     glm::vec3 intersection, surfaceNormal, direction, origin;
     auto rayPickResult = std::static_pointer_cast<RayPickResult>(pickResult);
@@ -232,7 +238,8 @@ PointerEvent LaserPointer::buildPointerEvent(const PickedObject& target, const P
     TriggerState& state = hover ? _latestState : _states[button];
     float sensorToWorldScale = DependencyManager::get<AvatarManager>()->getMyAvatar()->getSensorToWorldScale();
     float deadspotSquared = TOUCH_PRESS_TO_MOVE_DEADSPOT_SQUARED * sensorToWorldScale * sensorToWorldScale;
-    bool withinDeadspot = usecTimestampNow() - state.triggerStartTime < POINTER_MOVE_DELAY && glm::distance2(pos2D, state.triggerPos2D) < deadspotSquared;
+    bool withinDeadspot = usecTimestampNow() - state.triggerStartTime < POINTER_MOVE_DELAY &&
+                          glm::distance2(pos2D, state.triggerPos2D) < deadspotSquared;
     if ((state.triggering || state.wasTriggering) && !state.deadspotExpired && withinDeadspot) {
         pos2D = state.triggerPos2D;
         intersection = state.intersection;
@@ -245,7 +252,8 @@ PointerEvent LaserPointer::buildPointerEvent(const PickedObject& target, const P
     return PointerEvent(pos2D, intersection, surfaceNormal, direction);
 }
 
-glm::vec3 LaserPointer::findIntersection(const PickedObject& pickedObject, const glm::vec3& origin, const glm::vec3& direction) {
+glm::vec3 LaserPointer::findIntersection(const PickedObject& pickedObject, const glm::vec3& origin,
+                                         const glm::vec3& direction) {
     switch (pickedObject.type) {
         case ENTITY:
         case LOCAL_ENTITY:

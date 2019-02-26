@@ -8,25 +8,19 @@
 #ifndef hifi_Pick_h
 #define hifi_Pick_h
 
-#include <memory>
 #include <stdint.h>
 #include <bitset>
+#include <memory>
 
-#include <QtCore/QUuid>
-#include <QVector>
 #include <QVariant>
+#include <QVector>
+#include <QtCore/QUuid>
 
-#include <shared/ReadWriteLockable.h>
-#include <TransformNode.h>
 #include <PickFilter.h>
+#include <TransformNode.h>
+#include <shared/ReadWriteLockable.h>
 
-enum IntersectionType {
-    NONE = 0,
-    ENTITY,
-    LOCAL_ENTITY,
-    AVATAR,
-    HUD
-};
+enum IntersectionType { NONE = 0, ENTITY, LOCAL_ENTITY, AVATAR, HUD };
 
 class PickResult {
 public:
@@ -34,9 +28,7 @@ public:
     PickResult(const QVariantMap& pickVariant) : pickVariant(pickVariant) {}
     virtual ~PickResult() = default;
 
-    virtual QVariantMap toVariantMap() const {
-        return pickVariant;
-    }
+    virtual QVariantMap toVariantMap() const { return pickVariant; }
 
     virtual bool doesIntersect() const = 0;
 
@@ -72,7 +64,7 @@ public:
      *
      * @property {number} Ray Ray picks intersect a ray with the nearest object in front of them, along a given direction.
      * @property {number} Stylus Stylus picks provide "tapping" functionality on/into flat surfaces.
-     * @property {number} Parabola Parabola picks intersect a parabola with the nearest object in front of them, with a given 
+     * @property {number} Parabola Parabola picks intersect a parabola with the nearest object in front of them, with a given
      *     initial velocity and acceleration.
      * @property {number} Collision Collision picks intersect a collision volume with avatars and entities that have collisions.
      */
@@ -90,21 +82,10 @@ public:
      * </table>
      * @typedef {number} PickType
      */
-    enum PickType {
-        Ray = 0,
-        Stylus,
-        Parabola,
-        Collision,
-        NUM_PICK_TYPES
-    };
+    enum PickType { Ray = 0, Stylus, Parabola, Collision, NUM_PICK_TYPES };
     Q_ENUM(PickType)
 
-    enum JointState {
-        JOINT_STATE_NONE = 0,
-        JOINT_STATE_LEFT_HAND,
-        JOINT_STATE_RIGHT_HAND,
-        JOINT_STATE_MOUSE
-    };
+    enum JointState { JOINT_STATE_NONE = 0, JOINT_STATE_LEFT_HAND, JOINT_STATE_RIGHT_HAND, JOINT_STATE_MOUSE };
 
     void enable(bool enabled = true);
     void disable() { enable(false); }
@@ -121,7 +102,7 @@ public:
     QVector<QUuid> getIgnoreItems() const;
     QVector<QUuid> getIncludeItems() const;
 
-    template <typename S>
+    template<typename S>
     QVector<S> getIgnoreItemsAs() const {
         QVector<S> result;
         withReadLock([&] {
@@ -132,7 +113,7 @@ public:
         return result;
     }
 
-    template <typename S>
+    template<typename S>
     QVector<S> getIncludeItemsAs() const {
         QVector<S> result;
         withReadLock([&] {
@@ -172,7 +153,9 @@ Q_DECLARE_METATYPE(PickQuery::PickType)
 template<typename T>
 class Pick : public PickQuery {
 public:
-    Pick(const T& mathPick, const PickFilter& filter, const float maxDistance, const bool enabled) : PickQuery(filter, maxDistance, enabled), _mathPick(mathPick) {}
+    Pick(const T& mathPick, const PickFilter& filter, const float maxDistance, const bool enabled) :
+        PickQuery(filter, maxDistance, enabled),
+        _mathPick(mathPick) {}
 
     virtual T getMathematicalPick() const = 0;
     virtual PickResultPointer getDefaultResult(const QVariantMap& pickVariant) const = 0;
@@ -185,12 +168,10 @@ protected:
 };
 
 namespace std {
-    template <>
-    struct hash<PickQuery::PickType> {
-        size_t operator()(const PickQuery::PickType& a) const {
-            return a;
-        }
-    };
-}
+template<>
+struct hash<PickQuery::PickType> {
+    size_t operator()(const PickQuery::PickType& a) const { return a; }
+};
+} // namespace std
 
 #endif // hifi_Pick_h

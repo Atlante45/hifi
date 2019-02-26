@@ -15,14 +15,14 @@
 #include <VersionHelpers.h>
 #endif
 
-#include <UserActivityLogger.h>
 #include <PathUtils.h>
+#include <UserActivityLogger.h>
 
 #include <controllers/UserInputMapper.h>
 
 const char* SpacemouseManager::NAME { "Spacemouse" };
 
-const float MAX_AXIS = 75.0f;  // max forward = 2x speed
+const float MAX_AXIS = 75.0f; // max forward = 2x speed
 #define LOGITECH_VENDOR_ID 0x46d
 
 #ifndef RIDEV_DEVNOTIFY
@@ -69,23 +69,20 @@ void SpacemouseManager::deactivate() {
     userInputMapper->removeDevice(deviceid);
 }
 
-void SpacemouseManager::pluginFocusOutEvent() { 
-    instance->focusOutEvent(); 
+void SpacemouseManager::pluginFocusOutEvent() {
+    instance->focusOutEvent();
 }
 
 void SpacemouseManager::pluginUpdate(float deltaTime, const controller::InputCalibrationData& inputCalibrationData) {
-    
 }
 
-SpacemouseDevice::SpacemouseDevice() : InputDevice(SpacemouseManager::NAME)
-{
+SpacemouseDevice::SpacemouseDevice() : InputDevice(SpacemouseManager::NAME) {
 }
 
 void SpacemouseDevice::focusOutEvent() {
     _axisStateMap.clear();
     _buttonPressedMap.clear();
 };
-
 
 void SpacemouseDevice::handleAxisEvent() {
     auto rotation = cc_rotation / MAX_AXIS;
@@ -103,16 +100,14 @@ void SpacemouseDevice::setButton(int lastButtonState) {
     _buttonPressedMap.insert(lastButtonState);
 }
 
-
 controller::Input::NamedVector SpacemouseDevice::getAvailableInputs() const {
     using namespace controller;
 
-
-    static const Input::NamedVector availableInputs{
+    static const Input::NamedVector availableInputs {
 
         makePair(BUTTON_1, "LeftButton"),
         makePair(BUTTON_2, "RightButton"),
-        //makePair(BUTTON_3, "BothButtons"),
+        // makePair(BUTTON_3, "BothButtons"),
         makePair(TRANSLATE_X, "TranslateX"),
         makePair(TRANSLATE_Y, "TranslateY"),
         makePair(TRANSLATE_Z, "TranslateZ"),
@@ -167,20 +162,20 @@ controller::Input::NamedPair SpacemouseDevice::makePair(SpacemouseDevice::Positi
 
 void SpacemouseDevice::update(float deltaTime, const controller::InputCalibrationData& inputCalibrationData) {
     // the update is done in the SpacemouseManager class.
-    // for windows in the nativeEventFilter the inputmapper is connected or registed or removed when an 3Dconnnexion device is attached or detached
-    // for osx the api will call DeviceAddedHandler or DeviceRemoveHandler when a 3Dconnexion device is attached or detached
+    // for windows in the nativeEventFilter the inputmapper is connected or registed or removed when an 3Dconnnexion device is
+    // attached or detached for osx the api will call DeviceAddedHandler or DeviceRemoveHandler when a 3Dconnexion device is
+    // attached or detached
 }
 
 #ifdef Q_OS_WIN
 
 bool SpacemouseManager::nativeEventFilter(const QByteArray& eventType, void* message, long* result) {
-    MSG* msg = static_cast< MSG * >(message);
+    MSG* msg = static_cast<MSG*>(message);
     return RawInputEventFilter(message, result);
 }
 
-
-//Get an initialized array of PRAWINPUTDEVICE for the 3D devices
-//pNumDevices returns the number of devices to register. Currently this is always 1.
+// Get an initialized array of PRAWINPUTDEVICE for the 3D devices
+// pNumDevices returns the number of devices to register. Currently this is always 1.
 static PRAWINPUTDEVICE GetDevicesToRegister(unsigned int* pNumDevices) {
     // Array of raw input devices to register
     static RAWINPUTDEVICE sRawInputDevices[] = {
@@ -194,8 +189,7 @@ static PRAWINPUTDEVICE GetDevicesToRegister(unsigned int* pNumDevices) {
     return sRawInputDevices;
 }
 
-
-//Detect the 3D mouse
+// Detect the 3D mouse
 bool Is3dmouseAttached() {
     unsigned int numDevicesOfInterest = 0;
     PRAWINPUTDEVICE devicesToRegister = GetDevicesToRegister(&numDevicesOfInterest);
@@ -211,7 +205,8 @@ bool Is3dmouseAttached() {
     }
 
     std::vector<RAWINPUTDEVICELIST> rawInputDeviceList(nDevices);
-    if (::GetRawInputDeviceList(&rawInputDeviceList[0], &nDevices, sizeof(RAWINPUTDEVICELIST)) == static_cast<unsigned int>(-1)) {
+    if (::GetRawInputDeviceList(&rawInputDeviceList[0], &nDevices, sizeof(RAWINPUTDEVICELIST)) ==
+        static_cast<unsigned int>(-1)) {
         return false;
     }
 
@@ -220,15 +215,15 @@ bool Is3dmouseAttached() {
         unsigned int cbSize = sizeof(rdi);
 
         if (GetRawInputDeviceInfo(rawInputDeviceList[i].hDevice, RIDI_DEVICEINFO, &rdi, &cbSize) > 0) {
-            //skip non HID and non logitec (3DConnexion) devices
+            // skip non HID and non logitec (3DConnexion) devices
             if (rdi.dwType != RIM_TYPEHID || rdi.hid.dwVendorId != LOGITECH_VENDOR_ID) {
                 continue;
             }
 
-            //check if devices matches Multi-axis Controller
+            // check if devices matches Multi-axis Controller
             for (unsigned int j = 0; j < numDevicesOfInterest; ++j) {
-                if (devicesToRegister[j].usUsage == rdi.hid.usUsage
-                    && devicesToRegister[j].usUsagePage == rdi.hid.usUsagePage) {
+                if (devicesToRegister[j].usUsage == rdi.hid.usUsage &&
+                    devicesToRegister[j].usUsagePage == rdi.hid.usUsagePage) {
                     return true;
                 }
             }
@@ -253,63 +248,72 @@ enum ConnexionPid {
 // e3dmouse_virtual_key
 enum V3dk {
     V3DK_INVALID = 0,
-    V3DK_MENU = 1, V3DK_FIT,
-    V3DK_TOP, V3DK_LEFT, V3DK_RIGHT, V3DK_FRONT, V3DK_BOTTOM, V3DK_BACK,
-    V3DK_CW, V3DK_CCW,
-    V3DK_ISO1, V3DK_ISO2,
-    V3DK_1, V3DK_2, V3DK_3, V3DK_4, V3DK_5, V3DK_6, V3DK_7, V3DK_8, V3DK_9, V3DK_10,
-    V3DK_ESC, V3DK_ALT, V3DK_SHIFT, V3DK_CTRL,
-    V3DK_ROTATE, V3DK_PANZOOM, V3DK_DOMINANT,
-    V3DK_PLUS, V3DK_MINUS
+    V3DK_MENU = 1,
+    V3DK_FIT,
+    V3DK_TOP,
+    V3DK_LEFT,
+    V3DK_RIGHT,
+    V3DK_FRONT,
+    V3DK_BOTTOM,
+    V3DK_BACK,
+    V3DK_CW,
+    V3DK_CCW,
+    V3DK_ISO1,
+    V3DK_ISO2,
+    V3DK_1,
+    V3DK_2,
+    V3DK_3,
+    V3DK_4,
+    V3DK_5,
+    V3DK_6,
+    V3DK_7,
+    V3DK_8,
+    V3DK_9,
+    V3DK_10,
+    V3DK_ESC,
+    V3DK_ALT,
+    V3DK_SHIFT,
+    V3DK_CTRL,
+    V3DK_ROTATE,
+    V3DK_PANZOOM,
+    V3DK_DOMINANT,
+    V3DK_PLUS,
+    V3DK_MINUS
 };
 
 struct tag_VirtualKeys {
     ConnexionPid pid;
     size_t nKeys;
-    V3dk *vkeys;
+    V3dk* vkeys;
 };
 
 // e3dmouse_virtual_key
-static const V3dk SpaceExplorerKeys[] = {
-    V3DK_INVALID, // there is no button 0
-    V3DK_1, V3DK_2,
-    V3DK_TOP, V3DK_LEFT, V3DK_RIGHT, V3DK_FRONT,
-    V3DK_ESC, V3DK_ALT, V3DK_SHIFT, V3DK_CTRL,
-    V3DK_FIT, V3DK_MENU,
-    V3DK_PLUS, V3DK_MINUS,
-    V3DK_ROTATE
-};
+static const V3dk SpaceExplorerKeys[] = { V3DK_INVALID, // there is no button 0
+                                          V3DK_1,       V3DK_2,    V3DK_TOP,  V3DK_LEFT,  V3DK_RIGHT,
+                                          V3DK_FRONT,   V3DK_ESC,  V3DK_ALT,  V3DK_SHIFT, V3DK_CTRL,
+                                          V3DK_FIT,     V3DK_MENU, V3DK_PLUS, V3DK_MINUS, V3DK_ROTATE };
 
-//e3dmouse_virtual_key
+// e3dmouse_virtual_key
 static const V3dk SpacePilotKeys[] = {
-    V3DK_INVALID,
-    V3DK_1, V3DK_2, V3DK_3, V3DK_4, V3DK_5, V3DK_6,
-    V3DK_TOP, V3DK_LEFT, V3DK_RIGHT, V3DK_FRONT,
-    V3DK_ESC, V3DK_ALT, V3DK_SHIFT, V3DK_CTRL,
-    V3DK_FIT, V3DK_MENU,
-    V3DK_PLUS, V3DK_MINUS,
-    V3DK_DOMINANT, V3DK_ROTATE,
+    V3DK_INVALID, V3DK_1,    V3DK_2,     V3DK_3,     V3DK_4,     V3DK_5,        V3DK_6,
+    V3DK_TOP,     V3DK_LEFT, V3DK_RIGHT, V3DK_FRONT, V3DK_ESC,   V3DK_ALT,      V3DK_SHIFT,
+    V3DK_CTRL,    V3DK_FIT,  V3DK_MENU,  V3DK_PLUS,  V3DK_MINUS, V3DK_DOMINANT, V3DK_ROTATE,
 };
 
 static const struct tag_VirtualKeys _3dmouseVirtualKeys[] = {
-    CONNEXIONPID_SPACEPILOT,
-    sizeof(SpacePilotKeys) / sizeof(SpacePilotKeys[0]),
-    const_cast<V3dk *>(SpacePilotKeys),
-    CONNEXIONPID_SPACEEXPLORER,
-    sizeof(SpaceExplorerKeys) / sizeof(SpaceExplorerKeys[0]),
-    const_cast<V3dk *>(SpaceExplorerKeys)
+    CONNEXIONPID_SPACEPILOT,    sizeof(SpacePilotKeys) / sizeof(SpacePilotKeys[0]),       const_cast<V3dk*>(SpacePilotKeys),
+    CONNEXIONPID_SPACEEXPLORER, sizeof(SpaceExplorerKeys) / sizeof(SpaceExplorerKeys[0]), const_cast<V3dk*>(SpaceExplorerKeys)
 };
 
-// Converts a hid device keycode (button identifier) of a pre-2009 3Dconnexion USB device to the standard 3d mouse virtual key definition.
-// pid USB Product ID (PID) of 3D mouse device
-// hidKeyCode  Hid keycode as retrieved from a Raw Input packet
-// return The standard 3d mouse virtual key (button identifier) or zero if an error occurs.
+// Converts a hid device keycode (button identifier) of a pre-2009 3Dconnexion USB device to the standard 3d mouse virtual key
+// definition. pid USB Product ID (PID) of 3D mouse device hidKeyCode  Hid keycode as retrieved from a Raw Input packet return
+// The standard 3d mouse virtual key (button identifier) or zero if an error occurs.
 
 // Converts a hid device keycode (button identifier) of a pre-2009 3Dconnexion USB device
 // to the standard 3d mouse virtual key definition.
 unsigned short HidToVirtualKey(unsigned long pid, unsigned short hidKeyCode) {
     unsigned short virtualkey = hidKeyCode;
-    for (size_t i = 0; i<sizeof(_3dmouseVirtualKeys) / sizeof(_3dmouseVirtualKeys[0]); ++i) {
+    for (size_t i = 0; i < sizeof(_3dmouseVirtualKeys) / sizeof(_3dmouseVirtualKeys[0]); ++i) {
         if (pid == _3dmouseVirtualKeys[i].pid) {
             if (hidKeyCode < _3dmouseVirtualKeys[i].nKeys) {
                 virtualkey = _3dmouseVirtualKeys[i].vkeys[hidKeyCode];
@@ -324,12 +328,10 @@ unsigned short HidToVirtualKey(unsigned long pid, unsigned short hidKeyCode) {
 }
 
 bool SpacemouseManager::RawInputEventFilter(void* msg, long* result) {
-
     auto userInputMapper = DependencyManager::get<UserInputMapper>();
     if (Is3dmouseAttached() && instance->getDeviceID() == controller::Input::INVALID_DEVICE) {
         userInputMapper->registerDevice(instance);
-    }
-    else if (!Is3dmouseAttached() && instance->getDeviceID() != controller::Input::INVALID_DEVICE) {
+    } else if (!Is3dmouseAttached() && instance->getDeviceID() != controller::Input::INVALID_DEVICE) {
         userInputMapper->removeDevice(instance->getDeviceID());
     }
 
@@ -350,7 +352,7 @@ bool SpacemouseManager::RawInputEventFilter(void* msg, long* result) {
     return false;
 }
 
-//Called with the processed motion data when a 3D mouse event is received
+// Called with the processed motion data when a 3D mouse event is received
 void SpacemouseManager::Move3d(HANDLE device, std::vector<float>& motionData) {
     Q_UNUSED(device);
     instance->cc_position = { motionData[0] * 1000, motionData[1] * 1000, motionData[2] * 1000 };
@@ -358,18 +360,17 @@ void SpacemouseManager::Move3d(HANDLE device, std::vector<float>& motionData) {
     instance->handleAxisEvent();
 }
 
-//Called when a 3D mouse key is pressed
+// Called when a 3D mouse key is pressed
 void SpacemouseManager::On3dmouseKeyDown(HANDLE device, int virtualKeyCode) {
     Q_UNUSED(device);
     instance->setButton(virtualKeyCode);
 }
 
-//Called when a 3D mouse key is released
+// Called when a 3D mouse key is released
 void SpacemouseManager::On3dmouseKeyUp(HANDLE device, int virtualKeyCode) {
     Q_UNUSED(device);
     instance->setButton(0);
 }
-
 
 // Initialize the window to recieve raw-input messages
 // This needs to be called initially so that Windows will send the messages from the 3D mouse to the window.
@@ -391,7 +392,7 @@ bool SpacemouseManager::InitializeRawInput(HWND hwndTarget) {
     unsigned int cbSize = sizeof(devicesToRegister[0]);
     for (size_t i = 0; i < numDevices; i++) {
         // Set the target window to use
-        //devicesToRegister[i].hwndTarget = hwndTarget;
+        // devicesToRegister[i].hwndTarget = hwndTarget;
 
         // If Vista or newer, enable receiving the WM_INPUT_DEVICE_CHANGE message.
         if (IsWindowsVistaOrGreater()) {
@@ -401,10 +402,10 @@ bool SpacemouseManager::InitializeRawInput(HWND hwndTarget) {
     return (::RegisterRawInputDevices(devicesToRegister, numDevices, cbSize) != FALSE);
 }
 
-//Get the raw input data from Windows
+// Get the raw input data from Windows
 UINT SpacemouseManager::GetRawInputBuffer(PRAWINPUT pData, PUINT pcbSize, UINT cbSizeHeader) {
-    //Includes workaround for incorrect alignment of the RAWINPUT structure on x64 os
-    //when running as Wow64 (copied directly from 3DConnexion code)
+    // Includes workaround for incorrect alignment of the RAWINPUT structure on x64 os
+    // when running as Wow64 (copied directly from 3DConnexion code)
 #ifdef _WIN64
     return ::GetRawInputBuffer(pData, pcbSize, cbSizeHeader);
 #else
@@ -436,7 +437,7 @@ UINT SpacemouseManager::GetRawInputBuffer(PRAWINPUT pData, PUINT pcbSize, UINT c
             PeekMessage(&msg, hwndTarget, WM_INPUT, WM_INPUT, PM_REMOVE);
 
             pri = NEXTRAWINPUTBLOCK(pri);
-            cbDataSize = reinterpret_cast<ULONG_PTR>(pri)-reinterpret_cast<ULONG_PTR>(pData);
+            cbDataSize = reinterpret_cast<ULONG_PTR>(pri) - reinterpret_cast<ULONG_PTR>(pData);
             if (cbDataSize >= *pcbSize) {
                 cbDataSize = *pcbSize;
                 break;
@@ -461,17 +462,17 @@ void SpacemouseManager::On3dmouseInput() {
         }
     }
 
-    DWORD dwNow = ::GetTickCount();           // Current time;
-    DWORD dwElapsedTime;                      // Elapsed time since we were last here
+    DWORD dwNow = ::GetTickCount(); // Current time;
+    DWORD dwElapsedTime; // Elapsed time since we were last here
 
     if (0 == fLast3dmouseInputTime) {
-        dwElapsedTime = 10;                    // System timer resolution
+        dwElapsedTime = 10; // System timer resolution
     } else {
         dwElapsedTime = dwNow - fLast3dmouseInputTime;
         if (fLast3dmouseInputTime > dwNow) {
             dwElapsedTime = ~dwElapsedTime + 1;
         }
-        if (dwElapsedTime<1) {
+        if (dwElapsedTime < 1) {
             dwElapsedTime = 1;
         } else if (dwElapsedTime > 500) {
             // Check for wild numbers because the device was removed while sending data
@@ -479,7 +480,7 @@ void SpacemouseManager::On3dmouseInput() {
         }
     }
 
-    //qDebug("On3DmouseInput() period is %dms\n", dwElapsedTime);
+    // qDebug("On3DmouseInput() period is %dms\n", dwElapsedTime);
 
     float mouseData2Rotation = k3dmouseAngularVelocity;
     // v = w * r,  we don't know r yet so lets assume r=1.)
@@ -498,11 +499,10 @@ void SpacemouseManager::On3dmouseInput() {
 
     std::map<HANDLE, TInputData>::iterator iterator = fDevice2Data.begin();
     while (iterator != fDevice2Data.end()) {
-
         // If we have not received data for a while send a zero event
         if ((--(iterator->second.fTimeToLive)) == 0) {
             iterator->second.fAxes.assign(6, .0);
-        } else if (!iterator->second.fIsDirty) { //!t_bPoll3dmouse &&
+        } else if (!iterator->second.fIsDirty) { //! t_bPoll3dmouse &&
             // If we are not polling then only handle the data that was actually received
             ++iterator;
             continue;
@@ -520,14 +520,14 @@ void SpacemouseManager::On3dmouseInput() {
         // Pan Zoom filter
         // See "Programming for the 3D Mouse", Section 5.1.2
         if (!i3dmouseParam.IsPanZoom()) {
-        // Pan zoom is switched off so set the translation vector values to zero
+            // Pan zoom is switched off so set the translation vector values to zero
             motionData[0] = motionData[1] = motionData[2] = 0.;
         }
 
         // Rotate filter
         // See "Programming for the 3D Mouse", Section 5.1.1
         if (!i3dmouseParam.IsRotate()) {
-        // Rotate is switched off so set the rotation vector values to zero
+            // Rotate is switched off so set the rotation vector values to zero
             motionData[3] = motionData[4] = motionData[5] = 0.;
         }
 
@@ -576,7 +576,7 @@ void SpacemouseManager::On3dmouseInput() {
     }
 }
 
-//Called when new raw input data is available
+// Called when new raw input data is available
 void SpacemouseManager::OnRawInput(UINT nInputCode, HRAWINPUT hRawInput) {
     const size_t cbSizeOfBuffer = 1024;
     BYTE pBuffer[cbSizeOfBuffer];
@@ -598,10 +598,10 @@ void SpacemouseManager::OnRawInput(UINT nInputCode, HRAWINPUT hRawInput) {
         qDebug("GetRawInputBuffer returned error %d\n", GetLastError());
     }
 
-    while (nCount>0 && nCount != static_cast<UINT>(-1)) {
+    while (nCount > 0 && nCount != static_cast<UINT>(-1)) {
         PRAWINPUT pri = pRawInput;
         UINT nInput;
-        for (nInput = 0; nInput<nCount; ++nInput) {
+        for (nInput = 0; nInput < nCount; ++nInput) {
             b3dmouseInput |= TranslateRawInputData(nInputCode, pri);
             // clean the buffer
             ::DefRawInputProc(&pri, 1, sizeof(RAWINPUTHEADER));
@@ -643,20 +643,17 @@ bool SpacemouseManager::TranslateRawInputData(UINT nInputCode, PRAWINPUT pRawInp
     if (::GetRawInputDeviceInfo(pRawInput->header.hDevice, RIDI_DEVICEINFO, &sRidDeviceInfo, &cbSize) == cbSize) {
         if (TRACE_RIDI_DEVICEINFO == 1) {
             switch (sRidDeviceInfo.dwType) {
-            case RIM_TYPEMOUSE:
-                qDebug("\tsRidDeviceInfo.dwType=RIM_TYPEMOUSE\n");
-                break;
-            case RIM_TYPEKEYBOARD:
-                qDebug("\tsRidDeviceInfo.dwType=RIM_TYPEKEYBOARD\n");
-                break;
-            case RIM_TYPEHID:
-                qDebug("\tsRidDeviceInfo.dwType=RIM_TYPEHID\n");
-                qDebug("\tVendor=0x%x\n\tProduct=0x%x\n\tUsagePage=0x%x\n\tUsage=0x%x\n",
-                    sRidDeviceInfo.hid.dwVendorId,
-                    sRidDeviceInfo.hid.dwProductId,
-                    sRidDeviceInfo.hid.usUsagePage,
-                    sRidDeviceInfo.hid.usUsage);
-                break;
+                case RIM_TYPEMOUSE:
+                    qDebug("\tsRidDeviceInfo.dwType=RIM_TYPEMOUSE\n");
+                    break;
+                case RIM_TYPEKEYBOARD:
+                    qDebug("\tsRidDeviceInfo.dwType=RIM_TYPEKEYBOARD\n");
+                    break;
+                case RIM_TYPEHID:
+                    qDebug("\tsRidDeviceInfo.dwType=RIM_TYPEHID\n");
+                    qDebug("\tVendor=0x%x\n\tProduct=0x%x\n\tUsagePage=0x%x\n\tUsage=0x%x\n", sRidDeviceInfo.hid.dwVendorId,
+                           sRidDeviceInfo.hid.dwProductId, sRidDeviceInfo.hid.usUsagePage, sRidDeviceInfo.hid.usUsage);
+                    break;
             }
         }
 
@@ -671,9 +668,9 @@ bool SpacemouseManager::TranslateRawInputData(UINT nInputCode, PRAWINPUT pRawInp
                     deviceData.fAxes[1] = static_cast<float>(pnRawData[1]);
                     deviceData.fAxes[2] = static_cast<float>(pnRawData[2]);
 
-                    //qDebug("Pan/Zoom RI Data =\t0x%x,\t0x%x,\t0x%x\n", pnRawData[0], pnRawData[1], pnRawData[2]);
+                    // qDebug("Pan/Zoom RI Data =\t0x%x,\t0x%x,\t0x%x\n", pnRawData[0], pnRawData[1], pnRawData[2]);
 
-                    //if (pRawInput->data.hid.dwSizeHid >= 13) { // Highspeed package
+                    // if (pRawInput->data.hid.dwSizeHid >= 13) { // Highspeed package
                     //    // Cache the rotation data
                     //    deviceData.fAxes[3] = static_cast<float>(pnRawData[3]);
                     //    deviceData.fAxes[4] = static_cast<float>(pnRawData[4]);
@@ -700,7 +697,7 @@ bool SpacemouseManager::TranslateRawInputData(UINT nInputCode, PRAWINPUT pRawInp
                     deviceData.fAxes[5] = static_cast<float>(pnRawData[2]);
                     deviceData.fIsDirty = true;
 
-                    //qDebug("Rotation RI Data =\t0x%x,\t0x%x,\t0x%x\n", pnRawData[0], pnRawData[1], pnRawData[2]);
+                    // qDebug("Rotation RI Data =\t0x%x,\t0x%x,\t0x%x\n", pnRawData[0], pnRawData[1], pnRawData[2]);
 
                     return true;
                 }
@@ -710,7 +707,7 @@ bool SpacemouseManager::TranslateRawInputData(UINT nInputCode, PRAWINPUT pRawInp
 
                 unsigned long dwKeystate = *reinterpret_cast<unsigned long*>(&pRawInput->data.hid.bRawData[1]);
 
-                //qDebug("ButtonData =0x%x\n", dwKeystate);
+                // qDebug("ButtonData =0x%x\n", dwKeystate);
 
                 // Log the keystate changes
                 unsigned long dwOldKeystate = fDevice2Keystate[pRawInput->header.hDevice];
@@ -724,7 +721,7 @@ bool SpacemouseManager::TranslateRawInputData(UINT nInputCode, PRAWINPUT pRawInp
                 if (bIsForeground) {
                     unsigned long dwChange = dwKeystate ^ dwOldKeystate;
 
-                    for (int nKeycode = 1; nKeycode<33; nKeycode++) {
+                    for (int nKeycode = 1; nKeycode < 33; nKeycode++) {
                         if (dwChange & 0x01) {
                             int nVirtualKeyCode = HidToVirtualKey(sRidDeviceInfo.hid.dwProductId, nKeycode);
                             if (nVirtualKeyCode) {
@@ -752,19 +749,18 @@ MouseParameters::MouseParameters() :
     fIsLockHorizon(true),
     fIsPanZoom(true),
     fIsRotate(true),
-    fSpeed(SPEED_LOW)
-{
+    fSpeed(SPEED_LOW) {
 }
 
-bool MouseParameters::IsPanZoom()  const {
+bool MouseParameters::IsPanZoom() const {
     return fIsPanZoom;
 }
 
-bool MouseParameters::IsRotate()  const {
+bool MouseParameters::IsRotate() const {
     return fIsRotate;
 }
 
-MouseParameters::Speed MouseParameters::GetSpeed()  const {
+MouseParameters::Speed MouseParameters::GetSpeed() const {
     return fSpeed;
 }
 
@@ -822,7 +818,7 @@ static SpacemouseDeviceState lastState;
 
 static void DeviceAddedHandler(unsigned int connection);
 static void DeviceRemovedHandler(unsigned int connection);
-static void MessageHandler(unsigned int connection, unsigned int messageType, void *messageArgument);
+static void MessageHandler(unsigned int connection, unsigned int messageType, void* messageArgument);
 
 void SpacemouseManager::toggleSpacemouse(bool shouldEnable) {
     if (shouldEnable && !Is3dmouseAttached()) {
@@ -839,16 +835,18 @@ void SpacemouseManager::init() {
         // Install message handler and register our client
         InstallConnexionHandlers(MessageHandler, DeviceAddedHandler, DeviceRemovedHandler);
         // Either use this to take over in our application only... does not work
-        // fConnexionClientID = RegisterConnexionClient('MCTt', "\pConnexion Client Test", kConnexionClientModeTakeOver, kConnexionMaskAll);
+        // fConnexionClientID = RegisterConnexionClient('MCTt', "\pConnexion Client Test", kConnexionClientModeTakeOver,
+        // kConnexionMaskAll);
 
         // ...or use this to take over system-wide
-        fConnexionClientID = RegisterConnexionClient(kConnexionClientWildcard, NULL, kConnexionClientModeTakeOver, kConnexionMaskAll);
+        fConnexionClientID = RegisterConnexionClient(kConnexionClientWildcard, NULL, kConnexionClientModeTakeOver,
+                                                     kConnexionMaskAll);
         memcpy(&instance->clientId, &fConnexionClientID, (long)sizeof(int));
 
         // A separate API call is required to capture buttons beyond the first 8
         SetConnexionClientButtonMask(fConnexionClientID, kConnexionMaskAllButtons);
 
-        // use default switches 
+        // use default switches
         ConnexionClientControl(fConnexionClientID, kConnexionCtlSetSwitches, kConnexionSwitchesDisabled, NULL);
 
         if (Is3dmouseAttached() && instance->getDeviceID() == controller::Input::INVALID_DEVICE) {
@@ -856,8 +854,9 @@ void SpacemouseManager::init() {
             userInputMapper->registerDevice(instance);
             emit deviceConnected(getName());
         }
-        //let one axis be dominant
-        //ConnexionClientControl(fConnexionClientID, kConnexionCtlSetSwitches, kConnexionSwitchDominant | kConnexionSwitchEnableAll, NULL);
+        // let one axis be dominant
+        // ConnexionClientControl(fConnexionClientID, kConnexionCtlSetSwitches, kConnexionSwitchDominant |
+        // kConnexionSwitchEnableAll, NULL);
     }
 }
 
@@ -907,31 +906,30 @@ bool SpacemouseManager::Is3dmouseAttached() {
     return false;
 }
 
-void MessageHandler(unsigned int connection, unsigned int messageType, void *messageArgument) {
-    SpacemouseDeviceState *state;
+void MessageHandler(unsigned int connection, unsigned int messageType, void* messageArgument) {
+    SpacemouseDeviceState* state;
 
     switch (messageType) {
-    case kConnexionMsgDeviceState:
-        state = (SpacemouseDeviceState*)messageArgument;
-        if (state->client == fConnexionClientID) {
-            instance->cc_position = { state->axis[0], state->axis[1], state->axis[2] };
-            instance->cc_rotation = { state->axis[3], state->axis[4], state->axis[5] };
+        case kConnexionMsgDeviceState:
+            state = (SpacemouseDeviceState*)messageArgument;
+            if (state->client == fConnexionClientID) {
+                instance->cc_position = { state->axis[0], state->axis[1], state->axis[2] };
+                instance->cc_rotation = { state->axis[3], state->axis[4], state->axis[5] };
 
-            instance->handleAxisEvent();
-            if (state->buttons != lastState.buttons) {
-                instance->setButton(state->buttons);
+                instance->handleAxisEvent();
+                if (state->buttons != lastState.buttons) {
+                    instance->setButton(state->buttons);
+                }
+                memmove(&lastState, state, (long)sizeof(SpacemouseDeviceState));
             }
-            memmove(&lastState, state, (long)sizeof(SpacemouseDeviceState));
-        }
-        break;
-    case kConnexionMsgPrefsChanged:
-        // the prefs have changed, do something
-        break;
-    default:
-        // other messageTypes can happen and should be ignored
-        break;
+            break;
+        case kConnexionMsgPrefsChanged:
+            // the prefs have changed, do something
+            break;
+        default:
+            // other messageTypes can happen and should be ignored
+            break;
     }
-
 }
 
 #endif // __APPLE__

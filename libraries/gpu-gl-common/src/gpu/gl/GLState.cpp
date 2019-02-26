@@ -13,13 +13,11 @@
 #endif
 #endif
 
-
 #include "GLState.h"
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
-
 
 #include "GLBackend.h"
 
@@ -47,44 +45,38 @@ const GLState::Commands makeResetStateCommands() {
     const State::Data DEFAULT = State::Data();
 
     auto depthBiasCommand = std::make_shared<CommandDepthBias>(&GLBackend::do_setStateDepthBias,
-        Vec2(DEFAULT.depthBias, DEFAULT.depthBiasSlopeScale));
+                                                               Vec2(DEFAULT.depthBias, DEFAULT.depthBiasSlopeScale));
     auto stencilCommand = std::make_shared<CommandStencil>(&GLBackend::do_setStateStencil, DEFAULT.stencilActivation,
-        DEFAULT.stencilTestFront, DEFAULT.stencilTestBack);
+                                                           DEFAULT.stencilTestFront, DEFAULT.stencilTestBack);
 
     // The state commands to reset to default,
     // WARNING depending on the order of the State::Field enum
-    return {
-        std::make_shared<Command1I>(&GLBackend::do_setStateFillMode, DEFAULT.fillMode),
-        std::make_shared<Command1I>(&GLBackend::do_setStateCullMode, DEFAULT.cullMode),
-        std::make_shared<Command1B>(&GLBackend::do_setStateFrontFaceClockwise, DEFAULT.flags.frontFaceClockwise),
-        std::make_shared<Command1B>(&GLBackend::do_setStateDepthClampEnable, DEFAULT.flags.depthClampEnable),
-        std::make_shared<Command1B>(&GLBackend::do_setStateScissorEnable, DEFAULT.flags.scissorEnable),
-        std::make_shared<Command1B>(&GLBackend::do_setStateMultisampleEnable, DEFAULT.flags.multisampleEnable),
-        std::make_shared<Command1B>(&GLBackend::do_setStateAntialiasedLineEnable, DEFAULT.flags.antialisedLineEnable),
+    return { std::make_shared<Command1I>(&GLBackend::do_setStateFillMode, DEFAULT.fillMode),
+             std::make_shared<Command1I>(&GLBackend::do_setStateCullMode, DEFAULT.cullMode),
+             std::make_shared<Command1B>(&GLBackend::do_setStateFrontFaceClockwise, DEFAULT.flags.frontFaceClockwise),
+             std::make_shared<Command1B>(&GLBackend::do_setStateDepthClampEnable, DEFAULT.flags.depthClampEnable),
+             std::make_shared<Command1B>(&GLBackend::do_setStateScissorEnable, DEFAULT.flags.scissorEnable),
+             std::make_shared<Command1B>(&GLBackend::do_setStateMultisampleEnable, DEFAULT.flags.multisampleEnable),
+             std::make_shared<Command1B>(&GLBackend::do_setStateAntialiasedLineEnable, DEFAULT.flags.antialisedLineEnable),
 
-        // Depth bias has 2 fields in State but really one call in GLBackend
-        CommandPointer(depthBiasCommand),
-        CommandPointer(depthBiasCommand),
+             // Depth bias has 2 fields in State but really one call in GLBackend
+             CommandPointer(depthBiasCommand), CommandPointer(depthBiasCommand),
 
-        std::make_shared<CommandDepthTest>(&GLBackend::do_setStateDepthTest, DEFAULT.depthTest),
+             std::make_shared<CommandDepthTest>(&GLBackend::do_setStateDepthTest, DEFAULT.depthTest),
 
-        // Depth bias has 3 fields in State but really one call in GLBackend
-        CommandPointer(stencilCommand),
-        CommandPointer(stencilCommand),
-        CommandPointer(stencilCommand),
+             // Depth bias has 3 fields in State but really one call in GLBackend
+             CommandPointer(stencilCommand), CommandPointer(stencilCommand), CommandPointer(stencilCommand),
 
-        std::make_shared<Command1U>(&GLBackend::do_setStateSampleMask, DEFAULT.sampleMask),
+             std::make_shared<Command1U>(&GLBackend::do_setStateSampleMask, DEFAULT.sampleMask),
 
-        std::make_shared<Command1B>(&GLBackend::do_setStateAlphaToCoverageEnable, DEFAULT.flags.alphaToCoverageEnable),
+             std::make_shared<Command1B>(&GLBackend::do_setStateAlphaToCoverageEnable, DEFAULT.flags.alphaToCoverageEnable),
 
-        std::make_shared<CommandBlend>(&GLBackend::do_setStateBlend, DEFAULT.blendFunction),
+             std::make_shared<CommandBlend>(&GLBackend::do_setStateBlend, DEFAULT.blendFunction),
 
-        std::make_shared<Command1U>(&GLBackend::do_setStateColorWriteMask, DEFAULT.colorWriteMask)
-    };
+             std::make_shared<Command1U>(&GLBackend::do_setStateColorWriteMask, DEFAULT.colorWriteMask) };
 }
 
 const GLState::Commands GLState::_resetStateCommands = makeResetStateCommands();
-
 
 void generateFillMode(GLState::Commands& commands, State::FillMode fillMode) {
     commands.push_back(std::make_shared<Command1I>(&GLBackend::do_setStateFillMode, int32(fillMode)));
@@ -115,7 +107,8 @@ void generateAntialiasedLineEnable(GLState::Commands& commands, bool enable) {
 }
 
 void generateDepthBias(GLState::Commands& commands, const State& state) {
-    commands.push_back(std::make_shared<CommandDepthBias>(&GLBackend::do_setStateDepthBias, Vec2(state.getDepthBias(), state.getDepthBiasSlopeScale())));
+    commands.push_back(std::make_shared<CommandDepthBias>(&GLBackend::do_setStateDepthBias,
+                                                          Vec2(state.getDepthBias(), state.getDepthBiasSlopeScale())));
 }
 
 void generateDepthTest(GLState::Commands& commands, const State::DepthTest& test) {
@@ -123,7 +116,8 @@ void generateDepthTest(GLState::Commands& commands, const State::DepthTest& test
 }
 
 void generateStencil(GLState::Commands& commands, const State& state) {
-    commands.push_back(std::make_shared<CommandStencil>(&GLBackend::do_setStateStencil, state.getStencilActivation(), state.getStencilTestFront(), state.getStencilTestBack()));
+    commands.push_back(std::make_shared<CommandStencil>(&GLBackend::do_setStateStencil, state.getStencilActivation(),
+                                                        state.getStencilTestFront(), state.getStencilTestBack()));
 }
 
 void generateAlphaToCoverageEnable(GLState::Commands& commands, bool enable) {
@@ -168,69 +162,69 @@ GLState* GLState::sync(const State& state) {
     for (int i = 0; i < State::NUM_FIELDS; i++) {
         if (state.getSignature()[i]) {
             switch (i) {
-            case State::FILL_MODE: {
-                generateFillMode(object->_commands, state.getFillMode());
-                break;
-            }
-            case State::CULL_MODE: {
-                generateCullMode(object->_commands, state.getCullMode());
-                break;
-            }
-            case State::DEPTH_BIAS:
-            case State::DEPTH_BIAS_SLOPE_SCALE: {
-                depthBias = true;
-                break;
-            }
-            case State::FRONT_FACE_CLOCKWISE: {
-                generateFrontFaceClockwise(object->_commands, state.isFrontFaceClockwise());
-                break;
-            }
-            case State::DEPTH_CLAMP_ENABLE: {
-                generateDepthClampEnable(object->_commands, state.isDepthClampEnable());
-                break;
-            }
-            case State::SCISSOR_ENABLE: {
-                generateScissorEnable(object->_commands, state.isScissorEnable());
-                break;
-            }
-            case State::MULTISAMPLE_ENABLE: {
-                generateMultisampleEnable(object->_commands, state.isMultisampleEnable());
-                break;
-            }
-            case State::ANTIALISED_LINE_ENABLE: {
-                generateAntialiasedLineEnable(object->_commands, state.isAntialiasedLineEnable());
-                break;
-            }
-            case State::DEPTH_TEST: {
-                generateDepthTest(object->_commands, state.getDepthTest());
-                break;
-            }
+                case State::FILL_MODE: {
+                    generateFillMode(object->_commands, state.getFillMode());
+                    break;
+                }
+                case State::CULL_MODE: {
+                    generateCullMode(object->_commands, state.getCullMode());
+                    break;
+                }
+                case State::DEPTH_BIAS:
+                case State::DEPTH_BIAS_SLOPE_SCALE: {
+                    depthBias = true;
+                    break;
+                }
+                case State::FRONT_FACE_CLOCKWISE: {
+                    generateFrontFaceClockwise(object->_commands, state.isFrontFaceClockwise());
+                    break;
+                }
+                case State::DEPTH_CLAMP_ENABLE: {
+                    generateDepthClampEnable(object->_commands, state.isDepthClampEnable());
+                    break;
+                }
+                case State::SCISSOR_ENABLE: {
+                    generateScissorEnable(object->_commands, state.isScissorEnable());
+                    break;
+                }
+                case State::MULTISAMPLE_ENABLE: {
+                    generateMultisampleEnable(object->_commands, state.isMultisampleEnable());
+                    break;
+                }
+                case State::ANTIALISED_LINE_ENABLE: {
+                    generateAntialiasedLineEnable(object->_commands, state.isAntialiasedLineEnable());
+                    break;
+                }
+                case State::DEPTH_TEST: {
+                    generateDepthTest(object->_commands, state.getDepthTest());
+                    break;
+                }
 
-            case State::STENCIL_ACTIVATION:
-            case State::STENCIL_TEST_FRONT:
-            case State::STENCIL_TEST_BACK: {
-                stencilState = true;
-                break;
-            }
+                case State::STENCIL_ACTIVATION:
+                case State::STENCIL_TEST_FRONT:
+                case State::STENCIL_TEST_BACK: {
+                    stencilState = true;
+                    break;
+                }
 
-            case State::SAMPLE_MASK: {
-                generateSampleMask(object->_commands, state.getSampleMask());
-                break;
-            }
-            case State::ALPHA_TO_COVERAGE_ENABLE: {
-                generateAlphaToCoverageEnable(object->_commands, state.isAlphaToCoverageEnabled());
-                break;
-            }
+                case State::SAMPLE_MASK: {
+                    generateSampleMask(object->_commands, state.getSampleMask());
+                    break;
+                }
+                case State::ALPHA_TO_COVERAGE_ENABLE: {
+                    generateAlphaToCoverageEnable(object->_commands, state.isAlphaToCoverageEnabled());
+                    break;
+                }
 
-            case State::BLEND_FUNCTION: {
-                generateBlend(object->_commands, state);
-                break;
-            }
+                case State::BLEND_FUNCTION: {
+                    generateBlend(object->_commands, state);
+                    break;
+                }
 
-            case State::COLOR_WRITE_MASK: {
-                generateColorWriteMask(object->_commands, state.getColorWriteMask());
-                break;
-            }
+                case State::COLOR_WRITE_MASK: {
+                    generateColorWriteMask(object->_commands, state.getColorWriteMask());
+                    break;
+                }
             }
         }
     }
@@ -245,4 +239,3 @@ GLState* GLState::sync(const State& state) {
 
     return object;
 }
-

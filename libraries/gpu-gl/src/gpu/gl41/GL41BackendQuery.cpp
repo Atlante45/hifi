@@ -14,10 +14,11 @@
 
 using namespace gpu;
 using namespace gpu::gl;
-using namespace gpu::gl41; 
+using namespace gpu::gl41;
 
 class GL41Query : public GLQuery {
     using Parent = GLQuery;
+
 public:
     static GLuint allocateQuery() {
         GLuint result;
@@ -25,8 +26,8 @@ public:
         return result;
     }
 
-    GL41Query(const std::weak_ptr<GLBackend>& backend, const Query& query)
-        : Parent(backend, query, allocateQuery(), allocateQuery()) { }
+    GL41Query(const std::weak_ptr<GLBackend>& backend, const Query& query) :
+        Parent(backend, query, allocateQuery(), allocateQuery()) {}
 };
 
 GLQuery* GL41Backend::syncGPUObject(const Query& query) {

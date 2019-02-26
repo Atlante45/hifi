@@ -11,37 +11,37 @@
 #ifndef hifi_workload_SpaceClassifier_h
 #define hifi_workload_SpaceClassifier_h
 
-#include "ViewTask.h"
 #include "RegionTracker.h"
+#include "ViewTask.h"
 
 namespace workload {
-    class SpaceClassifierTask {
-    public:
-        using Inputs = Views;
-        using Outputs = RegionTracker::Outputs;
-        using JobModel = Task::ModelIO<SpaceClassifierTask, Inputs, Outputs>;
-        void build(JobModel& model, const Varying& in, Varying& out);
-    };
+class SpaceClassifierTask {
+public:
+    using Inputs = Views;
+    using Outputs = RegionTracker::Outputs;
+    using JobModel = Task::ModelIO<SpaceClassifierTask, Inputs, Outputs>;
+    void build(JobModel& model, const Varying& in, Varying& out);
+};
 
+class PerformSpaceTransactionConfig : public Job::Config {
+    Q_OBJECT
+public:
+signals:
+    void dirty();
 
-    class PerformSpaceTransactionConfig : public Job::Config {
-        Q_OBJECT
-    public:
-    signals :
-        void dirty();
+protected:
+};
 
-    protected:
-    };
+class PerformSpaceTransaction {
+public:
+    using Config = PerformSpaceTransactionConfig;
+    using JobModel = Job::Model<PerformSpaceTransaction, Config>;
 
-    class PerformSpaceTransaction {
-    public:
-        using Config = PerformSpaceTransactionConfig;
-        using JobModel = Job::Model<PerformSpaceTransaction, Config>;
+    void configure(const Config& config);
+    void run(const WorkloadContextPointer& context);
 
-        void configure(const Config& config);
-        void run(const WorkloadContextPointer& context);
-    protected:
-    };
+protected:
+};
 } // namespace workload
 
 #endif // hifi_workload_SpaceClassifier_h

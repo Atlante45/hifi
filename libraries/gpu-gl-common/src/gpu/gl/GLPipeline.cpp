@@ -8,9 +8,9 @@
 
 #include "GLPipeline.h"
 
+#include "GLBackend.h"
 #include "GLShader.h"
 #include "GLState.h"
-#include "GLBackend.h"
 
 using namespace gpu;
 using namespace gpu::gl;

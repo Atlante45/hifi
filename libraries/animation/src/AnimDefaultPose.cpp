@@ -10,17 +10,14 @@
 
 #include "AnimDefaultPose.h"
 
-AnimDefaultPose::AnimDefaultPose(const QString& id) :
-    AnimNode(AnimNode::Type::DefaultPose, id)
-{
-
+AnimDefaultPose::AnimDefaultPose(const QString& id) : AnimNode(AnimNode::Type::DefaultPose, id) {
 }
 
 AnimDefaultPose::~AnimDefaultPose() {
-
 }
 
-const AnimPoseVec& AnimDefaultPose::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) {
+const AnimPoseVec& AnimDefaultPose::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                             AnimVariantMap& triggersOut) {
     if (_skeleton) {
         _poses = _skeleton->getRelativeDefaultPoses();
     } else {

@@ -19,14 +19,14 @@
 
 #include <PortableHighResolutionClock.h>
 
+#include "../HifiSockAddr.h"
 #include "ConnectionStats.h"
 #include "Constants.h"
 #include "LossList.h"
 #include "SendQueue.h"
-#include "../HifiSockAddr.h"
 
 namespace udt {
-    
+
 class CongestionControl;
 class ControlPacket;
 class Packet;
@@ -38,7 +38,7 @@ public:
     void enqueuePacket(std::unique_ptr<Packet> packet);
     bool hasAvailablePackets() const;
     std::unique_ptr<Packet> removeNextPacket();
-    
+
     std::list<std::unique_ptr<Packet>> _packets;
 
 private:
@@ -51,7 +51,7 @@ class Connection : public QObject {
     Q_OBJECT
 public:
     using ControlPacketPointer = std::unique_ptr<ControlPacket>;
-    
+
     Connection(Socket* parentSocket, HifiSockAddr destination, std::unique_ptr<CongestionControl> congestionControl);
     virtual ~Connection();
 
@@ -65,7 +65,7 @@ public:
     void processControl(ControlPacketPointer controlPacket);
 
     void queueReceivedMessagePacket(std::unique_ptr<Packet> packet);
-    
+
     ConnectionStats::Stats sampleStats() { return _stats.sample(); }
 
     HifiSockAddr getDestination() const { return _destination; }
@@ -73,7 +73,7 @@ public:
     void setMaxBandwidth(int maxBandwidth);
 
     void sendHandshakeRequest();
-    
+
     void recordSentUnreliablePackets(int wireSize, int payloadSize);
     void recordReceivedUnreliablePackets(int wireSize, int payloadSize);
 
@@ -83,50 +83,54 @@ signals:
 
 private slots:
     void recordSentPackets(int wireSize, int payloadSize, SequenceNumber seqNum, p_high_resolution_clock::time_point timePoint);
-    void recordRetransmission(int wireSize, int payloadSize, SequenceNumber sequenceNumber, p_high_resolution_clock::time_point timePoint);
+    void recordRetransmission(int wireSize, int payloadSize, SequenceNumber sequenceNumber,
+                              p_high_resolution_clock::time_point timePoint);
 
     void queueInactive();
     void queueTimeout();
-    
+
 private:
     void sendACK();
-    
+
     void processACK(ControlPacketPointer controlPacket);
     void processHandshake(ControlPacketPointer controlPacket);
     void processHandshakeACK(ControlPacketPointer controlPacket);
-    
+
     void resetReceiveState();
-    
+
     SendQueue& getSendQueue();
     SequenceNumber nextACK() const;
-    
+
     void updateCongestionControlAndSendQueue(std::function<void()> congestionCallback);
-    
+
     void stopSendQueue();
-    
+
     bool _hasReceivedHandshake { false }; // flag for receipt of handshake from server
     bool _hasReceivedHandshakeACK { false }; // flag for receipt of handshake ACK from client
     bool _didRequestHandshake { false }; // flag for request of handshake from server
-   
-    p_high_resolution_clock::time_point _connectionStart = p_high_resolution_clock::now(); // holds the time_point for creation of this connection
+
+    p_high_resolution_clock::time_point
+        _connectionStart = p_high_resolution_clock::now(); // holds the time_point for creation of this connection
     p_high_resolution_clock::time_point _lastReceiveTime; // holds the last time we received anything from sender
 
-    SequenceNumber _initialSequenceNumber; // Randomized on Connection creation, identifies connection during re-connect requests
-    SequenceNumber _initialReceiveSequenceNumber; // Randomized by peer Connection on creation, identifies connection during re-connect requests
+    SequenceNumber
+        _initialSequenceNumber; // Randomized on Connection creation, identifies connection during re-connect requests
+    SequenceNumber _initialReceiveSequenceNumber; // Randomized by peer Connection on creation, identifies connection during
+                                                  // re-connect requests
 
     MessageNumber _lastMessageNumber { 0 };
 
     LossList _lossList; // List of all missing packets
     SequenceNumber _lastReceivedSequenceNumber; // The largest sequence number received from the peer
     SequenceNumber _lastReceivedACK; // The last ACK received
-    
+
     Socket* _parentSocket { nullptr };
     HifiSockAddr _destination;
-   
+
     std::unique_ptr<CongestionControl> _congestionControl;
-   
+
     std::unique_ptr<SendQueue> _sendQueue;
-    
+
     std::map<MessageNumber, PendingReceivedMessage> _pendingReceivedMessages;
 
     // Re-used control packets
@@ -135,7 +139,7 @@ private:
 
     ConnectionStats _stats;
 };
-    
-}
+
+} // namespace udt
 
 #endif // hifi_Connection_h

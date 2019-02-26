@@ -8,10 +8,7 @@
 
 #include "MaterialMappingMode.h"
 
-const char* materialMappingModeNames[] = {
-    "uv",
-    "projected"
-};
+const char* materialMappingModeNames[] = { "uv", "projected" };
 
 static const size_t MATERIAL_MODE_NAMES = (sizeof(materialMappingModeNames) / sizeof(materialMappingModeNames[0]));
 

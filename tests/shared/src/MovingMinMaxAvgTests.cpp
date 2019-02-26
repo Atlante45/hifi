@@ -20,7 +20,6 @@
 #include <test-utils/GLMTestUtils.h>
 #include <test-utils/QTestExtensions.h>
 
-
 QTEST_MAIN(MovingMinMaxAvgTests)
 
 quint64 MovingMinMaxAvgTests::randQuint64() {
@@ -52,7 +51,6 @@ void MovingMinMaxAvgTests::testQuint64() {
     QQueue<quint64> windowSamples;
     // fill window samples
     for (int i = 0; i < 100000; i++) {
-
         quint64 sample = randQuint64();
 
         windowSamples.enqueue(sample);
@@ -69,10 +67,10 @@ void MovingMinMaxAvgTests::testQuint64() {
 
         QCOMPARE(stats.getMin(), min);
         QCOMPARE(stats.getMax(), max);
-        
-        QCOMPARE_WITH_ABS_ERROR((float) stats.getAverage() / (float) average, 1.0f, EPSILON);
-        QCOMPARE_WITH_ABS_ERROR((float) stats.getAverage(), (float) average, EPSILON);
-        
+
+        QCOMPARE_WITH_ABS_ERROR((float)stats.getAverage() / (float)average, 1.0f, EPSILON);
+        QCOMPARE_WITH_ABS_ERROR((float)stats.getAverage(), (float)average, EPSILON);
+
         if ((i + 1) % INTERVAL_LENGTH == 0) {
             QVERIFY(stats.getNewStatsAvailableFlag());
             stats.clearNewStatsAvailableFlag();
@@ -116,7 +114,6 @@ void MovingMinMaxAvgTests::testInt() {
     QQueue<int> windowSamples;
     // fill window samples
     for (int i = 0; i < 100000; i++) {
-
         int sample = rand();
 
         windowSamples.enqueue(sample);
@@ -136,7 +133,6 @@ void MovingMinMaxAvgTests::testInt() {
         QCOMPARE_WITH_ABS_ERROR((float)stats.getAverage(), (float)average, EPSILON);
 
         if ((i + 1) % INTERVAL_LENGTH == 0) {
-
             QVERIFY(stats.getNewStatsAvailableFlag());
             stats.clearNewStatsAvailableFlag();
 
@@ -179,7 +175,6 @@ void MovingMinMaxAvgTests::testFloat() {
     QQueue<float> windowSamples;
     // fill window samples
     for (int i = 0; i < 100000; i++) {
-
         float sample = randFloat();
 
         windowSamples.enqueue(sample);
@@ -199,7 +194,6 @@ void MovingMinMaxAvgTests::testFloat() {
         QCOMPARE_WITH_ABS_ERROR((float)stats.getAverage(), (float)average, EPSILON);
 
         if ((i + 1) % INTERVAL_LENGTH == 0) {
-
             QVERIFY(stats.getNewStatsAvailableFlag());
             stats.clearNewStatsAvailableFlag();
 

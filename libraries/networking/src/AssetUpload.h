@@ -25,32 +25,23 @@
 class AssetUpload : public QObject {
     Q_OBJECT
 public:
-    
-    enum Error {
-        NoError = 0,
-        NetworkError,
-        Timeout,
-        TooLarge,
-        PermissionDenied,
-        FileOpenError,
-        ServerFileError
-    };
-    
+    enum Error { NoError = 0, NetworkError, Timeout, TooLarge, PermissionDenied, FileOpenError, ServerFileError };
+
     static const QString PERMISSION_DENIED_ERROR;
-    
+
     AssetUpload(const QString& filename);
     AssetUpload(const QByteArray& data);
-    
+
     Q_INVOKABLE void start();
-    
+
     const QString& getFilename() const { return _filename; }
     const Error& getError() const { return _error; }
     QString getErrorString() const;
-    
+
 signals:
     void finished(AssetUpload* upload, const QString& hash);
     void progress(uint64_t totalReceived, uint64_t total);
-    
+
 private:
     QString _filename;
     QByteArray _data;

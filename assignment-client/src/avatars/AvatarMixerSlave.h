@@ -101,9 +101,8 @@ public:
     using ConstIter = NodeList::const_iterator;
 
     void configure(ConstIter begin, ConstIter end);
-    void configureBroadcast(ConstIter begin, ConstIter end, 
-                    p_high_resolution_clock::time_point lastFrameTimestamp, 
-                    float maxKbpsPerNode, float throttlingRatio);
+    void configureBroadcast(ConstIter begin, ConstIter end, p_high_resolution_clock::time_point lastFrameTimestamp,
+                            float maxKbpsPerNode, float throttlingRatio);
 
     void processIncomingPackets(const SharedNodePointer& node);
     void broadcastAvatarData(const SharedNodePointer& node);
@@ -114,13 +113,10 @@ private:
     int sendIdentityPacket(NLPacketList& packet, const AvatarMixerClientData* nodeData, const Node& destinationNode);
     int sendReplicatedIdentityPacket(const Node& agentNode, const AvatarMixerClientData* nodeData, const Node& destinationNode);
 
-    qint64 addTraitsNodeHeader(AvatarMixerClientData* listeningNodeData,
-                               const AvatarMixerClientData* sendingNodeData,
-                               NLPacketList& traitsPacketList,
-                               qint64 bytesWritten);
+    qint64 addTraitsNodeHeader(AvatarMixerClientData* listeningNodeData, const AvatarMixerClientData* sendingNodeData,
+                               NLPacketList& traitsPacketList, qint64 bytesWritten);
 
-    qint64 addChangedTraitsToBulkPacket(AvatarMixerClientData* listeningNodeData,
-                                        const AvatarMixerClientData* sendingNodeData,
+    qint64 addChangedTraitsToBulkPacket(AvatarMixerClientData* listeningNodeData, const AvatarMixerClientData* sendingNodeData,
                                         NLPacketList& traitsPacketList);
 
     void broadcastAvatarDataToAgent(const SharedNodePointer& node);

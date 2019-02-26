@@ -16,9 +16,9 @@
 #include <QFile>
 
 #include <DependencyManager.h>
-#include <NetworkLogging.h>
 #include <NLPacket.h>
 #include <NLPacketList.h>
+#include <NetworkLogging.h>
 #include <NodeList.h>
 #include <udt/Packet.h>
 
@@ -26,13 +26,12 @@
 #include "ByteRange.h"
 #include "ClientServerUtils.h"
 
-SendAssetTask::SendAssetTask(QSharedPointer<ReceivedMessage> message, const SharedNodePointer& sendToNode, const QDir& resourcesDir) :
+SendAssetTask::SendAssetTask(QSharedPointer<ReceivedMessage> message, const SharedNodePointer& sendToNode,
+                             const QDir& resourcesDir) :
     QRunnable(),
     _message(message),
     _senderNode(sendToNode),
-    _resourcesDir(resourcesDir)
-{
-    
+    _resourcesDir(resourcesDir) {
 }
 
 void SendAssetTask::run() {
@@ -47,12 +46,12 @@ void SendAssetTask::run() {
     // starting at index 1.
     _message->readPrimitive(&byteRange.fromInclusive);
     _message->readPrimitive(&byteRange.toExclusive);
-    
+
     QString hexHash = assetHash.toHex();
-    
-    qDebug() << "Received a request for the file (" << messageID << "): " << hexHash << " from "
-        << byteRange.fromInclusive << " to " << byteRange.toExclusive;
-    
+
+    qDebug() << "Received a request for the file (" << messageID << "): " << hexHash << " from " << byteRange.fromInclusive
+             << " to " << byteRange.toExclusive;
+
     qDebug() << "Starting task to send asset: " << hexHash << " for messageID " << messageID;
     auto replyPacketList = NLPacketList::create(PacketType::AssetGetReply, QByteArray(), true, true);
 
@@ -64,11 +63,10 @@ void SendAssetTask::run() {
         replyPacketList->writePrimitive(AssetUtils::AssetServerError::InvalidByteRange);
     } else {
         QString filePath = _resourcesDir.filePath(QString(hexHash));
-        
+
         QFile file { filePath };
 
         if (file.open(QIODevice::ReadOnly)) {
-
             // first fixup the range based on the now known file size
             byteRange.fixupRange(file.size());
 
@@ -76,14 +74,13 @@ void SendAssetTask::run() {
             // because of the file size
             if (file.size() < byteRange.fromInclusive || file.size() < byteRange.toExclusive) {
                 replyPacketList->writePrimitive(AssetUtils::AssetServerError::InvalidByteRange);
-                qCDebug(networking) << "Bad byte range: " << hexHash << " "
-                    << byteRange.fromInclusive << ":" << byteRange.toExclusive;
+                qCDebug(networking) << "Bad byte range: " << hexHash << " " << byteRange.fromInclusive << ":"
+                                    << byteRange.toExclusive;
             } else {
                 // we have a valid byte range, handle it and send the asset
                 auto size = byteRange.size();
 
                 if (byteRange.fromInclusive >= 0) {
-
                     // this range is positive, meaning we just need to seek into the file and then read from there
                     file.seek(byteRange.fromInclusive);
                     replyPacketList->writePrimitive(AssetUtils::AssetServerError::NoError);

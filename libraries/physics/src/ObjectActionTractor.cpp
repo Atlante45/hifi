@@ -20,7 +20,6 @@ const float MAX_TRACTOR_TIMESCALE = 600.0f; // 10 min is a long time
 
 const uint16_t ObjectActionTractor::tractorVersion = 1;
 
-
 ObjectActionTractor::ObjectActionTractor(const QUuid& id, EntityItemPointer ownerEntity) :
     ObjectAction(DYNAMIC_TYPE_TRACTOR, id, ownerEntity),
     _positionalTarget(0.0f),
@@ -31,8 +30,7 @@ ObjectActionTractor::ObjectActionTractor(const QUuid& id, EntityItemPointer owne
     _desiredRotationalTarget(),
     _angularTimeScale(FLT_MAX),
     _rotationalTargetSet(true),
-    _linearVelocityTarget(0.0f)
-{
+    _linearVelocityTarget(0.0f) {
 #if WANT_DEBUG
     qCDebug(physics) << "ObjectActionTractor::ObjectActionTractor";
 #endif
@@ -44,11 +42,10 @@ ObjectActionTractor::~ObjectActionTractor() {
 #endif
 }
 
-bool ObjectActionTractor::getTarget(float deltaTimeStep, glm::quat& rotation, glm::vec3& position,
-                                    glm::vec3& linearVelocity, glm::vec3& angularVelocity,
-                                    float& linearTimeScale, float& angularTimeScale) {
+bool ObjectActionTractor::getTarget(float deltaTimeStep, glm::quat& rotation, glm::vec3& position, glm::vec3& linearVelocity,
+                                    glm::vec3& angularVelocity, float& linearTimeScale, float& angularTimeScale) {
     SpatiallyNestablePointer other = getOther();
-    return resultWithReadLock<bool>([&]{
+    return resultWithReadLock<bool>([&] {
         linearTimeScale = _linearTimeScale;
         angularTimeScale = _angularTimeScale;
 
@@ -124,10 +121,8 @@ bool ObjectActionTractor::prepareForTractorUpdate(btScalar deltaTimeStep) {
         glm::vec3 angularVelocityForAction;
         float linearTimeScale;
         float angularTimeScale;
-        bool success = tractorAction->getTarget(deltaTimeStep,
-                                                rotationForAction, positionForAction,
-                                                linearVelocityForAction, angularVelocityForAction,
-                                                linearTimeScale, angularTimeScale);
+        bool success = tractorAction->getTarget(deltaTimeStep, rotationForAction, positionForAction, linearVelocityForAction,
+                                                angularVelocityForAction, linearTimeScale, angularTimeScale);
         if (success) {
             if (angularTimeScale < MAX_TRACTOR_TIMESCALE) {
                 angularTractorCount++;
@@ -148,7 +143,7 @@ bool ObjectActionTractor::prepareForTractorUpdate(btScalar deltaTimeStep) {
     }
 
     if (angularTractorCount > 0 || linearTractorCount > 0) {
-        withWriteLock([&]{
+        withWriteLock([&] {
             if (doLinearTraction && linearTractorCount > 0) {
                 position /= linearTractorCount;
                 _lastPositionTarget = _positionalTarget;
@@ -177,13 +172,12 @@ bool ObjectActionTractor::prepareForTractorUpdate(btScalar deltaTimeStep) {
     return true;
 }
 
-
 void ObjectActionTractor::updateActionWorker(btScalar deltaTimeStep) {
     if (!prepareForTractorUpdate(deltaTimeStep)) {
         return;
     }
 
-    withReadLock([&]{
+    withReadLock([&] {
         auto ownerEntity = _ownerEntity.lock();
         if (!ownerEntity) {
             return;
@@ -249,7 +243,6 @@ void ObjectActionTractor::updateActionWorker(btScalar deltaTimeStep) {
 
 const float MIN_TIMESCALE = 0.1f;
 
-
 bool ObjectActionTractor::updateArguments(QVariantMap arguments) {
     glm::vec3 positionalTarget;
     float linearTimeScale;
@@ -260,23 +253,26 @@ bool ObjectActionTractor::updateArguments(QVariantMap arguments) {
 
     bool needUpdate = false;
     bool somethingChanged = ObjectDynamic::updateArguments(arguments);
-    withReadLock([&]{
+    withReadLock([&] {
         // targets are required, tractor-constants are optional
         bool ok = true;
-        positionalTarget = EntityDynamicInterface::extractVec3Argument("tractor action", arguments, "targetPosition", ok, false);
+        positionalTarget = EntityDynamicInterface::extractVec3Argument("tractor action", arguments, "targetPosition", ok,
+                                                                       false);
         if (ok) {
             _positionalTargetSet = true;
         } else {
             positionalTarget = _desiredPositionalTarget;
         }
         ok = true;
-        linearTimeScale = EntityDynamicInterface::extractFloatArgument("tractor action", arguments, "linearTimeScale", ok, false);
+        linearTimeScale = EntityDynamicInterface::extractFloatArgument("tractor action", arguments, "linearTimeScale", ok,
+                                                                       false);
         if (!ok || linearTimeScale <= 0.0f) {
             linearTimeScale = _linearTimeScale;
         }
 
         ok = true;
-        rotationalTarget = EntityDynamicInterface::extractQuatArgument("tractor action", arguments, "targetRotation", ok, false);
+        rotationalTarget = EntityDynamicInterface::extractQuatArgument("tractor action", arguments, "targetRotation", ok,
+                                                                       false);
         if (ok) {
             _rotationalTargetSet = true;
         } else {
@@ -284,8 +280,8 @@ bool ObjectActionTractor::updateArguments(QVariantMap arguments) {
         }
 
         ok = true;
-        angularTimeScale =
-            EntityDynamicInterface::extractFloatArgument("tractor action", arguments, "angularTimeScale", ok, false);
+        angularTimeScale = EntityDynamicInterface::extractFloatArgument("tractor action", arguments, "angularTimeScale", ok,
+                                                                        false);
         if (!ok) {
             angularTimeScale = _angularTimeScale;
         }
@@ -297,18 +293,14 @@ bool ObjectActionTractor::updateArguments(QVariantMap arguments) {
         }
 
         ok = true;
-        otherJointIndex = EntityDynamicInterface::extractIntegerArgument("tractor action", arguments,
-                                                                         "otherJointIndex", ok, false);
+        otherJointIndex = EntityDynamicInterface::extractIntegerArgument("tractor action", arguments, "otherJointIndex", ok,
+                                                                         false);
         if (!ok) {
             otherJointIndex = _otherJointIndex;
         }
 
-        if (somethingChanged ||
-            positionalTarget != _desiredPositionalTarget ||
-            linearTimeScale != _linearTimeScale ||
-            rotationalTarget != _desiredRotationalTarget ||
-            angularTimeScale != _angularTimeScale ||
-            otherID != _otherID ||
+        if (somethingChanged || positionalTarget != _desiredPositionalTarget || linearTimeScale != _linearTimeScale ||
+            rotationalTarget != _desiredRotationalTarget || angularTimeScale != _angularTimeScale || otherID != _otherID ||
             otherJointIndex != _otherJointIndex) {
             // something changed
             needUpdate = true;

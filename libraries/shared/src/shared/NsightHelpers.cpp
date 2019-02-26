@@ -8,7 +8,6 @@
 
 #include "NsightHelpers.h"
 
-
 #if defined(_WIN32) && defined(NSIGHT_FOUND)
 
 #include <QtCore/QProcessEnvironment>

@@ -11,26 +11,18 @@
 
 #include "SimulationOwner.h"
 
-#include <iostream> // included for tests
 #include <assert.h>
+#include <iostream> // included for tests
 
 #include <NumericalConstants.h>
 
 // static
 const int SimulationOwner::NUM_BYTES_ENCODED = NUM_BYTES_RFC4122_UUID + 1;
 
-SimulationOwner::SimulationOwner() :
-        _id(),
-        _expiry(0),
-        _priority(0)
-{
+SimulationOwner::SimulationOwner() : _id(), _expiry(0), _priority(0) {
 }
 
-SimulationOwner::SimulationOwner(const QUuid& id, uint8_t priority) :
-        _id(id),
-        _expiry(0),
-        _priority(priority)
-{
+SimulationOwner::SimulationOwner(const QUuid& id, uint8_t priority) : _id(id), _expiry(0), _priority(priority) {
 }
 
 QByteArray SimulationOwner::toByteArray() const {
@@ -183,4 +175,3 @@ QDebug& operator<<(QDebug& d, const SimulationOwner& simOwner) {
     d << "{ id : " << simOwner._id << ", priority : " << (int)simOwner._priority << " }";
     return d;
 }
-

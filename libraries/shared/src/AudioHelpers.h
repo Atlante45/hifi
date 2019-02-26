@@ -27,8 +27,10 @@ const int IEEE754_EXPN_BIAS = 127;
 // rel |error| < 0.4 from precision loss very close to 1.0f
 //
 static inline float fastLog2f(float x) {
-
-    union { float f; int32_t i; } mant, bits = { x };
+    union {
+        float f;
+        int32_t i;
+    } mant, bits = { x };
 
     // split into mantissa and exponent
     mant.i = (bits.i & ((1 << IEEE754_MANT_BITS) - 1)) | (IEEE754_EXPN_BIAS << IEEE754_MANT_BITS);
@@ -50,8 +52,10 @@ static inline float fastLog2f(float x) {
 // rel |error| < 9e-6, smooth (exact for x=N)
 //
 static inline float fastExp2f(float x) {
-
-    union { float f; int32_t i; } xi;
+    union {
+        float f;
+        int32_t i;
+    } xi;
 
     // bias such that x > 0
     x += IEEE754_EXPN_BIAS;
@@ -61,7 +65,7 @@ static inline float fastExp2f(float x) {
     x -= xi.i;
 
     // construct exp2(xi) as a float
-    xi.i &= ~(xi.i >> 31);  // MAX(xi.i, 0)
+    xi.i &= ~(xi.i >> 31); // MAX(xi.i, 0)
     xi.i <<= IEEE754_MANT_BITS;
 
     // polynomial for exp2(x) over x=[0,1]
@@ -77,13 +81,13 @@ static inline float fastExp2f(float x) {
 
 #include <xmmintrin.h>
 // inline sqrtss, without requiring /fp:fast
-static inline float fastSqrtf(float x) {   
+static inline float fastSqrtf(float x) {
     return _mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(x)));
 }
 
-#else 
+#else
 
-static inline float fastSqrtf(float x) {   
+static inline float fastSqrtf(float x) {
     return sqrtf(x);
 }
 
@@ -96,11 +100,13 @@ static inline float fastSqrtf(float x) {
 // abs |error| < 7e-5, smooth
 //
 static inline float fastAcosf(float x) {
-
-    union { float f; int32_t i; } xi = { x };
+    union {
+        float f;
+        int32_t i;
+    } xi = { x };
 
     int32_t sign = xi.i & 0x80000000;
-    xi.i ^= sign;   // fabs(x)
+    xi.i ^= sign; // fabs(x)
 
     // compute sqrt(1-x) in parallel
     float r = fastSqrtf(1.0f - xi.f);
@@ -120,20 +126,18 @@ static inline float fastAcosf(float x) {
 // Value of 1.0 (+0dB) is reconstructed exactly
 //
 const float GAIN_CONVERSION_RATIO = 2.0f * 6.02059991f; // scale log2 to 0.5dB
-const float GAIN_CONVERSION_OFFSET = 255 - 60.0f;       // translate +30dB to max
+const float GAIN_CONVERSION_OFFSET = 255 - 60.0f; // translate +30dB to max
 
 static inline uint8_t packFloatGainToByte(float gain) {
-
     float f = fastLog2f(gain) * GAIN_CONVERSION_RATIO + GAIN_CONVERSION_OFFSET;
-    int32_t i = (int32_t)(f + 0.5f);                    // quantize
-    
+    int32_t i = (int32_t)(f + 0.5f); // quantize
+
     uint8_t byte = (i < 0) ? 0 : ((i > 255) ? 255 : i); // clamp
     return byte;
 }
 
 static inline float unpackFloatGainFromByte(uint8_t byte) {
-
-    float gain = (byte == 0) ? 0.0f : fastExp2f((byte - GAIN_CONVERSION_OFFSET) * (1.0f/GAIN_CONVERSION_RATIO));
+    float gain = (byte == 0) ? 0.0f : fastExp2f((byte - GAIN_CONVERSION_OFFSET) * (1.0f / GAIN_CONVERSION_RATIO));
     return gain;
 }
 

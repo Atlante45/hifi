@@ -26,8 +26,7 @@ public:
     Q_INVOKABLE QString meshToOBJ(MeshProxyList in);
     Q_INVOKABLE QScriptValue appendMeshes(MeshProxyList in);
     Q_INVOKABLE QScriptValue transformMesh(glm::mat4 transform, MeshProxy* meshProxy);
-    Q_INVOKABLE QScriptValue newMesh(const QVector<glm::vec3>& vertices,
-                                     const QVector<glm::vec3>& normals,
+    Q_INVOKABLE QScriptValue newMesh(const QVector<glm::vec3>& vertices, const QVector<glm::vec3>& normals,
                                      const QVector<MeshFace>& faces);
     Q_INVOKABLE QScriptValue getVertexCount(MeshProxy* meshProxy);
     Q_INVOKABLE QScriptValue getVertex(MeshProxy* meshProxy, int vertexIndex);

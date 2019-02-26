@@ -92,10 +92,10 @@ public:
     static const char* NAME;
 
 protected:
-
     class InputDevice : public controller::InputDevice {
     public:
         InputDevice() : controller::InputDevice("Keyboard") {}
+
     private:
         // Device functions
         virtual controller::Input::NamedVector getAvailableInputs() const override;

@@ -19,8 +19,7 @@
 #include <SharedUtil.h>
 
 AutoUpdater::AutoUpdater() :
-    _currentVersion(BuildInfo::BUILD_TYPE == BuildInfo::BuildType::Stable ? BuildInfo::VERSION : BuildInfo::BUILD_NUMBER)
-{
+    _currentVersion(BuildInfo::BUILD_TYPE == BuildInfo::BuildType::Stable ? BuildInfo::VERSION : BuildInfo::BUILD_NUMBER) {
 #if defined Q_OS_WIN32
     _operatingSystem = "windows";
 #elif defined Q_OS_MAC
@@ -28,7 +27,7 @@ AutoUpdater::AutoUpdater() :
 #elif defined Q_OS_LINUX
     _operatingSystem = "ubuntu";
 #endif
-    
+
     connect(this, SIGNAL(latestVersionDataParsed()), this, SLOT(checkVersionAndNotify()));
 }
 
@@ -49,7 +48,7 @@ void AutoUpdater::getLatestVersionData() {
     } else if (BuildInfo::BUILD_TYPE == BuildInfo::BuildType::Master) {
         buildsURL = MASTER_BUILDS_XML_URL;
     }
-    
+
     QNetworkRequest latestVersionRequest(buildsURL);
 
     latestVersionRequest.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
@@ -60,14 +59,14 @@ void AutoUpdater::getLatestVersionData() {
 
 void AutoUpdater::parseLatestVersionData() {
     QNetworkReply* sender = qobject_cast<QNetworkReply*>(QObject::sender());
-    
+
     QXmlStreamReader xml(sender);
 
     struct InstallerURLs {
         QString full;
         QString clientOnly;
     };
-    
+
     QString version;
     QString downloadUrl;
     QString releaseTime;
@@ -84,20 +83,15 @@ void AutoUpdater::parseLatestVersionData() {
     } else if (BuildInfo::BUILD_TYPE == BuildInfo::BuildType::Master) {
         versionKey = "version";
     }
-    
+
     while (xml.readNextStartElement()) {
         if (xml.name() == "projects") {
             while (xml.readNextStartElement()) {
-                if (xml.name().toString() == "project" &&
-                    xml.attributes().hasAttribute("name") &&
+                if (xml.name().toString() == "project" && xml.attributes().hasAttribute("name") &&
                     xml.attributes().value("name").toString() == "interface") {
-
                     while (xml.readNextStartElement()) {
-
-                        if (xml.name().toString() == "platform" &&
-                            xml.attributes().hasAttribute("name") &&
+                        if (xml.name().toString() == "platform" && xml.attributes().hasAttribute("name") &&
                             xml.attributes().value("name").toString() == _operatingSystem) {
-
                             while (xml.readNextStartElement()) {
                                 if (xml.name() == "build") {
                                     QHash<QString, InstallerURLs> campaignInstallers;
@@ -190,8 +184,8 @@ void AutoUpdater::checkVersionAndNotify() {
         return;
     }
 
-    qDebug() << "Checking if update version" << _builds.lastKey().versionString
-        << "is newer than current version" << _currentVersion.versionString;
+    qDebug() << "Checking if update version" << _builds.lastKey().versionString << "is newer than current version"
+             << _currentVersion.versionString;
 
     if (_builds.lastKey() > _currentVersion) {
         emit newVersionIsAvailable();
@@ -209,17 +203,12 @@ void AutoUpdater::downloadUpdateVersion(const QString& version) {
     emit newVersionIsDownloaded();
 }
 
-void AutoUpdater::appendBuildData(const QString& versionNumber,
-                                 const QString& downloadURL,
-                                 const QString& releaseTime,
-                                 const QString& releaseNotes,
-                                 const QString& pullRequestNumber) {
-    
+void AutoUpdater::appendBuildData(const QString& versionNumber, const QString& downloadURL, const QString& releaseTime,
+                                  const QString& releaseNotes, const QString& pullRequestNumber) {
     QMap<QString, QString> thisBuildDetails;
     thisBuildDetails.insert("downloadUrl", downloadURL);
     thisBuildDetails.insert("releaseTime", releaseTime);
     thisBuildDetails.insert("releaseNotes", releaseNotes);
     thisBuildDetails.insert("pullRequestNumber", pullRequestNumber);
     _builds.insert(ApplicationVersion(versionNumber), thisBuildDetails);
-    
 }

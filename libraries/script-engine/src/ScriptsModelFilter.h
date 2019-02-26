@@ -12,8 +12,8 @@
 #ifndef hifi_ScriptsModelFilter_h
 #define hifi_ScriptsModelFilter_h
 
-#include "ScriptsModel.h"
 #include <QSortFilterProxyModel>
+#include "ScriptsModel.h"
 
 /**jsdoc
  * <p>Provided as a property of {@link ScriptDiscoveryService}.</p>
@@ -28,7 +28,8 @@
 class ScriptsModelFilter : public QSortFilterProxyModel {
     Q_OBJECT
 public:
-    ScriptsModelFilter(QObject *parent = NULL);
+    ScriptsModelFilter(QObject* parent = NULL);
+
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
     bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;

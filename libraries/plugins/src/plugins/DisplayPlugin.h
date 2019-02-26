@@ -7,40 +7,37 @@
 //
 #pragma once
 
-#include <functional>
 #include <atomic>
+#include <functional>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <QtCore/QSize>
-#include <QtCore/QPoint>
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QJsonObject>
 #include <QtCore/QMutex>
+#include <QtCore/QPoint>
+#include <QtCore/QSize>
 #include <QtCore/QWaitCondition>
 
 #include <GLMHelpers.h>
 #include <NumericalConstants.h>
 #include <RegisteredMetaTypes.h>
-#include <shared/Bilateral.h>
 #include <SimpleMovingAverage.h>
 #include <gpu/Forward.h>
+#include <shared/Bilateral.h>
 #include "Plugin.h"
 
 class QOpenGLFramebufferObject;
 
 class QImage;
 
-enum Eye {
-    Left = (int)bilateral::Side::Left,
-    Right = (int)bilateral::Side::Right
-};
+enum Eye { Left = (int)bilateral::Side::Left, Right = (int)bilateral::Side::Right };
 
 /*
  * Helper method to iterate over each eye
  */
-template <typename F>
+template<typename F>
 void for_each_eye(F f) {
     f(Left);
     f(Right);
@@ -49,7 +46,7 @@ void for_each_eye(F f) {
 /*
  * Helper method to iterate over each eye, with an additional lambda to take action between the eyes
  */
-template <typename F, typename FF>
+template<typename F, typename FF>
 void for_each_eye(F f, FF ff) {
     f(Eye::Left);
     ff();
@@ -61,13 +58,13 @@ class QWindow;
 #define AVERAGE_HUMAN_IPD 0.064f
 
 namespace gpu {
-    class Texture;
-    using TexturePointer = std::shared_ptr<Texture>;
-}
+class Texture;
+using TexturePointer = std::shared_ptr<Texture>;
+} // namespace gpu
 
 class NetworkTexture;
 using NetworkTexturePointer = QSharedPointer<NetworkTexture>;
-typedef struct __GLsync *GLsync;
+typedef struct __GLsync* GLsync;
 
 // Stereo display functionality
 // TODO move out of this file don't derive DisplayPlugin from this.  Instead use dynamic casting when
@@ -75,13 +72,9 @@ typedef struct __GLsync *GLsync;
 class StereoDisplay {
 public:
     // Stereo specific methods
-    virtual glm::mat4 getEyeProjection(Eye eye, const glm::mat4& baseProjection) const {
-        return baseProjection;
-    }
+    virtual glm::mat4 getEyeProjection(Eye eye, const glm::mat4& baseProjection) const { return baseProjection; }
 
-    virtual glm::mat4 getCullingProjection(const glm::mat4& baseProjection) const {
-        return baseProjection;
-    }
+    virtual glm::mat4 getCullingProjection(const glm::mat4& baseProjection) const { return baseProjection; }
 
     virtual float getIPD() const { return AVERAGE_HUMAN_IPD; }
 };
@@ -96,9 +89,7 @@ public:
     virtual glm::mat4 getEyeToHeadTransform(Eye eye) const;
 
     // returns a copy of the most recent head pose, computed via updateHeadPose
-    virtual glm::mat4 getHeadPose() const {
-        return glm::mat4();
-    }
+    virtual glm::mat4 getHeadPose() const { return glm::mat4(); }
 
     virtual void abandonCalibration() {}
 
@@ -109,7 +100,7 @@ public:
         RightHand = 0x02,
     };
 
-    virtual bool suppressKeyboard() { return false;  }
+    virtual bool suppressKeyboard() { return false; }
     virtual void unsuppressKeyboard() {};
     virtual bool isKeyboardVisible() { return false; }
 
@@ -120,6 +111,7 @@ public:
 class DisplayPlugin : public Plugin, public HmdDisplay {
     Q_OBJECT
     using Parent = Plugin;
+
 public:
     virtual int getRequiredThreadCount() const { return 0; }
     virtual bool isHmd() const { return false; }
@@ -142,28 +134,20 @@ public:
     // Rendering support
     virtual void setContext(const gpu::ContextPointer& context) final { _gpuContext = context; }
     virtual void submitFrame(const gpu::FramePointer& newFrame) = 0;
-    virtual void captureFrame(const std::string& outputName) const { }
+    virtual void captureFrame(const std::string& outputName) const {}
 
-    virtual float getRenderResolutionScale() const {
-        return _renderResolutionScale;
-    }
+    virtual float getRenderResolutionScale() const { return _renderResolutionScale; }
 
-    void setRenderResolutionScale(float renderResolutionScale) {
-        _renderResolutionScale = renderResolutionScale;
-    }
+    void setRenderResolutionScale(float renderResolutionScale) { _renderResolutionScale = renderResolutionScale; }
 
     // The size of the rendering target (may be larger than the device size due to distortion)
     virtual glm::uvec2 getRecommendedRenderSize() const = 0;
 
     // The size of the UI
-    virtual glm::uvec2 getRecommendedUiSize() const {
-        return getRecommendedRenderSize();
-    }
+    virtual glm::uvec2 getRecommendedUiSize() const { return getRecommendedRenderSize(); }
 
     // By default the aspect ratio is just the render size
-    virtual float getRecommendedAspectRatio() const {
-        return aspect(getRecommendedRenderSize());
-    }
+    virtual float getRecommendedAspectRatio() const { return aspect(getRecommendedRenderSize()); }
 
     // The recommended bounds for primary HUD placement
     virtual QRect getRecommendedHUDRect() const {
@@ -203,7 +187,8 @@ public:
     // Hardware specific stats
     virtual QJsonObject getHardwareStats() const { return QJsonObject(); }
 
-    virtual void copyTextureToQuickFramebuffer(NetworkTexturePointer source, QOpenGLFramebufferObject* target, GLsync* fenceSync) = 0;
+    virtual void copyTextureToQuickFramebuffer(NetworkTexturePointer source, QOpenGLFramebufferObject* target,
+                                               GLsync* fenceSync) = 0;
 
     uint32_t presentCount() const { return _presentedFrameIndex; }
     // Time since last call to incrementPresentCount (only valid if DEBUG_PAINT_DELAY is defined)
@@ -231,7 +216,9 @@ protected:
 
     gpu::ContextPointer _gpuContext;
 
-    std::function<void(gpu::Batch&, const gpu::TexturePointer&, bool mirror)> _hudOperator { std::function<void(gpu::Batch&, const gpu::TexturePointer&, bool mirror)>() };
+    std::function<void(gpu::Batch&, const gpu::TexturePointer&, bool mirror)> _hudOperator {
+        std::function<void(gpu::Batch&, const gpu::TexturePointer&, bool mirror)>()
+    };
 
     MovingAverage<float, 10> _movingAveragePresent;
 
@@ -244,4 +231,3 @@ private:
     mutable std::mutex _paintDelayMutex;
     QElapsedTimer _paintDelayTimer;
 };
-

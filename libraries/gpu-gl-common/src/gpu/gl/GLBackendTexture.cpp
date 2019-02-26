@@ -14,7 +14,6 @@
 using namespace gpu;
 using namespace gpu::gl;
 
-
 GLuint GLBackend::getTextureID(const TexturePointer& texture) {
     GLTexture* object = syncGPUObject(texture);
 
@@ -36,9 +35,9 @@ GLTexture* GLBackend::syncGPUObject(const TexturePointer& texturePointer) {
             // Discard any superfluous updates
             while (updates.size() > 1) {
                 const auto& update = updates.front();
-                // Superfluous updates will never have been read, but we want to ensure the previous 
-                // writes to them are complete before they're written again, so return them with the 
-                // same fences they arrived with.  This can happen on any thread because no GL context 
+                // Superfluous updates will never have been read, but we want to ensure the previous
+                // writes to them are complete before they're written again, so return them with the
+                // same fences they arrived with.  This can happen on any thread because no GL context
                 // work is involved
                 recycler(update.first, update.second);
                 updates.pop_front();
@@ -58,7 +57,7 @@ GLTexture* GLBackend::syncGPUObject(const TexturePointer& texturePointer) {
         }
 
         // Return the texture object (if any) associated with the texture, without extensive logic
-        // (external textures are 
+        // (external textures are
         return Backend::getGPUObject<GLTexture>(texture);
     }
 

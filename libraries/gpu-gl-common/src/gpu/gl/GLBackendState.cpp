@@ -17,7 +17,7 @@ using namespace gpu;
 using namespace gpu::gl;
 
 void GLBackend::resetPipelineState(State::Signature nextSignature) {
-    auto currentNotSignature = ~_pipeline._stateSignatureCache; 
+    auto currentNotSignature = ~_pipeline._stateSignatureCache;
     auto nextNotSignature = ~nextSignature;
     auto fieldsToBeReset = currentNotSignature ^ (currentNotSignature | nextNotSignature);
     if (fieldsToBeReset.any()) {
@@ -36,13 +36,12 @@ void GLBackend::resetPipelineState(State::Signature nextSignature) {
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
     // Point size is always on
-    //glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    // glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
     glEnable(GL_PROGRAM_POINT_SIZE_EXT);
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
     glEnable(GL_LINE_SMOOTH);
 #endif
-
 }
 
 void GLBackend::syncPipelineStateCache() {
@@ -57,7 +56,7 @@ void GLBackend::syncPipelineStateCache() {
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
     // Point size is always on
-    //glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    // glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
     glEnable(GL_PROGRAM_POINT_SIZE_EXT);
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
     glEnable(GL_LINE_SMOOTH);
@@ -69,7 +68,6 @@ void GLBackend::syncPipelineStateCache() {
     _pipeline._stateCache = state;
     _pipeline._stateSignatureCache = signature;
 }
-
 
 void GLBackend::do_setStateFillMode(int32 mode) {
     if (_pipeline._stateCache.fillMode != mode) {
@@ -101,7 +99,7 @@ void GLBackend::do_setStateCullMode(int32 mode) {
 
 void GLBackend::do_setStateFrontFaceClockwise(bool isClockwise) {
     if (_pipeline._stateCache.flags.frontFaceClockwise != isClockwise) {
-        static GLenum  GL_FRONT_FACES[] = { GL_CCW, GL_CW };
+        static GLenum GL_FRONT_FACES[] = { GL_CCW, GL_CW };
         glFrontFace(GL_FRONT_FACES[isClockwise]);
         (void)CHECK_GL_ERROR();
 
@@ -205,22 +203,19 @@ void GLBackend::do_setStateDepthTest(State::DepthTest test) {
         }
         if (CHECK_GL_ERROR()) {
             qCDebug(gpulogging) << "DepthTest" << (test.isEnabled() ? "Enabled" : "Disabled")
-                << "Mask=" << (test.getWriteMask() ? "Write" : "no Write")
-                << "Func=" << (uint16_t)test.getFunction()
-                << "Raw=" << test.getRaw();
+                                << "Mask=" << (test.getWriteMask() ? "Write" : "no Write")
+                                << "Func=" << (uint16_t)test.getFunction() << "Raw=" << test.getRaw();
         }
         _pipeline._stateCache.depthTest = test;
     }
 }
 
-void GLBackend::do_setStateStencil(State::StencilActivation activation, State::StencilTest testFront, State::StencilTest testBack) {
+void GLBackend::do_setStateStencil(State::StencilActivation activation, State::StencilTest testFront,
+                                   State::StencilTest testBack) {
     const auto& currentActivation = _pipeline._stateCache.stencilActivation;
     const auto& currentTestFront = _pipeline._stateCache.stencilTestFront;
     const auto& currentTestBack = _pipeline._stateCache.stencilTestBack;
-    if ((currentActivation != activation)
-        || (currentTestFront != testFront)
-        || (currentTestBack != testBack)) {
-
+    if ((currentActivation != activation) || (currentTestFront != testFront) || (currentTestBack != testBack)) {
         if (activation.isEnabled()) {
             glEnable(GL_STENCIL_TEST);
         } else {
@@ -234,24 +229,22 @@ void GLBackend::do_setStateStencil(State::StencilActivation activation, State::S
             glStencilMask(activation.getWriteMaskFront());
         }
 
-        static GLenum STENCIL_OPS[State::NUM_STENCIL_OPS] = {
-            GL_KEEP,
-            GL_ZERO,
-            GL_REPLACE,
-            GL_INCR_WRAP,
-            GL_DECR_WRAP,
-            GL_INVERT,
-            GL_INCR,
-            GL_DECR };
+        static GLenum STENCIL_OPS[State::NUM_STENCIL_OPS] = { GL_KEEP,      GL_ZERO,   GL_REPLACE, GL_INCR_WRAP,
+                                                              GL_DECR_WRAP, GL_INVERT, GL_INCR,    GL_DECR };
 
         if (testFront != testBack) {
-            glStencilOpSeparate(GL_FRONT, STENCIL_OPS[testFront.getFailOp()], STENCIL_OPS[testFront.getDepthFailOp()], STENCIL_OPS[testFront.getPassOp()]);
-            glStencilFuncSeparate(GL_FRONT, COMPARISON_TO_GL[testFront.getFunction()], testFront.getReference(), testFront.getReadMask());
+            glStencilOpSeparate(GL_FRONT, STENCIL_OPS[testFront.getFailOp()], STENCIL_OPS[testFront.getDepthFailOp()],
+                                STENCIL_OPS[testFront.getPassOp()]);
+            glStencilFuncSeparate(GL_FRONT, COMPARISON_TO_GL[testFront.getFunction()], testFront.getReference(),
+                                  testFront.getReadMask());
 
-            glStencilOpSeparate(GL_BACK, STENCIL_OPS[testBack.getFailOp()], STENCIL_OPS[testBack.getDepthFailOp()], STENCIL_OPS[testBack.getPassOp()]);
-            glStencilFuncSeparate(GL_BACK, COMPARISON_TO_GL[testBack.getFunction()], testBack.getReference(), testBack.getReadMask());
+            glStencilOpSeparate(GL_BACK, STENCIL_OPS[testBack.getFailOp()], STENCIL_OPS[testBack.getDepthFailOp()],
+                                STENCIL_OPS[testBack.getPassOp()]);
+            glStencilFuncSeparate(GL_BACK, COMPARISON_TO_GL[testBack.getFunction()], testBack.getReference(),
+                                  testBack.getReadMask());
         } else {
-            glStencilOp(STENCIL_OPS[testFront.getFailOp()], STENCIL_OPS[testFront.getDepthFailOp()], STENCIL_OPS[testFront.getPassOp()]);
+            glStencilOp(STENCIL_OPS[testFront.getFailOp()], STENCIL_OPS[testFront.getDepthFailOp()],
+                        STENCIL_OPS[testFront.getPassOp()]);
             glStencilFunc(COMPARISON_TO_GL[testFront.getFunction()], testFront.getReference(), testFront.getReadMask());
         }
 
@@ -294,12 +287,12 @@ void GLBackend::do_setStateBlend(State::BlendFunction function) {
         if (function.isEnabled()) {
             glEnable(GL_BLEND);
 
-            glBlendEquationSeparate(BLEND_OPS_TO_GL[function.getOperationColor()], BLEND_OPS_TO_GL[function.getOperationAlpha()]);
+            glBlendEquationSeparate(BLEND_OPS_TO_GL[function.getOperationColor()],
+                                    BLEND_OPS_TO_GL[function.getOperationAlpha()]);
             (void)CHECK_GL_ERROR();
 
-
             glBlendFuncSeparate(BLEND_ARGS_TO_GL[function.getSourceColor()], BLEND_ARGS_TO_GL[function.getDestinationColor()],
-                BLEND_ARGS_TO_GL[function.getSourceAlpha()], BLEND_ARGS_TO_GL[function.getDestinationAlpha()]);
+                                BLEND_ARGS_TO_GL[function.getSourceAlpha()], BLEND_ARGS_TO_GL[function.getDestinationAlpha()]);
         } else {
             glDisable(GL_BLEND);
         }
@@ -311,22 +304,17 @@ void GLBackend::do_setStateBlend(State::BlendFunction function) {
 
 void GLBackend::do_setStateColorWriteMask(uint32 mask) {
     if (_pipeline._stateCache.colorWriteMask != mask) {
-        glColorMask(mask & State::ColorMask::WRITE_RED,
-            mask & State::ColorMask::WRITE_GREEN,
-            mask & State::ColorMask::WRITE_BLUE,
-            mask & State::ColorMask::WRITE_ALPHA);
+        glColorMask(mask & State::ColorMask::WRITE_RED, mask & State::ColorMask::WRITE_GREEN,
+                    mask & State::ColorMask::WRITE_BLUE, mask & State::ColorMask::WRITE_ALPHA);
         (void)CHECK_GL_ERROR();
 
         _pipeline._stateCache.colorWriteMask = (State::ColorMask)mask;
     }
 }
 
-
 void GLBackend::do_setStateBlendFactor(const Batch& batch, size_t paramOffset) {
-    Vec4 factor(batch._params[paramOffset + 0]._float,
-        batch._params[paramOffset + 1]._float,
-        batch._params[paramOffset + 2]._float,
-        batch._params[paramOffset + 3]._float);
+    Vec4 factor(batch._params[paramOffset + 0]._float, batch._params[paramOffset + 1]._float,
+                batch._params[paramOffset + 2]._float, batch._params[paramOffset + 3]._float);
 
     glBlendColor(factor.x, factor.y, factor.z, factor.w);
     (void)CHECK_GL_ERROR();
@@ -345,4 +333,3 @@ void GLBackend::do_setStateScissorRect(const Batch& batch, size_t paramOffset) {
     glScissor(rect.x, rect.y, rect.z, rect.w);
     (void)CHECK_GL_ERROR();
 }
-

@@ -132,7 +132,7 @@ public:
     glm::mat4 getSensorToWorldMatrix() const;
     glm::mat4 getControllerLeftHandMatrix() const;
     glm::mat4 getControllerRightHandMatrix() const;
-    
+
 signals:
     void displayNameChanged();
     void sessionDisplayNameChanged();

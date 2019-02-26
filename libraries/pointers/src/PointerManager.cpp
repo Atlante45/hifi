@@ -35,9 +35,7 @@ unsigned int PointerManager::addPointer(std::shared_ptr<Pointer> pointer) {
 }
 
 void PointerManager::removePointer(unsigned int uid) {
-    withWriteLock([&] {
-        _pointers.erase(uid);
-    });
+    withWriteLock([&] { _pointers.erase(uid); });
 }
 
 void PointerManager::enablePointer(unsigned int uid) const {
@@ -61,7 +59,8 @@ void PointerManager::setRenderState(unsigned int uid, const std::string& renderS
     }
 }
 
-void PointerManager::editRenderState(unsigned int uid, const std::string& state, const QVariant& startProps, const QVariant& pathProps, const QVariant& endProps) const {
+void PointerManager::editRenderState(unsigned int uid, const std::string& state, const QVariant& startProps,
+                                     const QVariant& pathProps, const QVariant& endProps) const {
     auto pointer = find(uid);
     if (pointer) {
         pointer->editRenderState(state, startProps, pathProps, endProps);
@@ -87,9 +86,8 @@ QVariantMap PointerManager::getPointerProperties(unsigned int uid) const {
 }
 
 void PointerManager::update() {
-    auto cachedPointers = resultWithReadLock<std::unordered_map<unsigned int, std::shared_ptr<Pointer>>>([&] {
-        return _pointers;
-    });
+    auto cachedPointers = resultWithReadLock<std::unordered_map<unsigned int, std::shared_ptr<Pointer>>>(
+        [&] { return _pointers; });
 
     for (const auto& pointerPair : cachedPointers) {
         pointerPair.second->update(pointerPair.first);

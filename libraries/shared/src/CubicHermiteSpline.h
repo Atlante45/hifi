@@ -15,9 +15,17 @@
 class CubicHermiteSplineFunctor {
 public:
     CubicHermiteSplineFunctor() : _p0(), _m0(), _p1(), _m1() {}
-    CubicHermiteSplineFunctor(const glm::vec3& p0, const glm::vec3& m0, const glm::vec3& p1, const glm::vec3& m1) : _p0(p0), _m0(m0), _p1(p1), _m1(m1) {}
+    CubicHermiteSplineFunctor(const glm::vec3& p0, const glm::vec3& m0, const glm::vec3& p1, const glm::vec3& m1) :
+        _p0(p0),
+        _m0(m0),
+        _p1(p1),
+        _m1(m1) {}
 
-    CubicHermiteSplineFunctor(const CubicHermiteSplineFunctor& orig) : _p0(orig._p0), _m0(orig._m0), _p1(orig._p1), _m1(orig._m1) {}
+    CubicHermiteSplineFunctor(const CubicHermiteSplineFunctor& orig) :
+        _p0(orig._p0),
+        _m0(orig._m0),
+        _p1(orig._p1),
+        _m1(orig._m1) {}
 
     virtual ~CubicHermiteSplineFunctor() {}
 
@@ -65,13 +73,14 @@ public:
     CubicHermiteSplineFunctorWithArcLength() : CubicHermiteSplineFunctor() {
         memset(_values, 0, sizeof(float) * (NUM_SUBDIVISIONS + 1));
     }
-    CubicHermiteSplineFunctorWithArcLength(const glm::vec3& p0, const glm::vec3& m0, const glm::vec3& p1, const glm::vec3& m1) : CubicHermiteSplineFunctor(p0, m0, p1, m1) {
-
+    CubicHermiteSplineFunctorWithArcLength(const glm::vec3& p0, const glm::vec3& m0, const glm::vec3& p1, const glm::vec3& m1) :
+        CubicHermiteSplineFunctor(p0, m0, p1, m1) {
         initValues();
     }
 
-    CubicHermiteSplineFunctorWithArcLength(const glm::quat& tipRot, const glm::vec3& tipTrans, const glm::quat& baseRot, const glm::vec3& baseTrans, float baseGain = 1.0f, float tipGain = 1.0f) : CubicHermiteSplineFunctor() {
-
+    CubicHermiteSplineFunctorWithArcLength(const glm::quat& tipRot, const glm::vec3& tipTrans, const glm::quat& baseRot,
+                                           const glm::vec3& baseTrans, float baseGain = 1.0f, float tipGain = 1.0f) :
+        CubicHermiteSplineFunctor() {
         float linearDistance = glm::length(baseTrans - tipTrans);
         _p0 = baseTrans;
         _m0 = baseGain * linearDistance * (baseRot * Vectors::UNIT_Y);
@@ -81,7 +90,8 @@ public:
         initValues();
     }
 
-    CubicHermiteSplineFunctorWithArcLength(const CubicHermiteSplineFunctorWithArcLength& orig) : CubicHermiteSplineFunctor(orig) {
+    CubicHermiteSplineFunctorWithArcLength(const CubicHermiteSplineFunctorWithArcLength& orig) :
+        CubicHermiteSplineFunctor(orig) {
         memcpy(_values, orig._values, sizeof(float) * (NUM_SUBDIVISIONS + 1));
     }
 
@@ -108,6 +118,7 @@ public:
         const float DELTA = 1.0f / NUM_SUBDIVISIONS;
         return lerp(prevIndex * DELTA, nextIndex * DELTA, alpha);
     }
+
 protected:
     float _values[NUM_SUBDIVISIONS + 1];
 
@@ -118,12 +129,10 @@ protected:
         float accum = 0.0f;
         _values[0] = 0.0f;
         for (int i = 1; i < NUM_SUBDIVISIONS + 1; i++) {
-            accum += glm::distance(this->operator()(alpha),
-                this->operator()(alpha + DELTA));
+            accum += glm::distance(this->operator()(alpha), this->operator()(alpha + DELTA));
             alpha += DELTA;
             _values[i] = accum;
         }
-
     }
 };
 

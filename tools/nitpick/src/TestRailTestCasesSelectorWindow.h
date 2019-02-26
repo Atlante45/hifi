@@ -36,7 +36,7 @@ public:
     void setSuiteID(const int project);
     int getSuiteID();
 
-    bool userCancelled{ false };
+    bool userCancelled { false };
 
     void updateReleasesComboBoxData(QStringList data);
     int getReleaseID();

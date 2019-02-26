@@ -8,10 +8,7 @@
 
 #include "PrimitiveMode.h"
 
-const char* primitiveModeNames[] = {
-    "solid",
-    "lines"
-};
+const char* primitiveModeNames[] = { "solid", "lines" };
 
 static const size_t PRIMITIVE_MODE_NAMES = (sizeof(primitiveModeNames) / sizeof(primitiveModeNames[0]));
 

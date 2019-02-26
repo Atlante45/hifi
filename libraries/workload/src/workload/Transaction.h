@@ -13,74 +13,72 @@
 #define hifi_workload_Transaction_h
 
 #include <atomic>
-#include <mutex>
-#include <memory>
-#include <vector>
 #include <glm/glm.hpp>
+#include <memory>
+#include <mutex>
+#include <vector>
 
 #include "Proxy.h"
 
-
 namespace workload {
 
-    namespace indexed_container {
+namespace indexed_container {
 
-        using Index = int32_t;
-        const Index MAXIMUM_INDEX{ 1 << 30 };
-        const Index INVALID_INDEX{ -1 };
-        using Indices = std::vector< Index >;
+using Index = int32_t;
+const Index MAXIMUM_INDEX { 1 << 30 };
+const Index INVALID_INDEX { -1 };
+using Indices = std::vector<Index>;
 
-        template <Index MaxNumElements = MAXIMUM_INDEX>
-        class Allocator {
-        public:
-            Allocator() {}
-            Indices _freeIndices;
-            Index _nextNewIndex{ 0 };
+template<Index MaxNumElements = MAXIMUM_INDEX>
+class Allocator {
+public:
+    Allocator() {}
+    Indices _freeIndices;
+    Index _nextNewIndex { 0 };
 
-            bool checkIndex(Index index) const { return ((index >= 0) && (index < _nextNewIndex)); }
-            Index getNumLiveIndices() const { return _nextNewIndex - (Index)_freeIndices.size(); }
-            Index getNumFreeIndices() const { return (Index)_freeIndices.size(); }
-            Index getNumAllocatedIndices() const { return _nextNewIndex; }
+    bool checkIndex(Index index) const { return ((index >= 0) && (index < _nextNewIndex)); }
+    Index getNumLiveIndices() const { return _nextNewIndex - (Index)_freeIndices.size(); }
+    Index getNumFreeIndices() const { return (Index)_freeIndices.size(); }
+    Index getNumAllocatedIndices() const { return _nextNewIndex; }
 
-            Index allocateIndex() {
-                if (_freeIndices.empty()) {
-                    Index index = _nextNewIndex;
-                    if (index >= MaxNumElements) {
-                        // abort! we are trying to go overboard with the total number of allocated elements
-                        assert(false);
-                        // This should never happen because Bricks are allocated along with the cells and there
-                        // is already a cap on the cells allocation
-                        return INVALID_INDEX;
-                    }
-                    _nextNewIndex++;
-                    return index;
-                } else {
-                    // TODO: sort _freeIndices when neccessary to help keep used allocated indices more tightly packed
-                    Index index = _freeIndices.back();
-                    _freeIndices.pop_back();
-                    return index;
-                }
+    Index allocateIndex() {
+        if (_freeIndices.empty()) {
+            Index index = _nextNewIndex;
+            if (index >= MaxNumElements) {
+                // abort! we are trying to go overboard with the total number of allocated elements
+                assert(false);
+                // This should never happen because Bricks are allocated along with the cells and there
+                // is already a cap on the cells allocation
+                return INVALID_INDEX;
             }
-
-            void freeIndex(Index index) {
-                if (checkIndex(index)) {
-                    _freeIndices.push_back(index);
-                }
-            }
-
-            void clear() {
-                _freeIndices.clear();
-                _nextNewIndex = 0;
-            }
-        };
+            _nextNewIndex++;
+            return index;
+        } else {
+            // TODO: sort _freeIndices when neccessary to help keep used allocated indices more tightly packed
+            Index index = _freeIndices.back();
+            _freeIndices.pop_back();
+            return index;
+        }
     }
 
+    void freeIndex(Index index) {
+        if (checkIndex(index)) {
+            _freeIndices.push_back(index);
+        }
+    }
 
-    using Index = indexed_container::Index;
-    using IndexVector = indexed_container::Indices;
+    void clear() {
+        _freeIndices.clear();
+        _nextNewIndex = 0;
+    }
+};
+} // namespace indexed_container
 
-    using ProxyID = Index;
-    const ProxyID INVALID_PROXY_ID{ indexed_container ::INVALID_INDEX };
+using Index = indexed_container::Index;
+using IndexVector = indexed_container::Indices;
+
+using ProxyID = Index;
+const ProxyID INVALID_PROXY_ID { indexed_container ::INVALID_INDEX };
 
 // Transaction is the mechanism to make any change to the Space.
 // Whenever a new proxy need to be reset,
@@ -92,6 +90,7 @@ namespace workload {
 //
 class Transaction {
     friend class Space;
+
 public:
     using ProxyPayload = Sphere;
 
@@ -124,8 +123,6 @@ public:
     void clear();
 
 protected:
-
-
     Resets _resetItems;
     Removes _removedItems;
     Updates _updatedItems;
@@ -161,18 +158,16 @@ public:
     virtual void processTransactionQueue();
 
 protected:
-
     // Thread safe elements that can be accessed from anywhere
     indexed_container::Allocator<> _IDAllocator;
 
     std::mutex _transactionQueueMutex;
     TransactionQueue _transactionQueue;
 
-
     std::mutex _transactionFramesMutex;
     using TransactionFrames = std::vector<Transaction>;
     TransactionFrames _transactionFrames;
-    uint32_t _transactionFrameNumber{ 0 };
+    uint32_t _transactionFrameNumber { 0 };
 
     // Process one transaction frame
     virtual void processTransactionFrame(const Transaction& transaction) = 0;

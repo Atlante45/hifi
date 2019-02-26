@@ -14,7 +14,6 @@
 #include <qlist.h>
 
 class MovingPercentile {
-
 public:
     MovingPercentile(int numSamples, float percentile = 0.5f);
 
@@ -26,7 +25,7 @@ private:
     const float _percentile;
 
     QList<qint64> _samplesSorted;
-    QList<int> _sampleIds;      // incrementally assigned, is cyclic
+    QList<int> _sampleIds; // incrementally assigned, is cyclic
     int _newSampleId;
 
     int _indexOfPercentile;

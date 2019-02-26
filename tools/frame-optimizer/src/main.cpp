@@ -12,17 +12,15 @@
 #include <Windows.h>
 #endif
 
-#include <iostream>
 #include <gpu/FrameIO.h>
 #include <gpu/Texture.h>
+#include <iostream>
 
-
-gpu::IndexOptimizer optimizer= [](gpu::Primitive primitive, uint32_t faceCount, uint32_t indexCount, uint32_t* indices ) {
+gpu::IndexOptimizer optimizer = [](gpu::Primitive primitive, uint32_t faceCount, uint32_t indexCount, uint32_t* indices) {
     // FIXME add a triangle index optimizer here
 };
 
-
-void messageHandler(QtMsgType type, const QMessageLogContext &, const QString & message) {
+void messageHandler(QtMsgType type, const QMessageLogContext&, const QString& message) {
     auto messageStr = message.toStdString();
 #ifdef Q_OS_WIN
     OutputDebugStringA(messageStr.c_str());

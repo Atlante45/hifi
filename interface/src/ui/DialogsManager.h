@@ -55,7 +55,7 @@ public slots:
     void showDomainConnectionDialog();
     void showTestingResults();
     void toggleAddressBar();
-    
+
     // Application Update
     void showUpdateDialog();
 

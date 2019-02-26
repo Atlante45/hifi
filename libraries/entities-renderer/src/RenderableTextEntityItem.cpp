@@ -11,11 +11,11 @@
 
 #include "RenderableTextEntityItem.h"
 
-#include <TextEntityItem.h>
 #include <GeometryCache.h>
 #include <PerfStat.h>
-#include <Transform.h>
+#include <TextEntityItem.h>
 #include <TextRenderer3D.h>
+#include <Transform.h>
 
 #include "GLMHelpers.h"
 
@@ -23,7 +23,7 @@ using namespace render;
 using namespace render::entities;
 
 static const int FIXED_FONT_POINT_SIZE = 40;
-const int FIXED_FONT_SCALING_RATIO = FIXED_FONT_POINT_SIZE * 92.0f; // Determined through experimentation to fit font to line 
+const int FIXED_FONT_SCALING_RATIO = FIXED_FONT_POINT_SIZE * 92.0f; // Determined through experimentation to fit font to line
                                                                     // height.
 const float LINE_SCALE_RATIO = 1.2f;
 
@@ -44,7 +44,8 @@ TextEntityRenderer::~TextEntityRenderer() {
 }
 
 bool TextEntityRenderer::isTransparent() const {
-    return Parent::isTransparent() || _textAlpha < 1.0f || _backgroundAlpha < 1.0f || _pulseProperties.getAlphaMode() != PulseMode::NONE;
+    return Parent::isTransparent() || _textAlpha < 1.0f || _backgroundAlpha < 1.0f ||
+           _pulseProperties.getAlphaMode() != PulseMode::NONE;
 }
 
 Item::Bound TextEntityRenderer::getBound() {
@@ -125,9 +126,10 @@ bool TextEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityPoint
     return false;
 }
 
-void TextEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) {
+void TextEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                        const TypedEntityPointer& entity) {
     void* key = (void*)this;
-    AbstractViewStateInterface::instance()->pushPostUpdateLambda(key, [this, entity] () {
+    AbstractViewStateInterface::instance()->pushPostUpdateLambda(key, [this, entity]() {
         withWriteLock([&] {
             _dimensions = entity->getScaledDimensions();
             updateModelTransformAndBound();
@@ -181,7 +183,9 @@ void TextEntityRenderer::doRender(RenderArgs* args) {
     gpu::Batch& batch = *args->_batch;
 
     auto transformToTopLeft = modelTransform;
-    transformToTopLeft.setRotation(EntityItem::getBillboardRotation(transformToTopLeft.getTranslation(), transformToTopLeft.getRotation(), _billboardMode, args->getViewFrustum().getPosition()));
+    transformToTopLeft.setRotation(EntityItem::getBillboardRotation(transformToTopLeft.getTranslation(),
+                                                                    transformToTopLeft.getRotation(), _billboardMode,
+                                                                    args->getViewFrustum().getPosition()));
     transformToTopLeft.postTranslate(dimensions * glm::vec3(-0.5f, 0.5f, 0.0f)); // Go to the top left
     transformToTopLeft.setScale(1.0f); // Use a scale of one so that the text is not deformed
 
@@ -195,7 +199,7 @@ void TextEntityRenderer::doRender(RenderArgs* args) {
     if (textColor.a > 0.0f) {
         // FIXME: Factor out textRenderer so that text parts can be grouped by pipeline for a gpu performance increase.
         float scale = _lineHeight / _textRenderer->getFontSize();
-        transformToTopLeft.setScale(scale);  // Scale to have the correct line height
+        transformToTopLeft.setScale(scale); // Scale to have the correct line height
         batch.setModelTransform(transformToTopLeft);
 
         glm::vec2 bounds = glm::vec2(dimensions.x - (_leftMargin + _rightMargin), dimensions.y - (_topMargin + _bottomMargin));

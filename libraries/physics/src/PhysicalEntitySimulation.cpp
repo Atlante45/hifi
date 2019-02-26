@@ -9,7 +9,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #include "PhysicalEntitySimulation.h"
 
 #include <Profile.h>
@@ -18,17 +17,14 @@
 #include "PhysicsLogging.h"
 #include "ShapeManager.h"
 
-
 PhysicalEntitySimulation::PhysicalEntitySimulation() {
 }
 
 PhysicalEntitySimulation::~PhysicalEntitySimulation() {
 }
 
-void PhysicalEntitySimulation::init(
-        EntityTreePointer tree,
-        PhysicsEnginePointer physicsEngine,
-        EntityEditPacketSender* packetSender) {
+void PhysicalEntitySimulation::init(EntityTreePointer tree, PhysicsEnginePointer physicsEngine,
+                                    EntityEditPacketSender* packetSender) {
     assert(tree);
     setEntityTree(tree);
 
@@ -229,11 +225,11 @@ void PhysicalEntitySimulation::prepareEntityForDelete(EntityItemPointer entity) 
 
 const VectorOfMotionStates& PhysicalEntitySimulation::getObjectsToRemoveFromPhysics() {
     QMutexLocker lock(&_mutex);
-    for (auto entity: _entitiesToRemoveFromPhysics) {
+    for (auto entity : _entitiesToRemoveFromPhysics) {
         EntityMotionState* motionState = static_cast<EntityMotionState*>(entity->getPhysicsInfo());
         assert(motionState);
-      // TODO CLEan this, just a n extra check to avoid the crash that shouldn;t happen
-      if (motionState) {
+        // TODO CLEan this, just a n extra check to avoid the crash that shouldn;t happen
+        if (motionState) {
             _entitiesToAddToPhysics.remove(entity);
             if (entity->isDead() && entity->getElement()) {
                 _deadEntities.insert(entity);
@@ -287,9 +283,8 @@ void PhysicalEntitySimulation::getObjectsToAddToPhysics(VectorOfMotionStates& re
             int numPoints = shapeInfo.getLargestSubshapePointCount();
             if (shapeInfo.getType() == SHAPE_TYPE_COMPOUND) {
                 if (numPoints > MAX_HULL_POINTS) {
-                    qWarning() << "convex hull with" << numPoints
-                        << "points for entity" << entity->getName()
-                        << "at" << entity->getWorldPosition() << " will be reduced";
+                    qWarning() << "convex hull with" << numPoints << "points for entity" << entity->getName() << "at"
+                               << entity->getWorldPosition() << " will be reduced";
                 }
             }
             btCollisionShape* shape = const_cast<btCollisionShape*>(ObjectMotionState::getShapeManager()->getShape(shapeInfo));
@@ -303,7 +298,7 @@ void PhysicalEntitySimulation::getObjectsToAddToPhysics(VectorOfMotionStates& re
                 // make sure the motionState's region is up-to-date before it is actually added to physics
                 motionState->setRegion(_space->getRegion(entity->getSpaceIndex()));
             } else {
-                //qWarning() << "Failed to generate new shape for entity." << entity->getName();
+                // qWarning() << "Failed to generate new shape for entity." << entity->getName();
                 ++entityItr;
             }
         } else {
@@ -392,7 +387,8 @@ void PhysicalEntitySimulation::handleChangedMotionStates(const VectorOfMotionSta
             // usually don't get here, but if so clear all ownership
             clearOwnershipData();
         }
-        // send updates before bids, because this simplifies the logic thasuccessful bids will immediately send an update when added to the 'owned' list
+        // send updates before bids, because this simplifies the logic thasuccessful bids will immediately send an update when
+        // added to the 'owned' list
         sendOwnedUpdates(numSubsteps);
         sendOwnershipBids(numSubsteps);
     }
@@ -492,7 +488,7 @@ void PhysicalEntitySimulation::addDynamic(EntityDynamicPointer dynamic) {
             const QUuid& dynamicID = dynamic->getID();
             if (_physicsEngine->getDynamicByID(dynamicID)) {
                 qCDebug(physics) << "warning -- PhysicalEntitySimulation::addDynamic -- adding an "
-                    "dynamic that was already in _physicsEngine";
+                                    "dynamic that was already in _physicsEngine";
             }
         }
         EntitySimulation::addDynamic(dynamic);
@@ -503,9 +499,7 @@ void PhysicalEntitySimulation::applyDynamicChanges() {
     QList<EntityDynamicPointer> dynamicsFailedToAdd;
     if (_physicsEngine) {
         QMutexLocker lock(&_dynamicsMutex);
-        foreach(QUuid dynamicToRemove, _dynamicsToRemove) {
-            _physicsEngine->removeDynamic(dynamicToRemove);
-        }
+        foreach (QUuid dynamicToRemove, _dynamicsToRemove) { _physicsEngine->removeDynamic(dynamicToRemove); }
         foreach (EntityDynamicPointer dynamicToAdd, _dynamicsToAdd) {
             if (!_dynamicsToRemove.contains(dynamicToAdd->getID())) {
                 if (!_physicsEngine->addDynamic(dynamicToAdd)) {
@@ -518,7 +512,5 @@ void PhysicalEntitySimulation::applyDynamicChanges() {
     }
 
     // put back the ones that couldn't yet be added
-    foreach (EntityDynamicPointer dynamicFailedToAdd, dynamicsFailedToAdd) {
-        addDynamic(dynamicFailedToAdd);
-    }
+    foreach (EntityDynamicPointer dynamicFailedToAdd, dynamicsFailedToAdd) { addDynamic(dynamicFailedToAdd); }
 }

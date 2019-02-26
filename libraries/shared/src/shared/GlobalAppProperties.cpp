@@ -8,20 +8,22 @@
 
 #include "GlobalAppProperties.h"
 
-namespace hifi { namespace properties {
+namespace hifi {
+namespace properties {
 
-    const char* CRASHED = "com.highfidelity.crashed";
-    const char* STEAM = "com.highfidelity.launchedFromSteam";
-    const char* LOGGER = "com.highfidelity.logger";
-    const char* OCULUS_STORE = "com.highfidelity.oculusStore";
-    const char* TEST = "com.highfidelity.test";
-    const char* TRACING = "com.highfidelity.tracing";
-    const char* HMD = "com.highfidelity.hmd";
-    const char* APP_LOCAL_DATA_PATH = "com.highfidelity.appLocalDataPath";
+const char* CRASHED = "com.highfidelity.crashed";
+const char* STEAM = "com.highfidelity.launchedFromSteam";
+const char* LOGGER = "com.highfidelity.logger";
+const char* OCULUS_STORE = "com.highfidelity.oculusStore";
+const char* TEST = "com.highfidelity.test";
+const char* TRACING = "com.highfidelity.tracing";
+const char* HMD = "com.highfidelity.hmd";
+const char* APP_LOCAL_DATA_PATH = "com.highfidelity.appLocalDataPath";
 
-    namespace gl {
-        const char* BACKEND = "com.highfidelity.gl.backend";
-        const char* PRIMARY_CONTEXT = "com.highfidelity.gl.primaryContext";
-    }
+namespace gl {
+const char* BACKEND = "com.highfidelity.gl.backend";
+const char* PRIMARY_CONTEXT = "com.highfidelity.gl.primaryContext";
+} // namespace gl
 
-} }
+} // namespace properties
+} // namespace hifi

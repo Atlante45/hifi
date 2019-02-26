@@ -19,5 +19,4 @@ class GrabManager : public QObject, public Dependency {
 
 public:
     void simulateGrabs();
-
 };

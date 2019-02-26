@@ -13,29 +13,29 @@
 
 namespace controller {
 
-    class AccelerationLimiterFilter : public Filter {
-        REGISTER_FILTER_CLASS(AccelerationLimiterFilter);
+class AccelerationLimiterFilter : public Filter {
+    REGISTER_FILTER_CLASS(AccelerationLimiterFilter);
 
-    public:
-        AccelerationLimiterFilter() {}
+public:
+    AccelerationLimiterFilter() {}
 
-        AxisValue apply(AxisValue value) const override { return value; }
-        Pose apply(Pose value) const override;
-        bool parseParameters(const QJsonValue& parameters) override;
+    AxisValue apply(AxisValue value) const override { return value; }
+    Pose apply(Pose value) const override;
+    bool parseParameters(const QJsonValue& parameters) override;
 
-    private:
-        float _rotationAccelerationLimit { FLT_MAX };
-        float _translationAccelerationLimit { FLT_MAX };
-        float _rotationSnapThreshold { 0.0f };
-        float _translationSnapThreshold { 0.0f };
+private:
+    float _rotationAccelerationLimit { FLT_MAX };
+    float _translationAccelerationLimit { FLT_MAX };
+    float _rotationSnapThreshold { 0.0f };
+    float _translationSnapThreshold { 0.0f };
 
-        mutable glm::vec3 _prevPos[3];  // sensor space
-        mutable glm::quat _prevRot[3];  // sensor space
-        mutable glm::vec3 _unfilteredPrevPos[3];  // sensor space
-        mutable glm::quat _unfilteredPrevRot[3];  // sensor space
-        mutable bool _prevValid { false };
-    };
+    mutable glm::vec3 _prevPos[3]; // sensor space
+    mutable glm::quat _prevRot[3]; // sensor space
+    mutable glm::vec3 _unfilteredPrevPos[3]; // sensor space
+    mutable glm::quat _unfilteredPrevRot[3]; // sensor space
+    mutable bool _prevValid { false };
+};
 
-}
+} // namespace controller
 
 #endif

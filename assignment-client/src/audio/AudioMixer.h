@@ -20,8 +20,8 @@
 
 #include <plugins/Forward.h>
 
-#include "AudioMixerStats.h"
 #include "AudioMixerSlavePool.h"
+#include "AudioMixerStats.h"
 
 class PositionalAudioStream;
 class AvatarAudioStream;
@@ -33,7 +33,6 @@ class AudioMixer : public ThreadedAssignment {
     Q_OBJECT
 public:
     AudioMixer(ReceivedMessage& message);
-
 
     struct ZoneDescription {
         QString name;
@@ -59,13 +58,12 @@ public:
     static const std::pair<QString, CodecPluginPointer> negotiateCodec(std::vector<QString> codecs);
 
     static bool shouldReplicateTo(const Node& from, const Node& to) {
-        return to.getType() == NodeType::DownstreamAudioMixer &&
-               to.getPublicSocket() != from.getPublicSocket() &&
+        return to.getType() == NodeType::DownstreamAudioMixer && to.getPublicSocket() != from.getPublicSocket() &&
                to.getLocalSocket() != from.getLocalSocket();
     }
 
     virtual void aboutToFinish() override;
-    
+
 public slots:
     void run() override;
     void sendStatsPacket() override;
@@ -109,10 +107,11 @@ private:
 
     class Timer {
     public:
-        class Timing{
+        class Timing {
         public:
             Timing(uint64_t& sum);
             ~Timing();
+
         private:
             p_high_resolution_clock::time_point _timing;
             uint64_t& _sum;
@@ -120,6 +119,7 @@ private:
 
         Timing timer() { return Timing(_sum); }
         void get(uint64_t& timing, uint64_t& trailing);
+
     private:
         static const int TIMER_TRAILING_SECONDS = 10;
 

@@ -14,8 +14,8 @@
 
 #include <vector>
 
-#include <btBulletDynamicsCommon.h>
 #include <LinearMath/btHashMap.h>
+#include <btBulletDynamicsCommon.h>
 
 #include <ShapeInfo.h>
 
@@ -43,10 +43,8 @@
 // later.  When that list grows big enough the ShapeManager will remove any matching
 // entries that still have zero ref-count.
 
-
 class ShapeManager {
 public:
-
     ShapeManager();
     ~ShapeManager();
 

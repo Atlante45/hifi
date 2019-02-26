@@ -11,32 +11,32 @@
 #include <thread>
 
 #include <QCommandLineParser>
-#include <QtCore/QProcess>
 #include <QDebug>
 #include <QDir>
-#include <QLocalSocket>
 #include <QLocalServer>
+#include <QLocalSocket>
 #include <QSharedMemory>
 #include <QTranslator>
+#include <QtCore/QProcess>
 
 #include <BuildInfo.h>
+#include <NetworkAccessManager.h>
 #include <SandboxUtils.h>
 #include <SharedUtil.h>
-#include <NetworkAccessManager.h>
 #include <gl/GLHelpers.h>
 
 #include "AddressManager.h"
 #include "Application.h"
 #include "CrashHandler.h"
 #include "InterfaceLogging.h"
-#include "UserActivityLogger.h"
 #include "MainWindow.h"
+#include "UserActivityLogger.h"
 
 #include "Profile.h"
 
 #ifdef Q_OS_WIN
 extern "C" {
-    typedef int(__stdcall * CHECKMINSPECPROC) ();
+typedef int(__stdcall* CHECKMINSPECPROC)();
 }
 #endif
 
@@ -45,12 +45,12 @@ int main(int argc, const char* argv[]) {
     auto format = getDefaultOpenGLSurfaceFormat();
     // Deal with some weirdness in the chromium context sharing on Mac.
     // The primary share context needs to be 3.2, so that the Chromium will
-    // succeed in it's creation of it's command stub contexts.  
+    // succeed in it's creation of it's command stub contexts.
     format.setVersion(3, 2);
     // This appears to resolve the issues with corrupted fonts on OSX.  No
     // idea why.
     qputenv("QT_ENABLE_GLYPH_CACHE_WORKAROUND", "true");
-	// https://i.kym-cdn.com/entries/icons/original/000/008/342/ihave.jpg
+    // https://i.kym-cdn.com/entries/icons/original/000/008/342/ihave.jpg
     QSurfaceFormat::setDefaultFormat(format);
 #endif
     setupHifiApplication(BuildInfo::INTERFACE_NAME);
@@ -97,9 +97,9 @@ int main(int argc, const char* argv[]) {
         Q_UNREACHABLE();
     }
 
-    // Early check for --traceFile argument 
+    // Early check for --traceFile argument
     auto tracer = DependencyManager::set<tracing::Tracer>();
-    const char * traceFile = nullptr;
+    const char* traceFile = nullptr;
     const QString traceFileFlag("--traceFile");
     float traceDuration = 0.0f;
     for (int a = 1; a < argc; ++a) {
@@ -114,7 +114,7 @@ int main(int argc, const char* argv[]) {
     if (traceFile != nullptr) {
         tracer->startTracing();
     }
-   
+
     PROFILE_SYNC_BEGIN(startup, "main startup", "");
 
 #ifdef Q_OS_LINUX
@@ -122,8 +122,8 @@ int main(int argc, const char* argv[]) {
 #endif
 
 #if defined(USE_GLES) && defined(Q_OS_WIN)
-    // When using GLES on Windows, we can't create normal GL context in Qt, so 
-    // we force Qt to use angle.  This will cause the QML to be unable to be used 
+    // When using GLES on Windows, we can't create normal GL context in Qt, so
+    // we force Qt to use angle.  This will cause the QML to be unable to be used
     // in the output window, so QML should be disabled.
     qputenv("QT_ANGLE_PLATFORM", "d3d11");
     QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
@@ -150,14 +150,13 @@ int main(int argc, const char* argv[]) {
         qDebug() << "Crash handler started:" << crashHandlerStarted;
     }
 
-
     const QString& applicationName = getInterfaceSharedMemoryName();
     bool instanceMightBeRunning = true;
 #ifdef Q_OS_WIN
     // Try to create a shared memory block - if it can't be created, there is an instance of
     // interface already running. We only do this on Windows for now because of the potential
     // for crashed instances to leave behind shared memory instances on unix.
-    QSharedMemory sharedMemory{ applicationName };
+    QSharedMemory sharedMemory { applicationName };
     instanceMightBeRunning = !sharedMemory.create(1, QSharedMemory::ReadOnly);
 #endif
 
@@ -210,10 +209,9 @@ int main(int argc, const char* argv[]) {
 #endif
     }
 
-
-    // FIXME this method of checking the OpenGL version screws up the `QOpenGLContext::globalShareContext()` value, which in turn
-    // leads to crashes when creating the real OpenGL instance.  Disabling for now until we come up with a better way of checking
-    // the GL version on the system without resorting to creating a full Qt application
+    // FIXME this method of checking the OpenGL version screws up the `QOpenGLContext::globalShareContext()` value, which in
+    // turn leads to crashes when creating the real OpenGL instance.  Disabling for now until we come up with a better way of
+    // checking the GL version on the system without resorting to creating a full Qt application
 #if 0
     // Check OpenGL version.
     // This is done separately from the main Application so that start-up and shut-down logic within the main Application is
@@ -236,7 +234,6 @@ int main(int argc, const char* argv[]) {
         }
     }
 #endif
-
 
     // Debug option to demonstrate that the client's local time does not
     // need to be in sync with any other network node. This forces clock
@@ -302,8 +299,7 @@ int main(int argc, const char* argv[]) {
         PROFILE_SYNC_BEGIN(startup, "app full ctor", "");
         Application app(argcExtended, const_cast<char**>(argvExtended.data()), startupTime, runningMarkerExisted);
         PROFILE_SYNC_END(startup, "app full ctor", "");
-        
-        
+
         QTimer exitTimer;
         if (traceDuration > 0.0f) {
             exitTimer.setSingleShot(true);
@@ -336,8 +332,8 @@ int main(int argc, const char* argv[]) {
         server.removeServer(applicationName);
         server.listen(applicationName);
 
-        QObject::connect(&server, &QLocalServer::newConnection,
-                         &app, &Application::handleLocalServerConnection, Qt::DirectConnection);
+        QObject::connect(&server, &QLocalServer::newConnection, &app, &Application::handleLocalServerConnection,
+                         Qt::DirectConnection);
 
         printSystemInformation();
 

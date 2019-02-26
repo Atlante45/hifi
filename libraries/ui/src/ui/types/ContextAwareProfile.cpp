@@ -17,9 +17,8 @@
 
 static const QString RESTRICTED_FLAG_PROPERTY = "RestrictFileAccess";
 
-ContextAwareProfile::ContextAwareProfile(QQmlContext* parent) :
-    QQuickWebEngineProfile(parent), _context(parent) { }
-
+ContextAwareProfile::ContextAwareProfile(QQmlContext* parent) : QQuickWebEngineProfile(parent), _context(parent) {
+}
 
 void ContextAwareProfile::restrictContext(QQmlContext* context) {
     context->setContextProperty(RESTRICTED_FLAG_PROPERTY, true);

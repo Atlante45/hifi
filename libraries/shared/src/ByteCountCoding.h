@@ -30,10 +30,11 @@
 
 #include "NumericalConstants.h"
 
-template<typename T> class ByteCountCoded {
+template<typename T>
+class ByteCountCoded {
 public:
     T data;
-    ByteCountCoded(T input = 0) : data(input) { 
+    ByteCountCoded(T input = 0) : data(input) {
         // only use this template for non-signed integer types
         assert(!std::numeric_limits<T>::is_signed && std::numeric_limits<T>::is_integer);
     };
@@ -48,20 +49,23 @@ public:
     bool operator!=(const ByteCountCoded& other) const { return data != other.data; }
     bool operator!() const { return data == 0; }
 
-     operator QByteArray() const { return encode(); };
-     operator T() const { return data; };
+    operator QByteArray() const { return encode(); };
+    operator T() const { return data; };
 };
 
-template<typename T> inline QByteArray& operator<<(QByteArray& out, const ByteCountCoded<T>& value) {
+template<typename T>
+inline QByteArray& operator<<(QByteArray& out, const ByteCountCoded<T>& value) {
     return out = value;
 }
 
-template<typename T> inline QByteArray& operator>>(QByteArray& in, ByteCountCoded<T>& value) {
+template<typename T>
+inline QByteArray& operator>>(QByteArray& in, ByteCountCoded<T>& value) {
     value.decode(in);
     return in;
 }
 
-template<typename T> inline QByteArray ByteCountCoded<T>::encode() const {
+template<typename T>
+inline QByteArray ByteCountCoded<T>::encode() const {
     QByteArray output;
 
     int totalBits = sizeof(data) * BITS_IN_BYTE;
@@ -82,32 +86,32 @@ template<typename T> inline QByteArray ByteCountCoded<T>::encode() const {
         }
         temp = temp << 1;
     }
-    
+
     // calculate the number of total bytes, including our header
     // BITS_IN_BYTE-1 because we need to code the number of bytes in the header
     // + 1 because we always take at least 1 byte, even if number of bits is less than a bytes worth
-    int numberOfBytes = (valueBits / (BITS_IN_BYTE - 1)) + 1; 
+    int numberOfBytes = (valueBits / (BITS_IN_BYTE - 1)) + 1;
 
     output.fill(0, numberOfBytes);
 
     // next pack the number of header bits in, the first N-1 to be set to 1, the last to be set to 0
-    for(int i = 0; i < numberOfBytes; i++) {
+    for (int i = 0; i < numberOfBytes; i++) {
         int outputIndex = i;
-        T bitValue = (i < (numberOfBytes - 1)  ? 1 : 0);
+        T bitValue = (i < (numberOfBytes - 1) ? 1 : 0);
         char original = output.at(outputIndex / BITS_IN_BYTE);
         int shiftBy = BITS_IN_BYTE - ((outputIndex % BITS_IN_BYTE) + 1);
-        char thisBit = ( bitValue << shiftBy);
+        char thisBit = (bitValue << shiftBy);
         output[i / BITS_IN_BYTE] = (original | thisBit);
     }
 
     // finally pack the the actual bits from the bit array
     temp = data;
-    for(int i = numberOfBytes; i < (numberOfBytes + valueBits); i++) {
+    for (int i = numberOfBytes; i < (numberOfBytes + valueBits); i++) {
         int outputIndex = i;
         T bitValue = (temp & 1);
         char original = output.at(outputIndex / BITS_IN_BYTE);
         int shiftBy = BITS_IN_BYTE - ((outputIndex % BITS_IN_BYTE) + 1);
-        char thisBit = ( bitValue << shiftBy);
+        char thisBit = (bitValue << shiftBy);
         output[i / BITS_IN_BYTE] = (original | thisBit);
 
         temp = temp >> 1;
@@ -115,11 +119,13 @@ template<typename T> inline QByteArray ByteCountCoded<T>::encode() const {
     return output;
 }
 
-template<typename T> inline size_t ByteCountCoded<T>::decode(const QByteArray& fromEncodedBytes) {
+template<typename T>
+inline size_t ByteCountCoded<T>::decode(const QByteArray& fromEncodedBytes) {
     return decode(fromEncodedBytes.constData(), fromEncodedBytes.size());
 }
 
-template<typename T> inline size_t ByteCountCoded<T>::decode(const char* encodedBuffer, int encodedSize) {
+template<typename T>
+inline size_t ByteCountCoded<T>::decode(const char* encodedBuffer, int encodedSize) {
     data = 0; // reset data
     size_t bytesConsumed = 0;
     int bitCount = BITS_IN_BYTE * encodedSize;
@@ -131,14 +137,14 @@ template<typename T> inline size_t ByteCountCoded<T>::decode(const char* encoded
     int expectedBitCount; // unknown at this point
     int lastValueBit = 0;
     T bitValue = 1;
-    
-    for(int byte = 0; byte < encodedSize; byte++) {
+
+    for (int byte = 0; byte < encodedSize; byte++) {
         char originalByte = encodedBuffer[byte];
         bytesConsumed++;
         unsigned char maskBit = 128; // LEFT MOST BIT set
-        for(int bit = 0; bit < BITS_IN_BYTE; bit++) {
+        for (int bit = 0; bit < BITS_IN_BYTE; bit++) {
             bool bitIsSet = originalByte & maskBit;
-            
+
             // Processing of the lead bits
             if (inLeadBits) {
                 if (bitIsSet) {
@@ -158,8 +164,8 @@ template<typename T> inline size_t ByteCountCoded<T>::decode(const char* encoded
                 if (bitAt > lastValueBit) {
                     break;
                 }
-                
-                if(bitIsSet) {
+
+                if (bitIsSet) {
                     data += bitValue;
                 }
                 bitValue *= 2;
@@ -174,4 +180,3 @@ template<typename T> inline size_t ByteCountCoded<T>::decode(const char* encoded
     return bytesConsumed;
 }
 #endif // hifi_ByteCountCoding_h
-

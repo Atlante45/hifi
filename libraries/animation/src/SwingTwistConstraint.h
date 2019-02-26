@@ -41,7 +41,6 @@ public:
     /// so we'll use the input set to extrapolate a lookup function of evenly spaced values.
     void setSwingLimits(const std::vector<glm::vec3>& swungDirections);
 
-
     /// \param minTwist the minimum angle of rotation about the twist axis
     /// \param maxTwist the maximum angle of rotation about the twist axis
     void setTwistLimits(float minTwist, float maxTwist);

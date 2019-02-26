@@ -42,6 +42,6 @@ protected:
     const Clip::Pointer _wrappedClip;
 };
 
-}
+} // namespace recording
 
 #endif

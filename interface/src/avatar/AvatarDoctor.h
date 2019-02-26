@@ -14,8 +14,8 @@
 #define hifi_AvatarDoctor_h
 
 #include <QUrl>
-#include <QVector>
 #include <QVariantMap>
+#include <QVector>
 
 struct AvatarDiagnosticResult {
     QString message;
@@ -48,4 +48,4 @@ private:
     bool _isDiagnosing = false;
 };
 
-#endif  // hifi_AvatarDoctor_h
+#endif // hifi_AvatarDoctor_h

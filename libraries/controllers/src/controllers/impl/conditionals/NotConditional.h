@@ -14,17 +14,17 @@
 
 namespace controller {
 
-    class NotConditional : public Conditional {
-    public:
-        using Pointer = std::shared_ptr<NotConditional>;
+class NotConditional : public Conditional {
+public:
+    using Pointer = std::shared_ptr<NotConditional>;
 
-        NotConditional(Conditional::Pointer operand) : _operand(operand) { }
+    NotConditional(Conditional::Pointer operand) : _operand(operand) {}
 
-        virtual bool satisfied() override;
+    virtual bool satisfied() override;
 
-    private:
-        Conditional::Pointer _operand;
-    };
-}
+private:
+    Conditional::Pointer _operand;
+};
+} // namespace controller
 
 #endif

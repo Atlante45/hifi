@@ -11,8 +11,8 @@
 
 #include <glm/gtx/transform.hpp>
 
-#include <AnimInverseKinematics.h>
 #include <AnimBlendLinear.h>
+#include <AnimInverseKinematics.h>
 #include <AnimationLogging.h>
 #include <NumericalConstants.h>
 
@@ -27,7 +27,6 @@ const glm::vec3 zAxis(0.0f, 0.0f, 1.0f);
 const glm::quat identity = glm::quat();
 const glm::quat quaterTurnAroundZ = glm::angleAxis(0.5f * PI, zAxis);
 
-
 void makeTestFBXJoints(HFMModel& hfmModel) {
     HFMJoint joint;
     joint.isFree = false;
@@ -35,11 +34,11 @@ void makeTestFBXJoints(HFMModel& hfmModel) {
     joint.parentIndex = -1;
     joint.distanceToParent = 1.0f;
 
-    joint.translation = origin;        // T
-    joint.preTransform = glm::mat4();  // Roff * Rp
-    joint.preRotation = identity;      // Rpre
-    joint.rotation = identity;         // R
-    joint.postRotation = identity;     // Rpost
+    joint.translation = origin; // T
+    joint.preTransform = glm::mat4(); // Roff * Rp
+    joint.preRotation = identity; // Rpre
+    joint.rotation = identity; // R
+    joint.postRotation = identity; // Rpost
     joint.postTransform = glm::mat4(); // Rp-1 * Soff * Sp * S * Sp-1
 
     // World = ParentWorld * T * (Roff * Rp) * Rpre * R * Rpost * (Rp-1 * Soff * Sp * S * Sp-1)
@@ -82,18 +81,14 @@ void makeTestFBXJoints(HFMModel& hfmModel) {
         HFMJoint& j = hfmModel.joints[i];
         int parentIndex = j.parentIndex;
         // World = ParentWorld * T * (Roff * Rp) * Rpre * R * Rpost * (Rp-1 * Soff * Sp * S * Sp-1)
-        j.transform = hfmModel.joints[parentIndex].transform *
-            glm::translate(j.translation) *
-            j.preTransform *
-            glm::mat4_cast(j.preRotation * j.rotation * j.postRotation) *
-            j.postTransform;
+        j.transform = hfmModel.joints[parentIndex].transform * glm::translate(j.translation) * j.preTransform *
+                      glm::mat4_cast(j.preRotation * j.rotation * j.postRotation) * j.postTransform;
         j.inverseBindRotation = identity;
         j.bindTransform = j.transform;
     }
 }
 
 void AnimInverseKinematicsTests::testSingleChain() {
-
     AnimContext context(false, false, false, glm::mat4(), glm::mat4());
 
     HFMModel hfmModel;
@@ -139,7 +134,7 @@ void AnimInverseKinematicsTests::testSingleChain() {
         varMap.set("targetTypeD", (int)IKTarget::Type::RotationAndPosition);
         varMap.set("poleVectorEnabledD", false);
 
-        std::vector<float> flexCoefficients = {1.0f, 1.0f, 1.0f, 1.0f};
+        std::vector<float> flexCoefficients = { 1.0f, 1.0f, 1.0f, 1.0f };
         ikDoll.setTargetVars(QString("D"), QString("positionD"), QString("rotationD"), QString("targetTypeD"),
                              QString("weightD"), 1.0f, flexCoefficients, QString("poleVectorEnabledD"),
                              QString("poleReferenceVectorD"), QString("poleVectorD"));
@@ -193,7 +188,6 @@ void AnimInverseKinematicsTests::testSingleChain() {
         QCOMPARE_WITH_ABS_ERROR(relativePoses[1].trans(), xAxis, acceptableTranslationError);
         QCOMPARE_WITH_ABS_ERROR(relativePoses[2].trans(), xAxis, acceptableTranslationError);
         QCOMPARE_WITH_ABS_ERROR(relativePoses[3].trans(), xAxis, acceptableTranslationError);
-
     }
     { // hard test IK of joint C
         // load intial poses that look like this:
@@ -232,7 +226,7 @@ void AnimInverseKinematicsTests::testSingleChain() {
         varMap.set("rotationD", targetRotation);
         varMap.set("targetTypeD", (int)IKTarget::Type::RotationAndPosition);
         varMap.set("poleVectorEnabledD", false);
-        std::vector<float> flexCoefficients = {1.0f, 1.0f, 1.0f, 1.0f};
+        std::vector<float> flexCoefficients = { 1.0f, 1.0f, 1.0f, 1.0f };
         ikDoll.setTargetVars(QString("D"), QString("positionD"), QString("rotationD"), QString("targetTypeD"),
                              QString("weightD"), 1.0f, flexCoefficients, QString("poleVectorEnabledD"),
                              QString("poleReferenceVectorD"), QString("poleVectorD"));
@@ -304,4 +298,3 @@ void AnimInverseKinematicsTests::testBar() {
     glm::vec3 expectedTransC = transA + transB;
     QCOMPARE_WITH_ABS_ERROR(expectedTransC, poseC.trans(), EPSILON);
 }
-

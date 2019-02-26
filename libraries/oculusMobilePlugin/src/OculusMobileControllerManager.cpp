@@ -10,146 +10,145 @@
 
 #include <array>
 
-#include <ui-plugins/PluginContainer.h>
-#include <controllers/UserInputMapper.h>
 #include <controllers/StandardControls.h>
+#include <controllers/UserInputMapper.h>
 #include <input-plugins/KeyboardMouseDevice.h>
+#include <ui-plugins/PluginContainer.h>
 
-#include <PerfStat.h>
-#include <PathUtils.h>
 #include <NumericalConstants.h>
+#include <PathUtils.h>
+#include <PerfStat.h>
 #include <StreamUtils.h>
 #include <VrApi.h>
 #include <VrApi_Input.h>
 #include <ovr/Helpers.h>
 
-#include "Logging.h"
 #include <ovr/VrHandler.h>
+#include "Logging.h"
 
 const char* OculusMobileControllerManager::NAME = "Oculus";
 const quint64 LOST_TRACKING_DELAY = 3000000;
 
 namespace ovr {
 
-    controller::Pose toControllerPose(ovrHandedness hand, const ovrRigidBodyPosef& handPose) {
-        // When the sensor-to-world rotation is identity the coordinate axes look like this:
-        //
-        //                       user
-        //                      forward
-        //                        -z
-        //                         |
-        //                        y|      user
-        //      y                  o----x right
-        //       o-----x         user
-        //       |                up
-        //       |
-        //       z
-        //
-        //     Rift
+controller::Pose toControllerPose(ovrHandedness hand, const ovrRigidBodyPosef& handPose) {
+    // When the sensor-to-world rotation is identity the coordinate axes look like this:
+    //
+    //                       user
+    //                      forward
+    //                        -z
+    //                         |
+    //                        y|      user
+    //      y                  o----x right
+    //       o-----x         user
+    //       |                up
+    //       |
+    //       z
+    //
+    //     Rift
 
-        // From ABOVE the hand canonical axes looks like this:
-        //
-        //      | | | |          y        | | | |
-        //      | | | |          |        | | | |
-        //      |     |          |        |     |
-        //      |left | /  x---- +      \ |right|
-        //      |     _/          z      \_     |
-        //       |   |                     |   |
-        //       |   |                     |   |
-        //
+    // From ABOVE the hand canonical axes looks like this:
+    //
+    //      | | | |          y        | | | |
+    //      | | | |          |        | | | |
+    //      |     |          |        |     |
+    //      |left | /  x---- +      \ |right|
+    //      |     _/          z      \_     |
+    //       |   |                     |   |
+    //       |   |                     |   |
+    //
 
-        // So when the user is in Rift space facing the -zAxis with hands outstretched and palms down
-        // the rotation to align the Touch axes with those of the hands is:
-        //
-        //    touchToHand = halfTurnAboutY * quaterTurnAboutX
+    // So when the user is in Rift space facing the -zAxis with hands outstretched and palms down
+    // the rotation to align the Touch axes with those of the hands is:
+    //
+    //    touchToHand = halfTurnAboutY * quaterTurnAboutX
 
-        // Due to how the Touch controllers fit into the palm there is an offset that is different for each hand.
-        // You can think of this offset as the inverse of the measured rotation when the hands are posed, such that
-        // the combination (measurement * offset) is identity at this orientation.
-        //
-        //    Qoffset = glm::inverse(deltaRotation when hand is posed fingers forward, palm down)
-        //
-        // An approximate offset for the Touch can be obtained by inspection:
-        //
-        //    Qoffset = glm::inverse(glm::angleAxis(sign * PI/2.0f, zAxis) * glm::angleAxis(PI/4.0f, xAxis))
-        //
-        // So the full equation is:
-        //
-        //    Q = combinedMeasurement * touchToHand
-        //
-        //    Q = (deltaQ * QOffset) * (yFlip * quarterTurnAboutX)
-        //
-        //    Q = (deltaQ * inverse(deltaQForAlignedHand)) * (yFlip * quarterTurnAboutX)
-        static const glm::quat yFlip = glm::angleAxis(PI, Vectors::UNIT_Y);
-        static const glm::quat quarterX = glm::angleAxis(PI_OVER_TWO, Vectors::UNIT_X);
-        static const glm::quat touchToHand = yFlip * quarterX;
+    // Due to how the Touch controllers fit into the palm there is an offset that is different for each hand.
+    // You can think of this offset as the inverse of the measured rotation when the hands are posed, such that
+    // the combination (measurement * offset) is identity at this orientation.
+    //
+    //    Qoffset = glm::inverse(deltaRotation when hand is posed fingers forward, palm down)
+    //
+    // An approximate offset for the Touch can be obtained by inspection:
+    //
+    //    Qoffset = glm::inverse(glm::angleAxis(sign * PI/2.0f, zAxis) * glm::angleAxis(PI/4.0f, xAxis))
+    //
+    // So the full equation is:
+    //
+    //    Q = combinedMeasurement * touchToHand
+    //
+    //    Q = (deltaQ * QOffset) * (yFlip * quarterTurnAboutX)
+    //
+    //    Q = (deltaQ * inverse(deltaQForAlignedHand)) * (yFlip * quarterTurnAboutX)
+    static const glm::quat yFlip = glm::angleAxis(PI, Vectors::UNIT_Y);
+    static const glm::quat quarterX = glm::angleAxis(PI_OVER_TWO, Vectors::UNIT_X);
+    static const glm::quat touchToHand = yFlip * quarterX;
 
-        static const glm::quat leftQuarterZ = glm::angleAxis(-PI_OVER_TWO, Vectors::UNIT_Z);
-        static const glm::quat rightQuarterZ = glm::angleAxis(PI_OVER_TWO, Vectors::UNIT_Z);
+    static const glm::quat leftQuarterZ = glm::angleAxis(-PI_OVER_TWO, Vectors::UNIT_Z);
+    static const glm::quat rightQuarterZ = glm::angleAxis(PI_OVER_TWO, Vectors::UNIT_Z);
 
-        static const glm::quat leftRotationOffset = glm::inverse(leftQuarterZ) * touchToHand;
-        static const glm::quat rightRotationOffset = glm::inverse(rightQuarterZ) * touchToHand;
+    static const glm::quat leftRotationOffset = glm::inverse(leftQuarterZ) * touchToHand;
+    static const glm::quat rightRotationOffset = glm::inverse(rightQuarterZ) * touchToHand;
 
-        static const float CONTROLLER_LENGTH_OFFSET = 0.0762f;  // three inches
-        static const glm::vec3 CONTROLLER_OFFSET =
-            glm::vec3(CONTROLLER_LENGTH_OFFSET / 2.0f, -CONTROLLER_LENGTH_OFFSET / 2.0f, CONTROLLER_LENGTH_OFFSET * 1.5f);
-        static const glm::vec3 leftTranslationOffset = glm::vec3(-1.0f, 1.0f, 1.0f) * CONTROLLER_OFFSET;
-        static const glm::vec3 rightTranslationOffset = CONTROLLER_OFFSET;
+    static const float CONTROLLER_LENGTH_OFFSET = 0.0762f; // three inches
+    static const glm::vec3 CONTROLLER_OFFSET = glm::vec3(CONTROLLER_LENGTH_OFFSET / 2.0f, -CONTROLLER_LENGTH_OFFSET / 2.0f,
+                                                         CONTROLLER_LENGTH_OFFSET * 1.5f);
+    static const glm::vec3 leftTranslationOffset = glm::vec3(-1.0f, 1.0f, 1.0f) * CONTROLLER_OFFSET;
+    static const glm::vec3 rightTranslationOffset = CONTROLLER_OFFSET;
 
-        auto translationOffset = (hand == VRAPI_HAND_LEFT ? leftTranslationOffset : rightTranslationOffset);
-        auto rotationOffset = (hand == VRAPI_HAND_LEFT ? leftRotationOffset : rightRotationOffset);
+    auto translationOffset = (hand == VRAPI_HAND_LEFT ? leftTranslationOffset : rightTranslationOffset);
+    auto rotationOffset = (hand == VRAPI_HAND_LEFT ? leftRotationOffset : rightRotationOffset);
 
-        glm::quat rotation = toGlm(handPose.Pose.Orientation);
+    glm::quat rotation = toGlm(handPose.Pose.Orientation);
 
-        controller::Pose pose;
-        pose.translation = toGlm(handPose.Pose.Position);
-        pose.translation += rotation * translationOffset;
-        pose.rotation = rotation * rotationOffset;
-        pose.angularVelocity = rotation * toGlm(handPose.AngularVelocity);
-        pose.velocity = toGlm(handPose.LinearVelocity);
-        pose.valid = true;
-        return pose;
-    }
-
-    controller::Pose toControllerPose(ovrHandedness hand,
-                                      const ovrRigidBodyPosef& handPose,
-                                      const ovrRigidBodyPosef& lastHandPose) {
-        static const glm::quat yFlip = glm::angleAxis(PI, Vectors::UNIT_Y);
-        static const glm::quat quarterX = glm::angleAxis(PI_OVER_TWO, Vectors::UNIT_X);
-        static const glm::quat touchToHand = yFlip * quarterX;
-
-        static const glm::quat leftQuarterZ = glm::angleAxis(-PI_OVER_TWO, Vectors::UNIT_Z);
-        static const glm::quat rightQuarterZ = glm::angleAxis(PI_OVER_TWO, Vectors::UNIT_Z);
-
-        static const glm::quat leftRotationOffset = glm::inverse(leftQuarterZ) * touchToHand;
-        static const glm::quat rightRotationOffset = glm::inverse(rightQuarterZ) * touchToHand;
-
-        static const float CONTROLLER_LENGTH_OFFSET = 0.0762f;  // three inches
-        static const glm::vec3 CONTROLLER_OFFSET =
-            glm::vec3(CONTROLLER_LENGTH_OFFSET / 2.0f, -CONTROLLER_LENGTH_OFFSET / 2.0f, CONTROLLER_LENGTH_OFFSET * 1.5f);
-        static const glm::vec3 leftTranslationOffset = glm::vec3(-1.0f, 1.0f, 1.0f) * CONTROLLER_OFFSET;
-        static const glm::vec3 rightTranslationOffset = CONTROLLER_OFFSET;
-
-        auto translationOffset = (hand == VRAPI_HAND_LEFT ? leftTranslationOffset : rightTranslationOffset);
-        auto rotationOffset = (hand == VRAPI_HAND_LEFT ? leftRotationOffset : rightRotationOffset);
-
-        glm::quat rotation = toGlm(handPose.Pose.Orientation);
-
-        controller::Pose pose;
-        pose.translation = toGlm(lastHandPose.Pose.Position);
-        pose.translation += rotation * translationOffset;
-        pose.rotation = rotation * rotationOffset;
-        pose.angularVelocity = toGlm(lastHandPose.AngularVelocity);
-        pose.velocity = toGlm(lastHandPose.LinearVelocity);
-        pose.valid = true;
-        return pose;
-    }
-
+    controller::Pose pose;
+    pose.translation = toGlm(handPose.Pose.Position);
+    pose.translation += rotation * translationOffset;
+    pose.rotation = rotation * rotationOffset;
+    pose.angularVelocity = rotation * toGlm(handPose.AngularVelocity);
+    pose.velocity = toGlm(handPose.LinearVelocity);
+    pose.valid = true;
+    return pose;
 }
 
+controller::Pose toControllerPose(ovrHandedness hand, const ovrRigidBodyPosef& handPose,
+                                  const ovrRigidBodyPosef& lastHandPose) {
+    static const glm::quat yFlip = glm::angleAxis(PI, Vectors::UNIT_Y);
+    static const glm::quat quarterX = glm::angleAxis(PI_OVER_TWO, Vectors::UNIT_X);
+    static const glm::quat touchToHand = yFlip * quarterX;
+
+    static const glm::quat leftQuarterZ = glm::angleAxis(-PI_OVER_TWO, Vectors::UNIT_Z);
+    static const glm::quat rightQuarterZ = glm::angleAxis(PI_OVER_TWO, Vectors::UNIT_Z);
+
+    static const glm::quat leftRotationOffset = glm::inverse(leftQuarterZ) * touchToHand;
+    static const glm::quat rightRotationOffset = glm::inverse(rightQuarterZ) * touchToHand;
+
+    static const float CONTROLLER_LENGTH_OFFSET = 0.0762f; // three inches
+    static const glm::vec3 CONTROLLER_OFFSET = glm::vec3(CONTROLLER_LENGTH_OFFSET / 2.0f, -CONTROLLER_LENGTH_OFFSET / 2.0f,
+                                                         CONTROLLER_LENGTH_OFFSET * 1.5f);
+    static const glm::vec3 leftTranslationOffset = glm::vec3(-1.0f, 1.0f, 1.0f) * CONTROLLER_OFFSET;
+    static const glm::vec3 rightTranslationOffset = CONTROLLER_OFFSET;
+
+    auto translationOffset = (hand == VRAPI_HAND_LEFT ? leftTranslationOffset : rightTranslationOffset);
+    auto rotationOffset = (hand == VRAPI_HAND_LEFT ? leftRotationOffset : rightRotationOffset);
+
+    glm::quat rotation = toGlm(handPose.Pose.Orientation);
+
+    controller::Pose pose;
+    pose.translation = toGlm(lastHandPose.Pose.Position);
+    pose.translation += rotation * translationOffset;
+    pose.rotation = rotation * rotationOffset;
+    pose.angularVelocity = toGlm(lastHandPose.AngularVelocity);
+    pose.velocity = toGlm(lastHandPose.LinearVelocity);
+    pose.valid = true;
+    return pose;
+}
+
+} // namespace ovr
 
 class OculusMobileInputDevice : public controller::InputDevice {
     friend class OculusMobileControllerManager;
+
 public:
     using Pointer = std::shared_ptr<OculusMobileInputDevice>;
     static Pointer check(ovrMobile* session);
@@ -164,10 +163,10 @@ public:
     bool triggerHapticPulse(float strength, float duration, controller::Hand hand) override;
 
 private:
-    void handlePose(float deltaTime, const controller::InputCalibrationData& inputCalibrationData,
-                    ovrHandedness hand, const ovrRigidBodyPosef& handPose);
-    void handleRotationForUntrackedHand(const controller::InputCalibrationData& inputCalibrationData,
-                                        ovrHandedness hand, const ovrRigidBodyPosef& handPose);
+    void handlePose(float deltaTime, const controller::InputCalibrationData& inputCalibrationData, ovrHandedness hand,
+                    const ovrRigidBodyPosef& handPose);
+    void handleRotationForUntrackedHand(const controller::InputCalibrationData& inputCalibrationData, ovrHandedness hand,
+                                        const ovrRigidBodyPosef& handPose);
     void handleHeadPose(float deltaTime, const controller::InputCalibrationData& inputCalibrationData,
                         const ovrRigidBodyPosef& headPose);
 
@@ -176,27 +175,28 @@ private:
     // perform an action when the TouchDevice mutex is acquired.
     using Locker = std::unique_lock<std::recursive_mutex>;
 
-    template <typename F>
-    void withLock(F&& f) { Locker locker(_lock); f(); }
+    template<typename F>
+    void withLock(F&& f) {
+        Locker locker(_lock);
+        f();
+    }
 
     mutable std::recursive_mutex _lock;
     ovrTracking2 _headTracking;
     struct HandData {
-        HandData() {
-            state.Header.ControllerType =ovrControllerType_TrackedRemote;
-        }
+        HandData() { state.Header.ControllerType = ovrControllerType_TrackedRemote; }
 
         float hapticDuration { 0.0f };
         float hapticStrength { 0.0f };
-        bool valid{ false };
-        bool lostTracking{ false };
+        bool valid { false };
+        bool lostTracking { false };
         quint64 regainTrackingDeadline;
         ovrRigidBodyPosef lastPose;
         ovrInputTrackedRemoteCapabilities caps;
         ovrInputStateTrackedRemote state;
-        ovrResult stateResult{ ovrError_NotInitialized };
+        ovrResult stateResult { ovrError_NotInitialized };
         ovrTracking tracking;
-        ovrResult trackingResult{ ovrError_NotInitialized };
+        ovrResult trackingResult { ovrError_NotInitialized };
         bool setHapticFeedback(float strength, float duration) {
 #if 0
             bool success = true;
@@ -219,14 +219,11 @@ private:
         }
 
         void stopHapticPulse() {
-            ovr::VrHandler::withOvrMobile([&](ovrMobile* session){
-                vrapi_SetHapticVibrationSimple(session, caps.Header.DeviceID, 0.0f);
-            });
+            ovr::VrHandler::withOvrMobile(
+                [&](ovrMobile* session) { vrapi_SetHapticVibrationSimple(session, caps.Header.DeviceID, 0.0f); });
         }
 
-        bool isValid() const {
-            return (stateResult == ovrSuccess) && (trackingResult == ovrSuccess);
-        }
+        bool isValid() const { return (stateResult == ovrSuccess) && (trackingResult == ovrSuccess); }
 
         void update(ovrMobile* session, double time = 0.0) {
             const auto& deviceId = caps.Header.DeviceID;
@@ -237,7 +234,7 @@ private:
     std::array<HandData, 2> _hands;
 };
 
-OculusMobileInputDevice::Pointer OculusMobileInputDevice::check(ovrMobile *session) {
+OculusMobileInputDevice::Pointer OculusMobileInputDevice::check(ovrMobile* session) {
     Pointer result;
 
     std::vector<ovrInputTrackedRemoteCapabilities> devicesCaps;
@@ -281,7 +278,7 @@ void OculusMobileControllerManager::checkForConnectedDevices() {
         return;
     }
 
-    ovr::VrHandler::withOvrMobile([&](ovrMobile* session){
+    ovr::VrHandler::withOvrMobile([&](ovrMobile* session) {
         oculusMobileControllers = OculusMobileInputDevice::check(session);
         if (oculusMobileControllers) {
             auto userInputMapper = DependencyManager::get<controller::UserInputMapper>();
@@ -301,7 +298,8 @@ void OculusMobileControllerManager::deactivate() {
     }
 }
 
-void OculusMobileControllerManager::pluginUpdate(float deltaTime, const controller::InputCalibrationData& inputCalibrationData) {
+void OculusMobileControllerManager::pluginUpdate(float deltaTime,
+                                                 const controller::InputCalibrationData& inputCalibrationData) {
     PerformanceTimer perfTimer("OculusMobileInputDevice::update");
 
     checkForConnectedDevices();
@@ -310,9 +308,7 @@ void OculusMobileControllerManager::pluginUpdate(float deltaTime, const controll
         return;
     }
 
-    bool updated = ovr::VrHandler::withOvrMobile([&](ovrMobile* session){
-        oculusMobileControllers->updateHands(session);
-    });
+    bool updated = ovr::VrHandler::withOvrMobile([&](ovrMobile* session) { oculusMobileControllers->updateHands(session); });
 
     if (updated) {
         oculusMobileControllers->update(deltaTime, inputCalibrationData);
@@ -361,7 +357,6 @@ static const std::vector<std::pair<ovrTouch, StandardButtonChannel>> LEFT_TOUCH_
     { ovrTouch_IndexPointing, LEFT_INDEX_POINT },
 } };
 
-
 static const std::vector<std::pair<ovrTouch, StandardButtonChannel>> RIGHT_TOUCH_MAP { {
     { ovrTouch_A, RIGHT_PRIMARY_THUMB_TOUCH },
     { ovrTouch_B, RIGHT_SECONDARY_THUMB_TOUCH },
@@ -387,11 +382,11 @@ void OculusMobileInputDevice::update(float deltaTime, const controller::InputCal
         ++numTrackedControllers;
 
         // Disable hand tracking while in Oculus Dash (Dash renders it's own hands)
-//        if (!hasInputFocus) {
-//            _poseStateMap.erase(controller);
-//            _poseStateMap[controller].valid = false;
-//            return;
-//        }
+        //        if (!hasInputFocus) {
+        //            _poseStateMap.erase(controller);
+        //            _poseStateMap[controller].valid = false;
+        //            return;
+        //        }
 
         if (REQUIRED_HAND_STATUS == (tracking.Status & REQUIRED_HAND_STATUS)) {
             _poseStateMap.erase(controller);
@@ -415,7 +410,6 @@ void OculusMobileInputDevice::update(float deltaTime, const controller::InputCal
         handleRotationForUntrackedHand(inputCalibrationData, hand, tracking.HeadPose);
     });
 
-
     using namespace controller;
     // Axes
     {
@@ -427,7 +421,7 @@ void OculusMobileInputDevice::update(float deltaTime, const controller::InputCal
         for (const auto& pair : BUTTON_MAP) {
             if (inputState.Buttons & pair.first) {
                 _buttonPressedMap.insert(pair.second);
-                qDebug()<<"AAAA:BUTTON PRESSED "<<pair.second;
+                qDebug() << "AAAA:BUTTON PRESSED " << pair.second;
             }
         }
         for (const auto& pair : LEFT_TOUCH_MAP) {
@@ -474,9 +468,8 @@ void OculusMobileInputDevice::focusOutEvent() {
     _buttonPressedMap.clear();
 };
 
-void OculusMobileInputDevice::handlePose(float deltaTime,
-                                                      const controller::InputCalibrationData& inputCalibrationData,
-                                                      ovrHandedness hand, const ovrRigidBodyPosef& handPose) {
+void OculusMobileInputDevice::handlePose(float deltaTime, const controller::InputCalibrationData& inputCalibrationData,
+                                         ovrHandedness hand, const ovrRigidBodyPosef& handPose) {
     auto poseId = (hand == VRAPI_HAND_LEFT) ? controller::LEFT_HAND : controller::RIGHT_HAND;
     auto& pose = _poseStateMap[poseId];
     pose = ovr::toControllerPose(hand, handPose);
@@ -485,29 +478,25 @@ void OculusMobileInputDevice::handlePose(float deltaTime,
     pose = pose.transform(controllerToAvatar);
 }
 
-void OculusMobileInputDevice::handleHeadPose(float deltaTime,
-                                                          const controller::InputCalibrationData& inputCalibrationData,
-                                                          const ovrRigidBodyPosef& headPose) {
-    glm::mat4 mat = createMatFromQuatAndPos(ovr::toGlm(headPose.Pose.Orientation),
-                                            ovr::toGlm(headPose.Pose.Position));
+void OculusMobileInputDevice::handleHeadPose(float deltaTime, const controller::InputCalibrationData& inputCalibrationData,
+                                             const ovrRigidBodyPosef& headPose) {
+    glm::mat4 mat = createMatFromQuatAndPos(ovr::toGlm(headPose.Pose.Orientation), ovr::toGlm(headPose.Pose.Position));
 
-    //perform a 180 flip to make the HMD face the +z instead of -z, beacuse the head faces +z
+    // perform a 180 flip to make the HMD face the +z instead of -z, beacuse the head faces +z
     glm::mat4 matYFlip = mat * Matrices::Y_180;
-    controller::Pose pose(extractTranslation(matYFlip),
-                          glmExtractRotation(matYFlip),
+    controller::Pose pose(extractTranslation(matYFlip), glmExtractRotation(matYFlip),
                           ovr::toGlm(headPose.LinearVelocity), // XXX * matYFlip ?
                           ovr::toGlm(headPose.AngularVelocity));
 
     glm::mat4 sensorToAvatar = glm::inverse(inputCalibrationData.avatarMat) * inputCalibrationData.sensorToWorldMat;
-    glm::mat4 defaultHeadOffset = glm::inverse(inputCalibrationData.defaultCenterEyeMat) *
-        inputCalibrationData.defaultHeadMat;
+    glm::mat4 defaultHeadOffset = glm::inverse(inputCalibrationData.defaultCenterEyeMat) * inputCalibrationData.defaultHeadMat;
 
     pose.valid = true;
     _poseStateMap[controller::HEAD] = pose.postTransform(defaultHeadOffset).transform(sensorToAvatar);
 }
 
 void OculusMobileInputDevice::handleRotationForUntrackedHand(const controller::InputCalibrationData& inputCalibrationData,
-                                                                          ovrHandedness hand, const ovrRigidBodyPosef& handPose) {
+                                                             ovrHandedness hand, const ovrRigidBodyPosef& handPose) {
     auto poseId = (hand == VRAPI_HAND_LEFT ? controller::LEFT_HAND : controller::RIGHT_HAND);
     auto& pose = _poseStateMap[poseId];
     const auto& lastHandPose = (hand == VRAPI_HAND_LEFT) ? _hands[0].lastPose : _hands[1].lastPose;
@@ -520,7 +509,7 @@ bool OculusMobileInputDevice::triggerHapticPulse(float strength, float duration,
     Locker locker(_lock);
     bool success = true;
 
-    qDebug()<<"AAAA: Haptic duration %f " << duration;
+    qDebug() << "AAAA: Haptic duration %f " << duration;
 
     if (hand == controller::BOTH || hand == controller::LEFT) {
         success &= _hands[0].setHapticFeedback(strength, duration);
@@ -532,8 +521,8 @@ bool OculusMobileInputDevice::triggerHapticPulse(float strength, float duration,
 }
 
 /**jsdoc
- * <p>The <code>Controller.Hardware.OculusTouch</code> object has properties representing Oculus Rift. The property values are 
- * integer IDs, uniquely identifying each output. <em>Read-only.</em> These can be mapped to actions or functions or 
+ * <p>The <code>Controller.Hardware.OculusTouch</code> object has properties representing Oculus Rift. The property values are
+ * integer IDs, uniquely identifying each output. <em>Read-only.</em> These can be mapped to actions or functions or
  * <code>Controller.Standard</code> items in a {@link RouteObject} mapping.</p>
  * <table>
  *   <thead>
@@ -564,25 +553,25 @@ bool OculusMobileInputDevice::triggerHapticPulse(float strength, float duration,
  *     <tr><td><code>LeftGrip</code></td><td>number</td><td>number</td><td>Left grip scale.</td></tr>
  *     <tr><td><code>RightGrip</code></td><td>number</td><td>number</td><td>Right grip scale.</td></tr>
  *     <tr><td colspan="4"><strong>Finger Abstractions</strong></td></tr>
- *     <tr><td><code>LeftPrimaryThumbTouch</code></td><td>number</td><td>number</td><td>Left thumb touching primary thumb 
+ *     <tr><td><code>LeftPrimaryThumbTouch</code></td><td>number</td><td>number</td><td>Left thumb touching primary thumb
  *       button.</td></tr>
- *     <tr><td><code>LeftSecondaryThumbTouch</code></td><td>number</td><td>number</td><td>Left thumb touching secondary thumb 
+ *     <tr><td><code>LeftSecondaryThumbTouch</code></td><td>number</td><td>number</td><td>Left thumb touching secondary thumb
  *       button.</td></tr>
- *     <tr><td><code>LeftThumbUp</code></td><td>number</td><td>number</td><td>Left thumb not touching primary or secondary 
+ *     <tr><td><code>LeftThumbUp</code></td><td>number</td><td>number</td><td>Left thumb not touching primary or secondary
  *       thumb buttons.</td></tr>
- *     <tr><td><code>RightPrimaryThumbTouch</code></td><td>number</td><td>number</td><td>Right thumb touching primary thumb 
+ *     <tr><td><code>RightPrimaryThumbTouch</code></td><td>number</td><td>number</td><td>Right thumb touching primary thumb
  *       button.</td></tr>
- *     <tr><td><code>RightSecondaryThumbTouch</code></td><td>number</td><td>number</td><td>Right thumb touching secondary thumb 
+ *     <tr><td><code>RightSecondaryThumbTouch</code></td><td>number</td><td>number</td><td>Right thumb touching secondary thumb
  *       button.</td></tr>
- *     <tr><td><code>RightThumbUp</code></td><td>number</td><td>number</td><td>Right thumb not touching primary or secondary 
+ *     <tr><td><code>RightThumbUp</code></td><td>number</td><td>number</td><td>Right thumb not touching primary or secondary
  *       thumb buttons.</td></tr>
- *     <tr><td><code>LeftPrimaryIndexTouch</code></td><td>number</td><td>number</td><td>Left index finger is touching primary 
+ *     <tr><td><code>LeftPrimaryIndexTouch</code></td><td>number</td><td>number</td><td>Left index finger is touching primary
  *       index finger control.</td></tr>
- *     <tr><td><code>LeftIndexPoint</code></td><td>number</td><td>number</td><td>Left index finger is pointing, not touching 
+ *     <tr><td><code>LeftIndexPoint</code></td><td>number</td><td>number</td><td>Left index finger is pointing, not touching
  *       primary or secondary index finger controls.</td></tr>
- *     <tr><td><code>RightPrimaryIndexTouch</code></td><td>number</td><td>number</td><td>Right index finger is touching primary 
+ *     <tr><td><code>RightPrimaryIndexTouch</code></td><td>number</td><td>number</td><td>Right index finger is touching primary
  *       index finger control.</td></tr>
- *     <tr><td><code>RightIndexPoint</code></td><td>number</td><td>number</td><td>Right index finger is pointing, not touching 
+ *     <tr><td><code>RightIndexPoint</code></td><td>number</td><td>number</td><td>Right index finger is pointing, not touching
  *       primary or secondary index finger controls.</td></tr>
  *     <tr><td colspan="4"><strong>Avatar Skeleton</strong></td></tr>
  *     <tr><td><code>Head</code></td><td>number</td><td>{@link Pose}</td><td>Head pose.</td></tr>
@@ -594,7 +583,7 @@ bool OculusMobileInputDevice::triggerHapticPulse(float strength, float duration,
  */
 controller::Input::NamedVector OculusMobileInputDevice::getAvailableInputs() const {
     using namespace controller;
-    QVector<Input::NamedPair> availableInputs{
+    QVector<Input::NamedPair> availableInputs {
         // buttons
         makePair(A, "A"),
         makePair(B, "B"),
@@ -612,8 +601,8 @@ controller::Input::NamedVector OculusMobileInputDevice::getAvailableInputs() con
         makePair(RT, "RT"),
 
         // trigger buttons
-        //makePair(LB, "LB"),
-        //makePair(RB, "RB"),
+        // makePair(LB, "LB"),
+        // makePair(RB, "RB"),
 
         // side grip triggers
         makePair(LEFT_GRIP, "LeftGrip"),
@@ -645,7 +634,9 @@ controller::Input::NamedVector OculusMobileInputDevice::getAvailableInputs() con
     return availableInputs;
 }
 
-OculusMobileInputDevice::OculusMobileInputDevice(ovrMobile* session, const std::vector<ovrInputTrackedRemoteCapabilities>& devicesCaps) : controller::InputDevice("OculusTouch") {
+OculusMobileInputDevice::OculusMobileInputDevice(ovrMobile* session,
+                                                 const std::vector<ovrInputTrackedRemoteCapabilities>& devicesCaps) :
+    controller::InputDevice("OculusTouch") {
     qWarning() << "QQQ" << __FUNCTION__ << "Found " << devicesCaps.size() << "devices";
     for (const auto& deviceCaps : devicesCaps) {
         size_t handIndex = -1;
@@ -690,7 +681,8 @@ void OculusMobileInputDevice::reconnectTouchControllers(ovrMobile* session) {
             caps.Header = capsHeader;
             vrapi_GetInputDeviceCapabilities(session, &caps.Header);
 
-            if (caps.ControllerCapabilities & ovrControllerCaps_LeftHand || caps.ControllerCapabilities & ovrControllerCaps_RightHand) {
+            if (caps.ControllerCapabilities & ovrControllerCaps_LeftHand ||
+                caps.ControllerCapabilities & ovrControllerCaps_RightHand) {
                 size_t handIndex = caps.ControllerCapabilities & ovrControllerCaps_LeftHand ? 0 : 1;
                 HandData& handData = _hands[handIndex];
                 handData.state.Header.ControllerType = ovrControllerType_TrackedRemote;
@@ -710,11 +702,7 @@ QString OculusMobileInputDevice::getDefaultMappingConfig() const {
 
 // TODO migrate to a DLL model where plugins are discovered and loaded at runtime by the PluginManager class
 InputPluginList getInputPlugins() {
-    InputPlugin* PLUGIN_POOL[] = {
-        new KeyboardMouseDevice(),
-        new OculusMobileControllerManager(),
-        nullptr
-    };
+    InputPlugin* PLUGIN_POOL[] = { new KeyboardMouseDevice(), new OculusMobileControllerManager(), nullptr };
 
     InputPluginList result;
     for (int i = 0; PLUGIN_POOL[i]; ++i) {

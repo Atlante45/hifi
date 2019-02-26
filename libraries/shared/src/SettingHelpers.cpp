@@ -224,7 +224,6 @@ QJsonDocument variantMapToJsonDocument(const QSettings::SettingsMap& map) {
     return QJsonDocument(object);
 }
 
-
 QSettings::SettingsMap jsonDocumentToVariantMap(const QJsonDocument& document) {
     if (!document.isObject()) {
         qWarning() << "Settings file does not contain a JSON object";
@@ -234,7 +233,6 @@ QSettings::SettingsMap jsonDocumentToVariantMap(const QJsonDocument& document) {
     QSettings::SettingsMap map;
 
     for (auto it = object.begin(); it != object.end(); ++it) {
-
         QVariant result;
 
         if (!it->isString()) {
@@ -248,7 +246,6 @@ QSettings::SettingsMap jsonDocumentToVariantMap(const QJsonDocument& document) {
             } else if (string.startsWith(QLatin1Char('@'))) { // Custom type to string
 
                 if (string.endsWith(QLatin1Char(')'))) {
-
                     if (string.startsWith(QLatin1String("@ByteArray("))) {
                         result = QVariant(string.toLatin1().mid(11, string.size() - 12));
 
@@ -261,8 +258,7 @@ QSettings::SettingsMap jsonDocumentToVariantMap(const QJsonDocument& document) {
                     } else if (string.startsWith(QLatin1String("@Rect("))) {
                         QStringList args = splitArgs(string, 5);
                         if (args.size() == 4) {
-                            result = QRect(args[0].toInt(), args[1].toInt(),
-                                           args[2].toInt(), args[3].toInt());
+                            result = QRect(args[0].toInt(), args[1].toInt(), args[2].toInt(), args[3].toInt());
                         }
 
                     } else if (string.startsWith(QLatin1String("@Size("))) {

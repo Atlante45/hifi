@@ -8,17 +8,17 @@
 
 #include "TextureTest.h"
 
-#include <iostream>
 #include <QtCore/QTemporaryFile>
+#include <iostream>
 
-#include <gpu/Forward.h>
+#include <NumericalConstants.h>
 #include <gl/Config.h>
 #include <gl/GLHelpers.h>
+#include <gpu/Forward.h>
 #include <gpu/gl/GLBackend.h>
-#include <NumericalConstants.h>
 
-#include <quazip5/quazip.h>
 #include <quazip5/JlCompress.h>
+#include <quazip5/quazip.h>
 
 #include <test-utils/QTestExtensions.h>
 #include <test-utils/Utils.h>
@@ -241,7 +241,8 @@ void TextureTest::testTextureLoading() {
         }
         reportLambda();
         QCOMPARE(populatedMemory, allocatedMemory);
-        // FIXME workaround a race condition in the difference between populated size and the actual _populatedMip value in the texture
+        // FIXME workaround a race condition in the difference between populated size and the actual _populatedMip value in the
+        // texture
         for (size_t i = 0; i < textures.size(); ++i) {
             renderFrame();
         }

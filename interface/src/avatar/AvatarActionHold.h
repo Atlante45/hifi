@@ -14,12 +14,11 @@
 
 #include <QUuid>
 
-#include <EntityItem.h>
 #include <AnimPose.h>
+#include <EntityItem.h>
 #include <ObjectActionTractor.h>
 
 #include "avatar/MyAvatar.h"
-
 
 class AvatarActionHold : public ObjectActionTractor {
 public:
@@ -39,9 +38,8 @@ public:
     virtual bool shouldSuppressLocationEdits() override { return _active && !_ownerEntity.expired(); }
 
     bool getAvatarRigidBodyLocation(glm::vec3& avatarRigidBodyPosition, glm::quat& avatarRigidBodyRotation);
-    virtual bool getTarget(float deltaTimeStep, glm::quat& rotation, glm::vec3& position,
-                           glm::vec3& linearVelocity, glm::vec3& angularVelocity,
-                           float& linearTimeScale, float& angularTimeScale) override;
+    virtual bool getTarget(float deltaTimeStep, glm::quat& rotation, glm::vec3& position, glm::vec3& linearVelocity,
+                           glm::vec3& angularVelocity, float& linearTimeScale, float& angularTimeScale) override;
 
     virtual void prepareForPhysicsSimulation() override;
 

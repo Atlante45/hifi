@@ -12,7 +12,6 @@
 #include "GooglePolyScriptingInterface.h"
 
 #include <QEventLoop>
-#include <QtGlobal>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -22,15 +21,31 @@
 #include <QString>
 #include <QTime>
 #include <QUrl>
+#include <QtGlobal>
 
 #include "ScriptEngineLogging.h"
 
 const QString LIST_POLY_URL = "https://poly.googleapis.com/v1/assets?";
 const QString GET_POLY_URL = "https://poly.googleapis.com/v1/assets/model?";
 
-const QStringList VALID_FORMATS = QStringList() << "BLOCKS" << "FBX" << "GLTF" << "GLTF2" << "OBJ" << "TILT" << "";
-const QStringList VALID_CATEGORIES = QStringList() << "animals" << "architecture" << "art" << "food" << 
-    "nature" << "objects" << "people" << "scenes" << "technology" << "transport" << "";
+const QStringList VALID_FORMATS = QStringList() << "BLOCKS"
+                                                << "FBX"
+                                                << "GLTF"
+                                                << "GLTF2"
+                                                << "OBJ"
+                                                << "TILT"
+                                                << "";
+const QStringList VALID_CATEGORIES = QStringList() << "animals"
+                                                   << "architecture"
+                                                   << "art"
+                                                   << "food"
+                                                   << "nature"
+                                                   << "objects"
+                                                   << "people"
+                                                   << "scenes"
+                                                   << "technology"
+                                                   << "transport"
+                                                   << "";
 
 GooglePolyScriptingInterface::GooglePolyScriptingInterface() {
     // nothing to be implemented
@@ -44,7 +59,7 @@ QString GooglePolyScriptingInterface::getAssetList(const QString& keyword, const
     QUrl url = formatURLQuery(keyword, category, format);
     if (!url.isEmpty()) {
         QByteArray json = parseJSON(url, 0).toJsonDocument().toJson();
-        return (QString) json;
+        return (QString)json;
     } else {
         qCDebug(scriptengine) << "Invalid filters were specified.";
         return "";
@@ -75,7 +90,7 @@ QString GooglePolyScriptingInterface::getGLTF2(const QString& keyword, const QSt
     QUrl url = formatURLQuery(keyword, category, "GLTF2");
     return getModelURL(url);
 }
- 
+
 // This method will not be useful until we support Tilt models
 QString GooglePolyScriptingInterface::getTilt(const QString& keyword, const QString& category) {
     QUrl url = formatURLQuery(keyword, category, "TILT");
@@ -141,7 +156,7 @@ QString GooglePolyScriptingInterface::getModelURL(const QUrl& url) {
 // FIXME: synchronous
 QByteArray GooglePolyScriptingInterface::getHTTPRequest(const QUrl& url) {
     QNetworkAccessManager manager;
-    QNetworkReply *response = manager.get(QNetworkRequest(url));
+    QNetworkReply* response = manager.get(QNetworkRequest(url));
     QEventLoop event;
     connect(response, SIGNAL(finished()), &event, SLOT(quit()));
     event.exec();
@@ -174,7 +189,7 @@ QVariant GooglePolyScriptingInterface::parseJSON(const QUrl& url, int fileType) 
         }
         // return whole asset list
         return QJsonDocument(arr);
-    // return specific object
+        // return specific object
     } else {
         return jsonString;
     }

@@ -11,13 +11,12 @@
 #include "TestHelpers.h"
 
 class TestInstancedShapes : public GpuTestBase {
-
     std::vector<std::vector<mat4>> transforms;
     std::vector<vec4> colors;
     gpu::BufferPointer colorBuffer;
     gpu::BufferView instanceXfmView;
+
 public:
     TestInstancedShapes();
     void renderTest(size_t testId, RenderArgs* args) override;
 };
-

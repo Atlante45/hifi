@@ -15,9 +15,9 @@
 #include <udt/PacketHeaders.h>
 
 #include <QDebug>
-#include <QJsonObject>
-#include <QJsonDocument>
 #include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 bool OctreeUtils::RawOctreeData::readOctreeDataInfoFromMap(const QVariantMap& map) {
     if (map.contains("Id") && map.contains("DataVersion") && map.contains("Version")) {
@@ -113,4 +113,6 @@ void OctreeUtils::RawEntityData::writeSubclassData(QByteArray& root) const {
     root += "]";
 }
 
-PacketType OctreeUtils::RawEntityData::dataPacketType() const { return PacketType::EntityData; }
+PacketType OctreeUtils::RawEntityData::dataPacketType() const {
+    return PacketType::EntityData;
+}

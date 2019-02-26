@@ -9,27 +9,19 @@
 //
 
 #include "AnimSplineIK.h"
-#include "AnimationLogging.h"
-#include "CubicHermiteSpline.h"
 #include <DebugDraw.h>
 #include "AnimUtil.h"
+#include "AnimationLogging.h"
+#include "CubicHermiteSpline.h"
 
 static const float FRAMES_PER_SECOND = 30.0f;
 
-AnimSplineIK::AnimSplineIK(const QString& id, float alpha, bool enabled, float interpDuration,
-    const QString& baseJointName,
-    const QString& midJointName,
-    const QString& tipJointName,
-    const QString& basePositionVar,
-    const QString& baseRotationVar,
-    const QString& midPositionVar,
-    const QString& midRotationVar,
-    const QString& tipPositionVar,
-    const QString& tipRotationVar,
-    const QString& alphaVar,
-    const QString& enabledVar,
-    const std::vector<float> tipTargetFlexCoefficients,
-    const std::vector<float> midTargetFlexCoefficients) :
+AnimSplineIK::AnimSplineIK(const QString& id, float alpha, bool enabled, float interpDuration, const QString& baseJointName,
+                           const QString& midJointName, const QString& tipJointName, const QString& basePositionVar,
+                           const QString& baseRotationVar, const QString& midPositionVar, const QString& midRotationVar,
+                           const QString& tipPositionVar, const QString& tipRotationVar, const QString& alphaVar,
+                           const QString& enabledVar, const std::vector<float> tipTargetFlexCoefficients,
+                           const std::vector<float> midTargetFlexCoefficients) :
     AnimNode(AnimNode::Type::SplineIK, id),
     _alpha(alpha),
     _enabled(enabled),
@@ -44,14 +36,12 @@ AnimSplineIK::AnimSplineIK(const QString& id, float alpha, bool enabled, float i
     _tipPositionVar(tipPositionVar),
     _tipRotationVar(tipRotationVar),
     _alphaVar(alphaVar),
-    _enabledVar(enabledVar)
-{
-
+    _enabledVar(enabledVar) {
     for (int i = 0; i < (int)tipTargetFlexCoefficients.size(); i++) {
         if (i < MAX_NUMBER_FLEX_VARIABLES) {
             _tipTargetFlexCoefficients[i] = tipTargetFlexCoefficients[i];
         }
-     }
+    }
     _numTipTargetFlexCoefficients = std::min((int)tipTargetFlexCoefficients.size(), MAX_NUMBER_FLEX_VARIABLES);
 
     for (int i = 0; i < (int)midTargetFlexCoefficients.size(); i++) {
@@ -60,14 +50,13 @@ AnimSplineIK::AnimSplineIK(const QString& id, float alpha, bool enabled, float i
         }
     }
     _numMidTargetFlexCoefficients = std::min((int)midTargetFlexCoefficients.size(), MAX_NUMBER_FLEX_VARIABLES);
-
 }
 
 AnimSplineIK::~AnimSplineIK() {
-
 }
 
-const AnimPoseVec& AnimSplineIK::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt, AnimVariantMap& triggersOut) {
+const AnimPoseVec& AnimSplineIK::evaluate(const AnimVariantMap& animVars, const AnimContext& context, float dt,
+                                          AnimVariantMap& triggersOut) {
     assert(_children.size() == 1);
     if (_children.size() != 1) {
         return _poses;
@@ -81,7 +70,8 @@ const AnimPoseVec& AnimSplineIK::evaluate(const AnimVariantMap& animVars, const 
     AnimPoseVec underPoses = _children[0]->evaluate(animVars, context, dt, triggersOut);
 
     // if we don't have a skeleton, or jointName lookup failed or the spline alpha is 0 or there are no underposes.
-    if (!_skeleton || _baseJointIndex == -1 || _midJointIndex == -1 || _tipJointIndex == -1 || alpha < EPSILON || underPoses.size() == 0) {
+    if (!_skeleton || _baseJointIndex == -1 || _midJointIndex == -1 || _tipJointIndex == -1 || alpha < EPSILON ||
+        underPoses.size() == 0) {
         // pass underPoses through unmodified.
         _poses = underPoses;
         return _poses;
@@ -125,7 +115,7 @@ const AnimPoseVec& AnimSplineIK::evaluate(const AnimVariantMap& animVars, const 
     baseTargetAbsolutePose.trans() = animVars.lookupRigToGeometry(_basePositionVar, baseJointUnderPose.trans());
 
     int baseParentIndex = _skeleton->getParentIndex(_baseJointIndex);
-    AnimPose baseParentAbsPose(Quaternions::IDENTITY,glm::vec3());
+    AnimPose baseParentAbsPose(Quaternions::IDENTITY, glm::vec3());
     if (baseParentIndex >= 0) {
         baseParentAbsPose = _skeleton->getAbsolutePose(baseParentIndex, _poses);
     }
@@ -149,7 +139,8 @@ const AnimPoseVec& AnimSplineIK::evaluate(const AnimVariantMap& animVars, const 
     absolutePosesAfterBaseTipSpline.resize(_poses.size());
     computeAbsolutePoses(absolutePosesAfterBaseTipSpline);
     midJointChain.buildFromRelativePoses(_skeleton, _poses, midTarget.getIndex());
-    solveTargetWithSpline(context, _baseJointIndex, midTarget, absolutePosesAfterBaseTipSpline, context.getEnableDebugDrawIKChains(), midJointChain);
+    solveTargetWithSpline(context, _baseJointIndex, midTarget, absolutePosesAfterBaseTipSpline,
+                          context.getEnableDebugDrawIKChains(), midJointChain);
     midJointChain.outputRelativePoses(_poses);
 
     // initialize the tip target
@@ -169,7 +160,8 @@ const AnimPoseVec& AnimSplineIK::evaluate(const AnimVariantMap& animVars, const 
     finalAbsolutePoses.resize(_poses.size());
     computeAbsolutePoses(finalAbsolutePoses);
     upperJointChain.buildFromRelativePoses(_skeleton, _poses, tipTarget.getIndex());
-    solveTargetWithSpline(context, _midJointIndex, tipTarget, finalAbsolutePoses, context.getEnableDebugDrawIKChains(), upperJointChain);
+    solveTargetWithSpline(context, _midJointIndex, tipTarget, finalAbsolutePoses, context.getEnableDebugDrawIKChains(),
+                          upperJointChain);
     upperJointChain.buildDirtyAbsolutePoses();
     upperJointChain.outputRelativePoses(_poses);
 
@@ -222,21 +214,22 @@ const AnimPoseVec& AnimSplineIK::evaluate(const AnimVariantMap& animVars, const 
         glm::mat4 geomTargetMat = createMatFromQuatAndPos(tipTarget.getRotation(), tipTarget.getTranslation());
         glm::mat4 avatarTargetMat = rigToAvatarMat * context.getGeometryToRigMatrix() * geomTargetMat;
         QString name = QString("ikTargetSplineTip");
-        DebugDraw::getInstance().addMyAvatarMarker(name, glmExtractRotation(avatarTargetMat), extractTranslation(avatarTargetMat), WHITE);
+        DebugDraw::getInstance().addMyAvatarMarker(name, glmExtractRotation(avatarTargetMat),
+                                                   extractTranslation(avatarTargetMat), WHITE);
 
         glm::mat4 geomTargetMat2 = createMatFromQuatAndPos(midTarget.getRotation(), midTarget.getTranslation());
         glm::mat4 avatarTargetMat2 = rigToAvatarMat * context.getGeometryToRigMatrix() * geomTargetMat2;
         QString name2 = QString("ikTargetSplineMid");
-        DebugDraw::getInstance().addMyAvatarMarker(name2, glmExtractRotation(avatarTargetMat2), extractTranslation(avatarTargetMat2), WHITE);
+        DebugDraw::getInstance().addMyAvatarMarker(name2, glmExtractRotation(avatarTargetMat2),
+                                                   extractTranslation(avatarTargetMat2), WHITE);
 
         glm::mat4 geomTargetMat3 = createMatFromQuatAndPos(baseTargetAbsolutePose.rot(), baseTargetAbsolutePose.trans());
         glm::mat4 avatarTargetMat3 = rigToAvatarMat * context.getGeometryToRigMatrix() * geomTargetMat3;
         QString name3 = QString("ikTargetSplineBase");
-        DebugDraw::getInstance().addMyAvatarMarker(name3, glmExtractRotation(avatarTargetMat3), extractTranslation(avatarTargetMat3), WHITE);
-
+        DebugDraw::getInstance().addMyAvatarMarker(name3, glmExtractRotation(avatarTargetMat3),
+                                                   extractTranslation(avatarTargetMat3), WHITE);
 
     } else if (context.getEnableDebugDrawIKTargets() != _previousEnableDebugIKTargets) {
-
         // remove markers if they were added last frame.
         QString name = QString("ikTargetSplineTip");
         DebugDraw::getInstance().removeMyAvatarMarker(name);
@@ -286,8 +279,8 @@ void AnimSplineIK::setSkeletonInternal(AnimSkeleton::ConstPointer skeleton) {
     lookUpIndices();
 }
 
-void AnimSplineIK::solveTargetWithSpline(const AnimContext& context, int base, const IKTarget& target, const AnimPoseVec& absolutePoses, bool debug, AnimChain& chainInfoOut) const {
-
+void AnimSplineIK::solveTargetWithSpline(const AnimContext& context, int base, const IKTarget& target,
+                                         const AnimPoseVec& absolutePoses, bool debug, AnimChain& chainInfoOut) const {
     // build spline from tip to base
     AnimPose tipPose = AnimPose(glm::vec3(1.0f), target.getRotation(), target.getTranslation());
     AnimPose basePose = absolutePoses[base];
@@ -297,9 +290,10 @@ void AnimSplineIK::solveTargetWithSpline(const AnimContext& context, int base, c
         // set gain factors so that more curvature occurs near the tip of the spline.
         const float HIPS_GAIN = 0.5f;
         const float HEAD_GAIN = 1.0f;
-        spline = CubicHermiteSplineFunctorWithArcLength(tipPose.rot(), tipPose.trans(), basePose.rot(), basePose.trans(), HIPS_GAIN, HEAD_GAIN);
+        spline = CubicHermiteSplineFunctorWithArcLength(tipPose.rot(), tipPose.trans(), basePose.rot(), basePose.trans(),
+                                                        HIPS_GAIN, HEAD_GAIN);
     } else {
-        spline = CubicHermiteSplineFunctorWithArcLength(tipPose.rot(),tipPose.trans(), basePose.rot(), basePose.trans());
+        spline = CubicHermiteSplineFunctorWithArcLength(tipPose.rot(), tipPose.trans(), basePose.rot(), basePose.trans());
     }
     float totalArcLength = spline.arcLength(1.0f);
 
@@ -353,7 +347,8 @@ void AnimSplineIK::solveTargetWithSpline(const AnimContext& context, int base, c
                     float flexInterp = splineJointInfo.ratio * (float)(numFlexCoeff - 1);
                     int startCoeff = (int)glm::floor(flexInterp);
                     float partial = flexInterp - startCoeff;
-                    interpedCoefficient = target.getFlexCoefficient(startCoeff) * (1.0f - partial) + target.getFlexCoefficient(startCoeff + 1) * partial;
+                    interpedCoefficient = target.getFlexCoefficient(startCoeff) * (1.0f - partial) +
+                                          target.getFlexCoefficient(startCoeff + 1) * partial;
                 } else {
                     interpedCoefficient = target.getFlexCoefficient(numFlexCoeff - 1);
                 }
@@ -395,7 +390,9 @@ void AnimSplineIK::solveTargetWithSpline(const AnimContext& context, int base, c
     }
 }
 
-const std::vector<AnimSplineIK::SplineJointInfo>* AnimSplineIK::findOrCreateSplineJointInfo(const AnimContext& context, int base, const IKTarget& target) const {
+const std::vector<AnimSplineIK::SplineJointInfo>* AnimSplineIK::findOrCreateSplineJointInfo(const AnimContext& context,
+                                                                                            int base,
+                                                                                            const IKTarget& target) const {
     // find or create splineJointInfo for this target
     auto iter = _splineJointInfoMap.find(target.getIndex());
     if (iter != _splineJointInfoMap.end()) {
@@ -411,7 +408,8 @@ const std::vector<AnimSplineIK::SplineJointInfo>* AnimSplineIK::findOrCreateSpli
 }
 
 // pre-compute information about each joint influenced by this spline IK target.
-void AnimSplineIK::computeAndCacheSplineJointInfosForIKTarget(const AnimContext& context, int base, const IKTarget& target) const {
+void AnimSplineIK::computeAndCacheSplineJointInfosForIKTarget(const AnimContext& context, int base,
+                                                              const IKTarget& target) const {
     std::vector<SplineJointInfo> splineJointInfoVec;
 
     // build spline between the default poses.
@@ -423,7 +421,8 @@ void AnimSplineIK::computeAndCacheSplineJointInfosForIKTarget(const AnimContext&
         // set gain factors so that more curvature occurs near the tip of the spline.
         const float HIPS_GAIN = 0.5f;
         const float HEAD_GAIN = 1.0f;
-        spline = CubicHermiteSplineFunctorWithArcLength(tipPose.rot(), tipPose.trans(), basePose.rot(), basePose.trans(), HIPS_GAIN, HEAD_GAIN);
+        spline = CubicHermiteSplineFunctorWithArcLength(tipPose.rot(), tipPose.trans(), basePose.rot(), basePose.trans(),
+                                                        HIPS_GAIN, HEAD_GAIN);
     } else {
         spline = CubicHermiteSplineFunctorWithArcLength(tipPose.rot(), tipPose.trans(), basePose.rot(), basePose.trans());
     }

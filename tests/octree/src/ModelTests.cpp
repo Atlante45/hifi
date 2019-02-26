@@ -38,7 +38,7 @@ void EntityTests::entityTreeTests(bool verbose) {
     if (verbose) {
         qDebug() << "******************************************************************************************";
     }
-    
+
     qDebug() << "EntityTests::entityTreeTests()";
 
     // Tree, id, and entity properties used in many tests below...
@@ -57,27 +57,27 @@ void EntityTests::entityTreeTests(bool verbose) {
         if (verbose) {
             qDebug() << "Test" << testsTaken <<":" << qPrintable(testName);
         }
-        
+
         properties.setPosition(positionAtCenter);
         // TODO: Fix these unit tests.
         //properties.setModelURL("http://s3.amazonaws.com/hifi-public/ozan/theater.fbx");
 
         tree.addEntity(entityID, properties);
-        
+
         float targetRadius = oneMeter * 2.0f;
         EntityItemPointer foundEntityByRadius = tree.findClosestEntity(positionAtCenter, targetRadius);
         EntityItemPointer foundEntityByID = tree.findEntityByEntityItemID(entityID);
         EntityTreeElement* containingElement = tree.getContainingElement(entityID);
         const AACube& elementCube = containingElement ? containingElement->getAACube() : AACube();
-        
+
         if (verbose) {
             qDebug() << "foundEntityByRadius=" << foundEntityByRadius.get();
             qDebug() << "foundEntityByID=" << foundEntityByID.get();
             qDebug() << "containingElement=" << containingElement;
-            qDebug() << "containingElement.box=" 
-                << elementCube.getCorner().x << "," 
+            qDebug() << "containingElement.box="
+                << elementCube.getCorner().x << ","
                 << elementCube.getCorner().y << ","
-                << elementCube.getCorner().z << ":" 
+                << elementCube.getCorner().z << ":"
                 << elementCube.getScale();
             qDebug() << "elementCube.getScale()=" << elementCube.getScale();
             //containingElement->printDebugDetails("containingElement");
@@ -98,27 +98,27 @@ void EntityTests::entityTreeTests(bool verbose) {
         if (verbose) {
             qDebug() << "Test" << testsTaken <<":" << qPrintable(testName);
         }
-        
+
         glm::vec3 newPosition = positionNearOrigin;
 
         properties.setPosition(newPosition);
 
         tree.updateEntity(entityID, properties);
-        
+
         float targetRadius = oneMeter * 2.0f;
         EntityItemPointer foundEntityByRadius = tree.findClosestEntity(positionNearOrigin, targetRadius);
         EntityItemPointer foundEntityByID = tree.findEntityByEntityItemID(entityID);
         EntityTreeElement* containingElement = tree.getContainingElement(entityID);
         const AACube& elementCube = containingElement ? containingElement->getAACube() : AACube();
-        
+
         if (verbose) {
             qDebug() << "foundEntityByRadius=" << foundEntityByRadius.get();
             qDebug() << "foundEntityByID=" << foundEntityByID.get();
             qDebug() << "containingElement=" << containingElement;
-            qDebug() << "containingElement.box=" 
-                << elementCube.getCorner().x << "," 
+            qDebug() << "containingElement.box="
+                << elementCube.getCorner().x << ","
                 << elementCube.getCorner().y << ","
-                << elementCube.getCorner().z << ":" 
+                << elementCube.getCorner().z << ":"
                 << elementCube.getScale();
             //containingElement->printDebugDetails("containingElement");
         }
@@ -138,27 +138,27 @@ void EntityTests::entityTreeTests(bool verbose) {
         if (verbose) {
             qDebug() << "Test" << testsTaken <<":" << qPrintable(testName);
         }
-        
+
         glm::vec3 newPosition = positionAtCenter;
 
         properties.setPosition(newPosition);
 
         tree.updateEntity(entityID, properties);
-        
+
         float targetRadius = oneMeter * 2.0f;
         EntityItemPointer foundEntityByRadius = tree.findClosestEntity(positionAtCenter, targetRadius);
         EntityItemPointer foundEntityByID = tree.findEntityByEntityItemID(entityID);
         EntityTreeElement* containingElement = tree.getContainingElement(entityID);
         const AACube& elementCube = containingElement ? containingElement->getAACube() : AACube();
-        
+
         if (verbose) {
             qDebug() << "foundEntityByRadius=" << foundEntityByRadius.get();
             qDebug() << "foundEntityByID=" << foundEntityByID.get();
             qDebug() << "containingElement=" << containingElement;
-            qDebug() << "containingElement.box=" 
-                << elementCube.getCorner().x << "," 
+            qDebug() << "containingElement.box="
+                << elementCube.getCorner().x << ","
                 << elementCube.getCorner().y << ","
-                << elementCube.getCorner().z << ":" 
+                << elementCube.getCorner().z << ":"
                 << elementCube.getScale();
             //containingElement->printDebugDetails("containingElement");
         }
@@ -183,11 +183,11 @@ void EntityTests::entityTreeTests(bool verbose) {
         float targetRadius = oneMeter * 2.0f;
         quint64 start = usecTimestampNow();
         EntityItemPointer foundEntityByRadius = NULL;
-        for (int i = 0; i < TEST_ITERATIONS; i++) {        
+        for (int i = 0; i < TEST_ITERATIONS; i++) {
             foundEntityByRadius = tree.findClosestEntity(positionAtCenter, targetRadius);
         }
         quint64 end = usecTimestampNow();
-        
+
         if (verbose) {
              qDebug() << "foundEntityByRadius=" << foundEntityByRadius.get();
         }
@@ -219,7 +219,7 @@ void EntityTests::entityTreeTests(bool verbose) {
             foundEntityByID = tree.findEntityByEntityItemID(entityID);
         }
         quint64 end = usecTimestampNow();
-        
+
         if (verbose) {
             qDebug() << "foundEntityByID=" << foundEntityByID.get();
         }
@@ -239,7 +239,7 @@ void EntityTests::entityTreeTests(bool verbose) {
     {
         // seed the random number generator so that our tests are reproducible
         srand(0xFEEDBEEF);
-    
+
         testsTaken++;
         const int TEST_ITERATIONS = 1000;
         QString testName = "Performance - add entity to tree " + QString::number(TEST_ITERATIONS) + " times";
@@ -250,7 +250,7 @@ void EntityTests::entityTreeTests(bool verbose) {
         int iterationsPassed = 0;
         quint64 totalElapsedAdd = 0;
         quint64 totalElapsedFind = 0;
-        for (int i = 0; i < TEST_ITERATIONS; i++) {        
+        for (int i = 0; i < TEST_ITERATIONS; i++) {
             QUuid id = QUuid::createUuid();// make sure it doesn't collide with previous entity ids
             EntityItemID entityID(id);
 
@@ -260,7 +260,7 @@ void EntityTests::entityTreeTests(bool verbose) {
             glm::vec3 randomPosition(randomX,randomY,randomZ);
 
             properties.setPosition(randomPosition);
-            
+
             // TODO: fix these unit tests
             //properties.setModelURL("http://s3.amazonaws.com/hifi-public/ozan/theater.fbx");
 
@@ -288,34 +288,31 @@ void EntityTests::entityTreeTests(bool verbose) {
 
             EntityTreeElement* containingElement = tree.getContainingElement(entityID);
             const AACube& elementCube = containingElement ? containingElement->getAACube() : AACube();
-            
+
             bool elementIsBestFit = containingElement->bestFitEntityBounds(foundEntityByID);
-            
+
             if (extraVerbose) {
                 qDebug() << "foundEntityByRadius=" << foundEntityByRadius.get();
                 qDebug() << "foundEntityByID=" << foundEntityByID.get();
                 qDebug() << "containingElement=" << containingElement;
-                qDebug() << "containingElement.box=" 
-                    << elementCube.getCorner().x << "," 
+                qDebug() << "containingElement.box="
+                    << elementCube.getCorner().x << ","
                     << elementCube.getCorner().y << ","
-                    << elementCube.getCorner().z << ":" 
+                    << elementCube.getCorner().z << ":"
                     << elementCube.getScale();
                 qDebug() << "elementCube.getScale()=" << elementCube.getScale();
                 //containingElement->printDebugDetails("containingElement");
                 qDebug() << "elementIsBestFit=" << elementIsBestFit;
             }
-            
+
             // Every 1000th test, show the size of the tree...
             if (extraVerbose && (i % 1000 == 0)) {
                 qDebug() << "after test:" << i << "getOctreeElementsCount()=" << tree.getOctreeElementsCount();
             }
 
-            bool passed = foundEntityByRadius && foundEntityByID && (foundEntityByRadius == foundEntityByID) && elementIsBestFit;
-            if (passed) {
-              iterationsPassed++;
-            } else {
-                if (extraVerbose) {
-                    qDebug() << "FAILED - Test" << testsTaken <<":" << qPrintable(testName) << "iteration:" << i
+            bool passed = foundEntityByRadius && foundEntityByID && (foundEntityByRadius == foundEntityByID) &&
+elementIsBestFit; if (passed) { iterationsPassed++; } else { if (extraVerbose) { qDebug() << "FAILED - Test" << testsTaken <<":"
+<< qPrintable(testName) << "iteration:" << i
                                 //<< "foundEntityByRadius=" << foundEntityByRadius
                                 << "foundEntityByID=" << foundEntityByID.get()
                                 << "x/y/z=" << randomX << "," << randomY << "," << randomZ
@@ -327,7 +324,7 @@ void EntityTests::entityTreeTests(bool verbose) {
         if (extraVerbose) {
             qDebug() << "getOctreeElementsCount()=" << tree.getOctreeElementsCount();
         }
-        
+
         bool passed = iterationsPassed == TEST_ITERATIONS;
         if (passed) {
             testsPassed++;
@@ -338,7 +335,7 @@ void EntityTests::entityTreeTests(bool verbose) {
         float USECS_PER_MSECS = 1000.0f;
         float elapsedInMSecsAdd = (float)(totalElapsedAdd) / USECS_PER_MSECS;
         float elapsedInMSecsFind = (float)(totalElapsedFind) / USECS_PER_MSECS;
-        qDebug() << "TIME - Test" << testsTaken <<":" << qPrintable(testName) 
+        qDebug() << "TIME - Test" << testsTaken <<":" << qPrintable(testName)
                         << "elapsed Add=" << elapsedInMSecsAdd << "msecs"
                         << "elapsed Find=" << elapsedInMSecsFind << "msecs";
     }
@@ -354,7 +351,7 @@ void EntityTests::entityTreeTests(bool verbose) {
         int iterationsPassed = 0;
         quint64 totalElapsedDelete = 0;
         quint64 totalElapsedFind = 0;
-        for (int i = 0; i < TEST_ITERATIONS; i++) {        
+        for (int i = 0; i < TEST_ITERATIONS; i++) {
             QUuid id = QUuid::createUuid();// make sure it doesn't collide with previous entity ids
             EntityItemID entityID(id);
 
@@ -377,11 +374,11 @@ void EntityTests::entityTreeTests(bool verbose) {
             totalElapsedFind += (endFind - startFind);
 
             EntityTreeElement* containingElement = tree.getContainingElement(entityID);
-            
+
             if (extraVerbose) {
                  qDebug() << "foundEntityByID=" << foundEntityByID.get();
             }
-            
+
             // Every 1000th test, show the size of the tree...
             if (extraVerbose && (i % 1000 == 0)) {
                 qDebug() << "after test:" << i << "getOctreeElementsCount()=" << tree.getOctreeElementsCount();
@@ -401,7 +398,7 @@ void EntityTests::entityTreeTests(bool verbose) {
         if (extraVerbose) {
             qDebug() << "getOctreeElementsCount()=" << tree.getOctreeElementsCount();
         }
-        
+
         bool passed = iterationsPassed == TEST_ITERATIONS;
         if (passed) {
             testsPassed++;
@@ -412,7 +409,7 @@ void EntityTests::entityTreeTests(bool verbose) {
         float USECS_PER_MSECS = 1000.0f;
         float elapsedInMSecsDelete = (float)(totalElapsedDelete) / USECS_PER_MSECS;
         float elapsedInMSecsFind = (float)(totalElapsedFind) / USECS_PER_MSECS;
-        qDebug() << "TIME - Test" << testsTaken <<":" << qPrintable(testName) 
+        qDebug() << "TIME - Test" << testsTaken <<":" << qPrintable(testName)
                         << "elapsed Delete=" << elapsedInMSecsDelete << "msecs"
                         << "elapsed Find=" << elapsedInMSecsFind << "msecs";
     }
@@ -422,7 +419,7 @@ void EntityTests::entityTreeTests(bool verbose) {
         testsTaken++;
         const int TEST_ITERATIONS = 100;
         const int ENTITIES_PER_ITERATION = 10;
-        QString testName = "Performance - delete " + QString::number(ENTITIES_PER_ITERATION) 
+        QString testName = "Performance - delete " + QString::number(ENTITIES_PER_ITERATION)
                             + " entities from tree " + QString::number(TEST_ITERATIONS) + " times";
         if (verbose) {
             qDebug() << "Test" << testsTaken <<":" << qPrintable(testName);
@@ -431,10 +428,10 @@ void EntityTests::entityTreeTests(bool verbose) {
         int iterationsPassed = 0;
         quint64 totalElapsedDelete = 0;
         quint64 totalElapsedFind = 0;
-        for (int i = 0; i < TEST_ITERATIONS; i++) {        
+        for (int i = 0; i < TEST_ITERATIONS; i++) {
 
             QSet<EntityItemID> entitiesToDelete;
-            for (int j = 0; j < ENTITIES_PER_ITERATION; j++) {        
+            for (int j = 0; j < ENTITIES_PER_ITERATION; j++) {
                 //uint32_t id = 2 + (i * ENTITIES_PER_ITERATION) + j; // These are the entities we added above
                 QUuid id = QUuid::createUuid();// make sure it doesn't collide with previous entity ids
                 EntityItemID entityID(id);
@@ -455,7 +452,7 @@ void EntityTests::entityTreeTests(bool verbose) {
             }
 
             quint64 startFind = usecTimestampNow();
-            for (int j = 0; j < ENTITIES_PER_ITERATION; j++) {        
+            for (int j = 0; j < ENTITIES_PER_ITERATION; j++) {
                 //uint32_t id = 2 + (i * ENTITIES_PER_ITERATION) + j; // These are the entities we added above
                 QUuid id = QUuid::createUuid();// make sure it doesn't collide with previous entity ids
                 EntityItemID entityID(id);
@@ -485,7 +482,7 @@ void EntityTests::entityTreeTests(bool verbose) {
         if (extraVerbose) {
             qDebug() << "getOctreeElementsCount()=" << tree.getOctreeElementsCount();
         }
-        
+
         bool passed = iterationsPassed == (TEST_ITERATIONS * ENTITIES_PER_ITERATION);
         if (passed) {
             testsPassed++;
@@ -496,7 +493,7 @@ void EntityTests::entityTreeTests(bool verbose) {
         float USECS_PER_MSECS = 1000.0f;
         float elapsedInMSecsDelete = (float)(totalElapsedDelete) / USECS_PER_MSECS;
         float elapsedInMSecsFind = (float)(totalElapsedFind) / USECS_PER_MSECS;
-        qDebug() << "TIME - Test" << testsTaken <<":" << qPrintable(testName) 
+        qDebug() << "TIME - Test" << testsTaken <<":" << qPrintable(testName)
                         << "elapsed Delete=" << elapsedInMSecsDelete << "msecs"
                         << "elapsed Find=" << elapsedInMSecsFind << "msecs";
     }

@@ -16,18 +16,18 @@
 // Lightweight functions to detect SSE/AVX/AVX2/AVX512 support
 //
 
-#define MASK_SSE3       (1 << 0)                // SSE3
-#define MASK_SSSE3      (1 << 9)                // SSSE3
-#define MASK_SSE41      (1 << 19)               // SSE4.1
-#define MASK_SSE42      ((1 << 20) | (1 << 23)) // SSE4.2 and POPCNT
-#define MASK_OSXSAVE    (1 << 27)               // OSXSAVE
-#define MASK_AVX        ((1 << 27) | (1 << 28)) // OSXSAVE and AVX
-#define MASK_AVX2       (1 << 5)                // AVX2
+#define MASK_SSE3 (1 << 0) // SSE3
+#define MASK_SSSE3 (1 << 9) // SSSE3
+#define MASK_SSE41 (1 << 19) // SSE4.1
+#define MASK_SSE42 ((1 << 20) | (1 << 23)) // SSE4.2 and POPCNT
+#define MASK_OSXSAVE (1 << 27) // OSXSAVE
+#define MASK_AVX ((1 << 27) | (1 << 28)) // OSXSAVE and AVX
+#define MASK_AVX2 (1 << 5) // AVX2
 
-#define MASK_AVX512     ((1 << 16) | (1 << 17) | (1 << 28) | (1 << 30) | (1 << 31)) // AVX512 F,DQ,CD,BW,VL (SKX)
+#define MASK_AVX512 ((1 << 16) | (1 << 17) | (1 << 28) | (1 << 30) | (1 << 31)) // AVX512 F,DQ,CD,BW,VL (SKX)
 
-#define MASK_XCR0_YMM   ((1 << 1) | (1 << 2))               // XMM,YMM
-#define MASK_XCR0_ZMM   ((1 << 1) | (1 << 2) | (7 << 5))    // XMM,YMM,ZMM
+#define MASK_XCR0_YMM ((1 << 1) | (1 << 2)) // XMM,YMM
+#define MASK_XCR0_ZMM ((1 << 1) | (1 << 2) | (7 << 5)) // XMM,YMM,ZMM
 
 #if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
 #define ARCH_X86
@@ -38,8 +38,8 @@
 #include <intrin.h>
 
 // use MSVC intrinsics
-#define cpuidex(info, eax, ecx)     __cpuidex(info, eax, ecx)
-#define xgetbv(ecx)                 _xgetbv(ecx)
+#define cpuidex(info, eax, ecx) __cpuidex(info, eax, ecx)
+#define xgetbv(ecx) _xgetbv(ecx)
 
 #elif defined(ARCH_X86) && defined(__GNUC__)
 
@@ -50,7 +50,7 @@ static inline void cpuidex(int info[4], int eax, int ecx) {
     __cpuid_count(eax, ecx, info[0], info[1], info[2], info[3]);
 }
 
-static inline unsigned long long xgetbv(unsigned int ecx){
+static inline unsigned long long xgetbv(unsigned int ecx) {
     unsigned int eax, edx;
     __asm__("xgetbv" : "=a"(eax), "=d"(edx) : "c"(ecx));
     return ((unsigned long long)edx << 32) | eax;
@@ -65,7 +65,7 @@ static inline void cpuidex(int info[4], int eax, int ecx) {
     info[3] = 0;
 }
 
-static inline unsigned long long xgetbv(unsigned int ecx){
+static inline unsigned long long xgetbv(unsigned int ecx) {
     return 0ULL;
 }
 
@@ -110,7 +110,6 @@ static inline bool cpuSupportsAVX() {
 
     bool result = false;
     if ((info[2] & MASK_AVX) == MASK_AVX) {
-
         // verify OS support for YMM state
         if ((xgetbv(0) & MASK_XCR0_YMM) == MASK_XCR0_YMM) {
             result = true;
@@ -124,7 +123,6 @@ static inline bool cpuSupportsAVX2() {
 
     bool result = false;
     if (cpuSupportsAVX()) {
-
         cpuidex(info, 0x7, 0);
 
         if ((info[1] & MASK_AVX2) == MASK_AVX2) {
@@ -141,10 +139,8 @@ static inline bool cpuSupportsAVX512() {
 
     bool result = false;
     if ((info[2] & MASK_OSXSAVE) == MASK_OSXSAVE) {
-
         // verify OS support for ZMM state
         if ((xgetbv(0) & MASK_XCR0_ZMM) == MASK_XCR0_ZMM) {
-
             cpuidex(info, 0x7, 0);
 
             if ((info[1] & MASK_AVX512) == MASK_AVX512) {

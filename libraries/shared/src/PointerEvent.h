@@ -15,34 +15,29 @@
 #include <Qt>
 
 #include <stdint.h>
-#include <glm/glm.hpp>
 #include <QScriptValue>
+#include <glm/glm.hpp>
 
 class PointerEvent {
 public:
-    enum Button {
-        NoButtons = 0x0,
-        PrimaryButton = 0x1,
-        SecondaryButton = 0x2,
-        TertiaryButton = 0x4
-    };
+    enum Button { NoButtons = 0x0, PrimaryButton = 0x1, SecondaryButton = 0x2, TertiaryButton = 0x4 };
 
     enum EventType {
-        Press,       // A button has just been pressed
+        Press, // A button has just been pressed
         DoublePress, // A button has just been double pressed
-        Release,     // A button has just been released
-        Move,         // The pointer has just moved
+        Release, // A button has just been released
+        Move, // The pointer has just moved
         NumEventTypes
     };
 
     PointerEvent() {}
     PointerEvent(EventType type, uint32_t id);
-    PointerEvent(EventType type, uint32_t id, const glm::vec2& pos2D, Button button, uint32_t buttons, Qt::KeyboardModifiers keyboardModifiers);
+    PointerEvent(EventType type, uint32_t id, const glm::vec2& pos2D, Button button, uint32_t buttons,
+                 Qt::KeyboardModifiers keyboardModifiers);
     PointerEvent(const glm::vec2& pos2D, const glm::vec3& pos3D, const glm::vec3& normal, const glm::vec3& direction);
-    PointerEvent(EventType type, uint32_t id,
-                 const glm::vec2& pos2D, const glm::vec3& pos3D,
-                 const glm::vec3& normal, const glm::vec3& direction,
-                 Button button = NoButtons, uint32_t buttons = NoButtons, Qt::KeyboardModifiers keyboardModifiers = Qt::NoModifier);
+    PointerEvent(EventType type, uint32_t id, const glm::vec2& pos2D, const glm::vec3& pos3D, const glm::vec3& normal,
+                 const glm::vec3& direction, Button button = NoButtons, uint32_t buttons = NoButtons,
+                 Qt::KeyboardModifiers keyboardModifiers = Qt::NoModifier);
 
     static QScriptValue toScriptValue(QScriptEngine* engine, const PointerEvent& event);
     static void fromScriptValue(const QScriptValue& object, PointerEvent& event);
@@ -72,13 +67,16 @@ public:
 
 private:
     EventType _type;
-    uint32_t _id { INVALID_POINTER_ID };     // used to identify the pointer.  (left vs right hand, for example)
-    glm::vec2 _pos2D { glm::vec2(NAN) };     // (in meters) projected onto the xy plane of entities dimension box, (0, 0) is upper right hand corner
-    glm::vec3 _pos3D { glm::vec3(NAN) };     // surface location in world coordinates (in meters)
-    glm::vec3 _normal { glm::vec3(NAN) };    // surface normal
+    uint32_t _id { INVALID_POINTER_ID }; // used to identify the pointer.  (left vs right hand, for example)
+    glm::vec2 _pos2D { glm::vec2(
+        NAN) }; // (in meters) projected onto the xy plane of entities dimension box, (0, 0) is upper right hand corner
+    glm::vec3 _pos3D { glm::vec3(NAN) }; // surface location in world coordinates (in meters)
+    glm::vec3 _normal { glm::vec3(NAN) }; // surface normal
     glm::vec3 _direction { glm::vec3(NAN) }; // incoming direction of pointer ray.
 
-    Button _button { NoButtons };  // button associated with this event, (if type is Press, this will be the button that is pressed)
+    Button _button {
+        NoButtons
+    }; // button associated with this event, (if type is Press, this will be the button that is pressed)
     uint32_t _buttons { NoButtons }; // the current state of all the buttons.
     Qt::KeyboardModifiers _keyboardModifiers { Qt::KeyboardModifier::NoModifier }; // set of keys held when event was generated
 

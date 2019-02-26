@@ -12,11 +12,11 @@
 #ifndef hifi_AbstractViewStateInterface_h
 #define hifi_AbstractViewStateInterface_h
 
-#include <glm/glm.hpp>
 #include <functional>
+#include <glm/glm.hpp>
 
-#include <render/Scene.h>
 #include <render/Engine.h>
+#include <render/Scene.h>
 
 #include <QtGlobal>
 
@@ -41,16 +41,16 @@ public:
 
     virtual glm::vec3 getAvatarPosition() const = 0;
 
-    // Unfortunately, having this here is a bad idea.  Lots of objects connect to 
-    // the aboutToQuit signal, and it's impossible to know the order in which 
+    // Unfortunately, having this here is a bad idea.  Lots of objects connect to
+    // the aboutToQuit signal, and it's impossible to know the order in which
     // the receivers will be called, so this might return false negatives
-    //virtual bool isAboutToQuit() const = 0;
+    // virtual bool isAboutToQuit() const = 0;
 
-    // Queue code to execute on the main thread. 
+    // Queue code to execute on the main thread.
     // If called from the main thread, the lambda will execute synchronously
     virtual void postLambdaEvent(const std::function<void()>& f) = 0;
     // Synchronously execute code on the main thread.  This function will
-    // not return until the code is executed, regardles of which thread it 
+    // not return until the code is executed, regardles of which thread it
     // is called from
     virtual void sendLambdaEvent(const std::function<void()>& f) = 0;
 
@@ -68,4 +68,4 @@ public:
     static void setInstance(AbstractViewStateInterface* instance);
 };
 
-#endif  // hifi_AbstractViewStateInterface_h
+#endif // hifi_AbstractViewStateInterface_h

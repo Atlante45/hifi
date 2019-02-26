@@ -12,8 +12,9 @@
 
 #include <gpu/State.h>
 
-namespace gpu { namespace gl {
-    
+namespace gpu {
+namespace gl {
+
 class GLBackend;
 class GLState : public GPUObject {
 public:
@@ -26,7 +27,8 @@ public:
         virtual ~Command() {};
     };
 
-    template <class T> class Command1 : public Command {
+    template<class T>
+    class Command1 : public Command {
     public:
         typedef void (GLBackend::*GLFunction)(T);
         void run(GLBackend* backend) { (backend->*(_func))(_param); }
@@ -34,7 +36,8 @@ public:
         GLFunction _func;
         T _param;
     };
-    template <class T, class U> class Command2 : public Command {
+    template<class T, class U>
+    class Command2 : public Command {
     public:
         typedef void (GLBackend::*GLFunction)(T, U);
         void run(GLBackend* backend) { (backend->*(_func))(_param0, _param1); }
@@ -44,19 +47,24 @@ public:
         U _param1;
     };
 
-    template <class T, class U, class V> class Command3 : public Command {
+    template<class T, class U, class V>
+    class Command3 : public Command {
     public:
         typedef void (GLBackend::*GLFunction)(T, U, V);
         void run(GLBackend* backend) { (backend->*(_func))(_param0, _param1, _param2); }
-        Command3(GLFunction func, T param0, U param1, V param2) : _func(func), _param0(param0), _param1(param1), _param2(param2) {};
+        Command3(GLFunction func, T param0, U param1, V param2) :
+            _func(func),
+            _param0(param0),
+            _param1(param1),
+            _param2(param2) {};
         GLFunction _func;
         T _param0;
         U _param1;
         V _param2;
     };
 
-    typedef std::shared_ptr< Command > CommandPointer;
-    typedef std::vector< CommandPointer > Commands;
+    typedef std::shared_ptr<Command> CommandPointer;
+    typedef std::vector<CommandPointer> Commands;
 
     Commands _commands;
     Stamp _stamp;
@@ -68,6 +76,7 @@ public:
     friend class GLBackend;
 };
 
-} }
+} // namespace gl
+} // namespace gpu
 
 #endif

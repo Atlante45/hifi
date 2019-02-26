@@ -46,10 +46,7 @@ public:
     };
     Q_ENUM(State);
 
-    MarketplaceItemUploader(QString title,
-                            QString description,
-                            QString rootFilename,
-                            QUuid marketplaceID,
+    MarketplaceItemUploader(QString title, QString description, QString rootFilename, QUuid marketplaceID,
                             QList<ProjectFilePath> filePaths);
 
     Q_INVOKABLE void send();
@@ -102,4 +99,4 @@ private:
     QByteArray _fileData;
 };
 
-#endif  // hifi_MarketplaceItemUploader_h
+#endif // hifi_MarketplaceItemUploader_h

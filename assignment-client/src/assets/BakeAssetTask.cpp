@@ -13,8 +13,8 @@
 
 #include <mutex>
 
-#include <QtCore/QThread>
 #include <QCoreApplication>
+#include <QtCore/QThread>
 
 #include <PathUtils.h>
 
@@ -24,12 +24,11 @@ static const int OVEN_STATUS_CODE_ABORT { 2 };
 
 std::once_flag registerMetaTypesFlag;
 
-BakeAssetTask::BakeAssetTask(const AssetUtils::AssetHash& assetHash, const AssetUtils::AssetPath& assetPath, const QString& filePath) :
+BakeAssetTask::BakeAssetTask(const AssetUtils::AssetHash& assetHash, const AssetUtils::AssetPath& assetPath,
+                             const QString& filePath) :
     _assetHash(assetHash),
     _assetPath(assetPath),
-    _filePath(filePath)
-{
-
+    _filePath(filePath) {
     std::call_once(registerMetaTypesFlag, []() {
         qRegisterMetaType<QProcess::ProcessError>("QProcess::ProcessError");
         qRegisterMetaType<QProcess::ExitStatus>("QProcess::ExitStatus");
@@ -62,56 +61,54 @@ void BakeAssetTask::run() {
     QString path = base.absolutePath() + "/oven";
     QString extension = _assetPath.mid(_assetPath.lastIndexOf('.') + 1);
     QStringList args {
-        "-i", _filePath,
-        "-o", tempOutputDir,
-        "-t", extension,
+        "-i", _filePath, "-o", tempOutputDir, "-t", extension,
     };
 
     _ovenProcess.reset(new QProcess());
 
     QEventLoop loop;
 
-    connect(_ovenProcess.get(), static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
-            this, [&loop, this, tempOutputDir](int exitCode, QProcess::ExitStatus exitStatus) {
-        qDebug() << "Baking process finished: " << exitCode << exitStatus;
+    connect(_ovenProcess.get(), static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this,
+            [&loop, this, tempOutputDir](int exitCode, QProcess::ExitStatus exitStatus) {
+                qDebug() << "Baking process finished: " << exitCode << exitStatus;
 
-        if (exitStatus == QProcess::CrashExit) {
-            if (_wasAborted) {
-                emit bakeAborted(_assetHash, _assetPath);
-            } else {
-                QString errors = "Fatal error occurred while baking";
-                emit bakeFailed(_assetHash, _assetPath, errors);
-            }
-        } else if (exitCode == OVEN_STATUS_CODE_SUCCESS) {
-            QDir outputDir = tempOutputDir;
-            auto files = outputDir.entryInfoList(QDir::Files);
-            QVector<QString> outputFiles;
-            for (auto& file : files) {
-                outputFiles.push_back(file.absoluteFilePath());
-            }
+                if (exitStatus == QProcess::CrashExit) {
+                    if (_wasAborted) {
+                        emit bakeAborted(_assetHash, _assetPath);
+                    } else {
+                        QString errors = "Fatal error occurred while baking";
+                        emit bakeFailed(_assetHash, _assetPath, errors);
+                    }
+                } else if (exitCode == OVEN_STATUS_CODE_SUCCESS) {
+                    QDir outputDir = tempOutputDir;
+                    auto files = outputDir.entryInfoList(QDir::Files);
+                    QVector<QString> outputFiles;
+                    for (auto& file : files) {
+                        outputFiles.push_back(file.absoluteFilePath());
+                    }
 
-            emit bakeComplete(_assetHash, _assetPath, tempOutputDir, outputFiles);
-        } else if (exitStatus == QProcess::NormalExit && exitCode == OVEN_STATUS_CODE_ABORT) {
-            _wasAborted.store(true);
-            emit bakeAborted(_assetHash, _assetPath);
-        } else {
-            QString errors;
-            if (exitCode == OVEN_STATUS_CODE_FAIL) {
-                QDir outputDir = tempOutputDir;
-                auto errorFilePath = outputDir.absoluteFilePath("errors.txt");
-                QFile errorFile { errorFilePath };
-                if (errorFile.open(QIODevice::ReadOnly)) {
-                    errors = errorFile.readAll();
-                    errorFile.close();
+                    emit bakeComplete(_assetHash, _assetPath, tempOutputDir, outputFiles);
+                } else if (exitStatus == QProcess::NormalExit && exitCode == OVEN_STATUS_CODE_ABORT) {
+                    _wasAborted.store(true);
+                    emit bakeAborted(_assetHash, _assetPath);
                 } else {
-                    errors = "Unknown error occurred while baking";
+                    QString errors;
+                    if (exitCode == OVEN_STATUS_CODE_FAIL) {
+                        QDir outputDir = tempOutputDir;
+                        auto errorFilePath = outputDir.absoluteFilePath("errors.txt");
+                        QFile errorFile { errorFilePath };
+                        if (errorFile.open(QIODevice::ReadOnly)) {
+                            errors = errorFile.readAll();
+                            errorFile.close();
+                        } else {
+                            errors = "Unknown error occurred while baking";
+                        }
+                    }
+                    emit bakeFailed(_assetHash, _assetPath, errors);
                 }
-            }
-            emit bakeFailed(_assetHash, _assetPath, errors);
-        }
 
-        loop.quit();
-    });
+                loop.quit();
+            });
 
     qDebug() << "Starting oven for " << _assetPath;
     _ovenProcess->start(path, args, QIODevice::ReadOnly);

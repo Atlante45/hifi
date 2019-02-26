@@ -11,14 +11,14 @@
 
 #include "LODManager.h"
 
-#include <SettingHandle.h>
 #include <OctreeUtils.h>
+#include <SettingHandle.h>
 #include <Util.h>
 #include <shared/GlobalAppProperties.h>
 
 #include "Application.h"
-#include "ui/DialogsManager.h"
 #include "InterfaceLogging.h"
+#include "ui/DialogsManager.h"
 
 const float LODManager::DEFAULT_DESKTOP_LOD_DOWN_FPS = LOD_DEFAULT_QUALITY_LEVEL * LOD_MAX_LIKELY_DESKTOP_FPS;
 const float LODManager::DEFAULT_HMD_LOD_DOWN_FPS = LOD_DEFAULT_QUALITY_LEVEL * LOD_MAX_LIKELY_HMD_FPS;
@@ -39,10 +39,10 @@ LODManager::LODManager() {
 const float LOD_ADJUST_RUNNING_AVG_TIMESCALE = 0.08f; // sec
 
 // batchTIme is always contained in presentTime.
-// We favor using batchTime instead of presentTime as a representative value for rendering duration (on present thread) 
+// We favor using batchTime instead of presentTime as a representative value for rendering duration (on present thread)
 // if batchTime + cushionTime < presentTime.
 // since we are shooting for fps around 60, 90Hz, the ideal frames are around 10ms
-// so we are picking a cushion time of 3ms 
+// so we are picking a cushion time of 3ms
 const float LOD_BATCH_TO_PRESENT_CUSHION_TIME = 3.0f; // msec
 
 void LODManager::setRenderTimes(float presentTime, float engineRunTime, float batchTime, float gpuTime) {
@@ -54,16 +54,18 @@ void LODManager::setRenderTimes(float presentTime, float engineRunTime, float ba
 }
 
 void LODManager::autoAdjustLOD(float realTimeDelta) {
- 
     // The "render time" is the worse of:
     // - engineRunTime: Time spent in the render thread in the engine producing the gpu::Frame N
     // - batchTime: Time spent in the present thread processing the batches of gpu::Frame N+1
-    // - presentTime: Time spent in the present thread between the last 2 swap buffers considered the total time to submit gpu::Frame N+1
+    // - presentTime: Time spent in the present thread between the last 2 swap buffers considered the total time to submit
+    // gpu::Frame N+1
     // - gpuTime: Time spent in the GPU executing the gpu::Frame N + 2
 
     // But Present time is in reality synched with the monitor/display refresh rate, it s always longer than batchTime.
     // So if batchTime is fast enough relative to presentTime we are using it, otherwise we are using presentTime. got it ?
-    auto presentTime = (_presentTime > _batchTime + LOD_BATCH_TO_PRESENT_CUSHION_TIME ? _batchTime + LOD_BATCH_TO_PRESENT_CUSHION_TIME : _presentTime);
+    auto presentTime = (_presentTime > _batchTime + LOD_BATCH_TO_PRESENT_CUSHION_TIME
+                            ? _batchTime + LOD_BATCH_TO_PRESENT_CUSHION_TIME
+                            : _presentTime);
     float maxRenderTime = glm::max(glm::max(presentTime, _engineRunTime), _gpuTime);
 
     // maxRenderTime must be a realistic valid duration in order for the regulation to work correctly.
@@ -77,11 +79,14 @@ void LODManager::autoAdjustLOD(float realTimeDelta) {
 
     // compute time-weighted running average render time (now and smooth)
     // We MUST clamp the blend between 0.0 and 1.0 for stability
-    float nowBlend = (realTimeDelta < LOD_ADJUST_RUNNING_AVG_TIMESCALE) ? realTimeDelta / LOD_ADJUST_RUNNING_AVG_TIMESCALE : 1.0f;
-    float smoothBlend = (realTimeDelta <  LOD_ADJUST_RUNNING_AVG_TIMESCALE * _smoothScale) ? realTimeDelta / (LOD_ADJUST_RUNNING_AVG_TIMESCALE * _smoothScale) : 1.0f;
+    float nowBlend = (realTimeDelta < LOD_ADJUST_RUNNING_AVG_TIMESCALE) ? realTimeDelta / LOD_ADJUST_RUNNING_AVG_TIMESCALE
+                                                                        : 1.0f;
+    float smoothBlend = (realTimeDelta < LOD_ADJUST_RUNNING_AVG_TIMESCALE * _smoothScale)
+                            ? realTimeDelta / (LOD_ADJUST_RUNNING_AVG_TIMESCALE * _smoothScale)
+                            : 1.0f;
 
-    //Evaluate the running averages for the render time
-    // We must sanity check for the output average evaluated to be in a valid range to avoid issues 
+    // Evaluate the running averages for the render time
+    // We must sanity check for the output average evaluated to be in a valid range to avoid issues
     _nowRenderTime = (1.0f - nowBlend) * _nowRenderTime + nowBlend * maxRenderTime; // msec
     _nowRenderTime = std::max(0.0f, std::min(_nowRenderTime, (float)MSECS_PER_SECOND));
     _smoothRenderTime = (1.0f - smoothBlend) * _smoothRenderTime + smoothBlend * maxRenderTime; // msec
@@ -102,7 +107,7 @@ void LODManager::autoAdjustLOD(float realTimeDelta) {
     // Current fps based on latest measurments
     float currentNowFPS = (float)MSECS_PER_SECOND / _nowRenderTime;
     float currentSmoothFPS = (float)MSECS_PER_SECOND / _smoothRenderTime;
- 
+
     // Compute the Variance of the FPS signal (FPS - smouthFPS)^2
     // Also scale it by a percentage for fine tuning (default is 100%)
     float currentVarianceFPS = (currentSmoothFPS - currentNowFPS);
@@ -126,8 +131,8 @@ void LODManager::autoAdjustLOD(float realTimeDelta) {
         noiseCoef = (currentErrorFPSSquare - currentVarianceFPS) / currentVarianceFPS;
     }
 
-    // The final normalized error is the the error to the FPS target, weighted by the noiseCoef, then normailzed by the target FPS.
-    // it s also clamped in the [-1, 1] range
+    // The final normalized error is the the error to the FPS target, weighted by the noiseCoef, then normailzed by the target
+    // FPS. it s also clamped in the [-1, 1] range
     auto error = noiseCoef * currentErrorFPS / targetFPS;
     error = glm::clamp(error, -1.0f, 1.0f);
 
@@ -154,9 +159,9 @@ void LODManager::autoAdjustLOD(float realTimeDelta) {
     _pidHistory.z = derivative;
 
     // Compute the output of the PID and record intermediate results for tuning
-    _pidOutputs.x = _pidCoefs.x * error;        // Kp * error
-    _pidOutputs.y = _pidCoefs.y * integral;     // Ki * integral 
-    _pidOutputs.z = _pidCoefs.z * derivative;   // Kd * derivative
+    _pidOutputs.x = _pidCoefs.x * error; // Kp * error
+    _pidOutputs.y = _pidCoefs.y * integral; // Ki * integral
+    _pidOutputs.z = _pidCoefs.z * derivative; // Kd * derivative
 
     auto output = _pidOutputs.x + _pidOutputs.y + _pidOutputs.z;
     _pidOutputs.w = output;
@@ -277,18 +282,16 @@ QString LODManager::getLODFeedbackText() {
     int boundaryLevelAdjust = getBoundaryLevelAdjust();
     QString granularityFeedback;
     switch (boundaryLevelAdjust) {
-    case 0: {
-        granularityFeedback = QString(".");
-    } break;
-    case 1: {
-        granularityFeedback = QString(" at half of standard granularity.");
-    } break;
-    case 2: {
-        granularityFeedback = QString(" at a third of standard granularity.");
-    } break;
-    default: {
-        granularityFeedback = QString(" at 1/%1th of standard granularity.").arg(boundaryLevelAdjust + 1);
-    } break;
+        case 0: {
+            granularityFeedback = QString(".");
+        } break;
+        case 1: {
+            granularityFeedback = QString(" at half of standard granularity.");
+        } break;
+        case 2: {
+            granularityFeedback = QString(" at a third of standard granularity.");
+        } break;
+        default: { granularityFeedback = QString(" at 1/%1th of standard granularity.").arg(boundaryLevelAdjust + 1); } break;
     }
     // distance feedback
     float octreeSizeScale = getOctreeSizeScale();
@@ -297,13 +300,21 @@ QString LODManager::getLODFeedbackText() {
 
     QString result;
     if (relativeToDefault > 1.01f) {
-        result = QString("20:%1 or %2 times further than average vision%3").arg(relativeToTwentyTwenty).arg(relativeToDefault, 0, 'f', 2).arg(granularityFeedback);
+        result = QString("20:%1 or %2 times further than average vision%3")
+                     .arg(relativeToTwentyTwenty)
+                     .arg(relativeToDefault, 0, 'f', 2)
+                     .arg(granularityFeedback);
     } else if (relativeToDefault > 0.99f) {
         result = QString("20:20 or the default distance for average vision%1").arg(granularityFeedback);
     } else if (relativeToDefault > 0.01f) {
-        result = QString("20:%1 or %2 of default distance for average vision%3").arg(relativeToTwentyTwenty).arg(relativeToDefault, 0, 'f', 3).arg(granularityFeedback);
+        result = QString("20:%1 or %2 of default distance for average vision%3")
+                     .arg(relativeToTwentyTwenty)
+                     .arg(relativeToDefault, 0, 'f', 3)
+                     .arg(granularityFeedback);
     } else {
-        result = QString("%2 of default distance for average vision%3").arg(relativeToDefault, 0, 'f', 3).arg(granularityFeedback);
+        result = QString("%2 of default distance for average vision%3")
+                     .arg(relativeToDefault, 0, 'f', 3)
+                     .arg(granularityFeedback);
     }
     return result;
 }
@@ -382,7 +393,6 @@ void LODManager::setWorldDetailQuality(float quality) {
 }
 
 float LODManager::getWorldDetailQuality() const {
-
     static const float LOW = 0.25f;
     static const float MEDIUM = 0.5f;
     static const float HIGH = 0.75f;
@@ -406,7 +416,6 @@ float LODManager::getWorldDetailQuality() const {
 
     return HIGH;
 }
-
 
 void LODManager::setLODQualityLevel(float quality) {
     _lodQualityLevel = quality;

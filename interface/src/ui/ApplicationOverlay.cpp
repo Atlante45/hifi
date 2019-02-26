@@ -13,30 +13,28 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include <avatar/AvatarManager.h>
-#include <GLMHelpers.h>
+#include <CursorManager.h>
 #include <GLMHelpers.h>
 #include <OffscreenUi.h>
-#include <CursorManager.h>
 #include <PerfStat.h>
+#include <avatar/AvatarManager.h>
 
+#include "Application.h"
 #include "AudioClient.h"
 #include "audio/AudioScope.h"
-#include "Application.h"
 
-#include "Util.h"
-#include "ui/Stats.h"
-#include "ui/AvatarInputs.h"
-#include "OffscreenUi.h"
-#include "InterfaceLogging.h"
 #include <QQmlContext>
+#include "InterfaceLogging.h"
+#include "OffscreenUi.h"
+#include "Util.h"
+#include "ui/AvatarInputs.h"
+#include "ui/Stats.h"
 
-const vec4 CONNECTION_STATUS_BORDER_COLOR{ 1.0f, 0.0f, 0.0f, 0.8f };
+const vec4 CONNECTION_STATUS_BORDER_COLOR { 1.0f, 0.0f, 0.0f, 0.8f };
 static const float ORTHO_NEAR_CLIP = -1000.0f;
 static const float ORTHO_FAR_CLIP = 1000.0f;
 
-ApplicationOverlay::ApplicationOverlay()
-{
+ApplicationOverlay::ApplicationOverlay() {
     auto geometryCache = DependencyManager::get<GeometryCache>();
     _domainStatusBorder = geometryCache->allocateID();
     _magnifierBorder = geometryCache->allocateID();
@@ -56,7 +54,7 @@ ApplicationOverlay::~ApplicationOverlay() {
 void ApplicationOverlay::renderOverlay(RenderArgs* renderArgs) {
     PROFILE_RANGE(render, __FUNCTION__);
     buildFramebufferObject();
-    
+
     if (!_overlayFramebuffer) {
         return; // we can't do anything without our frame buffer.
     }
@@ -162,10 +160,10 @@ void ApplicationOverlay::renderDomainConnectionStatusBorder(RenderArgs* renderAr
         // FIXME: THe line width of CONNECTION_STATUS_BORDER_LINE_WIDTH is not supported anymore, we ll need a workaround
 
         // TODO animate the disconnect border for some excitement while not connected?
-        //double usecs = usecTimestampNow();
-        //double secs = usecs / 1000000.0;
-        //float scaleAmount = 1.0f + (0.01f * sin(secs * 5.0f));
-        //batch.setModelTransform(glm::scale(mat4(), vec3(scaleAmount)));
+        // double usecs = usecTimestampNow();
+        // double secs = usecs / 1000000.0;
+        // float scaleAmount = 1.0f + (0.01f * sin(secs * 5.0f));
+        // batch.setModelTransform(glm::scale(mat4(), vec3(scaleAmount)));
 
         geometryCache->renderVertices(batch, gpu::LINE_STRIP, _domainStatusBorder);
     }
@@ -186,13 +184,15 @@ void ApplicationOverlay::buildFramebufferObject() {
     auto width = uiSize.x;
     auto height = uiSize.y;
     if (!_overlayFramebuffer->getDepthStencilBuffer()) {
-        auto overlayDepthTexture = gpu::Texture::createRenderBuffer(DEPTH_FORMAT, width, height, gpu::Texture::SINGLE_MIP, DEFAULT_SAMPLER);
+        auto overlayDepthTexture = gpu::Texture::createRenderBuffer(DEPTH_FORMAT, width, height, gpu::Texture::SINGLE_MIP,
+                                                                    DEFAULT_SAMPLER);
         _overlayFramebuffer->setDepthStencilBuffer(overlayDepthTexture, DEPTH_FORMAT);
     }
 
     if (!_overlayFramebuffer->getRenderBuffer(0)) {
         const gpu::Sampler OVERLAY_SAMPLER(gpu::Sampler::FILTER_MIN_MAG_LINEAR, gpu::Sampler::WRAP_CLAMP);
-        auto colorBuffer = gpu::Texture::createRenderBuffer(COLOR_FORMAT, width, height, gpu::Texture::SINGLE_MIP, OVERLAY_SAMPLER);
+        auto colorBuffer = gpu::Texture::createRenderBuffer(COLOR_FORMAT, width, height, gpu::Texture::SINGLE_MIP,
+                                                            OVERLAY_SAMPLER);
         _overlayFramebuffer->setRenderBuffer(0, colorBuffer);
     }
 }

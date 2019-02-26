@@ -21,23 +21,23 @@
 
 class FaceTracker : public QObject {
     Q_OBJECT
-    
+
 public:
     virtual bool isActive() const { return false; }
     virtual bool isTracking() const { return false; }
-    
+
     virtual void init();
     virtual void update(float deltaTime);
     virtual void reset();
-    
+
     float getFadeCoefficient() const;
-    
+
     const glm::vec3 getHeadTranslation() const;
     const glm::quat getHeadRotation() const;
-    
+
     float getEstimatedEyePitch() const { return _estimatedEyePitch; }
-    float getEstimatedEyeYaw() const { return _estimatedEyeYaw; } 
-    
+    float getEstimatedEyeYaw() const { return _estimatedEyeYaw; }
+
     int getNumBlendshapes() const { return _blendshapeCoefficients.size(); }
     bool isValidBlendshapeIndex(int index) const { return index >= 0 && index < getNumBlendshapes(); }
     const QVector<float>& getBlendshapeCoefficients() const;
@@ -49,18 +49,12 @@ public:
     static float getEyeDeflection() { return _eyeDeflection.get(); }
     static void setEyeDeflection(float eyeDeflection);
 
-    static void updateFakeCoefficients(float leftBlink,
-                                float rightBlink,
-                                float browUp,
-                                float jawOpen,
-                                float mouth2,
-                                float mouth3,
-                                float mouth4,
-                                QVector<float>& coefficients);
+    static void updateFakeCoefficients(float leftBlink, float rightBlink, float browUp, float jawOpen, float mouth2,
+                                       float mouth3, float mouth4, QVector<float>& coefficients);
 
 signals:
 
-    /**jsdoc 
+    /**jsdoc
      * @function FaceTracker.muteToggled
      * @returns {Signal}
      */
@@ -70,7 +64,7 @@ public slots:
 
     // No JSDoc here because it's overridden in DdeFaceTracker.
     virtual void setEnabled(bool enabled) = 0;
-    
+
     /**jsdoc
      * @function FaceTracker.toggleMute
      */
@@ -78,7 +72,7 @@ public slots:
 
     /**jsdoc
      * @function FaceTracker.getMuted
-     * @returns {boolean} 
+     * @returns {boolean}
      */
     bool getMuted() { return _isMuted; }
 
@@ -93,7 +87,7 @@ protected:
     float _estimatedEyePitch = 0.0f;
     float _estimatedEyeYaw = 0.0f;
     QVector<float> _blendshapeCoefficients;
-    
+
     float _relaxationStatus = 0.0f; // Between 0.0f and 1.0f
     float _fadeCoefficient = 0.0f; // Between 0.0f and 1.0f
 

@@ -26,4 +26,4 @@ private:
     int _returnCode { 0 };
 };
 
-#endif //hifi_SkeletonDumpApp_h
+#endif // hifi_SkeletonDumpApp_h

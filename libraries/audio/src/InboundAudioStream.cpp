@@ -60,7 +60,8 @@ InboundAudioStream::InboundAudioStream(int numChannels, int numFrames, int numBl
     _incomingSequenceNumberStats(STATS_FOR_STATS_PACKET_WINDOW_SECONDS),
     _starveHistory(STARVE_HISTORY_CAPACITY),
     _unplayedMs(0, UNPLAYED_MS_WINDOW_SECS),
-    _timeGapStatsForStatsPacket(0, STATS_FOR_STATS_PACKET_WINDOW_SECONDS) {}
+    _timeGapStatsForStatsPacket(0, STATS_FOR_STATS_PACKET_WINDOW_SECONDS) {
+}
 
 InboundAudioStream::~InboundAudioStream() {
     cleanupCodec();
@@ -121,8 +122,8 @@ int InboundAudioStream::parseData(ReceivedMessage& message) {
     // parse sequence number and track it
     quint16 sequence;
     message.readPrimitive(&sequence);
-    SequenceNumberStats::ArrivalInfo arrivalInfo =
-        _incomingSequenceNumberStats.sequenceNumberReceived(sequence, message.getSourceID());
+    SequenceNumberStats::ArrivalInfo arrivalInfo = _incomingSequenceNumberStats.sequenceNumberReceived(sequence,
+                                                                                                       message.getSourceID());
     QString codecInPacket = message.readString();
 
     packetReceivedUpdateTimingStats();
@@ -131,7 +132,8 @@ int InboundAudioStream::parseData(ReceivedMessage& message) {
 
     // parse the info after the seq number and before the audio data (the stream properties)
     int prePropertyPosition = message.getPosition();
-    int propertyBytes = parseStreamProperties(message.getType(), message.readWithoutCopy(message.getBytesLeftToRead()), networkFrames);
+    int propertyBytes = parseStreamProperties(message.getType(), message.readWithoutCopy(message.getBytesLeftToRead()),
+                                              networkFrames);
 
     message.seek(prePropertyPosition + propertyBytes);
 
@@ -143,7 +145,7 @@ int InboundAudioStream::parseData(ReceivedMessage& message) {
         }
         case SequenceNumberStats::Early: {
             // Packet is early. Treat the packets as if all the packets between the last
-            // OnTime packet and this packet were lost. If we're using a codec this will 
+            // OnTime packet and this packet were lost. If we're using a codec this will
             // also result in allowing the codec to interpolate lost data. Then
             // fall through to the "on time" logic to actually handle this packet
             int packetsDropped = arrivalInfo._seqDiffFromExpected;
@@ -154,8 +156,8 @@ int InboundAudioStream::parseData(ReceivedMessage& message) {
         // FALLTHRU
         case SequenceNumberStats::OnTime: {
             // Packet is on time; parse its data to the ringbuffer
-            if (message.getType() == PacketType::SilentAudioFrame
-                || message.getType() == PacketType::ReplicatedSilentAudioFrame) {
+            if (message.getType() == PacketType::SilentAudioFrame ||
+                message.getType() == PacketType::ReplicatedSilentAudioFrame) {
                 // If we recieved a SilentAudioFrame from our sender, we might want to drop
                 // some of the samples in order to catch up to our desired jitter buffer size.
                 writeDroppableSilentFrames(networkFrames);
@@ -190,8 +192,8 @@ int InboundAudioStream::parseData(ReceivedMessage& message) {
                         auto sendingNode = DependencyManager::get<NodeList>()->nodeWithLocalID(message.getSourceID());
                         if (sendingNode) {
                             emit mismatchedAudioCodec(sendingNode, _selectedCodecName, codecInPacket);
-                            qDebug(audio) << "Codec mismatch threshold exceeded, sent selected codec"
-                                << _selectedCodecName << "to" << message.getSenderSockAddr();
+                            qDebug(audio) << "Codec mismatch threshold exceeded, sent selected codec" << _selectedCodecName
+                                          << "to" << message.getSenderSockAddr();
                         }
                     }
                 }
@@ -215,7 +217,7 @@ int InboundAudioStream::parseData(ReceivedMessage& message) {
     if (framesAvailable > _desiredJitterBufferFrames + MAX_FRAMES_OVER_DESIRED) {
         int framesToDrop = framesAvailable - (_desiredJitterBufferFrames + DESIRED_JITTER_BUFFER_FRAMES_PADDING);
         _ringBuffer.shiftReadPosition(framesToDrop * _ringBuffer.getNumFrameSamples());
-        
+
         _framesAvailableStat.reset();
         _currentJitterBufferFrames = 0;
 
@@ -270,18 +272,17 @@ int InboundAudioStream::parseAudioData(PacketType type, const QByteArray& packet
 }
 
 int InboundAudioStream::writeDroppableSilentFrames(int silentFrames) {
-
     // We can't guarentee that all clients have faded the stream down
-    // to silence and encoded that silence before sending us a 
+    // to silence and encoded that silence before sending us a
     // SilentAudioFrame. If the encoder has truncated the stream it will
-    // leave the decoder holding some unknown loud state. To handle this 
+    // leave the decoder holding some unknown loud state. To handle this
     // case we will call the decoder's lostFrame() method, which indicates
-    // that it should interpolate from its last known state down toward 
+    // that it should interpolate from its last known state down toward
     // silence.
     if (_decoder) {
-        // FIXME - We could potentially use the output from the codec, in which 
-        // case we might get a cleaner fade toward silence. NOTE: The below logic 
-        // attempts to catch up in the event that the jitter buffers have grown. 
+        // FIXME - We could potentially use the output from the codec, in which
+        // case we might get a cleaner fade toward silence. NOTE: The below logic
+        // attempts to catch up in the event that the jitter buffers have grown.
         // The better long term fix is to use the output from the decode, detect
         // when it actually reaches silence, and then delete the silent portions
         // of the jitter buffers. Or petentially do a cross fade from the decode
@@ -297,7 +298,6 @@ int InboundAudioStream::writeDroppableSilentFrames(int silentFrames) {
     int numSilentFramesToDrop = 0;
 
     if (silentSamples >= samplesPerFrame && _currentJitterBufferFrames > desiredJitterBufferFramesPlusPadding) {
-
         // our avg jitter buffer size exceeds its desired value, so ignore some silent
         // frames to get that size as close to desired as possible
         int numSilentFramesToDropDesired = _currentJitterBufferFrames - desiredJitterBufferFramesPlusPadding;
@@ -316,7 +316,7 @@ int InboundAudioStream::writeDroppableSilentFrames(int silentFrames) {
     }
 
     int ret = _ringBuffer.addSilentSamples(silentSamples - numSilentFramesToDrop * samplesPerFrame);
-    
+
     return ret;
 }
 
@@ -354,7 +354,8 @@ int InboundAudioStream::popFrames(int maxFrames, bool allOrNothing) {
 }
 
 void InboundAudioStream::popSamplesNoCheck(int samples) {
-    float unplayedMs = (_ringBuffer.samplesAvailable() / (float)_ringBuffer.getNumFrameSamples()) * AudioConstants::NETWORK_FRAME_MSECS;
+    float unplayedMs = (_ringBuffer.samplesAvailable() / (float)_ringBuffer.getNumFrameSamples()) *
+                       AudioConstants::NETWORK_FRAME_MSECS;
     _unplayedMs.update(unplayedMs);
 
     _lastPopOutput = _ringBuffer.nextOutput();
@@ -409,8 +410,8 @@ void InboundAudioStream::setToStarved() {
             // we don't know when the next packet will arrive, so it's possible the gap between the last packet and the
             // next packet will exceed the max time gap in the window.  If the time since the last packet has already exceeded
             // the window max gap, then we should use that value to calculate desired frames.
-            int framesSinceLastPacket = ceilf((float)(now - _lastPacketReceivedTime)
-                                              / (float)AudioConstants::NETWORK_FRAME_USECS);
+            int framesSinceLastPacket = ceilf((float)(now - _lastPacketReceivedTime) /
+                                              (float)AudioConstants::NETWORK_FRAME_USECS);
             calculatedJitterBufferFrames = std::max(_calculatedJitterBufferFrames, framesSinceLastPacket);
             // make sure _desiredJitterBufferFrames does not become lower here
             if (calculatedJitterBufferFrames >= _desiredJitterBufferFrames) {
@@ -441,7 +442,6 @@ void InboundAudioStream::setStaticJitterBufferFrames(int staticJitterBufferFrame
 }
 
 void InboundAudioStream::packetReceivedUpdateTimingStats() {
-    
     // update our timegap stats and desired jitter buffer frames if necessary
     // discard the first few packets we receive since they usually have gaps that aren't represensative of normal jitter
     const quint32 NUM_INITIAL_PACKETS_DISCARD = 1000; // 10s
@@ -455,17 +455,18 @@ void InboundAudioStream::packetReceivedUpdateTimingStats() {
         _timeGapStatsForDesiredReduction.update(gap);
 
         if (_timeGapStatsForDesiredCalcOnTooManyStarves.getNewStatsAvailableFlag()) {
-            _calculatedJitterBufferFrames = ceilf((float)_timeGapStatsForDesiredCalcOnTooManyStarves.getWindowMax()
-                                                             / (float) AudioConstants::NETWORK_FRAME_USECS);
+            _calculatedJitterBufferFrames = ceilf((float)_timeGapStatsForDesiredCalcOnTooManyStarves.getWindowMax() /
+                                                  (float)AudioConstants::NETWORK_FRAME_USECS);
             _timeGapStatsForDesiredCalcOnTooManyStarves.clearNewStatsAvailableFlag();
         }
 
         if (_dynamicJitterBufferEnabled) {
-            // if the max gap in window B (_timeGapStatsForDesiredReduction) corresponds to a smaller number of frames than _desiredJitterBufferFrames,
-            // then reduce _desiredJitterBufferFrames to that number of frames.
-            if (_timeGapStatsForDesiredReduction.getNewStatsAvailableFlag() && _timeGapStatsForDesiredReduction.isWindowFilled()) {
-                int calculatedJitterBufferFrames = ceilf((float)_timeGapStatsForDesiredReduction.getWindowMax()
-                                                         / (float)AudioConstants::NETWORK_FRAME_USECS);
+            // if the max gap in window B (_timeGapStatsForDesiredReduction) corresponds to a smaller number of frames than
+            // _desiredJitterBufferFrames, then reduce _desiredJitterBufferFrames to that number of frames.
+            if (_timeGapStatsForDesiredReduction.getNewStatsAvailableFlag() &&
+                _timeGapStatsForDesiredReduction.isWindowFilled()) {
+                int calculatedJitterBufferFrames = ceilf((float)_timeGapStatsForDesiredReduction.getWindowMax() /
+                                                         (float)AudioConstants::NETWORK_FRAME_USECS);
                 if (calculatedJitterBufferFrames < _desiredJitterBufferFrames) {
                     _desiredJitterBufferFrames = calculatedJitterBufferFrames;
                     qCInfo(audiostream, "Set desired jitter frames to %d (reduced)", _desiredJitterBufferFrames);
@@ -495,7 +496,7 @@ AudioStreamStats InboundAudioStream::getAudioStreamStats() const {
     streamStats._starveCount = _starveCount;
     streamStats._consecutiveNotMixedCount = _consecutiveNotMixedCount;
     streamStats._overflowCount = _ringBuffer.getOverflowCount();
-    streamStats._framesDropped = _silentFramesDropped + _oldFramesDropped;    // TODO: add separate stat for old frames dropped
+    streamStats._framesDropped = _silentFramesDropped + _oldFramesDropped; // TODO: add separate stat for old frames dropped
 
     streamStats._packetStreamStats = _incomingSequenceNumberStats.getStats();
     streamStats._packetStreamWindowStats = _incomingSequenceNumberStats.getStatsForHistoryWindow();

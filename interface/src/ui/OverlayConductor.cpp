@@ -14,8 +14,8 @@
 #include <display-plugins/CompositorHelper.h>
 
 #include "Application.h"
-#include "avatar/AvatarManager.h"
 #include "InterfaceLogging.h"
+#include "avatar/AvatarManager.h"
 
 OverlayConductor::OverlayConductor() {
 }
@@ -32,8 +32,8 @@ bool OverlayConductor::headOutsideOverlay() const {
     glm::vec3 uiPos = uiTransform.getTranslation();
     glm::vec3 uiForward = uiTransform.getRotation() * glm::vec3(0.0f, 0.0f, -1.0f);
 
-    const float MAX_COMPOSITOR_DISTANCE = 0.99f;  // If you're 1m from center of ui sphere, you're at the surface.
-    const float MAX_COMPOSITOR_ANGLE = 180.0f;    // rotation check is effectively disabled
+    const float MAX_COMPOSITOR_DISTANCE = 0.99f; // If you're 1m from center of ui sphere, you're at the surface.
+    const float MAX_COMPOSITOR_ANGLE = 180.0f; // rotation check is effectively disabled
     if (glm::distance(uiPos, hmdPos) > MAX_COMPOSITOR_DISTANCE ||
         glm::dot(uiForward, hmdForward) < cosf(glm::radians(MAX_COMPOSITOR_ANGLE))) {
         return true;
@@ -44,8 +44,8 @@ bool OverlayConductor::headOutsideOverlay() const {
 bool OverlayConductor::updateAvatarIsAtRest() {
     auto myAvatar = DependencyManager::get<AvatarManager>()->getMyAvatar();
 
-    const quint64 REST_ENABLE_TIME_USECS = 1000 * 1000;  // 1 s
-    const quint64 REST_DISABLE_TIME_USECS = 200 * 1000;  // 200 ms
+    const quint64 REST_ENABLE_TIME_USECS = 1000 * 1000; // 1 s
+    const quint64 REST_DISABLE_TIME_USECS = 200 * 1000; // 200 ms
 
     const float AT_REST_THRESHOLD = 0.01f;
     bool desiredAtRest = glm::length(myAvatar->getWorldVelocity()) < AT_REST_THRESHOLD;

@@ -38,7 +38,6 @@ public:
      */
     Q_INVOKABLE void editProperties(const QVariantMap& properties);
 
-
     // QmlWrapper methods.
 
     /**jsdoc
@@ -104,7 +103,6 @@ public:
      */
     Q_INVOKABLE void removeButton(const QVariant& name);
 
-
     // QmlWrapper methods.
 
     /**jsdoc
@@ -143,7 +141,6 @@ Q_DECLARE_METATYPE(ToolbarProxy*);
 class ToolbarScriptingInterface : public QObject, public Dependency {
     Q_OBJECT
 public:
-
     /**jsdoc
      * @function Toolbars.getToolbar
      * @param {string} toolbarID
@@ -151,6 +148,5 @@ public:
      */
     Q_INVOKABLE ToolbarProxy* getToolbar(const QString& toolbarId);
 };
-
 
 #endif // hifi_ToolbarScriptingInterface_h

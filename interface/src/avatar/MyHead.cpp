@@ -8,18 +8,18 @@
 
 #include "MyHead.h"
 
-#include <glm/gtx/quaternion.hpp>
 #include <gpu/Batch.h>
+#include <glm/gtx/quaternion.hpp>
 
 #include <NodeList.h>
-#include <recording/Deck.h>
 #include <Rig.h>
-#include <trackers/FaceTracker.h>
+#include <recording/Deck.h>
 #include <trackers/EyeTracker.h>
+#include <trackers/FaceTracker.h>
 
-#include "devices/DdeFaceTracker.h"
 #include "Application.h"
 #include "MyAvatar.h"
+#include "devices/DdeFaceTracker.h"
 
 using namespace std;
 

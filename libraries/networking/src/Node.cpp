@@ -11,8 +11,8 @@
 
 #include "Node.h"
 
-#include <cstring>
 #include <stdio.h>
+#include <cstring>
 
 #include <QtCore/QDataStream>
 #include <QtCore/QDebug>
@@ -29,21 +29,19 @@ int NodePtrMetaTypeId = qRegisterMetaType<Node*>("Node*");
 int sharedPtrNodeMetaTypeId = qRegisterMetaType<QSharedPointer<Node>>("QSharedPointer<Node>");
 int sharedNodePtrMetaTypeId = qRegisterMetaType<SharedNodePointer>("SharedNodePointer");
 
-static const QHash<NodeType_t, QString> TYPE_NAME_HASH {
-    { NodeType::DomainServer, "Domain Server" },
-    { NodeType::EntityServer, "Entity Server" },
-    { NodeType::Agent, "Agent" },
-    { NodeType::AudioMixer, "Audio Mixer" },
-    { NodeType::AvatarMixer, "Avatar Mixer" },
-    { NodeType::MessagesMixer, "Messages Mixer" },
-    { NodeType::AssetServer, "Asset Server" },
-    { NodeType::EntityScriptServer, "Entity Script Server" },
-    { NodeType::UpstreamAudioMixer, "Upstream Audio Mixer" },
-    { NodeType::UpstreamAvatarMixer, "Upstream Avatar Mixer" },
-    { NodeType::DownstreamAudioMixer, "Downstream Audio Mixer" },
-    { NodeType::DownstreamAvatarMixer, "Downstream Avatar Mixer" },
-    { NodeType::Unassigned, "Unassigned" }
-};
+static const QHash<NodeType_t, QString> TYPE_NAME_HASH { { NodeType::DomainServer, "Domain Server" },
+                                                         { NodeType::EntityServer, "Entity Server" },
+                                                         { NodeType::Agent, "Agent" },
+                                                         { NodeType::AudioMixer, "Audio Mixer" },
+                                                         { NodeType::AvatarMixer, "Avatar Mixer" },
+                                                         { NodeType::MessagesMixer, "Messages Mixer" },
+                                                         { NodeType::AssetServer, "Asset Server" },
+                                                         { NodeType::EntityScriptServer, "Entity Script Server" },
+                                                         { NodeType::UpstreamAudioMixer, "Upstream Audio Mixer" },
+                                                         { NodeType::UpstreamAvatarMixer, "Upstream Avatar Mixer" },
+                                                         { NodeType::DownstreamAudioMixer, "Downstream Audio Mixer" },
+                                                         { NodeType::DownstreamAvatarMixer, "Downstream Avatar Mixer" },
+                                                         { NodeType::Unassigned, "Unassigned" } };
 
 const QString& NodeType::getNodeTypeName(NodeType_t nodeType) {
     const auto matchedTypeName = TYPE_NAME_HASH.find(nodeType);
@@ -84,15 +82,14 @@ NodeType_t NodeType::fromString(QString type) {
     return TYPE_NAME_HASH.key(type, NodeType::Unassigned);
 }
 
-
-Node::Node(const QUuid& uuid, NodeType_t type, const HifiSockAddr& publicSocket,
-    const HifiSockAddr& localSocket, QObject* parent) :
+Node::Node(const QUuid& uuid, NodeType_t type, const HifiSockAddr& publicSocket, const HifiSockAddr& localSocket,
+           QObject* parent) :
     NetworkPeer(uuid, publicSocket, localSocket, parent),
     _type(type),
-    _pingMs(-1),  // "Uninitialized"
+    _pingMs(-1), // "Uninitialized"
     _clockSkewUsec(0),
     _mutex(),
-    _clockSkewMovingPercentile(30, 0.8f)   // moving 80th percentile of 30 samples
+    _clockSkewMovingPercentile(30, 0.8f) // moving 80th percentile of 30 samples
 {
     // Update socket's object name
     setType(_type);
@@ -100,13 +97,12 @@ Node::Node(const QUuid& uuid, NodeType_t type, const HifiSockAddr& publicSocket,
 
 void Node::setType(char type) {
     _type = type;
-    
+
     auto typeString = NodeType::getNodeTypeName(type);
     _publicSocket.setObjectName(typeString);
     _localSocket.setObjectName(typeString);
     _symmetricSocket.setObjectName(typeString);
 }
-
 
 void Node::updateClockSkewUsec(qint64 clockSkewSample) {
     _clockSkewMovingPercentile.updatePercentile(clockSkewSample);
@@ -139,7 +135,7 @@ void Node::addIgnoredNode(const QUuid& otherNodeID) {
     if (!otherNodeID.isNull() && otherNodeID != _uuid) {
         QWriteLocker lock { &_ignoredNodeIDSetLock };
         qCDebug(networking) << "Adding" << uuidStringWithoutCurlyBraces(otherNodeID) << "to ignore set for"
-            << uuidStringWithoutCurlyBraces(_uuid);
+                            << uuidStringWithoutCurlyBraces(_uuid);
 
         // add the session UUID to the set of ignored ones for this listening node
         if (std::find(_ignoredNodeIDs.begin(), _ignoredNodeIDs.end(), otherNodeID) == _ignoredNodeIDs.end()) {
@@ -154,7 +150,7 @@ void Node::removeIgnoredNode(const QUuid& otherNodeID) {
     if (!otherNodeID.isNull() && otherNodeID != _uuid) {
         QWriteLocker lock { &_ignoredNodeIDSetLock };
         qCDebug(networking) << "Removing" << uuidStringWithoutCurlyBraces(otherNodeID) << "from ignore set for"
-            << uuidStringWithoutCurlyBraces(_uuid);
+                            << uuidStringWithoutCurlyBraces(_uuid);
 
         // remove the session UUID from the set of ignored ones for this listening node, if it exists
         auto it = std::remove(_ignoredNodeIDs.begin(), _ignoredNodeIDs.end(), otherNodeID);

@@ -9,7 +9,6 @@
 #include "StatTracker.h"
 
 StatTracker::StatTracker() {
-    
 }
 
 QVariant StatTracker::getStat(const QString& name) {

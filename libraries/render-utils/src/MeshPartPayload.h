@@ -74,19 +74,24 @@ public:
     void removeMaterial(graphics::MaterialPointer material);
 
 protected:
-    render::ItemKey _itemKey{ render::ItemKey::Builder::opaqueShape().build() };
+    render::ItemKey _itemKey { render::ItemKey::Builder::opaqueShape().build() };
 };
 
 namespace render {
-    template <> const ItemKey payloadGetKey(const MeshPartPayload::Pointer& payload);
-    template <> const Item::Bound payloadGetBound(const MeshPartPayload::Pointer& payload);
-    template <> const ShapeKey shapeGetShapeKey(const MeshPartPayload::Pointer& payload);
-    template <> void payloadRender(const MeshPartPayload::Pointer& payload, RenderArgs* args);
-}
+template<>
+const ItemKey payloadGetKey(const MeshPartPayload::Pointer& payload);
+template<>
+const Item::Bound payloadGetBound(const MeshPartPayload::Pointer& payload);
+template<>
+const ShapeKey shapeGetShapeKey(const MeshPartPayload::Pointer& payload);
+template<>
+void payloadRender(const MeshPartPayload::Pointer& payload, RenderArgs* args);
+} // namespace render
 
 class ModelMeshPartPayload : public MeshPartPayload {
 public:
-    ModelMeshPartPayload(ModelPointer model, int meshIndex, int partIndex, int shapeIndex, const Transform& transform, const Transform& offsetTransform);
+    ModelMeshPartPayload(ModelPointer model, int meshIndex, int partIndex, int shapeIndex, const Transform& transform,
+                         const Transform& offsetTransform);
 
     typedef render::Payload<ModelMeshPartPayload> Payload;
     typedef Payload::DataPointer Pointer;
@@ -126,11 +131,12 @@ public:
     int _meshIndex;
     int _shapeID;
 
-    bool _isSkinned{ false };
+    bool _isSkinned { false };
     bool _isBlendShaped { false };
     bool _hasTangents { false };
 
-    void setBlendshapeBuffer(const std::unordered_map<int, gpu::BufferPointer>& blendshapeBuffers, const QVector<int>& blendedMeshSizes);
+    void setBlendshapeBuffer(const std::unordered_map<int, gpu::BufferPointer>& blendshapeBuffers,
+                             const QVector<int>& blendedMeshSizes);
 
 private:
     void initCache(const ModelPointer& model);
@@ -141,10 +147,14 @@ private:
 };
 
 namespace render {
-    template <> const ItemKey payloadGetKey(const ModelMeshPartPayload::Pointer& payload);
-    template <> const Item::Bound payloadGetBound(const ModelMeshPartPayload::Pointer& payload);
-    template <> const ShapeKey shapeGetShapeKey(const ModelMeshPartPayload::Pointer& payload);
-    template <> void payloadRender(const ModelMeshPartPayload::Pointer& payload, RenderArgs* args);
-}
+template<>
+const ItemKey payloadGetKey(const ModelMeshPartPayload::Pointer& payload);
+template<>
+const Item::Bound payloadGetBound(const ModelMeshPartPayload::Pointer& payload);
+template<>
+const ShapeKey shapeGetShapeKey(const ModelMeshPartPayload::Pointer& payload);
+template<>
+void payloadRender(const ModelMeshPartPayload::Pointer& payload, RenderArgs* args);
+} // namespace render
 
 #endif // hifi_MeshPartPayload_h

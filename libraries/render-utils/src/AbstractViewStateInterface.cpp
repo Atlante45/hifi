@@ -8,7 +8,7 @@
 
 #include "AbstractViewStateInterface.h"
 
-static AbstractViewStateInterface* INSTANCE{nullptr};
+static AbstractViewStateInterface* INSTANCE { nullptr };
 
 AbstractViewStateInterface* AbstractViewStateInterface::instance() {
     return INSTANCE;
@@ -17,4 +17,3 @@ AbstractViewStateInterface* AbstractViewStateInterface::instance() {
 void AbstractViewStateInterface::setInstance(AbstractViewStateInterface* instance) {
     INSTANCE = instance;
 }
-

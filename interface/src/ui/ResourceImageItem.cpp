@@ -38,7 +38,7 @@ void ResourceImageItem::setReady(bool ready) {
 void ResourceImageItemRenderer::onUpdateTimer() {
     if (_ready) {
         if (_networkTexture && _networkTexture->isLoaded()) {
-            if(_fboMutex.tryLock()) {
+            if (_fboMutex.tryLock()) {
                 invalidateFramebufferObject();
                 qApp->getActiveDisplayPlugin()->copyTextureToQuickFramebuffer(_networkTexture, _copyFbo, &_fenceSync);
                 _fboMutex.unlock();
@@ -96,7 +96,8 @@ void ResourceImageItemRenderer::render() {
     if (_ready) {
         _fboMutex.lock();
         _copyFbo->bind();
-        QOpenGLFramebufferObject::blitFramebuffer(framebufferObject(), _copyFbo, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        QOpenGLFramebufferObject::blitFramebuffer(framebufferObject(), _copyFbo, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT,
+                                                  GL_NEAREST);
 
         // this clears the copyFbo texture
         // so next frame starts fresh - helps

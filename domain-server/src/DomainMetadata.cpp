@@ -62,8 +62,8 @@ DomainMetadata::DomainMetadata(QObject* domainServer) : QObject(domainServer) {
     connect(server, &DomainServer::userDisconnected, this, &DomainMetadata::usersChanged);
 
     // update the metadata when security changes
-    connect(&server->_settingsManager, &DomainServerSettingsManager::updateNodePermissions,
-        this, static_cast<void(DomainMetadata::*)()>(&DomainMetadata::securityChanged));
+    connect(&server->_settingsManager, &DomainServerSettingsManager::updateNodePermissions, this,
+            static_cast<void (DomainMetadata::*)()>(&DomainMetadata::securityChanged));
 
     // initialize the descriptors
     securityChanged(false);
@@ -122,10 +122,10 @@ void DomainMetadata::securityChanged(bool send) {
     QString restriction;
 
     const auto& settingsManager = static_cast<DomainServer*>(parent())->_settingsManager;
-    bool hasAnonymousAccess = settingsManager.getStandardPermissionsForName(NodePermissions::standardNameAnonymous).can(
-        NodePermissions::Permission::canConnectToDomain);
-    bool hasHifiAccess = settingsManager.getStandardPermissionsForName(NodePermissions::standardNameLoggedIn).can(
-        NodePermissions::Permission::canConnectToDomain);
+    bool hasAnonymousAccess = settingsManager.getStandardPermissionsForName(NodePermissions::standardNameAnonymous)
+                                  .can(NodePermissions::Permission::canConnectToDomain);
+    bool hasHifiAccess = settingsManager.getStandardPermissionsForName(NodePermissions::standardNameLoggedIn)
+                             .can(NodePermissions::Permission::canConnectToDomain);
     if (hasAnonymousAccess) {
         restriction = hasHifiAccess ? RESTRICTION_OPEN : RESTRICTION_ANON;
     } else if (hasHifiAccess) {
@@ -199,16 +199,15 @@ void DomainMetadata::maybeUpdateUsers() {
 }
 
 void DomainMetadata::sendDescriptors() {
-    QString domainUpdateJSON = QString("{\"domain\":%1}").arg(QString(QJsonDocument(get(DESCRIPTORS)).toJson(QJsonDocument::Compact)));
+    QString domainUpdateJSON = QString("{\"domain\":%1}")
+                                   .arg(QString(QJsonDocument(get(DESCRIPTORS)).toJson(QJsonDocument::Compact)));
     const QUuid& domainID = DependencyManager::get<LimitedNodeList>()->getSessionUUID();
     if (!domainID.isNull()) {
         static const QString DOMAIN_UPDATE = "/api/v1/domains/%1";
         QString path { DOMAIN_UPDATE.arg(uuidStringWithoutCurlyBraces(domainID)) };
-        DependencyManager::get<AccountManager>()->sendRequest(path,
-            AccountManagerAuth::Required,
-            QNetworkAccessManager::PutOperation,
-            JSONCallbackParameters(),
-            domainUpdateJSON.toUtf8());
+        DependencyManager::get<AccountManager>()->sendRequest(path, AccountManagerAuth::Required,
+                                                              QNetworkAccessManager::PutOperation, JSONCallbackParameters(),
+                                                              domainUpdateJSON.toUtf8());
 
 #if DEV_BUILD || PR_BUILD
         qDebug() << "Domain metadata sent to" << path;

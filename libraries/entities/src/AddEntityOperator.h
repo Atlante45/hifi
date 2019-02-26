@@ -29,12 +29,12 @@ public:
     virtual bool preRecursion(const OctreeElementPointer& element) override;
     virtual bool postRecursion(const OctreeElementPointer& element) override;
     virtual OctreeElementPointer possiblyCreateChildAt(const OctreeElementPointer& element, int childIndex) override;
+
 private:
     EntityTreePointer _tree;
     EntityItemPointer _newEntity;
     AABox _newEntityBox;
     bool _foundNew;
 };
-
 
 #endif // hifi_AddEntityOperator_h

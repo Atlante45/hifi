@@ -268,9 +268,7 @@ void EntitySimulation::removeDynamic(const QUuid dynamicID) {
 
 void EntitySimulation::removeDynamics(QList<QUuid> dynamicIDsToRemove) {
     QMutexLocker lock(&_dynamicsMutex);
-    foreach(QUuid uuid, dynamicIDsToRemove) {
-        _dynamicsToRemove.insert(uuid);
-    }
+    foreach (QUuid uuid, dynamicIDsToRemove) { _dynamicsToRemove.insert(uuid); }
 }
 
 void EntitySimulation::applyDynamicChanges() {

@@ -13,24 +13,25 @@
 
 namespace controller {
 
-    class LowVelocityFilter : public Filter {
-        REGISTER_FILTER_CLASS(LowVelocityFilter);
+class LowVelocityFilter : public Filter {
+    REGISTER_FILTER_CLASS(LowVelocityFilter);
 
-    public:
-        LowVelocityFilter() = default;
-        LowVelocityFilter(float rotationConstant, float translationConstant) :
-            _translationConstant(translationConstant), _rotationConstant(rotationConstant) {}
+public:
+    LowVelocityFilter() = default;
+    LowVelocityFilter(float rotationConstant, float translationConstant) :
+        _translationConstant(translationConstant),
+        _rotationConstant(rotationConstant) {}
 
-        AxisValue apply(AxisValue value) const override { return value; }
-        Pose apply(Pose newPose) const override;
-        bool parseParameters(const QJsonValue& parameters) override;
+    AxisValue apply(AxisValue value) const override { return value; }
+    Pose apply(Pose newPose) const override;
+    bool parseParameters(const QJsonValue& parameters) override;
 
-    private:
-        float _translationConstant { 0.1f };
-        float _rotationConstant { 0.1f };
-        mutable Pose _oldPose { Pose() };
-    };
+private:
+    float _translationConstant { 0.1f };
+    float _rotationConstant { 0.1f };
+    mutable Pose _oldPose { Pose() };
+};
 
-}
+} // namespace controller
 
 #endif

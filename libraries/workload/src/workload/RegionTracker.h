@@ -15,30 +15,30 @@
 #ifndef hifi_workload_RegionTracker_h
 #define hifi_workload_RegionTracker_h
 
-#include "Space.h"
 #include "Engine.h"
+#include "Space.h"
 
 namespace workload {
 
-    class RegionTrackerConfig : public Job::Config {
-        Q_OBJECT
-    public:
-        RegionTrackerConfig() : Job::Config(true) {}
-    };
+class RegionTrackerConfig : public Job::Config {
+    Q_OBJECT
+public:
+    RegionTrackerConfig() : Job::Config(true) {}
+};
 
-    class RegionTracker {
-    public:
-        using Config = RegionTrackerConfig;
-        using Outputs = VaryingSet2<Changes, IndexVectors>;
-        using JobModel = workload::Job::ModelO<RegionTracker, Outputs, Config>;
+class RegionTracker {
+public:
+    using Config = RegionTrackerConfig;
+    using Outputs = VaryingSet2<Changes, IndexVectors>;
+    using JobModel = workload::Job::ModelO<RegionTracker, Outputs, Config>;
 
-        RegionTracker() {}
+    RegionTracker() {}
 
-        void configure(const Config& config);
-        void run(const workload::WorkloadContextPointer& renderContext, Outputs& outputs);
+    void configure(const Config& config);
+    void run(const workload::WorkloadContextPointer& renderContext, Outputs& outputs);
 
-    protected:
-    };
+protected:
+};
 } // namespace workload
 
 #endif // hifi_workload_RegionTracker_h

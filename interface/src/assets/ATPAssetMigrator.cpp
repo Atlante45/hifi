@@ -23,8 +23,8 @@
 
 #include <AssetClient.h>
 #include <AssetUpload.h>
-#include <ResourceManager.h>
 #include <MappingRequest.h>
+#include <ResourceManager.h>
 
 #include "OffscreenUi.h"
 
@@ -42,26 +42,26 @@ static const QString COMPOUND_SHAPE_URL_KEY = "compoundShapeURL";
 static const QString MESSAGE_BOX_TITLE = "ATP Asset Migration";
 
 void ATPAssetMigrator::loadEntityServerFile() {
-    ModalDialogListener* dlg = OffscreenUi::getOpenFileNameAsync(_dialogParent, tr("Select an entity-server content file to migrate"),
-                                      QString(), tr("Entity-Server Content (*.gz)"));
+    ModalDialogListener* dlg = OffscreenUi::getOpenFileNameAsync(_dialogParent,
+                                                                 tr("Select an entity-server content file to migrate"),
+                                                                 QString(), tr("Entity-Server Content (*.gz)"));
 
-    connect(dlg, &ModalDialogListener::response, this, [=] (QVariant response) {
+    connect(dlg, &ModalDialogListener::response, this, [=](QVariant response) {
         const QString& filename = response.toString();
         disconnect(dlg, &ModalDialogListener::response, this, nullptr);
         if (!filename.isEmpty()) {
             qCDebug(asset_migrator) << "Selected filename for ATP asset migration: " << filename;
 
             auto migrateResources = [=](QUrl migrationURL, QJsonValueRef jsonValue, bool isModelURL) {
-                auto request =
-                        DependencyManager::get<ResourceManager>()->createResourceRequest(
-                            this, migrationURL, true, -1, "ATPAssetMigrator::loadEntityServerFile");
+                auto request = DependencyManager::get<ResourceManager>()->createResourceRequest(
+                    this, migrationURL, true, -1, "ATPAssetMigrator::loadEntityServerFile");
 
                 if (request) {
                     qCDebug(asset_migrator) << "Requesting" << migrationURL << "for ATP asset migration";
 
                     // add this combination of QUrl and QJsonValueRef to our multi hash so we can change the URL
                     // to an ATP one once ready
-                    _pendingReplacements.insert(migrationURL, { jsonValue, (isModelURL ? 0 : 1)});
+                    _pendingReplacements.insert(migrationURL, { jsonValue, (isModelURL ? 0 : 1) });
 
                     connect(request, &ResourceRequest::finished, this, [=]() {
                         if (request->getResult() == ResourceRequest::Success) {
@@ -81,16 +81,17 @@ void ATPAssetMigrator::loadEntityServerFile() {
                     ++_errorCount;
                     qWarning() << "Could not create request for asset";
                 }
-
             };
             static const QString MIGRATION_CONFIRMATION_TEXT {
-                "The ATP Asset Migration process will scan the selected entity-server file,\nupload discovered resources to the"\
-                " current asset-server\nand then save a new entity-server file with the ATP URLs.\n\nAre you ready to"\
+                "The ATP Asset Migration process will scan the selected entity-server file,\nupload discovered resources to the"
+                " current asset-server\nand then save a new entity-server file with the ATP URLs.\n\nAre you ready to"
                 " continue?\n\nMake sure you are connected to the right domain."
             };
-            ModalDialogListener* migrationConfirmDialog = OffscreenUi::asyncQuestion(_dialogParent, MESSAGE_BOX_TITLE, MIGRATION_CONFIRMATION_TEXT,
-                                       QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-            QObject::connect(migrationConfirmDialog, &ModalDialogListener::response, this, [=] (QVariant answer) {
+            ModalDialogListener* migrationConfirmDialog = OffscreenUi::asyncQuestion(_dialogParent, MESSAGE_BOX_TITLE,
+                                                                                     MIGRATION_CONFIRMATION_TEXT,
+                                                                                     QMessageBox::Yes | QMessageBox::No,
+                                                                                     QMessageBox::Yes);
+            QObject::connect(migrationConfirmDialog, &ModalDialogListener::response, this, [=](QVariant answer) {
                 QObject::disconnect(migrationConfirmDialog, &ModalDialogListener::response, this, nullptr);
 
                 if (QMessageBox::Yes == static_cast<QMessageBox::StandardButton>(answer.toInt())) {
@@ -102,7 +103,8 @@ void ATPAssetMigrator::loadEntityServerFile() {
                         QByteArray jsonData;
 
                         if (!gunzip(compressedJsonData, jsonData)) {
-                            OffscreenUi::asyncWarning(_dialogParent, "Error", "The file at" + filename + "was not in gzip format.");
+                            OffscreenUi::asyncWarning(_dialogParent, "Error",
+                                                      "The file at" + filename + "was not in gzip format.");
                         }
 
                         QJsonDocument modelsJSON = QJsonDocument::fromJson(jsonData);
@@ -121,10 +123,11 @@ void ATPAssetMigrator::loadEntityServerFile() {
                                 if (!migrationURLString.isEmpty()) {
                                     QUrl migrationURL = QUrl(migrationURLString);
 
-                                    if (!_ignoredUrls.contains(migrationURL)
-                                            && (migrationURL.scheme() == HIFI_URL_SCHEME_HTTP || migrationURL.scheme() == HIFI_URL_SCHEME_HTTPS
-                                                || migrationURL.scheme() == HIFI_URL_SCHEME_FILE || migrationURL.scheme() == HIFI_URL_SCHEME_FTP)) {
-
+                                    if (!_ignoredUrls.contains(migrationURL) &&
+                                        (migrationURL.scheme() == HIFI_URL_SCHEME_HTTP ||
+                                         migrationURL.scheme() == HIFI_URL_SCHEME_HTTPS ||
+                                         migrationURL.scheme() == HIFI_URL_SCHEME_FILE ||
+                                         migrationURL.scheme() == HIFI_URL_SCHEME_FTP)) {
                                         if (_pendingReplacements.contains(migrationURL)) {
                                             // we already have a request out for this asset, just store the QJsonValueRef
                                             // so we can do the hash replacement when the request comes back
@@ -135,46 +138,60 @@ void ATPAssetMigrator::loadEntityServerFile() {
                                             if (isModelURL) {
                                                 entityObject[MODEL_URL_KEY] = _uploadedAssets.value(migrationURL).toString();
                                             } else {
-                                                entityObject[COMPOUND_SHAPE_URL_KEY] = _uploadedAssets.value(migrationURL).toString();
+                                                entityObject[COMPOUND_SHAPE_URL_KEY] = _uploadedAssets.value(migrationURL)
+                                                                                           .toString();
                                             }
 
                                             jsonValue = entityObject;
                                         } else {
-
                                             static bool hasAskedForCompleteMigration { false };
                                             static bool wantsCompleteMigration { false };
 
                                             if (!hasAskedForCompleteMigration) {
-                                                // this is the first resource migration - ask the user if they just want to migrate everything
-                                                static const QString COMPLETE_MIGRATION_TEXT { "Do you want to migrate all assets found in this entity-server file?\n"\
-                                                                                               "Select \"Yes\" to upload all discovered assets to the current asset-server immediately.\n"\
-                                                                                               "Select \"No\" to be prompted for each discovered asset."
-                                                                                             };
-                                                ModalDialogListener* migrationConfirmDialog1 = OffscreenUi::asyncQuestion(_dialogParent, MESSAGE_BOX_TITLE,
-                                                                           "Would you like to migrate the following resource?\n" + migrationURL.toString(),
-                                                                           QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+                                                // this is the first resource migration - ask the user if they just want to
+                                                // migrate everything
+                                                static const QString COMPLETE_MIGRATION_TEXT {
+                                                    "Do you want to migrate all assets found in this entity-server file?\n"
+                                                    "Select \"Yes\" to upload all discovered assets to the current "
+                                                    "asset-server immediately.\n"
+                                                    "Select \"No\" to be prompted for each discovered asset."
+                                                };
+                                                ModalDialogListener* migrationConfirmDialog1 = OffscreenUi::asyncQuestion(
+                                                    _dialogParent, MESSAGE_BOX_TITLE,
+                                                    "Would you like to migrate the following resource?\n" +
+                                                        migrationURL.toString(),
+                                                    QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
-                                                QObject::connect(migrationConfirmDialog1, &ModalDialogListener::response, this, [=] (QVariant answer) {
-                                                    QObject::disconnect(migrationConfirmDialog1, &ModalDialogListener::response, this, nullptr);
-                                                    if (static_cast<QMessageBox::StandardButton>(answer.toInt()) ==
+                                                QObject::connect(
+                                                    migrationConfirmDialog1, &ModalDialogListener::response, this,
+                                                    [=](QVariant answer) {
+                                                        QObject::disconnect(migrationConfirmDialog1,
+                                                                            &ModalDialogListener::response, this, nullptr);
+                                                        if (static_cast<QMessageBox::StandardButton>(answer.toInt()) ==
                                                             QMessageBox::Yes) {
-                                                        wantsCompleteMigration = true;
-                                                        migrateResources(migrationURL, jsonValue, isModelURL);
-                                                    } else {
-                                                        ModalDialogListener* migrationConfirmDialog2 = OffscreenUi::asyncQuestion(_dialogParent, MESSAGE_BOX_TITLE, COMPLETE_MIGRATION_TEXT,
-                                                                                   QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+                                                            wantsCompleteMigration = true;
+                                                            migrateResources(migrationURL, jsonValue, isModelURL);
+                                                        } else {
+                                                            ModalDialogListener*
+                                                                migrationConfirmDialog2 = OffscreenUi::asyncQuestion(
+                                                                    _dialogParent, MESSAGE_BOX_TITLE, COMPLETE_MIGRATION_TEXT,
+                                                                    QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
-                                                        QObject::connect(migrationConfirmDialog2, &ModalDialogListener::response, this, [=] (QVariant answer) {
-                                                            QObject::disconnect(migrationConfirmDialog2, &ModalDialogListener::response, this, nullptr);
-                                                            if (static_cast<QMessageBox::StandardButton>(answer.toInt()) ==
-                                                                    QMessageBox::Yes) {
-                                                                migrateResources(migrationURL, jsonValue, isModelURL);
-                                                            } else {
-                                                                _ignoredUrls.insert(migrationURL);
-                                                            }
-                                                        });
-                                                    }
-                                                });
+                                                            QObject::connect(
+                                                                migrationConfirmDialog2, &ModalDialogListener::response, this,
+                                                                [=](QVariant answer) {
+                                                                    QObject::disconnect(migrationConfirmDialog2,
+                                                                                        &ModalDialogListener::response, this,
+                                                                                        nullptr);
+                                                                    if (static_cast<QMessageBox::StandardButton>(
+                                                                            answer.toInt()) == QMessageBox::Yes) {
+                                                                        migrateResources(migrationURL, jsonValue, isModelURL);
+                                                                    } else {
+                                                                        _ignoredUrls.insert(migrationURL);
+                                                                    }
+                                                                });
+                                                        }
+                                                    });
                                                 hasAskedForCompleteMigration = true;
                                             }
                                             if (wantsCompleteMigration) {
@@ -191,8 +208,9 @@ void ATPAssetMigrator::loadEntityServerFile() {
                         checkIfFinished();
 
                     } else {
-                        OffscreenUi::asyncWarning(_dialogParent, "Error",
-                                                  "There was a problem loading that entity-server file for ATP asset migration. Please try again");
+                        OffscreenUi::asyncWarning(
+                            _dialogParent, "Error",
+                            "There was a problem loading that entity-server file for ATP asset migration. Please try again");
                     }
                 }
             });
@@ -203,7 +221,7 @@ void ATPAssetMigrator::loadEntityServerFile() {
 void ATPAssetMigrator::migrateResource(ResourceRequest* request) {
     // use an asset client to upload the asset
     auto assetClient = DependencyManager::get<AssetClient>();
-    
+
     auto upload = assetClient->createUpload(request->getData());
 
     // add this URL to our hash of AssetUpload to original URL
@@ -218,12 +236,11 @@ void ATPAssetMigrator::migrateResource(ResourceRequest* request) {
     upload->start();
 }
 
-void ATPAssetMigrator::assetUploadFinished(AssetUpload *upload, const QString& hash) {
+void ATPAssetMigrator::assetUploadFinished(AssetUpload* upload, const QString& hash) {
     // remove this migrationURL from the key for the AssetUpload pointer
     auto migrationURL = _originalURLs.take(upload);
 
     if (upload->getError() == AssetUpload::NoError) {
-
         // use the path of the migrationURL to add a mapping in the Asset Server
         auto assetClient = DependencyManager::get<AssetClient>();
         auto setMappingRequest = assetClient->createSetMappingRequest(migrationURL.path(), hash);
@@ -239,11 +256,12 @@ void ATPAssetMigrator::assetUploadFinished(AssetUpload *upload, const QString& h
         _pendingReplacements.remove(migrationURL);
 
         ++_errorCount;
-        qWarning() << "Failed to upload" << "- error was" << upload->getErrorString();
+        qWarning() << "Failed to upload"
+                   << "- error was" << upload->getErrorString();
     }
 
     checkIfFinished();
-    
+
     upload->deleteLater();
 }
 
@@ -252,7 +270,6 @@ void ATPAssetMigrator::setMappingFinished(SetMappingRequest* request) {
     auto migrationURL = _originalURLs.take(request);
 
     if (request->getError() == MappingRequest::NoError) {
-
         // successfully uploaded asset - make any required replacements found in the pending replacements
         auto values = _pendingReplacements.values(migrationURL);
 
@@ -281,7 +298,8 @@ void ATPAssetMigrator::setMappingFinished(SetMappingRequest* request) {
         _pendingReplacements.remove(migrationURL);
 
         ++_errorCount;
-        qWarning() << "Error setting mapping for" << "- error was " << request->getErrorString();
+        qWarning() << "Error setting mapping for"
+                   << "- error was " << request->getErrorString();
     }
 
     checkIfFinished();
@@ -299,24 +317,25 @@ void ATPAssetMigrator::checkIfFinished() {
 bool ATPAssetMigrator::wantsToMigrateResource(const QUrl& url) {
     static bool hasAskedForCompleteMigration { false };
     static bool wantsCompleteMigration { false };
-    
+
     if (!hasAskedForCompleteMigration) {
         // this is the first resource migration - ask the user if they just want to migrate everything
-        static const QString COMPLETE_MIGRATION_TEXT { "Do you want to migrate all assets found in this entity-server file?\n"\
-            "Select \"Yes\" to upload all discovered assets to the current asset-server immediately.\n"\
+        static const QString COMPLETE_MIGRATION_TEXT {
+            "Do you want to migrate all assets found in this entity-server file?\n"
+            "Select \"Yes\" to upload all discovered assets to the current asset-server immediately.\n"
             "Select \"No\" to be prompted for each discovered asset."
         };
-        
+
         auto button = OffscreenUi::question(_dialogParent, MESSAGE_BOX_TITLE, COMPLETE_MIGRATION_TEXT,
                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-                              
+
         if (button == QMessageBox::Yes) {
             wantsCompleteMigration = true;
         }
-        
+
         hasAskedForCompleteMigration = true;
     }
-    
+
     if (wantsCompleteMigration) {
         return true;
     } else {
@@ -331,7 +350,7 @@ bool ATPAssetMigrator::wantsToMigrateResource(const QUrl& url) {
 void ATPAssetMigrator::saveEntityServerFile() {
     // show a dialog to ask the user where they want to save the file
     ModalDialogListener* dlg = OffscreenUi::getSaveFileNameAsync(_dialogParent, "Save Migrated Entities File");
-    connect(dlg, &ModalDialogListener::response, this, [=] (QVariant response) {
+    connect(dlg, &ModalDialogListener::response, this, [=](QVariant response) {
         const QString& saveName = response.toString();
         QFile saveFile { saveName };
 
@@ -343,7 +362,6 @@ void ATPAssetMigrator::saveEntityServerFile() {
             QByteArray jsonDataForFile;
 
             if (gzip(newDocument.toJson(), jsonDataForFile, -1)) {
-
                 saveFile.write(jsonDataForFile);
                 saveFile.close();
 
@@ -352,7 +370,8 @@ void ATPAssetMigrator::saveEntityServerFile() {
                 if (_errorCount > 0) {
                     infoMessage += QString("\nThere were %1 models that could not be migrated.\n").arg(_errorCount);
                     infoMessage += "Check the warnings in your log for details.\n";
-                    infoMessage += "You can re-attempt migration on those models\nby restarting this process with the newly saved file.";
+                    infoMessage += "You can re-attempt migration on those models\nby restarting this process with the newly "
+                                   "saved file.";
                 }
 
                 OffscreenUi::asyncInformation(_dialogParent, "Success", infoMessage);
@@ -362,7 +381,7 @@ void ATPAssetMigrator::saveEntityServerFile() {
 
         } else {
             OffscreenUi::asyncWarning(_dialogParent, "Error",
-                                 QString("Could not open file at %1 to write new entities file to.").arg(saveName));
+                                      QString("Could not open file at %1 to write new entities file to.").arg(saveName));
         }
         // reset after the attempted save, success or fail
         reset();

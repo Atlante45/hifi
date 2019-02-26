@@ -32,15 +32,15 @@ double ImageComparer::compareImages(QImage resultImage, QImage expectedImage) co
     // q - pixel in result image
     //
     const int WIN_SIZE = 8;
-    int x{ 0 };             // column index (start of block)
-    int y{ 0 };             // row index (start of block
-    
+    int x { 0 }; // column index (start of block)
+    int y { 0 }; // row index (start of block
+
     // Pixels are processed in square blocks
     double p[WIN_SIZE * WIN_SIZE];
     double q[WIN_SIZE * WIN_SIZE];
 
-    int windowCounter{ 0 };
-    double ssim{ 0.0 };
+    int windowCounter { 0 };
+    double ssim { 0.0 };
     while (x < expectedImage.width()) {
         int lastX = x + WIN_SIZE - 1;
         if (lastX > expectedImage.width() - 1) {
@@ -54,7 +54,7 @@ double ImageComparer::compareImages(QImage resultImage, QImage expectedImage) co
             }
 
             // Collect pixels into linear arrays
-            int i{ 0 };
+            int i { 0 };
             for (int xx = 0; xx < WIN_SIZE && x + xx < expectedImage.width(); ++xx) {
                 for (int yy = 0; yy < WIN_SIZE && y + yy < expectedImage.height(); ++yy) {
                     // Get pixels
@@ -68,10 +68,10 @@ double ImageComparer::compareImages(QImage resultImage, QImage expectedImage) co
                     ++i;
                 }
             }
-  
+
             // Calculate mean
-            double mP{ 0.0 };    // average value of expected pixel
-            double mQ{ 0.0 };    // average value of result pixel
+            double mP { 0.0 }; // average value of expected pixel
+            double mQ { 0.0 }; // average value of result pixel
             for (int j = 0; j < WIN_SIZE * WIN_SIZE; ++j) {
                 mP += p[j];
                 mQ += q[j];
@@ -80,9 +80,9 @@ double ImageComparer::compareImages(QImage resultImage, QImage expectedImage) co
             mQ /= (WIN_SIZE * WIN_SIZE);
 
             // Calculate variance and covariance
-            double sigsqP{ 0.0 };
-            double sigsqQ{ 0.0 };
-            double sigPQ{ 0.0 };
+            double sigsqP { 0.0 };
+            double sigsqQ { 0.0 };
+            double sigPQ { 0.0 };
             for (int j = 0; j < WIN_SIZE * WIN_SIZE; ++j) {
                 sigsqP += pow((p[j] - mP), 2);
                 sigsqQ += pow((q[j] - mQ), 2);

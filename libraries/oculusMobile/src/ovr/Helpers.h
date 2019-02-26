@@ -7,11 +7,11 @@
 //
 #pragma once
 
+#include <VrApi_Types.h>
 #include <functional>
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <VrApi_Types.h>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace ovr {
 
@@ -86,9 +86,4 @@ static inline ovrPosef poseFromGlm(const glm::mat4& m) {
     return result;
 }
 
-}
-
-
-
-
-
+} // namespace ovr

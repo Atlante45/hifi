@@ -15,23 +15,21 @@
 
 #include "HTTPSConnection.h"
 
-HTTPSManager::HTTPSManager(QHostAddress listenAddress, quint16 port, const QSslCertificate& certificate, const QSslKey& privateKey,
-                           const QString& documentRoot, HTTPSRequestHandler* requestHandler) :
+HTTPSManager::HTTPSManager(QHostAddress listenAddress, quint16 port, const QSslCertificate& certificate,
+                           const QSslKey& privateKey, const QString& documentRoot, HTTPSRequestHandler* requestHandler) :
     HTTPManager(listenAddress, port, documentRoot, requestHandler),
     _certificate(certificate),
     _privateKey(privateKey),
-    _sslRequestHandler(requestHandler)
-{
-    
+    _sslRequestHandler(requestHandler) {
 }
 
 void HTTPSManager::incomingConnection(qintptr socketDescriptor) {
     QSslSocket* sslSocket = new QSslSocket(this);
-    
+
     sslSocket->setLocalCertificate(_certificate);
     sslSocket->setPrivateKey(_privateKey);
     sslSocket->setPeerVerifyMode(QSslSocket::VerifyNone);
-    
+
     if (sslSocket->setSocketDescriptor(socketDescriptor)) {
         new HTTPSConnection(sslSocket, this);
     } else {
@@ -39,7 +37,7 @@ void HTTPSManager::incomingConnection(qintptr socketDescriptor) {
     }
 }
 
-bool HTTPSManager::handleHTTPRequest(HTTPConnection* connection, const QUrl &url, bool skipSubHandler) {
+bool HTTPSManager::handleHTTPRequest(HTTPConnection* connection, const QUrl& url, bool skipSubHandler) {
     return handleHTTPSRequest(reinterpret_cast<HTTPSConnection*>(connection), url, skipSubHandler);
 }
 

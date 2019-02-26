@@ -19,20 +19,17 @@ QTEST_MAIN(SequenceNumberStatsTests)
 
 const quint32 UINT16_RANGE = std::numeric_limits<quint16>::max() + 1;
 
-
 // Adds an implicit cast to make sure that actual and expected are of the same type.
 //  QCOMPARE(<unsigned int>, <int>) => cryptic linker error.
 //  (since QTest::qCompare is defined for (T, T, ...), but not (T, U, ...))
 //
-#define QCOMPARE_WITH_CAST(actual, expected) \
-    QCOMPARE(actual, static_cast<decltype(actual)>(expected))
+#define QCOMPARE_WITH_CAST(actual, expected) QCOMPARE(actual, static_cast<decltype(actual)>(expected))
 
 void SequenceNumberStatsTests::rolloverTest() {
-
     SequenceNumberStats stats;
 
     // insert enough samples to cause 3 rollovers
-    quint16 seq = 79;   // start on some random number
+    quint16 seq = 79; // start on some random number
 
     for (int R = 0; R < 2; R++) {
         for (quint32 i = 0; i < 3 * UINT16_RANGE; i++) {
@@ -51,7 +48,6 @@ void SequenceNumberStatsTests::rolloverTest() {
 }
 
 void SequenceNumberStatsTests::earlyLateTest() {
-
     SequenceNumberStats stats;
     quint16 seq = 65530;
     quint32 numSent = 0;
@@ -63,7 +59,6 @@ void SequenceNumberStatsTests::earlyLateTest() {
 
     for (int R = 0; R < 2; R++) {
         for (int T = 0; T < 10000; T++) {
-
             // insert 7 consecutive
             for (int i = 0; i < 7; i++) {
                 stats.sequenceNumberReceived(seq);
@@ -122,7 +117,6 @@ void SequenceNumberStatsTests::earlyLateTest() {
 }
 
 void SequenceNumberStatsTests::duplicateTest() {
-
     SequenceNumberStats stats;
     quint16 seq = 12345;
     quint32 numSent = 0;
@@ -134,7 +128,6 @@ void SequenceNumberStatsTests::duplicateTest() {
 
     for (int R = 0; R < 2; R++) {
         for (int T = 0; T < 5; T++) {
-
             quint16 duplicate = seq;
 
             // insert 7 consecutive
@@ -153,7 +146,6 @@ void SequenceNumberStatsTests::duplicateTest() {
 
             // skip 10
             seq = seq + (quint16)10;
-
 
             quint16 duplicate2 = seq;
 
@@ -215,7 +207,6 @@ void SequenceNumberStatsTests::duplicateTest() {
 }
 
 void SequenceNumberStatsTests::pruneTest() {
-    
     SequenceNumberStats stats;
     quint16 seq = 54321;
     quint32 numSent = 0;
@@ -281,7 +272,6 @@ void SequenceNumberStatsTests::pruneTest() {
 }
 
 void SequenceNumberStatsTests::resyncTest() {
-
     SequenceNumberStats stats(0);
 
     quint16 sequence;
@@ -298,7 +288,6 @@ void SequenceNumberStatsTests::resyncTest() {
     }
 
     QCOMPARE_WITH_CAST(stats.getUnreasonable(), 0);
-
 
     sequence = 0;
     for (int R = 0; R < 7; R++) {

@@ -8,18 +8,16 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #include "FST.h"
 
+#include <hfm/HFM.h>
 #include <QDir>
 #include <QFileInfo>
-#include <hfm/HFM.h>
 
 constexpr float DEFAULT_SCALE { 1.0f };
 
 FST::FST(QString fstPath, QVariantHash data) : _fstPath(std::move(fstPath)) {
-
-    auto setValueFromFSTData = [&data] (const QString& propertyID, auto &targetProperty) mutable {
+    auto setValueFromFSTData = [&data](const QString& propertyID, auto& targetProperty) mutable {
         if (data.contains(propertyID)) {
             targetProperty = data[propertyID].toString();
             data.remove(propertyID);
@@ -46,11 +44,11 @@ FST* FST::createFSTFromModel(const QString& fstPath, const QString& modelFilePat
     // mixamo files - in the event that a mixamo file was edited by some other tool, it's likely the applicationName will
     // be rewritten, so we detect the existence of several different blendshapes which indicate we're likely a mixamo file
     bool likelyMixamoFile = hfmModel.applicationName == "mixamo.com" ||
-        (hfmModel.blendshapeChannelNames.contains("BrowsDown_Right") &&
-            hfmModel.blendshapeChannelNames.contains("MouthOpen") &&
-            hfmModel.blendshapeChannelNames.contains("Blink_Left") &&
-            hfmModel.blendshapeChannelNames.contains("Blink_Right") &&
-            hfmModel.blendshapeChannelNames.contains("Squint_Right"));
+                            (hfmModel.blendshapeChannelNames.contains("BrowsDown_Right") &&
+                             hfmModel.blendshapeChannelNames.contains("MouthOpen") &&
+                             hfmModel.blendshapeChannelNames.contains("Blink_Left") &&
+                             hfmModel.blendshapeChannelNames.contains("Blink_Right") &&
+                             hfmModel.blendshapeChannelNames.contains("Squint_Right"));
 
     mapping.insert(NAME_FIELD, QFileInfo(fstPath).baseName());
     mapping.insert(FILENAME_FIELD, QFileInfo(modelFilePath).fileName());
@@ -59,11 +57,13 @@ FST* FST::createFSTFromModel(const QString& fstPath, const QString& modelFilePat
     // mixamo/autodesk defaults
     mapping.insert(SCALE_FIELD, DEFAULT_SCALE);
     QVariantHash joints = mapping.value(JOINT_FIELD).toHash();
-        joints.insert("jointEyeLeft", hfmModel.jointIndices.contains("jointEyeLeft") ? "jointEyeLeft" :
-            (hfmModel.jointIndices.contains("EyeLeft") ? "EyeLeft" : "LeftEye"));
+    joints.insert("jointEyeLeft", hfmModel.jointIndices.contains("jointEyeLeft")
+                                      ? "jointEyeLeft"
+                                      : (hfmModel.jointIndices.contains("EyeLeft") ? "EyeLeft" : "LeftEye"));
 
-    joints.insert("jointEyeRight", hfmModel.jointIndices.contains("jointEyeRight") ? "jointEyeRight" :
-            hfmModel.jointIndices.contains("EyeRight") ? "EyeRight" : "RightEye");
+    joints.insert("jointEyeRight", hfmModel.jointIndices.contains("jointEyeRight")
+                                       ? "jointEyeRight"
+                                       : hfmModel.jointIndices.contains("EyeRight") ? "EyeRight" : "RightEye");
 
     joints.insert("jointNeck", hfmModel.jointIndices.contains("jointNeck") ? "jointNeck" : "Neck");
     joints.insert("jointRoot", "Hips");
@@ -81,7 +81,6 @@ FST* FST::createFSTFromModel(const QString& fstPath, const QString& modelFilePat
         jointIndices.insert(hfmModel.joints.at(i).name, QString::number(i));
     }
     mapping.insert(JOINT_INDEX_FIELD, jointIndices);
-
 
     // If there are no blendshape mappings, and we detect that this is likely a mixamo file,
     // then we can add the default mixamo to "faceshift" mappings
@@ -143,8 +142,8 @@ FST* FST::createFSTFromModel(const QString& fstPath, const QString& modelFilePat
 }
 
 QString FST::absoluteModelPath() const {
-    QFileInfo fileInfo{ _fstPath };
-    QDir dir{ fileInfo.absoluteDir() };
+    QFileInfo fileInfo { _fstPath };
+    QDir dir { fileInfo.absoluteDir() };
     return dir.absoluteFilePath(_modelPath);
 }
 

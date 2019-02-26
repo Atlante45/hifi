@@ -12,30 +12,30 @@
 #ifndef hifi_EntityItem_h
 #define hifi_EntityItem_h
 
-#include <memory>
 #include <stdint.h>
+#include <memory>
 
 #include <glm/glm.hpp>
 
 #include <QtGui/QWindow>
 
+#include <Interpolate.h>
 #include <Octree.h> // for EncodeBitstreamParams class
 #include <OctreeElement.h> // for OctreeElement::AppendState
 #include <OctreePacketData.h>
 #include <PhysicsCollisionGroups.h>
 #include <ShapeInfo.h>
-#include <Transform.h>
 #include <SpatiallyNestable.h>
-#include <Interpolate.h>
+#include <Transform.h>
 
+#include "EntityDynamicInterface.h"
 #include "EntityItemID.h"
 #include "EntityItemPropertiesDefaults.h"
 #include "EntityPropertyFlags.h"
 #include "EntityTypes.h"
-#include "SimulationOwner.h"
-#include "SimulationFlags.h"
-#include "EntityDynamicInterface.h"
 #include "GrabPropertyGroup.h"
+#include "SimulationFlags.h"
+#include "SimulationOwner.h"
 
 class EntitySimulation;
 class EntityTreeElement;
@@ -50,7 +50,7 @@ typedef std::shared_ptr<EntityTreeElement> EntityTreeElementPointer;
 using EntityTreeElementExtraEncodeDataPointer = std::shared_ptr<EntityTreeElementExtraEncodeData>;
 
 #define DONT_ALLOW_INSTANTIATION virtual void pureVirtualFunctionPlaceHolder() = 0;
-#define ALLOW_INSTANTIATION virtual void pureVirtualFunctionPlaceHolder() override { };
+#define ALLOW_INSTANTIATION virtual void pureVirtualFunctionPlaceHolder() override {};
 
 #define debugTime(T, N) qPrintable(QString("%1 [ %2 ago]").arg(T, 16, 10).arg(formatUsecTime(N - T), 15))
 #define debugTimeOnly(T) qPrintable(QString("%1").arg(T, 16, 10))
@@ -66,11 +66,7 @@ class MeshProxyList;
 #endif
 
 namespace entity {
-enum class HostType {
-    DOMAIN = 0,
-    AVATAR,
-    LOCAL
-};
+enum class HostType { DOMAIN = 0, AVATAR, LOCAL };
 }
 
 /// EntityItem class this is the base class for all entity types. It handles the basic properties and functionality available
@@ -84,8 +80,8 @@ class EntityItem : public QObject, public SpatiallyNestable, public ReadWriteLoc
     // do cleanup.
     friend class EntityTreeElement;
     friend class EntitySimulation;
-public:
 
+public:
     DONT_ALLOW_INSTANTIATION // This class can not be instantiated directly
 
     EntityItem(const EntityItemID& entityItemID);
@@ -98,7 +94,8 @@ public:
     EntityItemID getEntityItemID() const { return EntityItemID(_id); }
 
     // methods for getting/setting all properties of an entity
-    virtual EntityItemProperties getProperties(const EntityPropertyFlags& desiredProperties = EntityPropertyFlags(), bool allowEmptyDesiredProperties = false) const;
+    virtual EntityItemProperties getProperties(const EntityPropertyFlags& desiredProperties = EntityPropertyFlags(),
+                                               bool allowEmptyDesiredProperties = false) const;
 
     /// returns true if something changed
     // This function calls setSubClass properties and detects if any property changes value.
@@ -107,21 +104,26 @@ public:
 
     // Set properties for sub class so they can add their own properties
     // it does nothing in the root class
-    // This function is called by setProperties which then can detects if any property changes value in the SubClass (see aboe comment on setProperties)
+    // This function is called by setProperties which then can detects if any property changes value in the SubClass (see aboe
+    // comment on setProperties)
     virtual bool setSubClassProperties(const EntityItemProperties& properties) { return false; }
 
-    // Update properties with empty parent id and globalized/absolute values (applying offset), and apply (non-empty) log template to args id, name-or-type, parent id.
-    void globalizeProperties(EntityItemProperties& properties, const QString& messageTemplate = QString(), const glm::vec3& offset = glm::vec3(0.0f)) const;
+    // Update properties with empty parent id and globalized/absolute values (applying offset), and apply (non-empty) log
+    // template to args id, name-or-type, parent id.
+    void globalizeProperties(EntityItemProperties& properties, const QString& messageTemplate = QString(),
+                             const glm::vec3& offset = glm::vec3(0.0f)) const;
 
-    void recordCreationTime();    // set _created to 'now'
+    void recordCreationTime(); // set _created to 'now'
     quint64 getLastSimulated() const; /// Last simulated time of this entity universal usecs
     void setLastSimulated(quint64 now);
 
-     /// Last edited time of this entity universal usecs
+    /// Last edited time of this entity universal usecs
     quint64 getLastEdited() const;
     void setLastEdited(quint64 lastEdited);
     float getEditedAgo() const /// Elapsed seconds since this entity was last edited
-        { return (float)(usecTimestampNow() - getLastEdited()) / (float)USECS_PER_SECOND; }
+    {
+        return (float)(usecTimestampNow() - getLastEdited()) / (float)USECS_PER_SECOND;
+    }
 
     /// Last time we sent out an edit packet for this entity
     quint64 getLastBroadcast() const;
@@ -132,27 +134,27 @@ public:
 
     virtual EntityPropertyFlags getEntityProperties(EncodeBitstreamParams& params) const;
 
-    virtual OctreeElement::AppendState appendEntityData(OctreePacketData* packetData, EncodeBitstreamParams& params,
-                                                        EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData) const;
+    virtual OctreeElement::AppendState appendEntityData(
+        OctreePacketData* packetData, EncodeBitstreamParams& params,
+        EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData) const;
 
     virtual void appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
                                     EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
+                                    EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                    EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
                                     OctreeElement::AppendState& appendState) const { /* do nothing*/ };
 
     static EntityItemID readEntityItemIDFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                    ReadBitstreamToTreeParams& args);
+                                                   ReadBitstreamToTreeParams& args);
 
     int readEntityDataFromBuffer(const unsigned char* data, int bytesLeftToRead, ReadBitstreamToTreeParams& args);
 
     virtual int readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged)
-                                                { somethingChanged = false; return 0; }
+                                                 ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                 bool overwriteLocalData, bool& somethingChanged) {
+        somethingChanged = false;
+        return 0;
+    }
     static int expectedBytes();
 
     static void adjustEditPacketForClockSkew(QByteArray& buffer, qint64 clockSkew);
@@ -170,14 +172,17 @@ public:
     virtual void debugDump() const;
 
     virtual bool supportsDetailedIntersection() const { return false; }
-    virtual bool findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                         OctreeElementPointer& element, float& distance,
-                         BoxFace& face, glm::vec3& surfaceNormal,
-                         QVariantMap& extraInfo, bool precisionPicking) const { return true; }
+    virtual bool findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction, OctreeElementPointer& element,
+                                             float& distance, BoxFace& face, glm::vec3& surfaceNormal, QVariantMap& extraInfo,
+                                             bool precisionPicking) const {
+        return true;
+    }
     virtual bool findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
-                        const glm::vec3& acceleration, OctreeElementPointer& element, float& parabolicDistance,
-                        BoxFace& face, glm::vec3& surfaceNormal,
-                        QVariantMap& extraInfo, bool precisionPicking) const { return true; }
+                                                  const glm::vec3& acceleration, OctreeElementPointer& element,
+                                                  float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
+                                                  QVariantMap& extraInfo, bool precisionPicking) const {
+        return true;
+    }
 
     // attributes applicable to all entity types
     EntityTypes::EntityType getType() const { return _type; }
@@ -400,7 +405,8 @@ public:
 
     void setPosition(const glm::vec3& value);
     virtual void setParentID(const QUuid& parentID) override;
-    virtual void setShapeType(ShapeType type) { /* do nothing */ }
+    virtual void setShapeType(ShapeType type) { /* do nothing */
+    }
 
     void setRotation(glm::quat orientation);
     void setVelocity(const glm::vec3& velocity);
@@ -557,9 +563,18 @@ public:
     virtual void removeGrab(GrabPointer grab) override;
     virtual void disableGrab(GrabPointer grab) override;
 
-    static void setBillboardRotationOperator(std::function<glm::quat(const glm::vec3&, const glm::quat&, BillboardMode, const glm::vec3&)> getBillboardRotationOperator) { _getBillboardRotationOperator = getBillboardRotationOperator; }
-    static glm::quat getBillboardRotation(const glm::vec3& position, const glm::quat& rotation, BillboardMode billboardMode, const glm::vec3& frustumPos) { return _getBillboardRotationOperator(position, rotation, billboardMode, frustumPos); }
-    static void setPrimaryViewFrustumPositionOperator(std::function<glm::vec3()> getPrimaryViewFrustumPositionOperator) { _getPrimaryViewFrustumPositionOperator = getPrimaryViewFrustumPositionOperator; }
+    static void setBillboardRotationOperator(
+        std::function<glm::quat(const glm::vec3&, const glm::quat&, BillboardMode, const glm::vec3&)>
+            getBillboardRotationOperator) {
+        _getBillboardRotationOperator = getBillboardRotationOperator;
+    }
+    static glm::quat getBillboardRotation(const glm::vec3& position, const glm::quat& rotation, BillboardMode billboardMode,
+                                          const glm::vec3& frustumPos) {
+        return _getBillboardRotationOperator(position, rotation, billboardMode, frustumPos);
+    }
+    static void setPrimaryViewFrustumPositionOperator(std::function<glm::vec3()> getPrimaryViewFrustumPositionOperator) {
+        _getPrimaryViewFrustumPositionOperator = getPrimaryViewFrustumPositionOperator;
+    }
     static glm::vec3 getPrimaryViewFrustumPosition() { return _getPrimaryViewFrustumPositionOperator(); }
 
 signals:
@@ -582,7 +597,7 @@ protected:
     glm::vec3 _unscaledDimensions { ENTITY_ITEM_DEFAULT_DIMENSIONS };
     EntityTypes::EntityType _type { EntityTypes::Unknown };
     quint64 _lastSimulated { 0 }; // last time this entity called simulate(), this includes velocity, angular velocity,
-                            // and physics changes
+                                  // and physics changes
     quint64 _lastUpdated { 0 }; // last time this entity called update(), this includes animations and non-physics changes
     quint64 _lastEdited { 0 }; // last official local or remote edit time
     QUuid _lastEditedBy { ENTITY_ITEM_DEFAULT_LAST_EDITED_BY }; // id of last editor
@@ -632,7 +647,7 @@ protected:
     bool _isVisibleInSecondaryCamera { ENTITY_ITEM_DEFAULT_VISIBLE_IN_SECONDARY_CAMERA };
     RenderLayer _renderLayer { RenderLayer::WORLD };
     PrimitiveMode _primitiveMode { PrimitiveMode::SOLID };
-    bool _canCastShadow{ ENTITY_ITEM_DEFAULT_CAN_CAST_SHADOW };
+    bool _canCastShadow { ENTITY_ITEM_DEFAULT_CAN_CAST_SHADOW };
     bool _ignorePickIntersection { false };
     bool _collisionless { ENTITY_ITEM_DEFAULT_COLLISIONLESS };
     uint16_t _collisionMask { ENTITY_COLLISION_MASK_DEFAULT };
@@ -642,8 +657,8 @@ protected:
     SimulationOwner _simulationOwner;
     bool _shouldHighlight { false };
     QString _name { ENTITY_ITEM_DEFAULT_NAME };
-    QString _href; //Hyperlink href
-    QString _description; //Hyperlink description
+    QString _href; // Hyperlink href
+    QString _description; // Hyperlink description
 
     // Certifiable Properties
     QString _itemName { ENTITY_ITEM_DEFAULT_ITEM_NAME };
@@ -658,7 +673,6 @@ protected:
     QString _marketplaceID { ENTITY_ITEM_DEFAULT_MARKETPLACE_ID };
     quint32 _staticCertificateVersion { ENTITY_ITEM_DEFAULT_STATIC_CERTIFICATE_VERSION };
 
-
     // NOTE: Damping is applied like this:  v *= pow(1 - damping, dt)
     //
     // Hence the damping coefficient must range from 0 (no damping) to 1 (immediate stop).
@@ -670,7 +684,9 @@ protected:
     //
 
     // DirtyFlags are set whenever a property changes that the EntitySimulation needs to know about.
-    std::atomic_uint _flags { 0 };   // things that have changed from EXTERNAL changes (via script or packet) but NOT from simulation
+    std::atomic_uint _flags {
+        0
+    }; // things that have changed from EXTERNAL changes (via script or packet) but NOT from simulation
 
     // these backpointers are only ever set/cleared by friends:
     EntityTreeElementPointer _element; // set by EntityTreeElement
@@ -704,7 +720,7 @@ protected:
     QUuid _sourceUUID; /// the server node UUID we came from
 
     entity::HostType _hostType { entity::HostType::DOMAIN };
-    bool _transitingWithAvatar{ false };
+    bool _transitingWithAvatar { false };
     QUuid _owningAvatarID;
 
     // physics related changes from the network to suppress any duplicates and make
@@ -750,7 +766,8 @@ protected:
     QHash<QUuid, EntityDynamicPointer> _grabActions;
 
 private:
-    static std::function<glm::quat(const glm::vec3&, const glm::quat&, BillboardMode, const glm::vec3&)> _getBillboardRotationOperator;
+    static std::function<glm::quat(const glm::vec3&, const glm::quat&, BillboardMode, const glm::vec3&)>
+        _getBillboardRotationOperator;
     static std::function<glm::vec3()> _getPrimaryViewFrustumPositionOperator;
 };
 

@@ -15,6 +15,7 @@
 
 class LaserPointer : public PathPointer {
     using Parent = PathPointer;
+
 public:
     class RenderState : public StartEndRenderState {
     public:
@@ -29,8 +30,9 @@ public:
 
         void cleanup() override;
         void disable() override;
-        void update(const glm::vec3& origin, const glm::vec3& end, const glm::vec3& surfaceNormal, float parentScale, bool distanceScaleEnd, bool centerEndY,
-                    bool faceAvatar, bool followNormal, float followNormalStrength, float distance, const PickResultPointer& pickResult) override;
+        void update(const glm::vec3& origin, const glm::vec3& end, const glm::vec3& surfaceNormal, float parentScale,
+                    bool distanceScaleEnd, bool centerEndY, bool faceAvatar, bool followNormal, float followNormalStrength,
+                    float distance, const PickResultPointer& pickResult) override;
 
     private:
         QUuid _pathID;
@@ -39,8 +41,9 @@ public:
         float _lineWidth;
     };
 
-    LaserPointer(const QVariant& rayProps, const RenderStateMap& renderStates, const DefaultRenderStateMap& defaultRenderStates, bool hover, const PointerTriggers& triggers,
-        bool faceAvatar, bool followNormal, float followNormalStrength, bool centerEndY, bool lockEnd, bool distanceScaleEnd, bool scaleWithParent, bool enabled);
+    LaserPointer(const QVariant& rayProps, const RenderStateMap& renderStates, const DefaultRenderStateMap& defaultRenderStates,
+                 bool hover, const PointerTriggers& triggers, bool faceAvatar, bool followNormal, float followNormalStrength,
+                 bool centerEndY, bool lockEnd, bool distanceScaleEnd, bool scaleWithParent, bool enabled);
 
     QVariantMap toVariantMap() const override;
 
@@ -59,11 +62,11 @@ protected:
     void setVisualPickResultInternal(PickResultPointer pickResult, IntersectionType type, const QUuid& id,
                                      const glm::vec3& intersection, float distance, const glm::vec3& surfaceNormal) override;
 
-    PointerEvent buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult, const std::string& button = "", bool hover = true) override;
+    PointerEvent buildPointerEvent(const PickedObject& target, const PickResultPointer& pickResult,
+                                   const std::string& button = "", bool hover = true) override;
 
 private:
     static glm::vec3 findIntersection(const PickedObject& pickedObject, const glm::vec3& origin, const glm::vec3& direction);
-
 };
 
 #endif // hifi_LaserPointer_h

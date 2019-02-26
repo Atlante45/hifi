@@ -13,14 +13,12 @@
 
 #include <QtCore/QObject>
 
-#include <NodeList.h>
 #include <NLPacketList.h>
+#include <NodeList.h>
 
 #include "AvatarData.h"
 
-ClientTraitsHandler::ClientTraitsHandler(AvatarData* owningAvatar) :
-    _owningAvatar(owningAvatar)
-{
+ClientTraitsHandler::ClientTraitsHandler(AvatarData* owningAvatar) : _owningAvatar(owningAvatar) {
     auto nodeList = DependencyManager::get<NodeList>();
     QObject::connect(nodeList.data(), &NodeList::nodeAdded, this, [this](SharedNodePointer addedNode) {
         if (addedNode->getType() == NodeType::AvatarMixer) {
@@ -120,15 +118,15 @@ int ClientTraitsHandler::sendChangedTraitsToMixer() {
         auto instancedIt = traitStatusesCopy.instancedCBegin();
         while (instancedIt != traitStatusesCopy.instancedCEnd()) {
             for (auto& instanceIDValuePair : instancedIt->instances) {
-                if ((initialSend && instanceIDValuePair.value != Deleted)
-                    || instanceIDValuePair.value == Updated) {
+                if ((initialSend && instanceIDValuePair.value != Deleted) || instanceIDValuePair.value == Updated) {
                     // this is a changed trait we need to send or we haven't send out trait information yet
                     // ask the owning avatar to pack it
-                    bytesWritten += _owningAvatar->packTraitInstance(instancedIt->traitType, instanceIDValuePair.id, *traitsPacketList);
+                    bytesWritten += _owningAvatar->packTraitInstance(instancedIt->traitType, instanceIDValuePair.id,
+                                                                     *traitsPacketList);
                 } else if (!initialSend && instanceIDValuePair.value == Deleted) {
                     // pack delete for this trait instance
                     bytesWritten += AvatarTraits::packInstancedTraitDelete(instancedIt->traitType, instanceIDValuePair.id,
-                                                           *traitsPacketList);
+                                                                           *traitsPacketList);
                 }
             }
 
@@ -156,10 +154,8 @@ void ClientTraitsHandler::processTraitOverride(QSharedPointer<ReceivedMessage> m
 
             // only accept an override if this is for a trait type we override
             // and the version matches what we last sent for skeleton
-            if (traitType == AvatarTraits::SkeletonModelURL
-                && traitVersion == _currentSkeletonVersion
-                && _traitStatuses[AvatarTraits::SkeletonModelURL] != Updated) {
-
+            if (traitType == AvatarTraits::SkeletonModelURL && traitVersion == _currentSkeletonVersion &&
+                _traitStatuses[AvatarTraits::SkeletonModelURL] != Updated) {
                 // override the skeleton URL but do not mark the trait as having changed
                 // so that we don't unecessarily send a new trait packet to the mixer with the overriden URL
                 auto encodedSkeletonURL = QUrl::fromEncoded(message->readWithoutCopy(traitBinarySize));

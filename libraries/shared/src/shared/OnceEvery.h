@@ -9,13 +9,13 @@
 #include <stdint.h>
 #include <functional>
 
-#include "../SharedUtil.h"
 #include "../NumericalConstants.h"
+#include "../SharedUtil.h"
 
-template <size_t MS = 1000>
+template<size_t MS = 1000>
 class OnceEvery {
 public:
-    OnceEvery(std::function<void()> f) : _f(f) { }
+    OnceEvery(std::function<void()> f) : _f(f) {}
 
     bool maybeExecute() {
         uint64_t now = usecTimestampNow();

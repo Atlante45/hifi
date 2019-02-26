@@ -29,7 +29,9 @@ ProfileRangeBatch::~ProfileRangeBatch() {
 }
 #endif
 
-#define ADD_COMMAND(call) _commands.emplace_back(COMMAND_##call); _commandOffsets.emplace_back(_params.size());
+#define ADD_COMMAND(call)                                                                                                      \
+    _commands.emplace_back(COMMAND_##call);                                                                                    \
+    _commandOffsets.emplace_back(_params.size());
 
 using namespace gpu;
 
@@ -38,12 +40,12 @@ static const int MAX_NUM_UNIFORM_BUFFERS = 14;
 static const int MAX_NUM_RESOURCE_BUFFERS = 16;
 static const int MAX_NUM_RESOURCE_TEXTURES = 16;
 
-size_t Batch::_commandsMax{ BATCH_PREALLOCATE_MIN };
-size_t Batch::_commandOffsetsMax{ BATCH_PREALLOCATE_MIN };
-size_t Batch::_paramsMax{ BATCH_PREALLOCATE_MIN };
-size_t Batch::_dataMax{ BATCH_PREALLOCATE_MIN };
-size_t Batch::_objectsMax{ BATCH_PREALLOCATE_MIN };
-size_t Batch::_drawCallInfosMax{ BATCH_PREALLOCATE_MIN };
+size_t Batch::_commandsMax { BATCH_PREALLOCATE_MIN };
+size_t Batch::_commandOffsetsMax { BATCH_PREALLOCATE_MIN };
+size_t Batch::_paramsMax { BATCH_PREALLOCATE_MIN };
+size_t Batch::_dataMax { BATCH_PREALLOCATE_MIN };
+size_t Batch::_objectsMax { BATCH_PREALLOCATE_MIN };
+size_t Batch::_drawCallInfosMax { BATCH_PREALLOCATE_MIN };
 
 Batch::Batch(const std::string& name) {
     _name = name;
@@ -142,7 +144,8 @@ void Batch::drawIndexed(Primitive primitiveType, uint32 numIndices, uint32 start
     captureDrawCallInfo();
 }
 
-void Batch::drawInstanced(uint32 numInstances, Primitive primitiveType, uint32 numVertices, uint32 startVertex, uint32 startInstance) {
+void Batch::drawInstanced(uint32 numInstances, Primitive primitiveType, uint32 numVertices, uint32 startVertex,
+                          uint32 startInstance) {
     ADD_COMMAND(drawInstanced);
 
     _params.emplace_back(startInstance);
@@ -154,7 +157,8 @@ void Batch::drawInstanced(uint32 numInstances, Primitive primitiveType, uint32 n
     captureDrawCallInfo();
 }
 
-void Batch::drawIndexedInstanced(uint32 numInstances, Primitive primitiveType, uint32 numIndices, uint32 startIndex, uint32 startInstance) {
+void Batch::drawIndexedInstanced(uint32 numInstances, Primitive primitiveType, uint32 numIndices, uint32 startIndex,
+                                 uint32 startInstance) {
     ADD_COMMAND(drawIndexedInstanced);
 
     _params.emplace_back(startInstance);
@@ -348,7 +352,8 @@ void Batch::setResourceTextureTable(const TextureTablePointer& textureTable, uin
     _params.emplace_back(slot);
 }
 
-void Batch::setResourceFramebufferSwapChainTexture(uint32 slot, const FramebufferSwapChainPointer& framebuffer, unsigned int swapChainIndex, unsigned int renderBufferSlot) {
+void Batch::setResourceFramebufferSwapChainTexture(uint32 slot, const FramebufferSwapChainPointer& framebuffer,
+                                                   unsigned int swapChainIndex, unsigned int renderBufferSlot) {
     ADD_COMMAND(setResourceFramebufferSwapChainTexture);
 
     _params.emplace_back(_swapChains.cache(framebuffer));
@@ -405,8 +410,8 @@ void Batch::clearDepthStencilFramebuffer(float depth, int stencil, bool enableSc
     clearFramebuffer(Framebuffer::BUFFER_DEPTHSTENCIL, Vec4(0.0f), depth, stencil, enableScissor);
 }
 
-void Batch::blit(const FramebufferPointer& src, const Vec4i& srcViewport,
-    const FramebufferPointer& dst, const Vec4i& dstViewport) {
+void Batch::blit(const FramebufferPointer& src, const Vec4i& srcViewport, const FramebufferPointer& dst,
+                 const Vec4i& dstViewport) {
     ADD_COMMAND(blit);
 
     _params.emplace_back(_framebuffers.cache(src));
@@ -576,9 +581,9 @@ void Batch::captureDrawCallInfo() {
 }
 
 void Batch::captureNamedDrawCallInfo(std::string name) {
-    std::swap(_currentNamedCall, name);  // Set and save _currentNamedCall
+    std::swap(_currentNamedCall, name); // Set and save _currentNamedCall
     captureDrawCallInfoImpl();
-    std::swap(_currentNamedCall, name);  // Restore _currentNamedCall
+    std::swap(_currentNamedCall, name); // Restore _currentNamedCall
 }
 
 // Debugging

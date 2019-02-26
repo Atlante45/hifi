@@ -40,14 +40,14 @@ void WebEntityItem::setUnscaledDimensions(const glm::vec3& value) {
     EntityItem::setUnscaledDimensions(glm::vec3(value.x, value.y, WEB_ENTITY_ITEM_FIXED_DEPTH));
 }
 
-EntityItemProperties WebEntityItem::getProperties(const EntityPropertyFlags& desiredProperties, bool allowEmptyDesiredProperties) const {
-    EntityItemProperties properties = EntityItem::getProperties(desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
+EntityItemProperties WebEntityItem::getProperties(const EntityPropertyFlags& desiredProperties,
+                                                  bool allowEmptyDesiredProperties) const {
+    EntityItemProperties properties = EntityItem::getProperties(
+        desiredProperties, allowEmptyDesiredProperties); // get the properties from our base class
 
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(color, getColor);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(alpha, getAlpha);
-    withReadLock([&] {
-        _pulseProperties.getProperties(properties);
-    });
+    withReadLock([&] { _pulseProperties.getProperties(properties); });
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(billboardMode, getBillboardMode);
 
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(sourceUrl, getSourceUrl);
@@ -83,8 +83,8 @@ bool WebEntityItem::setProperties(const EntityItemProperties& properties) {
         if (wantDebug) {
             uint64_t now = usecTimestampNow();
             int elapsed = now - getLastEdited();
-            qCDebug(entities) << "WebEntityItem::setProperties() AFTER update... edited AGO=" << elapsed <<
-                    "now=" << now << " getLastEdited()=" << getLastEdited();
+            qCDebug(entities) << "WebEntityItem::setProperties() AFTER update... edited AGO=" << elapsed << "now=" << now
+                              << " getLastEdited()=" << getLastEdited();
         }
         setLastEdited(properties._lastEdited);
     }
@@ -93,10 +93,8 @@ bool WebEntityItem::setProperties(const EntityItemProperties& properties) {
 }
 
 int WebEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, int bytesLeftToRead,
-                                                ReadBitstreamToTreeParams& args,
-                                                EntityPropertyFlags& propertyFlags, bool overwriteLocalData,
-                                                bool& somethingChanged) {
-
+                                                    ReadBitstreamToTreeParams& args, EntityPropertyFlags& propertyFlags,
+                                                    bool overwriteLocalData, bool& somethingChanged) {
     int bytesRead = 0;
     const unsigned char* dataAt = data;
 
@@ -104,8 +102,8 @@ int WebEntityItem::readEntitySubclassDataFromBuffer(const unsigned char* data, i
     READ_ENTITY_PROPERTY(PROP_ALPHA, float, setAlpha);
     withWriteLock([&] {
         int bytesFromPulse = _pulseProperties.readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
-            propertyFlags, overwriteLocalData,
-            somethingChanged);
+                                                                               propertyFlags, overwriteLocalData,
+                                                                               somethingChanged);
         bytesRead += bytesFromPulse;
         dataAt += bytesFromPulse;
     });
@@ -138,19 +136,16 @@ EntityPropertyFlags WebEntityItem::getEntityProperties(EncodeBitstreamParams& pa
 }
 
 void WebEntityItem::appendSubclassData(OctreePacketData* packetData, EncodeBitstreamParams& params,
-                                    EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
-                                    EntityPropertyFlags& requestedProperties,
-                                    EntityPropertyFlags& propertyFlags,
-                                    EntityPropertyFlags& propertiesDidntFit,
-                                    int& propertyCount,
-                                    OctreeElement::AppendState& appendState) const {
-
+                                       EntityTreeElementExtraEncodeDataPointer entityTreeElementExtraEncodeData,
+                                       EntityPropertyFlags& requestedProperties, EntityPropertyFlags& propertyFlags,
+                                       EntityPropertyFlags& propertiesDidntFit, int& propertyCount,
+                                       OctreeElement::AppendState& appendState) const {
     bool successPropertyFits = true;
     APPEND_ENTITY_PROPERTY(PROP_COLOR, getColor());
     APPEND_ENTITY_PROPERTY(PROP_ALPHA, getAlpha());
     withReadLock([&] {
         _pulseProperties.appendSubclassData(packetData, params, entityTreeElementExtraEncodeData, requestedProperties,
-            propertyFlags, propertiesDidntFit, propertyCount, appendState);
+                                            propertyFlags, propertiesDidntFit, propertyCount, appendState);
     });
     APPEND_ENTITY_PROPERTY(PROP_BILLBOARD_MODE, (uint32_t)getBillboardMode());
 
@@ -173,14 +168,15 @@ glm::vec3 WebEntityItem::getRaycastDimensions() const {
 }
 
 bool WebEntityItem::findDetailedRayIntersection(const glm::vec3& origin, const glm::vec3& direction,
-                                                OctreeElementPointer& element, float& distance,
-                                                BoxFace& face, glm::vec3& surfaceNormal,
-                                                QVariantMap& extraInfo, bool precisionPicking) const {
+                                                OctreeElementPointer& element, float& distance, BoxFace& face,
+                                                glm::vec3& surfaceNormal, QVariantMap& extraInfo, bool precisionPicking) const {
     glm::vec3 dimensions = getScaledDimensions();
     glm::vec2 xyDimensions(dimensions.x, dimensions.y);
     glm::quat rotation = getWorldOrientation();
-    glm::vec3 position = getWorldPosition() + rotation * (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint()));
-    rotation = EntityItem::getBillboardRotation(position, rotation, _billboardMode, EntityItem::getPrimaryViewFrustumPosition());
+    glm::vec3 position = getWorldPosition() +
+                         rotation * (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint()));
+    rotation = EntityItem::getBillboardRotation(position, rotation, _billboardMode,
+                                                EntityItem::getPrimaryViewFrustumPosition());
 
     if (findRayRectangleIntersection(origin, direction, rotation, position, xyDimensions, distance)) {
         glm::vec3 forward = rotation * Vectors::FRONT;
@@ -197,14 +193,15 @@ bool WebEntityItem::findDetailedRayIntersection(const glm::vec3& origin, const g
     }
 }
 
-bool WebEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity, const glm::vec3& acceleration,
-                                                     OctreeElementPointer& element, float& parabolicDistance,
-                                                     BoxFace& face, glm::vec3& surfaceNormal,
+bool WebEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, const glm::vec3& velocity,
+                                                     const glm::vec3& acceleration, OctreeElementPointer& element,
+                                                     float& parabolicDistance, BoxFace& face, glm::vec3& surfaceNormal,
                                                      QVariantMap& extraInfo, bool precisionPicking) const {
     glm::vec3 dimensions = getScaledDimensions();
     glm::vec2 xyDimensions(dimensions.x, dimensions.y);
     glm::quat rotation = getWorldOrientation();
-    glm::vec3 position = getWorldPosition() + rotation * (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint()));
+    glm::vec3 position = getWorldPosition() +
+                         rotation * (dimensions * (ENTITY_ITEM_DEFAULT_REGISTRATION_POINT - getRegistrationPoint()));
 
     glm::quat inverseRot = glm::inverse(rotation);
     glm::vec3 localOrigin = inverseRot * (origin - position);
@@ -228,63 +225,43 @@ bool WebEntityItem::findDetailedParabolaIntersection(const glm::vec3& origin, co
 }
 
 void WebEntityItem::setColor(const glm::u8vec3& value) {
-    withWriteLock([&] {
-        _color = value;
-    });
+    withWriteLock([&] { _color = value; });
 }
 
 glm::u8vec3 WebEntityItem::getColor() const {
-    return resultWithReadLock<glm::u8vec3>([&] {
-        return _color;
-    });
+    return resultWithReadLock<glm::u8vec3>([&] { return _color; });
 }
 
 void WebEntityItem::setAlpha(float alpha) {
-    withWriteLock([&] {
-        _alpha = alpha;
-    });
+    withWriteLock([&] { _alpha = alpha; });
 }
 
 float WebEntityItem::getAlpha() const {
-    return resultWithReadLock<float>([&] {
-        return _alpha;
-    });
+    return resultWithReadLock<float>([&] { return _alpha; });
 }
 
 BillboardMode WebEntityItem::getBillboardMode() const {
-    return resultWithReadLock<BillboardMode>([&] {
-        return _billboardMode;
-    });
+    return resultWithReadLock<BillboardMode>([&] { return _billboardMode; });
 }
 
 void WebEntityItem::setBillboardMode(BillboardMode value) {
-    withWriteLock([&] {
-        _billboardMode = value;
-    });
+    withWriteLock([&] { _billboardMode = value; });
 }
 
 void WebEntityItem::setSourceUrl(const QString& value) {
-    withWriteLock([&] {
-        _sourceUrl = value;
-    });
+    withWriteLock([&] { _sourceUrl = value; });
 }
 
-QString WebEntityItem::getSourceUrl() const { 
-    return resultWithReadLock<QString>([&] {
-        return _sourceUrl;
-    });
+QString WebEntityItem::getSourceUrl() const {
+    return resultWithReadLock<QString>([&] { return _sourceUrl; });
 }
 
 void WebEntityItem::setDPI(uint16_t value) {
-    withWriteLock([&] {
-        _dpi = value;
-    });
+    withWriteLock([&] { _dpi = value; });
 }
 
 uint16_t WebEntityItem::getDPI() const {
-    return resultWithReadLock<uint16_t>([&] {
-        return _dpi;
-    });
+    return resultWithReadLock<uint16_t>([&] { return _dpi; });
 }
 
 void WebEntityItem::setScriptURL(const QString& value) {
@@ -302,33 +279,23 @@ void WebEntityItem::setScriptURL(const QString& value) {
 }
 
 QString WebEntityItem::getScriptURL() const {
-    return resultWithReadLock<QString>([&] {
-        return _scriptURL;
-    });
+    return resultWithReadLock<QString>([&] { return _scriptURL; });
 }
 
 void WebEntityItem::setMaxFPS(uint8_t value) {
-    withWriteLock([&] {
-        _maxFPS = value;
-    });
+    withWriteLock([&] { _maxFPS = value; });
 }
 
 uint8_t WebEntityItem::getMaxFPS() const {
-    return resultWithReadLock<uint8_t>([&] {
-        return _maxFPS;
-    });
+    return resultWithReadLock<uint8_t>([&] { return _maxFPS; });
 }
 
 void WebEntityItem::setInputMode(const WebInputMode& value) {
-    withWriteLock([&] {
-        _inputMode = value;
-    });
+    withWriteLock([&] { _inputMode = value; });
 }
 
 WebInputMode WebEntityItem::getInputMode() const {
-    return resultWithReadLock<WebInputMode>([&] {
-        return _inputMode;
-    });
+    return resultWithReadLock<WebInputMode>([&] { return _inputMode; });
 }
 
 void WebEntityItem::setShowKeyboardFocusHighlight(bool value) {
@@ -340,7 +307,5 @@ bool WebEntityItem::getShowKeyboardFocusHighlight() const {
 }
 
 PulsePropertyGroup WebEntityItem::getPulseProperties() const {
-    return resultWithReadLock<PulsePropertyGroup>([&] {
-        return _pulseProperties;
-    });
+    return resultWithReadLock<PulsePropertyGroup>([&] { return _pulseProperties; });
 }

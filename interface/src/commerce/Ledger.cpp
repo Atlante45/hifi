@@ -11,27 +11,26 @@
 
 #include "Ledger.h"
 
-#include <QJsonObject>
 #include <QJsonArray>
-#include <QTimeZone>
 #include <QJsonDocument>
+#include <QJsonObject>
+#include <QTimeZone>
 
-#include <NetworkingConstants.h>
 #include <AddressManager.h>
+#include <NetworkingConstants.h>
 
-#include "Wallet.h"
 #include "CommerceLogging.h"
+#include "Wallet.h"
 
 // inventory answers {status: 'success', data: {assets: [{id: "guid", title: "name", preview: "url"}....]}}
 // balance answers {status: 'success', data: {balance: integer}}
 // buy and receive_at answer {status: 'success'}
 // account synthesizes a result {status: 'success', data: {keyStatus: "preexisting"|"conflicting"|"ok"}}
 
-
 QJsonObject Ledger::apiResponse(const QString& label, QNetworkReply* reply) {
     QByteArray response = reply->readAll();
     QJsonObject data = QJsonDocument::fromJson(response).object();
-#if defined(DEV_BUILD)  // Don't expose user's personal data in the wild. But during development this can be handy.
+#if defined(DEV_BUILD) // Don't expose user's personal data in the wild. But during development this can be handy.
     qInfo(commerce) << label << "response" << QJsonDocument(data).toJson(QJsonDocument::Compact);
 #endif
     return data;
@@ -44,45 +43,34 @@ QJsonObject Ledger::failResponse(const QString& label, QNetworkReply* reply) {
     // tempResult will be NULL if the response isn't valid JSON.
     QJsonDocument tempResult = QJsonDocument::fromJson(response.toLocal8Bit());
     if (tempResult.isNull()) {
-        QJsonObject result
-        {
-            { "status", "fail" },
-            { "message", response }
-        };
+        QJsonObject result { { "status", "fail" }, { "message", response } };
         return result;
     } else {
         return tempResult.object();
     }
 }
-#define ApiHandler(NAME) void Ledger::NAME##Success(QNetworkReply* reply) { emit NAME##Result(apiResponse(#NAME, reply)); }
-#define FailHandler(NAME) void Ledger::NAME##Failure(QNetworkReply* reply) { emit NAME##Result(failResponse(#NAME, reply)); }
+#define ApiHandler(NAME)                                                                                                       \
+    void Ledger::NAME##Success(QNetworkReply* reply) { emit NAME##Result(apiResponse(#NAME, reply)); }
+#define FailHandler(NAME)                                                                                                      \
+    void Ledger::NAME##Failure(QNetworkReply* reply) { emit NAME##Result(failResponse(#NAME, reply)); }
 #define Handler(NAME) ApiHandler(NAME) FailHandler(NAME)
-Handler(buy)
-Handler(receiveAt)
-Handler(balance)
-Handler(inventory)
-Handler(transferAssetToNode)
-Handler(transferAssetToUsername)
-Handler(authorizeAssetTransfer)
-Handler(alreadyOwned)
-Handler(availableUpdates)
-Handler(updateItem)
+Handler(buy) Handler(receiveAt) Handler(balance) Handler(inventory) Handler(transferAssetToNode)
+    Handler(transferAssetToUsername) Handler(authorizeAssetTransfer) Handler(alreadyOwned) Handler(availableUpdates)
+        Handler(updateItem)
 
-void Ledger::send(const QString& endpoint, const QString& success, const QString& fail, QNetworkAccessManager::Operation method, AccountManagerAuth::Type authType, QJsonObject request) {
+            void Ledger::send(const QString& endpoint, const QString& success, const QString& fail,
+                              QNetworkAccessManager::Operation method, AccountManagerAuth::Type authType, QJsonObject request) {
     auto accountManager = DependencyManager::get<AccountManager>();
     const QString URL = "/api/v1/commerce/";
     JSONCallbackParameters callbackParams(this, success, fail);
-#if defined(DEV_BUILD)  // Don't expose user's personal data in the wild. But during development this can be handy.
+#if defined(DEV_BUILD) // Don't expose user's personal data in the wild. But during development this can be handy.
     qCInfo(commerce) << "Sending" << QJsonDocument(request).toJson(QJsonDocument::Compact);
 #endif
-    accountManager->sendRequest(URL + endpoint,
-        authType,
-        method,
-        callbackParams,
-        QJsonDocument(request).toJson());
+    accountManager->sendRequest(URL + endpoint, authType, method, callbackParams, QJsonDocument(request).toJson());
 }
 
-void Ledger::signedSend(const QString& propertyName, const QByteArray& text, const QString& key, const QString& endpoint, const QString& success, const QString& fail, const bool controlled_failure) {
+void Ledger::signedSend(const QString& propertyName, const QByteArray& text, const QString& key, const QString& endpoint,
+                        const QString& success, const QString& fail, const bool controlled_failure) {
     auto wallet = DependencyManager::get<Wallet>();
     QString signature = wallet->signWithKey(text, key);
     QJsonObject request;
@@ -111,13 +99,14 @@ void Ledger::keysQuery(const QString& endpoint, const QString& success, const QS
     keysQuery(endpoint, success, fail, requestParams);
 }
 
-void Ledger::buy(const QString& hfc_key, int cost, const QString& asset_id, const QString& inventory_key, const bool controlled_failure) {
+void Ledger::buy(const QString& hfc_key, int cost, const QString& asset_id, const QString& inventory_key,
+                 const bool controlled_failure) {
     QJsonObject transaction;
     transaction["hfc_key"] = hfc_key;
     transaction["cost"] = cost;
     transaction["asset_id"] = asset_id;
     transaction["inventory_key"] = inventory_key;
-    QJsonDocument transactionDoc{ transaction };
+    QJsonDocument transactionDoc { transaction };
     auto transactionString = transactionDoc.toJson(QJsonDocument::Compact);
     signedSend("transaction", transactionString, hfc_key, "buy", "buySuccess", "buyFailure", controlled_failure);
 }
@@ -126,14 +115,14 @@ bool Ledger::receiveAt(const QString& hfc_key, const QString& signing_key, const
     auto accountManager = DependencyManager::get<AccountManager>();
     if (!accountManager->isLoggedIn()) {
         qCWarning(commerce) << "Cannot set receiveAt when not logged in.";
-        QJsonObject result{ { "status", "fail" }, { "message", "Not logged in" } };
+        QJsonObject result { { "status", "fail" }, { "message", "Not logged in" } };
         emit receiveAtResult(result);
         return false; // We know right away that we will fail, so tell the caller.
     }
     QJsonObject transaction;
     transaction["public_key"] = hfc_key;
     transaction["locker"] = QString::fromUtf8(locker);
-    QJsonDocument transactionDoc{ transaction };
+    QJsonDocument transactionDoc { transaction };
     auto transactionString = transactionDoc.toJson(QJsonDocument::Compact);
     signedSend("text", transactionString, signing_key, "receive_at", "receiveAtSuccess", "receiveAtFailure");
     return true; // Note that there may still be an asynchronous signal of failure that callers might be interested in.
@@ -153,7 +142,8 @@ void Ledger::balance(const QStringList& keys) {
     keysQuery("balance", "balanceSuccess", "balanceFailure");
 }
 
-void Ledger::inventory(const QString& editionFilter, const QString& typeFilter, const QString& titleFilter, const int& page, const int& perPage) {
+void Ledger::inventory(const QString& editionFilter, const QString& typeFilter, const QString& titleFilter, const int& page,
+                       const int& perPage) {
     QJsonObject params;
     params["edition_filter"] = editionFilter;
     params["type_filter"] = typeFilter;
@@ -183,7 +173,8 @@ QString hfcString(const QJsonValue& sentValue, const QJsonValue& receivedValue) 
 }
 static const QString USER_PAGE_BASE_URL = NetworkingConstants::METAVERSE_SERVER_URL().toString() + "/users/";
 static const QString PLACE_PAGE_BASE_URL = NetworkingConstants::METAVERSE_SERVER_URL().toString() + "/places/";
-static const QStringList KNOWN_USERS(QStringList() << "highfidelity" << "marketplace");
+static const QStringList KNOWN_USERS(QStringList() << "highfidelity"
+                                                   << "marketplace");
 QString userLink(const QString& username, const QString& placename) {
     if (username.isEmpty()) {
         if (placename.isEmpty()) {
@@ -225,11 +216,9 @@ QString transactionString(const QJsonObject& valueObject) {
         if (!message.isEmpty()) {
             result += QString("<br>with memo: <i>\"%1\"</i>").arg(message);
         }
-    } else if (sentMoney <= 0 && receivedMoney <= 0 && 
-               (sentCerts > 0 || receivedCerts > 0) && 
+    } else if (sentMoney <= 0 && receivedMoney <= 0 && (sentCerts > 0 || receivedCerts > 0) &&
                !KNOWN_USERS.contains(valueObject["sender_name"].toString()) &&
-               !KNOWN_USERS.contains(valueObject["recipient_name"].toString())
-        ) {
+               !KNOWN_USERS.contains(valueObject["recipient_name"].toString())) {
         // this is a non-HFC asset transfer.
         if (sentCerts > 0) {
             if (transactionType == "escrow") {
@@ -250,7 +239,8 @@ QString transactionString(const QJsonObject& valueObject) {
     }
 
     // no matter what we append a smaller date to the bottom of this...
-    result += QString("<br><font size='-2' color='#1080B8'>%1").arg(createdAt.toLocalTime().toString(Qt::DefaultLocaleShortDate));
+    result += QString("<br><font size='-2' color='#1080B8'>%1")
+                  .arg(createdAt.toLocalTime().toString(Qt::DefaultLocaleShortDate));
     return result;
 }
 
@@ -261,7 +251,8 @@ void Ledger::historySuccess(QNetworkReply* reply) {
     // public key(s) are.  Let's keep it that way
     QByteArray response = reply->readAll();
     QJsonObject data = QJsonDocument::fromJson(response).object();
-    qInfo(commerce) << "history" << "response" << QJsonDocument(data).toJson(QJsonDocument::Compact);
+    qInfo(commerce) << "history"
+                    << "response" << QJsonDocument(data).toJson(QJsonDocument::Compact);
 
     // we will need the array of public keys from the wallet
     auto wallet = DependencyManager::get<Wallet>();
@@ -343,7 +334,7 @@ void Ledger::accountSuccess(QNetworkReply* reply) {
 
     // none of the hfc account info should be emitted
     QJsonObject json;
-    QJsonObject responseData{ { "status", "success"} };
+    QJsonObject responseData { { "status", "success" } };
     json["keyStatus"] = keyStatus;
     responseData["data"] = json;
     emit accountResult(responseData);
@@ -353,20 +344,27 @@ void Ledger::accountFailure(QNetworkReply* reply) {
     failResponse("account", reply);
 }
 void Ledger::account() {
-    send("hfc_account", "accountSuccess", "accountFailure", QNetworkAccessManager::PutOperation, AccountManagerAuth::Required, QJsonObject());
+    send("hfc_account", "accountSuccess", "accountFailure", QNetworkAccessManager::PutOperation, AccountManagerAuth::Required,
+         QJsonObject());
 }
 
 // The api/failResponse is called just for the side effect of logging.
-void Ledger::updateLocationSuccess(QNetworkReply* reply) { apiResponse("updateLocation", reply); }
-void Ledger::updateLocationFailure(QNetworkReply* reply) { failResponse("updateLocation", reply); }
-void Ledger::updateLocation(const QString& asset_id, const QString& location, const bool& alsoUpdateSiblings, const bool controlledFailure) {
+void Ledger::updateLocationSuccess(QNetworkReply* reply) {
+    apiResponse("updateLocation", reply);
+}
+void Ledger::updateLocationFailure(QNetworkReply* reply) {
+    failResponse("updateLocation", reply);
+}
+void Ledger::updateLocation(const QString& asset_id, const QString& location, const bool& alsoUpdateSiblings,
+                            const bool controlledFailure) {
     auto wallet = DependencyManager::get<Wallet>();
     auto walletScriptingInterface = DependencyManager::get<WalletScriptingInterface>();
     uint walletStatus = walletScriptingInterface->getWalletStatus();
 
     if (walletStatus != (uint)wallet->WALLET_STATUS_READY) {
         emit walletScriptingInterface->walletNotSetup();
-        qDebug(commerce) << "User attempted to update the location of a certificate, but their wallet wasn't ready. Status:" << walletStatus;
+        qDebug(commerce) << "User attempted to update the location of a certificate, but their wallet wasn't ready. Status:"
+                         << walletStatus;
     } else {
         QStringList cachedPublicKeys = wallet->listPublicKeys();
         if (!cachedPublicKeys.isEmpty()) {
@@ -377,9 +375,10 @@ void Ledger::updateLocation(const QString& asset_id, const QString& location, co
             if (alsoUpdateSiblings) {
                 transaction["also_update_siblings"] = true;
             }
-            QJsonDocument transactionDoc{ transaction };
+            QJsonDocument transactionDoc { transaction };
             auto transactionString = transactionDoc.toJson(QJsonDocument::Compact);
-            signedSend("transaction", transactionString, key, "location", "updateLocationSuccess", "updateLocationFailure", controlledFailure);
+            signedSend("transaction", transactionString, key, "location", "updateLocationSuccess", "updateLocationFailure",
+                       controlledFailure);
         } else {
             qDebug(commerce) << "User attempted to update the location of a certificate, but cachedPublicKeys was empty!";
         }
@@ -400,7 +399,8 @@ void Ledger::certificateInfoSuccess(QNetworkReply* reply) {
             replyObject.insert("isMyCert", true);
         }
     }
-    qInfo(commerce) << "certificateInfo" << "response" << QJsonDocument(replyObject).toJson(QJsonDocument::Compact);
+    qInfo(commerce) << "certificateInfo"
+                    << "response" << QJsonDocument(replyObject).toJson(QJsonDocument::Compact);
     emit certificateInfoResult(replyObject);
 }
 void Ledger::certificateInfoFailure(QNetworkReply* reply) {
@@ -410,10 +410,12 @@ void Ledger::certificateInfo(const QString& certificateId) {
     QString endpoint = "proof_of_purchase_status/transfer";
     QJsonObject request;
     request["certificate_id"] = certificateId;
-    send(endpoint, "certificateInfoSuccess", "certificateInfoFailure", QNetworkAccessManager::PutOperation, AccountManagerAuth::None, request);
+    send(endpoint, "certificateInfoSuccess", "certificateInfoFailure", QNetworkAccessManager::PutOperation,
+         AccountManagerAuth::None, request);
 }
 
-void Ledger::transferAssetToNode(const QString& hfc_key, const QString& nodeID, const QString& certificateID, const int& amount, const QString& optionalMessage) {
+void Ledger::transferAssetToNode(const QString& hfc_key, const QString& nodeID, const QString& certificateID, const int& amount,
+                                 const QString& optionalMessage) {
     QJsonObject transaction;
     transaction["public_key"] = hfc_key;
     transaction["node_id"] = nodeID;
@@ -423,16 +425,19 @@ void Ledger::transferAssetToNode(const QString& hfc_key, const QString& nodeID, 
     if (!certificateID.isEmpty()) {
         transaction["certificate_id"] = certificateID;
     }
-    QJsonDocument transactionDoc{ transaction };
+    QJsonDocument transactionDoc { transaction };
     auto transactionString = transactionDoc.toJson(QJsonDocument::Compact);
     if (certificateID.isEmpty()) {
-        signedSend("transaction", transactionString, hfc_key, "transfer_hfc_to_node", "transferAssetToNodeSuccess", "transferAssetToNodeFailure");
+        signedSend("transaction", transactionString, hfc_key, "transfer_hfc_to_node", "transferAssetToNodeSuccess",
+                   "transferAssetToNodeFailure");
     } else {
-        signedSend("transaction", transactionString, hfc_key, "transfer_asset_to_node", "transferAssetToNodeSuccess", "transferAssetToNodeFailure");
+        signedSend("transaction", transactionString, hfc_key, "transfer_asset_to_node", "transferAssetToNodeSuccess",
+                   "transferAssetToNodeFailure");
     }
 }
 
-void Ledger::transferAssetToUsername(const QString& hfc_key, const QString& username, const QString& certificateID, const int& amount, const QString& optionalMessage) {
+void Ledger::transferAssetToUsername(const QString& hfc_key, const QString& username, const QString& certificateID,
+                                     const int& amount, const QString& optionalMessage) {
     QJsonObject transaction;
     transaction["public_key"] = hfc_key;
     transaction["username"] = username;
@@ -442,16 +447,19 @@ void Ledger::transferAssetToUsername(const QString& hfc_key, const QString& user
     if (!certificateID.isEmpty()) {
         transaction["certificate_id"] = certificateID;
     }
-    QJsonDocument transactionDoc{ transaction };
+    QJsonDocument transactionDoc { transaction };
     auto transactionString = transactionDoc.toJson(QJsonDocument::Compact);
     if (certificateID.isEmpty()) {
-        signedSend("transaction", transactionString, hfc_key, "transfer_hfc_to_user", "transferAssetToUsernameSuccess", "transferAssetToUsernameFailure");
+        signedSend("transaction", transactionString, hfc_key, "transfer_hfc_to_user", "transferAssetToUsernameSuccess",
+                   "transferAssetToUsernameFailure");
     } else {
-        signedSend("transaction", transactionString, hfc_key, "transfer_asset_to_user", "transferAssetToUsernameSuccess", "transferAssetToUsernameFailure");
+        signedSend("transaction", transactionString, hfc_key, "transfer_asset_to_user", "transferAssetToUsernameSuccess",
+                   "transferAssetToUsernameFailure");
     }
 }
 
-void Ledger::authorizeAssetTransfer(const QString& hfc_key, const QString& couponID, const QString& certificateID, const int& amount, const QString& optionalMessage) {
+void Ledger::authorizeAssetTransfer(const QString& hfc_key, const QString& couponID, const QString& certificateID,
+                                    const int& amount, const QString& optionalMessage) {
     QJsonObject transaction;
     transaction["public_key"] = hfc_key;
     transaction["coupon_id"] = couponID;
@@ -460,9 +468,10 @@ void Ledger::authorizeAssetTransfer(const QString& hfc_key, const QString& coupo
     if (!certificateID.isEmpty()) {
         transaction["certificate_id"] = certificateID;
     }
-    QJsonDocument transactionDoc{ transaction };
+    QJsonDocument transactionDoc { transaction };
     auto transactionString = transactionDoc.toJson(QJsonDocument::Compact);
-    signedSend("transaction", transactionString, hfc_key, "authorize", "authorizeAssetTransferSuccess", "authorizeAssetTransferFailure");
+    signedSend("transaction", transactionString, hfc_key, "authorize", "authorizeAssetTransferSuccess",
+               "authorizeAssetTransferFailure");
 }
 
 void Ledger::alreadyOwned(const QString& marketplaceId) {
@@ -473,7 +482,8 @@ void Ledger::alreadyOwned(const QString& marketplaceId) {
     if (!cachedPublicKeys.isEmpty()) {
         request["public_keys"] = QJsonArray::fromStringList(wallet->listPublicKeys());
         request["marketplace_item_id"] = marketplaceId;
-        send(endpoint, "alreadyOwnedSuccess", "alreadyOwnedFailure", QNetworkAccessManager::PutOperation, AccountManagerAuth::Required, request);
+        send(endpoint, "alreadyOwnedSuccess", "alreadyOwnedFailure", QNetworkAccessManager::PutOperation,
+             AccountManagerAuth::Required, request);
     } else {
         qDebug(commerce) << "User attempted to use the alreadyOwned endpoint, but cachedPublicKeys was empty!";
     }
@@ -489,14 +499,15 @@ void Ledger::getAvailableUpdates(const QString& itemId, const int& pageNumber, c
     }
     request["per_page"] = itemsPerPage;
     request["page"] = pageNumber;
-    send(endpoint, "availableUpdatesSuccess", "availableUpdatesFailure", QNetworkAccessManager::PutOperation, AccountManagerAuth::Required, request);
+    send(endpoint, "availableUpdatesSuccess", "availableUpdatesFailure", QNetworkAccessManager::PutOperation,
+         AccountManagerAuth::Required, request);
 }
 
 void Ledger::updateItem(const QString& hfc_key, const QString& certificate_id) {
     QJsonObject transaction;
     transaction["public_key"] = hfc_key;
     transaction["certificate_id"] = certificate_id;
-    QJsonDocument transactionDoc{ transaction };
+    QJsonDocument transactionDoc { transaction };
     auto transactionString = transactionDoc.toJson(QJsonDocument::Compact);
     signedSend("transaction", transactionString, hfc_key, "update_item", "updateItemSuccess", "updateItemFailure");
 }

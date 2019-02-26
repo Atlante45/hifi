@@ -18,8 +18,8 @@
 #include <QtCore/QStandardPaths>
 #include <QtCore/QThread>
 
-#include <LogHandler.h>
 #include <HifiConfigVariantMap.h>
+#include <LogHandler.h>
 #include <SharedUtil.h>
 #include <ShutdownEventListener.h>
 
@@ -27,19 +27,17 @@
 #include "AssignmentClient.h"
 #include "AssignmentClientMonitor.h"
 
-AssignmentClientApp::AssignmentClientApp(int argc, char* argv[]) :
-    QCoreApplication(argc, argv)
-{
-#   ifndef WIN32
+AssignmentClientApp::AssignmentClientApp(int argc, char* argv[]) : QCoreApplication(argc, argv) {
+#ifndef WIN32
     setvbuf(stdout, NULL, _IOLBF, 0);
-#   endif
+#endif
 
     // setup a shutdown event listener to handle SIGTERM or WM_CLOSE for us
-#   ifdef _WIN32
+#ifdef _WIN32
     installNativeEventFilter(&ShutdownEventListener::getInstance());
-#   else
+#else
     ShutdownEventListener::getInstance();
-#   endif
+#endif
 
     // parse command-line
     QCommandLineParser parser;
@@ -48,9 +46,8 @@ AssignmentClientApp::AssignmentClientApp(int argc, char* argv[]) :
     const QCommandLineOption versionOption = parser.addVersionOption();
 
     QString typeDescription = "run single assignment client of given type\n# | Type\n============================";
-    for (Assignment::Type type = Assignment::FirstType;
-        type != Assignment::AllTypes;
-        type = static_cast<Assignment::Type>(static_cast<int>(type) + 1)) {
+    for (Assignment::Type type = Assignment::FirstType; type != Assignment::AllTypes;
+         type = static_cast<Assignment::Type>(static_cast<int>(type) + 1)) {
         typeDescription.append(QStringLiteral("\n%1 | %2").arg(QString::number(type), Assignment::typeToString(type)));
     }
     const QCommandLineOption clientTypeOption(ASSIGNMENT_TYPE_OVERRIDE_OPTION, typeDescription, "type");
@@ -64,16 +61,16 @@ AssignmentClientApp::AssignmentClientApp(int argc, char* argv[]) :
                                         "UDP port for this assignment client (or monitor)", "port");
     parser.addOption(portOption);
 
-    const QCommandLineOption walletDestinationOption(ASSIGNMENT_WALLET_DESTINATION_ID_OPTION,
-                                                     "set wallet destination", "wallet-uuid");
+    const QCommandLineOption walletDestinationOption(ASSIGNMENT_WALLET_DESTINATION_ID_OPTION, "set wallet destination",
+                                                     "wallet-uuid");
     parser.addOption(walletDestinationOption);
 
     const QCommandLineOption assignmentServerHostnameOption(CUSTOM_ASSIGNMENT_SERVER_HOSTNAME_OPTION,
                                                             "set assignment-server hostname", "hostname");
     parser.addOption(assignmentServerHostnameOption);
 
-    const QCommandLineOption assignmentServerPortOption(CUSTOM_ASSIGNMENT_SERVER_PORT_OPTION,
-                                                        "set assignment-server port", "port");
+    const QCommandLineOption assignmentServerPortOption(CUSTOM_ASSIGNMENT_SERVER_PORT_OPTION, "set assignment-server port",
+                                                        "port");
     parser.addOption(assignmentServerPortOption);
 
     const QCommandLineOption numChildsOption(ASSIGNMENT_NUM_FORKS_OPTION, "number of children to fork", "child-count");
@@ -151,13 +148,12 @@ AssignmentClientApp::AssignmentClientApp(int argc, char* argv[]) :
         logDirectory = parser.value(logDirectoryOption);
     }
 
-
     Assignment::Type requestAssignmentType = Assignment::AllTypes;
     if (argumentVariantMap.contains(ASSIGNMENT_TYPE_OVERRIDE_OPTION)) {
-        requestAssignmentType = (Assignment::Type) argumentVariantMap.value(ASSIGNMENT_TYPE_OVERRIDE_OPTION).toInt();
+        requestAssignmentType = (Assignment::Type)argumentVariantMap.value(ASSIGNMENT_TYPE_OVERRIDE_OPTION).toInt();
     }
     if (parser.isSet(clientTypeOption)) {
-        requestAssignmentType = (Assignment::Type) parser.value(clientTypeOption).toInt();
+        requestAssignmentType = (Assignment::Type)parser.value(clientTypeOption).toInt();
     }
 
     QString assignmentPool;
@@ -233,16 +229,15 @@ AssignmentClientApp::AssignmentClientApp(int argc, char* argv[]) :
     DependencyManager::registerInheritance<LimitedNodeList, NodeList>();
 
     if (numForks || minForks || maxForks) {
-        AssignmentClientMonitor* monitor =  new AssignmentClientMonitor(numForks, minForks, maxForks,
-                                                                        requestAssignmentType, assignmentPool,
-                                                                        listenPort, walletUUID, assignmentServerHostname,
-                                                                        assignmentServerPort, httpStatusPort, logDirectory);
+        AssignmentClientMonitor* monitor = new AssignmentClientMonitor(numForks, minForks, maxForks, requestAssignmentType,
+                                                                       assignmentPool, listenPort, walletUUID,
+                                                                       assignmentServerHostname, assignmentServerPort,
+                                                                       httpStatusPort, logDirectory);
         monitor->setParent(this);
         connect(this, &QCoreApplication::aboutToQuit, monitor, &AssignmentClientMonitor::aboutToQuit);
     } else {
-        AssignmentClient* client = new AssignmentClient(requestAssignmentType, assignmentPool, listenPort,
-                                                        walletUUID, assignmentServerHostname,
-                                                        assignmentServerPort, monitorPort);
+        AssignmentClient* client = new AssignmentClient(requestAssignmentType, assignmentPool, listenPort, walletUUID,
+                                                        assignmentServerHostname, assignmentServerPort, monitorPort);
         client->setParent(this);
         connect(this, &QCoreApplication::aboutToQuit, client, &AssignmentClient::aboutToQuit);
     }

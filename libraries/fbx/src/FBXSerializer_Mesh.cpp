@@ -10,28 +10,28 @@
 //
 
 #ifdef _WIN32
-#pragma warning( push )
-#pragma warning( disable : 4267 )
+#pragma warning(push)
+#pragma warning(disable : 4267)
 #endif
 
 #include <draco/compression/decode.h>
 
 #ifdef _WIN32
-#pragma warning( pop )
+#pragma warning(pop)
 #endif
 
-#include <iostream>
+#include <LogHandler.h>
+#include <hfm/ModelFormatLogging.h>
 #include <QBuffer>
 #include <QDataStream>
+#include <QFileInfo>
+#include <QHash>
 #include <QIODevice>
 #include <QStringList>
 #include <QTextStream>
 #include <QtDebug>
 #include <QtEndian>
-#include <QFileInfo>
-#include <QHash>
-#include <LogHandler.h>
-#include <hfm/ModelFormatLogging.h>
+#include <iostream>
 
 #include "FBXSerializer.h"
 
@@ -75,7 +75,7 @@ public:
     QVector<int> normalIndices;
 
     bool colorsByVertex;
-    glm::vec4 averageColor{1.0f, 1.0f, 1.0f, 1.0f};
+    glm::vec4 averageColor { 1.0f, 1.0f, 1.0f, 1.0f };
     QVector<glm::vec4> colors;
     QVector<int> colorIndices;
 
@@ -87,7 +87,6 @@ public:
     std::vector<AttributeData> attributes;
 };
 
-
 void appendIndex(MeshData& data, QVector<int>& indices, int index, bool deduplicate) {
     if (index >= data.polygonIndices.size()) {
         return;
@@ -98,7 +97,7 @@ void appendIndex(MeshData& data, QVector<int>& indices, int index, bool deduplic
     }
     Vertex vertex;
     vertex.originalIndex = vertexIndex;
-    
+
     glm::vec3 position;
     if (vertexIndex < data.vertices.size()) {
         position = data.vertices.at(vertexIndex);
@@ -106,7 +105,7 @@ void appendIndex(MeshData& data, QVector<int>& indices, int index, bool deduplic
 
     glm::vec3 normal;
     int normalIndex = data.normalsByVertex ? vertexIndex : index;
-    if (data.normalIndices.isEmpty()) {    
+    if (data.normalIndices.isEmpty()) {
         if (normalIndex < data.normals.size()) {
             normal = data.normals.at(normalIndex);
         }
@@ -117,12 +116,11 @@ void appendIndex(MeshData& data, QVector<int>& indices, int index, bool deduplic
         }
     }
 
-
     glm::vec4 color;
     bool hasColors = (data.colors.size() > 1);
     if (hasColors) {
         int colorIndex = data.colorsByVertex ? vertexIndex : index;
-        if (data.colorIndices.isEmpty()) {    
+        if (data.colorIndices.isEmpty()) {
             if (colorIndex < data.colors.size()) {
                 color = data.colors.at(colorIndex);
             }
@@ -144,7 +142,7 @@ void appendIndex(MeshData& data, QVector<int>& indices, int index, bool deduplic
             vertex.texCoord = data.texCoords.at(texCoordIndex);
         }
     }
-    
+
     bool hasMoreTexcoords = (data.attributes.size() > 1);
     if (hasMoreTexcoords) {
         if (data.attributes[1].texCoordIndices.empty()) {
@@ -214,7 +212,7 @@ ExtractedMesh FBXSerializer::extractMesh(const FBXNode& object, unsigned int& me
 
                 } else if (subdata.name == "MappingInformationType" && subdata.properties.at(0) == BY_VERTICE) {
                     data.normalsByVertex = true;
-                    
+
                 } else if (subdata.name == "ReferenceInformationType" && subdata.properties.at(0) == INDEX_TO_DIRECT) {
                     indexToDirect = true;
                 }
@@ -234,7 +232,7 @@ ExtractedMesh FBXSerializer::extractMesh(const FBXNode& object, unsigned int& me
 
                 } else if (subdata.name == "MappingInformationType" && subdata.properties.at(0) == BY_VERTICE) {
                     data.colorsByVertex = true;
-                    
+
                 } else if (subdata.name == "ReferenceInformationType" && subdata.properties.at(0) == INDEX_TO_DIRECT) {
                     indexToDirect = true;
                 }
@@ -256,7 +254,7 @@ ExtractedMesh FBXSerializer::extractMesh(const FBXNode& object, unsigned int& me
                 qCDebug(modelformat) << "LayerElementColor has an average value of 0.0f... let's forget it.";
             }
 #endif
-         
+
         } else if (child.name == "LayerElementUV") {
             if (child.properties.at(0).toInt() == 0) {
                 AttributeData attrib;
@@ -270,14 +268,13 @@ ExtractedMesh FBXSerializer::extractMesh(const FBXNode& object, unsigned int& me
                         attrib.texCoordIndices = getIntVector(subdata);
                     } else if (subdata.name == "Name") {
                         attrib.name = subdata.properties.at(0).toString();
-                    } 
+                    }
 #if defined(DEBUG_FBXSERIALIZER)
                     else {
                         int unknown = 0;
                         QString subname = subdata.name.data();
-                        if ( (subdata.name == "Version")
-                             || (subdata.name == "MappingInformationType")
-                             || (subdata.name == "ReferenceInformationType") ) {
+                        if ((subdata.name == "Version") || (subdata.name == "MappingInformationType") ||
+                            (subdata.name == "ReferenceInformationType")) {
                         } else {
                             unknown++;
                         }
@@ -294,16 +291,15 @@ ExtractedMesh FBXSerializer::extractMesh(const FBXNode& object, unsigned int& me
                         attrib.texCoords = createVec2Vector(getDoubleVector(subdata));
                     } else if (subdata.name == "UVIndex") {
                         attrib.texCoordIndices = getIntVector(subdata);
-                    } else if  (subdata.name == "Name") {
+                    } else if (subdata.name == "Name") {
                         attrib.name = subdata.properties.at(0).toString();
                     }
 #if defined(DEBUG_FBXSERIALIZER)
                     else {
                         int unknown = 0;
                         QString subname = subdata.name.data();
-                        if ( (subdata.name == "Version")
-                             || (subdata.name == "MappingInformationType")
-                             || (subdata.name == "ReferenceInformationType") ) {
+                        if ((subdata.name == "Version") || (subdata.name == "MappingInformationType") ||
+                            (subdata.name == "ReferenceInformationType")) {
                         } else {
                             unknown++;
                         }
@@ -317,7 +313,8 @@ ExtractedMesh FBXSerializer::extractMesh(const FBXNode& object, unsigned int& me
                     data.attributes.push_back(attrib);
                 } else {
                     // WTF same names for different UVs?
-                    qCDebug(modelformat) << "LayerElementUV #" << attrib.index << " is reusing the same name as #" << (*it) << ". Skip this texcoord attribute.";
+                    qCDebug(modelformat) << "LayerElementUV #" << attrib.index << " is reusing the same name as #" << (*it)
+                                         << ". Skip this texcoord attribute.";
                 }
             }
         } else if (child.name == "LayerElementMaterial") {
@@ -333,7 +330,6 @@ ExtractedMesh FBXSerializer::extractMesh(const FBXNode& object, unsigned int& me
                     isMaterialPerPolygon = false;
                 }
             }
-
 
         } else if (child.name == "LayerElementTexture") {
             foreach (const FBXNode& subdata, child.children) {
@@ -418,8 +414,8 @@ ExtractedMesh FBXSerializer::extractMesh(const FBXNode& object, unsigned int& me
                     // some meshes have a second set of UVs, read those to extracted mesh
                     auto mappedIndex = extraTexCoordAttribute->mapped_index(vertexIndex);
 
-                    extraTexCoordAttribute->ConvertValue<float, 2>(mappedIndex,
-                                                                   reinterpret_cast<float*>(&data.extracted.mesh.texCoords1[i]));
+                    extraTexCoordAttribute->ConvertValue<float, 2>(mappedIndex, reinterpret_cast<float*>(
+                                                                                    &data.extracted.mesh.texCoords1[i]));
                 }
 
                 if (colorAttribute) {
@@ -491,7 +487,8 @@ ExtractedMesh FBXSerializer::extractMesh(const FBXNode& object, unsigned int& me
         QHash<QPair<int, int>, int> materialTextureParts;
         for (int beginIndex = 0; beginIndex < data.polygonIndices.size(); polygonIndex++) {
             int endIndex = beginIndex;
-            while (endIndex < data.polygonIndices.size() && data.polygonIndices.at(endIndex++) >= 0);
+            while (endIndex < data.polygonIndices.size() && data.polygonIndices.at(endIndex++) >= 0)
+                ;
 
             QPair<int, int> materialTexture((polygonIndex < materials.size()) ? materials.at(polygonIndex) : 0,
                                             (polygonIndex < textures.size()) ? textures.at(polygonIndex) : 0);
@@ -531,7 +528,7 @@ ExtractedMesh FBXSerializer::extractMesh(const FBXNode& object, unsigned int& me
                 part.quadTrianglesIndices.append(i3);
 
             } else {
-                for (int nextIndex = beginIndex + 1;; ) {
+                for (int nextIndex = beginIndex + 1;;) {
                     appendIndex(data, part.triangleIndices, beginIndex, deduplicate);
                     appendIndex(data, part.triangleIndices, nextIndex++, deduplicate);
                     appendIndex(data, part.triangleIndices, nextIndex, deduplicate);
@@ -543,6 +540,6 @@ ExtractedMesh FBXSerializer::extractMesh(const FBXNode& object, unsigned int& me
             }
         }
     }
-    
+
     return data.extracted;
 }

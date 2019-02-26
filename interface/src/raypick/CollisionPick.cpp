@@ -20,13 +20,15 @@ PickResultPointer CollisionPickResult::compareAndProcessNewResult(const PickResu
     const std::shared_ptr<CollisionPickResult> newCollisionResult = std::static_pointer_cast<CollisionPickResult>(newRes);
 
     if (entityIntersections.size()) {
-        entityIntersections.insert(entityIntersections.cend(), newCollisionResult->entityIntersections.begin(), newCollisionResult->entityIntersections.end());
+        entityIntersections.insert(entityIntersections.cend(), newCollisionResult->entityIntersections.begin(),
+                                   newCollisionResult->entityIntersections.end());
     } else {
         entityIntersections = newCollisionResult->entityIntersections;
     }
 
     if (avatarIntersections.size()) {
-        avatarIntersections.insert(avatarIntersections.cend(), newCollisionResult->avatarIntersections.begin(), newCollisionResult->avatarIntersections.end());
+        avatarIntersections.insert(avatarIntersections.cend(), newCollisionResult->avatarIntersections.begin(),
+                                   newCollisionResult->avatarIntersections.end());
     } else {
         avatarIntersections = newCollisionResult->avatarIntersections;
     }
@@ -36,7 +38,9 @@ PickResultPointer CollisionPickResult::compareAndProcessNewResult(const PickResu
     return std::make_shared<CollisionPickResult>(*this);
 }
 
-void buildObjectIntersectionsMap(IntersectionType intersectionType, const std::vector<ContactTestResult>& objectIntersections, std::unordered_map<QUuid, QVariantMap>& intersections, std::unordered_map<QUuid, QVariantList>& collisionPointPairs) {
+void buildObjectIntersectionsMap(IntersectionType intersectionType, const std::vector<ContactTestResult>& objectIntersections,
+                                 std::unordered_map<QUuid, QVariantMap>& intersections,
+                                 std::unordered_map<QUuid, QVariantList>& collisionPointPairs) {
     for (auto& objectIntersection : objectIntersections) {
         auto at = intersections.find(objectIntersection.foundID);
         if (at == intersections.end()) {
@@ -103,7 +107,8 @@ bool CollisionPick::getShapeInfoReady(const CollisionRegion& pick) {
     return _mathPick.loaded;
 }
 
-void CollisionPick::computeShapeInfoDimensionsOnly(const CollisionRegion& pick, ShapeInfo& shapeInfo, QSharedPointer<GeometryResource> resource) {
+void CollisionPick::computeShapeInfoDimensionsOnly(const CollisionRegion& pick, ShapeInfo& shapeInfo,
+                                                   QSharedPointer<GeometryResource> resource) {
     ShapeType type = shapeInfo.getType();
     glm::vec3 dimensions = pick.transform.getScale();
     QString modelURL = (resource ? resource->getURL().toString() : "");
@@ -116,7 +121,8 @@ void CollisionPick::computeShapeInfoDimensionsOnly(const CollisionRegion& pick, 
     }
 }
 
-void CollisionPick::computeShapeInfo(const CollisionRegion& pick, ShapeInfo& shapeInfo, QSharedPointer<GeometryResource> resource) {
+void CollisionPick::computeShapeInfo(const CollisionRegion& pick, ShapeInfo& shapeInfo,
+                                     QSharedPointer<GeometryResource> resource) {
     // This code was copied and modified from RenderableModelEntityItem::computeShapeInfo
     // TODO: Move to some shared code area (in entities-renderer? model-networking?)
     // after we verify this is working and do a diff comparison with RenderableModelEntityItem::computeShapeInfo
@@ -130,7 +136,7 @@ void CollisionPick::computeShapeInfo(const CollisionRegion& pick, ShapeInfo& sha
     if (type == SHAPE_TYPE_COMPOUND) {
         // should never fall in here when collision model not fully loaded
         // TODO: assert that all geometries exist and are loaded
-        //assert(_model && _model->isLoaded() && _compoundShapeResource && _compoundShapeResource->isLoaded());
+        // assert(_model && _model->isLoaded() && _compoundShapeResource && _compoundShapeResource->isLoaded());
         const HFMModel& collisionModel = resource->getHFMModel();
 
         ShapeInfo::PointCollection& pointCollection = shapeInfo.getPointCollection();
@@ -141,14 +147,14 @@ void CollisionPick::computeShapeInfo(const CollisionRegion& pick, ShapeInfo& sha
         // to find one actual "mesh" (with one or more meshParts in it), but we loop over the meshes, just in case.
         foreach (const HFMMesh& mesh, collisionModel.meshes) {
             // each meshPart is a convex hull
-            foreach (const HFMMeshPart &meshPart, mesh.parts) {
+            foreach (const HFMMeshPart& meshPart, mesh.parts) {
                 pointCollection.push_back(QVector<glm::vec3>());
                 ShapeInfo::PointList& pointsInPart = pointCollection[i];
 
                 // run through all the triangles and (uniquely) add each point to the hull
                 uint32_t numIndices = (uint32_t)meshPart.triangleIndices.size();
                 // TODO: assert rather than workaround after we start sanitizing HFMMesh higher up
-                //assert(numIndices % TRIANGLE_STRIDE == 0);
+                // assert(numIndices % TRIANGLE_STRIDE == 0);
                 numIndices -= numIndices % TRIANGLE_STRIDE; // WORKAROUND lack of sanity checking in FBXSerializer
 
                 for (uint32_t j = 0; j < numIndices; j += TRIANGLE_STRIDE) {
@@ -169,7 +175,7 @@ void CollisionPick::computeShapeInfo(const CollisionRegion& pick, ShapeInfo& sha
                 // run through all the quads and (uniquely) add each point to the hull
                 numIndices = (uint32_t)meshPart.quadIndices.size();
                 // TODO: assert rather than workaround after we start sanitizing HFMMesh higher up
-                //assert(numIndices % QUAD_STRIDE == 0);
+                // assert(numIndices % QUAD_STRIDE == 0);
                 numIndices -= numIndices % QUAD_STRIDE; // WORKAROUND lack of sanity checking in FBXSerializer
 
                 for (uint32_t j = 0; j < numIndices; j += QUAD_STRIDE) {
@@ -225,7 +231,8 @@ void CollisionPick::computeShapeInfo(const CollisionRegion& pick, ShapeInfo& sha
         }
         const int32_t MAX_VERTICES_PER_STATIC_MESH = 1e6;
         if (totalNumVertices > MAX_VERTICES_PER_STATIC_MESH) {
-            qWarning() << "model" << "has too many vertices" << totalNumVertices << "and will collide as a box.";
+            qWarning() << "model"
+                       << "has too many vertices" << totalNumVertices << "and will collide as a box.";
             shapeInfo.setParams(SHAPE_TYPE_BOX, 0.5f * dimensions);
             return;
         }
@@ -304,7 +311,7 @@ void CollisionPick::computeShapeInfo(const CollisionRegion& pick, ShapeInfo& sha
                     std::set<int32_t> uniqueIndices;
                     auto numIndices = meshPart.triangleIndices.count();
                     // TODO: assert rather than workaround after we start sanitizing HFMMesh higher up
-                    //assert(numIndices% TRIANGLE_STRIDE == 0);
+                    // assert(numIndices% TRIANGLE_STRIDE == 0);
                     numIndices -= numIndices % TRIANGLE_STRIDE; // WORKAROUND lack of sanity checking in FBXSerializer
 
                     auto indexItr = meshPart.triangleIndices.cbegin();
@@ -345,7 +352,8 @@ void CollisionPick::computeShapeInfo(const CollisionRegion& pick, ShapeInfo& sha
     }
 }
 
-CollisionPick::CollisionPick(const PickFilter& filter, float maxDistance, bool enabled, bool scaleWithParent, CollisionRegion collisionRegion, PhysicsEnginePointer physicsEngine) :
+CollisionPick::CollisionPick(const PickFilter& filter, float maxDistance, bool enabled, bool scaleWithParent,
+                             CollisionRegion collisionRegion, PhysicsEnginePointer physicsEngine) :
     Pick(collisionRegion, filter, maxDistance, enabled),
     _scaleWithParent(scaleWithParent),
     _physicsEngine(physicsEngine) {
@@ -367,7 +375,8 @@ CollisionRegion CollisionPick::getMathematicalPick() const {
             float largestDimension = glm::max(glm::max(scale.x, scale.y), scale.z);
             mathPick.threshold *= largestDimension;
         } else {
-            // We need to undo parent scaling after-the-fact because the parent's scale was needed to calculate this mathPick's position
+            // We need to undo parent scaling after-the-fact because the parent's scale was needed to calculate this mathPick's
+            // position
             mathPick.transform.setScale(_mathPick.transform.getScale());
         }
     }
@@ -400,11 +409,13 @@ void CollisionPick::filterIntersections(std::vector<ContactTestResult>& intersec
 PickResultPointer CollisionPick::getEntityIntersection(const CollisionRegion& pick) {
     if (!pick.loaded) {
         // Cannot compute result
-        return std::make_shared<CollisionPickResult>(pick.toVariantMap(), std::vector<ContactTestResult>(), std::vector<ContactTestResult>());
+        return std::make_shared<CollisionPickResult>(pick.toVariantMap(), std::vector<ContactTestResult>(),
+                                                     std::vector<ContactTestResult>());
     }
     getShapeInfoReady(pick);
-    
-    auto entityIntersections = _physicsEngine->contactTest(USER_COLLISION_MASK_ENTITIES, *_mathPick.shapeInfo, pick.transform, pick.collisionGroup, pick.threshold);
+
+    auto entityIntersections = _physicsEngine->contactTest(USER_COLLISION_MASK_ENTITIES, *_mathPick.shapeInfo, pick.transform,
+                                                           pick.collisionGroup, pick.threshold);
     filterIntersections(entityIntersections);
     return std::make_shared<CollisionPickResult>(pick, entityIntersections, std::vector<ContactTestResult>());
 }
@@ -415,8 +426,9 @@ PickResultPointer CollisionPick::getAvatarIntersection(const CollisionRegion& pi
         return std::make_shared<CollisionPickResult>(pick, std::vector<ContactTestResult>(), std::vector<ContactTestResult>());
     }
     getShapeInfoReady(pick);
-    
-    auto avatarIntersections = _physicsEngine->contactTest(USER_COLLISION_MASK_AVATARS, *_mathPick.shapeInfo, pick.transform, pick.collisionGroup, pick.threshold);
+
+    auto avatarIntersections = _physicsEngine->contactTest(USER_COLLISION_MASK_AVATARS, *_mathPick.shapeInfo, pick.transform,
+                                                           pick.collisionGroup, pick.threshold);
     filterIntersections(avatarIntersections);
     return std::make_shared<CollisionPickResult>(pick, std::vector<ContactTestResult>(), avatarIntersections);
 }

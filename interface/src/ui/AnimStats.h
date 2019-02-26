@@ -9,8 +9,8 @@
 #ifndef hifi_AnimStats_h
 #define hifi_AnimStats_h
 
-#include <OffscreenQmlElement.h>
 #include <AnimContext.h>
+#include <OffscreenQmlElement.h>
 
 class AnimStats : public QQuickItem {
     Q_OBJECT
@@ -61,11 +61,11 @@ signals:
 
 private:
     QStringList _animAlphaValues;
-    AnimContext::DebugAlphaMap _prevDebugAlphaMap;  // alpha values from previous frame
+    AnimContext::DebugAlphaMap _prevDebugAlphaMap; // alpha values from previous frame
     std::map<QString, qint64> _animAlphaValueChangedTimers; // last time alpha value has changed
 
     QStringList _animVarsList;
-    std::map<QString, QString> _prevAnimVars;  // anim vars from previous frame
+    std::map<QString, QString> _prevAnimVars; // anim vars from previous frame
     std::map<QString, qint64> _animVarChangedTimers; // last time animVar value has changed.
 
     QStringList _animStateMachines;

@@ -25,7 +25,6 @@ class SoundEffect : public QQuickItem {
     Q_PROPERTY(QUrl source READ getSource WRITE setSource)
     Q_PROPERTY(float volume READ getVolume WRITE setVolume)
 public:
-
     virtual ~SoundEffect();
 
     QUrl getSource() const;
@@ -35,6 +34,7 @@ public:
     void setVolume(float volume);
 
     Q_INVOKABLE void play(QVariant position);
+
 protected:
     QUrl _url;
     float _volume { 1.0f };
@@ -42,4 +42,4 @@ protected:
     AudioInjectorPointer _injector;
 };
 
-#endif  // hifi_SoundEffect_h
+#endif // hifi_SoundEffect_h

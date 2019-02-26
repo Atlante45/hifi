@@ -11,8 +11,8 @@
 
 #include <glm/glm.hpp>
 
-#include "Application.h"
 #include <DependencyManager.h>
+#include "Application.h"
 #include "avatar/AvatarManager.h"
 
 #include <controllers/StandardControls.h>
@@ -36,16 +36,16 @@ struct SideData {
     }
 };
 
-static const std::array<SideData, 2> SIDES{ { { "LeftHandIndex4",
-                                                "_CAMERA_RELATIVE_CONTROLLER_LEFTHAND",
-                                                controller::StandardPoseChannel::LEFT_HAND,
-                                                controller::Hand::LEFT,
-                                                { -0.04f, 0.13f, 0.039f } },
-                                              { "RightHandIndex4",
-                                                "_CAMERA_RELATIVE_CONTROLLER_RIGHTHAND",
-                                                controller::StandardPoseChannel::RIGHT_HAND,
-                                                controller::Hand::RIGHT,
-                                                { 0.04f, 0.13f, 0.039f } } } };
+static const std::array<SideData, 2> SIDES { { { "LeftHandIndex4",
+                                                 "_CAMERA_RELATIVE_CONTROLLER_LEFTHAND",
+                                                 controller::StandardPoseChannel::LEFT_HAND,
+                                                 controller::Hand::LEFT,
+                                                 { -0.04f, 0.13f, 0.039f } },
+                                               { "RightHandIndex4",
+                                                 "_CAMERA_RELATIVE_CONTROLLER_RIGHTHAND",
+                                                 controller::StandardPoseChannel::RIGHT_HAND,
+                                                 controller::Hand::RIGHT,
+                                                 { 0.04f, 0.13f, 0.039f } } } };
 
 std::shared_ptr<PickResult> StylusPickResult::compareAndProcessNewResult(const std::shared_ptr<PickResult>& newRes) {
     auto newStylusResult = std::static_pointer_cast<StylusPickResult>(newRes);
@@ -61,8 +61,7 @@ bool StylusPickResult::checkOrFilterAgainstMaxDistance(float maxDistance) {
 }
 
 StylusPick::StylusPick(Side side, const PickFilter& filter, float maxDistance, bool enabled, const glm::vec3& tipOffset) :
-    Pick(StylusTip(side, tipOffset), filter, maxDistance, enabled)
-{
+    Pick(StylusTip(side, tipOffset), filter, maxDistance, enabled) {
 }
 
 static StylusTip getFingerWorldLocation(Side side) {
@@ -87,8 +86,8 @@ static StylusTip getFingerWorldLocation(Side side) {
 
 // controllerWorldLocation is where the controller would be, in-world, with an added offset
 static StylusTip getControllerWorldLocation(Side side, const glm::vec3& tipOffset) {
-    static const std::array<controller::Input, 2> INPUTS{ { UserInputMapper::makeStandardInput(SIDES[0].channel),
-                                                           UserInputMapper::makeStandardInput(SIDES[1].channel) } };
+    static const std::array<controller::Input, 2> INPUTS { { UserInputMapper::makeStandardInput(SIDES[0].channel),
+                                                             UserInputMapper::makeStandardInput(SIDES[1].channel) } };
     const auto sideIndex = index(side);
     const auto& input = INPUTS[sideIndex];
 
@@ -106,7 +105,8 @@ static StylusTip getControllerWorldLocation(Side side, const glm::vec3& tipOffse
         const auto avatarPosition = myAvatar->getWorldPosition();
         result.orientation = avatarOrientation * myAvatar->getAbsoluteJointRotationInObjectFrame(controllerJointIndex);
 
-        result.position = avatarPosition + (avatarOrientation * myAvatar->getAbsoluteJointTranslationInObjectFrame(controllerJointIndex));
+        result.position = avatarPosition +
+                          (avatarOrientation * myAvatar->getAbsoluteJointTranslationInObjectFrame(controllerJointIndex));
         // add to the real position so the grab-point is out in front of the hand, a bit
         result.position += result.orientation * (sideData.grabPointSphereOffset * sensorScaleFactor);
         // move the stylus forward a bit
@@ -116,7 +116,8 @@ static StylusTip getControllerWorldLocation(Side side, const glm::vec3& tipOffse
         // compute tip velocity from hand controller motion, it is more accurate than computing it from previous positions.
         auto worldControllerLinearVel = avatarOrientation * pose.velocity;
         auto worldControllerAngularVel = avatarOrientation * pose.angularVelocity;
-        result.velocity = worldControllerLinearVel + glm::cross(worldControllerAngularVel, result.position - worldControllerPos);
+        result.velocity = worldControllerLinearVel +
+                          glm::cross(worldControllerAngularVel, result.position - worldControllerPos);
     }
 
     return result;
@@ -162,8 +163,8 @@ PickResultPointer StylusPick::getEntityIntersection(const StylusTip& pick) {
             const auto entityDimensions = entity->getScaledDimensions();
             const auto entityRegistrationPoint = entity->getRegistrationPoint();
             glm::vec3 intersection = pick.position - (normal * distance);
-            glm::vec2 pos2D = RayPick::projectOntoXYPlane(intersection, entityPosition, entityRotation,
-                                                          entityDimensions, entityRegistrationPoint, false);
+            glm::vec2 pos2D = RayPick::projectOntoXYPlane(intersection, entityPosition, entityRotation, entityDimensions,
+                                                          entityRegistrationPoint, false);
             if (pos2D == glm::clamp(pos2D, glm::vec2(0), glm::vec2(1))) {
                 IntersectionType type = IntersectionType::ENTITY;
                 if (getFilter().doesPickLocalEntities()) {

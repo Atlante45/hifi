@@ -14,10 +14,10 @@
 
 #include <mutex>
 
-#include <QtGlobal>
+#include <QtCore/QCoreApplication>
 #include <QtCore/QMimeData>
 #include <QtCore/QUrl>
-#include <QtCore/QCoreApplication>
+#include <QtGlobal>
 
 #include <QtGui/QKeyEvent>
 #include <QtGui/QPaintEngine>
@@ -27,10 +27,10 @@
 #include "GLHelpers.h"
 
 class GLPaintEngine : public QPaintEngine {
-    bool begin(QPaintDevice *pdev) override { return true; }
-    bool end() override { return true; } 
-    void updateState(const QPaintEngineState &state) override { }
-    void drawPixmap(const QRectF &r, const QPixmap &pm, const QRectF &sr) override { }
+    bool begin(QPaintDevice* pdev) override { return true; }
+    bool end() override { return true; }
+    void updateState(const QPaintEngineState& state) override {}
+    void drawPixmap(const QRectF& r, const QPixmap& pm, const QRectF& sr) override {}
     Type type() const override { return OpenGL2; }
 };
 
@@ -130,8 +130,7 @@ bool GLWidget::eventFilter(QObject*, QEvent* event) {
     switch (event->type()) {
         case QEvent::KeyPress:
         case QEvent::KeyRelease:
-        case QEvent::ShortcutOverride:
-        {
+        case QEvent::ShortcutOverride: {
             QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
             if (keyEvent->key() == Qt::Key_Alt || keyEvent->key() == Qt::Key_Meta) {
                 if (event->type() == QEvent::KeyPress) {
@@ -150,8 +149,7 @@ bool GLWidget::eventFilter(QObject*, QEvent* event) {
     return false;
 }
 
-
-bool GLWidget::nativeEvent(const QByteArray &eventType, void *message, long *result) {
+bool GLWidget::nativeEvent(const QByteArray& eventType, void* message, long* result) {
 #ifdef Q_OS_WIN32
     MSG* win32message = static_cast<MSG*>(message);
     switch (win32message->message) {
@@ -159,7 +157,7 @@ bool GLWidget::nativeEvent(const QByteArray &eventType, void *message, long *res
             *result = 1L;
             return TRUE;
 
-        default: 
+        default:
             break;
     }
 #endif

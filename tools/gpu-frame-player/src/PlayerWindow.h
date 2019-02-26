@@ -7,8 +7,8 @@
 //
 
 #pragma once
-#include <QtGui/QWindow>
 #include <QtCore/QSettings>
+#include <QtGui/QWindow>
 
 #include <gpu/Forward.h>
 #include "RenderThread.h"
@@ -16,7 +16,6 @@
 // Create a simple OpenGL window that renders text in various ways
 class PlayerWindow : public QWindow {
 public:
-
     PlayerWindow();
     virtual ~PlayerWindow();
 

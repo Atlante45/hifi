@@ -16,11 +16,11 @@
 
 #include <mutex>
 
-#include "EntityItem.h"
 #include "AvatarData.h"
+#include "EntityItem.h"
 
 /// Utility for processing, packing, queueing and sending of outbound edit voxel messages.
-class EntityEditPacketSender :  public OctreeEditPacketSender {
+class EntityEditPacketSender : public OctreeEditPacketSender {
     Q_OBJECT
 public:
     EntityEditPacketSender();
@@ -32,9 +32,8 @@ public:
     /// which voxel-server node or nodes the packet should be sent to. Can be called even before voxel servers are known, in
     /// which case up to MaxPendingMessages will be buffered and processed when voxel servers are known.
     /// NOTE: EntityItemProperties assumes that all distances are in meter units
-    void queueEditEntityMessage(PacketType type, EntityTreePointer entityTree,
-                                EntityItemID entityItemID, const EntityItemProperties& properties);
-
+    void queueEditEntityMessage(PacketType type, EntityTreePointer entityTree, EntityItemID entityItemID,
+                                const EntityItemProperties& properties);
 
     void queueEraseEntityMessage(const EntityItemID& entityItemID);
     void queueCloneEntityMessage(const EntityItemID& entityIDToClone, const EntityItemID& newEntityID);
@@ -50,8 +49,8 @@ public slots:
     void processEntityEditNackPacket(QSharedPointer<ReceivedMessage> message, SharedNodePointer sendingNode);
 
 private:
-    void queueEditAvatarEntityMessage(EntityTreePointer entityTree,
-                                      EntityItemID entityItemID, const EntityItemProperties& properties);
+    void queueEditAvatarEntityMessage(EntityTreePointer entityTree, EntityItemID entityItemID,
+                                      const EntityItemProperties& properties);
 
 private:
     std::mutex _mutex;

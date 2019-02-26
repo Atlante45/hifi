@@ -12,10 +12,10 @@
 #ifndef hifi_Sound_h
 #define hifi_Sound_h
 
+#include <QtScript/qscriptengine.h>
 #include <QRunnable>
 #include <QtCore/QObject>
 #include <QtNetwork/QNetworkReply>
-#include <QtScript/qscriptengine.h>
 
 #include <ResourceCache.h>
 
@@ -34,8 +34,7 @@ public:
     using AudioSample = AudioConstants::AudioSample;
 
     // Allocates the buffer memory contiguous with the object
-    static AudioDataPointer make(uint32_t numSamples, uint32_t numChannels,
-                                 const AudioSample* samples);
+    static AudioDataPointer make(uint32_t numSamples, uint32_t numChannels, const AudioSample* samples);
 
     uint32_t getNumSamples() const { return _numSamples; }
     uint32_t getNumChannels() const { return _numChannels; }
@@ -79,13 +78,13 @@ signals:
 protected slots:
     void soundProcessSuccess(AudioDataPointer audioData);
     void soundProcessError(int error, QString str);
-    
+
 private:
     virtual void downloadFinished(const QByteArray& data) override;
 
     AudioDataPointer _audioData;
 
-     // Only used for caching until the download has finished
+    // Only used for caching until the download has finished
     int _numChannels { 0 };
 };
 
@@ -102,12 +101,9 @@ public:
 
     virtual void run() override;
 
-    QByteArray downSample(const QByteArray& rawAudioByteArray,
-                          AudioProperties properties);
-    AudioProperties interpretAsWav(const QByteArray& inputAudioByteArray,
-                                   QByteArray& outputAudioByteArray);
-    AudioProperties interpretAsMP3(const QByteArray& inputAudioByteArray,
-                                   QByteArray& outputAudioByteArray);
+    QByteArray downSample(const QByteArray& rawAudioByteArray, AudioProperties properties);
+    AudioProperties interpretAsWav(const QByteArray& inputAudioByteArray, QByteArray& outputAudioByteArray);
+    AudioProperties interpretAsMP3(const QByteArray& inputAudioByteArray, QByteArray& outputAudioByteArray);
 
 signals:
     void onSuccess(AudioDataPointer audioData);
@@ -130,14 +126,14 @@ typedef QSharedPointer<Sound> SharedSoundPointer;
  * </ul>
  *
  * @class SoundObject
- * 
+ *
  * @hifi-interface
  * @hifi-client-entity
  * @hifi-avatar
  * @hifi-server-entity
  * @hifi-assignment-client
  *
- * @property {boolean} downloaded - <code>true</code> if the sound has been downloaded and is ready to be played, otherwise 
+ * @property {boolean} downloaded - <code>true</code> if the sound has been downloaded and is ready to be played, otherwise
  *     <code>false</code>.
  * @property {number} duration - The duration of the sound, in seconds.
  */
@@ -154,11 +150,11 @@ public:
     bool isReady() const { return _sound ? _sound->isReady() : false; }
     float getDuration() { return _sound ? _sound->getDuration() : 0.0f; }
 
-/**jsdoc
- * Triggered when the sound has been downloaded and is ready to be played.
- * @function SoundObject.ready
- * @returns {Signal}
- */
+    /**jsdoc
+     * Triggered when the sound has been downloaded and is ready to be played.
+     * @function SoundObject.ready
+     * @returns {Signal}
+     */
 signals:
     void ready();
 

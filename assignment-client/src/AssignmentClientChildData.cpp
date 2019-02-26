@@ -11,9 +11,5 @@
 
 #include "AssignmentClientChildData.h"
 
-
-AssignmentClientChildData::AssignmentClientChildData(Assignment::Type childType) :
-    _childType(childType)
-{
-    
+AssignmentClientChildData::AssignmentClientChildData(Assignment::Type childType) : _childType(childType) {
 }

@@ -23,8 +23,8 @@
 
 // <!
 
-namespace procedural { namespace slot {
-
+namespace procedural {
+namespace slot {
 
 namespace uniform {
 enum Uniform {
@@ -41,7 +41,8 @@ enum Texture {
 };
 } // namespace texture
 
-} } // namespace procedural::slot
+} // namespace slot
+} // namespace procedural
 
 // !>
 // Hack Comment

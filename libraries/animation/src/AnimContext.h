@@ -61,16 +61,19 @@ public:
         _debugAlphaMap[key] = DebugAlphaMapValue(alpha, type);
     }
 
-    const DebugAlphaMap& getDebugAlphaMap() const {
-        return _debugAlphaMap;
-    }
+    const DebugAlphaMap& getDebugAlphaMap() const { return _debugAlphaMap; }
 
     using DebugStateMachineMapValue = QString;
     using DebugStateMachineMap = std::map<QString, DebugStateMachineMapValue>;
 
-    void addStateMachineInfo(const QString& stateMachineName, const QString& currentState, const QString& previousState, bool duringInterp, float alpha) const {
+    void addStateMachineInfo(const QString& stateMachineName, const QString& currentState, const QString& previousState,
+                             bool duringInterp, float alpha) const {
         if (duringInterp) {
-            _stateMachineMap[stateMachineName] = QString("%1: %2 -> %3 (%4)").arg(stateMachineName).arg(previousState).arg(currentState).arg(QString::number(alpha, 'f', 2));
+            _stateMachineMap[stateMachineName] = QString("%1: %2 -> %3 (%4)")
+                                                     .arg(stateMachineName)
+                                                     .arg(previousState)
+                                                     .arg(currentState)
+                                                     .arg(QString::number(alpha, 'f', 2));
         } else {
             _stateMachineMap[stateMachineName] = QString("%1: %2").arg(stateMachineName).arg(currentState);
         }
@@ -79,7 +82,6 @@ public:
     const DebugStateMachineMap& getStateMachineMap() const { return _stateMachineMap; }
 
 protected:
-
     bool _enableDebugDrawIKTargets { false };
     bool _enableDebugDrawIKConstraints { false };
     bool _enableDebugDrawIKChains { false };
@@ -91,4 +93,4 @@ protected:
     mutable DebugStateMachineMap _stateMachineMap;
 };
 
-#endif  // hifi_AnimContext_h
+#endif // hifi_AnimContext_h

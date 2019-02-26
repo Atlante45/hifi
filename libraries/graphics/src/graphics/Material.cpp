@@ -45,8 +45,7 @@ Material::Material(const Material& material) :
     _materialParams(material._materialParams),
     _textureMaps(material._textureMaps),
     _defaultFallthrough(material._defaultFallthrough),
-    _propertyFallthroughs(material._propertyFallthroughs)
-{
+    _propertyFallthroughs(material._propertyFallthroughs) {
 }
 
 Material& Material::operator=(const Material& material) {
@@ -135,8 +134,8 @@ void Material::setTextureMap(MapChannel channel, const TextureMapPointer& textur
         _lightmapParams = (textureMap ? glm::vec2(textureMap->getLightmapOffsetScale()) : glm::vec2(0.0, 1.0));
     }
 
-    _materialParams = (textureMap ? glm::vec2(textureMap->getMappingMode(), textureMap->getRepeat()) : glm::vec2(MaterialMappingMode::UV, 1.0));
-
+    _materialParams = (textureMap ? glm::vec2(textureMap->getMappingMode(), textureMap->getRepeat())
+                                  : glm::vec2(MaterialMappingMode::UV, 1.0));
 }
 
 void Material::resetOpacityMap() const {
@@ -145,11 +144,7 @@ void Material::resetOpacityMap() const {
     _key.setTranslucentMap(false);
 
     const auto& textureMap = getTextureMap(MaterialKey::ALBEDO_MAP);
-    if (textureMap &&
-        textureMap->useAlphaChannel() &&
-        textureMap->isDefined() &&
-        textureMap->getTextureView().isValid()) {
-
+    if (textureMap && textureMap->useAlphaChannel() && textureMap->isDefined() && textureMap->getTextureView().isValid()) {
         auto usage = textureMap->getTextureView()._texture->getUsage();
         if (usage.isAlpha()) {
             if (usage.isAlphaMask()) {
@@ -177,7 +172,7 @@ const TextureMapPointer Material::getTextureMap(MapChannel channel) const {
 }
 
 void Material::setTextureTransforms(const Transform& transform, MaterialMappingMode mode, bool repeat) {
-    for (auto &textureMapItem : _textureMaps) {
+    for (auto& textureMapItem : _textureMaps) {
         if (textureMapItem.second) {
             textureMapItem.second->setTextureTransform(transform);
             textureMapItem.second->setMappingMode(mode);
@@ -192,7 +187,7 @@ void Material::setTextureTransforms(const Transform& transform, MaterialMappingM
 
 MultiMaterial::MultiMaterial() {
     Schema schema;
-    _schemaBuffer = gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(Schema), (const gpu::Byte*) &schema, sizeof(Schema)));
+    _schemaBuffer = gpu::BufferView(std::make_shared<gpu::Buffer>(sizeof(Schema), (const gpu::Byte*)&schema, sizeof(Schema)));
 }
 
 void MultiMaterial::calculateMaterialInfo() const {
@@ -202,7 +197,7 @@ void MultiMaterial::calculateMaterialInfo() const {
         _textureCount = 0;
 
         auto textures = _textureTable->getTextures();
-        for (auto const &texture : textures) {
+        for (auto const& texture : textures) {
             if (texture && texture->isDefined()) {
                 auto size = texture->getSize();
                 _textureSize += size;

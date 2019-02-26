@@ -26,8 +26,8 @@ class Node;
 
 class UploadAssetTask : public QRunnable {
 public:
-    UploadAssetTask(QSharedPointer<ReceivedMessage> message, QSharedPointer<Node> senderNode, 
-                    const QDir& resourcesDir, uint64_t filesizeLimit);
+    UploadAssetTask(QSharedPointer<ReceivedMessage> message, QSharedPointer<Node> senderNode, const QDir& resourcesDir,
+                    uint64_t filesizeLimit);
 
     void run() override;
 

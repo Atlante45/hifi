@@ -68,7 +68,7 @@ signals:
     void mountedChanged();
 
 private:
-    float _IPDScale{ 1.0 };
+    float _IPDScale { 1.0 };
 };
 
 #endif // hifi_AbstractHMDScriptingInterface_h

@@ -7,9 +7,9 @@
 //
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
 
 #include <gl/Config.h>
 #include <gl/Context.h>
@@ -21,28 +21,28 @@
 #include <QtCore/QLoggingCategory>
 #include <QtCore/QRegularExpression>
 #include <QtCore/QSettings>
-#include <QtCore/QTimer>
 #include <QtCore/QThread>
 #include <QtCore/QThreadPool>
+#include <QtCore/QTimer>
 
 #include <QtGui/QGuiApplication>
 #include <QtGui/QResizeEvent>
 #include <QtGui/QWindow>
 
+#include <QtWidgets/QApplication>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QInputDialog>
 #include <QtWidgets/QMessageBox>
-#include <QtWidgets/QApplication>
 
+#include <AssetClient.h>
+#include <LogHandler.h>
+#include <StatTracker.h>
+#include <shaders/Shaders.h>
 #include <shared/ConicalViewFrustum.h>
-#include <shared/RateCounter.h>
-#include <shared/NetworkUtils.h>
 #include <shared/FileLogger.h>
 #include <shared/FileUtils.h>
-#include <StatTracker.h>
-#include <LogHandler.h>
-#include <AssetClient.h>
-#include <shaders/Shaders.h>
+#include <shared/NetworkUtils.h>
+#include <shared/RateCounter.h>
 
 #include <gl/OffscreenGLCanvas.h>
 
@@ -53,30 +53,30 @@
 #include <ui/OffscreenQmlSurface.h>
 
 #include <AnimationCache.h>
-#include <SimpleEntitySimulation.h>
-#include <EntityDynamicInterface.h>
-#include <EntityDynamicFactoryInterface.h>
-#include <WebEntityItem.h>
-#include <OctreeUtils.h>
-#include <render/Engine.h>
-#include <Model.h>
-#include <graphics/Stage.h>
-#include <TextureCache.h>
-#include <FramebufferCache.h>
-#include <model-networking/ModelCache.h>
-#include <GeometryCache.h>
 #include <DeferredLightingEffect.h>
-#include <render/RenderFetchCullSortTask.h>
-#include <UpdateSceneTask.h>
-#include <RenderViewTask.h>
-#include <RenderShadowTask.h>
+#include <EntityDynamicFactoryInterface.h>
+#include <EntityDynamicInterface.h>
+#include <FramebufferCache.h>
+#include <GeometryCache.h>
+#include <Model.h>
+#include <OctreeConstants.h>
+#include <OctreeUtils.h>
 #include <RenderDeferredTask.h>
 #include <RenderForwardTask.h>
-#include <OctreeConstants.h>
+#include <RenderShadowTask.h>
+#include <RenderViewTask.h>
+#include <SimpleEntitySimulation.h>
+#include <TextureCache.h>
+#include <UpdateSceneTask.h>
+#include <WebEntityItem.h>
+#include <graphics/Stage.h>
+#include <model-networking/ModelCache.h>
+#include <render/Engine.h>
+#include <render/RenderFetchCullSortTask.h>
 
-#include <EntityTreeRenderer.h>
 #include <AbstractViewStateInterface.h>
 #include <AddressManager.h>
+#include <EntityTreeRenderer.h>
 #include <SceneScriptingInterface.h>
 
 #include "Camera.hpp"
@@ -164,7 +164,7 @@ public:
         if (buttons & Qt::RightButton) {
             dolly(delta.y * 0.01f);
         } else if (buttons & Qt::LeftButton) {
-            //rotate(delta.x * -0.01f);
+            // rotate(delta.x * -0.01f);
             rotate(delta * -0.01f);
         } else if (buttons & Qt::MiddleButton) {
             delta.y *= -1.0f;
@@ -176,7 +176,7 @@ public:
 };
 
 static QString toHumanSize(size_t size, size_t maxUnit = std::numeric_limits<size_t>::max()) {
-    static const std::vector<QString> SUFFIXES{ { "B", "KB", "MB", "GB", "TB", "PB" } };
+    static const std::vector<QString> SUFFIXES { { "B", "KB", "MB", "GB", "TB", "PB" } };
     const size_t maxIndex = std::min(maxUnit, SUFFIXES.size() - 1);
     size_t suffixIndex = 0;
 
@@ -196,20 +196,20 @@ class RenderThread : public GenericThread {
 public:
     gl::Context _context;
     gpu::PipelinePointer _presentPipeline;
-    gpu::ContextPointer _gpuContext;  // initialized during window creation
+    gpu::ContextPointer _gpuContext; // initialized during window creation
     std::atomic<size_t> _presentCount;
     QElapsedTimer _elapsed;
-    std::atomic<uint16_t> _fps{ 1 };
+    std::atomic<uint16_t> _fps { 1 };
     RateCounter<200> _fpsCounter;
     std::mutex _mutex;
     std::shared_ptr<gpu::Backend> _backend;
     std::vector<uint64_t> _frameTimes;
-    size_t _frameIndex{ 0 };
+    size_t _frameIndex { 0 };
     std::mutex _frameLock;
     std::queue<gpu::FramePointer> _pendingFrames;
     gpu::FramePointer _activeFrame;
     QSize _size;
-    static const size_t FRAME_TIME_BUFFER_SIZE{ 8192 };
+    static const size_t FRAME_TIME_BUFFER_SIZE { 8192 };
 
     void submitFrame(const gpu::FramePointer& frame) {
         std::unique_lock<std::mutex> lock(_frameLock);
@@ -293,7 +293,7 @@ public:
         _context.makeCurrent();
         _context.swapBuffers();
         _fpsCounter.increment();
-        static size_t _frameCount{ 0 };
+        static size_t _frameCount { 0 };
         ++_frameCount;
         if (_elapsed.elapsed() >= 500) {
             _fps = _fpsCounter.rate();
@@ -362,9 +362,7 @@ public:
 
 class TestActionFactory : public EntityDynamicFactoryInterface {
 public:
-    virtual EntityDynamicPointer factory(EntityDynamicType type,
-                                         const QUuid& id,
-                                         EntityItemPointer ownerEntity,
+    virtual EntityDynamicPointer factory(EntityDynamicType type, const QUuid& id, EntityItemPointer ownerEntity,
                                          QVariantMap arguments) override {
         return EntityDynamicPointer();
     }
@@ -377,24 +375,24 @@ class BackgroundRenderData {
 public:
     typedef render::Payload<BackgroundRenderData> Payload;
     typedef Payload::DataPointer Pointer;
-    static render::ItemID _item;  // unique WorldBoxRenderData
+    static render::ItemID _item; // unique WorldBoxRenderData
 };
 
 render::ItemID BackgroundRenderData::_item = 0;
 QSharedPointer<FileLogger> logger;
 
 namespace render {
-template <>
+template<>
 const ItemKey payloadGetKey(const BackgroundRenderData::Pointer& stuff) {
     return ItemKey::Builder::background();
 }
 
-template <>
+template<>
 const Item::Bound payloadGetBound(const BackgroundRenderData::Pointer& stuff) {
     return Item::Bound();
 }
 
-template <>
+template<>
 void payloadRender(const BackgroundRenderData::Pointer& background, RenderArgs* args) {
     Q_ASSERT(args->_batch);
     gpu::Batch& batch = *args->_batch;
@@ -417,9 +415,9 @@ void payloadRender(const BackgroundRenderData::Pointer& background, RenderArgs* 
             break;
     }
 }
-}  // namespace render
+} // namespace render
 
-OffscreenGLCanvas* _chromiumShareContext{ nullptr };
+OffscreenGLCanvas* _chromiumShareContext { nullptr };
 Q_GUI_EXPORT void qt_gl_set_global_share_context(QOpenGLContext* context);
 
 // Create a simple OpenGL window that renders text in various ways
@@ -488,7 +486,7 @@ public:
         nodeList->setPermissions(permissions);
 
         {
-            SimpleEntitySimulationPointer simpleSimulation{ new SimpleEntitySimulation() };
+            SimpleEntitySimulationPointer simpleSimulation { new SimpleEntitySimulation() };
             simpleSimulation->setEntityTree(_octree->getTree());
             _octree->getTree()->setSimulation(simpleSimulation);
             _entitySimulation = simpleSimulation;
@@ -541,14 +539,14 @@ public:
         restorePosition();
 
         QTimer* timer = new QTimer(this);
-        timer->setInterval(0);  // Qt::CoarseTimer acceptable
+        timer->setInterval(0); // Qt::CoarseTimer acceptable
         connect(timer, &QTimer::timeout, this, [this] { draw(); });
         timer->start();
         _ready = true;
     }
 
     virtual ~QTestWindow() {
-        getEntities()->shutdown();  // tell the entities system we're shutting down, so it will stop running scripts
+        getEntities()->shutdown(); // tell the entities system we're shutting down, so it will stop running scripts
         _renderEngine.reset();
         _main3DScene.reset();
         EntityTreePointer tree = getEntities()->getTree();
@@ -639,8 +637,8 @@ protected:
 
 private:
     static bool cull(const RenderArgs* args, const AABox& bounds) {
-        float renderAccuracy =
-            calculateRenderAccuracy(args->getViewFrustum().getPosition(), bounds, args->_sizeScale, args->_boundaryLevelAdjust);
+        float renderAccuracy = calculateRenderAccuracy(args->getViewFrustum().getPosition(), bounds, args->_sizeScale,
+                                                       args->_boundaryLevelAdjust);
         return (renderAccuracy > 0.0f);
     }
 
@@ -659,7 +657,8 @@ private:
         update();
 
         _initContext.makeCurrent();
-        RenderArgs renderArgs(_renderThread._gpuContext, DEFAULT_OCTREE_SIZE_SCALE, 0, getPerspectiveAccuracyAngleTan(DEFAULT_OCTREE_SIZE_SCALE, 0), RenderArgs::DEFAULT_RENDER_MODE,
+        RenderArgs renderArgs(_renderThread._gpuContext, DEFAULT_OCTREE_SIZE_SCALE, 0,
+                              getPerspectiveAccuracyAngleTan(DEFAULT_OCTREE_SIZE_SCALE, 0), RenderArgs::DEFAULT_RENDER_MODE,
                               RenderArgs::MONO, RenderArgs::RENDER_DEBUG_NONE);
 
         QSize windowSize = _size;
@@ -674,16 +673,16 @@ private:
                     eyeProjections[i] = _viewFrustum.getProjection();
                 }
             } else if (_renderMode == HMD) {
-                eyeOffsets[0][3] = vec4{ -0.0327499993, 0.0, 0.0149999997, 1.0 };
-                eyeOffsets[1][3] = vec4{ 0.0327499993, 0.0, 0.0149999997, 1.0 };
-                eyeProjections[0][0] = vec4{ 0.759056330, 0.000000000, 0.000000000, 0.000000000 };
-                eyeProjections[0][1] = vec4{ 0.000000000, 0.682773232, 0.000000000, 0.000000000 };
-                eyeProjections[0][2] = vec4{ -0.0580431037, -0.00619550655, -1.00000489, -1.00000000 };
-                eyeProjections[0][3] = vec4{ 0.000000000, 0.000000000, -0.0800003856, 0.000000000 };
-                eyeProjections[1][0] = vec4{ 0.752847493, 0.000000000, 0.000000000, 0.000000000 };
-                eyeProjections[1][1] = vec4{ 0.000000000, 0.678060353, 0.000000000, 0.000000000 };
-                eyeProjections[1][2] = vec4{ 0.0578232110, -0.00669418881, -1.00000489, -1.000000000 };
-                eyeProjections[1][3] = vec4{ 0.000000000, 0.000000000, -0.0800003856, 0.000000000 };
+                eyeOffsets[0][3] = vec4 { -0.0327499993, 0.0, 0.0149999997, 1.0 };
+                eyeOffsets[1][3] = vec4 { 0.0327499993, 0.0, 0.0149999997, 1.0 };
+                eyeProjections[0][0] = vec4 { 0.759056330, 0.000000000, 0.000000000, 0.000000000 };
+                eyeProjections[0][1] = vec4 { 0.000000000, 0.682773232, 0.000000000, 0.000000000 };
+                eyeProjections[0][2] = vec4 { -0.0580431037, -0.00619550655, -1.00000489, -1.00000000 };
+                eyeProjections[0][3] = vec4 { 0.000000000, 0.000000000, -0.0800003856, 0.000000000 };
+                eyeProjections[1][0] = vec4 { 0.752847493, 0.000000000, 0.000000000, 0.000000000 };
+                eyeProjections[1][1] = vec4 { 0.000000000, 0.678060353, 0.000000000, 0.000000000 };
+                eyeProjections[1][2] = vec4 { 0.0578232110, -0.00669418881, -1.00000489, -1.000000000 };
+                eyeProjections[1][3] = vec4 { 0.000000000, 0.000000000, -0.0800003856, 0.000000000 };
                 windowSize = { 2048, 2048 };
             }
             renderArgs._context->setStereoProjections(eyeProjections);
@@ -717,7 +716,7 @@ private:
             EntityTreeElementPointer entityTreeElement = std::static_pointer_cast<EntityTreeElement>(element);
             entityTreeElement->forEachEntity([&](EntityItemPointer entityItem) {
                 if (!entityItem->isParentIDValid()) {
-                    return;  // we weren't able to resolve a parent from _parentID, so don't save this entity.
+                    return; // we weren't able to resolve a parent from _parentID, so don't save this entity.
                 }
                 entityItem->update(now);
             });
@@ -844,7 +843,7 @@ private:
         }
 
         EntityUpdateOperator updateOperator(now);
-        //getEntities()->getTree()->recurseTreeWithOperator(&updateOperator);
+        // getEntities()->getTree()->recurseTreeWithOperator(&updateOperator);
         {
             for (auto& iter : _postUpdateLambdas) {
                 iter.second();
@@ -859,8 +858,8 @@ private:
         // The pending changes collecting the changes here
         render::Transaction transaction;
 
-        // FIXME: Move this out of here!, Background / skybox should be driven by the enityt content just like the other entities
-        // Background rendering decision
+        // FIXME: Move this out of here!, Background / skybox should be driven by the enityt content just like the other
+        // entities Background rendering decision
         if (!render::Item::isValidID(BackgroundRenderData::_item)) {
             auto backgroundRenderData = std::make_shared<BackgroundRenderData>();
             auto backgroundRenderPayload = std::make_shared<BackgroundRenderData::Payload>(backgroundRenderData);
@@ -916,7 +915,7 @@ private:
         }
         _renderThread._size = size;
         //_textOverlay->resize(toGlm(_size));
-        //glViewport(0, 0, size.width(), size.height());
+        // glViewport(0, 0, size.width(), size.height());
     }
 
     void parsePath(const QString& viewpointString) {
@@ -1027,10 +1026,10 @@ private:
         static auto defaultProjection = SimpleCamera().matrices.perspective;
         _renderMode = (RenderMode)((_renderMode + 1) % RENDER_MODE_COUNT);
         if (_renderMode == HMD) {
-            _camera.matrices.perspective[0] = vec4{ 0.759056330, 0.000000000, 0.000000000, 0.000000000 };
-            _camera.matrices.perspective[1] = vec4{ 0.000000000, 0.682773232, 0.000000000, 0.000000000 };
-            _camera.matrices.perspective[2] = vec4{ -0.0580431037, -0.00619550655, -1.00000489, -1.00000000 };
-            _camera.matrices.perspective[3] = vec4{ 0.000000000, 0.000000000, -0.0800003856, 0.000000000 };
+            _camera.matrices.perspective[0] = vec4 { 0.759056330, 0.000000000, 0.000000000, 0.000000000 };
+            _camera.matrices.perspective[1] = vec4 { 0.000000000, 0.682773232, 0.000000000, 0.000000000 };
+            _camera.matrices.perspective[2] = vec4 { -0.0580431037, -0.00619550655, -1.00000489, -1.00000000 };
+            _camera.matrices.perspective[3] = vec4 { 0.000000000, 0.000000000, -0.0800003856, 0.000000000 };
         } else {
             _camera.matrices.perspective = defaultProjection;
             _camera.setAspectRatio((float)_size.width() / (float)_size.height());
@@ -1040,7 +1039,7 @@ private:
     QSharedPointer<EntityTreeRenderer> getEntities() { return _octree; }
 
 private:
-    render::CullFunctor _cullFunctor{ [&](const RenderArgs* args, const AABox& bounds) -> bool {
+    render::CullFunctor _cullFunctor { [&](const RenderArgs* args, const AABox& bounds) -> bool {
         if (_cullingEnabled) {
             return cull(args, bounds);
         } else {
@@ -1048,39 +1047,33 @@ private:
         }
     } };
 
-    render::EnginePointer _renderEngine{ new render::RenderEngine() };
-    render::ScenePointer _main3DScene{ new render::Scene(glm::vec3(-0.5f * (float)TREE_SCALE), (float)TREE_SCALE) };
+    render::EnginePointer _renderEngine { new render::RenderEngine() };
+    render::ScenePointer _main3DScene { new render::Scene(glm::vec3(-0.5f * (float)TREE_SCALE), (float)TREE_SCALE) };
     QSize _size;
     QSettings _settings;
 
-    std::atomic<size_t> _renderCount{ 0 };
+    std::atomic<size_t> _renderCount { 0 };
     gl::OffscreenContext _initContext;
     RenderThread _renderThread;
     QWindowCamera _camera;
-    ViewFrustum _viewFrustum;  // current state of view frustum, perspective, orientation, etc.
+    ViewFrustum _viewFrustum; // current state of view frustum, perspective, orientation, etc.
     graphics::SunSkyStage _sunSkyStage;
-    graphics::LightPointer _globalLight{ std::make_shared<graphics::Light>() };
-    bool _ready{ false };
+    graphics::LightPointer _globalLight { std::make_shared<graphics::Light>() };
+    bool _ready { false };
     EntitySimulationPointer _entitySimulation;
     ConicalViewFrustums _view;
 
     QStringList _commands;
     QString _commandPath;
-    int _commandLoops{ 0 };
-    int _commandIndex{ -1 };
-    uint64_t _nextCommandTime{ 0 };
+    int _commandLoops { 0 };
+    int _commandIndex { -1 };
+    uint64_t _nextCommandTime { 0 };
 
-    //TextOverlay* _textOverlay;
+    // TextOverlay* _textOverlay;
     static bool _cullingEnabled;
 
-    enum RenderMode
-    {
-        NORMAL = 0,
-        STEREO,
-        HMD,
-        RENDER_MODE_COUNT
-    };
-    RenderMode _renderMode{ NORMAL };
+    enum RenderMode { NORMAL = 0, STEREO, HMD, RENDER_MODE_COUNT };
+    RenderMode _renderMode { NORMAL };
     QSharedPointer<EntityTreeRenderer> _octree;
 };
 
@@ -1099,7 +1092,7 @@ int main(int argc, char** argv) {
     QLoggingCategory::setFilterRules(LOG_FILTER_RULES);
     QTestWindow::setup();
     QTestWindow window;
-    //window.loadCommands("C:/Users/bdavis/Git/dreaming/exports2/commands.txt");
+    // window.loadCommands("C:/Users/bdavis/Git/dreaming/exports2/commands.txt");
     app.exec();
     return 0;
 }

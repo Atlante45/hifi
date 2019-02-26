@@ -15,8 +15,8 @@
 #include <stdint.h>
 
 #include <QDebug>
-#include <QObject>
 #include <QHash>
+#include <QObject>
 #include <QScriptEngine>
 #include <QUuid>
 
@@ -42,10 +42,15 @@ inline QDebug operator<<(QDebug debug, const EntityItemID& id) {
 Q_DECLARE_METATYPE(EntityItemID);
 Q_DECLARE_METATYPE(QVector<EntityItemID>);
 QScriptValue EntityItemIDtoScriptValue(QScriptEngine* engine, const EntityItemID& properties);
-void EntityItemIDfromScriptValue(const QScriptValue &object, EntityItemID& properties);
+void EntityItemIDfromScriptValue(const QScriptValue& object, EntityItemID& properties);
 QVector<EntityItemID> qVectorEntityItemIDFromScriptValue(const QScriptValue& array);
 
 // Allow the use of std::unordered_map with QUuid keys
-namespace std { template<> struct hash<EntityItemID> { size_t operator()(const EntityItemID& id) const; }; }
+namespace std {
+template<>
+struct hash<EntityItemID> {
+    size_t operator()(const EntityItemID& id) const;
+};
+} // namespace std
 
 #endif // hifi_EntityItemID_h

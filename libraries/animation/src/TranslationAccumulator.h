@@ -14,7 +14,7 @@
 
 class TranslationAccumulator {
 public:
-    TranslationAccumulator() : _accum(0.0f, 0.0f, 0.0f), _totalWeight(0), _isDirty(false) { }
+    TranslationAccumulator() : _accum(0.0f, 0.0f, 0.0f), _totalWeight(0), _isDirty(false) {}
 
     int size() const { return _totalWeight > 0.0f; }
 

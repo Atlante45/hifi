@@ -19,10 +19,10 @@
 #include <AbstractAudioInterface.h>
 #include <EntityScriptingInterface.h> // for RayToEntityIntersectionResult
 #include <EntityTree.h>
+#include <OctreeProcessor.h>
 #include <PointerEvent.h>
 #include <ScriptCache.h>
 #include <TextureCache.h>
-#include <OctreeProcessor.h>
 #include <render/Forward.h>
 #include <workload/Space.h>
 
@@ -33,12 +33,14 @@ class ScriptEngine;
 class ZoneEntityItem;
 class EntityItem;
 
-namespace render { namespace entities {
-    class EntityRenderer;
-    using EntityRendererPointer = std::shared_ptr<EntityRenderer>;
-    using EntityRendererWeakPointer = std::weak_ptr<EntityRenderer>;
+namespace render {
+namespace entities {
+class EntityRenderer;
+using EntityRendererPointer = std::shared_ptr<EntityRenderer>;
+using EntityRendererWeakPointer = std::weak_ptr<EntityRenderer>;
 
-} }
+} // namespace entities
+} // namespace render
 
 using EntityRenderer = render::entities::EntityRenderer;
 using EntityRendererPointer = render::entities::EntityRendererPointer;
@@ -57,12 +59,10 @@ public:
     static std::function<bool()> getEntitiesShouldFadeFunction() { return _entitiesShouldFadeFunction; }
 
     EntityTreeRenderer(bool wantScripts, AbstractViewStateInterface* viewState,
-                                AbstractScriptingServicesInterface* scriptingServices);
+                       AbstractScriptingServicesInterface* scriptingServices);
     virtual ~EntityTreeRenderer();
 
-    QSharedPointer<EntityTreeRenderer> getSharedFromThis() {
-        return qSharedPointerCast<EntityTreeRenderer>(sharedFromThis());
-    }
+    QSharedPointer<EntityTreeRenderer> getSharedFromThis() { return qSharedPointerCast<EntityTreeRenderer>(sharedFromThis()); }
 
     virtual char getMyNodeType() const override { return NodeType::EntityServer; }
     virtual PacketType getMyQueryMessageType() const override { return PacketType::EntityQuery; }
@@ -70,12 +70,19 @@ public:
 
     // Returns the priority at which an entity should be loaded. Higher values indicate higher priority.
     static float getEntityLoadingPriority(const EntityItem& item) { return _calculateEntityLoadingPriorityFunc(item); }
-    static void setEntityLoadingPriorityFunction(CalculateEntityLoadingPriority fn) { _calculateEntityLoadingPriorityFunc = fn; }
+    static void setEntityLoadingPriorityFunction(CalculateEntityLoadingPriority fn) {
+        _calculateEntityLoadingPriorityFunc = fn;
+    }
 
     void setMouseRayPickID(unsigned int rayPickID) { _mouseRayPickID = rayPickID; }
     unsigned int getMouseRayPickID() { return _mouseRayPickID; }
-    void setMouseRayPickResultOperator(std::function<RayToEntityIntersectionResult(unsigned int)> getPrevRayPickResultOperator) { _getPrevRayPickResultOperator = getPrevRayPickResultOperator;  }
-    void setSetPrecisionPickingOperator(std::function<void(unsigned int, bool)> setPrecisionPickingOperator) { _setPrecisionPickingOperator = setPrecisionPickingOperator; }
+    void setMouseRayPickResultOperator(
+        std::function<RayToEntityIntersectionResult(unsigned int)> getPrevRayPickResultOperator) {
+        _getPrevRayPickResultOperator = getPrevRayPickResultOperator;
+    }
+    void setSetPrecisionPickingOperator(std::function<void(unsigned int, bool)> setPrecisionPickingOperator) {
+        _setPrecisionPickingOperator = setPrecisionPickingOperator;
+    }
 
     void shutdown();
     void update(bool simulate);
@@ -121,15 +128,31 @@ public:
 
     EntityEditPacketSender* getPacketSender();
 
-    static void setAddMaterialToEntityOperator(std::function<bool(const QUuid&, graphics::MaterialLayer, const std::string&)> addMaterialToEntityOperator) { _addMaterialToEntityOperator = addMaterialToEntityOperator; }
-    static void setRemoveMaterialFromEntityOperator(std::function<bool(const QUuid&, graphics::MaterialPointer, const std::string&)> removeMaterialFromEntityOperator) { _removeMaterialFromEntityOperator = removeMaterialFromEntityOperator; }
-    static bool addMaterialToEntity(const QUuid& entityID, graphics::MaterialLayer material, const std::string& parentMaterialName);
-    static bool removeMaterialFromEntity(const QUuid& entityID, graphics::MaterialPointer material, const std::string& parentMaterialName);
+    static void setAddMaterialToEntityOperator(
+        std::function<bool(const QUuid&, graphics::MaterialLayer, const std::string&)> addMaterialToEntityOperator) {
+        _addMaterialToEntityOperator = addMaterialToEntityOperator;
+    }
+    static void setRemoveMaterialFromEntityOperator(
+        std::function<bool(const QUuid&, graphics::MaterialPointer, const std::string&)> removeMaterialFromEntityOperator) {
+        _removeMaterialFromEntityOperator = removeMaterialFromEntityOperator;
+    }
+    static bool addMaterialToEntity(const QUuid& entityID, graphics::MaterialLayer material,
+                                    const std::string& parentMaterialName);
+    static bool removeMaterialFromEntity(const QUuid& entityID, graphics::MaterialPointer material,
+                                         const std::string& parentMaterialName);
 
-    static void setAddMaterialToAvatarOperator(std::function<bool(const QUuid&, graphics::MaterialLayer, const std::string&)> addMaterialToAvatarOperator) { _addMaterialToAvatarOperator = addMaterialToAvatarOperator; }
-    static void setRemoveMaterialFromAvatarOperator(std::function<bool(const QUuid&, graphics::MaterialPointer, const std::string&)> removeMaterialFromAvatarOperator) { _removeMaterialFromAvatarOperator = removeMaterialFromAvatarOperator; }
-    static bool addMaterialToAvatar(const QUuid& avatarID, graphics::MaterialLayer material, const std::string& parentMaterialName);
-    static bool removeMaterialFromAvatar(const QUuid& avatarID, graphics::MaterialPointer material, const std::string& parentMaterialName);
+    static void setAddMaterialToAvatarOperator(
+        std::function<bool(const QUuid&, graphics::MaterialLayer, const std::string&)> addMaterialToAvatarOperator) {
+        _addMaterialToAvatarOperator = addMaterialToAvatarOperator;
+    }
+    static void setRemoveMaterialFromAvatarOperator(
+        std::function<bool(const QUuid&, graphics::MaterialPointer, const std::string&)> removeMaterialFromAvatarOperator) {
+        _removeMaterialFromAvatarOperator = removeMaterialFromAvatarOperator;
+    }
+    static bool addMaterialToAvatar(const QUuid& avatarID, graphics::MaterialLayer material,
+                                    const std::string& parentMaterialName);
+    static bool removeMaterialFromAvatar(const QUuid& avatarID, graphics::MaterialPointer material,
+                                         const std::string& parentMaterialName);
 
 signals:
     void enterEntity(const EntityItemID& entityItemID);
@@ -162,8 +185,12 @@ protected:
 private:
     void addPendingEntities(const render::ScenePointer& scene, render::Transaction& transaction);
     void updateChangedEntities(const render::ScenePointer& scene, render::Transaction& transaction);
-    EntityRendererPointer renderableForEntity(const EntityItemPointer& entity) const { return renderableForEntityId(entity->getID()); }
-    render::ItemID renderableIdForEntity(const EntityItemPointer& entity) const { return renderableIdForEntityId(entity->getID()); }
+    EntityRendererPointer renderableForEntity(const EntityItemPointer& entity) const {
+        return renderableForEntityId(entity->getID());
+    }
+    render::ItemID renderableIdForEntity(const EntityItemPointer& entity) const {
+        return renderableIdForEntityId(entity->getID());
+    }
 
     void resetEntitiesScriptEngine();
 
@@ -263,15 +290,13 @@ private:
     static std::function<bool()> _entitiesShouldFadeFunction;
 
     mutable std::mutex _spaceLock;
-    workload::SpacePointer _space{ new workload::Space() };
+    workload::SpacePointer _space { new workload::Space() };
     workload::Transaction::Updates _spaceUpdates;
 
     static std::function<bool(const QUuid&, graphics::MaterialLayer, const std::string&)> _addMaterialToEntityOperator;
     static std::function<bool(const QUuid&, graphics::MaterialPointer, const std::string&)> _removeMaterialFromEntityOperator;
     static std::function<bool(const QUuid&, graphics::MaterialLayer, const std::string&)> _addMaterialToAvatarOperator;
     static std::function<bool(const QUuid&, graphics::MaterialPointer, const std::string&)> _removeMaterialFromAvatarOperator;
-
 };
-
 
 #endif // hifi_EntityTreeRenderer_h

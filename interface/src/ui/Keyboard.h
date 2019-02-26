@@ -16,32 +16,23 @@
 #include <memory>
 #include <vector>
 
-#include <QtCore/QObject>
-#include <QTimer>
-#include <QHash>
-#include <DependencyManager.h>
-#include <Sound.h>
 #include <AudioInjector.h>
-#include <shared/ReadWriteLockable.h>
+#include <DependencyManager.h>
 #include <SettingHandle.h>
+#include <Sound.h>
+#include <shared/ReadWriteLockable.h>
+#include <QHash>
+#include <QTimer>
+#include <QtCore/QObject>
 
 class PointerEvent;
-
 
 class Key {
 public:
     Key() = default;
     ~Key() = default;
 
-    enum Type {
-        CHARACTER,
-        CAPS,
-        CLOSE,
-        LAYER,
-        BACKSPACE,
-        SPACE,
-        ENTER
-    };
+    enum Type { CHARACTER, CAPS, CLOSE, LAYER, BACKSPACE, SPACE, ENTER };
 
     static Key::Type getKeyTypeFromString(const QString& keyTypeString);
 
@@ -69,6 +60,7 @@ public:
     void saveDimensionsAndLocalPosition();
 
     void scaleKey(float sensorToWorldScale);
+
 private:
     Type _type { Type::CHARACTER };
 

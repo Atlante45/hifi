@@ -11,19 +11,18 @@
 #include <mutex>
 
 #include <QtCore/QObject>
-#include <QtCore/QtPlugin>
 #include <QtCore/QStringList>
+#include <QtCore/QtPlugin>
 
-#include <plugins/RuntimePlugin.h>
 #include <plugins/InputPlugin.h>
+#include <plugins/RuntimePlugin.h>
 
 #include "LeapMotionPlugin.h"
 
-class LeapMotionProvider : public QObject, public InputProvider
-{
+class LeapMotionProvider : public QObject, public InputProvider {
     Q_OBJECT
-        Q_PLUGIN_METADATA(IID InputProvider_iid FILE "plugin.json")
-        Q_INTERFACES(InputProvider)
+    Q_PLUGIN_METADATA(IID InputProvider_iid FILE "plugin.json")
+    Q_INTERFACES(InputProvider)
 
 public:
     LeapMotionProvider(QObject* parent = nullptr) : QObject(parent) {}
@@ -40,9 +39,7 @@ public:
         return _inputPlugins;
     }
 
-    virtual void destroyInputPlugins() override {
-        _inputPlugins.clear();
-    }
+    virtual void destroyInputPlugins() override { _inputPlugins.clear(); }
 
 private:
     InputPluginList _inputPlugins;

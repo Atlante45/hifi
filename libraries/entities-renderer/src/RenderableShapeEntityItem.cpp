@@ -10,11 +10,11 @@
 
 #include <glm/gtx/quaternion.hpp>
 
-#include <gpu/Batch.h>
 #include <DependencyManager.h>
-#include <StencilMaskPass.h>
 #include <GeometryCache.h>
 #include <PerfStat.h>
+#include <StencilMaskPass.h>
+#include <gpu/Batch.h>
 #include <shaders/Shaders.h>
 
 #include "RenderPipelines.h"
@@ -26,7 +26,7 @@
 using namespace render;
 using namespace render::entities;
 
-// Sphere entities should fit inside a cube entity of the same size, so a sphere that has dimensions 1x1x1 
+// Sphere entities should fit inside a cube entity of the same size, so a sphere that has dimensions 1x1x1
 // is a half unit sphere.  However, the geometry cache renders a UNIT sphere, so we need to scale down.
 static const float SPHERE_ENTITY_SCALE = 0.5f;
 
@@ -48,17 +48,17 @@ ShapeEntityRenderer::ShapeEntityRenderer(const EntityItemPointer& entity) : Pare
 
 bool ShapeEntityRenderer::needsRenderUpdate() const {
     if (resultWithReadLock<bool>([&] {
-        if (_procedural.isEnabled() && _procedural.isFading()) {
-            return true;
-        }
+            if (_procedural.isEnabled() && _procedural.isFading()) {
+                return true;
+            }
 
-        auto mat = _materials.find("0");
-        if (mat != _materials.end() && (mat->second.needsUpdate() || mat->second.areTexturesLoading())) {
-            return true;
-        }
+            auto mat = _materials.find("0");
+            if (mat != _materials.end() && (mat->second.needsUpdate() || mat->second.areTexturesLoading())) {
+                return true;
+            }
 
-        return false;
-    })) {
+            return false;
+        })) {
         return true;
     }
 
@@ -92,7 +92,8 @@ bool ShapeEntityRenderer::needsRenderUpdateFromTypedEntity(const TypedEntityPoin
     return false;
 }
 
-void ShapeEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction, const TypedEntityPointer& entity) {
+void ShapeEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& scene, Transaction& transaction,
+                                                         const TypedEntityPointer& entity) {
     withWriteLock([&] {
         auto userData = entity->getUserData();
         if (_lastUserData != userData) {
@@ -105,7 +106,7 @@ void ShapeEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& sce
     });
 
     void* key = (void*)this;
-    AbstractViewStateInterface::instance()->pushPostUpdateLambda(key, [this] () {
+    AbstractViewStateInterface::instance()->pushPostUpdateLambda(key, [this]() {
         withWriteLock([&] {
             auto entity = getEntity();
             _position = entity->getWorldPosition();
@@ -118,7 +119,8 @@ void ShapeEntityRenderer::doRenderUpdateSynchronousTyped(const ScenePointer& sce
             }
 
             _renderTransform.postScale(_dimensions);
-        });;
+        });
+        ;
     });
 }
 
@@ -165,15 +167,14 @@ bool ShapeEntityRenderer::isTransparent() const {
 }
 
 bool ShapeEntityRenderer::useMaterialPipeline(const graphics::MultiMaterial& materials) const {
-    bool proceduralReady = resultWithReadLock<bool>([&] {
-        return _procedural.isReady();
-    });
+    bool proceduralReady = resultWithReadLock<bool>([&] { return _procedural.isReady(); });
     if (proceduralReady) {
         return false;
     }
 
     graphics::MaterialKey drawMaterialKey = materials.getMaterialKey();
-    if (drawMaterialKey.isEmissive() || drawMaterialKey.isUnlit() || drawMaterialKey.isMetallic() || drawMaterialKey.isScattering()) {
+    if (drawMaterialKey.isEmissive() || drawMaterialKey.isUnlit() || drawMaterialKey.isMetallic() ||
+        drawMaterialKey.isScattering()) {
         return true;
     }
 
@@ -223,9 +224,7 @@ ShapeKey ShapeEntityRenderer::getShapeKey() {
         return builder.build();
     } else {
         ShapeKey::Builder builder;
-        bool proceduralReady = resultWithReadLock<bool>([&] {
-            return _procedural.isReady();
-        });
+        bool proceduralReady = resultWithReadLock<bool>([&] { return _procedural.isReady(); });
         if (proceduralReady) {
             builder.withOwnPipeline();
         }
@@ -277,9 +276,11 @@ void ShapeEntityRenderer::doRender(RenderArgs* args) {
         outColor.a *= _isFading ? Interpolate::calculateFadeRatio(_fadeStartTime) : 1.0f;
         render::ShapePipelinePointer pipeline;
         if (_renderLayer == RenderLayer::WORLD) {
-            pipeline = outColor.a < 1.0f ? geometryCache->getTransparentShapePipeline() : geometryCache->getOpaqueShapePipeline();
+            pipeline = outColor.a < 1.0f ? geometryCache->getTransparentShapePipeline()
+                                         : geometryCache->getOpaqueShapePipeline();
         } else {
-            pipeline = outColor.a < 1.0f ? geometryCache->getForwardTransparentShapePipeline() : geometryCache->getForwardOpaqueShapePipeline();
+            pipeline = outColor.a < 1.0f ? geometryCache->getForwardTransparentShapePipeline()
+                                         : geometryCache->getForwardOpaqueShapePipeline();
         }
         if (render::ShapeKey(args->_globalShapeKey).isWireframe() || _primitiveMode == PrimitiveMode::LINES) {
             geometryCache->renderWireShapeInstance(args, batch, geometryShape, outColor, pipeline);
@@ -299,7 +300,7 @@ void ShapeEntityRenderer::doRender(RenderArgs* args) {
     args->_details._trianglesRendered += (int)triCount;
 }
 
-scriptable::ScriptableModelBase ShapeEntityRenderer::getScriptableModel()  {
+scriptable::ScriptableModelBase ShapeEntityRenderer::getScriptableModel() {
     scriptable::ScriptableModelBase result;
     auto geometryCache = DependencyManager::get<GeometryCache>();
     auto geometryShape = geometryCache->getShapeForEntityShape(_shape);
@@ -309,7 +310,8 @@ scriptable::ScriptableModelBase ShapeEntityRenderer::getScriptableModel()  {
         result.appendMaterials(_materials);
         auto materials = _materials.find("0");
         if (materials != _materials.end()) {
-            vertexColor = ColorUtils::tosRGBVec3(materials->second.getSchemaBuffer().get<graphics::MultiMaterial::Schema>()._albedo);
+            vertexColor = ColorUtils::tosRGBVec3(
+                materials->second.getSchemaBuffer().get<graphics::MultiMaterial::Schema>()._albedo);
         }
     }
     if (auto mesh = geometryCache->meshFromShape(geometryShape, vertexColor)) {

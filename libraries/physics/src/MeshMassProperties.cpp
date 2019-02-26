@@ -24,7 +24,7 @@ void computeBoxInertia(btScalar mass, const btVector3& diagonal, btMatrix3x3& in
     //                  |                             |
     //                  |     0        0    x^2 + y^2 |
     //
-    
+
     mass = mass / btScalar(12.0f);
     btScalar x = diagonal[0];
     x = mass * x * x;
@@ -59,28 +59,21 @@ void computeTetrahedronInertia(btScalar mass, btVector3* points, btMatrix3x3& in
     const btVector3& p2 = points[2];
     const btVector3& p3 = points[3];
 
-    for (uint32_t i = 0; i < 3; ++i ) {
+    for (uint32_t i = 0; i < 3; ++i) {
         uint32_t j = (i + 1) % 3;
         uint32_t k = (j + 1) % 3;
 
         // compute diagonal
-        inertia[i][i] = mass * btScalar(0.1f) * 
-            ( p0[j] * (p0[j] + p1[j] + p2[j] + p3[j])
-            + p1[j] * (p1[j] + p2[j] + p3[j])
-            + p2[j] * (p2[j] + p3[j])
-            + p3[j] * p3[j]
-            + p0[k] * (p0[k] + p1[k] + p2[k] + p3[k])
-            + p1[k] * (p1[k] + p2[k] + p3[k])
-            + p2[k] * (p2[k] + p3[k])
-            + p3[k] * p3[k] );
+        inertia[i][i] = mass * btScalar(0.1f) *
+                        (p0[j] * (p0[j] + p1[j] + p2[j] + p3[j]) + p1[j] * (p1[j] + p2[j] + p3[j]) + p2[j] * (p2[j] + p3[j]) +
+                         p3[j] * p3[j] + p0[k] * (p0[k] + p1[k] + p2[k] + p3[k]) + p1[k] * (p1[k] + p2[k] + p3[k]) +
+                         p2[k] * (p2[k] + p3[k]) + p3[k] * p3[k]);
 
         // compute off-diagonals
-        inertia[j][k] = inertia[k][j] = - mass * btScalar(0.05f) *
-            ( btScalar(2.0f) * ( p0[j] * p0[k] +  p1[j] * p1[k] +  p2[j] * p2[k] +  p3[j] * p3[k] )
-            + p0[j] * (p1[k] + p2[k] + p3[k])
-            + p1[j] * (p0[k] + p2[k] + p3[k])
-            + p2[j] * (p0[k] + p1[k] + p3[k])
-            + p3[j] * (p0[k] + p1[k] + p2[k]) );
+        inertia[j][k] = inertia[k][j] = -mass * btScalar(0.05f) *
+                                        (btScalar(2.0f) * (p0[j] * p0[k] + p1[j] * p1[k] + p2[j] * p2[k] + p3[j] * p3[k]) +
+                                         p0[j] * (p1[k] + p2[k] + p3[k]) + p1[j] * (p0[k] + p2[k] + p3[k]) +
+                                         p2[j] * (p0[k] + p1[k] + p3[k]) + p3[j] * (p0[k] + p1[k] + p2[k]));
     }
 }
 
@@ -92,7 +85,7 @@ void computePointInertia(const btVector3& point, btScalar mass, btMatrix3x3& ine
             btScalar pointi = point[i];
             inertia[i][i] = mass * (distanceSquared - (pointi * pointi));
             for (uint32_t j = i + 1; j < 3; ++j) {
-                btScalar offDiagonal = - mass * pointi * point[j];
+                btScalar offDiagonal = -mass * pointi * point[j];
                 inertia[i][j] = offDiagonal;
                 inertia[j][i] = offDiagonal;
             }
@@ -102,15 +95,11 @@ void computePointInertia(const btVector3& point, btScalar mass, btMatrix3x3& ine
 
 // this method is included for unit test verification
 void computeTetrahedronInertiaByBruteForce(btVector3* points, btMatrix3x3& inertia) {
-    // Computes the approximate inertia tensor of a tetrahedron (about frame's origin) 
-    // by integration over the "point" masses.  This is numerically expensive so it may 
+    // Computes the approximate inertia tensor of a tetrahedron (about frame's origin)
+    // by integration over the "point" masses.  This is numerically expensive so it may
     // take a while to complete.
 
-    VectorOfIndices triangles = {
-        0, 2, 1, 
-        0, 3, 2, 
-        0, 1, 3, 
-        1, 2, 3 };
+    VectorOfIndices triangles = { 0, 2, 1, 0, 3, 2, 0, 1, 3, 1, 2, 3 };
 
     for (int i = 0; i < 3; ++i) {
         inertia[i].setZero();
@@ -126,7 +115,7 @@ void computeTetrahedronInertiaByBruteForce(btVector3* points, btMatrix3x3& inert
         btVector3& p1 = points[triangles[t + 1]];
         btVector3& p2 = points[triangles[t + 2]];
         normals[i] = ((p1 - p0).cross(p2 - p1)).normalized();
-        // make sure normal points away from center 
+        // make sure normal points away from center
         if (normals[i].dot(p0 - center) < btScalar(0.0f)) {
             normals[i] *= btScalar(-1.0f);
         }
@@ -137,7 +126,7 @@ void computeTetrahedronInertiaByBruteForce(btVector3* points, btMatrix3x3& inert
     btVector3 boxMax = points[0];
     btVector3 boxMin = points[0];
     for (int i = 1; i < 4; ++i) {
-        for(int j = 0; j < 3; ++j) {
+        for (int j = 0; j < 3; ++j) {
             if (points[i][j] > boxMax[j]) {
                 boxMax[j] = points[i][j];
             }
@@ -166,7 +155,7 @@ void computeTetrahedronInertiaByBruteForce(btVector3* points, btMatrix3x3& inert
     btScalar YY = boxMax[1];
     btScalar ZZ = boxMax[2];
     btScalar x = boxMin[0];
-    while(x < XX) {
+    while (x < XX) {
         btScalar y = boxMin[1];
         while (y < YY) {
             btScalar z = boxMin[2];
@@ -205,7 +194,7 @@ void applyParallelAxisTheorem(btMatrix3x3& inertia, const btVector3& shift, btSc
     // Parallel Axis Theorem says:
     //
     // Ishifted = Icm + M * [ (R*R)E - R(x)R ]
-    // 
+    //
     // where R*R   = inside product
     //       R(x)R = outside product
     //       E     = identity matrix
@@ -229,7 +218,7 @@ void applyInverseParallelAxisTheorem(btMatrix3x3& inertia, const btVector3& shif
     // Parallel Axis Theorem says:
     //
     // Ishifted = Icm + M * [ (R*R)E - R(x)R ]
-    // 
+    //
     // So the inverse would be:
     //
     // Icm = Ishifted - M * [ (R*R)E - R(x)R ]
@@ -253,13 +242,13 @@ MeshMassProperties::MeshMassProperties(const VectorOfPoints& points, const Vecto
 }
 
 void MeshMassProperties::computeMassProperties(const VectorOfPoints& points, const VectorOfIndices& triangleIndices) {
-    // We process the mesh one triangle at a time.  Each triangle defines a tetrahedron 
-    // relative to some local point p0 (which we chose to be the local origin for convenience). 
+    // We process the mesh one triangle at a time.  Each triangle defines a tetrahedron
+    // relative to some local point p0 (which we chose to be the local origin for convenience).
     // Each tetrahedron contributes to the three totals: volume, centerOfMass, and inertiaTensor.
     //
-    // We assume the mesh triangles are wound using the right-hand-rule, such that the 
+    // We assume the mesh triangles are wound using the right-hand-rule, such that the
     // triangle's points circle counter-clockwise about its face normal.
-    // 
+    //
 
     // initialize the totals
     _volume = btScalar(0.0f);
@@ -269,25 +258,25 @@ void MeshMassProperties::computeMassProperties(const VectorOfPoints& points, con
         _inertia[i].setZero();
     }
 
-    // create some variables to hold temporary results
-    #ifndef NDEBUG
+// create some variables to hold temporary results
+#ifndef NDEBUG
     uint32_t numPoints = (uint32_t)points.size();
-    #endif
+#endif
     const btVector3 p0(0.0f, 0.0f, 0.0f);
     btMatrix3x3 tetraInertia;
     btMatrix3x3 doubleDebugInertia;
     btVector3 tetraPoints[4];
     btVector3 center;
-    
+
     // loop over triangles
     uint32_t numTriangles = (uint32_t)triangleIndices.size() / 3;
     for (uint32_t i = 0; i < numTriangles; ++i) {
         uint32_t t = 3 * i;
-        #ifndef NDEBUG
+#ifndef NDEBUG
         assert(triangleIndices[t] < numPoints);
         assert(triangleIndices[t + 1] < numPoints);
         assert(triangleIndices[t + 2] < numPoints);
-        #endif
+#endif
 
         // extract raw vertices
         tetraPoints[0] = p0;
@@ -319,7 +308,6 @@ void MeshMassProperties::computeMassProperties(const VectorOfPoints& points, con
     }
 
     _centerOfMass = weightedCenter / _volume;
-    
+
     applyInverseParallelAxisTheorem(_inertia, _centerOfMass, _volume);
 }
-

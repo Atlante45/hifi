@@ -35,7 +35,7 @@ GPUIdent* GPUIdent::ensureQuery(const QString& vendor, const QString& renderer) 
     if (_isQueried) {
         return this;
     }
-    _isQueried = true;  // Don't try again, even if not _isValid;
+    _isQueried = true; // Don't try again, even if not _isValid;
 #if (defined Q_OS_MAC)
     GLuint cglDisplayMask = -1; // Iterate over all of them.
     CGLRendererInfoObj rendererInfo;
@@ -79,7 +79,7 @@ GPUIdent* GPUIdent::ensureQuery(const QString& vendor, const QString& renderer) 
     HRESULT hr = S_OK;
 
     IDXGIFactory1* pFactory = nullptr;
-    hr = CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)(&pFactory) );
+    hr = CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)(&pFactory));
     if (hr != S_OK || pFactory == nullptr) {
         qCDebug(shared) << "Unable to create DXGI";
         return this;
@@ -93,7 +93,6 @@ GPUIdent* GPUIdent::ensureQuery(const QString& vendor, const QString& renderer) 
         UINT adapterNum = 0;
         IDXGIAdapter1* pAdapter = nullptr;
         while (pFactory->EnumAdapters1(adapterNum, &pAdapter) != DXGI_ERROR_NOT_FOUND) {
-
             // Found an adapter, get descriptor
             DXGI_ADAPTER_DESC1 adapterDesc;
             pAdapter->GetDesc1(&adapterDesc);
@@ -101,22 +100,19 @@ GPUIdent* GPUIdent::ensureQuery(const QString& vendor, const QString& renderer) 
             LARGE_INTEGER version;
             hr = pAdapter->CheckInterfaceSupport(__uuidof(IDXGIDevice), &version);
 
-            std::wstring wDescription (adapterDesc.Description);
+            std::wstring wDescription(adapterDesc.Description);
             std::string description(wDescription.begin(), wDescription.end());
             qCDebug(shared) << "Found adapter: " << description.c_str()
-                << " Driver version: " << convertDriverVersionToString.convert(version);
+                            << " Driver version: " << convertDriverVersionToString.convert(version);
 
             AdapterEntry adapterEntry;
             adapterEntry.first.first = adapterDesc;
             adapterEntry.first.second = version;
 
-
-
             UINT outputNum = 0;
-            IDXGIOutput * pOutput;
+            IDXGIOutput* pOutput;
             bool hasOutputConnectedToDesktop = false;
             while (pAdapter->EnumOutputs(outputNum, &pOutput) != DXGI_ERROR_NOT_FOUND) {
-
                 // FOund an output attached to the adapter, get descriptor
                 DXGI_OUTPUT_DESC outputDesc;
                 pOutput->GetDesc(&outputDesc);
@@ -125,11 +121,13 @@ GPUIdent* GPUIdent::ensureQuery(const QString& vendor, const QString& renderer) 
 
                 std::wstring wDeviceName(outputDesc.DeviceName);
                 std::string deviceName(wDeviceName.begin(), wDeviceName.end());
-                qCDebug(shared) << "    Found output: " << deviceName.c_str() << " desktop: " << (outputDesc.AttachedToDesktop ? "true" : "false")
-                    << " Rect [ l=" << outputDesc.DesktopCoordinates.left << " r=" << outputDesc.DesktopCoordinates.right
-                    << " b=" << outputDesc.DesktopCoordinates.bottom << " t=" << outputDesc.DesktopCoordinates.top << " ]";
+                qCDebug(shared) << "    Found output: " << deviceName.c_str()
+                                << " desktop: " << (outputDesc.AttachedToDesktop ? "true" : "false")
+                                << " Rect [ l=" << outputDesc.DesktopCoordinates.left
+                                << " r=" << outputDesc.DesktopCoordinates.right << " b=" << outputDesc.DesktopCoordinates.bottom
+                                << " t=" << outputDesc.DesktopCoordinates.top << " ]";
 
-                hasOutputConnectedToDesktop |= (bool) outputDesc.AttachedToDesktop;
+                hasOutputConnectedToDesktop |= (bool)outputDesc.AttachedToDesktop;
 
                 pOutput->Release();
                 outputNum++;
@@ -147,7 +145,6 @@ GPUIdent* GPUIdent::ensureQuery(const QString& vendor, const QString& renderer) 
         }
     }
     pFactory->Release();
-
 
     // THis was the previous technique used to detect the platform we are running on on windows.
     /*
@@ -170,10 +167,9 @@ GPUIdent* GPUIdent::ensureQuery(const QString& vendor, const QString& renderer) 
     }
 
     // Switch the security level to IMPERSONATE so that provider will grant access to system-level objects.
-    hr = CoSetProxyBlanket(spServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_DEFAULT);
-    if (hr != S_OK) {
-        qCDebug(shared) << "Unable to authorize access to system objects.";
-        return this;
+    hr = CoSetProxyBlanket(spServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL,
+    RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_DEFAULT); if (hr != S_OK) { qCDebug(shared) << "Unable to authorize access to system
+    objects."; return this;
     }
 
     // Get the vid controller

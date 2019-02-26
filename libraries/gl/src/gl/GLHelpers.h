@@ -10,8 +10,8 @@
 #ifndef hifi_GLHelpers_h
 #define hifi_GLHelpers_h
 
-#include <functional>
 #include <QJsonObject>
+#include <functional>
 
 #include "GLLogging.h"
 
@@ -35,24 +35,24 @@ int glVersionToInteger(QString glVersion);
 bool isRenderThread();
 
 namespace gl {
-    void globalLock();
-    void globalRelease(bool finish = true);
+void globalLock();
+void globalRelease(bool finish = true);
 
-    bool debugContextEnabled();
+bool debugContextEnabled();
 
-    bool khrDebugEnabled();
+bool khrDebugEnabled();
 
-    bool extDebugMarkerEnabled();
+bool extDebugMarkerEnabled();
 
-    void withSavedContext(const std::function<void()>& f);
+void withSavedContext(const std::function<void()>& f);
 
-    bool checkGLError(const char* name);
+bool checkGLError(const char* name);
 
-    bool checkGLErrorDebug(const char* name);
+bool checkGLErrorDebug(const char* name);
 
-    bool disableGl45();
+bool disableGl45();
 
-    void getTargetVersion(int& major, int& minor);
+void getTargetVersion(int& major, int& minor);
 } // namespace gl
 
 #define CHECK_GL_ERROR() ::gl::checkGLErrorDebug(__FUNCTION__)

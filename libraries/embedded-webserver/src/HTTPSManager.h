@@ -12,8 +12,8 @@
 #ifndef hifi_HTTPSManager_h
 #define hifi_HTTPSManager_h
 
-#include <QtNetwork/QSslKey>
 #include <QtNetwork/QSslCertificate>
+#include <QtNetwork/QSslKey>
 
 #include "HTTPManager.h"
 
@@ -26,22 +26,19 @@ public:
 class HTTPSManager : public HTTPManager, public HTTPSRequestHandler {
     Q_OBJECT
 public:
-    HTTPSManager(QHostAddress listenAddress,
-                 quint16 port,
-                 const QSslCertificate& certificate,
-                 const QSslKey& privateKey,
-                 const QString& documentRoot,
-                 HTTPSRequestHandler* requestHandler = nullptr);
-    
+    HTTPSManager(QHostAddress listenAddress, quint16 port, const QSslCertificate& certificate, const QSslKey& privateKey,
+                 const QString& documentRoot, HTTPSRequestHandler* requestHandler = nullptr);
+
     void setCertificate(const QSslCertificate& certificate) { _certificate = certificate; }
     void setPrivateKey(const QSslKey& privateKey) { _privateKey = privateKey; }
-    
+
     bool handleHTTPRequest(HTTPConnection* connection, const QUrl& url, bool skipSubHandler = false) override;
     bool handleHTTPSRequest(HTTPSConnection* connection, const QUrl& url, bool skipSubHandler = false) override;
-    
+
 protected:
     void incomingConnection(qintptr socketDescriptor) override;
     bool requestHandledByRequestHandler(HTTPConnection* connection, const QUrl& url) override;
+
 private:
     QSslCertificate _certificate;
     QSslKey _privateKey;

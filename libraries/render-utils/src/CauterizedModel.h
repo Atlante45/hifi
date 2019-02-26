@@ -9,7 +9,6 @@
 #ifndef hifi_CauterizedModel_h
 #define hifi_CauterizedModel_h
 
-
 #include "Model.h"
 
 class CauterizedModel : public Model {
@@ -32,7 +31,7 @@ public:
     bool updateGeometry() override;
 
     void createRenderItemSet() override;
-    
+
     virtual void updateClusterMatrices() override;
     void updateRenderItems() override;
 

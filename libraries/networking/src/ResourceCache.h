@@ -1,4 +1,4 @@
- //
+//
 //  ResourceCache.h
 //  libraries/shared/src
 //
@@ -19,11 +19,11 @@
 #include <QtCore/QList>
 #include <QtCore/QObject>
 #include <QtCore/QPointer>
+#include <QtCore/QQueue>
+#include <QtCore/QReadWriteLock>
 #include <QtCore/QSharedPointer>
 #include <QtCore/QUrl>
 #include <QtCore/QWeakPointer>
-#include <QtCore/QReadWriteLock>
-#include <QtCore/QQueue>
 
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
@@ -43,7 +43,7 @@ class Resource;
 
 static const qint64 BYTES_PER_MEGABYTES = 1024 * 1024;
 static const qint64 BYTES_PER_GIGABYTES = 1024 * BYTES_PER_MEGABYTES;
-static const qint64 MAXIMUM_CACHE_SIZE = 10 * BYTES_PER_GIGABYTES;  // 10GB
+static const qint64 MAXIMUM_CACHE_SIZE = 10 * BYTES_PER_GIGABYTES; // 10GB
 
 // Windows can have troubles allocating that much memory in ram sometimes
 // so default cache size at 100 MB on windows (1GB otherwise)
@@ -59,7 +59,7 @@ static const qint64 MAX_UNUSED_MAX_SIZE = MAXIMUM_CACHE_SIZE;
 // ResourceCache derived classes. Since we can't count on the ordering of
 // static members destruction, we need to use this Dependency manager implemented
 // object instead
-class ResourceCacheSharedItems : public Dependency  {
+class ResourceCacheSharedItems : public Dependency {
     SINGLETON_DEPENDENCY
 
     using Mutex = std::recursive_mutex;
@@ -89,7 +89,6 @@ private:
 
 /// Wrapper to expose resources to JS/QML
 class ScriptableResource : public QObject {
-
     /**jsdoc
      * @class ResourceObject
      *
@@ -107,7 +106,6 @@ class ScriptableResource : public QObject {
     Q_PROPERTY(int state READ getState NOTIFY stateChanged)
 
 public:
-
     /**jsdoc
      * @typedef {object} Resource.State
      * @property {number} QUEUED - The resource is queued up, waiting to be loaded.
@@ -129,9 +127,9 @@ public:
     virtual ~ScriptableResource() = default;
 
     /**jsdoc
-      * Release this resource.
-      * @function ResourceObject#release
-      */
+     * Release this resource.
+     * @function ResourceObject#release
+     */
     Q_INVOKABLE void release();
 
     const QUrl& getURL() const { return _url; }
@@ -161,7 +159,10 @@ signals:
     void stateChanged(int state);
 
 protected:
-    void setState(State state) { _state = state; emit stateChanged(_state); }
+    void setState(State state) {
+        _state = state;
+        emit stateChanged(_state);
+    }
 
 private slots:
     void loadingChanged();
@@ -182,7 +183,7 @@ private:
     QMetaObject::Connection _finishedConnection;
 
     QUrl _url;
-    State _state{ QUEUED };
+    State _state { QUEUED };
 };
 
 Q_DECLARE_METATYPE(ScriptableResource*);
@@ -197,7 +198,6 @@ class ResourceCache : public QObject {
     Q_PROPERTY(size_t sizeCached READ getSizeCachedResources NOTIFY dirty)
 
 public:
-
     size_t getNumTotalResources() const { return _numTotalResources; }
     size_t getSizeTotalResources() const { return _totalResourcesSize; }
     size_t getNumCachedResources() const { return _numUnusedResources; }
@@ -207,7 +207,7 @@ public:
 
     static void setRequestLimit(uint32_t limit);
     static uint32_t getRequestLimit() { return DependencyManager::get<ResourceCacheSharedItems>()->getRequestLimit(); }
-    
+
     void setUnusedResourceCacheSize(qint64 unusedResourcesMaxSize);
     qint64 getUnusedResourceCacheSize() const { return _unusedResourcesMaxSize; }
 
@@ -217,7 +217,7 @@ public:
 
     ResourceCache(QObject* parent = nullptr);
     virtual ~ResourceCache();
-    
+
     void refreshAll();
     void clearUnusedResources();
 
@@ -240,7 +240,9 @@ protected slots:
     /// returns an empty smart pointer and loads its asynchronously.
     /// \param fallback a fallback URL to load if the desired one is unavailable
     // FIXME: std::numeric_limits<size_t>::max() could be a valid extraHash
-    QSharedPointer<Resource> getResource(const QUrl& url, const QUrl& fallback = QUrl()) { return getResource(url, fallback, nullptr, std::numeric_limits<size_t>::max()); }
+    QSharedPointer<Resource> getResource(const QUrl& url, const QUrl& fallback = QUrl()) {
+        return getResource(url, fallback, nullptr, std::numeric_limits<size_t>::max());
+    }
     QSharedPointer<Resource> getResource(const QUrl& url, const QUrl& fallback, void* extra, size_t extraHash);
 
 private slots:
@@ -252,7 +254,9 @@ protected:
     // which should be a QScriptEngine with ScriptableResource registered, so that
     // the QScriptEngine will delete the pointer when it is garbage collected.
     // JSDoc is provided on more general function signature.
-    Q_INVOKABLE ScriptableResource* prefetch(const QUrl& url) { return prefetch(url, nullptr, std::numeric_limits<size_t>::max()); }
+    Q_INVOKABLE ScriptableResource* prefetch(const QUrl& url) {
+        return prefetch(url, nullptr, std::numeric_limits<size_t>::max());
+    }
 
     /// Creates a new resource.
     virtual QSharedPointer<Resource> createResource(const QUrl& url) = 0;
@@ -299,7 +303,7 @@ private:
 class ScriptableResourceCache : public QObject {
     Q_OBJECT
 
-    // JSDoc 3.5.5 doesn't augment name spaces with @property definitions so the following properties JSDoc is copied to the 
+    // JSDoc 3.5.5 doesn't augment name spaces with @property definitions so the following properties JSDoc is copied to the
     // different exposed cache classes.
 
     /**jsdoc
@@ -335,7 +339,9 @@ public:
      * @param {string} url - URL of the resource to prefetch.
      * @returns {ResourceObject}
      */
-    Q_INVOKABLE ScriptableResource* prefetch(const QUrl& url) { return prefetch(url, nullptr, std::numeric_limits<size_t>::max()); }
+    Q_INVOKABLE ScriptableResource* prefetch(const QUrl& url) {
+        return prefetch(url, nullptr, std::numeric_limits<size_t>::max());
+    }
     Q_INVOKABLE ScriptableResource* prefetch(const QUrl& url, void* extra, size_t extraHash);
 
 signals:
@@ -393,7 +399,7 @@ public:
 
     /// For loading resources, returns the number of bytes received.
     qint64 getBytesReceived() const { return _bytesReceived; }
-    
+
     /// For loading resources, returns the number of total bytes (<= zero if unknown).
     qint64 getBytesTotal() const { return _bytesTotal; }
 
@@ -402,7 +408,7 @@ public:
 
     /// For loading resources, returns the load progress.
     float getProgress() const { return (_bytesTotal <= 0) ? 0.0f : (float)_bytesReceived / _bytesTotal; }
-    
+
     /// Refreshes the resource.
     virtual void refresh();
 
@@ -411,7 +417,7 @@ public:
     void setCache(ResourceCache* cache) { _cache = cache; }
 
     virtual void deleter() { allReferencesCleared(); }
-    
+
     const QUrl& getURL() const { return _url; }
 
     unsigned int getDownloadAttempts() { return _attempts; }
@@ -507,21 +513,21 @@ public slots:
 private:
     friend class ResourceCache;
     friend class ScriptableResource;
-    
+
     void setLRUKey(int lruKey) { _lruKey = lruKey; }
-    
+
     void retry();
     void reinsert();
 
     bool isInScript() const { return _isInScript; }
     void setInScript(bool isInScript) { _isInScript = isInScript; }
-    
-    int _lruKey{ 0 };
-    QTimer* _replyTimer{ nullptr };
-    unsigned int _attempts{ 0 };
+
+    int _lruKey { 0 };
+    QTimer* _replyTimer { nullptr };
+    unsigned int _attempts { 0 };
     static const int MAX_ATTEMPTS = 8;
     unsigned int _attemptsRemaining { MAX_ATTEMPTS };
-    bool _isInScript{ false };
+    bool _isInScript { false };
 };
 
 uint qHash(const QPointer<QObject>& value, uint seed = 0);

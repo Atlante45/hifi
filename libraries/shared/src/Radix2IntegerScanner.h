@@ -17,72 +17,73 @@
 
 namespace type_traits { // those are needed for the declaration, see below
 
-    // Note: There are better / more generally appicable implementations 
-    // in C++11, make_signed is missing in TR1 too - so I just use C++98
-    // hacks that get the job done...
+// Note: There are better / more generally appicable implementations
+// in C++11, make_signed is missing in TR1 too - so I just use C++98
+// hacks that get the job done...
 
-    template< typename T > struct is_signed 
-    { static bool const value = T(-1) < T(0); };
+template<typename T>
+struct is_signed {
+    static bool const value = T(-1) < T(0);
+};
 
-    template< typename T, size_t S = sizeof(T) > struct make_unsigned;
-    template< typename T > struct make_unsigned< T, 1 > { typedef uint8_t type; };
-    template< typename T > struct make_unsigned< T, 2 > { typedef uint16_t type; };
-    template< typename T > struct make_unsigned< T, 4 > { typedef uint32_t type; };
-    template< typename T > struct make_unsigned< T, 8 > { typedef quint64 type; };
-}
-
+template<typename T, size_t S = sizeof(T)>
+struct make_unsigned;
+template<typename T>
+struct make_unsigned<T, 1> {
+    typedef uint8_t type;
+};
+template<typename T>
+struct make_unsigned<T, 2> {
+    typedef uint16_t type;
+};
+template<typename T>
+struct make_unsigned<T, 4> {
+    typedef uint32_t type;
+};
+template<typename T>
+struct make_unsigned<T, 8> {
+    typedef quint64 type;
+};
+} // namespace type_traits
 
 /**
  * Bit decomposition facility for integers.
  */
-template< typename T, 
-        bool _Signed = type_traits::is_signed<T>::value  >
+template<typename T, bool _Signed = type_traits::is_signed<T>::value>
 class Radix2IntegerScanner;
 
+template<typename UInt>
+class Radix2IntegerScanner<UInt, false> {
+    UInt valMsb;
 
+public:
+    Radix2IntegerScanner() : valMsb(~UInt(0) & ~(~UInt(0) >> 1)) {}
 
-template< typename UInt >
-class Radix2IntegerScanner< UInt, false > {
+    explicit Radix2IntegerScanner(int bits) : valMsb(UInt(1u) << (bits - 1)) {}
 
-        UInt valMsb;
-    public:
+    typedef UInt state_type;
 
-        Radix2IntegerScanner()
-            : valMsb(~UInt(0) &~ (~UInt(0) >> 1)) { }
+    state_type initial_state() const { return valMsb; }
+    bool advance(state_type& s) const { return (s >>= 1) != 0u; }
 
-        explicit Radix2IntegerScanner(int bits)
-            : valMsb(UInt(1u) << (bits - 1)) {
-        }
-
-        typedef UInt state_type;
-
-        state_type initial_state()  const   { return valMsb; }
-        bool advance(state_type& s) const   { return (s >>= 1) != 0u; }
-
-        bool bit(UInt const& v, state_type const& s) const { return !!(v & s); }
+    bool bit(UInt const& v, state_type const& s) const { return !!(v & s); }
 };
 
-template< typename Int >
-class Radix2IntegerScanner< Int, true >
-{
-        typename type_traits::make_unsigned<Int>::type valMsb;
-    public:
+template<typename Int>
+class Radix2IntegerScanner<Int, true> {
+    typename type_traits::make_unsigned<Int>::type valMsb;
 
-        Radix2IntegerScanner()
-            : valMsb(~state_type(0u) &~ (~state_type(0u) >> 1)) {
-        }
+public:
+    Radix2IntegerScanner() : valMsb(~state_type(0u) & ~(~state_type(0u) >> 1)) {}
 
-        explicit Radix2IntegerScanner(int bits)
-            : valMsb(state_type(1u) << (bits - 1)) {
-        }
+    explicit Radix2IntegerScanner(int bits) : valMsb(state_type(1u) << (bits - 1)) {}
 
+    typedef typename type_traits::make_unsigned<Int>::type state_type;
 
-        typedef typename type_traits::make_unsigned<Int>::type state_type;
-        
-        state_type initial_state()  const   { return valMsb; }
-        bool advance(state_type& s) const   { return (s >>= 1) != 0u; }
+    state_type initial_state() const { return valMsb; }
+    bool advance(state_type& s) const { return (s >>= 1) != 0u; }
 
-        bool bit(Int const& v, state_type const& s) const { return !!((v-valMsb) & s); }
+    bool bit(Int const& v, state_type const& s) const { return !!((v - valMsb) & s); }
 };
 
 #endif // hifi_Radix2IntegerScanner_h

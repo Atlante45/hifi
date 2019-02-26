@@ -77,7 +77,8 @@ protected:
 
     Q_INVOKABLE void buy(const QString& assetId, int cost, const bool controlledFailure = false);
     Q_INVOKABLE void balance();
-    Q_INVOKABLE void inventory(const QString& editionFilter = QString(), const QString& typeFilter = QString(), const QString& titleFilter = QString(), const int& page = 1, const int& perPage = 20);
+    Q_INVOKABLE void inventory(const QString& editionFilter = QString(), const QString& typeFilter = QString(),
+                               const QString& titleFilter = QString(), const int& page = 1, const int& perPage = 20);
     Q_INVOKABLE void history(const int& pageNumber, const int& itemsPerPage = 100);
     Q_INVOKABLE void generateKeyPair();
     Q_INVOKABLE void account();
@@ -85,9 +86,12 @@ protected:
     Q_INVOKABLE void certificateInfo(const QString& certificateId);
     Q_INVOKABLE void alreadyOwned(const QString& marketplaceId);
 
-    Q_INVOKABLE void transferAssetToNode(const QString& nodeID, const QString& certificateID, const int& amount, const QString& optionalMessage);
-    Q_INVOKABLE void transferAssetToUsername(const QString& username, const QString& certificateID, const int& amount, const QString& optionalMessage);
-    Q_INVOKABLE void authorizeAssetTransfer(const QString& couponID, const QString& certificateID, const int& amount, const QString& optionalMessage);
+    Q_INVOKABLE void transferAssetToNode(const QString& nodeID, const QString& certificateID, const int& amount,
+                                         const QString& optionalMessage);
+    Q_INVOKABLE void transferAssetToUsername(const QString& username, const QString& certificateID, const int& amount,
+                                             const QString& optionalMessage);
+    Q_INVOKABLE void authorizeAssetTransfer(const QString& couponID, const QString& certificateID, const int& amount,
+                                            const QString& optionalMessage);
 
     Q_INVOKABLE void replaceContentSet(const QString& itemHref, const QString& certificateID);
 

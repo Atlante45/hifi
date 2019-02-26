@@ -14,8 +14,8 @@
 #ifndef hifi_ScriptUUID_h
 #define hifi_ScriptUUID_h
 
-#include <QUuid>
 #include <QObject>
+#include <QUuid>
 #include <QtScript/QScriptable>
 
 /**jsdoc
@@ -65,7 +65,7 @@ public slots:
      * @returns {string} - A string representation of the UUID.
      */
     QString toString(const QUuid& id);
-    
+
     /**jsdoc
      * Generate a new UUID.
      * @function Uuid.generate

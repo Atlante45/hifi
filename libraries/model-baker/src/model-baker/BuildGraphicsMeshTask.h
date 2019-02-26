@@ -15,12 +15,13 @@
 #include <hfm/HFM.h>
 #include <shared/HifiTypes.h>
 
-#include "Engine.h"
 #include "BakerTypes.h"
+#include "Engine.h"
 
 class BuildGraphicsMeshTask {
 public:
-    using Input = baker::VaryingSet5<std::vector<hfm::Mesh>, hifi::URL, baker::MeshIndicesToModelNames, baker::NormalsPerMesh, baker::TangentsPerMesh>;
+    using Input = baker::VaryingSet5<std::vector<hfm::Mesh>, hifi::URL, baker::MeshIndicesToModelNames, baker::NormalsPerMesh,
+                                     baker::TangentsPerMesh>;
     using Output = std::vector<graphics::MeshPointer>;
     using JobModel = baker::Job::ModelIO<BuildGraphicsMeshTask, Input, Output>;
 

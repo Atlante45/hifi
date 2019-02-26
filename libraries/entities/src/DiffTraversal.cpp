@@ -21,7 +21,7 @@ DiffTraversal::Waypoint::Waypoint(EntityTreeElementPointer& element) : _nextInde
 }
 
 void DiffTraversal::Waypoint::getNextVisibleElementFirstTime(DiffTraversal::VisibleElement& next,
-        const DiffTraversal::View& view) {
+                                                             const DiffTraversal::View& view) {
     // NOTE: no need to set next.intersection in the "FirstTime" context
     if (_nextIndex == -1) {
         // root case is special:
@@ -47,8 +47,8 @@ void DiffTraversal::Waypoint::getNextVisibleElementFirstTime(DiffTraversal::Visi
     next.element.reset();
 }
 
-void DiffTraversal::Waypoint::getNextVisibleElementRepeat(
-        DiffTraversal::VisibleElement& next, const DiffTraversal::View& view, uint64_t lastTime) {
+void DiffTraversal::Waypoint::getNextVisibleElementRepeat(DiffTraversal::VisibleElement& next, const DiffTraversal::View& view,
+                                                          uint64_t lastTime) {
     if (_nextIndex == -1) {
         // root case is special
         ++_nextIndex;
@@ -64,10 +64,7 @@ void DiffTraversal::Waypoint::getNextVisibleElementRepeat(
             while (_nextIndex < NUMBER_OF_CHILDREN) {
                 EntityTreeElementPointer nextElement = element->getChildAtIndex(_nextIndex);
                 ++_nextIndex;
-                if (nextElement &&
-                    nextElement->getLastChanged() > lastTime &&
-                    view.shouldTraverseElement(*nextElement)) {
-
+                if (nextElement && nextElement->getLastChanged() > lastTime && view.shouldTraverseElement(*nextElement)) {
                     next.element = nextElement;
                     return;
                 }
@@ -78,7 +75,8 @@ void DiffTraversal::Waypoint::getNextVisibleElementRepeat(
 }
 
 void DiffTraversal::Waypoint::getNextVisibleElementDifferential(DiffTraversal::VisibleElement& next,
-        const DiffTraversal::View& view, const DiffTraversal::View& lastView) {
+                                                                const DiffTraversal::View& view,
+                                                                const DiffTraversal::View& lastView) {
     if (_nextIndex == -1) {
         // root case is special
         ++_nextIndex;
@@ -108,8 +106,7 @@ bool DiffTraversal::View::usesViewFrustums() const {
 bool DiffTraversal::View::isVerySimilar(const View& view) const {
     auto size = view.viewFrustums.size();
 
-    if (view.lodScaleFactor != lodScaleFactor ||
-        viewFrustums.size() != size) {
+    if (view.lodScaleFactor != lodScaleFactor || viewFrustums.size() != size) {
         return false;
     }
 
@@ -150,9 +147,7 @@ float DiffTraversal::View::computePriority(const EntityItemPointer& entity) cons
         // pops to the next higher cell. So we want to check to see that the entity is large enough to be seen
         // before we consider including it.
         float angularSize = frustum.getAngularSize(distance, radius);
-        if (angularSize > lodScaleFactor * MIN_ENTITY_ANGULAR_DIAMETER &&
-            frustum.intersects(position, distance, radius)) {
-
+        if (angularSize > lodScaleFactor * MIN_ENTITY_ANGULAR_DIAMETER && frustum.intersects(position, distance, radius)) {
             // use the angular size as priority
             // we compute the max priority for all frustums
             priority = std::max(priority, angularSize);
@@ -172,7 +167,6 @@ bool DiffTraversal::View::shouldTraverseElement(const EntityTreeElement& element
     auto center = cube.calcCenter(); // center of bounding sphere
     auto radius = 0.5f * SQRT_THREE * cube.getScale(); // radius of bounding sphere
 
-
     return any_of(begin(viewFrustums), end(viewFrustums), [&](const ConicalViewFrustum& frustum) {
         auto position = center - frustum.getPosition(); // position of bounding sphere in view-frame
         float distance = glm::length(position); // distance to center of bounding sphere
@@ -183,8 +177,7 @@ bool DiffTraversal::View::shouldTraverseElement(const EntityTreeElement& element
         // before we consider including it.
         float angularSize = frustum.getAngularSize(distance, radius);
 
-        return angularSize > lodScaleFactor * MIN_ELEMENT_ANGULAR_DIAMETER &&
-               frustum.intersects(position, distance, radius);
+        return angularSize > lodScaleFactor * MIN_ELEMENT_ANGULAR_DIAMETER && frustum.intersects(position, distance, radius);
     });
 }
 
@@ -213,7 +206,8 @@ DiffTraversal::Type DiffTraversal::prepareNewTraversal(const DiffTraversal::View
 
     Type type;
     // If usesViewFrustum changes, treat it as a First traversal
-    if (forceFirstPass || _completedView.startTime == 0 || _currentView.usesViewFrustums() != _completedView.usesViewFrustums()) {
+    if (forceFirstPass || _completedView.startTime == 0 ||
+        _currentView.usesViewFrustums() != _completedView.usesViewFrustums()) {
         type = Type::First;
         _currentView.viewFrustums = view.viewFrustums;
         _currentView.lodScaleFactor = view.lodScaleFactor;
@@ -275,9 +269,9 @@ void DiffTraversal::getNextVisibleElement(DiffTraversal::VisibleElement& next) {
     }
 }
 
-void DiffTraversal::setScanCallback(std::function<void (DiffTraversal::VisibleElement&)> cb) {
+void DiffTraversal::setScanCallback(std::function<void(DiffTraversal::VisibleElement&)> cb) {
     if (!cb) {
-        _scanElementCallback = [](DiffTraversal::VisibleElement& a){};
+        _scanElementCallback = [](DiffTraversal::VisibleElement& a) {};
     } else {
         _scanElementCallback = cb;
     }

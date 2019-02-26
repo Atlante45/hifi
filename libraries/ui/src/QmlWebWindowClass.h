@@ -53,13 +53,14 @@
  * @borrows OverlayWindow.qmlToScript as qmlToScript
  */
 
-// FIXME refactor this class to be a QQuickItem derived type and eliminate the needless wrapping 
+// FIXME refactor this class to be a QQuickItem derived type and eliminate the needless wrapping
 class QmlWebWindowClass : public QmlWindowClass {
     Q_OBJECT
     Q_PROPERTY(QString url READ getURL CONSTANT)
 
 private:
     static QScriptValue internal_constructor(QScriptContext* context, QScriptEngine* engine, bool restricted);
+
 public:
     QmlWebWindowClass(bool restricted) : QmlWindowClass(restricted) {}
 
@@ -67,7 +68,7 @@ public:
         return internal_constructor(context, engine, false);
     }
 
-    static QScriptValue restricted_constructor(QScriptContext* context, QScriptEngine* engine ){
+    static QScriptValue restricted_constructor(QScriptContext* context, QScriptEngine* engine) {
         return internal_constructor(context, engine, true);
     }
 

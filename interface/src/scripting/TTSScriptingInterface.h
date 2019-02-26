@@ -11,19 +11,19 @@
 #ifndef hifi_SpeechScriptingInterface_h
 #define hifi_SpeechScriptingInterface_h
 
-#include <QtCore/QObject>
-#include <QTimer>
 #include <DependencyManager.h>
+#include <QTimer>
+#include <QtCore/QObject>
 #ifdef WIN32
 #pragma warning(disable : 4996)
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#include <sapi.h>      // SAPI
-#include <sphelper.h>  // SAPI Helper
+#include <sapi.h> // SAPI
+#include <sphelper.h> // SAPI Helper
 #endif
-#include <AudioInjector.h>
 #include <AudioConstants.h>
+#include <AudioInjector.h>
 
 class TTSScriptingInterface : public QObject, public Dependency {
     Q_OBJECT

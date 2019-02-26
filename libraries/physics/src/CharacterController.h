@@ -12,19 +12,19 @@
 #ifndef hifi_CharacterController_h
 #define hifi_CharacterController_h
 
+#include <BulletDynamics/Character/btCharacterControllerInterface.h>
 #include <assert.h>
+#include <btBulletDynamicsCommon.h>
 #include <stdint.h>
 #include <atomic>
-#include <btBulletDynamicsCommon.h>
-#include <BulletDynamics/Character/btCharacterControllerInterface.h>
 
 #include <GLMHelpers.h>
 #include <NumericalConstants.h>
 #include <PhysicsCollisionGroups.h>
 
+#include "AvatarConstants.h"
 #include "BulletUtil.h"
 #include "CharacterGhostObject.h"
-#include "AvatarConstants.h" 
 
 const uint32_t PENDING_FLAG_ADD_TO_SIMULATION = 1U << 0;
 const uint32_t PENDING_FLAG_REMOVE_FROM_SIMULATION = 1U << 1;
@@ -47,7 +47,6 @@ const btScalar MAX_CHARACTER_MOTOR_TIMESCALE = 60.0f; // one minute
 const btScalar MIN_CHARACTER_MOTOR_TIMESCALE = 0.05f;
 
 class CharacterController : public btCharacterControllerInterface {
-
 public:
     CharacterController();
     virtual ~CharacterController();
@@ -63,22 +62,26 @@ public:
     virtual void updateShapeIfNecessary() = 0;
 
     // overrides from btCharacterControllerInterface
-    virtual void setWalkDirection(const btVector3 &walkDirection) override { assert(false); }
-    virtual void setVelocityForTimeInterval(const btVector3 &velocity, btScalar timeInterval) override { assert(false); }
-    virtual void reset(btCollisionWorld* collisionWorld) override { }
-    virtual void warp(const btVector3& origin) override { }
-    virtual void debugDraw(btIDebugDraw* debugDrawer) override { }
-    virtual void setUpInterpolate(bool value) override { }
+    virtual void setWalkDirection(const btVector3& walkDirection) override { assert(false); }
+    virtual void setVelocityForTimeInterval(const btVector3& velocity, btScalar timeInterval) override { assert(false); }
+    virtual void reset(btCollisionWorld* collisionWorld) override {}
+    virtual void warp(const btVector3& origin) override {}
+    virtual void debugDraw(btIDebugDraw* debugDrawer) override {}
+    virtual void setUpInterpolate(bool value) override {}
     virtual void updateAction(btCollisionWorld* collisionWorld, btScalar deltaTime) override;
-    virtual void preStep(btCollisionWorld *collisionWorld) override;
-    virtual void playerStep(btCollisionWorld *collisionWorld, btScalar dt) override;
-    virtual bool canJump() const override { assert(false); return false; } // never call this
+    virtual void preStep(btCollisionWorld* collisionWorld) override;
+    virtual void playerStep(btCollisionWorld* collisionWorld, btScalar dt) override;
+    virtual bool canJump() const override {
+        assert(false);
+        return false;
+    } // never call this
     virtual void jump(const btVector3& dir = btVector3(0.0f, 0.0f, 0.0f)) override;
     virtual bool onGround() const override;
 
     void clearMotors();
     void addMotor(const glm::vec3& velocity, const glm::quat& rotation, float horizTimescale, float vertTimescale = -1.0f);
-    void applyMotor(int index, btScalar dt, btVector3& worldVelocity, std::vector<btVector3>& velocities, std::vector<btScalar>& weights);
+    void applyMotor(int index, btScalar dt, btVector3& worldVelocity, std::vector<btVector3>& velocities,
+                    std::vector<btScalar>& weights);
     void setStepUpEnabled(bool enabled) { _stepUpEnabled = enabled; }
     void computeNewVelocity(btScalar dt, btVector3& velocity);
     void computeNewVelocity(btScalar dt, glm::vec3& velocity);
@@ -90,7 +93,7 @@ public:
     void preSimulation();
     void postSimulation();
 
-    void setPositionAndOrientation( const glm::vec3& position, const glm::quat& orientation);
+    void setPositionAndOrientation(const glm::vec3& position, const glm::quat& orientation);
     void getPositionAndOrientation(glm::vec3& position, glm::quat& rotation) const;
 
     void setParentVelocity(const glm::vec3& parentVelocity);
@@ -107,12 +110,7 @@ public:
     float getCapsuleHalfHeight() const { return _halfHeight; }
     glm::vec3 getCapsuleLocalOffset() const { return _shapeLocalOffset; }
 
-    enum class State {
-        Ground = 0,
-        Takeoff,
-        InAir,
-        Hover
-    };
+    enum class State { Ground = 0, Takeoff, InAir, Hover };
 
     State getState() const { return _state; }
     void updateState();
@@ -132,7 +130,7 @@ public:
     void setFlyingAllowed(bool value);
     void setCollisionlessAllowed(bool value);
 
-    void setPendingFlagsUpdateCollisionMask(){ _pendingFlags |= PENDING_FLAG_UPDATE_COLLISION_MASK; }
+    void setPendingFlagsUpdateCollisionMask() { _pendingFlags |= PENDING_FLAG_UPDATE_COLLISION_MASK; }
 
 protected:
 #ifdef DEBUG_STATE_CHANGE

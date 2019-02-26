@@ -12,17 +12,17 @@
 #ifndef hifi_OctalCode_h
 #define hifi_OctalCode_h
 
-#include <vector>
 #include <QString>
+#include <vector>
 
 #include <memory>
 
 const int BITS_IN_OCTAL = 3;
 const int NUMBER_OF_COLORS = 3; // RGB!
 const int SIZE_OF_COLOR_DATA = NUMBER_OF_COLORS * sizeof(unsigned char); // size in bytes
-const int RED_INDEX   = 0;
+const int RED_INDEX = 0;
 const int GREEN_INDEX = 1;
-const int BLUE_INDEX  = 2;
+const int BLUE_INDEX = 2;
 
 using OctalCodePtr = std::shared_ptr<unsigned char>;
 using OctalCodePtrList = std::vector<OctalCodePtr>;
@@ -41,8 +41,8 @@ const int UNKNOWN_OCTCODE_LENGTH = -2;
 int numberOfThreeBitSectionsInCode(const unsigned char* octalCode, int maxBytes = UNKNOWN_OCTCODE_LENGTH);
 
 const int CHECK_NODE_ONLY = -1;
-bool isAncestorOf(const unsigned char* possibleAncestor, const unsigned char* possibleDescendent, 
-        int descendentsChild = CHECK_NODE_ONLY);
+bool isAncestorOf(const unsigned char* possibleAncestor, const unsigned char* possibleDescendent,
+                  int descendentsChild = CHECK_NODE_ONLY);
 
 void copyFirstVertexForCode(const unsigned char* octalCode, float* output);
 
@@ -51,12 +51,7 @@ struct VoxelPositionSize {
 };
 void voxelDetailsForCode(const unsigned char* octalCode, VoxelPositionSize& voxelPositionSize);
 
-typedef enum {
-    ILLEGAL_CODE = -2,
-    LESS_THAN = -1,
-    EXACT_MATCH = 0,
-    GREATER_THAN = 1
-} OctalCodeComparison;
+typedef enum { ILLEGAL_CODE = -2, LESS_THAN = -1, EXACT_MATCH = 0, GREATER_THAN = 1 } OctalCodeComparison;
 
 OctalCodeComparison compareOctalCodes(const unsigned char* code1, const unsigned char* code2);
 

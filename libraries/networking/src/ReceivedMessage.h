@@ -50,7 +50,7 @@ public:
 
     qint64 getSize() const { return _data.size(); }
 
-    qint64 getBytesLeftToRead() const { return _data.size() -  _position; }
+    qint64 getBytesLeftToRead() const { return _data.size() - _position; }
 
     void seek(qint64 position) { _position = position; }
 
@@ -74,10 +74,13 @@ public:
     // exceed that of the ReceivedMessage.
     QByteArray readWithoutCopy(qint64 size);
 
-    template<typename T> qint64 peekPrimitive(T* data);
-    template<typename T> qint64 readPrimitive(T* data);
+    template<typename T>
+    qint64 peekPrimitive(T* data);
+    template<typename T>
+    qint64 readPrimitive(T* data);
 
-    template<typename T> qint64 readHeadPrimitive(T* data);
+    template<typename T>
+    qint64 readHeadPrimitive(T* data);
 
 signals:
     void progress(qint64 size);
@@ -98,22 +101,25 @@ private:
     PacketVersion _packetVersion;
     HifiSockAddr _senderSockAddr;
 
-    std::atomic<bool> _isComplete { true };  
+    std::atomic<bool> _isComplete { true };
     std::atomic<bool> _failed { false };
 };
 
 Q_DECLARE_METATYPE(ReceivedMessage*)
 Q_DECLARE_METATYPE(QSharedPointer<ReceivedMessage>)
 
-template<typename T> qint64 ReceivedMessage::peekPrimitive(T* data) {
+template<typename T>
+qint64 ReceivedMessage::peekPrimitive(T* data) {
     return peek(reinterpret_cast<char*>(data), sizeof(T));
 }
 
-template<typename T> qint64 ReceivedMessage::readPrimitive(T* data) {
+template<typename T>
+qint64 ReceivedMessage::readPrimitive(T* data) {
     return read(reinterpret_cast<char*>(data), sizeof(T));
 }
 
-template<typename T> qint64 ReceivedMessage::readHeadPrimitive(T* data) {
+template<typename T>
+qint64 ReceivedMessage::readHeadPrimitive(T* data) {
     return readHead(reinterpret_cast<char*>(data), sizeof(T));
 }
 

@@ -14,9 +14,8 @@
 
 #include "SurfaceGeometryPass.h"
 
-
-// VelocityFramebuffer is  a helper class gathering in one place theframebuffers and targets describing the surface geometry linear depth
-// from a z buffer
+// VelocityFramebuffer is  a helper class gathering in one place theframebuffers and targets describing the surface geometry
+// linear depth from a z buffer
 class VelocityFramebuffer {
 public:
     VelocityFramebuffer();
@@ -44,7 +43,7 @@ protected:
 
     glm::ivec2 _frameSize;
     glm::ivec2 _halfFrameSize;
-    int _resolutionLevel{ 0 };
+    int _resolutionLevel { 0 };
 };
 
 using VelocityFramebufferPointer = std::shared_ptr<VelocityFramebuffer>;
@@ -56,7 +55,7 @@ class VelocityBufferPassConfig : public render::GPUJobConfig {
 public:
     VelocityBufferPassConfig() : render::GPUJobConfig(true) {}
 
-    float depthThreshold{ 5.0f };
+    float depthThreshold { 5.0f };
 
 signals:
     void dirty();
@@ -73,7 +72,7 @@ public:
 
     void configure(const Config& config);
     void run(const render::RenderContextPointer& renderContext, const Inputs& inputs, Outputs& outputs);
-    
+
 private:
     typedef gpu::BufferView UniformBufferView;
 
@@ -84,6 +83,5 @@ private:
 
     gpu::RangeTimerPointer _gpuTimer;
 };
-
 
 #endif // hifi_VelocityBufferPass_h

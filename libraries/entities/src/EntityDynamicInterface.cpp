@@ -9,8 +9,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
-
 /*
 
      +-------------------------+                               +--------------------------------+
@@ -94,47 +92,47 @@ variables.  These argument variables are used by the code which is run when bull
 #include "EntityItem.h"
 
 /**jsdoc
-* <p>An entity action may be one of the following types:</p>
-* <table>
-*   <thead>
-*     <tr><th>Value</th><th>Type</th><th>Description</th><th>Arguments</th></tr>
-*   </thead>
-*   <tbody>
-*     <tr><td><code>"far-grab"</code></td><td>Avatar action</td>
-*       <td>Moves and rotates an entity to a target position and orientation, optionally relative to another entity. Collisions 
-*       between the entity and the user's avatar are disabled during the far-grab.</td>
-*       <td>{@link Entities.ActionArguments-FarGrab}</td></tr>
-*     <tr><td><code>"hold"</code></td><td>Avatar action</td>
-*       <td>Positions and rotates an entity relative to an avatar's hand. Collisions between the entity and the user's avatar 
-*       are disabled during the hold.</td>
-*       <td>{@link Entities.ActionArguments-Hold}</td></tr>
-*     <tr><td><code>"offset"</code></td><td>Object action</td>
-*       <td>Moves an entity so that it is a set distance away from a target point.</td>
-*       <td>{@link Entities.ActionArguments-Offset}</td></tr>
-*     <tr><td><code>"tractor"</code></td><td>Object action</td>
-*       <td>Moves and rotates an entity to a target position and orientation, optionally relative to another entity.</td>
-*       <td>{@link Entities.ActionArguments-Tractor}</td></tr>
-*     <tr><td><code>"travel-oriented"</code></td><td>Object action</td>
-*       <td>Orients an entity to align with its direction of travel.</td>
-*       <td>{@link Entities.ActionArguments-TravelOriented}</td></tr>
-*     <tr><td><code>"hinge"</code></td><td>Object constraint</td>
-*       <td>Lets an entity pivot about an axis or connects two entities with a hinge joint.</td>
-*       <td>{@link Entities.ActionArguments-Hinge}</td></tr>
-*     <tr><td><code>"slider"</code></td><td>Object constraint</td>
-*       <td>Lets an entity slide and rotate along an axis, or connects two entities that slide and rotate along a shared 
-*       axis.</td>
-*       <td>{@link Entities.ActionArguments-Slider|ActionArguments-Slider}</td></tr>
-*     <tr><td><code>"cone-twist"</code></td><td>Object constraint</td>
-*       <td>Connects two entities with a joint that can move through a cone and can twist.</td>
-*       <td>{@link Entities.ActionArguments-ConeTwist}</td></tr>
-*     <tr><td><code>"ball-socket"</code></td><td>Object constraint</td>
-*       <td>Connects two entities with a ball and socket joint.</td>
-*       <td>{@link Entities.ActionArguments-BallSocket}</td></tr>
-*     <tr><td><code>"spring"</code></td><td colspan="3">Synonym for <code>"tractor"</code>. <em>Legacy value.</em></td></tr>
-*   </tbody>
-* </table>
-* @typedef {string} Entities.ActionType
-*/
+ * <p>An entity action may be one of the following types:</p>
+ * <table>
+ *   <thead>
+ *     <tr><th>Value</th><th>Type</th><th>Description</th><th>Arguments</th></tr>
+ *   </thead>
+ *   <tbody>
+ *     <tr><td><code>"far-grab"</code></td><td>Avatar action</td>
+ *       <td>Moves and rotates an entity to a target position and orientation, optionally relative to another entity. Collisions
+ *       between the entity and the user's avatar are disabled during the far-grab.</td>
+ *       <td>{@link Entities.ActionArguments-FarGrab}</td></tr>
+ *     <tr><td><code>"hold"</code></td><td>Avatar action</td>
+ *       <td>Positions and rotates an entity relative to an avatar's hand. Collisions between the entity and the user's avatar
+ *       are disabled during the hold.</td>
+ *       <td>{@link Entities.ActionArguments-Hold}</td></tr>
+ *     <tr><td><code>"offset"</code></td><td>Object action</td>
+ *       <td>Moves an entity so that it is a set distance away from a target point.</td>
+ *       <td>{@link Entities.ActionArguments-Offset}</td></tr>
+ *     <tr><td><code>"tractor"</code></td><td>Object action</td>
+ *       <td>Moves and rotates an entity to a target position and orientation, optionally relative to another entity.</td>
+ *       <td>{@link Entities.ActionArguments-Tractor}</td></tr>
+ *     <tr><td><code>"travel-oriented"</code></td><td>Object action</td>
+ *       <td>Orients an entity to align with its direction of travel.</td>
+ *       <td>{@link Entities.ActionArguments-TravelOriented}</td></tr>
+ *     <tr><td><code>"hinge"</code></td><td>Object constraint</td>
+ *       <td>Lets an entity pivot about an axis or connects two entities with a hinge joint.</td>
+ *       <td>{@link Entities.ActionArguments-Hinge}</td></tr>
+ *     <tr><td><code>"slider"</code></td><td>Object constraint</td>
+ *       <td>Lets an entity slide and rotate along an axis, or connects two entities that slide and rotate along a shared
+ *       axis.</td>
+ *       <td>{@link Entities.ActionArguments-Slider|ActionArguments-Slider}</td></tr>
+ *     <tr><td><code>"cone-twist"</code></td><td>Object constraint</td>
+ *       <td>Connects two entities with a joint that can move through a cone and can twist.</td>
+ *       <td>{@link Entities.ActionArguments-ConeTwist}</td></tr>
+ *     <tr><td><code>"ball-socket"</code></td><td>Object constraint</td>
+ *       <td>Connects two entities with a ball and socket joint.</td>
+ *       <td>{@link Entities.ActionArguments-BallSocket}</td></tr>
+ *     <tr><td><code>"spring"</code></td><td colspan="3">Synonym for <code>"tractor"</code>. <em>Legacy value.</em></td></tr>
+ *   </tbody>
+ * </table>
+ * @typedef {string} Entities.ActionType
+ */
 // Note: The "none" action type is not listed because it's an internal "uninitialized" value and not useful for scripts.
 EntityDynamicType EntityDynamicInterface::dynamicTypeFromString(QString dynamicTypeString) {
     QString normalizedDynamicTypeString = dynamicTypeString.toLower().remove('-').remove('_');
@@ -178,7 +176,7 @@ EntityDynamicType EntityDynamicInterface::dynamicTypeFromString(QString dynamicT
 }
 
 QString EntityDynamicInterface::dynamicTypeToString(EntityDynamicType dynamicType) {
-    switch(dynamicType) {
+    switch (dynamicType) {
         case DYNAMIC_TYPE_NONE:
             return "none";
         case DYNAMIC_TYPE_OFFSET:
@@ -205,8 +203,8 @@ QString EntityDynamicInterface::dynamicTypeToString(EntityDynamicType dynamicTyp
     return "none";
 }
 
-glm::vec3 EntityDynamicInterface::extractVec3Argument(QString objectName, QVariantMap arguments,
-                                                      QString argumentName, bool& ok, bool required) {
+glm::vec3 EntityDynamicInterface::extractVec3Argument(QString objectName, QVariantMap arguments, QString argumentName, bool& ok,
+                                                      bool required) {
     if (!arguments.contains(argumentName)) {
         if (required) {
             qCDebug(entities) << objectName << "requires argument:" << argumentName;
@@ -216,7 +214,7 @@ glm::vec3 EntityDynamicInterface::extractVec3Argument(QString objectName, QVaria
     }
 
     QVariant resultV = arguments[argumentName];
-    if (resultV.type() != (QVariant::Type) QMetaType::QVariantMap) {
+    if (resultV.type() != (QVariant::Type)QMetaType::QVariantMap) {
         qCDebug(entities) << objectName << "argument" << argumentName << "must be a map";
         ok = false;
         return glm::vec3(0.0f);
@@ -254,8 +252,8 @@ glm::vec3 EntityDynamicInterface::extractVec3Argument(QString objectName, QVaria
     return glm::vec3(x, y, z);
 }
 
-glm::quat EntityDynamicInterface::extractQuatArgument(QString objectName, QVariantMap arguments,
-                                                      QString argumentName, bool& ok, bool required) {
+glm::quat EntityDynamicInterface::extractQuatArgument(QString objectName, QVariantMap arguments, QString argumentName, bool& ok,
+                                                      bool required) {
     if (!arguments.contains(argumentName)) {
         if (required) {
             qCDebug(entities) << objectName << "requires argument:" << argumentName;
@@ -265,7 +263,7 @@ glm::quat EntityDynamicInterface::extractQuatArgument(QString objectName, QVaria
     }
 
     QVariant resultV = arguments[argumentName];
-    if (resultV.type() != (QVariant::Type) QMetaType::QVariantMap) {
+    if (resultV.type() != (QVariant::Type)QMetaType::QVariantMap) {
         qCDebug(entities) << objectName << "argument" << argumentName << "must be a map, not" << resultV.typeName();
         ok = false;
         return glm::quat();
@@ -307,8 +305,8 @@ glm::quat EntityDynamicInterface::extractQuatArgument(QString objectName, QVaria
     return glm::normalize(glm::quat(w, x, y, z));
 }
 
-float EntityDynamicInterface::extractFloatArgument(QString objectName, QVariantMap arguments,
-                                                   QString argumentName, bool& ok, bool required) {
+float EntityDynamicInterface::extractFloatArgument(QString objectName, QVariantMap arguments, QString argumentName, bool& ok,
+                                                   bool required) {
     if (!arguments.contains(argumentName)) {
         if (required) {
             qCDebug(entities) << objectName << "requires argument:" << argumentName;
@@ -329,8 +327,8 @@ float EntityDynamicInterface::extractFloatArgument(QString objectName, QVariantM
     return value;
 }
 
-int EntityDynamicInterface::extractIntegerArgument(QString objectName, QVariantMap arguments,
-                                                   QString argumentName, bool& ok, bool required) {
+int EntityDynamicInterface::extractIntegerArgument(QString objectName, QVariantMap arguments, QString argumentName, bool& ok,
+                                                   bool required) {
     if (!arguments.contains(argumentName)) {
         if (required) {
             qCDebug(entities) << objectName << "requires argument:" << argumentName;
@@ -351,8 +349,8 @@ int EntityDynamicInterface::extractIntegerArgument(QString objectName, QVariantM
     return value;
 }
 
-QString EntityDynamicInterface::extractStringArgument(QString objectName, QVariantMap arguments,
-                                                      QString argumentName, bool& ok, bool required) {
+QString EntityDynamicInterface::extractStringArgument(QString objectName, QVariantMap arguments, QString argumentName, bool& ok,
+                                                      bool required) {
     if (!arguments.contains(argumentName)) {
         if (required) {
             qCDebug(entities) << objectName << "requires argument:" << argumentName;
@@ -363,8 +361,8 @@ QString EntityDynamicInterface::extractStringArgument(QString objectName, QVaria
     return arguments[argumentName].toString();
 }
 
-bool EntityDynamicInterface::extractBooleanArgument(QString objectName, QVariantMap arguments,
-                                                    QString argumentName, bool& ok, bool required) {
+bool EntityDynamicInterface::extractBooleanArgument(QString objectName, QVariantMap arguments, QString argumentName, bool& ok,
+                                                    bool required) {
     if (!arguments.contains(argumentName)) {
         if (required) {
             qCDebug(entities) << objectName << "requires argument:" << argumentName;
@@ -395,7 +393,7 @@ QString serializedDynamicsToDebugString(QByteArray data) {
     serializedDynamicsStream >> serializedDynamics;
 
     QString result;
-    foreach(QByteArray serializedDynamic, serializedDynamics) {
+    foreach (QByteArray serializedDynamic, serializedDynamics) {
         QDataStream serializedDynamicStream(serializedDynamic);
         EntityDynamicType dynamicType;
         QUuid dynamicID;

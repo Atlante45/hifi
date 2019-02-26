@@ -18,17 +18,14 @@ namespace controller {
 
 class ScaleFilter : public Filter {
     REGISTER_FILTER_CLASS(ScaleFilter);
+
 public:
     ScaleFilter() = default;
     ScaleFilter(float scale) : _scale(scale) {}
 
-    virtual AxisValue apply(AxisValue value) const override {
-        return { value.value * _scale, value.timestamp };
-    }
+    virtual AxisValue apply(AxisValue value) const override { return { value.value * _scale, value.timestamp }; }
 
-    virtual Pose apply(Pose value) const override {
-        return value.transform(glm::scale(glm::mat4(), glm::vec3(_scale)));
-    }
+    virtual Pose apply(Pose value) const override { return value.transform(glm::scale(glm::mat4(), glm::vec3(_scale))); }
 
     virtual bool parseParameters(const QJsonValue& parameters) override;
 
@@ -36,6 +33,6 @@ private:
     float _scale = 1.0f;
 };
 
-}
+} // namespace controller
 
 #endif

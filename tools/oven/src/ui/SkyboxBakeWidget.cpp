@@ -19,8 +19,8 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStackedWidget>
 
-#include <QtCore/QDir>
 #include <QtCore/QDebug>
+#include <QtCore/QDir>
 #include <QtCore/QThread>
 
 #include <TextureBaker.h>
@@ -33,8 +33,7 @@ static const auto SELECTION_START_DIR_SETTING_KEY = "skybox_search_directory";
 SkyboxBakeWidget::SkyboxBakeWidget(QWidget* parent, Qt::WindowFlags flags) :
     BakeWidget(parent, flags),
     _exportDirectory(EXPORT_DIR_SETTING_KEY),
-    _selectionStartDirectory(SELECTION_START_DIR_SETTING_KEY)
-{
+    _selectionStartDirectory(SELECTION_START_DIR_SETTING_KEY) {
     setupUI();
 }
 
@@ -159,7 +158,8 @@ void SkyboxBakeWidget::bakeButtonClicked() {
 
     outputDirectory.mkdir(".");
     if (!outputDirectory.exists()) {
-        QMessageBox::warning(this, "Unable to create directory", "Unable to create output directory. Please create it manually or choose a different directory.");
+        QMessageBox::warning(this, "Unable to create directory",
+                             "Unable to create output directory. Please create it manually or choose a different directory.");
         return;
     }
 
@@ -180,9 +180,8 @@ void SkyboxBakeWidget::bakeButtonClicked() {
         }
 
         // everything seems to be in place, kick off a bake for this skybox now
-        auto baker = std::unique_ptr<TextureBaker> {
-            new TextureBaker(skyboxToBakeURL, image::TextureUsage::CUBE_TEXTURE, outputDirectory.absolutePath())
-        };
+        auto baker = std::unique_ptr<TextureBaker> { new TextureBaker(skyboxToBakeURL, image::TextureUsage::CUBE_TEXTURE,
+                                                                      outputDirectory.absolutePath()) };
 
         // move the baker to a worker thread
         baker->moveToThread(Oven::instance().getNextWorkerThread());
@@ -206,9 +205,8 @@ void SkyboxBakeWidget::bakeButtonClicked() {
 void SkyboxBakeWidget::handleFinishedBaker() {
     if (auto baker = qobject_cast<TextureBaker*>(sender())) {
         // add the results of this bake to the results window
-        auto it = std::find_if(_bakers.begin(), _bakers.end(), [baker](const BakerRowPair& value) {
-            return value.first.get() == baker;
-        });
+        auto it = std::find_if(_bakers.begin(), _bakers.end(),
+                               [baker](const BakerRowPair& value) { return value.first.get() == baker; });
 
         if (it != _bakers.end()) {
             auto resultRow = it->second;

@@ -8,8 +8,8 @@
 
 #include "PulseFilter.h"
 
-#include <QtCore/QJsonObject>
 #include <QtCore/QJsonArray>
+#include <QtCore/QJsonObject>
 
 using namespace controller;
 
@@ -43,4 +43,3 @@ bool PulseFilter::parseParameters(const QJsonValue& parameters) {
     }
     return parseSingleFloatParameter(parameters, JSON_INTERVAL, _interval);
 }
-

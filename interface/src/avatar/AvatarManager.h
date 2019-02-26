@@ -18,28 +18,27 @@
 #include <QtCore/QObject>
 #include <QtCore/QSharedPointer>
 
-#include <AvatarHashMap.h>
-#include <PhysicsEngine.h>
-#include <PIDController.h>
-#include <SimpleMovingAverage.h>
-#include <shared/RateCounter.h>
-#include <avatars-renderer/ScriptAvatar.h>
 #include <AudioInjector.h>
-#include <workload/Space.h>
+#include <AvatarHashMap.h>
 #include <EntitySimulation.h> // for SetOfEntities
+#include <PIDController.h>
+#include <PhysicsEngine.h>
+#include <SimpleMovingAverage.h>
+#include <avatars-renderer/ScriptAvatar.h>
+#include <shared/RateCounter.h>
+#include <workload/Space.h>
 
 #include "AvatarMotionState.h"
 #include "DetailedMotionState.h"
 #include "MyAvatar.h"
 #include "OtherAvatar.h"
 
-
 using SortedAvatar = std::pair<float, std::shared_ptr<Avatar>>;
 
-/**jsdoc 
+/**jsdoc
  * The AvatarManager API has properties and methods which manage Avatars within the same domain.
  *
- * <p><strong>Note:</strong> This API is also provided to Interface and client entity scripts as the synonym, 
+ * <p><strong>Note:</strong> This API is also provided to Interface and client entity scripts as the synonym,
  * <code>AvatarList</code>. For assignment client scripts, see the separate {@link AvatarList} API.
  *
  * @namespace AvatarManager
@@ -66,25 +65,26 @@ class AvatarManager : public AvatarHashMap {
     SINGLETON_DEPENDENCY
 
 public:
-
     /// Registers the script types associated with the avatar manager.
     static void registerMetaTypes(QScriptEngine* engine);
 
     virtual ~AvatarManager();
 
     void init();
-    void setSpace(workload::SpacePointer& space );
+    void setSpace(workload::SpacePointer& space);
 
     std::shared_ptr<MyAvatar> getMyAvatar() { return _myAvatar; }
     glm::vec3 getMyAvatarPosition() const { return _myAvatar->getWorldPosition(); }
 
-    /**jsdoc 
+    /**jsdoc
      * @function AvatarManager.getAvatar
      * @param {Uuid} avatarID
      * @returns {AvatarData}
      */
     // Null/Default-constructed QUuids will return MyAvatar
-    Q_INVOKABLE virtual ScriptAvatarData* getAvatar(QUuid avatarID) override { return new ScriptAvatar(getAvatarBySessionID(avatarID)); }
+    Q_INVOKABLE virtual ScriptAvatarData* getAvatar(QUuid avatarID) override {
+        return new ScriptAvatar(getAvatarBySessionID(avatarID));
+    }
 
     AvatarSharedPointer getAvatarBySessionID(const QUuid& sessionID) const override;
 
@@ -165,9 +165,8 @@ public:
      * @param {Uuid[]} avatarsToDiscard
      * @returns {ParabolaToAvatarIntersectionResult}
      */
-    Q_INVOKABLE ParabolaToAvatarIntersectionResult findParabolaIntersectionVector(const PickParabola& pick,
-                                                                                  const QVector<EntityItemID>& avatarsToInclude,
-                                                                                  const QVector<EntityItemID>& avatarsToDiscard);
+    Q_INVOKABLE ParabolaToAvatarIntersectionResult findParabolaIntersectionVector(
+        const PickParabola& pick, const QVector<EntityItemID>& avatarsToInclude, const QVector<EntityItemID>& avatarsToDiscard);
 
     /**jsdoc
      * @function AvatarManager.getAvatarSortCoefficient
@@ -250,7 +249,7 @@ private:
     workload::SpacePointer _space;
     std::vector<int32_t> _spaceProxiesToDelete;
 
-    AvatarTransit::TransitConfig  _transitConfig;
+    AvatarTransit::TransitConfig _transitConfig;
 };
 
 #endif // hifi_AvatarManager_h

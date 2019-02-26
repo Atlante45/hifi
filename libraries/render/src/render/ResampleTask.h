@@ -18,55 +18,54 @@
 
 namespace render {
 
-    class HalfDownsample {
-    public:
-        using Config = JobConfig;
-        using JobModel = Job::ModelIO<HalfDownsample, gpu::FramebufferPointer, gpu::FramebufferPointer, Config>;
+class HalfDownsample {
+public:
+    using Config = JobConfig;
+    using JobModel = Job::ModelIO<HalfDownsample, gpu::FramebufferPointer, gpu::FramebufferPointer, Config>;
 
-        HalfDownsample();
+    HalfDownsample();
 
-        void configure(const Config& config);
-        void run(const RenderContextPointer& renderContext, const gpu::FramebufferPointer& sourceFramebuffer, gpu::FramebufferPointer& resampledFrameBuffer);
+    void configure(const Config& config);
+    void run(const RenderContextPointer& renderContext, const gpu::FramebufferPointer& sourceFramebuffer,
+             gpu::FramebufferPointer& resampledFrameBuffer);
 
-    protected:
+protected:
+    static gpu::PipelinePointer _pipeline;
 
-        static gpu::PipelinePointer _pipeline;
+    gpu::FramebufferPointer _destinationFrameBuffer;
 
-        gpu::FramebufferPointer _destinationFrameBuffer;
+    gpu::FramebufferPointer getResampledFrameBuffer(const gpu::FramebufferPointer& sourceFramebuffer);
+};
 
-        gpu::FramebufferPointer getResampledFrameBuffer(const gpu::FramebufferPointer& sourceFramebuffer);
-    };
+class UpsampleConfig : public render::Job::Config {
+    Q_OBJECT
+    Q_PROPERTY(float factor MEMBER factor NOTIFY dirty)
+public:
+    float factor { 1.0f };
 
-    class UpsampleConfig : public render::Job::Config {
-        Q_OBJECT
-            Q_PROPERTY(float factor MEMBER factor NOTIFY dirty)
-    public:
+signals:
+    void dirty();
+};
 
-        float factor{ 1.0f };
+class Upsample {
+public:
+    using Config = UpsampleConfig;
+    using JobModel = Job::ModelIO<Upsample, gpu::FramebufferPointer, gpu::FramebufferPointer, Config>;
 
-    signals:
-        void dirty();
-    };
+    Upsample(float factor = 2.0f) : _factor { factor } {}
 
-    class Upsample {
-    public:
-        using Config = UpsampleConfig;
-        using JobModel = Job::ModelIO<Upsample, gpu::FramebufferPointer, gpu::FramebufferPointer, Config>;
+    void configure(const Config& config);
+    void run(const RenderContextPointer& renderContext, const gpu::FramebufferPointer& sourceFramebuffer,
+             gpu::FramebufferPointer& resampledFrameBuffer);
 
-        Upsample(float factor = 2.0f) : _factor{ factor } {}
+protected:
+    static gpu::PipelinePointer _pipeline;
 
-        void configure(const Config& config);
-        void run(const RenderContextPointer& renderContext, const gpu::FramebufferPointer& sourceFramebuffer, gpu::FramebufferPointer& resampledFrameBuffer);
+    gpu::FramebufferPointer _destinationFrameBuffer;
+    float _factor { 2.0f };
 
-    protected:
-
-        static gpu::PipelinePointer _pipeline;
-
-        gpu::FramebufferPointer _destinationFrameBuffer;
-        float _factor{ 2.0f };
-
-        gpu::FramebufferPointer getResampledFrameBuffer(const gpu::FramebufferPointer& sourceFramebuffer);
-    };
-}
+    gpu::FramebufferPointer getResampledFrameBuffer(const gpu::FramebufferPointer& sourceFramebuffer);
+};
+} // namespace render
 
 #endif // hifi_render_ResampleTask_h

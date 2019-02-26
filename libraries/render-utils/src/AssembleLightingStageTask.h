@@ -12,17 +12,17 @@
 #include <render/RenderFetchCullSortTask.h>
 #include "LightingModel.h"
 
-#include "LightStage.h"
 #include "BackgroundStage.h"
-#include "HazeStage.h"
 #include "BloomStage.h"
+#include "HazeStage.h"
+#include "LightStage.h"
 
 #include "ZoneRenderer.h"
 
-
 class FetchCurrentFrames {
 public:
-    using Output = render::VaryingSet4<LightStage::FramePointer, BackgroundStage::FramePointer, HazeStage::FramePointer, BloomStage::FramePointer>;
+    using Output = render::VaryingSet4<LightStage::FramePointer, BackgroundStage::FramePointer, HazeStage::FramePointer,
+                                       BloomStage::FramePointer>;
     using JobModel = render::Job::ModelO<FetchCurrentFrames, Output>;
 
     FetchCurrentFrames() {}

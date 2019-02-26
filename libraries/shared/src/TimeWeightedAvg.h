@@ -14,17 +14,10 @@
 
 #include "SharedUtil.h"
 
-template <typename T>
+template<typename T>
 class TimeWeightedAvg {
-
 public:
-
-    TimeWeightedAvg()
-        : _firstSampleTime(0),
-        _lastSample(),
-        _lastSampleTime(0),
-        _weightedSampleSumExcludingLastSample(0.0)
-    {}
+    TimeWeightedAvg() : _firstSampleTime(0), _lastSample(), _lastSampleTime(0), _weightedSampleSumExcludingLastSample(0.0) {}
 
     void reset() {
         _firstSampleTime = 0;
@@ -32,7 +25,7 @@ public:
         _weightedSampleSumExcludingLastSample = 0.0;
     }
 
-    void  updateWithSample(T sample) {
+    void updateWithSample(T sample) {
         quint64 now = usecTimestampNow();
 
         if (_firstSampleTime == 0) {
@@ -73,7 +66,7 @@ private:
 
     T _lastSample;
     quint64 _lastSampleTime;
-    
+
     double _weightedSampleSumExcludingLastSample;
 };
 

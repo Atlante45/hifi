@@ -24,7 +24,11 @@ public:
     static constexpr float FORCE_REMOVE { -1.0e5f };
     static constexpr float WHEN_IN_DOUBT_PRIORITY { 1.0f };
 
-    PrioritizedEntity(EntityItemPointer entity, float priority, bool forceRemove = false) : _weakEntity(entity), _rawEntityPointer(entity.get()), _priority(priority), _forceRemove(forceRemove) {}
+    PrioritizedEntity(EntityItemPointer entity, float priority, bool forceRemove = false) :
+        _weakEntity(entity),
+        _rawEntityPointer(entity.get()),
+        _priority(priority),
+        _forceRemove(forceRemove) {}
     EntityItemPointer getEntity() const { return _weakEntity.lock(); }
     EntityItem* getRawEntityPointer() const { return _rawEntityPointer; }
     float getPriority() const { return _priority; }
@@ -32,7 +36,7 @@ public:
 
     class Compare {
     public:
-        bool operator() (const PrioritizedEntity& A, const PrioritizedEntity& B) { return A._priority < B._priority; }
+        bool operator()(const PrioritizedEntity& A, const PrioritizedEntity& B) { return A._priority < B._priority; }
     };
     friend class Compare;
 
@@ -55,9 +59,7 @@ public:
         return _queue.top();
     }
 
-    inline bool contains(const EntityItem* entity) const {
-        return _entities.find(entity) != std::end(_entities);
-    }
+    inline bool contains(const EntityItem* entity) const { return _entities.find(entity) != std::end(_entities); }
 
     inline void emplace(const EntityItemPointer& entity, float priority, bool forceRemove = false) {
         assert(entity && !contains(entity.get()));
@@ -79,14 +81,11 @@ public:
     }
 
 private:
-    using PriorityQueue = std::priority_queue<PrioritizedEntity,
-                                              std::vector<PrioritizedEntity>,
-                                              PrioritizedEntity::Compare>;
+    using PriorityQueue = std::priority_queue<PrioritizedEntity, std::vector<PrioritizedEntity>, PrioritizedEntity::Compare>;
 
     PriorityQueue _queue;
     // Keep dictionary of all the entities in the queue for fast contain checks.
     std::unordered_set<const EntityItem*> _entities;
-
 };
 
 #endif // hifi_EntityPriorityQueue_h

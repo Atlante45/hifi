@@ -22,6 +22,7 @@ public:
 
     virtual bool preRecursion(const OctreeElementPointer& element) override;
     virtual bool postRecursion(const OctreeElementPointer& element) override;
+
 private:
     glm::vec3 _point;
     OctreeElementPointer _element;

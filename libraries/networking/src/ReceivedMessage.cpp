@@ -9,7 +9,6 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-
 #include "ReceivedMessage.h"
 
 #include "QSharedPointer"
@@ -19,31 +18,29 @@ int sharedPtrReceivedMessageMetaTypeId = qRegisterMetaType<QSharedPointer<Receiv
 
 static const int HEAD_DATA_SIZE = 512;
 
-ReceivedMessage::ReceivedMessage(const NLPacketList& packetList)
-    : _data(packetList.getMessage()),
-      _headData(_data.mid(0, HEAD_DATA_SIZE)),
-      _numPackets(packetList.getNumPackets()),
-      _sourceID(packetList.getSourceID()),
-      _packetType(packetList.getType()),
-      _packetVersion(packetList.getVersion()),
-      _senderSockAddr(packetList.getSenderSockAddr())
-{
+ReceivedMessage::ReceivedMessage(const NLPacketList& packetList) :
+    _data(packetList.getMessage()),
+    _headData(_data.mid(0, HEAD_DATA_SIZE)),
+    _numPackets(packetList.getNumPackets()),
+    _sourceID(packetList.getSourceID()),
+    _packetType(packetList.getType()),
+    _packetVersion(packetList.getVersion()),
+    _senderSockAddr(packetList.getSenderSockAddr()) {
 }
 
-ReceivedMessage::ReceivedMessage(NLPacket& packet)
-    : _data(packet.readAll()),
-      _headData(_data.mid(0, HEAD_DATA_SIZE)),
-      _numPackets(1),
-      _sourceID(packet.getSourceID()),
-      _packetType(packet.getType()),
-      _packetVersion(packet.getVersion()),
-      _senderSockAddr(packet.getSenderSockAddr()),
-      _isComplete(packet.getPacketPosition() == NLPacket::ONLY)
-{
+ReceivedMessage::ReceivedMessage(NLPacket& packet) :
+    _data(packet.readAll()),
+    _headData(_data.mid(0, HEAD_DATA_SIZE)),
+    _numPackets(1),
+    _sourceID(packet.getSourceID()),
+    _packetType(packet.getType()),
+    _packetVersion(packet.getVersion()),
+    _senderSockAddr(packet.getSenderSockAddr()),
+    _isComplete(packet.getPacketPosition() == NLPacket::ONLY) {
 }
 
 ReceivedMessage::ReceivedMessage(QByteArray byteArray, PacketType packetType, PacketVersion packetVersion,
-                const HifiSockAddr& senderSockAddr, NLPacket::LocalID sourceID) :
+                                 const HifiSockAddr& senderSockAddr, NLPacket::LocalID sourceID) :
     _data(byteArray),
     _headData(_data.mid(0, HEAD_DATA_SIZE)),
     _numPackets(1),
@@ -51,8 +48,7 @@ ReceivedMessage::ReceivedMessage(QByteArray byteArray, PacketType packetType, Pa
     _packetType(packetType),
     _packetVersion(packetVersion),
     _senderSockAddr(senderSockAddr),
-    _isComplete(true)
-{
+    _isComplete(true) {
 }
 
 void ReceivedMessage::setFailed() {
@@ -62,8 +58,7 @@ void ReceivedMessage::setFailed() {
 }
 
 void ReceivedMessage::appendPacket(NLPacket& packet) {
-    Q_ASSERT_X(!_isComplete, "ReceivedMessage::appendPacket", 
-               "We should not be appending to a complete message");
+    Q_ASSERT_X(!_isComplete, "ReceivedMessage::appendPacket", "We should not be appending to a complete message");
 
     // Limit progress signal to every X packets
     const int EMIT_PROGRESS_EVERY_X_PACKETS = 50;
@@ -122,7 +117,7 @@ QByteArray ReceivedMessage::readAll() {
 QString ReceivedMessage::readString() {
     uint32_t size;
     readPrimitive(&size);
-    //Q_ASSERT(size <= _size - _position);
+    // Q_ASSERT(size <= _size - _position);
     auto string = QString::fromUtf8(_data.constData() + _position, size);
     _position += size;
     return string;

@@ -13,7 +13,7 @@
 
 #include <cmath>
 
-MismatchWindow::MismatchWindow(QWidget *parent) : QDialog(parent) {
+MismatchWindow::MismatchWindow(QWidget* parent) : QDialog(parent) {
     setupUi(this);
 
     expectedImage->setScaledContents(true);
@@ -27,10 +27,10 @@ QPixmap MismatchWindow::computeDiffPixmap(QImage expectedImage, QImage resultIma
         return QPixmap();
     }
 
-	// This is an optimization, as QImage.setPixel() is embarrassingly slow
+    // This is an optimization, as QImage.setPixel() is embarrassingly slow
     unsigned char* buffer = new unsigned char[expectedImage.height() * expectedImage.width() * 3];
 
-	// loop over each pixel
+    // loop over each pixel
     for (int y = 0; y < expectedImage.height(); ++y) {
         for (int x = 0; x < expectedImage.width(); ++x) {
             QRgb pixelP = expectedImage.pixel(QPoint(x, y));
@@ -71,10 +71,8 @@ void MismatchWindow::setTestResult(TestResult testResult) {
     QPixmap expectedPixmap = QPixmap(testResult._pathname + testResult._expectedImageFilename);
     QPixmap actualPixmap = QPixmap(testResult._pathname + testResult._actualImageFilename);
 
-    _diffPixmap = computeDiffPixmap(
-        QImage(testResult._pathname + testResult._expectedImageFilename), 
-        QImage(testResult._pathname + testResult._actualImageFilename)
-    );
+    _diffPixmap = computeDiffPixmap(QImage(testResult._pathname + testResult._expectedImageFilename),
+                                    QImage(testResult._pathname + testResult._actualImageFilename));
 
     expectedImage->setPixmap(expectedPixmap);
     resultImage->setPixmap(actualPixmap);

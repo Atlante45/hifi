@@ -21,49 +21,49 @@
 #include "ExtendedIODevice.h"
 
 namespace AvatarTraits {
-    enum TraitType : int8_t {
-        NullTrait = -1,
-        SkeletonModelURL,
-        FirstInstancedTrait,
-        AvatarEntity = FirstInstancedTrait,
-        Grab,
-        TotalTraitTypes
-    };
-
-    using TraitInstanceID = QUuid;
-
-    inline bool isSimpleTrait(TraitType traitType) {
-        return traitType > NullTrait && traitType < FirstInstancedTrait;
-    }
-
-    using TraitVersion = int32_t;
-    const TraitVersion DEFAULT_TRAIT_VERSION = 0;
-    const TraitVersion NULL_TRAIT_VERSION = -1;
-
-    using TraitWireSize = int16_t;
-    const TraitWireSize DELETED_TRAIT_SIZE = -1;
-    const TraitWireSize MAXIMUM_TRAIT_SIZE = INT16_MAX;
-
-    using TraitMessageSequence = int64_t;
-    const TraitMessageSequence FIRST_TRAIT_SEQUENCE = 0;
-    const TraitMessageSequence MAX_TRAIT_SEQUENCE = INT64_MAX;
-
-    inline qint64 packInstancedTraitDelete(TraitType traitType, TraitInstanceID instanceID, ExtendedIODevice& destination,
-                                         TraitVersion traitVersion = NULL_TRAIT_VERSION) {
-        qint64 bytesWritten = 0;
-
-        bytesWritten += destination.writePrimitive(traitType);
-
-        if (traitVersion > DEFAULT_TRAIT_VERSION) {
-            bytesWritten += destination.writePrimitive(traitVersion);
-        }
-
-        bytesWritten += destination.write(instanceID.toRfc4122());
-
-        bytesWritten += destination.writePrimitive(DELETED_TRAIT_SIZE);
-
-        return bytesWritten;
-    }
+enum TraitType : int8_t {
+    NullTrait = -1,
+    SkeletonModelURL,
+    FirstInstancedTrait,
+    AvatarEntity = FirstInstancedTrait,
+    Grab,
+    TotalTraitTypes
 };
+
+using TraitInstanceID = QUuid;
+
+inline bool isSimpleTrait(TraitType traitType) {
+    return traitType > NullTrait && traitType < FirstInstancedTrait;
+}
+
+using TraitVersion = int32_t;
+const TraitVersion DEFAULT_TRAIT_VERSION = 0;
+const TraitVersion NULL_TRAIT_VERSION = -1;
+
+using TraitWireSize = int16_t;
+const TraitWireSize DELETED_TRAIT_SIZE = -1;
+const TraitWireSize MAXIMUM_TRAIT_SIZE = INT16_MAX;
+
+using TraitMessageSequence = int64_t;
+const TraitMessageSequence FIRST_TRAIT_SEQUENCE = 0;
+const TraitMessageSequence MAX_TRAIT_SEQUENCE = INT64_MAX;
+
+inline qint64 packInstancedTraitDelete(TraitType traitType, TraitInstanceID instanceID, ExtendedIODevice& destination,
+                                       TraitVersion traitVersion = NULL_TRAIT_VERSION) {
+    qint64 bytesWritten = 0;
+
+    bytesWritten += destination.writePrimitive(traitType);
+
+    if (traitVersion > DEFAULT_TRAIT_VERSION) {
+        bytesWritten += destination.writePrimitive(traitVersion);
+    }
+
+    bytesWritten += destination.write(instanceID.toRfc4122());
+
+    bytesWritten += destination.writePrimitive(DELETED_TRAIT_SIZE);
+
+    return bytesWritten;
+}
+}; // namespace AvatarTraits
 
 #endif // hifi_AvatarTraits_h

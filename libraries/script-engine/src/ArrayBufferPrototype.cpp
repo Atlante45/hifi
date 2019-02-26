@@ -31,11 +31,11 @@ QByteArray ArrayBufferPrototype::slice(qint32 begin, qint32 end) const {
     // if indices < 0 then they start from the end of the array
     begin = (begin < 0) ? ba->size() + begin : begin;
     end = (end < 0) ? ba->size() + end : end;
-    
+
     // here we clamp the indices to fit the array
     begin = glm::clamp(begin, 0, (ba->size() - 1));
     end = glm::clamp(end, 0, (ba->size() - 1));
-    
+
     return (end - begin > 0) ? ba->mid(begin, end - begin) : QByteArray();
 }
 
@@ -43,10 +43,10 @@ QByteArray ArrayBufferPrototype::slice(qint32 begin) const {
     QByteArray* ba = thisArrayBuffer();
     // if indices < 0 then they start from the end of the array
     begin = (begin < 0) ? ba->size() + begin : begin;
-    
+
     // here we clamp the indices to fit the array
     begin = glm::clamp(begin, 0, (ba->size() - 1));
-    
+
     return ba->mid(begin, -1);
 }
 
@@ -55,7 +55,7 @@ QByteArray ArrayBufferPrototype::compress() const {
     QByteArray* ba = thisArrayBuffer();
 
     QByteArray buffer = qCompress(*ba);
-    buffer.remove(QCOMPRESS_HEADER_POSITION, QCOMPRESS_HEADER_SIZE);  // Remove Qt's custom header to make it proper Zlib.
+    buffer.remove(QCOMPRESS_HEADER_POSITION, QCOMPRESS_HEADER_SIZE); // Remove Qt's custom header to make it proper Zlib.
 
     return buffer;
 }
@@ -81,7 +81,7 @@ QByteArray ArrayBufferPrototype::recodeImage(const QString& sourceFormat, const 
         image.save(&buffer, format);
         return buffer.data();
     }
-    
+
     return *ba;
 }
 

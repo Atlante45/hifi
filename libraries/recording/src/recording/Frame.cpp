@@ -18,7 +18,7 @@
 using namespace recording;
 
 // FIXME move to shared
-template <typename Key, typename Value> 
+template<typename Key, typename Value>
 class Registry {
 public:
     using ForwardMap = QMap<Value, Key>;
@@ -146,12 +146,11 @@ void Frame::clearFrameHandler(FrameType type) {
 
 void Frame::clearFrameHandler(const QString& frameTypeName) {
     auto frameType = registerFrameType(frameTypeName);
-    clearFrameHandler(frameType); 
+    clearFrameHandler(frameType);
 }
 
-
 void Frame::handleFrame(const Frame::ConstPointer& frame) {
-    Handler handler; 
+    Handler handler;
     {
         Locker lock(mutex);
         auto iterator = handlerMap.find(frame->type);

@@ -19,35 +19,38 @@
 namespace udt {
 
 class ControlPacket;
-    
+
 class LossList {
 public:
     LossList() {}
-    
-    void clear() { _length = 0; _lossList.clear(); }
-    
+
+    void clear() {
+        _length = 0;
+        _lossList.clear();
+    }
+
     // must always add at the end - faster than insert
     void append(SequenceNumber seq);
     void append(SequenceNumber start, SequenceNumber end);
-    
+
     // inserts anywhere - MUCH slower
     void insert(SequenceNumber start, SequenceNumber end);
-    
+
     bool remove(SequenceNumber seq);
     void remove(SequenceNumber start, SequenceNumber end);
-    
+
     int getLength() const { return _length; }
     bool isEmpty() const { return _length == 0; }
     SequenceNumber getFirstSequenceNumber() const;
     SequenceNumber popFirstSequenceNumber();
-    
+
     void write(ControlPacket& packet, int maxPairs = -1);
-    
+
 private:
     std::list<std::pair<SequenceNumber, SequenceNumber>> _lossList;
     int _length { 0 };
 };
-    
-}
+
+} // namespace udt
 
 #endif // hifi_LossList_h

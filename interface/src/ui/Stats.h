@@ -11,16 +11,17 @@
 
 #include <QtGui/QVector3D>
 
-#include <OffscreenQmlElement.h>
 #include <AudioIOStats.h>
+#include <OffscreenQmlElement.h>
 #include <render/Args.h>
 
-#define STATS_PROPERTY(type, name, initialValue) \
-    Q_PROPERTY(type name READ name NOTIFY name##Changed) \
-public: \
-    type name() { return _##name; }; \
-private: \
-    type _##name{ initialValue };
+#define STATS_PROPERTY(type, name, initialValue)                                                                               \
+    Q_PROPERTY(type name READ name NOTIFY name##Changed)                                                                       \
+public:                                                                                                                        \
+    type name() { return _##name; };                                                                                           \
+                                                                                                                               \
+private:                                                                                                                       \
+    type _##name { initialValue };
 
 /**jsdoc
  * @namespace Stats
@@ -286,7 +287,7 @@ class Stats : public QQuickItem {
     STATS_PROPERTY(int, gpuTextureExternalMemory, 0)
     STATS_PROPERTY(QString, gpuTextureMemoryPressureState, QString())
     STATS_PROPERTY(int, gpuFreeMemory, 0)
-    STATS_PROPERTY(QVector2D, gpuFrameSize, QVector2D(0,0))
+    STATS_PROPERTY(QVector2D, gpuFrameSize, QVector2D(0, 0))
     STATS_PROPERTY(float, gpuFrameTime, 0)
     STATS_PROPERTY(float, gpuFrameTimePerPixel, 0)
     STATS_PROPERTY(float, batchFrameTime, 0)
@@ -308,9 +309,7 @@ public:
     Stats(QQuickItem* parent = nullptr);
     bool includeTimingRecord(const QString& name);
     void setRenderDetails(const render::RenderDetails& details);
-    const QString& monospaceFont() {
-        return _monospaceFont;
-    }
+    const QString& monospaceFont() { return _monospaceFont; }
 
     void updateStats(bool force = false);
 
@@ -324,7 +323,7 @@ public:
         }
     }
 
-    QStringList downloadUrls () { return _downloadUrls; }
+    QStringList downloadUrls() { return _downloadUrls; }
 
 public slots:
     void forceUpdateStats() { updateStats(true); }
@@ -681,7 +680,6 @@ signals:
      */
     void entityPacketsInKbpsChanged();
 
-
     /**jsdoc
      * Triggered when the value of the <code>downloads</code> property changes.
      * @function Stats.downloadsChanged
@@ -732,11 +730,11 @@ signals:
     void trianglesChanged();
 
     /**jsdoc
-    * Triggered when the value of the <code>drawcalls</code> property changes.
-    * This 
-    * @function Stats.drawcallsChanged
-    * @returns {Signal}
-    */
+     * Triggered when the value of the <code>drawcalls</code> property changes.
+     * This
+     * @function Stats.drawcallsChanged
+     * @returns {Signal}
+     */
     void drawcallsChanged();
 
     /**jsdoc
@@ -1197,12 +1195,11 @@ signals:
      * @returns {Signal}
      */
 
-     /**jsdoc
+    /**jsdoc
      * @function Stats.windowChanged
      * @param {object} window
      * @returns {Signal}
      */
-
 
     // QQuickItem functions.
 
@@ -1318,11 +1315,11 @@ signals:
     void collisionPicksUpdatedChanged();
 
 private:
-    int _recentMaxPackets{ 0 } ; // recent max incoming voxel packets to process
-    bool _resetRecentMaxPacketsSoon{ true };
-    bool _expanded{ false };
-    bool _showTimingDetails{ false };
-    bool _showGameUpdateStats{ false };
+    int _recentMaxPackets { 0 }; // recent max incoming voxel packets to process
+    bool _resetRecentMaxPacketsSoon { true };
+    bool _expanded { false };
+    bool _showTimingDetails { false };
+    bool _showGameUpdateStats { false };
     QString _monospaceFont;
     const AudioIOStats* _audioStats;
     QStringList _downloadUrls = QStringList();

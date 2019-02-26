@@ -21,7 +21,7 @@
 
 QVariantHash FSTReader::parseMapping(QIODevice* device) {
     QVariantHash properties;
-    
+
     QByteArray line;
     while (!(line = device->readLine()).isEmpty()) {
         if ((line = line.trimmed()).startsWith('#')) {
@@ -34,12 +34,12 @@ QVariantHash FSTReader::parseMapping(QIODevice* device) {
         QByteArray name = sections.at(0).trimmed();
         if (sections.size() == 2) {
             properties.insertMulti(name, sections.at(1).trimmed());
-            
+
         } else if (sections.size() == 3) {
             QVariantHash heading = properties.value(name).toHash();
             heading.insertMulti(sections.at(1).trimmed(), sections.at(2).trimmed());
             properties.insert(name, heading);
-            
+
         } else if (sections.size() >= 4) {
             QVariantHash heading = properties.value(name).toHash();
             QVariantList contents;
@@ -50,7 +50,7 @@ QVariantHash FSTReader::parseMapping(QIODevice* device) {
             properties.insert(name, heading);
         }
     }
-    
+
     return properties;
 }
 
@@ -84,8 +84,8 @@ void FSTReader::writeVariant(QBuffer& buffer, QVariantHash::const_iterator& it) 
 
 QByteArray FSTReader::writeMapping(const QVariantHash& mapping) {
     static const QStringList PREFERED_ORDER = QStringList() << NAME_FIELD << TYPE_FIELD << SCALE_FIELD << FILENAME_FIELD
-    << MARKETPLACE_ID_FIELD << TEXDIR_FIELD << SCRIPT_FIELD << JOINT_FIELD
-    << BLENDSHAPE_FIELD << JOINT_INDEX_FIELD;
+                                                            << MARKETPLACE_ID_FIELD << TEXDIR_FIELD << SCRIPT_FIELD
+                                                            << JOINT_FIELD << BLENDSHAPE_FIELD << JOINT_INDEX_FIELD;
     QBuffer buffer;
     buffer.open(QIODevice::WriteOnly);
 
@@ -129,18 +129,17 @@ QHash<QString, FSTReader::ModelType> FSTReader::_namesToTypes;
 FSTReader::ModelType FSTReader::getTypeFromName(const QString& name) {
     if (_namesToTypes.size() == 0) {
         _namesToTypes["entity"] = ENTITY_MODEL;
-        _namesToTypes["head"] = HEAD_MODEL ;
+        _namesToTypes["head"] = HEAD_MODEL;
         _namesToTypes["body"] = BODY_ONLY_MODEL;
         _namesToTypes["body+head"] = HEAD_AND_BODY_MODEL;
-        
+
         // NOTE: this is not yet implemented, but will be used to allow you to attach fully independent models to your avatar
-        _namesToTypes["attachment"] = ATTACHMENT_MODEL; 
+        _namesToTypes["attachment"] = ATTACHMENT_MODEL;
     }
     return _namesToTypes[name];
 }
 
 FSTReader::ModelType FSTReader::predictModelType(const QVariantHash& mapping) {
-
     QVariantHash joints;
 
     if (mapping.contains("joint") && mapping["joint"].type() == QVariant::Hash) {
@@ -151,31 +150,31 @@ FSTReader::ModelType FSTReader::predictModelType(const QVariantHash& mapping) {
     if (mapping.contains(TYPE_FIELD)) {
         return FSTReader::getTypeFromName(mapping[TYPE_FIELD].toString());
     }
-    
+
     // check for blendshapes
     bool hasBlendshapes = mapping.contains(BLENDSHAPE_FIELD);
 
     // a Head needs to have these minimum fields...
-    //joint = jointEyeLeft = EyeL = 1
-    //joint = jointEyeRight = EyeR = 1
-    //joint = jointNeck = Head = 1
+    // joint = jointEyeLeft = EyeL = 1
+    // joint = jointEyeRight = EyeR = 1
+    // joint = jointNeck = Head = 1
     bool hasHeadMinimum = joints.contains("jointNeck") && joints.contains("jointEyeLeft") && joints.contains("jointEyeRight");
 
     // a Body needs to have these minimum fields...
-    //joint = jointRoot = Hips
-    //joint = jointLean = Spine
-    //joint = jointNeck = Neck
-    //joint = jointHead = HeadTop_End
+    // joint = jointRoot = Hips
+    // joint = jointLean = Spine
+    // joint = jointNeck = Neck
+    // joint = jointHead = HeadTop_End
 
-    bool hasBodyMinimumJoints = joints.contains("jointRoot") && joints.contains("jointLean") && joints.contains("jointNeck")  
-                                        && joints.contains("jointHead");
-    
+    bool hasBodyMinimumJoints = joints.contains("jointRoot") && joints.contains("jointLean") && joints.contains("jointNeck") &&
+                                joints.contains("jointHead");
+
     bool isLikelyHead = hasBlendshapes || hasHeadMinimum;
 
     if (isLikelyHead && hasBodyMinimumJoints) {
         return HEAD_AND_BODY_MODEL;
     }
-      
+
     if (isLikelyHead) {
         return HEAD_MODEL;
     }
@@ -183,17 +182,16 @@ FSTReader::ModelType FSTReader::predictModelType(const QVariantHash& mapping) {
     if (hasBodyMinimumJoints) {
         return BODY_ONLY_MODEL;
     }
-    
+
     return ENTITY_MODEL;
 }
 
 QVector<QString> FSTReader::getScripts(const QUrl& url, const QVariantHash& mapping) {
-
     auto fstMapping = mapping.isEmpty() ? downloadMapping(url.toString()) : mapping;
     QVector<QString> scriptPaths;
     if (!fstMapping.value(SCRIPT_FIELD).isNull()) {
         auto scripts = fstMapping.values(SCRIPT_FIELD).toVector();
-        for (auto &script : scripts) {
+        for (auto& script : scripts) {
             QString scriptPath = script.toString();
             if (QUrl(scriptPath).isRelative()) {
                 if (scriptPath.at(0) == '/') {

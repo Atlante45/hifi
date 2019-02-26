@@ -23,32 +23,34 @@ typedef struct PickCacheKey {
 } PickCacheKey;
 
 namespace std {
-    template <>
-    struct hash<PickCacheKey> {
-        size_t operator()(const PickCacheKey& k) const {
-            return ((hash<PickFilter::Flags>()(k.mask) ^ (qHash(k.include) << 1)) >> 1) ^ (qHash(k.ignore) << 1);
-        }
-    };
-}
+template<>
+struct hash<PickCacheKey> {
+    size_t operator()(const PickCacheKey& k) const {
+        return ((hash<PickFilter::Flags>()(k.mask) ^ (qHash(k.include) << 1)) >> 1) ^ (qHash(k.ignore) << 1);
+    }
+};
+} // namespace std
 
 // T is a mathematical representation of a Pick (a MathPick)
 // For example: RayPicks use T = PickRay
 template<typename T>
 class PickCacheOptimizer {
-
 public:
-    QVector3D update(std::unordered_map<uint32_t, std::shared_ptr<PickQuery>>& picks, uint32_t& nextToUpdate, uint64_t expiry, bool shouldPickHUD);
+    QVector3D update(std::unordered_map<uint32_t, std::shared_ptr<PickQuery>>& picks, uint32_t& nextToUpdate, uint64_t expiry,
+                     bool shouldPickHUD);
 
 protected:
     typedef std::unordered_map<T, std::unordered_map<PickCacheKey, PickResultPointer>> PickCache;
 
     // Returns true if this pick exists in the cache, and if it does, update res if the cached result is closer
     bool checkAndCompareCachedResults(T& pick, PickCache& cache, PickResultPointer& res, const PickCacheKey& key);
-    void cacheResult(const bool intersects, const PickResultPointer& resTemp, const PickCacheKey& key, PickResultPointer& res, T& mathPick, PickCache& cache, const std::shared_ptr<Pick<T>> pick);
+    void cacheResult(const bool intersects, const PickResultPointer& resTemp, const PickCacheKey& key, PickResultPointer& res,
+                     T& mathPick, PickCache& cache, const std::shared_ptr<Pick<T>> pick);
 };
 
 template<typename T>
-bool PickCacheOptimizer<T>::checkAndCompareCachedResults(T& pick, PickCache& cache, PickResultPointer& res, const PickCacheKey& key) {
+bool PickCacheOptimizer<T>::checkAndCompareCachedResults(T& pick, PickCache& cache, PickResultPointer& res,
+                                                         const PickCacheKey& key) {
     if (cache.find(pick) != cache.end() && cache[pick].find(key) != cache[pick].end()) {
         res = res->compareAndProcessNewResult(cache[pick][key]);
         return true;
@@ -57,7 +59,9 @@ bool PickCacheOptimizer<T>::checkAndCompareCachedResults(T& pick, PickCache& cac
 }
 
 template<typename T>
-void PickCacheOptimizer<T>::cacheResult(const bool needToCompareResults, const PickResultPointer& resTemp, const PickCacheKey& key, PickResultPointer& res, T& mathPick, PickCache& cache, const std::shared_ptr<Pick<T>> pick) {
+void PickCacheOptimizer<T>::cacheResult(const bool needToCompareResults, const PickResultPointer& resTemp,
+                                        const PickCacheKey& key, PickResultPointer& res, T& mathPick, PickCache& cache,
+                                        const std::shared_ptr<Pick<T>> pick) {
     if (needToCompareResults) {
         cache[mathPick][key] = resTemp;
         res = res->compareAndProcessNewResult(resTemp);
@@ -67,8 +71,8 @@ void PickCacheOptimizer<T>::cacheResult(const bool needToCompareResults, const P
 }
 
 template<typename T>
-QVector3D PickCacheOptimizer<T>::update(std::unordered_map<uint32_t, std::shared_ptr<PickQuery>>& picks,
-        uint32_t& nextToUpdate, uint64_t expiry, bool shouldPickHUD) {
+QVector3D PickCacheOptimizer<T>::update(std::unordered_map<uint32_t, std::shared_ptr<PickQuery>>& picks, uint32_t& nextToUpdate,
+                                        uint64_t expiry, bool shouldPickHUD) {
     QVector3D numIntersectionsComputed;
     PickCache results;
     const uint32_t INVALID_PICK_ID = 0;
@@ -80,7 +84,7 @@ QVector3D PickCacheOptimizer<T>::update(std::unordered_map<uint32_t, std::shared
         }
     }
     uint32_t numUpdates = 0;
-    while(numUpdates < picks.size()) {
+    while (numUpdates < picks.size()) {
         std::shared_ptr<Pick<T>> pick = std::static_pointer_cast<Pick<T>>(itr->second);
         T mathematicalPick = pick->getMathematicalPick();
         PickResultPointer res = pick->getDefaultResult(mathematicalPick.toVariantMap());
@@ -88,8 +92,10 @@ QVector3D PickCacheOptimizer<T>::update(std::unordered_map<uint32_t, std::shared
         if (!pick->isEnabled() || pick->getMaxDistance() < 0.0f || !mathematicalPick) {
             pick->setPickResult(res);
         } else {
-            if (pick->getFilter().doesPickDomainEntities() || pick->getFilter().doesPickAvatarEntities() || pick->getFilter().doesPickLocalEntities()) {
-                PickCacheKey entityKey = { pick->getFilter().getEntityFlags(), pick->getIncludeItems(), pick->getIgnoreItems() };
+            if (pick->getFilter().doesPickDomainEntities() || pick->getFilter().doesPickAvatarEntities() ||
+                pick->getFilter().doesPickLocalEntities()) {
+                PickCacheKey entityKey = { pick->getFilter().getEntityFlags(), pick->getIncludeItems(),
+                                           pick->getIgnoreItems() };
                 if (!checkAndCompareCachedResults(mathematicalPick, results, res, entityKey)) {
                     PickResultPointer entityRes = pick->getEntityIntersection(mathematicalPick);
                     numIntersectionsComputed[0]++;
@@ -100,7 +106,8 @@ QVector3D PickCacheOptimizer<T>::update(std::unordered_map<uint32_t, std::shared
             }
 
             if (pick->getFilter().doesPickAvatars()) {
-                PickCacheKey avatarKey = { pick->getFilter().getAvatarFlags(), pick->getIncludeItems(), pick->getIgnoreItems() };
+                PickCacheKey avatarKey = { pick->getFilter().getAvatarFlags(), pick->getIncludeItems(),
+                                           pick->getIgnoreItems() };
                 if (!checkAndCompareCachedResults(mathematicalPick, results, res, avatarKey)) {
                     PickResultPointer avatarRes = pick->getAvatarIntersection(mathematicalPick);
                     numIntersectionsComputed[1]++;
@@ -122,7 +129,8 @@ QVector3D PickCacheOptimizer<T>::update(std::unordered_map<uint32_t, std::shared
                 }
             }
 
-            if (pick->getMaxDistance() == 0.0f || (pick->getMaxDistance() > 0.0f && res->checkOrFilterAgainstMaxDistance(pick->getMaxDistance()))) {
+            if (pick->getMaxDistance() == 0.0f ||
+                (pick->getMaxDistance() > 0.0f && res->checkOrFilterAgainstMaxDistance(pick->getMaxDistance()))) {
                 pick->setPickResult(res);
             } else {
                 pick->setPickResult(pick->getDefaultResult(mathematicalPick.toVariantMap()));

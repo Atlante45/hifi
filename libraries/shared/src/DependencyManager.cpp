@@ -11,8 +11,8 @@
 
 #include "DependencyManager.h"
 
-#include "SharedUtil.h"
 #include "Finally.h"
+#include "SharedUtil.h"
 
 static const char* const DEPENDENCY_PROPERTY_NAME = "com.highfidelity.DependencyMananger";
 
