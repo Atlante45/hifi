@@ -17,8 +17,8 @@ from linter import parallel  # pylint: disable=wrong-import-position
 # Constants for clang-format
 
 # Expected version of clang-format
-CLANG_FORMAT_VERSION = "7.0.0"
-CLANG_FORMAT_SHORT_VERSION = "7.0"
+CLANG_FORMAT_VERSION = "8.0.0"
+CLANG_FORMAT_SHORT_VERSION = "8.0"
 
 # Name of clang-format as a binary
 CLANG_FORMAT_PROGNAME = "clang-format"
@@ -118,6 +118,9 @@ class ClangFormat(object):
             print("ERROR: exiting because of previous warning.")
             sys.exit(1)
 
+
+        self.verbose = True
+
         self.print_lock = threading.Lock()
 
     def _validate_version(self):
@@ -151,8 +154,9 @@ class ClangFormat(object):
                     print("ERROR: Found diff for " + file_name)
                     print("To fix formatting errors, run %s --style=file -i %s" % (self.path,
                                                                                    file_name))
-                    for line in result:
-                        print(line.rstrip())
+                    if self.verbose:
+                        for line in result:
+                            print(line.rstrip())
 
             return False
 
@@ -181,43 +185,32 @@ def _get_build_dir():
     """Return the location of the scons' build directory."""
     return os.path.join(git.get_base_dir(), "build")
 
-def _lint_files(clang_format, files):
+def _lint_files(options, files):
     """Lint a list of files with clang-format."""
-    clang_format = ClangFormat(clang_format, _get_build_dir())
+    if options.dry_run:
+        for file in files:
+            print(file.rstrip())
+        return
 
-    lint_clean = parallel.parallel_process([os.path.abspath(f) for f in files], clang_format.lint)
+    clang_format = ClangFormat(options.clang_format, _get_build_dir())
+    clang_format.verbose = options.verbose
+
+    lint_clean = parallel.parallel_process([os.path.abspath(f) for f in files],
+                                           clang_format.lint)
 
     if not lint_clean:
         print("ERROR: Code Style does not match coding style")
         sys.exit(1)
 
-def lint_patch(clang_format, infile):
-    """Lint patch command entry point."""
-    files = git.get_files_to_check_from_patch(infile, is_interesting_file)
-
-    # Patch may have files that we do not want to check which is fine
-    if files:
-        _lint_files(clang_format, files)
-
-def lint(clang_format):
-    """Lint files command entry point."""
-    files = git.get_files_to_check([], is_interesting_file)
-
-    _lint_files(clang_format, files)
-
-    return True
-
-def lint_all(clang_format):
-    """Lint files command entry point based on working tree."""
-    files = git.get_files_to_check_working_tree(is_interesting_file)
-
-    _lint_files(clang_format, files)
-
-    return True
-
-def _format_files(clang_format, files):
+def _format_files(options, files):
     """Format a list of files with clang-format."""
-    clang_format = ClangFormat(clang_format, _get_build_dir())
+    if options.dry_run:
+        for file in files:
+            print(file.rstrip())
+        return
+
+    clang_format = ClangFormat(options.clang_format, _get_build_dir())
+    clang_format.verbose = options.verbose
 
     format_clean = parallel.parallel_process([os.path.abspath(f) for f in files],
                                              clang_format.format)
@@ -226,22 +219,52 @@ def _format_files(clang_format, files):
         print("ERROR: failed to format files")
         sys.exit(1)
 
-def format_func(clang_format):
+def lint(options):
+    """Lint files command entry point."""
+    files = git.get_files_to_check([], is_interesting_file)
+
+    _lint_files(options, files)
+
+    return True
+
+def lint_all(options):
+    """Lint files command entry point based on working tree."""
+    files = git.get_files_to_check_working_tree(is_interesting_file)
+
+    _lint_files(options, files)
+
+    return True
+
+def lint_patch(options, infile):
+    """Lint patch command entry point."""
+    files = git.get_files_to_check_from_patch(infile, is_interesting_file)
+
+    # Patch may have files that we do not want to check which is fine
+    if files:
+        _lint_files(options, files)
+
+def lint_my_func(options, origin_branch):
+    """My Lint files command entry point."""
+    files = git.get_my_files_to_check(is_interesting_file, origin_branch)
+
+    _lint_files(options, files)
+
+def format_func(options):
     """Format files command entry point."""
     files = git.get_files_to_check([], is_interesting_file)
 
-    _format_files(clang_format, files)
+    _format_files(options, files)
 
-def format_my_func(clang_format, origin_branch):
+def format_my_func(options, origin_branch):
     """My Format files command entry point."""
     files = git.get_my_files_to_check(is_interesting_file, origin_branch)
 
-    _format_files(clang_format, files)
+    _format_files(options, files)
 
 def reformat_branch(  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
-        clang_format, commit_prior_to_reformat, commit_after_reformat):
+        options, commit_prior_to_reformat, commit_after_reformat):
     """Reformat a branch made before a clang-format run."""
-    clang_format = ClangFormat(clang_format, _get_build_dir())
+    clang_format = ClangFormat(options.clang_format, _get_build_dir())
 
     if os.getcwd() != git.get_base_dir():
         raise ValueError("reformat-branch must be run from the repo root")
@@ -390,6 +413,12 @@ def main():
     """Execute Main entry point."""
     parser = OptionParser()
     parser.add_option("-c", "--clang-format", type="string", dest="clang_format")
+    parser.add_option("--dry-run",
+                      action="store_true", dest="dry_run", default=False,
+                      help="Only like the files concerned")
+    parser.add_option("-q", "--quiet",
+                      action="store_false", dest="verbose", default=True,
+                      help="don't print status messages to stdout")
 
     (options, args) = parser.parse_args(args=sys.argv)
 
@@ -397,16 +426,17 @@ def main():
         command = args[1]
 
         if command == "lint":
-            lint(options.clang_format)
+            lint(options)
         elif command == "lint-all":
-            lint_all(options.clang_format)
+            lint_all(options)
         elif command == "lint-patch":
-            lint_patch(options.clang_format, args[2:])
+            lint_patch(options, args[2:])
+        elif command == "lint-my":
+            lint_my_func(options, args[2] if len(args) > 2 else "upstream/master")
         elif command == "format":
-            format_func(options.clang_format)
+            format_func(options)
         elif command == "format-my":
-
-            format_my_func(options.clang_format, args[2] if len(args) > 2 else "origin/master")
+            format_my_func(options, args[2] if len(args) > 2 else "upstream/master")
         elif command == "reformat-branch":
 
             if len(args) < 3:
@@ -415,7 +445,7 @@ def main():
                 )
                 return
 
-            reformat_branch(options.clang_format, args[2], args[3])
+            reformat_branch(options, args[2], args[3])
         else:
             usage()
     else:
