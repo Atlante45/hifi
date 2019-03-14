@@ -2,25 +2,39 @@ version: 2
 jobs:
   build:
     docker:
-      - image: debian:stretch
+      - image: circleci/buildpack-deps:18.04-curl
 
     steps:
       - run:
+          name: Install apt-get packages
+          command: |
+            sudo apt-get update
+            sudo apt-get install clang-format-7 clang-tidy-7
+
+      - restore_cache:
+          keys:
+            - source-v1-{{ .Branch }}-{{ .Revision }}
+            - source-v1-{{ .Branch }}-
+            - source-v1-
+
+      - checkout
+
+      - save_cache:
+          key: source-v1-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - ".git"
+
+      - run:
           name: Get GitHub API Status
           command: |
-            GH_URL='https://status.github.com/api/status.json'
-            GH_STATUS=$(curl -s $GH_URL |  jq --raw-output '.status')
-            echo "GitHub API Status: $GH_STATUS"
-            if [ "$GH_STATUS" != "good" ]; then
-              echo "Error [GitHub API status: $GH_STATUS]"
-              exit 1
-            fi
-      # - checkout
+            GH_URL='https://api.github.com/repos/Atlante45/hifi/compare/feat/clang-format-2...feat/circle-ci'
+            GH_AHEAD_BY=$(curl -s $GH_URL  | jq '.ahead_by')
+            echo "GitHub API ahead by: $GH_AHEAD_BY"
 
       - run:
-          name: Greeting
-          command: echo Hello, world.
+          name: Clang Format Version
+          command: clang-format-7 --version
 
       - run:
-          name: Print the Current Time
-          command: date
+          name: Clang Tidy Version
+          command: clang-tidy-7 --version
