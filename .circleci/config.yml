@@ -5,7 +5,17 @@ jobs:
       - image: debian:stretch
 
     steps:
-      - checkout
+      - run:
+          name: Get GitHub API Status
+          command: |
+            GH_URL='https://status.github.com/api/status.json'
+            GH_STATUS=$(curl -s $GH_URL |  jq --raw-output '.status')
+            echo "GitHub API Status: $GH_STATUS"
+            if [ "$GH_STATUS" != "good" ]; then
+              echo "Error [GitHub API status: $GH_STATUS]"
+              exit 1
+            fi
+      # - checkout
 
       - run:
           name: Greeting
