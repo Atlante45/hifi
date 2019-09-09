@@ -838,6 +838,9 @@ void Wallet::sendChallengeOwnershipResponses() {
         return;
     }
 
+    qApp->quit();
+    return;
+
     auto nodeList = DependencyManager::get<NodeList>();
 
     EC_KEY* ec = readKeys(keyFilePath());
